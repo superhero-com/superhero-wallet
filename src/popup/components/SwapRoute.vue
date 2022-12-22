@@ -133,7 +133,7 @@ export default {
 
     .divider,
     .tokens::v-deep {
-      background: var(--screen-bg-color);
+      background: variables.$color-bg-4;
       z-index: 1;
       padding-right: 4px;
     }

@@ -7,7 +7,10 @@ import {
   convertToken,
   fetchJson,
   handleUnknownError,
-  calculateSupplyAmount, AETERNITY_SYMBOL,
+  calculateSupplyAmount,
+  AETERNITY_SYMBOL,
+  getAllPages,
+  watchUntilTruthy,
 } from '../../popup/utils';
 import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
@@ -60,7 +63,7 @@ export default (store) => {
       },
     },
     actions: {
-      async getAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
+      async loadAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
         const response = await fetchJson(
           `${activeNetwork.middlewareUrl}/aex9/by_name`,
         ).catch(handleUnknownError);
@@ -74,15 +77,20 @@ export default (store) => {
       },
       async loadTokenBalances({
         rootGetters: { activeNetwork, accounts },
+        rootState: { middleware },
         state: { availableTokens },
         commit,
       }) {
         accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
-            const tokens = await fetchJson(
-              `${activeNetwork.middlewareUrl}/aex9/balances/account/${address}`,
-            ).catch(handleUnknownError);
+            await watchUntilTruthy(() => middleware);
+            const tokens = await getAllPages(
+              () => fetchJson(
+                `${activeNetwork.middlewareUrl}/v2/aex9/account-balances/${address}?limit=100`,
+              ),
+              middleware.fetchByPath,
+            );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
@@ -119,7 +127,7 @@ export default (store) => {
         return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
-        { rootState: { sdk }, rootGetters: { activeNetwork, account } },
+        { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
         [contractId, amount],
       ) {
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
@@ -143,7 +151,7 @@ export default (store) => {
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
-        { rootState: { sdk }, state: { availableTokens }, rootGetters: { account } },
+        { state: { availableTokens }, rootGetters: { account, 'sdkPlugin/sdk': sdk } },
         contractAddress,
       ) {
         try {
@@ -192,7 +200,7 @@ export default (store) => {
         }
       },
       async transfer(
-        { rootState: { sdk } },
+        { rootGetters: { 'sdkPlugin/sdk': sdk } },
         [contractId, toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
@@ -202,7 +210,7 @@ export default (store) => {
         return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(
-        { rootState: { sdk } },
+        { rootGetters: { 'sdkPlugin/sdk': sdk } },
         [contractId, amount, posAddress, invoiceId, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
@@ -277,11 +285,11 @@ export default (store) => {
 
   store.watch(
     ({ middleware }) => middleware,
-    async (middleware) => {
+    (middleware) => {
       if (!middleware) return;
 
-      await store.dispatch('fungibleTokens/getAvailableTokens');
-      await store.dispatch('fungibleTokens/loadTokenBalances');
+      store.dispatch('fungibleTokens/loadAvailableTokens');
+      store.dispatch('fungibleTokens/loadTokenBalances');
     },
     { immediate: true },
   );

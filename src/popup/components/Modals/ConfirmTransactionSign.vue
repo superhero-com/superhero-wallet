@@ -99,7 +99,7 @@
     <template #footer>
       <BtnMain
         third
-        variant="secondary"
+        variant="muted"
         data-cy="deny"
         @click="cancel()"
       >
@@ -124,10 +124,13 @@ import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
-  convertToken,
-  watchUntilTruthy,
   AETERNITY_SYMBOL,
+  convertToken,
 } from '../../utils';
+import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
+import mixin from '../../pages/Popups/mixin';
+import { useSdk } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
@@ -137,8 +140,6 @@ import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Arrow from '../../../icons/arrow.svg?vue-component';
-import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
-import mixin from '../../pages/Popups/mixin';
 
 export default {
   components: {
@@ -178,10 +179,13 @@ export default {
     ],
   }),
   computed: {
-    ...mapState(['sdk']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['formatCurrency', 'account', 'activeNetwork']),
+    ...mapState('fungibleTokens', [
+      'availableTokens',
+    ]),
     ...mapGetters([
+      'formatCurrency',
+      'account',
+      'activeNetwork',
       'getTxSymbol',
       'getTxAmountTotal',
       'getTxFee',
@@ -236,10 +240,11 @@ export default {
     if (this.transaction.contractId) {
       try {
         this.loading = true;
+        const { getSdk } = useSdk();
         setTimeout(() => { this.loading = false; }, 20000);
-        await watchUntilTruthy(() => this.sdk);
-        const { bytecode } = await this.sdk.getContractByteCode(this.transaction.contractId);
-        const txParams = await this.sdk.compilerApi.decodeCalldataBytecode({
+        const sdk = await getSdk();
+        const { bytecode } = await sdk.getContractByteCode(this.transaction.contractId);
+        const txParams = await sdk.compilerApi.decodeCalldataBytecode({
           bytecode,
           calldata: this.transaction.callData,
         });

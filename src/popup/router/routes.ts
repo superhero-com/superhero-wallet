@@ -1,3 +1,13 @@
+import type { WalletAppRouteConfig } from '../../types';
+import {
+  ROUTE_INDEX,
+  ROUTE_ACCOUNT,
+  ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_NOTIFICATIONS,
+  ROUTE_COIN,
+  ROUTE_ACCOUNT_DETAILS,
+} from './routeNames';
+
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
@@ -9,6 +19,8 @@ import Dashboard from '../pages/Dashboard.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
+import TokenContainer from '../pages/FungibleTokens/TokenContainer.vue';
+import TokenTransactions from '../pages/FungibleTokens/TokenTransactions.vue';
 import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
@@ -42,25 +54,26 @@ import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
-import webIframePopups from './web-iframe-popups';
+import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 
-export default [
+export const routes: WalletAppRouteConfig[] = [
+  ...webIframePopups,
   {
     path: '/',
-    name: 'index',
+    name: ROUTE_INDEX,
     component: Index,
     meta: {
       title: '',
-      navigation: false,
+      hideHeader: true,
       ifNotAuthOnly: true,
       notPersist: true,
     },
   },
   {
     path: '/account',
-    name: 'account',
+    name: ROUTE_ACCOUNT,
     component: Dashboard,
   },
   {
@@ -73,11 +86,10 @@ export default [
     children: [
       {
         path: '',
-        name: 'account-details',
+        name: ROUTE_ACCOUNT_DETAILS,
         component: AccountDetailsTokens,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -86,7 +98,6 @@ export default [
         component: AccountDetailsTransactions,
         meta: {
           hideHeader: true,
-          asModal: true,
         },
       },
       {
@@ -100,7 +111,6 @@ export default [
             props: true,
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -110,7 +120,6 @@ export default [
             name: 'account-details-names-auctions',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
           {
@@ -120,7 +129,6 @@ export default [
             name: 'account-details-names-claim',
             meta: {
               hideHeader: true,
-              asModal: true,
             },
           },
         ],
@@ -169,9 +177,7 @@ export default [
     component: Settings,
     meta: {
       title: 'settings',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -180,9 +186,7 @@ export default [
     component: ResetWallet,
     meta: {
       title: 'reset-wallet',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -191,9 +195,7 @@ export default [
     component: ErrorLogSettings,
     meta: {
       title: 'save-errors-log',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -202,9 +204,7 @@ export default [
     component: LanguageSettings,
     meta: {
       title: 'language',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -213,9 +213,7 @@ export default [
     component: CurrencySettings,
     meta: {
       title: 'currency',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -224,9 +222,7 @@ export default [
     component: SeedPhraseSettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -235,9 +231,7 @@ export default [
     component: SeedPhraseDetailsSettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -246,9 +240,7 @@ export default [
     component: SeedPhraseVerifySettings,
     meta: {
       title: 'seed-phrase',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -258,9 +250,7 @@ export default [
     props: true,
     meta: {
       title: 'networks',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -270,21 +260,17 @@ export default [
     props: true,
     meta: {
       title: 'network-add',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
-    path: '/more/settings/networks/edit/:name',
+    path: '/more/settings/networks/:name',
     name: 'network-edit',
     component: NetworkForm,
     props: true,
     meta: {
       title: 'network-edit',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -293,9 +279,7 @@ export default [
     name: 'permissions-settings',
     meta: {
       title: 'permissionsSettings',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -304,9 +288,7 @@ export default [
     name: 'permissions-add',
     meta: {
       title: 'permissionsAdd',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -315,10 +297,8 @@ export default [
     name: 'permissions-details',
     meta: {
       title: 'permissionsEdit',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-      edit: true,
+      showHeaderNavigation: true,
+      isEdit: true,
     },
   },
   {
@@ -327,9 +307,7 @@ export default [
     name: 'about',
     meta: {
       title: 'about',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -338,9 +316,8 @@ export default [
     name: 'about-terms',
     meta: {
       title: 'terms',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
+      showScrollbar: true,
       ifNotAuth: true,
     },
   },
@@ -350,9 +327,8 @@ export default [
     name: 'about-privacy',
     meta: {
       title: 'privacy',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
+      showScrollbar: true,
     },
   },
   {
@@ -361,9 +337,7 @@ export default [
     component: TipsClaim,
     meta: {
       title: 'claim-tips',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -379,14 +353,13 @@ export default [
     },
   },
   {
+    path: '/account-details/transactions/:hash',
     name: 'tx-details',
-    path: '/transactions/:hash',
     component: TransactionDetails,
     props: true,
     meta: {
       title: 'tx-details',
-      hideNotificationsIcon: true,
-      closeButton: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -395,8 +368,7 @@ export default [
     name: 'more',
     meta: {
       title: 'more',
-      backButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -405,9 +377,7 @@ export default [
     component: Invite,
     meta: {
       title: 'invite',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -416,13 +386,11 @@ export default [
     component: NotificationSettings,
     meta: {
       title: 'notifications',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
+      showHeaderNavigation: true,
     },
   },
   {
-    path: '/names/auctions/:name/',
+    path: '/account-details/names/auctions/:name/',
     component: Auction,
     props: true,
     children: [
@@ -433,7 +401,7 @@ export default [
         name: 'auction-bid',
         meta: {
           title: 'auction',
-          backRoute: '/account-details/names/auctions',
+          showHeaderNavigation: true,
         },
       },
       {
@@ -443,7 +411,8 @@ export default [
         name: 'auction-history',
         meta: {
           title: 'auction',
-          backRoute: '/account-details/names/auctions',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
+          showHeaderNavigation: true,
         },
       },
     ],
@@ -477,38 +446,61 @@ export default [
     },
   },
   {
-    name: 'token-details',
-    path: '/balances/:id',
-    component: TokenDetails,
-    props: true,
-    meta: {
-      title: 'token-details',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-      modalHeader: true,
-    },
+    path: '/coins/:id',
+    component: TokenContainer,
+    name: ROUTE_COIN,
+    children: [
+      {
+        name: 'coin-transactions',
+        path: '',
+        component: TokenTransactions,
+        props: true,
+        meta: {
+          title: 'coin-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        name: 'coin-details',
+        path: 'details',
+        component: TokenDetails,
+        props: true,
+        meta: {
+          title: 'coin-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          showHeaderNavigation: true,
+        },
+      },
+    ],
   },
   {
-    name: 'coin-details',
-    path: '/ae-balances',
-    component: TokenDetails,
-    props: true,
-    meta: {
-      title: 'coin-details',
-      backButton: true,
-      closeButton: true,
-      hideNotificationsIcon: true,
-      modalHeader: true,
-    },
-  },
-  {
-    name: 'not-found',
-    path: '*',
-    component: NotFound,
-    meta: {
-      ifNotAuth: true,
-    },
+    path: '/tokens/:id',
+    component: TokenContainer,
+    children: [
+      {
+        name: 'token-transactions',
+        path: '',
+        component: TokenTransactions,
+        props: true,
+        meta: {
+          title: 'token-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        name: 'token-details',
+        path: 'details',
+        component: TokenDetails,
+        props: true,
+        meta: {
+          title: 'token-details',
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          showHeaderNavigation: true,
+        },
+      },
+    ],
   },
   {
     name: 'sign-message',
@@ -540,12 +532,21 @@ export default [
   },
   {
     path: '/notifications',
-    name: 'notifications',
+    name: ROUTE_NOTIFICATIONS,
     component: Notifications,
     meta: {
       title: 'notifications',
+      showHeaderNavigation: true,
       notPersist: true,
     },
   },
-  ...webIframePopups,
+  {
+    name: 'not-found',
+    path: '*',
+    component: NotFound,
+    meta: {
+      ifNotAuth: true,
+      showHeaderNavigation: true,
+    },
+  },
 ];

@@ -6,7 +6,9 @@
     :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
     :to="preventNavigation ? null : {
       name: targetRouteName,
-      params: { id: tokenData.contractId },
+      params: {
+        id: tokenData.contractId,
+      },
     }"
     @click="(event) => $emit('click', event)"
   >
@@ -68,7 +70,7 @@ export default {
       return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
     targetRouteName() {
-      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin-details' : 'token-details';
+      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin-transactions' : 'token-transactions';
     },
   },
 };

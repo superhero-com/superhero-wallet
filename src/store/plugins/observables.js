@@ -12,13 +12,12 @@ import {
   setBalanceLocalStorage,
   getBalanceLocalStorage,
 } from '../../popup/utils/helper';
-import { AGGREGATOR_URL } from '../../popup/utils/constants';
 
 export default (store) => {
   const watchAsObservable = (getter, options) => store._watcherVM
     .$watchAsObservable(() => getter(store.state, store.getters), options);
 
-  const sdk$ = watchAsObservable(({ sdk }) => sdk, { immediate: true }).pipe(
+  const sdk$ = watchAsObservable((state, getters) => getters['sdkPlugin/sdk'], { immediate: true }).pipe(
     pluck('newValue'),
     filter((sdk) => sdk),
   );
@@ -71,29 +70,8 @@ export default (store) => {
       : Promise.resolve([]))),
   );
 
-  const normalizeNotification = ({
-    entityId, sourceId, entityType, sender, ...other
-  }) => ({
-    sourceId,
-    entityId,
-    entityType,
-    ...other,
-    sender,
-    chainName: store.state.chainNames?.[sender],
-    path:
-      entityType === 'TIP'
-        ? `${AGGREGATOR_URL}tip/${entityId}`
-        : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
-  });
-
-  const notifications$ = createSdkObservable(
-    async () => (await store.dispatch('getAllNotifications')).map(normalizeNotification),
-    [],
-  );
-
   // eslint-disable-next-line no-param-reassign
   store.state.observables = {
-    notifications: notifications$,
     balance: balance$,
     balances: balances$,
     topBlockHeight: createSdkObservable(async (sdk) => (await sdk.api.getTopHeader()).height, 0),

@@ -15,11 +15,13 @@
     </button>
     <div
       v-show="!qrScannerOpen"
+      ref="innerElement"
       class="app-inner"
+      :class="{ 'show-scrollbar': $route.meta.showScrollbar }"
     >
       <Header v-if="showHeader" />
 
-      <transition :name="$route.meta.asModal ? 'pop-transition' : 'page-transition'">
+      <transition name="page-transition">
         <RouterView
           :class="{ 'show-header': showHeader }"
           class="main"
@@ -46,12 +48,15 @@ import {
   computed,
   defineComponent,
   onMounted,
+  ref,
   watch,
 } from '@vue/composition-api';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   NODE_STATUS_OFFLINE,
   NODE_STATUS_CONNECTION_DONE,
+  APP_LINK_FIREFOX,
+  APP_LINK_CHROME,
   watchUntilTruthy,
 } from './utils';
 import {
@@ -60,31 +65,40 @@ import {
   IS_MOBILE_DEVICE,
   IS_CORDOVA,
   IS_EXTENSION,
+  IS_CHROME_BASED,
+  IS_FIREFOX,
+  RUNNING_IN_POPUP,
 } from '../lib/environment';
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
+import { useNotifications } from '../composables/notifications';
+import { useViewport } from '../composables/viewport';
 
 export default defineComponent({
+  name: 'App',
   components: {
     Header,
     NodeConnectionStatus,
     Close,
   },
   setup(props, { root }) {
+    const innerElement = ref<HTMLDivElement | null>(null);
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
+    const modals = computed(() => root.$store.getters['modals/opened']);
+
+    const { addWalletNotification } = useNotifications();
+
+    const { initViewport } = useViewport();
 
     const showHeader = computed(() => !(
-      root.$route.path === '/'
-      || root.$route.path.startsWith('/web-iframe-popup')
-      || root.$route.params.app
+      RUNNING_IN_POPUP
+      || root.$route.params.app // TODO determine if still used
       || root.$route.meta?.hideHeader
     ));
-
-    const modals = computed(() => root.$store.getters['modals/opened']);
 
     function setDocumentHeight() {
       document.documentElement.style.setProperty(
@@ -96,10 +110,19 @@ export default defineComponent({
     async function checkExtensionUpdates() {
       if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
         const [update] = await browser.runtime.requestUpdateCheck();
+        let path = '';
+        if (IS_FIREFOX) {
+          path = APP_LINK_FIREFOX;
+        }
+        if (IS_CHROME_BASED) {
+          path = APP_LINK_CHROME;
+        }
         if (update === 'update_available') {
-          root.$store.commit('addNotification', {
-            text: root.$t('pages.account.updateAvailable'),
-            path: '',
+          addWalletNotification({
+            text: root.$t('pages.account.updateAvailableText'),
+            title: root.$t('pages.account.updateAvailable'),
+            buttonLabel: root.$t('pages.notifications.goToStore'),
+            path,
           });
         }
       }
@@ -118,9 +141,12 @@ export default defineComponent({
 
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
-        root.$store.commit('addNotification', {
-          text: root.$t('pages.account.seedNotification', [root.$t('pages.account.backup')]),
+        addWalletNotification({
+          title: root.$t('pages.account.secureYourAccount'),
+          text: root.$t('pages.account.seedNotification'),
+          buttonLabel: root.$t('pages.account.backupNow'),
           path: '/more/settings/seed-phrase',
+          isSeedBackup: true,
         });
       }
     });
@@ -128,11 +154,13 @@ export default defineComponent({
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
+      initViewport(innerElement.value);
+
       watchAppNetworkAccess();
 
       await watchUntilTruthy(() => isRestored.value);
-
       setNotificationSettings();
+
       root.$store.dispatch('fungibleTokens/getAeternityData');
       root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     });
@@ -144,6 +172,7 @@ export default defineComponent({
       modals,
       qrScannerOpen,
       showHeader,
+      innerElement,
     };
   },
 });
@@ -188,6 +217,22 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow-y: auto;
+
+    &.show-scrollbar {
+      -ms-overflow-style: auto;
+
+      &::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+        height: 0;
+
+        &-thumb {
+          display: block;
+          background-color: rgba(variables.$color-white, 0.15);
+          border-radius: 4px;
+        }
+      }
+    }
   }
 
   .main {
@@ -235,11 +280,8 @@ export default defineComponent({
   &.show-header {
     --header-height: 40px;
 
-    .main {
-      @include mixins.desktop {
-        min-height: calc(100% - var(--header-height));
-        min-height: calc(100% - var(--header-height) - env(safe-area-inset-top));
-      }
+    .app-inner {
+      padding-top: var(--header-height);
     }
   }
 }

@@ -1,15 +1,12 @@
-export {};
+import { ICordova } from './src/types/cordova';
 
-// Boilerplate schema for cordova API available on window object
-interface Cordova {
-  platformId?: string
-  plugins?: Record<string, any>
-  openwith?: any // cordova-plugin-openwith
-}
+export {};
 
 declare global {
   interface Window {
-    cordova?: Cordova
+    popupProps?: any
+    cordova?: ICordova
     StatusBar?: any // cordova-plugin-statusbar
+    IonicDeeplink?: any
   }
 }

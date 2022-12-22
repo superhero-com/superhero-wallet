@@ -39,6 +39,17 @@
     "required": {
       "msg": "Please fill in all fields."
     },
+    "payloadInfo": {
+      "title": "Payload message",
+      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /> <br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+    },
+    "payloadForm": {
+      "title": "Add payload (optional)",
+      "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
+      "label": "Payload message",
+      "doneBtn": "Done",
+      "cancelBtn": "Cancel"
+    },
     "only-chars": {
       "msg": "Only letters and numbers are allowed."
     },
@@ -236,7 +247,8 @@
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter address, .chain name or URL",
-      "next": "Next"
+      "next": "Next",
+      "payload": "Payload"
     },
     "wrongNetwork": {
       "title": "Network discrepancy",
@@ -359,7 +371,8 @@
       "reset-wallet": "Reset wallet",
       "seed-phrase": "Seed phrase",
       "network-add": "Add custom network",
-      "network-edit": "Edit network"
+      "network-edit": "Edit network",
+      "not-found": "Feature not found"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -385,10 +398,13 @@
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
-      "seedNotification": "You need to {0} your seed phrase",
+      "secureYourAccount": "Secure your account",
+      "backupNow": "Back up now",
+      "seedNotification": "Welcome to Superhero wallet! Please backup your seed phrase!",
       "backup": "backup",
       "updateExtension": "New version available! Please update your extension.",
-      "updateAvailable": "New version is available in the store!",
+      "updateAvailable": "Update available",
+      "updateAvailableText": "There is a new wallet version available for download in the store",
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
@@ -416,8 +432,10 @@
       "urlToClaim": "Claim tips from this URL:"
     },
     "notFound": {
-      "notFound": "Requested page can't be found",
-      "initialPage": "Open initial page"
+      "header": "Lost in space?",
+      "description": "The feature could not be found in this Universe. Keep calm and safely fly back home.",
+      "backToHome": "Return home",
+      "reportBug": "Report a bug"
     },
     "accountPassword": {
       "heading": "",
@@ -705,12 +723,12 @@
       "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
-      "enterSeedPhrase": "Please enter the 12 words of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
+      "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
       "continueButton": "Continue",
       "continue": "Continue",
       "importAccount": "Restore wallet",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
-      "invalidSeed": "Your seed phrase should consist of 12 words separated by spaces.",
+      "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here"
     },
     "ledgerSetup": {
@@ -744,14 +762,14 @@
       "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
-      "markAsRead": "Mark as Read",
-      "markAsUnread": "Mark as Unread",
       "commentOnComment": "replied to your comment.",
       "commentOnTip": "commented on your tip.",
       "tipOnComment": "tipped on your comment",
       "retipOnTip": "retipped your tip.",
       "claimOfTip": "claimed your tip.",
-      "claimOfRetip": "claimed your retip."
+      "claimOfRetip": "claimed your retip.",
+      "viewOnSuperhero": "View on Superhero.com",
+      "goToStore": "Go to store"
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
@@ -1197,7 +1215,7 @@
     },
     "permissions": {
       "login": "Don't ask for login requests",
-      "message-sign": "Don't ask for message signing",
+      "message-sign": "Auto-sign messages",
       "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",

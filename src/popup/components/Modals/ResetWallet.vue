@@ -20,7 +20,7 @@
     </div>
     <template #footer>
       <BtnMain
-        variant="secondary"
+        variant="muted"
         @click="reject"
       >
         {{ $t('pages.reset-wallet.cancel') }}

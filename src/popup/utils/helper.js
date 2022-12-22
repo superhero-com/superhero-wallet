@@ -1,7 +1,5 @@
-import { watch } from '@vue/composition-api';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { defer } from 'lodash-es';
-import { isFQDN } from 'validator';
+import { isFQDN, isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
@@ -24,29 +22,6 @@ import {
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
 import { IS_FIREFOX } from '../../lib/environment';
-
-export function watchUntilTruthy(getter) {
-  return new Promise((resolve) => {
-    const unwatch = watch(
-      getter,
-      (value) => {
-        if (!value) return;
-        resolve();
-        defer(() => unwatch());
-      },
-      { immediate: true },
-    );
-  });
-}
-
-export function waitUntilTruthy(getter) {
-  const poll = (resolve) => {
-    if (getter()) resolve();
-    else setTimeout(() => poll(resolve), 400);
-  };
-
-  return new Promise(poll);
-}
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
@@ -146,7 +121,7 @@ export const checkAensName = (value) => (
 
 export const getAddressByNameEntry = (nameEntry, pointer = 'account_pubkey') => ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 
-export const validateSeedLength = (seed) => seed && seed.split(' ').length === SEED_LENGTH;
+export const validateSeedLength = (seed) => seed && seed.split(' ').length >= SEED_LENGTH;
 
 export const contractCall = async ({
   instance,
@@ -208,17 +183,16 @@ export const getBalanceLocalStorage = () => (
 );
 
 export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.incomplete
-    || ((transaction.tx.function === 'tip' || transaction.tx.function === 'retip') && transaction.pending)) {
-    if (!transaction.tx?.selectedTokenContractId && transaction.pending) return null;
+  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
+    return null;
+  }
+  if (transaction.incomplete || transaction.pending) {
     return {
       amount: transaction.amount,
-      token: transaction.pending
-        ? transaction.tx?.selectedTokenContractId : transaction.tx.contractId,
-      to: transaction.tx.callerId,
+      token: transaction.tx.selectedTokenContractId ?? transaction.tx.contractId,
+      to: transaction.incomplete ? transaction.tx.recipientId : transaction.tx.callerId,
     };
   }
-  if (transaction.tx.type !== 'ContractCallTx') return null;
   switch (transaction.tx.function) {
     case 'transfer':
     case 'transfer_payload':
@@ -341,3 +315,8 @@ export const getLoginState = async ({
 };
 
 export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
+
+export const isValidURL = (url) => {
+  const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
+  return isURL(url) || !!pattern.test(url);
+};

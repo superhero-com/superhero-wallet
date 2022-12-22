@@ -1,9 +1,16 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import type { ICurrency, INetwork, INotificationSetting } from '../../types';
+import type {
+  ICurrency,
+  IDexContracts,
+  INetwork,
+  INotificationSetting,
+} from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
 export const EXTENSION_HEIGHT = 600;
+export const MOBILE_WIDTH = 480;
+
 export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
@@ -27,16 +34,35 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
+export const HASH_PREFIX_CONTRACT = 'ct';
+export const HASH_PREFIX_ACCOUNT = 'ak';
+export const HASH_PREFIX_NAME = 'nm';
+export const HASH_PREFIX_ORACLE = 'ok';
+export const HASH_PREFIX_TRANSACTION = 'th';
+
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const STUB_NONCE = 10000;
 export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 
-export const DEX_CONTRACTS = {
-  ae_uat: {
+export const ACCOUNT_HD_WALLET = 'hd-wallet';
+
+export const NETWORK_ID_MAINNET = 'ae_mainnet';
+export const NETWORK_ID_TESTNET = 'ae_uat';
+
+export const DEX_CONTRACTS: Record<string, IDexContracts> = {
+  [NETWORK_ID_MAINNET]: {
     router: [
-      'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6',
+      'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
+    ],
+    wae: [
+      'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
+    ],
+  },
+  [NETWORK_ID_TESTNET]: {
+    router: [
+      STUB_CONTRACT_ADDRESS,
       'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
       'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
       'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
@@ -52,15 +78,11 @@ export const DEX_CONTRACTS = {
       'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
     ],
   },
-  ae_mainnet: {
-    router: ['ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3'],
-    wae: ['ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa'],
-  },
 };
 
 export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
-  networkId: 'ae_mainnet',
+  networkId: NETWORK_ID_MAINNET,
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
   explorerUrl: 'https://explorer.aeternity.io',
   compilerUrl: 'https://compiler.aepps.com',
@@ -71,7 +93,7 @@ export const NETWORK_MAINNET: INetwork = {
 
 export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
-  networkId: 'ae_uat',
+  networkId: NETWORK_ID_TESTNET,
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
   explorerUrl: 'https://explorer.testnet.aeternity.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
@@ -101,7 +123,6 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
-export const NOTIFICATION_STATUS_PEEKED = 'PEEKED';
 export const NOTIFICATION_STATUS_READ = 'READ';
 
 export const NOTIFICATION_TYPE_WALLET = 'wallet';
@@ -111,6 +132,9 @@ export const NOTIFICATION_TYPE_TIP_ON_COMMENT = 'TIP_ON_COMMENT';
 export const NOTIFICATION_TYPE_CLAIM_OF_TIP = 'CLAIM_OF_TIP';
 export const NOTIFICATION_TYPE_CLAIM_OF_RETIP = 'CLAIM_OF_RETIP';
 export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
+
+export const AENS = 'AENS';
+export const DEX = 'DEX';
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
@@ -358,6 +382,7 @@ export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
+export const MODAL_PAYLOAD_FORM = 'payload-form';
 
 export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
 export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
@@ -385,3 +410,30 @@ export const DEX_TRANSACTION_TAGS = {
   deposit: DEX_SWAP,
   withdraw: DEX_SWAP,
 };
+
+export const RETURN_TYPE_OK = 'ok';
+
+export const ADDRESS_TYPES: Record<string, string> = {
+  [HASH_PREFIX_ACCOUNT]: 'account/transactions',
+  [HASH_PREFIX_CONTRACT]: 'contracts/transactions',
+  [HASH_PREFIX_NAME]: 'names',
+  [HASH_PREFIX_ORACLE]: 'oracles/queries',
+  [HASH_PREFIX_TRANSACTION]: 'transactions',
+};
+
+export const POPUP_TYPE_CONNECT = 'connectConfirm';
+export const POPUP_TYPE_SIGN = 'sign';
+export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
+export const POPUP_TYPE_RAW_SIGN = 'rawSign';
+
+export const POPUP_TYPES = [
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+] as const;
+
+export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
+export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
+
+export const NOTIFICATION_ENTITY_TYPE_TIP = 'TIP';

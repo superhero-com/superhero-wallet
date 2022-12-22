@@ -34,6 +34,7 @@ export default defineComponent({
       validator: (value: string) => [
         'primary',
         'secondary',
+        'muted',
         'alternative',
         'danger',
         'purple',
@@ -83,7 +84,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1 1 0;
+  flex-grow: 1;
   width: fit-content;
   min-height: 40px;
   padding: 8px 16px;
@@ -130,6 +131,10 @@ export default defineComponent({
   }
 
   &.secondary {
+    --color: #{variables.$color-secondary};
+  }
+
+  &.muted {
     --color: #{variables.$color-grey-medium};
 
     padding: 8px 32px;

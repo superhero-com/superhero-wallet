@@ -1,228 +1,273 @@
 <template>
   <div
-    :class="['notification-item', status.toLowerCase()]"
-    @click="$emit('click')"
+    class="notification-item"
+    @click.stop="handleClick"
   >
-    <div class="first-row">
-      <img
-        v-if="wallet"
-        src="../../icons/logo-small.svg"
-      >
-      <Avatar
-        v-else
-        :address="address"
-      />
-      <div class="address-and-menu">
-        <span @click.stop>
-          <slot />
-        </span>
-        <span v-if="!wallet">
-          {{ name }}
-        </span>
-        <span :class="['address', { wallet }]">
-          {{ wallet ? text : address }}
-        </span>
-      </div>
-      <ActionsMenu @click.native.stop>
-        <template #display>
-          <BtnIcon>
-            <ThreeDotsIcon />
-          </BtnIcon>
-        </template>
-        <div
-          class="mark-as-read"
-          @click="$emit('toggle-read')"
-        >
-          {{
-            (status === NOTIFICATION_STATUS_READ)
-              ? $t('pages.notifications.markAsUnread')
-              : $t('pages.notifications.markAsRead')
-          }}
-        </div>
-      </ActionsMenu>
-    </div>
-    <div class="second-row">
+    <div class="status-and-date ">
       <span
-        v-if="!wallet"
-        class="notification-text"
+        v-if="isUnread"
+        class="unread-dot"
+      />
+      <span class="date">
+        {{ createdAt }}
+      </span>
+    </div>
+    <DefaultWalletNotificationIcon
+      v-if="isWallet && !isSeedBackup"
+      class="notification-icon"
+    />
+    <BackupSeedNotificationIcon
+      v-else-if="isWallet && isSeedBackup"
+      class="notification-icon-backup"
+    />
+    <Avatar
+      v-else
+      size="md"
+      :address="address || title"
+      :name="chainName"
+      class="notification-avatar"
+      with-border
+    />
+    <div class="content">
+      <AddressTruncated
+        v-if="!chainName && address"
+        :address="address"
+        class="address"
+        medium-dots
+      />
+      <Truncate
+        v-else
+        class="title"
+        :str="title"
+      />
+      <div class="message">
+        {{ message }}
+      </div>
+      <BtnMain
+        v-if="isSeedBackup"
+        :text="redirectInfo"
+        class="redirect-button"
+        variant="danger"
+      />
+      <div
+        v-else-if="redirectInfo"
+        class="external-link-button"
       >
-        {{ text }}
-      </span>
-      <span :class="['format-date', { wallet }]">
-        <FormatDate v-bind="$attrs" />
-      </span>
+        {{ redirectInfo }}
+        <ExternalLinkIcon class="external-link-icon" />
+      </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import {
-  NOTIFICATION_STATUS_CREATED,
-  NOTIFICATION_STATUS_PEEKED,
   NOTIFICATION_STATUS_READ,
+  NOTIFICATION_TYPE_CLAIM_OF_RETIP,
+  NOTIFICATION_TYPE_CLAIM_OF_TIP,
+  NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
+  NOTIFICATION_TYPE_COMMENT_ON_TIP,
+  NOTIFICATION_TYPE_RETIP_ON_TIP,
+  NOTIFICATION_TYPE_TIP_ON_COMMENT,
+  NOTIFICATION_TYPE_WALLET,
+  relativeTimeTo,
 } from '../utils';
-import FormatDate from './FormatDate.vue';
+import { IS_EXTENSION, IS_MOBILE_DEVICE } from '../../lib/environment';
+import { INotification } from '../../types';
 import Avatar from './Avatar.vue';
-import ActionsMenu from './ActionsMenu.vue';
-import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
-import BtnIcon from './buttons/BtnIcon.vue';
+import AddressTruncated from './AddressTruncated.vue';
+import Truncate from './Truncate.vue';
+import BtnMain from './buttons/BtnMain.vue';
+import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
+import DefaultWalletNotificationIcon from '../../icons/default-wallet-notification.svg?vue-component';
+import BackupSeedNotificationIcon from '../../icons/backup-seed-notification.svg?vue-component';
 
-export default {
+interface IProps {
+  notification: INotification,
+}
+
+export default defineComponent({
   components: {
-    FormatDate,
+    BtnMain,
+    AddressTruncated,
     Avatar,
-    ActionsMenu,
-    ThreeDotsIcon,
-    BtnIcon,
+    Truncate,
+    ExternalLinkIcon,
+    DefaultWalletNotificationIcon,
+    BackupSeedNotificationIcon,
   },
   props: {
-    address: { type: String, default: '' },
-    name: { type: String, default: '' },
-    text: { type: String, default: '' },
-    to: { type: [String, Object, URL], required: true },
-    wallet: { type: Boolean },
-    status: {
-      type: String,
-      validator: (value) => [
-        NOTIFICATION_STATUS_CREATED,
-        NOTIFICATION_STATUS_PEEKED,
-        NOTIFICATION_STATUS_READ,
-      ].includes(value),
-      default: NOTIFICATION_STATUS_CREATED,
-    },
+    notification: { type: Object, required: true },
   },
-  data: () => ({
-    NOTIFICATION_STATUS_READ,
-  }),
-};
+  setup(props: IProps, { root }) {
+    function getNotificationText(notification: INotification) {
+      switch (notification.type) {
+        case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
+          return root.$t('pages.notifications.commentOnComment');
+        case NOTIFICATION_TYPE_COMMENT_ON_TIP:
+          return root.$t('pages.notifications.commentOnTip');
+        case NOTIFICATION_TYPE_TIP_ON_COMMENT:
+          return root.$t('pages.notifications.tipOnComment');
+        case NOTIFICATION_TYPE_RETIP_ON_TIP:
+          return root.$t('pages.notifications.retipOnTip');
+        case NOTIFICATION_TYPE_CLAIM_OF_TIP:
+          return root.$t('pages.notifications.claimOfTip');
+        case NOTIFICATION_TYPE_CLAIM_OF_RETIP:
+          return root.$t('pages.notifications.claimOfRetip');
+        case NOTIFICATION_TYPE_WALLET:
+          return notification.text;
+        default:
+          throw new Error(`Unknown notification status: ${notification.type}`);
+      }
+    }
+
+    const createdAt = computed(() => relativeTimeTo(props.notification.createdAt));
+    const message = computed(() => getNotificationText(props.notification));
+    const chainName = computed(
+      () => props.notification.senderName || props.notification.receiverName,
+    );
+    const address = computed(() => props.notification.sender || props.notification.receiver);
+    const isSeedBackup = computed(() => props.notification.isSeedBackup);
+    const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
+    const redirectInfo = computed(() => !isWallet.value ? root.$t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
+    const title = computed(() => isWallet.value
+      ? props.notification.title || ''
+      : chainName.value || address.value || 'Fellow Superhero');
+    const initialStatus = props.notification.status;
+    const isUnread = computed(() => (IS_EXTENSION
+      ? initialStatus
+      : props.notification.status) !== NOTIFICATION_STATUS_READ);
+
+    function handleClick() {
+      if (props.notification.path) {
+        if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
+          window.open(props.notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
+        } else {
+          root.$router.push(props.notification.path);
+        }
+      }
+    }
+
+    return {
+      createdAt,
+      message,
+      chainName,
+      address,
+      title,
+      isUnread,
+      redirectInfo,
+      isWallet,
+      isSeedBackup,
+      handleClick,
+      IS_MOBILE_DEVICE,
+      initialStatus,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .notification-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0.9rem 1rem;
-  margin-top: 0.1rem;
-  font-size: 0.95rem;
-  text-align: left;
+  $left-column-width: 48px;
+
+  padding: 8px 16px;
+  display: grid;
+  row-gap: 2px;
+  grid-template-columns: $left-column-width  auto;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  color: variables.$color-white;
   cursor: pointer;
 
-  &.created,
-  &.peeked {
-    background-color: variables.$color-bg-2;
-
-    .actions-menu,
-    .format-date,
-    .notification-text {
-      color: variables.$color-primary;
-    }
-  }
-
-  &.read {
-    background-color: variables.$color-bg-1;
-
-    .actions-menu,
-    .format-date,
-    .second-row .notification-text {
-      color: variables.$color-grey-dark;
-    }
-
-    .actions-menu:hover {
-      color: variables.$color-grey-light;
-    }
-  }
-
   &:hover {
-    background-color: variables.$color-bg-4-hover;
+    background-color: variables.$color-bg-1-hover;
   }
 
-  .first-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .content {
+    overflow: hidden;
+  }
 
-    .avatar,
-    img {
-      overflow: inherit;
+  .status-and-date {
+    @include mixins.flex(flex-start, center);
+
+    grid-column-start: 2;
+    gap: 4px;
+
+    .unread-dot {
+      $dot-size: 8px;
+
+      width: $dot-size;
+      height: $dot-size;
+      border-radius: $dot-size;
+      background-color: variables.$color-danger;
     }
 
-    .address-and-menu {
-      flex-grow: 1;
-      margin-left: 5px;
-      min-width: 0;
-      overflow-wrap: break-word;
+    .date {
+      color: rgba(variables.$color-white, 0.5);
 
-      .address {
-        font-size: 0.55rem;
-        color: variables.$color-white;
-
-        &.wallet {
-          font-size: inherit;
-          margin-right: 4rem;
-          word-break: break-word;
-        }
-      }
+      @extend %face-sans-12-regular;
     }
   }
 
-  .second-row {
+  .notification-avatar {
+    margin-top: 6px;
+    margin-left: 4px;
+  }
+
+  .notification-icon {
+    margin-top: 3px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .notification-icon-backup {
+    margin-top: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .title {
+    @extend %face-sans-15-medium;
+  }
+
+  .message {
+    @extend %face-sans-13-regular;
+
+    line-height: 20px;
+    color: rgba(variables.$color-white, 0.85);
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+
+  .address {
+    @extend %face-mono-15-medium;
+
+    letter-spacing: 0.07em;
+  }
+
+  .redirect-button {
     margin-top: 10px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-
-    .notification-text {
-      word-break: break-word;
-      color: variables.$color-white;
-    }
-
-    .format-date {
-      flex-basis: 100px;
-      text-align: right;
-      align-self: flex-end;
-      font-size: 0.75rem;
-      white-space: nowrap;
-
-      &.wallet {
-        width: 100%;
-        text-align: right;
-        margin-top: -1.4rem;
-      }
-    }
   }
 
-  .actions-menu {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: -3px;
-    height: 30px;
-    padding: 2px;
-    font-size: 1.5rem;
+  .external-link-button {
+    @include mixins.flex(flex-start, center);
 
-    &.active {
-      background-color: var(--screen-bg-color);
-    }
+    @extend %face-sans-13-medium;
 
-    &:hover {
-      box-sizing: border-box;
-      border-radius: 50%;
-      background-color: var(--screen-bg-color);
-    }
+    color: white;
+    margin-top: 6px;
 
-    .mark-as-read {
-      padding: 0.5rem;
-
-      @extend %face-sans-14-regular;
-
-      &:hover {
-        color: variables.$color-white;
-      }
+    .external-link-icon {
+      width: 24px;
+      height: 24px;
     }
   }
 }

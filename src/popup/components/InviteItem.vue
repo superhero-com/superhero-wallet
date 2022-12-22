@@ -24,7 +24,7 @@
       <BtnMain
         v-else
         class="button"
-        variant="secondary"
+        variant="muted"
         @click="deleteItem"
       >
         {{ $t('pages.invite.delete') }}
@@ -46,7 +46,7 @@
       />
       <div class="centered-buttons">
         <BtnMain
-          variant="secondary"
+          variant="muted"
           @click="resetTopUpChanges"
         >
           {{ $t('pages.invite.collapse') }}
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
 import { APP_LINK_WEB, watchUntilTruthy, formatDate } from '../utils';
 import TokenAmount from './TokenAmount.vue';
@@ -89,7 +89,7 @@ export default {
     error: false,
   }),
   computed: {
-    ...mapState(['sdk']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     link() {
       // sg_ prefix was chosen as a dummy to decode from base58Check
       const secretKey = (TxBuilderHelper.encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);

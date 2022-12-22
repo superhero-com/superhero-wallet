@@ -51,12 +51,16 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils/helper';
+import {
+  TXS_PER_PAGE,
+  AETERNITY_CONTRACT_ID,
+  MOBILE_WIDTH,
+  watchUntilTruthy,
+} from '../utils';
 import Filters from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import { TXS_PER_PAGE, FUNCTION_TYPE_DEX, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import Visible from '../../icons/visible.svg?vue-component';
 
 export default {
@@ -86,6 +90,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['getDexContracts', 'getTxSymbol']),
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapState(['transactions']),
     ...mapState({
@@ -106,7 +111,10 @@ export default {
               case 'all':
                 return true;
               case 'dex':
-                return FUNCTION_TYPE_DEX.pool.includes(tr.tx.function);
+                return this.getDexContracts && tr.tx.contractId && (
+                  this.getDexContracts.router.includes(tr.tx.contractId)
+                  || this.getDexContracts.wae?.includes(tr.tx.contractId)
+                );
               case 'out':
                 return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                     && tr.tx.senderId === address)
@@ -142,7 +150,6 @@ export default {
           .slice(0, this.maxLength || Infinity);
       },
     }),
-    ...mapGetters(['getTxSymbol']),
     showSearchAndFilters() {
       return (
         this.showFilters
@@ -169,7 +176,9 @@ export default {
   methods: {
     checkLoadMore() {
       if (this.isDestroyed || !this.transactions.nextPageUrl) return;
-      const isDesktop = document.documentElement.clientWidth > 480 || process.env.IS_EXTENSION;
+      // TODO - use viewport.ts composable after rewriting component to Vue 3
+      const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
+          || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = isDesktop
         ? document.querySelector('.app-inner') : document.documentElement;
       if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;

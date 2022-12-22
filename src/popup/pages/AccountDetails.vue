@@ -11,7 +11,7 @@
 
       <BtnClose
         class="close-button"
-        :to="{ name: 'index' }"
+        :to="{ name: 'account' }"
       />
     </div>
 
@@ -68,16 +68,15 @@ import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   DEX_URL,
+  EXTENSION_HEIGHT,
   buildSimplexLink,
 } from '../utils';
 import { IS_CORDOVA } from '../../lib/environment';
-import { EXTENSION_HEIGHT } from '../utils/constants';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
-import BtnIcon from '../components/buttons/BtnIcon.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
 import Tabs from '../components/tabs/Tabs.vue';
 import Tab from '../components/tabs/Tab.vue';
@@ -86,7 +85,6 @@ import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
-import CloseIcon from '../../icons/close.svg?vue-component';
 
 export default defineComponent({
   name: 'AccountDetails',
@@ -96,8 +94,6 @@ export default defineComponent({
     BtnPlain,
     Tabs,
     Tab,
-    CloseIcon,
-    BtnIcon,
     BtnBox,
     BtnClose,
   },
@@ -231,13 +227,11 @@ export default defineComponent({
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
-  --screen-bg-color: #{variables.$color-bg-modal};
 
   border-radius: variables.$border-radius-app;
   min-height: 100%;
   font-weight: 500;
   color: variables.$color-white;
-  background-color: var(--screen-bg-color);
   box-shadow:
     0 0 0 1px variables.$color-border,
     0 0 50px rgba(variables.$color-black, 0.6);

@@ -2,8 +2,6 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  NOTIFICATION_STATUS_CREATED,
-  NOTIFICATION_TYPE_WALLET,
   NODE_STATUS_CONNECTION_DONE,
   NODE_STATUS_CONNECTED,
   defaultNetwork,
@@ -50,9 +48,6 @@ export default {
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  initSdk(state, payload) {
-    state.sdk = payload;
-  },
   setMiddleware(state, payload) {
     state.middleware = payload;
   },
@@ -73,26 +68,8 @@ export default {
   setCurrentCurrency(state, currency) {
     state.current.currency = currency;
   },
-  setPageTitle(state, title) {
-    state.pageTitle = title;
-  },
   setCurrencies(state, payload) {
     state.currencies = payload;
-  },
-  addNotification(state, payload) {
-    state.notifications = [
-      ...state.notifications,
-      {
-        ...payload,
-        type: NOTIFICATION_TYPE_WALLET,
-        status: NOTIFICATION_STATUS_CREATED,
-        createdAt: new Date().toISOString(),
-      },
-    ];
-  },
-  setNotificationsStatus(state, { createdAt, status }) {
-    const index = state.notifications.findIndex((n) => n.createdAt === createdAt);
-    Vue.set(state.notifications[index], 'status', status);
   },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;

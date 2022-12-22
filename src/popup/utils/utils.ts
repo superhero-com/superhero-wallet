@@ -1,8 +1,31 @@
+import Vue from 'vue';
+import VueCompositionApi, {
+  onUnmounted,
+  Ref,
+  ref,
+  watch,
+} from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
+import { defer } from 'lodash-es';
 import { Observable } from 'rxjs';
-import { onUnmounted, Ref, ref } from '@vue/composition-api';
-import { HASH_REGEX, SIMPLEX_URL } from './constants';
+import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import {
+  ADDRESS_TYPES,
+  AENS_DOMAIN,
+  HASH_PREFIX_CONTRACT,
+  HASH_REGEX,
+  SIMPLEX_URL,
+} from './constants';
 import { i18n } from '../../store/plugins/languages';
+import dayjs from '../plugins/dayjsConfig';
+import type {
+  IRespondChallenge,
+  IResponseChallenge,
+  ISdk,
+  ITransaction,
+} from '../../types';
+
+Vue.use(VueCompositionApi);
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
@@ -33,28 +56,38 @@ export function formatTime(time: number) {
   });
 }
 
-export function checkHashType(fullHash: string) {
-  const addressTypes: Record<string, string> = {
-    ak: 'account/transactions',
-    ct: 'contracts/transactions',
-    nm: 'names',
-    ok: 'oracles/queries',
-    th: 'transactions',
-  };
-  const [prefix, hash] = fullHash.split('_');
+export const validateHash = (fullHash?: string) => {
+  const isName = !!fullHash?.endsWith(AENS_DOMAIN);
+  let valid = false;
+  let prefix = null;
+  let hash = null;
 
-  let valid: boolean = false;
-  let endpoint: string | null = null;
-
-  if (fullHash.endsWith('.chain')) {
-    valid = true;
-    endpoint = addressTypes.nm;
-  } else if (addressTypes[prefix] && HASH_REGEX.test(hash)) {
-    valid = true;
-    endpoint = addressTypes[prefix];
+  if (fullHash) {
+    [prefix, hash] = fullHash.split('_');
+    valid = (ADDRESS_TYPES[prefix] && HASH_REGEX.test(hash)) || isName;
   }
 
-  return { valid, endpoint, prefix };
+  return {
+    valid, isName, prefix, hash,
+  };
+};
+
+export function getMdwEndpointPrefixForHash(fullHash: string) {
+  const { valid, isName, prefix } = validateHash(fullHash);
+
+  if (!valid || !prefix) {
+    return null;
+  }
+
+  if (isName) {
+    return ADDRESS_TYPES.nm;
+  }
+  return ADDRESS_TYPES[prefix];
+}
+
+export function isContract(fullHash: string) {
+  const { valid, prefix } = validateHash(fullHash);
+  return (valid && prefix === HASH_PREFIX_CONTRACT);
 }
 
 export function escapeSpecialChars(str = '') {
@@ -89,13 +122,30 @@ export function buildSimplexLink(address: string) {
 }
 
 /**
+ * Watch for the getter to be truthy with the use of the compositionApi.
+ */
+export function watchUntilTruthy<T>(getter: () => T): Promise<NonNullable<T>> {
+  return new Promise((resolve) => {
+    const unwatch = watch(
+      getter,
+      (value) => {
+        if (!value) return;
+        resolve(getter() as NonNullable<T>);
+        defer(() => unwatch());
+      },
+      { immediate: true },
+    );
+  });
+}
+
+/**
  * Temporary function that allows to replace the `subscriptions` property
  * on Vue components when using the Vue setup() hook of the Vue composition API.
  */
-export function rxJsObservableToVueState(
+export function rxJsObservableToVueState<T = any>(
   observable: Observable<any>,
   defaultState: any = null,
-): Ref<any> {
+): Ref<T> {
   const state = ref(defaultState);
   const subscription = observable.subscribe((val) => {
     state.value = val || defaultState;
@@ -108,4 +158,29 @@ export function rxJsObservableToVueState(
 
 export function splitAddress(address: string | null): string {
   return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+}
+
+export function relativeTimeTo(date: string): string {
+  return dayjs().to(dayjs(date));
+}
+
+// TODO - move to sdk.ts composable after the removal of action.js file
+export async function fetchRespondChallenge(
+  sdk: ISdk,
+  responseChallenge: IResponseChallenge,
+): Promise<IRespondChallenge> {
+  const signedChallenge = Buffer.from(
+    await sdk.signMessage(responseChallenge.challenge),
+  ).toString('hex');
+
+  return {
+    challenge: responseChallenge.challenge,
+    signature: signedChallenge,
+  };
+}
+
+export function getPayload(transaction: ITransaction) {
+  return (transaction.tx?.payload)
+    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+    : null;
 }

@@ -20,6 +20,9 @@ describe('Pages', () => {
     options: {
       stubs: {
         RouterLink: RouterLinkStub,
+        i18n: {
+          template: '<span />',
+        },
       },
     },
     data: [{
@@ -37,7 +40,9 @@ describe('Pages', () => {
     name: 'About',
     page: About,
     options: {
-      stubs: ['router-link'],
+      stubs: {
+        RouterLink: RouterLinkStub,
+      },
     },
     data: [{
       extensionVersion: 'version-specific-text',
@@ -51,7 +56,14 @@ describe('Pages', () => {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
   }].forEach((test) => it(test.name, async () => {
-    const wrapper = mount(test.page, test.options);
+    const wrapper = mount(test.page, {
+      mocks: {
+        $store: {
+          getters: { activeNetwork: () => {} },
+        },
+      },
+      ...test.options,
+    });
     // eslint-disable-next-line no-restricted-syntax
     for (const data of test.data ?? [{}]) {
       // eslint-disable-next-line no-await-in-loop

@@ -30,62 +30,44 @@
     </div>
     <div
       v-else
-      class="web-icons"
+      class="web-icons-wrapper"
     >
-      <div
-        class="extension"
-      >
-        <div>
+      <div class="web-icons">
+        <div class="web-icons-title">
           {{ $t('pages.index.platforms.browser-extension') }}
         </div>
-        <div>
-          <a
-            :href="APP_LINK_FIREFOX"
-            target="_blank"
-          >
-            <img
-              :class="{ grey: !IS_FIREFOX || IS_MOBILE_DEVICE }"
-              src="../../icons/platforms/firefox.svg"
-              alt="Firefox"
-            >
-          </a>
-          <a
-            :href="APP_LINK_CHROME"
-            target="_blank"
-          >
-            <img
-              :class="{ grey: IS_FIREFOX || IS_MOBILE_DEVICE }"
-              src="../../icons/platforms/chrome.svg"
-              alt="Chrome"
-            >
-          </a>
+        <div class="web-icons-platforms">
+          <PlatformIcon
+            :to="APP_LINK_FIREFOX"
+            :disabled="!IS_FIREFOX || IS_MOBILE_DEVICE"
+            :src="require('../../icons/platforms/firefox.svg')"
+            alt="Firefox"
+          />
+          <PlatformIcon
+            :to="APP_LINK_CHROME"
+            :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
+            :src="require('../../icons/platforms/chrome.svg')"
+            alt="Chrome"
+          />
         </div>
       </div>
-      <div class="mobile-app">
-        <div>
+      <div class="web-icons">
+        <div class="web-icons-title">
           {{ $t('pages.index.platforms.mobile-app') }}
         </div>
-        <div>
-          <a
-            :href="APP_LINK_IOS"
-            target="_blank"
-          >
-            <img
-              :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
-              src="../../icons/platforms/app-store.svg"
-              alt="App Store"
-            >
-          </a>
-          <a
-            :href="APP_LINK_ANDROID"
-            target="_blank"
-          >
-            <img
-              :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
-              src="../../icons/platforms/google-play.svg"
-              alt="Google Play"
-            >
-          </a>
+        <div class="web-icons-platforms">
+          <PlatformIcon
+            :to="APP_LINK_IOS"
+            :disabled="!IS_IOS || !IS_MOBILE_DEVICE"
+            :src="require('../../icons/platforms/app-store.svg')"
+            alt="App Store"
+          />
+          <PlatformIcon
+            :to="APP_LINK_ANDROID"
+            :disabled="IS_IOS || !IS_MOBILE_DEVICE"
+            :src="require('../../icons/platforms/google-play.svg')"
+            alt="Google Play"
+          />
         </div>
       </div>
     </div>
@@ -103,8 +85,10 @@ import {
   APP_LINK_IOS,
 } from '../utils/constants';
 import { IS_MOBILE_DEVICE, IS_IOS, IS_FIREFOX } from '../../lib/environment';
+import PlatformIcon from './PlatformIcon.vue';
 
 export default {
+  components: { PlatformIcon },
   data: () => ({
     IS_MOBILE_DEVICE,
     IS_IOS,
@@ -130,18 +114,15 @@ export default {
   word-break: break-word;
 
   .heading {
-    @extend %face-sans-17-regular;
+    @extend %face-sans-17-medium;
 
-    margin: 8px auto;
-    width: 248px;
-    padding: 4px 8px;
-    color: variables.$color-white;
+    margin-bottom: 8px;
   }
 
   .footer {
-    @extend %face-sans-17-regular;
+    @extend %face-sans-17-medium;
 
-    margin-top: 14px;
+    margin-top: 28px;
     margin-bottom: 12px;
   }
 
@@ -149,54 +130,32 @@ export default {
     @include mixins.flex(center, center);
 
     gap: 17px;
+    padding-top: 8px;
   }
 
-  .web-icons {
+  .web-icons-wrapper {
     @include mixins.flex(center, center);
 
     text-align: center;
     color: variables.$color-grey-light;
+  }
 
-    .extension {
-      width: 50%;
-      border-right: 1px solid variables.$color-border-hover;
+  .web-icons {
+    &-title {
+      padding-top: 4px;
     }
 
-    .mobile-app {
-      flex-grow: 1;
+    &:first-child {
+      border-right: 1px solid rgba(variables.$color-white, 0.2);
     }
 
-    .mobile-app,
-    .extension {
-      div {
-        @include mixins.flex(center);
+    .web-icons-platforms {
+      @include mixins.flex(center);
 
-        + div {
-          padding-top: 15px;
-          padding-bottom: 12px;
-        }
-
-        a {
-          &:first-of-type {
-            margin-right: 32px;
-          }
-
-          img {
-            height: 40px;
-            width: 40px;
-
-            &.grey {
-              filter: grayscale(1);
-              opacity: 0.8;
-
-              &:hover {
-                filter: none;
-                opacity: 1;
-              }
-            }
-          }
-        }
-      }
+      gap: 32px;
+      padding-right: 30px;
+      padding-left: 30px;
+      padding-top: 12px;
     }
   }
 }

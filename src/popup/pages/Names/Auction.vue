@@ -22,7 +22,7 @@
 
 <script>
 import BigNumber from 'bignumber.js';
-import { aettosToAe, watchUntilTruthy } from '../../utils/helper';
+import { aettosToAe, watchUntilTruthy } from '../../utils';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
@@ -68,7 +68,7 @@ export default {
           bids: loadedBids,
         });
       } catch (error) {
-        this.$router.push('/names/auctions');
+        this.$router.push({ name: 'auction-bid' });
       }
       this.loading = false;
     },

@@ -40,7 +40,8 @@
             class="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance) && tokens"
+            v-if="(isPool || isAllowance)
+              && tokens"
             :tokens="tokens"
             :tx-function="transaction.tx.function"
             :is-allowance="isAllowance"
@@ -55,7 +56,7 @@
           >
             <template #value>
               <CopyText :value="tipUrl">
-                <LinkButton :to="/^http[s]*:\/\//.test(tipUrl) ? tipUrl : `http://${tipUrl}`">
+                <LinkButton :to="tipLink">
                   <Truncate
                     :str="tipUrl"
                     fixed
@@ -80,6 +81,8 @@
               </CopyText>
             </template>
           </DetailsItem>
+
+          <PayloadDetails :payload="getPayload(transaction)" />
 
           <div class="span-3-columns">
             <DetailsItem
@@ -134,7 +137,7 @@
           >
             <template #value>
               <TokenAmount
-                :amount="+aettosToAe(transaction.tx.gasPrice)"
+                :amount="+(aettosToAe(transaction.tx.gasPrice))"
                 symbol="AE"
                 hide-fiat
               />
@@ -164,8 +167,10 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import {
+  computed, defineComponent, PropType, ref, onMounted,
+} from '@vue/composition-api';
 import {
   FUNCTION_TYPE_DEX,
   formatDate,
@@ -174,8 +179,8 @@ import {
   watchUntilTruthy,
   splitAddress,
   AETERNITY_SYMBOL,
+  getPayload,
 } from '../utils';
-import transactionTokensMixin from '../../mixins/transactionTokensMixin';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
@@ -183,17 +188,20 @@ import TokenAmount from '../components/TokenAmount.vue';
 import DetailsItem from '../components/DetailsItem.vue';
 import LinkButton from '../components/LinkButton.vue';
 import Truncate from '../components/Truncate.vue';
-import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
+import PayloadDetails from '../components/PayloadDetails.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
+import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import ExternalLink from '../../icons/external-link.svg?vue-component';
+import type { ITransaction } from '../../types';
+import { useTransactionToken, useGetter } from '../../composables';
 
-export default {
-  name: 'TransactionDetails',
+export default defineComponent({
   components: {
+    PayloadDetails,
     TransactionErrorStatus,
     TransactionDetailsPoolTokens,
     TransactionTokens,
@@ -202,50 +210,74 @@ export default {
     DetailsItem,
     LinkButton,
     Truncate,
-    AnimatedPending,
-    AnimatedSpinner,
-    ExternalLink,
     CopyText,
     SwapRoute,
     SwapRates,
+    AnimatedPending,
+    AnimatedSpinner,
+    ExternalLink,
   },
-  mixins: [transactionTokensMixin],
   props: {
-    hash: { type: String, required: true },
+    hash: { type: String as PropType<string>, required: true },
   },
-  data: () => ({
-    transaction: null,
-    showDetailedAllowanceInfo: true,
-    AETERNITY_SYMBOL,
-  }),
-  computed: {
-    ...mapGetters(['getTx', 'getTxSymbol', 'getTxAmountTotal',
-      'isTxAex9', 'getTxTipUrl', 'getExplorerPath']),
-    tipUrl() {
-      return this.getTxTipUrl(this.transaction);
-    },
-    isSwap() {
-      return FUNCTION_TYPE_DEX.swap.includes(this.transaction?.tx?.function);
-    },
-    isPool() {
-      return FUNCTION_TYPE_DEX.pool.includes(this.transaction?.tx?.function);
-    },
+  setup(props, { root }) {
+    const transaction = ref<ITransaction>();
+    const getTx = useGetter('getTx');
+
+    const getTxTipUrl = useGetter('getTxTipUrl');
+    const getExplorerPath = useGetter('getExplorerPath');
+    const isTxAex9 = useGetter('isTxAex9');
+
+    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
+    const {
+      setTransaction,
+      getTxSymbol,
+      getTxAmountTotal,
+      isErrorTransaction,
+      isAllowance,
+      tokens,
+      isDex,
+    } = useTransactionToken(undefined, true);
+
+    onMounted(async () => {
+      transaction.value = getTx.value(props.hash);
+      if (!transaction.value || transaction.value.incomplete) {
+        await watchUntilTruthy(() => root.$store.state.middleware);
+        transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+        root.$store.commit('setTransactionByHash', transaction.value);
+      }
+      if (transaction.value) setTransaction(transaction.value);
+    });
+
+    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
+
+    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
+
+    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
+
+    return {
+      AETERNITY_SYMBOL,
+      transaction,
+      tipUrl,
+      isSwap,
+      isPool,
+      getTxSymbol,
+      getTxAmountTotal,
+      isErrorTransaction,
+      isAllowance,
+      tokens,
+      isDex,
+      getExplorerPath,
+      isTxAex9,
+      tipLink,
+      getPayload,
+      splitAddress,
+      aettosToAe,
+      formatDate,
+      formatTime,
+    };
   },
-  async mounted() {
-    this.transaction = this.getTx(this.hash);
-    if (!this.transaction || this.transaction?.incomplete) {
-      await watchUntilTruthy(() => this.$store.state.middleware);
-      this.transaction = await this.$store.state.middleware.getTxByHash(this.hash);
-      this.$store.commit('setTransactionByHash', this.transaction);
-    }
-  },
-  methods: {
-    splitAddress,
-    aettosToAe,
-    formatDate,
-    formatTime,
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -331,6 +363,10 @@ export default {
 
       .tip-url {
         width: 100%;
+
+        .copy-text {
+          width: 100%;
+        }
 
         .link-button {
           display: block;

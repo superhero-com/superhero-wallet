@@ -6,7 +6,7 @@
   >
     <TransactionInfo
       :title="$t('pages.connectConfirm.title')"
-      :sender="{ name: app.name, address: app.host, url: app.url }"
+      :sender="{ name: appName, address: app.host, url: app.url }"
       :recipient="account"
     />
 
@@ -14,12 +14,12 @@
       class="subtitle"
       data-cy="aepp"
     >
-      <span class="app-name">{{ app.name }}</span>
+      <span class="app-name">{{ appName }}</span>
       ({{ app.host }}) {{ $t('pages.connectConfirm.websiteRequestconnect') }}
     </div>
 
     <div class="permissions">
-      <template v-if="permissions.includes('address')">
+      <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
         <span class="title">
           <CheckMark class="icon" /> {{ $t('pages.connectConfirm.addressLabel') }}
         </span>
@@ -27,7 +27,7 @@
           {{ $t('pages.connectConfirm.addressRequest') }}
         </span>
       </template>
-      <template v-if="permissions.includes('transactions')">
+      <template v-if="access.includes(POPUP_CONNECT_TRANSACTIONS_PERMISSION)">
         <span class="title">
           <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
         </span>
@@ -39,7 +39,7 @@
 
     <template #footer>
       <BtnMain
-        variant="secondary"
+        variant="muted"
         data-cy="deny"
         @click="cancel()"
       >
@@ -58,11 +58,15 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import {
+  POPUP_CONNECT_ADDRESS_PERMISSION,
+  POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+} from '../../utils';
+import mixin from './mixin';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
 import CheckMark from '../../../icons/check-mark.svg?vue-component';
-import mixin from './mixin';
 
 export default {
   components: {
@@ -74,7 +78,19 @@ export default {
   mixins: [mixin],
   props: {
     app: { type: Object, required: true },
-    permissions: { type: Array, default: () => (['address', 'transactions']) },
+    access: {
+      type: Array,
+      default: () => ([
+        POPUP_CONNECT_ADDRESS_PERMISSION,
+        POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+      ]),
+    },
+  },
+  data() {
+    return {
+      POPUP_CONNECT_ADDRESS_PERMISSION,
+      POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+    };
   },
   computed: {
     ...mapGetters([
@@ -89,7 +105,13 @@ export default {
           url: this.getExplorerPath(account.address),
         };
       },
+      permission(state) {
+        return state.permissions[this.app.host];
+      },
     }),
+    appName() {
+      return this.permission?.name || this.app.name;
+    },
   },
   methods: {
     confirm() {
@@ -100,6 +122,7 @@ export default {
         transactionSignLimitLeft: 0,
         transactionSignFirstAskedOn: null,
         ...this.app,
+        ...this.permission,
       });
       this.resolve();
     },

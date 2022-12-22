@@ -35,7 +35,7 @@ jobs:
             npx commitlint --from $BASE --to $HEAD --verbose
           fi
       - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
-      # - run: npm test
+      - run: npm test
       - run: |
           npm run build:web
           npm run build:extension

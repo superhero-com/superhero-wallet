@@ -42,12 +42,12 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import {
+  BLOG_CLAIM_TIP_URL,
   aettosToAe,
   toURL,
   validateTipUrl,
   watchUntilTruthy,
-} from '../utils/helper';
-import { BLOG_CLAIM_TIP_URL } from '../utils/constants';
+} from '../utils';
 import { IS_EXTENSION } from '../../lib/environment';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -68,7 +68,8 @@ export default {
   }),
   computed: {
     ...mapState('accounts', ['activeIdx']),
-    ...mapState(['sdk', 'tippingV1']),
+    ...mapState(['tippingV1']),
+    ...mapGetters('sdkPlugin', ['sdk']),
     ...mapGetters(['account', 'tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';

@@ -22,7 +22,7 @@
     <div class="button-wrapper">
       <BtnMain
         data-cy="cancel"
-        variant="secondary"
+        variant="muted"
         class="cancel-button"
         @click="goBack"
       >
@@ -52,7 +52,7 @@ import { mapActions, mapGetters } from 'vuex';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InputField from '../components/InputField.vue';
 import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
-import { defaultNetwork } from '../utils/constants';
+import { defaultNetwork } from '../utils';
 
 export const NETWORK_PROPS = {
   url: null,
@@ -78,8 +78,8 @@ export default {
           key: 'name',
           placeholder: this.$t('pages.network.networkNamePlaceholder'),
           label: this.$t('pages.network.networkNameLabel'),
-          dateCy: 'network',
-          textLimit: 17,
+          dataCy: 'network',
+          textLimit: 15,
         },
         {
           key: 'url',

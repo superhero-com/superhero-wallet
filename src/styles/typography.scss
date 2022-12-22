@@ -43,6 +43,13 @@
   line-height: 24px;
 }
 
+%face-sans-22-bold {
+  font-family: $font-sans;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 32px;
+}
+
 %face-sans-20-bold {
   font-family: $font-sans;
   font-weight: bold;
@@ -223,6 +230,20 @@
   font-weight: normal;
   font-size: 11px;
   line-height: 16px;
+}
+
+%face-mono-15-medium {
+  font-family: $font-mono;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+%face-mono-15-regular {
+  font-family: $font-mono;
+  font-weight: normal;
+  font-size: 15px;
+  line-height: 20px;
 }
 
 %face-mono-14-medium {

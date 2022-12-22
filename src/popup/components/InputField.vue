@@ -89,6 +89,7 @@
     >
       <label
         class="message-text"
+        data-cy="input-field-message"
         :for="inputId"
       >
         {{ typeof message === 'object' ? message && message.text : message }}
@@ -217,16 +218,26 @@ export default {
     margin-top: 16px;
 
     &-text {
-      margin: 5px 0;
+      margin: 4px 0;
       display: inline-block;
     }
 
     &-help {
-      display: block;
-      width: 25px;
-      height: 20px;
-      padding-left: 5px;
-      color: inherit;
+      display: flex;
+      margin-left: 10px;
+
+      .icon {
+        color: variables.$color-white;
+        height: 24px;
+        width: 24px;
+        opacity: 0.5;
+      }
+
+      &:hover {
+        .icon {
+          opacity: 1;
+        }
+      }
     }
 
     &-after {
@@ -307,10 +318,10 @@ export default {
 
     &-help {
       display: block;
-      width: 25px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       padding-left: 5px;
-      color: inherit;
+      color: rgba(variables.$color-black, 0.75);
     }
   }
 

@@ -18,7 +18,7 @@
 
     <BtnMain
       extend
-      variant="secondary"
+      variant="muted"
       class="add-custom-network"
       data-cy="to-add"
       has-icon

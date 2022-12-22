@@ -1,9 +1,15 @@
-import { checkHashType } from '../../../src/popup/utils';
+import {
+  validateHash,
+  getMdwEndpointPrefixForHash,
+} from '../../../src/popup/utils';
+
+const testErrors = [{
+  hash: null,
+}, {
+  hash: undefined,
+}];
 
 const testHashes = [{
-  hash: null,
-  error: true,
-}, {
   hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcek0',
   error: true,
 }, {
@@ -32,16 +38,18 @@ const testHashes = [{
   endpoint: 'names',
 }];
 
-describe('checkHashType', () => {
+describe('validateHash', () => {
+  testErrors.forEach((test) => it('should throw an error', () => {
+    expect(() => validateHash(test.hash)).toThrow();
+  }));
   testHashes.forEach((test) => it('should be invalid if hash has improper length, contains invalid characters (0, J, O, l or symbols) or does not have ".chain" ending', () => {
-    expect(checkHashType(test.hash).valid).toBe(!test.error);
+    expect(validateHash(test.hash).valid).toBe(!test.error);
   }));
   testHashes.forEach((test) => it('should return correct endpoint related to its', () => {
     expect.assertions(1);
     if (test.error) {
-      expect(checkHashType(test.hash).valid).toBe(false);
-      return;
+      expect(validateHash(test.hash).valid).toBe(false);
     }
-    expect(checkHashType(test.hash).endpoint).toBe(test.endpoint);
+    expect(getMdwEndpointPrefixForHash(test.hash)).toBe(test.endpoint);
   }));
 });

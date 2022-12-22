@@ -1,12 +1,24 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import routes from './routes';
+import { ICordova } from '../../types';
+import {
+  ROUTE_ACCOUNT,
+  ROUTE_INDEX,
+} from './routeNames';
+import { routes } from './routes';
 import { i18n } from '../../store/plugins/languages';
-import { watchUntilTruthy } from '../utils/helper';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
-import { APP_LINK_WEB } from '../utils/constants';
+import {
+  APP_LINK_WEB,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+  MODAL_DEFAULT,
+  watchUntilTruthy,
+} from '../utils';
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,
@@ -27,33 +39,33 @@ const lastRouteKey = 'last-path';
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
-    (to.path === '/' && (await browser.storage.local.get(lastRouteKey))[lastRouteKey]) || undefined,
+    (to.name === ROUTE_INDEX && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
+    || undefined,
   );
   unbind();
 });
-
-let savedScrollPosition = 0;
 
 router.beforeEach(async (to, from, next) => {
   const { isLoggedIn } = store.getters;
 
   if (!isLoggedIn) {
-    if (to.meta.ifNotAuthOnly || to.meta.ifNotAuth) next();
-    else {
+    if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
+      next();
+    } else {
       store.commit('setLoginTargetLocation', to);
-      next('/');
+      next({ name: ROUTE_INDEX });
     }
     return;
   }
 
-  if (!store.state.sdk) initSdk();
+  if (!store.getters['sdkPlugin/sdk']) initSdk();
 
   if (RUNNING_IN_POPUP) {
     const name = {
-      connectConfirm: 'connect',
-      sign: 'popup-sign-tx',
-      rawSign: 'popup-raw-sign',
-      messageSign: 'message-sign',
+      [POPUP_TYPE_CONNECT]: 'connect',
+      [POPUP_TYPE_SIGN]: 'popup-sign-tx',
+      [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
+      [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
     }[POPUP_TYPE];
 
     if (name !== to.name) {
@@ -61,56 +73,51 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
   }
-  if (from.fullPath === '/transactions') {
-    savedScrollPosition = (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scrollTop;
-  }
+  // TODO: rethink this approach
+  // @ts-ignore
+  document.querySelector('.app-inner').scroll(0, 0);
 
-  if (to.fullPath === '/transactions' && savedScrollPosition) {
-    setTimeout(() => {
-      (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, savedScrollPosition);
-      savedScrollPosition = 0;
-    }, 50);
-  } else {
-    (process.env.IS_CORDOVA ? document.scrollingElement : document.querySelector('.app-inner')).scroll(0, 0);
-  }
-
-  next(to.meta.ifNotAuthOnly ? '/account' : undefined);
+  next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 
 router.afterEach(async (to) => {
-  if (to.meta.notPersist) await browser.storage.local.remove(lastRouteKey);
-  else await browser.storage.local.set({ [lastRouteKey]: to.path });
+  if (to.meta?.notPersist) {
+    await browser?.storage.local.remove(lastRouteKey);
+  } else {
+    await browser?.storage.local.set({ [lastRouteKey]: to.path });
+  }
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));
 
 const routerReadyPromise = new Promise((resolve) => {
   const unbindAfterEach = router.afterEach(() => {
-    resolve();
+    resolve(true);
     setTimeout(unbindAfterEach);
   });
 });
 
 if (IS_CORDOVA) {
   (async () => {
+    const cordova = window.cordova as ICordova;
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
-    window.IonicDeeplink.onDeepLink(({ url }) => {
+    window.IonicDeeplink.onDeepLink(({ url }: any) => {
       const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => url.startsWith(p));
       if (!prefix) throw new Error(`Unknown url: ${url}`);
       try {
-        window.location = `#/${url.slice(prefix.length)}`;
-      } catch (error) {
+        window.location.href = `#/${url.slice(prefix.length)}`;
+      } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
       }
     });
 
-    window.cordova.openwith.init();
-    window.cordova.openwith.addHandler((intent) => {
-      const url = intent.items.find(({ type }) => type.includes('url'))?.data;
+    cordova.openwith.init();
+    cordova.openwith.addHandler((intent: any) => {
+      const url = intent.items.find(({ type }: any) => type.includes('url'))?.data;
       if (url) {
-        router.push({ name: 'account', query: { url } });
+        router.push({ name: ROUTE_ACCOUNT, query: { url } });
       } else {
-        store.dispatch('modals/open', { name: 'default', ...i18n.t('modals.mobile-share-error') });
+        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') as any });
       }
     });
 

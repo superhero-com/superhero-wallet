@@ -1,5 +1,4 @@
-import { MODAL_SPEND_SUCCESS } from '../../popup/utils/constants';
-import { watchUntilTruthy } from '../../popup/utils/helper';
+import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const waitTransactionMined = async ({
@@ -7,7 +6,7 @@ export default async (store) => {
   }) => {
     const network = store.getters.activeNetwork?.networkId;
     try {
-      const transaction = await store.state.sdk.poll(hash);
+      const transaction = await store.getters['sdkPlugin/sdk'].poll(hash);
       const showSpendModal = () => store.dispatch('modals/open', {
         name: MODAL_SPEND_SUCCESS,
         transaction: {
@@ -36,7 +35,7 @@ export default async (store) => {
     }
   };
 
-  await watchUntilTruthy(() => store.state.sdk);
+  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[store.getters.activeNetwork?.networkId]

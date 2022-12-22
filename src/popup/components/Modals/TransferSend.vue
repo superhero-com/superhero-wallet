@@ -1,8 +1,10 @@
 <template>
   <Modal
+    :key="currentStep"
     class="transfer-send-modal"
     has-close-button
     from-bottom
+    :body-without-padding-bottom="currentStep === STEP_FORM"
     @close="closeModal"
   >
     <div class="relative">
@@ -22,7 +24,7 @@
     <template #footer>
       <BtnMain
         v-if="showEditButton"
-        variant="secondary"
+        variant="muted"
         text="Edit"
         class="button-action-secondary"
         @click="editTransfer"
@@ -43,8 +45,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { MODAL_TRANSFER_SEND } from '../../utils/constants';
-import { validateTipUrl } from '../../utils/helper';
+import { MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TransferSendForm from '../TransferSendForm.vue';
@@ -78,6 +79,7 @@ export default {
         address: '',
         amount: null,
         selectedAsset: null,
+        payload: '',
       },
       steps: {
         [STEP_FORM]: {

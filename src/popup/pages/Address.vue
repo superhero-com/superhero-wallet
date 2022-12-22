@@ -3,38 +3,40 @@
     :app="app"
     :resolve="onResolve"
     :reject="onReject"
-    :permissions="['address']"
+    :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
   />
 </template>
 
-<script>
-
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useDeepLinkApi } from '../../composables';
+import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
-import deeplinkApi from '../../mixins/deeplinkApi';
 
-export default {
+export default defineComponent({
+  name: 'Address',
   components: { Connect },
-  mixins: [deeplinkApi],
-  computed: {
-    app() {
-      const host = (new URL(this.$route.query['x-success']));
-      return {
-        name: host.hostname,
-        url: host.origin,
-        host: host.host,
-      };
-    },
+  setup(props, { root }) {
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
+    const app = computed<any>(() => callbackOrigin.value ? ({
+      name: callbackOrigin.value.hostname,
+      url: callbackOrigin.value.origin,
+      host: callbackOrigin.value.host,
+    }) : {});
+
+    const onResolve = () => openCallbackOrGoHome(true, {
+      address: root.$store.getters.account.address,
+      networkId: root.$store.getters.activeNetwork.networkId,
+    });
+
+    const onReject = () => openCallbackOrGoHome(false);
+
+    return {
+      onResolve,
+      onReject,
+      app,
+      POPUP_CONNECT_ADDRESS_PERMISSION,
+    };
   },
-  methods: {
-    onResolve() {
-      this.openCallbackOrGoHome(true, {
-        address: this.$store.getters.account.address,
-        networkId: this.$store.getters.activeNetwork.networkId,
-      });
-    },
-    onReject() {
-      this.openCallbackOrGoHome(false);
-    },
-  },
-};
+});
 </script>

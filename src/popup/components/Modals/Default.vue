@@ -1,5 +1,6 @@
 <template>
   <Modal
+    class="default"
     :class="{
       'text-center': textCenter
     }"
@@ -62,24 +63,30 @@ export default {
 @use '../../../styles/variables';
 @use '../../../styles/mixins';
 
-.icon-box {
-  @include mixins.flex(center, center, column);
-
-  gap: 20px;
-
-  .icon {
-    padding: 4px;
-    border: 4px solid variables.$color-disabled;
-    border-radius: 200%;
-    height: 64px;
-    width: 64px;
-    margin-bottom: 20px;
-    background-color: variables.$color-bg-1;
+.default {
+  .text-heading-2 {
+    margin-bottom: 16px;
   }
 
-  .center-button {
-    width: auto;
-    padding: 0 24px;
+  .icon-box {
+    @include mixins.flex(center, center, column);
+
+    gap: 20px;
+
+    .icon {
+      padding: 4px;
+      border: 4px solid variables.$color-disabled;
+      border-radius: 200%;
+      height: 64px;
+      width: 64px;
+      margin-bottom: 20px;
+      background-color: variables.$color-bg-1;
+    }
+
+    .center-button {
+      width: auto;
+      padding: 0 24px;
+    }
   }
 }
 </style>
