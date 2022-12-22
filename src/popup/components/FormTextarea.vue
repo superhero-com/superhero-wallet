@@ -9,7 +9,8 @@
       <textarea
         :id="inputId"
         data-cy="textarea"
-        :class="['textarea-input', { resizable }]"
+        class="textarea-input styled-scrollbar"
+        :class="{ resizable }"
         :placeholder="placeholder"
         :value="value"
         @keydown.enter="handleEnterClick"
