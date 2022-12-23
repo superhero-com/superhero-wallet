@@ -3,6 +3,7 @@
     :class="['account-card', { selected }]"
     :style="cardCssProps"
     :to="{ name: 'account-details' }"
+    data-cy="account-card"
   >
     <AccountInfo
       :account-idx="accountIdx"

@@ -1,5 +1,5 @@
 import getters from '../../../src/store/getters';
-import { AETERNITY_CONTRACT_ID } from '../../../src/popup/utils';
+import { AETERNITY_CONTRACT_ID, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
 
 const tests = [{
   transaction: {
@@ -15,7 +15,7 @@ const tests = [{
           value: 99900000000000000,
         },
       ],
-      contractId: 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8',
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
       function: 'change_allowance',
       type: 'ContractCallTx',
     },
