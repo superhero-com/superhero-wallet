@@ -169,7 +169,7 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, PropType, ref, onMounted,
+  computed, defineComponent, ref, onMounted,
 } from '@vue/composition-api';
 import {
   FUNCTION_TYPE_DEX,
@@ -218,7 +218,7 @@ export default defineComponent({
     ExternalLink,
   },
   props: {
-    hash: { type: String as PropType<string>, required: true },
+    hash: { type: String, required: true },
   },
   setup(props, { root }) {
     const transaction = ref<ITransaction>();

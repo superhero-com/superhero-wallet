@@ -61,13 +61,22 @@
   </InputField>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  PropType,
+  watch,
+} from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
+import { useGetter } from '../../composables';
+import { IAsset } from '../../types';
+import { rxJsObservableToVueState } from '../utils';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
-export default {
+export default defineComponent({
   components: {
     InputSelectAsset,
     InputField,
@@ -75,62 +84,58 @@ export default {
   props: {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
-    selectedAsset: { type: Object, default: null },
+    selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, [
-      'balance',
-      'balanceCurrency',
-    ]);
-  },
-  data() {
+  setup(props, { root, emit }) {
+    // eslint-disable-next-line no-unused-vars
+    const getAeternityToken = useGetter<(o: any) => IAsset>('fungibleTokens/getAeternityToken');
+    const formatCurrency = useGetter('formatCurrency');
+
+    const balance = rxJsObservableToVueState<BigNumber>(
+      (root.$store.state as any).observables.balance,
+    );
+    const balanceCurrency = rxJsObservableToVueState<number>(
+      (root.$store.state as any).observables.balanceCurrency,
+    );
+
+    const aeToken = getAeternityToken.value({
+      tokenBalance: balance.value,
+      balanceCurrency: balanceCurrency.value,
+    });
+
+    const currentAsset = computed((): IAsset => props.selectedAsset || aeToken);
+    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const totalAmount = computed(
+      () => (currentAsset.value?.current_price)
+        ? ((+props.value || 0) * currentAsset.value.current_price).toFixed(2)
+        : 0,
+    );
+    const currentTokenFiatPrice = computed(() => currentAsset.value?.current_price?.toFixed(2));
+
+    function handleAssetSelected(asset: IAsset) {
+      emit('asset-selected', asset);
+    }
+
+    watch(hasError, (val) => emit('error', val));
+
+    onMounted(() => {
+      if (!props.selectedAsset) {
+        handleAssetSelected(aeToken);
+      }
+    });
+
     return {
-      aeToken: null,
+      totalAmount,
+      currentTokenFiatPrice,
+      currentAsset,
+      hasError,
+      formatCurrency,
+      handleAssetSelected,
     };
   },
-  computed: {
-    ...mapGetters('fungibleTokens', ['getAeternityToken']),
-    ...mapGetters([
-      'formatCurrency',
-      'account',
-    ]),
-    hasError() {
-      return this.$validator.errors.has('amount');
-    },
-    totalAmount() {
-      return (this.currentAsset?.current_price)
-        ? ((+this.value || 0) * this.currentAsset.current_price).toFixed(2)
-        : 0;
-    },
-    currentTokenFiatPrice() {
-      return this.currentAsset?.current_price?.toFixed(2);
-    },
-    currentAsset() {
-      return this.selectedAsset || this.aeToken;
-    },
-  },
-  watch: {
-    hasError(value) {
-      return this.$emit('error', value);
-    },
-  },
-  created() {
-    this.aeToken = this.getAeternityToken({
-      tokenBalance: this.balance,
-      balanceCurrency: this.balanceCurrency,
-    });
-    if (!this.selectedAsset) {
-      this.handleAssetSelected(this.aeToken);
-    }
-  },
-  methods: {
-    handleAssetSelected(asset) {
-      this.$emit('asset-selected', asset);
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

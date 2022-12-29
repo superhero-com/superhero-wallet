@@ -1,82 +1,84 @@
 <template>
   <InputField
-    v-validate="ownValidation ? validation : {
+    v-validate="{
       required: true,
       min_value_exclusive: 0,
-      ...+balance.minus(fee) > 0 ? { max_value: max } : {},
       enough_ae: fee.toString(),
-      ...validation,
+      max_value: (max > 0) ? max : undefined,
     }"
+    v-bind="$attrs"
     name="amount"
-    :message="$attrs['message'] || errors.first('amount')"
     class="input-amount"
     type="number"
-    v-bind="$attrs"
     placeholder="0.00"
+    :value="value"
+    :message="$attrs['message'] || errors.first('amount')"
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
     @input="$emit('input', $event)"
   >
     <template #after>
-      <span class="token">AE</span>
+      <span class="token">{{ AETERNITY_SYMBOL }}</span>
       <span
         class="amount"
         data-cy="amount-currency"
       >
-        {{ `(${formatCurrency(currencyAmount)})` }}
+        ({{ currencyAmount }})
       </span>
     </template>
   </InputField>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+  watch,
+} from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { calculateFee } from '../utils';
-import { useSdk } from '../../composables';
+import { AETERNITY_SYMBOL, calculateFee, rxJsObservableToVueState } from '../utils';
+import { useGetter, useSdk } from '../../composables';
 import InputField from './InputField.vue';
 
-export default {
+export default defineComponent({
   components: {
     InputField,
   },
   props: {
-    noToken: { type: Boolean },
-    ownValidation: { type: Boolean },
-    validation: { type: Object, default: null },
+    value: { type: [String, Number], default: '' },
+    noToken: Boolean,
   },
-  data() {
+  setup(props, { emit, root }) {
+    const { getSdk } = useSdk();
+
+    const fee = ref(new BigNumber(0));
+
+    const balance = rxJsObservableToVueState<BigNumber>(
+      (root.$store.state as any).observables.balance,
+    );
+
+    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const max = computed(() => balance.value.minus(fee.value).toNumber());
+    const currencyAmount = computed(() => convertToCurrencyFormatted.value(props.value || 0));
+
+    onMounted(async () => {
+      const sdk = await getSdk();
+      fee.value = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
+    });
+
+    watch(hasError, (val) => emit('error', val));
+
     return {
-      fee: BigNumber(0),
+      AETERNITY_SYMBOL,
+      fee,
+      max,
+      currencyAmount,
     };
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
-  computed: {
-    ...mapGetters(['formatCurrency', 'account']),
-    hasError() {
-      return this.$validator.errors.has('amount');
-    },
-    max() {
-      return this.balance.minus(this.fee).toString();
-    },
-    currencyAmount() {
-      return ((this.$attrs.value || 0) * this.$store.getters.currentCurrencyRate).toFixed(2);
-    },
-  },
-  watch: {
-    hasError(value) {
-      return this.$emit('error', value);
-    },
-  },
-  async mounted() {
-    const { getSdk } = useSdk();
-    const sdk = await getSdk();
-    this.fee = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
