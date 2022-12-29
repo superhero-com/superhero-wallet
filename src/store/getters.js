@@ -3,6 +3,7 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import {
+  AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   AVATAR_URL,
   DEX_CONTRACTS,
@@ -19,7 +20,6 @@ import {
   categorizeContractCallTxObject,
   getHdWalletAccount,
   getMdwEndpointPrefixForHash,
-  AETERNITY_CONTRACT_ID,
 } from '../popup/utils';
 
 export default {

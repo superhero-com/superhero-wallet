@@ -80,6 +80,7 @@ export interface IPermission {
   host: string
   messageSign: boolean
   name: string
+  dailySpendLimit: boolean
   transactionSignFirstAskedOn: any
   transactionSignLimit: number
   transactionSignLimitLeft: number

@@ -7,27 +7,34 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
+import { useGetter } from '../../composables';
+import { rxJsObservableToVueState } from '../utils';
 
-export default {
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balances']);
-  },
-  computed: {
-    ...mapGetters(['convertToCurrencyFormatted']),
-    totalAmount() {
-      if (!this.balances?.length) return 0;
-      const total = this.balances.reduce(
+export default defineComponent({
+  setup(props, { root }) {
+    const balances = rxJsObservableToVueState<BigNumber[]>(
+      (root.$store.state as any).observables.balances,
+    );
+
+    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+
+    const totalAmount = computed(() => {
+      if (!balances.value?.length) return 0;
+      const total = balances.value.reduce(
         (previousValue, currentValue) => previousValue.plus(currentValue),
-        BigNumber(0),
+        new BigNumber(0),
       );
-      return this.convertToCurrencyFormatted(total);
-    },
+      return convertToCurrencyFormatted.value(total);
+    });
+
+    return {
+      totalAmount,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

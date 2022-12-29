@@ -3,34 +3,45 @@
     class="balance-info"
     data-cy="balance-info"
   >
-    <AeBalance :balance="Number(balances[idx])" />
+    <AeBalance :balance="balance" />
     <div class="display-value">
-      {{ formatCurrency(balances[idx] * currentCurrencyRate) }}
+      {{ currencyFormatted }}
     </div>
   </div>
 </template>
 
-<script>
-import { pick } from 'lodash-es';
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
+import { useGetter, useState } from '../../composables';
+import { rxJsObservableToVueState } from '../utils';
 import AeBalance from './AeBalance.vue';
 
-export default {
-  components: { AeBalance },
+export default defineComponent({
+  components: {
+    AeBalance,
+  },
   props: {
     accountIdx: { type: Number, default: -1 },
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balances']);
+  setup(props, { root }) {
+    const activeIdx = useState('accounts', 'activeIdx');
+    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+
+    const balances = rxJsObservableToVueState<BigNumber[]>(
+      (root.$store.state as any).observables.balances,
+    );
+
+    const idx = computed(() => props.accountIdx === -1 ? activeIdx.value : props.accountIdx);
+    const balance = computed(() => balances.value[idx.value].toNumber());
+    const currencyFormatted = computed(() => convertToCurrencyFormatted.value(balance.value));
+
+    return {
+      balance,
+      currencyFormatted,
+    };
   },
-  computed: {
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'accounts']),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
