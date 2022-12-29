@@ -10,6 +10,7 @@
         :name="name"
         :address="address"
       />
+
       <div class="header">
         <Truncate :str="name" />
         <span
@@ -19,7 +20,7 @@
           {{ $t('pages.transactions.pending') }}
         </span>
         <div
-          v-if="!nameEntry.pending"
+          v-else
           class="buttons"
         >
           <button
@@ -126,26 +127,36 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
 import {
+  computed,
+  defineComponent,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import {
+  NODAL_CONFIRM,
   blocksToRelativeTime,
   checkAddressOrChannel,
   readValueFromClipboard,
+  rxJsObservableToVueState,
 } from '../utils';
-import Pending from '../../icons/animated-pending.svg?vue-component';
+import { useGetter } from '../../composables';
+import { IAccount, IName } from '../../types';
+
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
 import InputField from './InputField.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
+
+import Pending from '../../icons/animated-pending.svg?vue-component';
 import Arrow from '../../icons/arrow.svg?vue-component';
 import Save from '../../icons/account-card/btn-save.svg?vue-component';
 import Paste from '../../icons/paste.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Pending,
     Avatar,
@@ -163,76 +174,92 @@ export default {
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
-  data: () => ({
-    expand: false,
-    newPointer: '',
-    showInput: false,
-    error: false,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['topBlockHeight']);
-  },
-  computed: {
-    ...mapGetters(['account']),
-    nameEntry() {
-      return this.$store.getters['names/get'](this.name);
-    },
-    hasPointer() {
-      return this.nameEntry?.pointers?.accountPubkey;
-    },
-    addressOrFirstPointer() {
-      return this.nameEntry?.pointers?.accountPubkey
-        || Object.values(this.nameEntry?.pointers || {})[0];
-    },
-  },
-  watch: {
-    newPointer() {
-      this.error = false;
-    },
-  },
-  methods: {
-    blocksToRelativeTime,
-    checkAddressOrChannel,
-    async insertValueFromClipboard() {
-      this.newPointer = await readValueFromClipboard();
-    },
-    async setDefault() {
-      await this.$store.dispatch('names/setDefault', {
-        address: this.account.address,
-        name: this.name,
+  setup(props, { root }) {
+    const expand = ref(false);
+    const newPointer = ref<string | undefined>('');
+    const showInput = ref(false);
+    const error = ref(false);
+
+    const account = useGetter<IAccount>('account');
+
+    const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
+    const hasPointer = computed(() => nameEntry.value?.pointers?.accountPubkey);
+    const addressOrFirstPointer = computed((): string | null => (
+      nameEntry.value?.pointers?.accountPubkey
+      || Object.values(nameEntry.value?.pointers || {})[0]
+    ));
+
+    const topBlockHeight = rxJsObservableToVueState<number>(
+      (root.$store.state as any).observables.topBlockHeight,
+    );
+
+    async function insertValueFromClipboard() {
+      newPointer.value = await readValueFromClipboard();
+    }
+
+    function expandAndShowInput() {
+      expand.value = true;
+      showInput.value = !showInput.value;
+    }
+
+    async function setDefault() {
+      await root.$store.dispatch('names/setDefault', {
+        address: account.value.address,
+        name: props.name,
       });
-    },
-    async setAutoExtend() {
-      if (!this.autoExtend) {
-        await this.$store.dispatch('modals/open', {
-          name: 'confirm',
+    }
+
+    async function setAutoExtend() {
+      if (!props.autoExtend) {
+        await root.$store.dispatch('modals/open', {
+          name: NODAL_CONFIRM,
           icon: 'info',
-          title: this.$t('modals.autoextend-help.title'),
-          msg: this.$t('modals.autoextend-help.msg'),
+          title: root.$t('modals.autoextend-help.title'),
+          msg: root.$t('modals.autoextend-help.msg'),
         });
       }
-      this.$store.commit('names/setAutoExtend', { name: this.name, value: !this.autoExtend });
-    },
-    expandAndShowInput() {
-      this.expand = true;
-      this.showInput = !this.showInput;
-    },
-    async setPointer() {
-      if (!checkAddressOrChannel(this.newPointer)) {
-        this.error = true;
+      root.$store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+    }
+
+    async function setPointer() {
+      if (!checkAddressOrChannel(newPointer.value)) {
+        error.value = true;
         return;
       }
-      this.$store.dispatch('names/updatePointer', {
-        name: this.name,
-        address: this.newPointer,
+      root.$store.dispatch('names/updatePointer', {
+        name: props.name,
+        address: newPointer.value,
         type: 'update',
       });
-      this.newPointer = '';
-      this.showInput = false;
-    },
+      newPointer.value = '';
+      showInput.value = false;
+    }
+
+    watch(newPointer, () => {
+      error.value = false;
+    });
+
+    return {
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      expand,
+      newPointer,
+      showInput,
+      error,
+      account,
+      nameEntry,
+      hasPointer,
+      addressOrFirstPointer,
+      topBlockHeight,
+      blocksToRelativeTime,
+      checkAddressOrChannel,
+      insertValueFromClipboard,
+      expandAndShowInput,
+      setDefault,
+      setAutoExtend,
+      setPointer,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

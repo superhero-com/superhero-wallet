@@ -40,17 +40,24 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
-import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from '@vue/composition-api';
+import { watchUntilTruthy, blocksToRelativeTime, rxJsObservableToVueState } from '../../utils';
+import { useGetter } from '../../../composables';
+import { IActiveAuction } from '../../../types';
+
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import RegisterName from '../../components/RegisterName.vue';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
-export default {
+export default defineComponent({
   components: {
     Filters,
     NameRow,
@@ -58,40 +65,58 @@ export default {
     AnimatedSpinner,
     RegisterName,
   },
-  data: () => ({
-    displayMode: { sort: 'soonest', rotated: false },
-    activeAuctions: [],
-    filters: { soonest: { rotated: false }, bid: { rotated: false }, length: { rotated: false } },
-    loading: false,
-  }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['topBlockHeight']);
-  },
-  computed: {
-    ...mapGetters(['getNameFee']),
-    auctions() {
-      return [...this.activeAuctions].sort((a, b) => {
-        switch (this.displayMode.sort) {
-          case 'length':
-            return a.name.length - b.name.length;
-          case 'bid':
-            return a.lastBid.nameFee - b.lastBid.nameFee;
-          default:
-            return 1;
-        }
-      }).sort(() => (this.displayMode.rotated ? -1 : 1));
-    },
-  },
-  async mounted() {
-    this.loading = true;
-    await watchUntilTruthy(() => this.$store.state.middleware);
-    this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
-    this.loading = false;
+  setup(props, { root }) {
+    const loading = ref(false);
+    const displayMode = ref({ sort: 'soonest', rotated: false });
+    const activeAuctions = ref<IActiveAuction[]>([]);
+    const filters = ref({
+      soonest: { rotated: false },
+      bid: { rotated: false },
+      length: { rotated: false },
+    });
+
+    const getNameFee = useGetter('getNameFee');
+
+    const auctions = computed(
+      () => [...activeAuctions.value]
+        .sort((a, b) => {
+          switch (displayMode.value.sort) {
+            case 'length':
+              return a.name.length - b.name.length;
+            case 'bid':
+              return parseInt(a.lastBid.nameFee, 10) - parseInt(b.lastBid.nameFee, 10);
+            default:
+              return 1;
+          }
+        })
+        .sort(() => (displayMode.value.rotated ? -1 : 1)),
+    );
+
+    const topBlockHeight = rxJsObservableToVueState<number>(
+      (root.$store.state as any).observables.topBlockHeight,
+    );
+
+    onMounted(async () => {
+      loading.value = true;
+      await watchUntilTruthy(() => root.$store.state.middleware);
+      activeAuctions.value = await root.$store.dispatch('names/fetchAuctions');
+      loading.value = false;
+    });
+
+    return {
+      loading,
+      displayMode,
+      activeAuctions,
+      auctions,
+      filters,
+      topBlockHeight,
+      getNameFee,
+    };
   },
   methods: {
     blocksToRelativeTime,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -109,11 +134,10 @@ export default {
     padding: 0;
 
     .name-wrapper {
-      display: flex;
-      justify-content: space-between;
-
       @extend %face-sans-14-regular;
 
+      display: flex;
+      justify-content: space-between;
       line-height: 16px;
 
       .name {

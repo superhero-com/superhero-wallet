@@ -228,7 +228,8 @@ export interface ISdk {
   signMessage: ISignMessage
   sendTransaction: (t: any, o: any) => Promise<any>
   spend: (a: any, r: any, o: any) => Promise<any>
-  address: () => Promise<string>,
+  address: () => Promise<string>
+  aensBid: (name: string, aettos: any) => Promise<any>
 }
 
 /**
@@ -278,11 +279,40 @@ export interface IName {
 }
 
 export interface IResponseChallenge {
-  challenge: string,
-  payload: string,
+  challenge: string
+  payload: string
 }
 
 export interface IRespondChallenge {
-  challenge: string,
-  signature: string,
+  challenge: string
+  signature: string
+}
+
+export interface IAuctionBid {
+  accountId: string
+  nameFee: BigNumber
+}
+
+export interface IAuction {
+  bids: IAuctionBid[]
+  expiration: number
+}
+
+export interface IActiveAuctionBid {
+  accountId: string
+  fee: number
+  name: string
+  nameFee: string
+  nameId: string
+  nameSalt: number
+  nonce: number
+  ttl: number
+  type: string
+  version: number
+}
+
+export interface IActiveAuction {
+  expiration: number
+  lastBid: IActiveAuctionBid
+  name: string
 }
