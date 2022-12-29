@@ -1,6 +1,7 @@
 <template>
   <div class="auction-bid">
     <AuctionCard :name="name" />
+
     <div class="form">
       <InputAmount
         v-model="amount"
@@ -25,6 +26,7 @@
           </template>
         </DetailsItem>
       </div>
+
       <BtnMain
         :disabled="!!amountError || error || !amount"
         class="button"
@@ -38,76 +40,84 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { aeToAettos, calculateNameClaimFee, watchUntilTruthy } from '../../utils';
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
+import { IAuctionBid } from '../../../types';
+import { useGetter, useSdk } from '../../../composables';
+import { aeToAettos, calculateNameClaimFee, MODAL_DEFAULT } from '../../utils';
+
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 
-export default {
+export default defineComponent({
+  name: 'AuctionBid',
   components: {
-    AuctionCard, InputAmount, DetailsItem, TokenAmount, BtnMain,
+    AuctionCard,
+    InputAmount,
+    DetailsItem,
+    TokenAmount,
+    BtnMain,
   },
   props: {
     name: { type: String, required: true },
   },
-  data() {
-    return {
-      loading: false,
-      amount: '',
-      amountError: null,
-      error: false,
-    };
-  },
-  computed: {
-    ...mapGetters('names', ['getHighestBid']),
-    highestBid() {
-      return this.getHighestBid(this.name).nameFee;
-    },
-    txFee() {
-      return calculateNameClaimFee(this.name);
-    },
-    amountTotal() {
-      return this.txFee.plus(this.amount || 0);
-    },
-  },
-  watch: {
-    amount(val) {
-      if (+val <= this.highestBid.multipliedBy(1.05)) {
-        const minBid = this.highestBid.multipliedBy(1.05).toString();
-        this.amountError = this.$t('pages.names.auctions.min-bid', { minBid });
-      } else {
-        this.amountError = '';
-      }
-    },
-  },
-  methods: {
-    async bid() {
-      await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
-      if (this.amountError) return;
-      this.loading = true;
+  setup(props, { root }) {
+    const { getSdk } = useSdk();
+
+    const loading = ref(false);
+    const amount = ref('');
+    const error = ref(false);
+
+    // eslint-disable-next-line no-unused-vars
+    const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
+
+    const highestBid = computed(() => getHighestBid.value(props.name).nameFee);
+    const txFee = computed<BigNumber>(() => calculateNameClaimFee(props.name));
+    const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
+    const amountError = computed(() => {
+      const minBid = highestBid.value.multipliedBy(1.05);
+      return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
+        ? root.$t('pages.names.auctions.min-bid', { minBid })
+        : null;
+    });
+
+    async function bid() {
+      const sdk = await getSdk();
+      if (amountError.value) return;
       try {
-        await this.$store.getters['sdkPlugin/sdk'].aensBid(this.name, aeToAettos(this.amount));
-        this.$store.dispatch('modals/open', {
-          name: 'default',
-          msg: this.$t('pages.names.auctions.bid-added', { name: this.name }),
+        loading.value = true;
+        await sdk.aensBid(props.name, aeToAettos(amount.value));
+        root.$store.dispatch('modals/open', {
+          name: MODAL_DEFAULT,
+          msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        this.$router.push({ name: 'auction-history', params: { name: this.name } });
-      } catch (e) {
+        root.$router.push({ name: 'auction-history', params: { name: props.name } });
+      } catch (e: any) {
         let msg = e.message;
         if (msg.includes('is not enough to execute')) {
-          msg = this.$t('pages.names.balance-error');
+          msg = root.$t('pages.names.balance-error');
         }
-        this.$store.dispatch('modals/open', { name: 'default', msg });
+        root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, msg });
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
+    }
+
+    return {
+      loading,
+      amount,
+      amountTotal,
+      amountError,
+      error,
+      txFee,
+      bid,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
