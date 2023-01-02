@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import { IScrollCallbackParams, useViewport } from '../../composables/viewport';
+import { useViewport } from '../../composables/viewport';
 
 export default defineComponent({
   name: 'InfiniteScroll',
@@ -16,13 +16,11 @@ export default defineComponent({
   setup(props, { emit }) {
     const { onViewportScroll } = useViewport();
 
-    function onScroll({ isOutsideOfViewport }: IScrollCallbackParams) {
+    onViewportScroll(({ isOutsideOfViewport }) => {
       if (props.isMoreData && isOutsideOfViewport) {
         emit('loadMore');
       }
-    }
-
-    onViewportScroll(onScroll);
+    });
   },
 });
 </script>

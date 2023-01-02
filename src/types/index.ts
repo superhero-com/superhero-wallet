@@ -8,6 +8,8 @@ import { POPUP_TYPES } from '../popup/utils';
 export * from './cordova';
 export * from './router';
 
+export type ObjectValues<T> = T[keyof T];
+
 export interface IToken {
   contractId: string
   convertedBalance?: number

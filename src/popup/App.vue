@@ -83,7 +83,7 @@ export default defineComponent({
     Close,
   },
   setup(props, { root }) {
-    const innerElement = ref<HTMLDivElement | null>(null);
+    const innerElement = ref<HTMLDivElement>();
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);

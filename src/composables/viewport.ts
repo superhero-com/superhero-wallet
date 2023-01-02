@@ -6,40 +6,49 @@ export interface IScrollCallbackParams {
   isOutsideOfViewport: boolean
 }
 
-const viewportElement = ref();
+// eslint-disable-next-line no-unused-vars
+export type OnViewportScrollCallback = (p: IScrollCallbackParams) => any;
+
+const viewportElement = ref<Element | undefined>();
 
 export const useViewport = () => {
-  const viewportScroll = debounce((callback: Function) => {
+  const viewportScroll = debounce((callback: OnViewportScrollCallback) => {
     const isDesktop = (
       document.documentElement.clientWidth > MOBILE_WIDTH
       || process.env.IS_EXTENSION
     );
 
-    const { scrollHeight, scrollTop, clientHeight } = isDesktop
-      ? viewportElement.value
-      : document.documentElement;
+    const element = isDesktop ? viewportElement.value : document.documentElement;
 
-    const isOutsideOfViewport = scrollHeight - scrollTop <= clientHeight + 100;
+    if (element) {
+      const { scrollHeight, scrollTop, clientHeight } = element;
+      const isOutsideOfViewport = scrollHeight - scrollTop <= clientHeight + 100;
 
-    callback({ isOutsideOfViewport });
+      callback({ isOutsideOfViewport });
+    }
   }, 50);
 
-  function initViewport(scrollableElement: HTMLDivElement | null) {
+  function initViewport(scrollableElement: Element | undefined) {
     viewportElement.value = scrollableElement;
   }
 
-  function onViewportScroll(onScrollMethod: Function) {
+  function onViewportScroll(onScrollMethod: OnViewportScrollCallback) {
     onMounted(() => {
-      viewportElement.value.addEventListener('scroll', () => viewportScroll(onScrollMethod));
+      if (viewportElement.value) {
+        viewportElement.value.addEventListener('scroll', () => viewportScroll(onScrollMethod));
+      }
       window.addEventListener('scroll', () => viewportScroll(onScrollMethod));
     });
     onBeforeUnmount(() => {
-      viewportElement.value.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
+      if (viewportElement.value) {
+        viewportElement.value.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
+      }
       window.removeEventListener('scroll', () => viewportScroll(onScrollMethod));
     });
   }
 
   return {
+    viewportElement,
     onViewportScroll,
     initViewport,
   };
