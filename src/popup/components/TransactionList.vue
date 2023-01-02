@@ -61,6 +61,13 @@ import {
   watch,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import type {
+  IAccount,
+  INetwork,
+  ITokenList,
+  ITransaction,
+  ObjectValues,
+} from '../../types';
 import {
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
@@ -68,12 +75,22 @@ import {
   watchUntilTruthy,
 } from '../utils';
 import { useGetter, useState } from '../../composables';
-import Filters from './Filters.vue';
+import Filters, { IFilterInputPayload, IFilters } from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import Visible from '../../icons/visible.svg?vue-component';
-import { ITransaction } from '../../types';
+
+const FILTER_MODE = {
+  all: 'all',
+  in: 'in',
+  out: 'out',
+  dex: 'dex',
+} as const;
+
+type TransactionsFilterMode = ObjectValues<typeof FILTER_MODE>;
+type TransactionsFilters = IFilters<TransactionsFilterMode>;
+type TransactionsFilterPayload = IFilterInputPayload<TransactionsFilterMode>;
 
 export default defineComponent({
   components: {
@@ -94,17 +111,20 @@ export default defineComponent({
     const loading = ref(false);
     const isDestroyed = ref(false);
     const searchTerm = ref('');
-    const displayMode = ref({ rotated: true, filter: 'all', sort: 'date' });
-    const filters = ref({
-      all: {}, in: {}, out: {}, dex: {},
+    const displayMode = ref<TransactionsFilterPayload>({ rotated: true, key: FILTER_MODE.all });
+    const filters = ref<TransactionsFilters>({
+      all: { name: root.$t('filters.all') },
+      in: { name: root.$t('filters.in') },
+      out: { name: root.$t('filters.out') },
+      dex: { name: root.$t('filters.dex') },
     });
 
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const transactions = useState('transactions');
 
     const getDexContracts = useGetter('getDexContracts');
-    const account = useGetter('account');
-    const activeNetwork = useGetter('activeNetwork');
+    const account = useGetter<IAccount>('account');
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
     const getTxSymbol = useGetter('getTxSymbol');
 
@@ -121,28 +141,30 @@ export default defineComponent({
     }
 
     const filteredTransactions = computed(
-      () => [...transactions.value.loaded, ...getAccountPendingTransactions.value]
+      () => [
+        ...transactions.value.loaded,
+        ...getAccountPendingTransactions.value,
+      ]
         .filter((tr) => (!props.token
           || (props.token !== AETERNITY_CONTRACT_ID
             ? tr.tx?.contractId === props.token
-            : (!tr.tx.contractId
-              || !isFungibleTokenTx(tr)))))
+            : (!tr.tx.contractId || !isFungibleTokenTx(tr)))))
         .filter((tr) => {
-          switch (displayMode.value.filter) {
-            case 'all':
+          switch (displayMode.value.key) {
+            case FILTER_MODE.all:
               return true;
-            case 'dex':
+            case FILTER_MODE.dex:
               return getDexContracts.value && tr.tx.contractId && (
                 getDexContracts.value.router.includes(tr.tx.contractId)
                 || getDexContracts.value.wae?.includes(tr.tx.contractId)
               );
-            case 'out':
+            case FILTER_MODE.out:
               return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && tr.tx.senderId === account.value.address)
                 || (isFungibleTokenTx(tr)
                   && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                   && tr.tx.callerId === account.value.address);
-            case 'in':
+            case FILTER_MODE.in:
               return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
                   && (tr.tx.recipientId === account.value.address
                     || (tr.tx.senderId !== account.value.address
@@ -150,13 +172,8 @@ export default defineComponent({
                 || (isFungibleTokenTx(tr)
                   && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
                   && tr.recipient === account.value.address);
-            case 'tips':
-              return (tr.tx.contractId
-                && (activeNetwork.value.tipContractV1 === tr.tx.contractId
-                  || activeNetwork.value.tipContractV2 === tr.tx.contractId)
-                && (tr.tx.function === 'tip' || tr.tx.function === 'retip')) || tr.claim;
             default:
-              throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.filter}`);
+              throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
           }
         })
         .filter(
@@ -168,18 +185,17 @@ export default defineComponent({
               ),
         )
         .sort((a, b) => {
-          const arr = [a, b].map((tr) => new Date(tr.microTime));
-          if (displayMode.value.rotated) {
-            arr.reverse();
-          }
-          return (arr[0].getTime() - arr[1].getTime()) || a.pending;
+          const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+          return a.pending || (bMicroTime - aMicroTime);
         })
         .slice(0, props.maxLength || Infinity),
     );
 
-    const showSearchAndFilters = computed(() => props.showFilters
-      || displayMode.value.filter !== 'all'
-      || searchTerm.value);
+    const showSearchAndFilters = computed(() => (
+      props.showFilters
+      || displayMode.value.key !== FILTER_MODE.all
+      || searchTerm.value
+    ));
 
     function checkLoadMore() {
       if (isDestroyed.value || !transactions.value.nextPageUrl) return;

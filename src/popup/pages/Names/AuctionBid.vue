@@ -45,7 +45,12 @@ import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { IAuctionBid } from '../../../types';
 import { useGetter, useSdk } from '../../../composables';
-import { aeToAettos, calculateNameClaimFee, MODAL_DEFAULT } from '../../utils';
+import {
+  AENS_BID_MIN_RATIO,
+  MODAL_DEFAULT,
+  aeToAettos,
+  calculateNameClaimFee,
+} from '../../utils';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
@@ -79,7 +84,7 @@ export default defineComponent({
     const txFee = computed<BigNumber>(() => calculateNameClaimFee(props.name));
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
-      const minBid = highestBid.value.multipliedBy(1.05);
+      const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
       return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
         ? root.$t('pages.names.auctions.min-bid', { minBid })
         : null;

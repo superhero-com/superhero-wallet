@@ -49,13 +49,26 @@ import {
 } from '@vue/composition-api';
 import { watchUntilTruthy, blocksToRelativeTime, rxJsObservableToVueState } from '../../utils';
 import { useGetter } from '../../../composables';
-import { IActiveAuction } from '../../../types';
+import { IActiveAuction, ObjectValues } from '../../../types';
 
-import Filters from '../../components/Filters.vue';
+import Filters, { IFilters, IFilterInputPayload } from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+
+const SORT_MODE = {
+  soonest: 'soonest',
+  bid: 'bid',
+  length: 'length',
+} as const;
+
+type AuctionsSortMode = ObjectValues<typeof SORT_MODE>;
+type AuctionsFilters = IFilters<AuctionsSortMode>;
+type AuctionsFilterPayload = IFilterInputPayload<AuctionsSortMode>;
+
+const SORT_ASC = 1;
+const SORT_DESC = -1;
 
 export default defineComponent({
   components: {
@@ -67,12 +80,12 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const loading = ref(false);
-    const displayMode = ref({ sort: 'soonest', rotated: false });
     const activeAuctions = ref<IActiveAuction[]>([]);
-    const filters = ref({
-      soonest: { rotated: false },
-      bid: { rotated: false },
-      length: { rotated: false },
+    const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
+    const filters = ref<AuctionsFilters>({
+      soonest: { rotated: false, name: root.$t('filters.soonest') },
+      bid: { rotated: false, name: root.$t('filters.bid') },
+      length: { rotated: false, name: root.$t('filters.length') },
     });
 
     const getNameFee = useGetter('getNameFee');
@@ -80,16 +93,16 @@ export default defineComponent({
     const auctions = computed(
       () => [...activeAuctions.value]
         .sort((a, b) => {
-          switch (displayMode.value.sort) {
-            case 'length':
+          switch (displayMode.value.key) {
+            case SORT_MODE.length:
               return a.name.length - b.name.length;
-            case 'bid':
+            case SORT_MODE.bid:
               return parseInt(a.lastBid.nameFee, 10) - parseInt(b.lastBid.nameFee, 10);
             default:
               return 1;
           }
         })
-        .sort(() => (displayMode.value.rotated ? -1 : 1)),
+        .sort(() => (displayMode.value.rotated ? SORT_DESC : SORT_ASC)),
     );
 
     const topBlockHeight = rxJsObservableToVueState<number>(

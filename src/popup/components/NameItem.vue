@@ -176,7 +176,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const expand = ref(false);
-    const newPointer = ref<string | undefined>('');
+    const newPointer = ref<string>('');
     const showInput = ref(false);
     const error = ref(false);
 
@@ -194,7 +194,7 @@ export default defineComponent({
     );
 
     async function insertValueFromClipboard() {
-      newPointer.value = await readValueFromClipboard();
+      newPointer.value = (await readValueFromClipboard()) || '';
     }
 
     function expandAndShowInput() {
