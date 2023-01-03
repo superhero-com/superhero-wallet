@@ -174,14 +174,6 @@ export const isNotFoundError = (error) => error.statusCode === 404;
 
 export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
 
-export const setBalanceLocalStorage = (balance) => {
-  localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
-};
-
-export const getBalanceLocalStorage = () => (
-  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : {}
-);
-
 export const categorizeContractCallTxObject = (transaction) => {
   if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
     return null;

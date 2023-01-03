@@ -12,6 +12,7 @@ import {
   validateTipUrl, isValidURL,
 } from '../../popup/utils/helper';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
+import { useBalances } from '../../composables';
 
 Vue.use(VeeValidate);
 
@@ -69,6 +70,8 @@ Validator.localize('en', {
 });
 
 export default (store) => {
+  const { balance, updateBalances } = useBalances({ store });
+
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
     REGISTERED_ADDRESS: Symbol('name state: registered and points to address'),
@@ -133,13 +136,13 @@ export default (store) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
-  Validator.extend('enough_ae', (_, [arg]) => new Promise(
-    (resolve) => store.state.observables.balance
-      .subscribe((balance) => resolve(balance.isGreaterThanOrEqualTo(arg)))
-      .unsubscribe(),
-  ));
+  Validator.extend('enough_ae', async (_, [arg]) => {
+    await updateBalances();
+    return balance.value.isGreaterThanOrEqualTo(arg);
+  });
   Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
-    ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
+    ? checkNameRegisteredAddress(value)
+    : Crypto.isAddressValid(value) || validateTipUrl(value)));
   Validator.extend('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);

@@ -1,9 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
+import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
 import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils/constants';
-// eslint-disable-next-line import/extensions
-import * as VuexComposables from '../../src/composables/vuex.ts';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -12,7 +11,9 @@ Object.assign(Vue.prototype, {
   $te: () => true,
 });
 
-const useGetter = (hasError) => (name) => {
+Vue.use(Vuex);
+
+function mountComponent({ hasError = false } = {}) {
   const testTransaction = {
     blockHeight: 624848,
     hash: 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
@@ -79,68 +80,65 @@ const useGetter = (hasError) => (name) => {
     },
   };
 
-  const getters = {
-    getTx: () => testTransaction,
-    getTxType: () => 'provide liquidity',
-    getTxSymbol: () => AETERNITY_SYMBOL,
-    getDexContracts: DEX_CONTRACTS.ae_uat,
-    getTxTipUrl: () => '',
-    getTxAmountTotal: () => 1,
-    getTxDirection: () => 'sent',
-    getExplorerPath: () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
-    isTxAex9: () => true,
-  };
-
-  return ['getDexContracts', 'getTx', 'getTxTipUrl'].includes(name)
-    ? { value: getters[name] }
-    : getters[name];
-};
-const useState = () => ({
-  value: {
-    availableTokens: {
-      value: {
-        ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF: {
-          contract: 'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
-          contract_txi: 27821843,
-          decimals: 18,
-          extensions: [
-            'allowances',
-          ],
-          name: 'Wrapped Aeternity',
-          symbol: 'WAE',
-        },
-        ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb: {
-          contract: 'ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb',
-          contract_txi: 27821844,
-          decimals: 18,
-          extensions: [
-            'allowances',
-            'mintable',
-            'burnable',
-            'swappable',
-          ],
-          name: 'TestAEX9-WaeP',
-          symbol: 'TAEX9-WaeP',
+  const store = new Vuex.Store({
+    state: {
+      fungibleTokens: {
+        availableTokens: {
+          ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF: {
+            contract: 'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
+            contract_txi: 27821843,
+            decimals: 18,
+            extensions: [
+              'allowances',
+            ],
+            name: 'Wrapped Aeternity',
+            symbol: 'WAE',
+          },
+          ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb: {
+            contract: 'ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb',
+            contract_txi: 27821844,
+            decimals: 18,
+            extensions: [
+              'allowances',
+              'mintable',
+              'burnable',
+              'swappable',
+            ],
+            name: 'TestAEX9-WaeP',
+            symbol: 'TAEX9-WaeP',
+          },
         },
       },
     },
-  },
-});
+    getters: {
+      getTx: () => () => testTransaction,
+      getTxType: () => () => 'provide liquidity',
+      getTxSymbol: () => AETERNITY_SYMBOL,
+      getDexContracts: () => DEX_CONTRACTS.ae_uat,
+      getTxTipUrl: () => () => '',
+      getTxAmountTotal: () => 1,
+      getTxDirection: () => 'sent',
+      getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
+      isTxAex9: () => true,
+    },
+  });
 
-jest.mock('../../src/composables/vuex.ts');
+  return shallowMount(TransactionDetails, {
+    store,
+    propsData: {
+      hash,
+    },
+  });
+}
 
 describe('Transaction Details', () => {
-  it('should display all required fields', async () => {
-    const useGetterMock = jest.spyOn(VuexComposables, 'useGetter');
-    useGetterMock.mockImplementation(useGetter());
-    const useStateMock = jest.spyOn(VuexComposables, 'useState');
-    useStateMock.mockImplementation(useState);
-    const wrapper = shallowMount(TransactionDetails, {
-      propsData: {
-        hash,
-      },
-    });
+  it('should render', async () => {
+    const wrapper = mountComponent();
+    expect(wrapper.classes()).toContain('transaction-details');
+  });
 
+  it('should display all required fields', async () => {
+    const wrapper = mountComponent();
     await wrapper.vm.$nextTick();
     expect(wrapper.find('[data-cy=hash]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=timestamp]').exists()).toBeTruthy();
@@ -153,26 +151,13 @@ describe('Transaction Details', () => {
   });
 
   it('should display error message when result returned === "abort"', async () => {
-    const useGetterMock = jest.spyOn(VuexComposables, 'useGetter');
-    useGetterMock.mockImplementation(useGetter(true));
-    const useStateMock = jest.spyOn(VuexComposables, 'useState');
-    useStateMock.mockImplementation(useState);
-    const wrapper = shallowMount(TransactionDetails, {
-      propsData: {
-        hash,
-      },
-    });
-
+    const wrapper = mountComponent({ hasError: true });
     await wrapper.vm.$nextTick();
-    expect(wrapper.find('.reason').exists()).toBeTruthy();
+    expect(wrapper.find('[data-cy=reason]').exists()).toBeTruthy();
   });
-  it('should display only spinner before loading transaction', async () => {
-    const wrapper = shallowMount(TransactionDetails, {
-      propsData: {
-        hash,
-      },
-    });
 
+  it('should display only spinner before loading transaction', async () => {
+    const wrapper = mountComponent();
     expect(wrapper.find('.spinner').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=hash]').exists()).toBeFalsy();
   });

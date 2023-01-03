@@ -5,6 +5,7 @@ import { mount } from '@vue/test-utils';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AETERNITY_SYMBOL } from '../../src/popup/utils';
+import { testAccount } from '../../src/popup/utils/config';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',
@@ -16,19 +17,8 @@ const maxBalance = 10000;
 
 const store = new Vuex.Store({
   plugins: [veeValidate],
-  state: {
-    observables: {
-      balance: {
-        subscribe: (callback) => {
-          callback(BigNumber(maxBalance));
-          return {
-            unsubscribe: () => null,
-          };
-        },
-      },
-    },
-  },
   getters: {
+    account: () => testAccount,
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
   },

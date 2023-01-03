@@ -139,9 +139,9 @@ import {
   blocksToRelativeTime,
   checkAddressOrChannel,
   readValueFromClipboard,
-  rxJsObservableToVueState,
 } from '../utils';
-import { useGetter } from '../../composables';
+import { useTopHeaderData } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import { IAccount, IName } from '../../types';
 
 import Avatar from './Avatar.vue';
@@ -175,6 +175,8 @@ export default defineComponent({
     autoExtend: { type: Boolean },
   },
   setup(props, { root }) {
+    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+
     const expand = ref(false);
     const newPointer = ref<string>('');
     const showInput = ref(false);
@@ -188,10 +190,6 @@ export default defineComponent({
       nameEntry.value?.pointers?.accountPubkey
       || Object.values(nameEntry.value?.pointers || {})[0]
     ));
-
-    const topBlockHeight = rxJsObservableToVueState<number>(
-      (root.$store.state as any).observables.topBlockHeight,
-    );
 
     async function insertValueFromClipboard() {
       newPointer.value = (await readValueFromClipboard()) || '';

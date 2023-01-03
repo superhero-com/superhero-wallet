@@ -1,13 +1,9 @@
 import Vue from 'vue';
 import VueCompositionApi, {
-  onUnmounted,
-  Ref,
-  ref,
   watch,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
-import { Observable } from 'rxjs';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
@@ -136,24 +132,6 @@ export function watchUntilTruthy<T>(getter: () => T): Promise<NonNullable<T>> {
       { immediate: true },
     );
   });
-}
-
-/**
- * Temporary function that allows to replace the `subscriptions` property
- * on Vue components when using the Vue setup() hook of the Vue composition API.
- */
-export function rxJsObservableToVueState<T = any>(
-  observable: Observable<any>,
-  defaultState: any = null,
-): Ref<T> {
-  const state = ref(defaultState);
-  const subscription = observable.subscribe((val) => {
-    state.value = val || defaultState;
-  });
-  onUnmounted(() => {
-    subscription.unsubscribe();
-  });
-  return state;
 }
 
 export function splitAddress(address: string | null): string {

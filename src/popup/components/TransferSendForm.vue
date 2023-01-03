@@ -124,22 +124,26 @@ import {
   ref,
   watch,
   onMounted,
+  PropType,
 } from '@vue/composition-api';
-import type { IToken } from '../../types';
+import { IAccount, IToken, ITokenList } from '../../types';
 import {
-  convertToken,
-  isNumbersEqual,
-  validateTipUrl,
-  checkAensName,
   MODAL_DEFAULT,
-} from '../utils';
-import {
+  MODAL_HELP,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
-  AETERNITY_CONTRACT_ID,
   MODAL_PAYLOAD_FORM,
-} from '../utils/constants';
-import { IFormModel, IMaxAmount, useMaxAmount } from '../../composables';
+  AETERNITY_CONTRACT_ID,
+  convertToken,
+  validateTipUrl,
+  checkAensName,
+} from '../utils';
+import {
+  IFormModel,
+  useBalances,
+  useMaxAmount,
+} from '../../composables';
+import { useState, useGetter } from '../../composables/vuex';
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -183,25 +187,22 @@ export default defineComponent({
     prop: 'transferData',
   },
   props: {
-    transferData: { type: Object, required: true },
+    transferData: { type: Object as PropType<IFormModel>, required: true },
   },
   setup(props, { root, emit }) {
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
-    const formModel = ref<IFormModel>(props.transferData as IFormModel);
+    const formModel = ref<IFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
-    const {
-      max,
-      fee,
-      balance,
-      balanceCurrency,
-      account,
-    } = useMaxAmount({ formModel } as IMaxAmount);
+    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { balance, balanceCurrency } = useBalances({ store: root.$store });
 
-    const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
-    const tokenBalances = computed(() => root.$store.getters.fungibleTokens.tokenBalances);
+    const account = useGetter<IAccount>('account');
+    const fungibleTokens = useState('fungibleTokens');
+    const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
+    const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
     const getAeternityToken = computed(() => root.$store.getters['fungibleTokens/getAeternityToken']);
     const addressErrorMsg = computed(
       () => (root as any).errors.items
@@ -249,10 +250,10 @@ export default defineComponent({
     const isToken = computed<boolean>(
       () => formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID,
     );
-    const isMaxValue = computed<boolean>(
-      () => isNumbersEqual(formModel.value.amount, max.value),
-    );
-
+    const isMaxValue = computed<boolean>(() => {
+      const amountInt = +formModel.value.amount;
+      return amountInt > 0 && amountInt === +max.value;
+    });
     const showPayloadForm = computed<boolean>(
       () => formModel.value.selectedAsset?.id === AETERNITY_CONTRACT_ID,
     );
@@ -275,7 +276,7 @@ export default defineComponent({
       },
     );
 
-    const queryHandler = async (query:any) => {
+    const queryHandler = async (query: any) => {
       formModel.value.selectedAsset = availableTokens.value[query.token]
         || getAeternityToken.value({
           tokenBalance: balance.value,
@@ -383,7 +384,7 @@ export default defineComponent({
 
     const openPayloadInformation = () => {
       root.$store.dispatch('modals/open', {
-        name: 'help',
+        name: MODAL_HELP,
         title: root.$t('modals.payloadInfo.title'),
         msg: root.$t('modals.payloadInfo.msg'),
         textCenter: true,

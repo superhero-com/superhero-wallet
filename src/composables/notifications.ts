@@ -1,10 +1,5 @@
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from '@vue/composition-api';
+import { computed, ref, watch } from '@vue/composition-api';
+import store from '../store';
 import {
   IAccount,
   INetwork,
@@ -19,26 +14,29 @@ import {
   NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-  executeAndSetInterval,
   fetchJson,
   postJson,
   fetchRespondChallenge,
 } from '../popup/utils';
 import { useSdk } from './sdk';
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 export interface UseNotificationsOptions {
-  requirePolling?: boolean,
+  requirePolling?: boolean
 }
 
+const POLLING_INTERVAL = 30000;
 const FETCHED_NOTIFICATIONS_LIMIT = 20;
 
-const pollingComponentsCounter = ref<number>(0);
+const initPollingWatcher = createPollingBasedOnMountedComponents();
+
 const notificationsSuperhero = ref<INotification[]>([]);
 const notificationsWallet = ref<INotification[]>([]);
-let pollingIntervalId: NodeJS.Timer | null = null;
 
-export function useNotifications(options: UseNotificationsOptions = {}) {
-  const { getSdk } = useSdk();
+export function useNotifications({
+  requirePolling = false,
+}: UseNotificationsOptions = {}) {
+  const { getSdk } = useSdk({ store });
 
   const activeNetwork = useGetter<INetwork>('activeNetwork');
   const account = useGetter<IAccount>('account');
@@ -126,17 +124,43 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     }
   }
 
-  function stopNotificationsPolling() {
-    if (pollingIntervalId) {
-      clearInterval(pollingIntervalId);
-      pollingIntervalId = null;
-    }
+  async function markAsReadSuperhero() {
+    const status = NOTIFICATION_STATUS_READ;
+
+    const unreadNotificationsIds = notificationsSuperhero.value
+      .filter((notification) => notification.status !== status)
+      .map((notification) => notification.id!);
+
+    notificationsSuperhero.value = notificationsSuperhero.value.map((notification) => ({
+      ...notification,
+      status,
+    }));
+
+    await modifyNotifications(unreadNotificationsIds, status);
   }
 
-  function startNotificationsPolling() {
-    stopNotificationsPolling();
+  function markAsReadWallet() {
+    notificationsWallet.value.forEach((notification) => {
+      if (notification.type === NOTIFICATION_TYPE_WALLET) {
+        setWalletNotificationsStatus(
+          notification.createdAt,
+          NOTIFICATION_STATUS_READ,
+        );
+      }
+    });
+  }
 
-    pollingIntervalId = executeAndSetInterval(async () => {
+  function markAsReadAll() {
+    markAsReadWallet();
+    markAsReadSuperhero();
+  }
+
+  if (requirePolling) {
+    watch(() => notificationsFiltered.value, () => {
+      loadMoreNotifications();
+    });
+
+    initPollingWatcher(async () => {
       notificationsSuperhero.value = (await fetchAllNotifications())
         .map(({
           entityId,
@@ -158,64 +182,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
             ? `${AGGREGATOR_URL}tip/${entityId}`
             : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
         }));
-    }, 30000);
+    }, POLLING_INTERVAL);
   }
-
-  async function markAsReadSuperhero() {
-    const status = NOTIFICATION_STATUS_READ;
-
-    const unreadNotificationsIds = notificationsSuperhero.value
-      .filter((notification) => notification.status !== status)
-      .map((notification) => notification.id!);
-
-    notificationsSuperhero.value = notificationsSuperhero.value.map((notification) => ({
-      ...notification,
-      status,
-    }));
-
-    await modifyNotifications(unreadNotificationsIds, status);
-    startNotificationsPolling();
-  }
-
-  function markAsReadWallet() {
-    notificationsWallet.value.forEach((notification) => {
-      if (notification.type === NOTIFICATION_TYPE_WALLET) {
-        setWalletNotificationsStatus(
-          notification.createdAt,
-          NOTIFICATION_STATUS_READ,
-        );
-      }
-    });
-  }
-
-  function markAsReadAll() {
-    markAsReadWallet();
-    markAsReadSuperhero();
-  }
-
-  if (options.requirePolling) {
-    watch(() => notificationsFiltered.value, () => {
-      loadMoreNotifications();
-    });
-  }
-
-  onMounted(async () => {
-    if (options.requirePolling) {
-      pollingComponentsCounter.value += 1;
-    }
-    if (pollingComponentsCounter.value > 0 && !pollingIntervalId) {
-      startNotificationsPolling();
-    }
-  });
-
-  onBeforeUnmount(() => {
-    if (options.requirePolling) {
-      pollingComponentsCounter.value -= 1;
-    }
-    if (pollingComponentsCounter.value <= 0) {
-      stopNotificationsPolling();
-    }
-  });
 
   return {
     notificationsToShow,

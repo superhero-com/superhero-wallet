@@ -67,7 +67,8 @@ import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransactionToken, useGetter } from '../../composables';
+import { useTransactionToken } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import { ITransaction, TransactionType } from '../../types';
 
 export default defineComponent({
@@ -93,7 +94,10 @@ export default defineComponent({
       availableTokens,
       tokens,
       isErrorTransaction,
-    } = useTransactionToken(props.transaction);
+    } = useTransactionToken({
+      store: root.$store,
+      initTransaction: props.transaction,
+    });
 
     const labels = computed(() => {
       const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;

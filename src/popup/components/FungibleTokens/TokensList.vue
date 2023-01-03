@@ -20,8 +20,9 @@ export default defineComponent({
   props: {
     searchTerm: { type: String, default: '' },
   },
-  setup(props) {
+  setup(props, { root }) {
     const { filteredTokens } = useTokensList({
+      store: root.$store,
       ownedOnly: true,
       searchTerm: computed(() => props.searchTerm),
     });

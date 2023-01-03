@@ -26,7 +26,8 @@ import {
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
 import { MODAL_DEFAULT } from '../utils';
-import { useDeepLinkApi, useGetter, useSdk } from '../../composables';
+import { useDeepLinkApi, useSdk } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
@@ -35,7 +36,7 @@ export default defineComponent({
     BtnMain,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
 
     const id = ref<string>('');

@@ -38,8 +38,9 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
-import { AETERNITY_SYMBOL, calculateFee, rxJsObservableToVueState } from '../utils';
-import { useGetter, useSdk } from '../../composables';
+import { AETERNITY_SYMBOL, calculateFee } from '../utils';
+import { useBalances, useSdk } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import InputField from './InputField.vue';
 
 export default defineComponent({
@@ -51,13 +52,10 @@ export default defineComponent({
     noToken: Boolean,
   },
   setup(props, { emit, root }) {
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: root.$store });
+    const { balance } = useBalances({ store: root.$store });
 
     const fee = ref(new BigNumber(0));
-
-    const balance = rxJsObservableToVueState<BigNumber>(
-      (root.$store.state as any).observables.balance,
-    );
 
     const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));

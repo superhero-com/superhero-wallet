@@ -28,7 +28,7 @@
         v-else
         class="ae-symbol"
       >
-        AE
+        {{ AETERNITY_SYMBOL }}
       </div>
     </template>
 
@@ -69,10 +69,10 @@ import {
   PropType,
   watch,
 } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
-import { useGetter } from '../../composables';
-import { IAsset } from '../../types';
-import { rxJsObservableToVueState } from '../utils';
+import { useBalances } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+import type { IAsset } from '../../types';
+import { AETERNITY_SYMBOL } from '../utils';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -89,16 +89,11 @@ export default defineComponent({
     showTokensWithBalance: Boolean,
   },
   setup(props, { root, emit }) {
+    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+
     // eslint-disable-next-line no-unused-vars
     const getAeternityToken = useGetter<(o: any) => IAsset>('fungibleTokens/getAeternityToken');
     const formatCurrency = useGetter('formatCurrency');
-
-    const balance = rxJsObservableToVueState<BigNumber>(
-      (root.$store.state as any).observables.balance,
-    );
-    const balanceCurrency = rxJsObservableToVueState<number>(
-      (root.$store.state as any).observables.balanceCurrency,
-    );
 
     const aeToken = getAeternityToken.value({
       tokenBalance: balance.value,
@@ -127,6 +122,7 @@ export default defineComponent({
     });
 
     return {
+      AETERNITY_SYMBOL,
       totalAmount,
       currentTokenFiatPrice,
       currentAsset,

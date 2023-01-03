@@ -67,12 +67,13 @@ export default defineComponent({
     selectedToken: { type: Object as PropType<IToken>, default: null },
     showTokensWithBalance: Boolean,
   },
-  setup(props) {
+  setup(props, { root }) {
     const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
     const { filteredTokens } = useTokensList({
+      store: root.$store,
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });

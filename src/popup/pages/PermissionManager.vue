@@ -137,10 +137,10 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, rxJsObservableToVueState } from '../utils';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 import { IPermission } from '../../types';
-import { useGetter, useState } from '../../composables';
+import { useBalances } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -160,6 +160,8 @@ export default defineComponent({
     DeleteIcon,
   },
   setup(props, { root }) {
+    const { balance } = useBalances({ store: root.$store });
+
     const routeHost = root.$route.params.host as string;
     const editView = !!root.$route.meta?.isEdit;
 
@@ -178,10 +180,6 @@ export default defineComponent({
 
     const permissions = useState<Record<string, IPermission>>('permissions');
     const currentCurrencyRate = useGetter('currentCurrencyRate');
-
-    const balance = rxJsObservableToVueState<BigNumber>(
-      (root.$store.state as any).observables.balance,
-    );
 
     const selectedAsset = computed(() => ({
       contractId: AETERNITY_CONTRACT_ID,

@@ -17,8 +17,9 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { IAuction, IAuctionBid } from '../../types';
-import { useGetter } from '../../composables';
-import { blocksToRelativeTime, rxJsObservableToVueState } from '../utils';
+import { useTopHeaderData } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+import { blocksToRelativeTime } from '../utils';
 
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -32,9 +33,7 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props, { root }) {
-    const topBlockHeight = rxJsObservableToVueState<number>(
-      (root.$store.state as any).observables.topBlockHeight,
-    );
+    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
 
     // eslint-disable-next-line no-unused-vars
     const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');

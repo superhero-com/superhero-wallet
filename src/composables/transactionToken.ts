@@ -1,10 +1,10 @@
 import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
+import type { Store } from 'vuex';
 import type {
   ITransaction, ITokenList, ITx, TransactionType, IDexContracts,
 } from '../types';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
-
 import {
   AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
@@ -12,7 +12,15 @@ import {
   RETURN_TYPE_OK,
   convertToken,
 } from '../popup/utils';
-import { useGetter, useState } from './vuex';
+
+interface UseTransactionTokenOptions {
+  /**
+   * TODO: Temporary solution to avoid dependency circle
+   */
+  store: Store<any>
+  initTransaction?: ITransaction
+  showDetailedAllowanceInfo?: boolean
+}
 
 interface ITokenTransactionComposable extends ITx {
   decimals?: number,
@@ -22,26 +30,27 @@ interface ITokenTransactionComposable extends ITx {
   isAe: string
 }
 
-export const useTransactionToken = (
-  initTransaction: ITransaction | undefined,
-  showDetailedAllowanceInfo?: boolean,
-) => {
+export function useTransactionToken({
+  store,
+  initTransaction,
+  showDetailedAllowanceInfo = false,
+}: UseTransactionTokenOptions) {
   const transaction = ref<ITransaction | undefined>(initTransaction);
 
   function setTransaction(newTransaction: ITransaction) {
     transaction.value = newTransaction;
   }
 
-  const fungibleTokens = useState('fungibleTokens');
+  const fungibleTokens = computed(() => store.state.fungibleTokens);
   const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
 
-  const getTxAmountTotal = useGetter('getTxAmountTotal');
-  const isTxAex9 = useGetter('isTxAex9');
+  const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
+  const isTxAex9 = computed(() => store.getters.isTxAex9);
 
-  const getTxSymbol = useGetter('getTxSymbol');
-  const getTxType = useGetter('getTxType');
-  const getTxDirection = useGetter('getTxDirection');
-  const getDexContracts = useGetter<IDexContracts>('getDexContracts');
+  const getTxSymbol = computed(() => store.getters.getTxSymbol);
+  const getTxType = computed(() => store.getters.getTxType);
+  const getTxDirection = computed(() => store.getters.getTxDirection);
+  const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 
@@ -85,11 +94,11 @@ export const useTransactionToken = (
     }];
   });
 
-  const isErrorTransaction = computed(
+  const isErrorTransaction = computed<boolean>(
     () => {
       if (!transaction.value) return false;
       const { returnType } = transaction.value.tx;
-      return returnType && returnType !== RETURN_TYPE_OK;
+      return !!(returnType && returnType !== RETURN_TYPE_OK);
     },
   );
 
@@ -113,4 +122,4 @@ export const useTransactionToken = (
     getDexContracts,
     setTransaction,
   };
-};
+}

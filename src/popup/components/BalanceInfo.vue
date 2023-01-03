@@ -12,9 +12,9 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
-import { useGetter, useState } from '../../composables';
-import { rxJsObservableToVueState } from '../utils';
+import { IAccount } from '../../types';
+import { useBalances } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 import AeBalance from './AeBalance.vue';
 
 export default defineComponent({
@@ -25,18 +25,20 @@ export default defineComponent({
     accountIdx: { type: Number, default: -1 },
   },
   setup(props, { root }) {
-    const activeIdx = useState('accounts', 'activeIdx');
+    const { balances } = useBalances({ store: root.$store });
+
+    const activeIdx = useState<number>('accounts', 'activeIdx');
+    const accounts = useGetter<IAccount[]>('accounts');
     const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
 
-    const balances = rxJsObservableToVueState<BigNumber[]>(
-      (root.$store.state as any).observables.balances,
-    );
-
     const idx = computed(() => props.accountIdx === -1 ? activeIdx.value : props.accountIdx);
-    const balance = computed(() => balances.value[idx.value].toNumber());
+    const balance = computed(
+      () => balances.value[accounts.value[idx.value].address]?.toNumber() || 0,
+    );
     const currencyFormatted = computed(() => convertToCurrencyFormatted.value(balance.value));
 
     return {
+      balances,
       balance,
       currencyFormatted,
     };
