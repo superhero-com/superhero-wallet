@@ -52,8 +52,6 @@
     "dex-contracts-v2": "github:aeternity/dex-contracts-v2",
     "lodash-es": "^4.17.21",
     "qr-code-styling": "github:aeternity/qr-code-styling",
-    "rxjs": "^6.6.7",
-    "rxjs-etc": "^10.6.2",
     "swiper": "^5.4.5",
     "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
     "ts-jest": "26.5.6",
@@ -65,7 +63,6 @@
     "vue-i18n": "^8.26.1",
     "vue-jest": "4.0.1",
     "vue-router": "^3.5.2",
-    "vue-rx": "^6.2.0",
     "vuex": "^3.6.2",
     "vuex-router-sync": "^5.0.0",
     "webextension-polyfill": "^0.9.0"

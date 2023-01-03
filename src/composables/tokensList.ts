@@ -1,9 +1,14 @@
 import { computed, ref, Ref } from '@vue/composition-api';
+import type { Store } from 'vuex';
 import type { IToken, ITokenList } from '../types';
-import { AETERNITY_CONTRACT_ID, rxJsObservableToVueState } from '../popup/utils';
-import store from '../store';
+import { AETERNITY_CONTRACT_ID } from '../popup/utils';
+import { useBalances } from './balances';
 
 export interface UseTokensListOptions {
+  /**
+   * TODO: Temporary solution to avoid dependency circle
+   */
+  store: Store<any>
   /**
    * Restrict the list to tokens owned by the user
    */
@@ -18,25 +23,19 @@ export interface UseTokensListOptions {
   searchTerm?: Ref<string>
 }
 
-export function useTokensList(options: UseTokensListOptions = {}) {
-  const {
-    ownedOnly = false,
-    withBalanceOnly = false,
-    searchTerm = ref(''),
-  }: UseTokensListOptions = options;
+export function useTokensList({
+  store,
+  ownedOnly = false,
+  withBalanceOnly = false,
+  searchTerm = ref(''),
+}: UseTokensListOptions) {
+  const { balance, balanceCurrency } = useBalances({ store });
 
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
   const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
   const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
-
-  const balance = rxJsObservableToVueState<any>(
-    (store.state as any).observables.balance,
-  );
-  const balanceCurrency = rxJsObservableToVueState<number>(
-    (store.state as any).observables.balanceCurrency,
-  );
 
   /**
    * Returns the default aeternity meta information

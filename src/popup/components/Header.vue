@@ -72,7 +72,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter, useState } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 import { WalletRouteMeta, INetwork } from '../../types';
 import {
   ROUTE_INDEX,

@@ -1,11 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
-import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
@@ -24,7 +22,6 @@ import veeValidate from './plugins/veeValidate';
 import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
 
 Vue.use(Vuex);
-Vue.use(VueRx);
 
 export default new Vuex.Store({
   state: {
@@ -67,7 +64,6 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
-    observables,
     modals,
     tipUrl,
     namesPlugin,

@@ -164,7 +164,7 @@ import {
   amountRounded,
   convertToken,
 } from '../../utils';
-import { useGetter } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressShortening from '../../components/AddressShortening.vue';

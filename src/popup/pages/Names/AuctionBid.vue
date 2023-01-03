@@ -44,7 +44,8 @@
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { IAuctionBid } from '../../../types';
-import { useGetter, useSdk } from '../../../composables';
+import { useSdk } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 import {
   AENS_BID_MIN_RATIO,
   MODAL_DEFAULT,
@@ -71,7 +72,7 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: root.$store });
 
     const loading = ref(false);
     const amount = ref('');

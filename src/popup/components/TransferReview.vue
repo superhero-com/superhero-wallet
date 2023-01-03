@@ -97,7 +97,8 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi, useGetter } from '../../composables';
+import { useDeepLinkApi } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import {
   aeToAettos,
   checkAensName,

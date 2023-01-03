@@ -66,18 +66,21 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
-import type { IToken } from '../../types';
+import {
+  IAccount,
+  IToken,
+  IPendingTransaction,
+  ISdk,
+} from '../../types';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
-import { convertToken, watchUntilTruthy, rxJsObservableToVueState } from '../utils';
-import { IPendingTransaction } from '../../types';
+import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
-  useGetter,
-  useState,
   IFormModel,
-  IMaxAmount,
+  useBalances,
 } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -86,32 +89,31 @@ import BalanceInfo from '../components/BalanceInfo.vue';
 export default defineComponent({
   name: 'Retip',
   components: {
-    InputAmount, UrlStatus, BtnMain, BalanceInfo,
+    InputAmount,
+    UrlStatus,
+    BtnMain,
+    BalanceInfo,
   },
   setup(props, { root }) {
+    const formModel = ref<IFormModel>({
+      amount: 0,
+      selectedAsset: null,
+    });
+
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+
     const tipId = root.$route.query.id;
     const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
     });
-    const formModel = ref<IFormModel>({
-      amount: 0,
-      selectedAsset: null,
-    });
-    const {
-      max,
-      fee,
-      balance,
-      account,
-    } = useMaxAmount({ formModel } as IMaxAmount);
-    const balanceCurrency = rxJsObservableToVueState<number>(
-      root.$store.state.observables.balanceCurrency,
-    );
 
     const loading = ref<boolean>(false);
     const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
-    const sdk = useGetter('sdkPlugin/sdk');
+    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
@@ -141,7 +143,7 @@ export default defineComponent({
 
     async function sendTip() {
       const amount = convertToken(
-        formModel.value.amount,
+        +formModel.value.amount,
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
           : MAGNITUDE,

@@ -9,34 +9,42 @@ import {
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import store from '../store';
+import type { Store } from 'vuex';
+import type { IAccount, IAsset, IToken } from '../types';
 import {
   MAGNITUDE,
   STUB_CONTRACT_ADDRESS,
   AETERNITY_CONTRACT_ID,
-  rxJsObservableToVueState,
   executeAndSetInterval,
   calculateFee,
   validateTipUrl,
   checkAensName,
   handleUnknownError,
 } from '../popup/utils';
-import { IAccount, IAsset, IToken } from '../types';
-import { useGetter } from './vuex';
 import { useSdk } from './sdk';
+import { useBalances } from './balances';
 
 export interface IFormModel {
-  amount: number;
+  amount: number | string;
   selectedAsset: IToken | IAsset | null;
   address?: string;
   payload?: string;
 }
-export interface IMaxAmount {
+export interface MaxAmountOptions {
+  /**
+   * TODO: Temporary solution to avoid dependency circle
+   */
+  store: Store<any>
   formModel: Ref<IFormModel>
 }
 
-export function useMaxAmount({ formModel }: IMaxAmount) {
-  const { getSdk } = useSdk();
+/**
+ * Composable that allows to use real max amount of selected token
+ * considering the fee that needs to be paid.
+ */
+export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
+  const { getSdk } = useSdk({ store });
+  const { balance } = useBalances({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
@@ -46,14 +54,7 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
-  const balance = rxJsObservableToVueState<any>(
-    (store.state as any).observables.balance,
-  );
-  const balanceCurrency = rxJsObservableToVueState<number>(
-    (store.state as any).observables.balanceCurrency,
-  );
-
-  const account = useGetter<IAccount>('account');
+  const account = computed<IAccount>(() => store.getters.account);
   const max = computed(() => {
     if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
       const _max = balance.value.minus(fee.value);
@@ -145,14 +146,7 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
   });
 
   return {
-    fee,
-    selectedTokenBalance,
-    tokenInstance,
-    nonce,
-    selectedAssetDecimals,
-    account,
     max,
-    balance,
-    balanceCurrency,
+    fee,
   };
 }

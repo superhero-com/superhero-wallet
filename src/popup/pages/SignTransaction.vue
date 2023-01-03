@@ -11,7 +11,7 @@ export default defineComponent({
   setup(props, { root }) {
     onMounted(async () => {
       const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { getSdk } = useSdk();
+      const { getSdk } = useSdk({ store: root.$store });
 
       try {
         const sdk = await getSdk();

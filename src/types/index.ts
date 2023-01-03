@@ -32,7 +32,7 @@ export interface IAsset {
   balanceCurrency: number
   circulating_supply: number
   contractId: string
-  convertedBalance: BigNumber
+  convertedBalance: typeof BigNumber
   current_price: number
   fully_diluted_valuation: any
   high_24h: number
@@ -156,7 +156,7 @@ export interface ITx {
   gasUsed: number,
   nonce: number,
   result: string,
-  return:string,
+  return: string,
   returnType: string,
   type: string,
   callerId: string,
@@ -215,6 +215,19 @@ export interface IDexContracts {
  */
 export type IPopupType = typeof POPUP_TYPES[number];
 
+export interface ITopHeader {
+  hash: string
+  height: number
+  pofHash: string
+  prevHash: string
+  prevKeyHash: string
+  signature: string
+  stateHash: string
+  time: number
+  txsHash: string
+  version: number
+}
+
 /**
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
@@ -222,7 +235,7 @@ export type IPopupType = typeof POPUP_TYPES[number];
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
-  api: Record<string, (a: string) => any>
+  api: Record<string, (a?: string) => any>
   Ae: Record<string, any>
   pool: Map<string, any>
   getContractInstance: (o: any) => any
@@ -232,6 +245,7 @@ export interface ISdk {
   spend: (a: any, r: any, o: any) => Promise<any>
   address: () => Promise<string>
   aensBid: (name: string, aettos: any) => Promise<any>
+  balance: (address: string) => Promise<number>
 }
 
 /**

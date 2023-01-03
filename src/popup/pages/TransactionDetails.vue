@@ -23,7 +23,7 @@
       <div class="content">
         <TransactionOverview v-bind="transaction" />
         <div class="explorer">
-          <LinkButton :to="getExplorerPath(hash)">
+          <LinkButton :to="explorerPath">
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
           </LinkButton>
@@ -38,10 +38,10 @@
             :label="$t('pages.transactionDetails.reason')"
             :value="transaction.tx.return"
             class="reason"
+            data-cy="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance)
-              && tokens"
+            v-if="(isPool || isAllowance) && tokens"
             :tokens="tokens"
             :tx-function="transaction.tx.function"
             :is-allowance="isAllowance"
@@ -181,6 +181,10 @@ import {
   AETERNITY_SYMBOL,
   getPayload,
 } from '../utils';
+import type { ITransaction } from '../../types';
+import { useTransactionToken } from '../../composables';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
+
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
@@ -193,12 +197,10 @@ import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import PayloadDetails from '../components/PayloadDetails.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
+
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
-import type { ITransaction } from '../../types';
-import { useTransactionToken, useGetter } from '../../composables';
-import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -222,14 +224,6 @@ export default defineComponent({
     hash: { type: String, required: true },
   },
   setup(props, { root }) {
-    const transaction = ref<ITransaction>();
-    const getTx = useGetter('getTx');
-
-    const getTxTipUrl = useGetter('getTxTipUrl');
-    const getExplorerPath = useGetter('getExplorerPath');
-    const isTxAex9 = useGetter('isTxAex9');
-
-    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
     const {
       setTransaction,
       getTxSymbol,
@@ -238,7 +232,23 @@ export default defineComponent({
       isAllowance,
       tokens,
       isDex,
-    } = useTransactionToken(undefined, true);
+    } = useTransactionToken({
+      store: root.$store,
+      showDetailedAllowanceInfo: true,
+    });
+
+    const transaction = ref<ITransaction>();
+
+    const getTx = computed(() => root.$store.getters.getTx);
+    const getTxTipUrl = computed(() => root.$store.getters.getTxTipUrl);
+    const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
+    const isTxAex9 = computed(() => root.$store.getters.isTxAex9);
+
+    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
+    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
+    const explorerPath = computed(() => getExplorerPath.value(props.hash));
+    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
+    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
 
     onMounted(async () => {
       transaction.value = getTx.value(props.hash);
@@ -255,16 +265,9 @@ export default defineComponent({
       if (transaction.value) setTransaction(transaction.value);
     });
 
-    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
-
-    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
-
-    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-
     return {
       AETERNITY_SYMBOL,
       transaction,
-      tipUrl,
       isSwap,
       isPool,
       getTxSymbol,
@@ -273,9 +276,10 @@ export default defineComponent({
       isAllowance,
       tokens,
       isDex,
-      getExplorerPath,
       isTxAex9,
+      tipUrl,
       tipLink,
+      explorerPath,
       getPayload,
       splitAddress,
       aettosToAe,

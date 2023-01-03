@@ -4,7 +4,7 @@
     has-close-button
     from-bottom
     centered
-    :body-without-padding-bottom="!!payload.length"
+    :body-without-padding-bottom="hasPayload"
     @close="resolve"
   >
     <ModalHeader
@@ -26,7 +26,7 @@
     </span>
     <div
       class="content"
-      :class="{ 'without-margin': payload.length }"
+      :class="{ 'without-margin': hasPayload }"
     >
       <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
       <AvatarWithChainName
@@ -107,6 +107,9 @@ export default {
     },
     payload() {
       return getPayload(this.transaction);
+    },
+    hasPayload() {
+      return this.payload && this.payload.length;
     },
   },
   async mounted() {

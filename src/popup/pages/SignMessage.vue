@@ -32,10 +32,12 @@ import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default defineComponent({
   name: 'SignMessage',
-  components: { BtnMain },
+  components: {
+    BtnMain,
+  },
   setup(props, { root }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: root.$store });
 
     const sendAddress = async () => {
       const sdk = await getSdk();

@@ -89,10 +89,10 @@ import {
   AETERNITY_SYMBOL,
   buildSimplexLink,
   isContract,
-  rxJsObservableToVueState,
 } from '../../utils';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useGetter, useSdk } from '../../../composables';
+import { useBalances, useSdk } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -121,7 +121,9 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: root.$store });
+    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
@@ -150,10 +152,6 @@ export default defineComponent({
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const aePublicData = computed(() => root.$store.state.fungibleTokens.aePublicData);
-    const balance = rxJsObservableToVueState((root.$store.state as any).observables.balance);
-    const balanceCurrency = rxJsObservableToVueState(
-      (root.$store.state as any).observables.balanceCurrency,
-    );
     const fungibleToken = computed(() => availableTokens.value[contractId]);
 
     const simplexLink = computed(() => buildSimplexLink(account.value.address));

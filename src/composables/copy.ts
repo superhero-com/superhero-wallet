@@ -39,10 +39,9 @@ export interface UseCopyOptions {
   timeout?: number
 }
 
-export function useCopy(options: UseCopyOptions = {}) {
-  const {
-    timeout = 1000,
-  }: UseCopyOptions = options;
+export function useCopy({
+  timeout = 1000,
+}: UseCopyOptions = {}) {
   const copied = ref(false);
 
   /**

@@ -1,19 +1,26 @@
 import { computed } from '@vue/composition-api';
+import type { Store } from 'vuex';
 import { ISdk } from '../types';
 import { watchUntilTruthy } from '../popup/utils';
-import { useGetter, useState } from './vuex';
+
+interface UseSdkOptions {
+  /**
+   * TODO: Temporary solution to avoid dependency circle
+   */
+  store: Store<any>
+}
 
 /**
  * Composable that will replace the Vuex SDK plugin.
  * For now it works as an abstraction layer.
  */
-export function useSdk() {
-  const sdk = useGetter<ISdk | undefined>('sdkPlugin/sdk');
+export function useSdk({ store }: UseSdkOptions) {
+  const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);
   const isSdkReady = computed(() => !!sdk.value);
 
-  const isNodeConnecting = useState<boolean>('sdkPlugin', 'isNodeConnecting');
-  const isNodeReady = useState<boolean>('sdkPlugin', 'isNodeReady');
-  const isNodeError = useState<boolean>('sdkPlugin', 'isNodeError');
+  const isNodeConnecting = computed<boolean>(() => store.state.sdkPlugin.isNodeConnecting);
+  const isNodeReady = computed<boolean>(() => store.state.sdkPlugin.isNodeReady);
+  const isNodeError = computed<boolean>(() => store.state.sdkPlugin.isNodeError);
 
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.

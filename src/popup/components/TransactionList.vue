@@ -74,7 +74,7 @@ import {
   MOBILE_WIDTH,
   watchUntilTruthy,
 } from '../utils';
-import { useGetter, useState } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 import Filters, { IFilterInputPayload, IFilters } from './Filters.vue';
 import TransactionItem from './TransactionItem.vue';
 import InputSearch from './InputSearch.vue';

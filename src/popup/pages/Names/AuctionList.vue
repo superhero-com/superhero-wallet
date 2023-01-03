@@ -47,9 +47,10 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
-import { watchUntilTruthy, blocksToRelativeTime, rxJsObservableToVueState } from '../../utils';
-import { useGetter } from '../../../composables';
-import { IActiveAuction, ObjectValues } from '../../../types';
+import type { IActiveAuction, ObjectValues } from '../../../types';
+import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
+import { useTopHeaderData } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 import Filters, { IFilters, IFilterInputPayload } from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
@@ -79,6 +80,8 @@ export default defineComponent({
     RegisterName,
   },
   setup(props, { root }) {
+    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+
     const loading = ref(false);
     const activeAuctions = ref<IActiveAuction[]>([]);
     const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
@@ -105,10 +108,6 @@ export default defineComponent({
         .sort(() => (displayMode.value.rotated ? SORT_DESC : SORT_ASC)),
     );
 
-    const topBlockHeight = rxJsObservableToVueState<number>(
-      (root.$store.state as any).observables.topBlockHeight,
-    );
-
     onMounted(async () => {
       loading.value = true;
       await watchUntilTruthy(() => root.$store.state.middleware);
@@ -117,6 +116,7 @@ export default defineComponent({
     });
 
     return {
+      blocksToRelativeTime,
       loading,
       displayMode,
       activeAuctions,
@@ -125,9 +125,6 @@ export default defineComponent({
       topBlockHeight,
       getNameFee,
     };
-  },
-  methods: {
-    blocksToRelativeTime,
   },
 });
 </script>
