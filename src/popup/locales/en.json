@@ -449,7 +449,8 @@
       "title": "Recent transactions",
       "viewMore": "View full transaction history",
       "noTransactionsFound": "There are no recent transactions for this account.",
-      "searchPlaceholder": "Search transactions by asset name"
+      "searchPlaceholder": "Search transactions by asset name",
+      "unknownMode": "Unknown display mode type:"
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
