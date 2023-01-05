@@ -44,6 +44,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
+import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import TokenAmount from '../TokenAmount.vue';
 import BtnPlain from '../buttons/BtnPlain.vue';
 import Tokens from '../Tokens.vue';
@@ -70,7 +71,9 @@ export default {
       return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
     targetRouteName() {
-      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin-transactions' : 'token-transactions';
+      return (this.tokenData.contractId === AETERNITY_CONTRACT_ID)
+        ? ROUTE_COIN
+        : ROUTE_TOKEN;
     },
   },
 };
