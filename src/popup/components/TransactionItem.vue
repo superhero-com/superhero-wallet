@@ -38,14 +38,16 @@
       />
       <div class="footer">
         <div class="labels">
-          <label
+          <TransactionTag
             v-for="label in labels"
             :key="label"
-          >
-            {{ label.toUpperCase() }}
-          </label>
+            v-text="label"
+          />
         </div>
-        <span v-if="fiatAmount">{{ fiatAmount }}</span>
+        <span
+          v-if="fiatAmount"
+          class="fiat-amount"
+        >{{ fiatAmount }}</span>
       </div>
     </div>
   </RouterLink>
@@ -54,6 +56,12 @@
 <script lang="ts">
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import type {
+  IAccount,
+  INetwork,
+  ITransaction,
+  TransactionType,
+} from '../../types';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -63,12 +71,12 @@ import {
   AENS,
   DEX,
 } from '../utils';
+import { useTransactionToken, useGetter } from '../../composables';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransactionToken, useGetter } from '../../composables';
-import { ITransaction, TransactionType } from '../../types';
+import TransactionTag from './TransactionTag.vue';
 
 export default defineComponent({
   components: {
@@ -76,14 +84,15 @@ export default defineComponent({
     Reverted,
     Warning,
     TransactionTokens,
+    TransactionTag,
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props, { root }) {
     const getAmountFiat = useGetter('getAmountFiat');
-    const activeNetwork = useGetter('activeNetwork');
-    const account = useGetter('account');
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const account = useGetter<IAccount>('account');
 
     const {
       txType,
@@ -154,8 +163,7 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
-      // TODO add type to tokens
-      const aeToken = tokens.value?.find((t: any) => t?.isAe);
+      const aeToken = tokens.value?.find((t) => t?.isAe);
       if (
         !aeToken
         || isErrorTransaction.value
@@ -249,31 +257,21 @@ export default defineComponent({
 
     .footer {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       color: variables.$color-white;
       padding-top: 4px;
 
-      span {
-        color: variables.$color-grey-light;
-
+      .fiat-amount {
         @extend %face-sans-15-medium;
+
+        color: variables.$color-grey-light;
       }
 
       .labels {
         display: flex;
+        gap: 4px;
         width: 100%;
-
-        label {
-          @extend %face-sans-11-regular;
-
-          height: 22px;
-          margin-right: 4px;
-          padding: 2px 5px;
-          border: 1px solid variables.$color-grey-dark;
-          border-radius: 4px;
-          color: variables.$color-grey-dark;
-          font-weight: 500;
-        }
       }
     }
   }

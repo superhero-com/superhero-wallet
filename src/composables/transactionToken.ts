@@ -19,7 +19,7 @@ interface ITokenTransactionComposable extends ITx {
   amount: number,
   symbol: string,
   isReceived: string,
-  isAe: string
+  isAe: boolean
 }
 
 export const useTransactionToken = (

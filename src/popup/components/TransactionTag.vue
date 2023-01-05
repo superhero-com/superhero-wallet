@@ -1,19 +1,8 @@
 <template>
   <div class="transaction-tag">
-    {{ txType }}
+    <slot />
   </div>
 </template>
-
-<script>
-export default {
-  props: {
-    txType: {
-      type: String,
-      required: true,
-    },
-  },
-};
-</script>
 
 <style lang="scss" scoped>
 @use '../../styles/typography';

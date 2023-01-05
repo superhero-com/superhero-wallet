@@ -2,14 +2,14 @@
   <div class="transaction-info">
     <div class="title-tag-wrapper">
       <TransactionTag
-        :tx-type="getTitle"
         data-cy="title"
+        v-text="getTitle"
       />
       <TransactionTag
         v-if="txFunction && getTxType"
-        :tx-type="getTxType"
         class="title-tag"
         data-cy="tx-function"
+        v-text="getTxType"
       />
     </div>
 
