@@ -91,7 +91,7 @@ import {
   isContract,
   rxJsObservableToVueState,
 } from '../../utils';
-import { ROUTE_COIN } from '../../router/routeNames';
+import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useGetter, useSdk } from '../../../composables';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -129,8 +129,8 @@ export default defineComponent({
       {
         text: root.$t('pages.transactionDetails.transactions'),
         routeName: isCoin
-          ? 'coin-transactions'
-          : 'token-transactions',
+          ? ROUTE_COIN
+          : ROUTE_TOKEN,
         exact: true,
       },
       {

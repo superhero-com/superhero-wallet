@@ -2,10 +2,11 @@ import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
+  ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
-  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_TOKEN,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -448,10 +449,9 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/coins/:id',
     component: TokenContainer,
-    name: ROUTE_COIN,
     children: [
       {
-        name: 'coin-transactions',
+        name: ROUTE_COIN,
         path: '',
         component: TokenTransactions,
         props: true,
@@ -479,7 +479,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: TokenContainer,
     children: [
       {
-        name: 'token-transactions',
+        name: ROUTE_TOKEN,
         path: '',
         component: TokenTransactions,
         props: true,
