@@ -7,6 +7,7 @@ import {
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
   ROUTE_TOKEN,
+  ROUTE_NOT_FOUND,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -541,7 +542,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'not-found',
+    name: ROUTE_NOT_FOUND,
     path: '*',
     component: NotFound,
     meta: {

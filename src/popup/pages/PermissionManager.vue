@@ -148,6 +148,7 @@ import InputField from '../components/InputField.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -224,7 +225,7 @@ export default defineComponent({
     if (editView) {
       const savedPermission = permissions.value[routeHost];
       if (!savedPermission) {
-        root.$router.replace({ name: 'not-found' });
+        root.$router.replace({ name: ROUTE_NOT_FOUND });
       } else {
         if (typeof savedPermission.transactionSignLimit === 'string') {
           savedPermission.transactionSignLimit = parseInt(

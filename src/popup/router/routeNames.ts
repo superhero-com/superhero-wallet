@@ -6,3 +6,4 @@ export const ROUTE_NOTIFICATIONS = 'notifications';
 export const ROUTE_COIN = 'coin';
 export const ROUTE_TOKEN = 'token';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
+export const ROUTE_NOT_FOUND = 'not-found';
