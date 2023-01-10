@@ -198,6 +198,7 @@ import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import type { ITransaction } from '../../types';
 import { useTransactionToken, useGetter } from '../../composables';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -243,7 +244,12 @@ export default defineComponent({
       transaction.value = getTx.value(props.hash);
       if (!transaction.value || transaction.value.incomplete) {
         await watchUntilTruthy(() => root.$store.state.middleware);
-        transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+        try {
+          transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+        } catch (e) {
+          root.$router.push({ name: ROUTE_NOT_FOUND });
+        }
+
         root.$store.commit('setTransactionByHash', transaction.value);
       }
       if (transaction.value) setTransaction(transaction.value);
