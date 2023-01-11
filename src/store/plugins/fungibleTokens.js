@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { isEqual, isEmpty, uniqBy } from 'lodash-es';
+import { isEmpty, uniqBy } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken,
@@ -284,23 +284,16 @@ export default (store) => {
   });
 
   store.watch(
-    ({ middleware }) => middleware,
-    (middleware) => {
-      if (!middleware) return;
-
-      store.dispatch('fungibleTokens/loadAvailableTokens');
-      store.dispatch('fungibleTokens/loadTokenBalances');
-    },
-    { immediate: true },
-  );
-
-  store.watch(
     (state, { activeNetwork }) => activeNetwork,
     async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
+      if (network?.middlewareUrl === oldNetwork?.middlewareUrl) return;
       store.commit('fungibleTokens/resetTokens');
       store.commit('fungibleTokens/resetTransactions');
+
+      await store.dispatch('fungibleTokens/loadAvailableTokens');
+      await store.dispatch('fungibleTokens/loadTokenBalances');
     },
+    { immediate: true },
   );
 
   store.watch(
