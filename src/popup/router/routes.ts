@@ -4,6 +4,7 @@ import {
   ROUTE_ACCOUNT,
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
   ROUTE_TOKEN,
@@ -96,7 +97,7 @@ export const routes: WalletAppRouteConfig[] = [
       },
       {
         path: 'transactions',
-        name: 'account-details-transactions',
+        name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
         component: AccountDetailsTransactions,
         meta: {
           hideHeader: true,

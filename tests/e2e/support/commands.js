@@ -1,5 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
+import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
 import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
@@ -215,13 +216,11 @@ Cypress.Commands.add('selectNetwork', () => {
 });
 
 Cypress.Commands.add('openTransactions', () => {
-  cy.get('[data-cy=view-all-transactions]')
+  cy.get('[data-cy=account-card]')
+    .click()
+    .get(`[data-cy=${ROUTE_ACCOUNT_DETAILS_TRANSACTIONS}]`)
     .click()
     .get('[data-cy=loader]')
-    .should('be.visible')
-    .get('[data-cy=list]')
-    .should('be.visible')
-    .get('[data-cy=filters]')
     .should('be.visible');
 });
 

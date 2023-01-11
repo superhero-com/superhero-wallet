@@ -37,6 +37,7 @@
           :exact-path="tab.exact"
           :to="{ name: tab.routeName }"
           :text="tab.text"
+          :data-cy="tab.routeName"
         />
       </Tabs>
     </div>
