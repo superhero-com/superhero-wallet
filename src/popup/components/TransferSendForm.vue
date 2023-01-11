@@ -126,7 +126,12 @@ import {
   onMounted,
   PropType,
 } from '@vue/composition-api';
-import { IAccount, IToken, ITokenList } from '../../types';
+import type {
+  IAccount,
+  IInputMessage,
+  IToken,
+  ITokenList,
+} from '../../types';
 import {
   MODAL_DEFAULT,
   MODAL_HELP,
@@ -221,7 +226,7 @@ export default defineComponent({
       () => validateTipUrl(formModel.value.address) && !checkAensName(formModel.value.address),
     );
 
-    const message = computed(() => {
+    const message = computed((): IInputMessage => {
       if (isTipUrl.value) {
         switch (urlStatus.value) {
           case 'verified': return { status: 'success', text: ' ', hideMessage: true };
