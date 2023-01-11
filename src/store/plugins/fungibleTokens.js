@@ -94,8 +94,7 @@ export default (store) => {
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
-            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
-            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
+            const balances = tokens.map(({ amount, contract_id: contractId }) => {
               const token = availableTokens[contractId];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
