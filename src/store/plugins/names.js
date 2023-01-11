@@ -210,7 +210,7 @@ export default (store) => {
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).height();
+      const height = await (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).height();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)
