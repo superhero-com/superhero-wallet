@@ -770,7 +770,8 @@
       "claimOfTip": "claimed your tip.",
       "claimOfRetip": "claimed your retip.",
       "viewOnSuperhero": "View on Superhero.com",
-      "goToStore": "Go to store"
+      "goToStore": "Go to store",
+      "noNotifications": "You do not have any unread notifications."
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
