@@ -441,3 +441,9 @@ export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
 
 export const NOTIFICATION_ENTITY_TYPE_TIP = 'TIP';
+
+export const INPUT_MESSAGE_STATUSES = {
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+} as const;

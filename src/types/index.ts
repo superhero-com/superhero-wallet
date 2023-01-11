@@ -3,12 +3,28 @@
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { POPUP_TYPES } from '../popup/utils';
+import { POPUP_TYPES, INPUT_MESSAGE_STATUSES } from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
 
+/**
+ * Convert `key: val` objects into union of values.
+ */
 export type ObjectValues<T> = T[keyof T];
+
+export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
+
+/**
+ * Input fields message prop type
+ */
+export interface IInputMessage {
+  status?: InputMessageStatus
+  text?: string
+  hideMessage?: boolean
+}
+
+export type IInputMessageRaw = string | IInputMessage;
 
 export interface IToken {
   contractId: string
