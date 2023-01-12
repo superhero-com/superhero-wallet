@@ -73,7 +73,7 @@ import {
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
-  sortTransaction,
+  sortTransactions,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import Filters, { IFilterInputPayload, IFilters } from './Filters.vue';
@@ -185,7 +185,7 @@ export default defineComponent({
                 searchTerm.value.toLocaleLowerCase(),
               ),
         )
-        .sort(sortTransaction)
+        .sort(sortTransactions)
         .slice(0, props.maxLength || Infinity),
     );
 

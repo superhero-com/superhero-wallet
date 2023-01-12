@@ -17,6 +17,7 @@ export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
+export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,
@@ -140,7 +141,7 @@ export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
-export const COUNT_OF_DASHBOARD_TRANSACTION = 3;
+export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {

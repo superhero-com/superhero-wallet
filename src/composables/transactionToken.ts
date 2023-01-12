@@ -2,7 +2,12 @@ import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type { Store } from 'vuex';
 import type {
-  ITransaction, ITokenList, ITx, TransactionType, IDexContracts,
+  ITransaction,
+  ITokenList,
+  ITx,
+  TransactionType,
+  IDexContracts,
+  IDashboardTransaction,
 } from '../types';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 import {
@@ -18,7 +23,7 @@ interface UseTransactionTokenOptions {
    * TODO: Temporary solution to avoid dependency circle
    */
   store: Store<any>
-  initTransaction?: ITransaction
+  initTransaction?: ITransaction | IDashboardTransaction
   showDetailedAllowanceInfo?: boolean
 }
 
@@ -35,9 +40,9 @@ export function useTransactionToken({
   initTransaction,
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokenOptions) {
-  const transaction = ref<ITransaction | undefined>(initTransaction);
+  const transaction = ref(initTransaction);
 
-  function setTransaction(newTransaction: ITransaction) {
+  function setTransaction(newTransaction: ITransaction | IDashboardTransaction) {
     transaction.value = newTransaction;
   }
 
@@ -84,7 +89,7 @@ export function useTransactionToken({
         ? convertToken(transaction.value.tx.fee, -MAGNITUDE)
         : getTxAmountTotal.value(transaction.value),
       symbol: isAllowance.value ? AETERNITY_SYMBOL : getTxSymbol.value(transaction.value),
-      isReceived: getTxDirection.value(transaction.value) === 'received',
+      isReceived: getTxDirection.value(transaction.value, transaction.value?.transactionOwner) === 'received', // TODO - check type
       isAe:
         isAllowance.value
         || (

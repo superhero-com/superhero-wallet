@@ -119,9 +119,13 @@ export default {
   getTxFee: () => (transaction) => +aettosToAe(
     new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
-  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'].map((key) => tx?.[key]).includes(address)
-    ? 'sent'
-    : 'received'),
+  getTxDirection: (_, { account: { address } }) => ({ tx }, externalAddress) => (
+    ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
+      .map((key) => tx?.[key])
+      .includes(externalAddress || address)
+      ? 'sent'
+      : 'received'
+  ),
   getTxTipUrl: () => (transaction) => (
     transaction.tipUrl
       || transaction.url

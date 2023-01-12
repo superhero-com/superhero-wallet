@@ -1,6 +1,7 @@
 {
   "ok": "OK",
   "ae": "AE",
+  "by": "by",
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
   "badges": {
@@ -294,11 +295,26 @@
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
       "payingForTx": "Paying For Transaction",
-      "pending": "Pending..."
+      "pending": "Pending",
+      "sentTx": "Sending",
+      "receivedTx": "Receiving"
+    },
+    "listType": {
+      "sentTx": "Sent",
+      "receivedTx": "Received",
+      "namePreClaimTx": "Name preclaimed",
+      "nameClaimTx": "Name claimed",
+      "nameUpdateTx": "Name updated",
+      "nameTransferTx": "Name transferred",
+      "nameRevokeTx": "Revoke name",
+      "provide_liquidity": "Liquidity provided",
+      "remove_liquidity": "Liquidity removed",
+      "tipSent": "Tip sent",
+      "tipReceived": "Tip received"
     },
     "dexType": {
       "provide_liquidity": "provide liquidity",
-      "remove_liquidity":"remove liquidity",
+      "remove_liquidity": "remove liquidity",
       "swap": "swap",
       "allow_token":"allow token" ,
       "change_allowance": "allow token",

@@ -3,39 +3,61 @@
     <div
       v-for="token in tokens.filter(({ amount }) => amount != null)"
       :key="token.symbol"
-      :class="['token-row', token.isReceived ? 'received': 'sent', { error }]"
+      :class="['token-row', token.isReceived && 'received']"
+      :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
         :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
         :icon-size="iconSize"
+        full-ae-symbol
       />
       <span class="amount">
-        {{
-          `${token.isReceived ? '+' : '−'}
-          ${amountRounded(token.decimals
-          ? convertToken(token.amount || 0, -token.decimals) : token.amount)}`
-        }}
+        {{ token.isReceived ? '+' : '−' }}
+        {{ tokenAmount(token) }}
       </span>
     </div>
   </div>
 </template>
 
 <script>
+import { defineComponent } from '@vue/composition-api';
 import { amountRounded, convertToken } from '../utils';
 import Tokens from './Tokens.vue';
 
-export default {
+export default defineComponent({
   components: { Tokens },
   props: {
     tokens: { type: Array, required: true },
     iconSize: { type: String, default: 'rg' },
-    error: Boolean,
   },
-  methods: {
-    convertToken,
-    amountRounded,
+  setup() {
+    function tokenAmount(token) {
+      return amountRounded(
+        token.decimals
+          ? convertToken(token.amount || 0, -token.decimals)
+          : token.amount,
+      );
+    }
+
+    function calculateFontSize(amount) {
+      if (amount <= 999999) {
+        return '18px';
+      }
+      if (amount <= 999999999) {
+        return '16px';
+      }
+      if (amount <= 999999999999) {
+        return '14px';
+      }
+      return '12px';
+    }
+
+    return {
+      tokenAmount,
+      calculateFontSize,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -46,23 +68,20 @@ export default {
   width: 100%;
 
   .token-row {
+    @extend %face-sans-15-regular;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
+    font-size: var(--font-size);
 
-    @extend %face-sans-15-regular;
-
-    &.error .amount {
-      color: variables.$color-grey-dark;
+    .amount {
+      color: variables.$color-white;
     }
 
-    &.received:not(.error) .amount {
+    &.received .amount {
       color: variables.$color-success-dark;
-    }
-
-    &.sent:not(.error) .amount {
-      color: variables.$color-danger;
     }
 
     .tokens {

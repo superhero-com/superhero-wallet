@@ -52,8 +52,8 @@
         </Card>
       </CardRow>
 
-      <CardRow>
-        <LatestTransactionsCard />
+      <CardRow :class="{ hidden: !transactionsLoaded }">
+        <LatestTransactionsCard @loaded="() => transactionsLoaded = true" />
       </CardRow>
 
       <CardRow>
@@ -104,7 +104,7 @@ import { isEmpty } from 'lodash-es';
 import {
   computed,
   watch,
-  defineComponent,
+  defineComponent, ref,
 } from '@vue/composition-api';
 import {
   MODAL_TRANSFER_RECEIVE,
@@ -144,8 +144,10 @@ export default defineComponent(
       BtnMain,
     },
     setup(_, { root }) {
+      const transactionsLoaded = ref(false);
+
       const backedUpSeed = useState('backedUpSeed');
-      const activeIdx = useState('transactions', 'activeIdx');
+      const activeIdx = useState('accounts', 'activeIdx');
 
       const account = useGetter('account');
       const isConnected = useGetter('isConnected');
@@ -164,6 +166,7 @@ export default defineComponent(
             root.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
           }
         },
+        { immediate: true },
       );
 
       function openTransferReceiveModal() {
@@ -184,6 +187,7 @@ export default defineComponent(
         backedUpSeed,
         isConnected,
         simplexLink,
+        transactionsLoaded,
         openTransferReceiveModal,
         openTransferSendModal,
       };
@@ -212,6 +216,14 @@ export default defineComponent(
 
   .card-button {
     margin-top: 12px;
+  }
+
+  .hidden {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    overflow: hidden;
+    pointer-events: none;
   }
 }
 </style>

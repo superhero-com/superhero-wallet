@@ -93,6 +93,7 @@ export default {
     state, getters, dispatch, commit,
   }, { limit, recent }) {
     if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) return;
+
     const { address } = getters.account;
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
@@ -109,7 +110,7 @@ export default {
     console.log({ txs });
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', recent),
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent }),
       dispatch('fetchTipWithdrawnTransactions', recent)]))
       .forEach((f) => {
         if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
@@ -127,6 +128,40 @@ export default {
     }
     console.log(1, txs);
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
+  },
+  // eslint-disable-next-line no-unused-vars
+  async fetchTransactionsForAllAccounts({ state, getters, dispatch }, { limit }) {
+    if (!state.middleware || (state.transactions.nextPageUrl === null)) return [];
+
+    const txs = await Promise.all(getters.accounts.flatMap((acc) => [
+      state.middleware.getTxByAccount(acc.address, limit, 1)
+        .then(({ data }) => camelcaseKeysDeep(data))
+        .catch(() => []),
+      dispatch('fetchPendingTransactions', acc.address),
+    ]));
+
+    console.log({ txs });
+
+    // const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
+    // const amountOfTx = flatten(txs).length;
+    // flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent: true }),
+    //   dispatch('fetchTipWithdrawnTransactions', recent)]))
+    //   .forEach((f) => {
+    //     if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
+    //       txs[0].push(f);
+    //     }
+    //   });
+    // txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    // const network = getters.activeNetwork.networkId;
+    // if (state.transactions.pending[network]) {
+    //   state.transactions.pending[network].forEach(({ hash }) => {
+    //     if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
+    //       commit('removePendingTransactionByHash', { hash, network });
+    //     }
+    //   });
+    // }
+    // commit('addTransactions', recent ? txs.slice(0, limit) : txs);
+    return flatten(txs).slice(0, 3);
   },
   pollCurrencies({ commit }) {
     return executeAndSetInterval(async () => {

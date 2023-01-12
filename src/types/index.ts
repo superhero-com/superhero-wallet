@@ -177,6 +177,10 @@ export interface ITransaction {
   tx: ITx
 }
 
+export interface IDashboardTransaction extends ITransaction {
+  transactionOwner: string,
+}
+
 export interface IPendingTransaction {
   hash: string,
   amount: number | string,

@@ -44,12 +44,13 @@
 </template>
 
 <script>
+import { computed, defineComponent } from '@vue/composition-api';
 import AeIcon from '../../icons/tokens/ae.svg';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils/constants';
+import { AETERNITY_COIN_SYMBOL, AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 
 const SIZES = ['rg', 'md', 'xl']; // TODO - add more sizes to icons
 
-export default {
+export default defineComponent({
   props: {
     /**
      * transactionTokenInfoResolvers []
@@ -64,27 +65,22 @@ export default {
     },
     vertical: Boolean,
     noIcons: Boolean,
+    fullAeSymbol: Boolean,
   },
-  computed: {
-    fromToken() {
-      return this.tokens?.[0] ? this.mapToken(this.tokens[0]) : null;
-    },
-    toToken() {
-      return this.tokens?.[1] ? this.mapToken(this.tokens[1]) : null;
-    },
-  },
-  methods: {
-    getAvailableCharLength() {
-      if (this.tokens?.length < 2) return this.symbolLength;
-      const shorterNameLength = [this.tokens[0].symbol.length, this.tokens[1].symbol.length]
-        .find((length) => length < this.doubleSymbolLength);
-      return shorterNameLength ? this.symbolLength - shorterNameLength : this.doubleSymbolLength;
-    },
-    shrinkString(text) {
-      const maxLength = this.getAvailableCharLength();
+  setup(props) {
+    function getAvailableCharLength() {
+      if (props.tokens?.length < 2) return props.symbolLength;
+      const shorterNameLength = [props.tokens[0].symbol.length, props.tokens[1].symbol.length]
+        .find((length) => length < props.doubleSymbolLength);
+      return shorterNameLength ? props.symbolLength - shorterNameLength : props.doubleSymbolLength;
+    }
+
+    function shrinkString(text) {
+      const maxLength = getAvailableCharLength();
       return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
-    },
-    mapToken(token) {
+    }
+
+    function mapToken(token) {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
@@ -93,16 +89,29 @@ export default {
         imgBorder = false;
       }
 
+      const aeSymbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
+
       return {
         ...token,
-        symbol: token.isAe ? AETERNITY_SYMBOL : token.symbol,
+        symbol: token.isAe ? aeSymbol : token.symbol,
         name: token.isAe ? 'Aeternity' : token.symbol,
         img,
         imgBorder,
       };
-    },
+    }
+
+    const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
+    const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
+
+    return {
+      fromToken,
+      toToken,
+      shrinkString,
+    };
   },
-};
+  methods: {
+  },
+});
 </script>
 
 <style lang="scss" scoped>

@@ -225,7 +225,7 @@ export default (store) => {
         {
           state: { transactions },
           rootGetters: { activeNetwork, account, getDexContracts }, commit,
-        }, recent,
+        }, { recent, multipleAccount },
       ) {
         const { address } = account;
         if (transactions[address]?.length && !recent) return transactions[address];
@@ -234,8 +234,8 @@ export default (store) => {
         const lastTransaction = transactions[address]?.[0];
         if (recent) {
           let nextPageUrl;
-          let isAllNewTransactionsLoadded = false;
-          while (nextPageUrl !== null && !isAllNewTransactionsLoadded) {
+          let isAllNewTransactionsLoaded = false;
+          while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
             // eslint-disable-next-line no-await-in-loop
             const { data, next } = await (fetchJson(nextPageUrl
               ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
@@ -243,7 +243,7 @@ export default (store) => {
             if (data?.length) rawTransactions.push(...data);
             if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
             || !transactions[address]?.length) {
-              isAllNewTransactionsLoadded = true;
+              isAllNewTransactionsLoaded = true;
             }
             nextPageUrl = next || null;
           }
@@ -271,13 +271,15 @@ export default (store) => {
             hash: tx.tx_hash,
           }));
 
-        if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
-          commit('setTransactions', {
-            address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
-          });
-          return newTransactions;
+        if (!multipleAccount) {
+          if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
+            commit('setTransactions', {
+              address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
+            });
+          } else {
+            commit('setTransactions', { address, transactions: newTransactions.reverse() });
+          }
         }
-        commit('setTransactions', { address, transactions: newTransactions.reverse() });
         return newTransactions;
       },
     },
