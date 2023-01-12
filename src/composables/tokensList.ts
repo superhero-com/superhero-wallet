@@ -54,7 +54,7 @@ export function useTokensList(options: UseTokensListOptions = {}) {
       .map(([contractId, tokenData]) => ({ ...tokenData, contractId }));
 
     tokenBalances.value.forEach((singleBalance: IToken) => {
-      const index = tokens.findIndex((token) => token.contractId === singleBalance.contractId);
+      const index = tokens.findIndex((token) => token.contractId === singleBalance?.contractId);
       if (index !== -1) {
         tokens[index] = singleBalance;
       }
