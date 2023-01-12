@@ -240,7 +240,7 @@ export default {
     if (this.transaction.contractId) {
       try {
         this.loading = true;
-        const { getSdk } = useSdk();
+        const { getSdk } = useSdk({ store: this.$store });
         setTimeout(() => { this.loading = false; }, 20000);
         const sdk = await getSdk();
         const { bytecode } = await sdk.getContractByteCode(this.transaction.contractId);

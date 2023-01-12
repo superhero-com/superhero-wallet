@@ -12,7 +12,7 @@ export default {
     secretKey: { type: String, required: true },
   },
   async mounted() {
-    const { getSdk } = useSdk();
+    const { getSdk } = useSdk({ store: this.$store });
     await getSdk();
 
     try {
