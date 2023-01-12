@@ -15,6 +15,7 @@
             <ArrowReceiveIcon />
           </template>
         </Card>
+
         <Card
           :title="$t('dashboard.send-card.title')"
           :description="$t('dashboard.send-card.description')"
@@ -28,6 +29,7 @@
           </template>
         </Card>
       </CardRow>
+
       <CardRow
         v-if="!backedUpSeed"
         data-cy="backup-seed-phrase"
@@ -49,6 +51,11 @@
           />
         </Card>
       </CardRow>
+
+      <CardRow>
+        <LatestTransactionsCard />
+      </CardRow>
+
       <CardRow>
         <Card
           :title="$t('dashboard.buy-card.title')"
@@ -68,6 +75,7 @@
           />
         </Card>
       </CardRow>
+
       <CardRow>
         <Card
           :title="$t('dashboard.name-card.title')"
@@ -92,8 +100,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
 import { isEmpty } from 'lodash-es';
+import {
+  computed,
+  watch,
+  defineComponent,
+} from '@vue/composition-api';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
@@ -103,68 +115,81 @@ import {
 import Card from '../components/dashboard/Card.vue';
 import CardRow from '../components/dashboard/CardRow.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
+import LatestTransactionsCard from '../components/dashboard/LatestTransactionsCard.vue';
 import AccountSwitcher from '../components/AccountSwitcher.vue';
 
 import ArrowReceiveIcon from '../../icons/dashboard/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/dashboard/arrow-send.svg?vue-component';
 import SubtractIcon from '../../icons/subtract.svg?vue-component';
 import CardIcon from '../../icons/creditcard.fill.svg?vue-component';
-import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
+import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
+import { useGetter, useState } from '../../composables/vuex';
 
-export default {
-  name: 'Dashboard',
-  components: {
-    CardRow,
-    Card,
-    AccountSwitcher,
-    ArrowReceiveIcon,
-    ArrowSendIcon,
-    SubtractIcon,
-    CardIcon,
-    MenuCardIcon,
-    BtnMain,
-  },
-  data: () => ({
-    buyBackground,
-    chainNameBackground,
-  }),
-  computed: {
-    ...mapState(['backedUpSeed', 'transactions']),
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['getAccountPendingTransactions', 'account', 'isConnected']),
-    simplexLink() {
-      return buildSimplexLink(this.account.address);
+export default defineComponent(
+  {
+    name: 'Dashboard',
+    components: {
+      LatestTransactionsCard,
+      CardRow,
+      Card,
+      AccountSwitcher,
+      ArrowReceiveIcon,
+      ArrowSendIcon,
+      SubtractIcon,
+      CardIcon,
+      MenuCardIcon,
+      BtnMain,
+    },
+    setup(_, { root }) {
+      const backedUpSeed = useState('backedUpSeed');
+      const activeIdx = useState('transactions', 'activeIdx');
+
+      const account = useGetter('account');
+      const isConnected = useGetter('isConnected');
+
+      const simplexLink = computed(() => buildSimplexLink(account.value.address));
+
+      watch(
+        () => activeIdx.value,
+        () => root.$store.commit('initTransactions'),
+      );
+
+      watch(
+        () => root.$route,
+        ({ query }) => {
+          if (!isEmpty(query)) {
+            root.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
+          }
+        },
+      );
+
+      function openTransferReceiveModal() {
+        root.$store.dispatch('modals/open', {
+          name: MODAL_TRANSFER_RECEIVE,
+        });
+      }
+
+      function openTransferSendModal() {
+        root.$store.dispatch('modals/open', {
+          name: MODAL_TRANSFER_SEND,
+        });
+      }
+
+      return {
+        buyBackground,
+        chainNameBackground,
+        backedUpSeed,
+        isConnected,
+        simplexLink,
+        openTransferReceiveModal,
+        openTransferSendModal,
+      };
     },
   },
-  watch: {
-    activeIdx() { // TODO: remove it, maybe by extracting transactions entity
-      this.$store.commit('initTransactions');
-    },
-    $route: {
-      immediate: true,
-      handler({ query }) {
-        if (!isEmpty(query)) {
-          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
-        }
-      },
-    },
-  },
-  methods: {
-    openTransferReceiveModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_RECEIVE,
-      });
-    },
-    openTransferSendModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_SEND,
-      });
-    },
-  },
-};
+);
 </script>
 
 <style lang="scss" scoped>

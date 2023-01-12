@@ -140,6 +140,8 @@ export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
+export const COUNT_OF_DASHBOARD_TRANSACTION = 3;
+
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
     text: i18n.t('pages.notification-settings.wallet'),

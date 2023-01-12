@@ -162,3 +162,8 @@ export function getPayload(transaction: ITransaction) {
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;
 }
+
+export function sortTransaction(a: ITransaction, b: ITransaction) {
+  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  return a.pending || (bMicroTime - aMicroTime);
+}

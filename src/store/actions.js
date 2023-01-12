@@ -106,7 +106,7 @@ export default {
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
     ]);
-
+    console.log({ txs });
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
     flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', recent),
@@ -125,6 +125,7 @@ export default {
         }
       });
     }
+    console.log(1, txs);
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
   pollCurrencies({ commit }) {

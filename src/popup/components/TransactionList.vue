@@ -73,6 +73,7 @@ import {
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
+  sortTransaction,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import Filters, { IFilterInputPayload, IFilters } from './Filters.vue';
@@ -184,10 +185,7 @@ export default defineComponent({
                 searchTerm.value.toLocaleLowerCase(),
               ),
         )
-        .sort((a, b) => {
-          const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
-          return a.pending || (bMicroTime - aMicroTime);
-        })
+        .sort(sortTransaction)
         .slice(0, props.maxLength || Infinity),
     );
 

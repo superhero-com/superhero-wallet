@@ -30,6 +30,9 @@
       "title": "Claim your own .chain name",
       "description": "Get a human-readable name for your account and receive funds with it.",
       "button": "Claim a name"
+    },
+    "latest-transaction-card": {
+      "title": "Latest transactions"
     }
   },
   "modals": {
