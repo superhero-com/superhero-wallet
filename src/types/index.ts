@@ -1,4 +1,8 @@
-/* eslint-disable camelcase, no-unused-vars */
+/*
+  eslint-disable
+    camelcase,
+    no-unused-vars,
+*/
 
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
@@ -19,19 +23,13 @@ export * from './filter';
  */
 export type ObjectValues<T> = T[keyof T];
 
+export interface IAppData {
+  name: string
+  url: string
+  host: string
+}
+
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
-
-/**
- * TxFunction names coming directly from the API or ready to be sent.
- */
-export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
-
-/**
- * TxFunctions used internally by the app.
- */
-export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
-
-export type TxFunction = TxFunctionRaw | TxFunctionParsed;
 
 /**
  * Input fields message prop type
@@ -52,6 +50,13 @@ export interface IToken {
   name: string
   symbol: string,
   extension?: string[]
+}
+
+export interface ITokenResolved extends Partial<IToken> {
+  amount?: number
+  isAe?: boolean
+  isPool?: boolean
+  isReceived?: boolean
 }
 
 export type ITokenList = Record<string, IToken>
@@ -100,8 +105,8 @@ export interface IAccount {
 }
 
 export interface IAccountLabeled extends Partial<IAccount>{
-  url?: string,
-  label?: TranslateResult,
+  url?: string
+  label?: TranslateResult
 }
 
 export interface INetwork {
@@ -164,39 +169,71 @@ export interface ICurrency {
 }
 
 export interface ITxArguments {
-  type: string,
-  value: string | number | any[],
+  type: 'tuple' | 'list'
+  value: any // TODO find type, this was not correct: (string | number | any[])
 }
+
+/**
+ * TxFunction names coming directly from the API or ready to be sent.
+ */
+export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
+
+/**
+ * TxFunctions used internally by the app.
+ */
+export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
+
+export type TxFunction = TxFunctionRaw | TxFunctionParsed;
+
+export type TransactionType =
+  | 'SpendTx'
+  | 'ContractCreateTx'
+  | 'ContractCallTx'
+  | 'NamePreclaimTx'
+  | 'NameClaimTx'
+  | 'NameUpdateTx'
+  | 'NameTransferTx'
+  | 'NameRevokeTx'
+  | 'OracleRegisterTx'
+  | 'OracleExtendTx'
+  | 'OraclePostQueryTx'
+  | 'OracleRespondTx'
+  | 'ChannelCloseSoloTx'
+  | 'ChannelSlashTx'
+  | 'ChannelSettleTx'
+  | 'ChannelSnapshotSoloTx';
 
 export interface ITx {
-  abiVersion: number,
-  amount: number,
-  contractId: string,
-  fee: number,
-  function: string,
-  gas: number,
-  gasPrice: number,
-  gasUsed: number,
-  nonce: number,
-  result: string,
-  return: string,
-  returnType: string,
-  type: string,
-  callerId: string,
-  accountId?: string,
-  senderId?: string,
-  recipientId?: string,
-  selectedTokenContractId?: string,
-  arguments: ITxArguments[],
+  abiVersion: number
+  accountId?: string
+  amount: number
+  arguments: ITxArguments[]
+  callData?: string // TODO find source
+  call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
+  callerId: string
+  code: string
+  commitmentId: any
+  contractId: string
+  fee: number
+  function?: TxFunction
+  gas: number
+  gasPrice: number
+  gasUsed: number
+  log?: any[] // TODO find source
+  name: any
+  nameFee: number
+  nameId: any
+  nameSalt: string
+  nonce: number
   payload?: string
-}
-
-export interface ITokenTransactionComposable extends ITx {
-  decimals?: number,
-  amount: number,
-  symbol: string,
-  isReceived: string,
-  isAe: string
+  pointers: any
+  result: string,
+  return: ITxArguments
+  returnType: string
+  recipientId?: string
+  senderId?: string
+  selectedTokenContractId?: string
+  type: TransactionType
 }
 
 export interface ITransaction {
@@ -234,24 +271,6 @@ export interface ITransactionOverview {
   function?: any,
 }
 
-export type TransactionType =
-  | 'SpendTx'
-  | 'ContractCreateTx'
-  | 'ContractCallTx'
-  | 'NamePreclaimTx'
-  | 'NameClaimTx'
-  | 'NameUpdateTx'
-  | 'NameTransferTx'
-  | 'NameRevokeTx'
-  | 'OracleRegisterTx'
-  | 'OracleExtendTx'
-  | 'OraclePostQueryTx'
-  | 'OracleRespondTx'
-  | 'ChannelCloseSoloTx'
-  | 'ChannelSlashTx'
-  | 'ChannelSettleTx'
-  | 'ChannelSnapshotSoloTx';
-
 export interface IDexContracts {
   router: string[],
   wae: string[],
@@ -282,27 +301,31 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
-  gaAttachTx: (options: {
-    ownerId: any;
-    code: any;
-    callData: any;
-    authFun: any;
-    gas: any;
-    options: { innerTx: boolean };
-  }) => Promise<any>;
-  send: (tx: any, arg1: {
-    innerTx: boolean;
-    onAccount: any; }) => { rawTx: any; } | PromiseLike<{ rawTx: any; }>;
-  payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>;
-  getAccount: (publicKey: any) => Promise<any>;
-  getContractByteCode(contractId: string): Promise<{ bytecode: any }>;
-  compilerApi: any;
   api: Record<string, (a?: string) => any>
+  compilerApi: Record<string, (...args: any[]) => Promise<any>>
   Ae: Record<string, any>
   pool: Map<string, any>
+  getAccount: (publicKey: any) => Promise<any>
+  gaAttachTx: (options: {
+    ownerId: any
+    code: any
+    callData: any
+    authFun: any
+    gas: any
+    options: { innerTx: boolean }
+  }) => Promise<any>
   getContractInstance: (o: any) => any
+  getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
+  payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
+  send: (
+    tx: any,
+    arg1: {
+      innerTx: boolean
+      onAccount: any
+    }
+  ) => Promise<{ rawTx: any; }>
   sendTransaction: (t: any, o: any) => Promise<any>
   spend: (a: any, r: any, o: any) => Promise<any>
   address: () => Promise<string>
@@ -328,7 +351,6 @@ export interface IMiddleware extends
   IMiddlewareClient,
   IMiddlewareCustomMethods {}
 
-/* eslint-disable camelcase */
 export interface IMiddlewareStatus {
   mdw_async_tasks: Record<string, number>
   mdw_gens_per_minute: number
@@ -344,7 +366,6 @@ export interface IMiddlewareStatus {
   node_syncing: boolean
   node_version: string
 }
-/* eslint-enable camelcase */
 
 export interface IName {
   autoExtend: boolean

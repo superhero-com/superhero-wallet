@@ -1,10 +1,12 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
+  TxFunctionRaw,
   ICurrency,
   IDexContracts,
   INetwork,
   INotificationSetting,
+  IPermission,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
@@ -17,6 +19,30 @@ export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
+
+export const TX_FUNCTIONS = {
+  tip: 'tip',
+  retip: 'retip',
+  transfer: 'transfer',
+  sent: 'sent',
+  received: 'received',
+  deposit: 'deposit',
+  addLiquidity: 'add_liquidity',
+  addLiquidityAe: 'add_liquidity_ae',
+  removeLiquidity: 'remove_liquidity',
+  removeLiquidityAe: 'remove_liquidity_ae',
+  swapExactTokensForTokens: 'swap_exact_tokens_for_tokens',
+  swapTokensForExactTokens: 'swap_tokens_for_exact_tokens',
+  swapExactAeForTokens: 'swap_exact_ae_for_tokens',
+  swapTokensForExactAe: 'swap_tokens_for_exact_ae',
+  swapExactTokensForAe: 'swap_exact_tokens_for_ae',
+  swapAeForExactTokens: 'swap_ae_for_exact_tokens',
+  createAllowance: 'create_allowance',
+  changeAllowance: 'change_allowance',
+  transferAllowance: 'transfer_allowance',
+  withdraw: 'withdraw',
+  claim: 'claim',
+} as const;
 
 export const TX_TYPE_MDW = {
   SpendTx: SCHEMA.TX_TYPE.spend,
@@ -332,7 +358,7 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const FUNCTION_TYPE_DEX = {
+export const FUNCTION_TYPE_DEX: Record<'pool' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
   pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
   swap: [
     'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
@@ -340,6 +366,8 @@ export const FUNCTION_TYPE_DEX = {
     'swap_ae_for_exact_tokens',
   ],
   allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
+  maxSpent: ['swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens'],
+  minReceived: ['swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae'],
 };
 
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
@@ -396,7 +424,7 @@ export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
 export const DEX_SWAP = 'swap';
 export const DEX_ALLOW_TOKEN = 'allow_token';
 
-export const DEX_TRANSACTION_TAGS = {
+export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   add_liquidity: DEX_PROVIDE_LIQUIDITY,
   add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
 
@@ -416,7 +444,15 @@ export const DEX_TRANSACTION_TAGS = {
 
   deposit: DEX_SWAP,
   withdraw: DEX_SWAP,
-};
+
+  // TODO establish transaction tags for the following tx functions:
+  retip: '',
+  tip: '',
+  transfer: '',
+  claim: '',
+  received: '',
+  sent: '',
+} as const;
 
 export const RETURN_TYPE_OK = 'ok';
 
@@ -443,6 +479,17 @@ export const POPUP_TYPES = [
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
 
+export const PERMISSION_DEFAULTS: IPermission = {
+  host: '',
+  name: '',
+  address: false,
+  messageSign: false,
+  dailySpendLimit: false,
+  transactionSignLimit: 0,
+  transactionSignLimitLeft: 0,
+  transactionSignFirstAskedOn: null,
+};
+
 export const NOTIFICATION_ENTITY_TYPE_TIP = 'TIP';
 
 export const INPUT_MESSAGE_STATUSES = {
@@ -455,7 +502,7 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
   other: 0,
   current: 1,
   subAccount: 2,
-};
+} as const;
 
 export const MULTISIG_CREATION_STEPS = {
   preparing: 'preparing',
@@ -465,27 +512,3 @@ export const MULTISIG_CREATION_STEPS = {
 } as const;
 
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
-
-export const TX_FUNCTIONS = {
-  tip: 'tip',
-  retip: 'retip',
-  transfer: 'transfer',
-  sent: 'sent',
-  received: 'received',
-  deposit: 'deposit',
-  addLiquidity: 'add_liquidity',
-  addLiquidityAe: 'add_liquidity_ae',
-  removeLiquidity: 'remove_liquidity',
-  removeLiquidityAe: 'remove_liquidity_ae',
-  swapExactTokensForTokens: 'swap_exact_tokens_for_tokens',
-  swapTokensForExactTokens: 'swap_tokens_for_exact_tokens',
-  swapExactAeForTokens: 'swap_exact_ae_for_tokens',
-  swapTokensForExactAe: 'swap_tokens_for_exact_ae',
-  swapExactTokensForAe: 'swap_exact_tokens_for_ae',
-  swapAeForExactTokens: 'swap_ae_for_exact_tokens',
-  createAllowance: 'create_allowance',
-  changeAllowance: 'change_allowance',
-  transferAllowance: 'transfer_allowance',
-  withdraw: 'withdraw',
-  claim: 'claim',
-} as const;

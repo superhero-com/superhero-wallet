@@ -40,10 +40,11 @@
 <script>
 import { mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
+import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
+import { FUNCTION_TYPE_DEX } from '../utils/constants';
+
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
-import * as transactionTokenInfoResolvers from '../utils/transactionTokenInfoResolvers';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
 
 export default {
   components: {
@@ -64,11 +65,11 @@ export default {
     rates() {
       if (!this.isSwapTx) return [];
 
-      if (!transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)]) return [];
+      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
 
-      const { tokens } = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)](
-        this.transaction, this.availableTokens,
-      );
+      if (!resolver) return [];
+
+      const { tokens } = resolver(this.transaction, this.availableTokens);
 
       if (tokens.length <= 1) return [];
 

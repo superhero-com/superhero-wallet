@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
+import { IAppData } from '../../types';
 import { useDeepLinkApi } from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
@@ -18,7 +19,7 @@ export default defineComponent({
   components: { Connect },
   setup(props, { root }) {
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
-    const app = computed<any>(() => callbackOrigin.value ? ({
+    const app = computed((): Partial<IAppData> => callbackOrigin.value ? ({
       name: callbackOrigin.value.hostname,
       url: callbackOrigin.value.origin,
       host: callbackOrigin.value.host,

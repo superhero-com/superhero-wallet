@@ -131,10 +131,11 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
 import { useBalances } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -142,7 +143,6 @@ import InputField from '../components/InputField.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
-import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -158,16 +158,7 @@ export default defineComponent({
     const routeHost = root.$route.params.host as string;
     const editView = !!root.$route.meta?.isEdit;
 
-    const permission = ref<IPermission>({
-      host: '',
-      name: '',
-      address: false,
-      messageSign: false,
-      dailySpendLimit: false,
-      transactionSignLimit: 0,
-      transactionSignLimitLeft: 0,
-      transactionSignFirstAskedOn: null,
-    });
+    const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
     const originalTransactionSignLimit = ref<number>(0);
 

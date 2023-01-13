@@ -34,7 +34,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
 import Tokens from './Tokens.vue';
-import * as transactionTokenInfoResolvers from '../utils/transactionTokenInfoResolvers';
+import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
 import { DEX_CONTRACTS, FUNCTION_TYPE_DEX } from '../utils/constants';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
 
@@ -51,10 +51,9 @@ export default {
     ...mapGetters(['activeNetwork']),
     tokens() {
       if (!FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) return [];
-      if (!transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)]) return [];
-      let { tokens } = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)](
-        this.transaction, this.availableTokens,
-      );
+      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
+      if (!resolver) return [];
+      let { tokens } = resolver(this.transaction, this.availableTokens);
       const index = this.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
       if (index >= 0 && this.transaction.tx.arguments[index].value.length > tokens.length) {
         tokens = [

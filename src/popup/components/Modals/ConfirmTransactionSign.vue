@@ -11,7 +11,7 @@
       class="loader"
     />
 
-    <template v-if="(isDex || isAllowance) && tokenList">
+    <template v-if="(isDex || isAllowance) && tokenList.length">
       <TransactionDetailsPoolTokenRow
         v-for="(token, idx) in tokenList"
         :key="token.contractId"
@@ -41,10 +41,10 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+convertToken(getSwapTokenAmountData.amount, -getSwapTokenAmountData.decimals)"
-            :symbol="getSwapTokenAmountData.isAe ? AETERNITY_SYMBOL : getSwapTokenAmountData.symbol"
+            :amount="tokenAmount"
+            :symbol="tokenSymbol"
             :aex9="isTxAex9(transaction)"
-            :hide-fiat="!getSwapTokenAmountData.isAe"
+            :hide-fiat="!swapTokenAmountData.isAe"
             data-cy="total"
           />
         </template>
@@ -87,11 +87,11 @@
         class="advanced"
       >
         <DetailsItem
-          v-for="field in filteredTxFields"
-          :key="field"
-          :label="$t('modals.confirm-transaction-sign')[field]"
-          :value="transaction[field]"
-          :class="{ 'hash-field': isHash(field) }"
+          v-for="key in filteredTxFields"
+          :key="key"
+          :label="$t('modals.confirm-transaction-sign')[key]"
+          :value="transaction[key]"
+          :class="{ 'hash-field': isHash(key) }"
         />
       </div>
     </transition>
@@ -115,8 +115,14 @@
   </Modal>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  PropType,
+  ref,
+} from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import {
   FUNCTION_TYPE_DEX,
@@ -127,9 +133,16 @@ import {
   TX_FUNCTIONS,
   convertToken,
 } from '../../utils';
-import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
-import mixin from '../../pages/Popups/mixin';
+import type {
+  ITokenResolved,
+  ITransaction,
+  ITx,
+  TxFunctionParsed,
+  TxFunctionRaw,
+} from '../../../types';
+import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
 import { useSdk } from '../../../composables';
+import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -141,7 +154,24 @@ import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vu
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import Arrow from '../../../icons/arrow.svg?vue-component';
 
-export default {
+type ITxKey = keyof ITx;
+
+const TX_FIELDS_TO_DISPLAY: ITxKey[] = [
+  'callData',
+  'code',
+  'contractId',
+  'commitmentId',
+  'name',
+  'nameFee',
+  'nameSalt',
+  'nameId',
+  'nonce',
+  'payload',
+  'pointers',
+  'recipientId',
+];
+
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
@@ -153,153 +183,190 @@ export default {
     TransactionDetailsPoolTokenRow,
     AnimatedSpinner,
   },
-  mixins: [mixin],
   props: {
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITx>, required: true },
+    resolve: { type: Function, required: true },
+    // eslint-disable-next-line no-unused-vars
+    reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  data: () => ({
-    showAdvanced: false,
-    tokenList: null,
-    txFunction: null,
-    loading: false,
-    AETERNITY_SYMBOL,
-    TX_FIELDS: [
-      'nonce',
-      'payload',
-      'recipientId',
-      'code',
-      'callData',
-      'contractId',
-      'commitmentId',
-      'name',
-      'nameFee',
-      'nameSalt',
-      'nameId',
-      'pointers',
-    ],
-  }),
-  computed: {
-    ...mapState('fungibleTokens', [
-      'availableTokens',
-    ]),
-    ...mapGetters([
-      'formatCurrency',
-      'account',
-      'activeNetwork',
-      'getTxSymbol',
-      'getTxAmountTotal',
-      'getTxFee',
-      'getNameFee',
-      'isTxAex9',
-      'getDexContracts',
-      'getTxDirection',
-    ]),
-    isAllowance() {
-      return FUNCTION_TYPE_DEX.allowance.includes(this.txFunction);
-    },
-    isSwap() {
-      return FUNCTION_TYPE_DEX.swap.includes(this.txFunction);
-    },
-    isPool() {
-      return FUNCTION_TYPE_DEX.pool.includes(this.txFunction);
-    },
-    isDex() {
-      return this.getDexContracts.router.includes(this.transaction?.contractId)
-        || this.getDexContracts.wae.includes(this.transaction?.contractId)
-        || this.isAllowance;
-    },
-    singleToken() {
-      return {
-        isReceived: this.getTxDirection(this.transaction) === TX_FUNCTIONS.received,
-        amount: this.getTxAmountTotal(this.transaction),
-        symbol: this.getTxSymbol(this.transaction),
-        isAex9: this.isTxAex9(this.transaction),
-        preventAmountConversion: true,
-        showFiat: true,
-      };
-    },
-    filteredTxFields() {
-      return this.TX_FIELDS.filter((field) => !!this.transaction[field]);
-    },
-    swapDirection() {
-      if (['swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens'].includes(this.txFunction)) return 'maxSpent';
-      if (['swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae'].includes(this.txFunction)) return 'minReceived';
-      return 'total';
-    },
-    getSwapTokenAmountData() {
-      return this.swapDirection === 'maxSpent' ? this.tokenList[0] : this.tokenList[1];
-    },
-    completeTransaction() {
-      return { ...this.transaction, function: this.txFunction };
-    },
-    isProvideLiquidity() {
-      return DEX_TRANSACTION_TAGS[this.txFunction] === DEX_PROVIDE_LIQUIDITY;
-    },
-  },
-  async mounted() {
-    if (this.transaction.contractId) {
-      try {
-        this.loading = true;
-        const { getSdk } = useSdk({ store: this.$store });
-        setTimeout(() => { this.loading = false; }, 20000);
-        const sdk = await getSdk();
-        const { bytecode } = await sdk.getContractByteCode(this.transaction.contractId);
-        const txParams = await sdk.compilerApi.decodeCalldataBytecode({
-          bytecode,
-          calldata: this.transaction.callData,
-        });
-        this.txFunction = txParams.function;
-        const allTokens = this.getTokens(txParams);
+  setup(props, { root }) {
+    const { getSdk } = useSdk({ store: root.$store });
 
-        this.tokenList = allTokens.map((token) => ({
-          ...token,
-          tokens: token.isPool && !this.isProvideLiquidity
-            ? allTokens.filter((t) => !t.isPool).reverse()
-            : [token],
-        }));
-      } catch (e) {
-        this.tokenList = null;
-        this.txFunction = null;
-      } finally {
-        this.loading = false;
+    const showAdvanced = ref(false);
+    const tokenList = ref<ITokenResolved[]>([]);
+    const txFunction = ref<TxFunctionRaw | undefined>();
+    const loading = ref(false);
+
+    const availableTokens = useState('fungibleTokens', 'availableTokens');
+    const getTxSymbol = useGetter('getTxSymbol');
+    const getTxAmountTotal = useGetter('getTxAmountTotal');
+    const getTxFee = useGetter('getTxFee');
+    const getNameFee = useGetter('getNameFee');
+    const getDexContracts = useGetter('getDexContracts');
+    const getTxDirection = useGetter('getTxDirection');
+    const isTxAex9 = useGetter('isTxAex9');
+
+    const isAllowance = computed(() => (
+      txFunction.value
+      && FUNCTION_TYPE_DEX.allowance.includes(txFunction.value)
+    ));
+
+    const isSwap = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
+    );
+
+    const isPool = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
+    );
+
+    const isDex = computed(() => (
+      getDexContracts.value.router.includes(props.transaction?.contractId)
+      || getDexContracts.value.wae.includes(props.transaction?.contractId)
+      || isAllowance.value
+    ));
+
+    const swapDirection = computed(() => {
+      if (txFunction.value) {
+        if (FUNCTION_TYPE_DEX.maxSpent.includes(txFunction.value)) {
+          return 'maxSpent';
+        }
+        if (FUNCTION_TYPE_DEX.minReceived.includes(txFunction.value)) {
+          return 'minReceived';
+        }
       }
-    }
-  },
-  methods: {
-    convertToken,
-    getTokens(txParams) {
-      if (!this.isDex) return [this.singleToken];
-      const resolver = transactionTokenInfoResolvers[camelCase(txParams.function)];
+      return 'total';
+    });
+
+    const singleToken = computed((): ITokenResolved => ({
+      isReceived: getTxDirection.value(props.transaction) === TX_FUNCTIONS.received,
+      amount: getTxAmountTotal.value(props.transaction),
+      symbol: getTxSymbol.value(props.transaction),
+    }));
+
+    const filteredTxFields = computed(
+      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!props.transaction[field]),
+    );
+
+    const swapTokenAmountData = computed(
+      (): ITokenResolved => swapDirection.value === 'maxSpent' ? tokenList.value[0] : tokenList.value[1],
+    );
+
+    const tokenAmount = computed((): number => +convertToken(
+      swapTokenAmountData.value.amount as number,
+      -(swapTokenAmountData.value.decimals as number),
+    ));
+
+    const tokenSymbol = computed(
+      () => swapTokenAmountData.value.isAe ? AETERNITY_SYMBOL : swapTokenAmountData.value.symbol,
+    );
+
+    const completeTransaction = computed(
+      (): ITx => ({ ...props.transaction, function: txFunction.value }),
+    );
+
+    const isProvideLiquidity = computed(
+      () => txFunction.value && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_PROVIDE_LIQUIDITY,
+    );
+
+    function getTokens(txParams: ITx): ITokenResolved[] {
+      if (!isDex.value) return [singleToken.value];
+      const functionName = camelCase(txParams.function) as TxFunctionParsed;
+      const resolver = transactionTokenInfoResolvers[functionName];
       if (!resolver) return [];
       const tokens = resolver(
-        { tx: { ...txParams, ...this.transaction } }, this.availableTokens,
+        { tx: { ...txParams, ...props.transaction } } as ITransaction,
+        availableTokens.value,
       )?.tokens;
-      if (!this.isPool) return tokens;
-      if (this.isProvideLiquidity) return tokens.filter((t) => !t.isPool);
+      if (!isPool.value) return tokens;
+      if (isProvideLiquidity.value) return tokens.filter((t) => !t.isPool);
       return tokens.reverse();
-    },
-    isHash(field) {
-      return ['callData', 'contractId'].includes(field);
-    },
-    getLabels(token, idx) {
-      if (this.isAllowance) {
-        return this.$t('pages.signTransaction.approveUseOfToken');
+    }
+
+    function isHash(key: ITxKey) {
+      const propertiesWithHashValues: ITxKey[] = ['callData', 'contractId'];
+      return propertiesWithHashValues.includes(key);
+    }
+
+    function getLabels(token: any, idx: number) {
+      if (isAllowance.value) {
+        return root.$t('pages.signTransaction.approveUseOfToken');
       }
-      if (this.isSwap) {
-        return !idx ? this.$t('pages.signTransaction.from') : this.$t('pages.signTransaction.to');
+      if (isSwap.value) {
+        return !idx ? root.$t('pages.signTransaction.from') : root.$t('pages.signTransaction.to');
       }
-      if (this.isPool && this.isProvideLiquidity) {
-        return token.isPool ? '' : this.$t('pages.signTransaction.maximumDeposited');
+      if (isPool.value && isProvideLiquidity.value) {
+        return token.isPool ? '' : root.$t('pages.signTransaction.maximumDeposited');
       }
-      if (this.isPool && DEX_TRANSACTION_TAGS[this.txFunction] === DEX_REMOVE_LIQUIDITY) {
+      if (
+        isPool.value
+        && txFunction.value
+        && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_REMOVE_LIQUIDITY
+      ) {
         return token.isPool
-          ? this.$t('pages.signTransaction.poolTokenSpent')
-          : this.$t('pages.signTransaction.minimumWithdrawn');
+          ? root.$t('pages.signTransaction.poolTokenSpent')
+          : root.$t('pages.signTransaction.minimumWithdrawn');
       }
       return '';
-    },
+    }
+
+    function cancel() {
+      props.reject(new Error('Rejected by user'));
+    }
+
+    onMounted(async () => {
+      if (props.transaction.contractId) {
+        try {
+          loading.value = true;
+          setTimeout(() => { loading.value = false; }, 20000);
+          const sdk = await getSdk();
+          const { bytecode } = await sdk.getContractByteCode(props.transaction.contractId);
+          const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
+            bytecode,
+            calldata: props.transaction.callData,
+          });
+          txFunction.value = txParams.function as TxFunctionRaw;
+          const allTokens = getTokens(txParams);
+
+          tokenList.value = allTokens.map((token) => ({
+            ...token,
+            tokens: token.isPool && !isProvideLiquidity.value
+              ? allTokens.filter((t) => !t.isPool).reverse()
+              : [token],
+          }));
+        } catch (e) {
+          tokenList.value = [];
+          txFunction.value = undefined;
+        } finally {
+          loading.value = false;
+        }
+      }
+    });
+
+    return {
+      AETERNITY_SYMBOL,
+      loading,
+      showAdvanced,
+      filteredTxFields,
+      completeTransaction,
+      tokenList,
+      tokenAmount,
+      tokenSymbol,
+      swapDirection,
+      isAllowance,
+      isSwap,
+      isDex,
+      isHash,
+      isTxAex9,
+      swapTokenAmountData,
+      getTxFee,
+      getTxSymbol,
+      getNameFee,
+      getLabels,
+      getTxAmountTotal,
+      cancel,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

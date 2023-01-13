@@ -57,6 +57,10 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
+import type {
+  ITransaction,
+  TxFunctionRaw,
+} from '../../types';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -64,15 +68,12 @@ import {
   formatDate,
   formatTime,
 } from '../utils';
+import { useTransaction } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+import TransactionTokens from './TransactionTokenRows.vue';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
-import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransaction } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import type {
-  ITransaction,
-} from '../../types';
 
 export default defineComponent({
   components: {
@@ -103,7 +104,10 @@ export default defineComponent({
       if (
         !aeToken
         || isErrorTransaction.value
-        || (isDex.value && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function))
+        || (
+          isDex.value
+          && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function as TxFunctionRaw)
+        )
       ) return 0;
       return getAmountFiat.value(amountRounded(
         aeToken.decimals

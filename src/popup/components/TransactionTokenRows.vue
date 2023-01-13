@@ -27,7 +27,7 @@ import {
   convertToken,
   TX_FUNCTIONS,
 } from '../utils';
-import { ITokenTransactionComposable } from '../../types';
+import { ITokenResolved } from '../../types';
 import Tokens from './Tokens.vue';
 
 export default defineComponent({
@@ -38,8 +38,8 @@ export default defineComponent({
     error: Boolean,
   },
   setup() {
-    function tokenAmount(token: ITokenTransactionComposable) {
-      const sign = token.isReceived ? '+' : '−';
+    function tokenAmount(token: ITokenResolved) {
+      const sign = token.isReceived ? '+' : '-';
       const amount = amountRounded(token.decimals
         ? convertToken(token.amount || 0, -token.decimals)
         : token.amount);

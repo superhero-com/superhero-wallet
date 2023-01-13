@@ -1,24 +1,61 @@
 import BigNumber from 'bignumber.js';
+import {
+  IToken,
+  ITokenList,
+  ITokenResolved,
+  ITransaction,
+  TxFunctionParsed,
+} from '../../types';
 import { AETERNITY_SYMBOL } from './constants';
 
-const defaultToken = {
+/* eslint-disable no-unused-vars */
+interface TransactionResolverReturnData {
+  tokens: ITokenResolved[]
+  sender?: any
+  recipient?: any
+}
+
+type TransactionResolver = (
+  transaction: ITransaction,
+  tokens: ITokenList | null
+) => TransactionResolverReturnData;
+
+type TransactionResolverGenerator = (
+  tokenAMapper: (t: ITransaction) => any,
+  tokenBMapper: (t: ITransaction) => any,
+  poolTokenAmountMapper?: (t: ITransaction) => any,
+  liquidityMethod?: 'add' | 'remove'
+) => TransactionResolver;
+
+type TransactionResolvers = Partial<Record<TxFunctionParsed, TransactionResolver>>;
+/* eslint-enable no-unused-vars */
+
+const defaultToken: Partial<IToken> = {
   decimals: 18,
   symbol: AETERNITY_SYMBOL,
 };
-const defaultPoolToken = {
+const defaultPoolToken: Partial<IToken> = {
   symbol: 'Pool Token',
   decimals: 18,
 };
 
 // liquidityMethod: null - not a liquidity, add, remove
-const genLiquiditySwapResolver = (
-  tokenAMapper, tokenBMapper, poolTokenAmountMapper = null, liquidityMethod = null,
+const genLiquiditySwapResolver: TransactionResolverGenerator = (
+  tokenAMapper,
+  tokenBMapper,
+  poolTokenAmountMapper = undefined,
+  liquidityMethod = undefined,
 ) => (transaction, tokens = null) => {
   const tokenA = tokenAMapper(transaction);
   const tokenB = tokenBMapper(transaction);
-  let returns = [];
-  if (transaction.tx.return && (transaction.tx.return.type === 'tuple'
-    || (!poolTokenAmountMapper && transaction.tx.return.type === 'list'))) {
+  let returns: any[] = [];
+  if (
+    transaction.tx.return
+    && (
+      transaction.tx.return.type === 'tuple'
+      || (!poolTokenAmountMapper && transaction.tx.return.type === 'list')
+    )
+  ) {
     returns = transaction.tx.return.value;
   }
   let poolTokenSymbol;
@@ -58,11 +95,9 @@ const genLiquiditySwapResolver = (
 /**
  * @description gets liquidity from a pair of tokenA*tokenB
  * ref: AedexV2Router.add_liquidity
- * @param transaction
- * @param tokens
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
-export const addLiquidity = genLiquiditySwapResolver(
+const addLiquidity = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[4]?.value, // amount_a_min: int
@@ -84,11 +119,9 @@ export const addLiquidity = genLiquiditySwapResolver(
 /**
  * @description gets liquidity from a pair of token*wae
  * ref: AedexV2Router.add_liquidity_ae
- * @param transaction
- * @param tokens
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
-export const addLiquidityAe = genLiquiditySwapResolver(
+const addLiquidityAe = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[2]?.value, // amount_a_min: int
@@ -110,11 +143,9 @@ export const addLiquidityAe = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.remove_liquidity
- * @param transaction
- * @param tokens
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
-export const removeLiquidity = genLiquiditySwapResolver(
+const removeLiquidity = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[3]?.value, // amount_a_min: int
@@ -131,11 +162,9 @@ export const removeLiquidity = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.remove_liquidity_ae
- * @param transaction
- * @param tokens
  * @return {{ tokens: [tokenA, tokenB, poolToken] }}
  */
-export const removeLiquidityAe = genLiquiditySwapResolver(
+const removeLiquidityAe = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[0]?.value,
     minAmount: _arguments[2]?.value, // amount_a_min: int
@@ -153,11 +182,9 @@ export const removeLiquidityAe = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_exact_tokens_for_tokens
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapExactTokensForTokens = genLiquiditySwapResolver(
+const swapExactTokensForTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     amount: _arguments[0]?.value, // amount_a_desired: int
@@ -171,11 +198,9 @@ export const swapExactTokensForTokens = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_tokens_for_exact_tokens
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapTokensForExactTokens = genLiquiditySwapResolver(
+const swapTokensForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value, // amount_a_max: int
@@ -189,11 +214,9 @@ export const swapTokensForExactTokens = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_exact_ae_for_tokens
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapExactAeForTokens = genLiquiditySwapResolver(
+const swapExactAeForTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
@@ -208,11 +231,9 @@ export const swapExactAeForTokens = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_tokens_for_exact_ae
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapTokensForExactAe = genLiquiditySwapResolver(
+const swapTokensForExactAe = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     maxAmount: _arguments[1]?.value,
@@ -228,11 +249,9 @@ export const swapTokensForExactAe = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_exact_tokens_for_ae
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapExactTokensForAe = genLiquiditySwapResolver(
+const swapExactTokensForAe = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments } }) => ({
     contractId: _arguments[2]?.value?.[0]?.value,
     minAmount: _arguments[0]?.value,
@@ -248,11 +267,8 @@ export const swapExactTokensForAe = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Router.swap_ae_for_exact_tokens
- * @param transaction
- * @param tokens
- * @returns {{ tokens: [fromToken, toToken] }}
  */
-export const swapAeForExactTokens = genLiquiditySwapResolver(
+const swapAeForExactTokens = genLiquiditySwapResolver(
   ({ tx: { arguments: _arguments, amount } }) => ({
     contractId: _arguments[1]?.value?.[0]?.value,
     amount, // amount_a_desired: int
@@ -266,11 +282,8 @@ export const swapAeForExactTokens = genLiquiditySwapResolver(
 
 /**
  * ref: AedexV2Pair.create_allowance
- * @param transaction
- * @param tokens
- * @returns {{ tokens: [token] }}
  */
-export const createAllowance = (transaction, tokens = null) => ({
+const changeAllowance: TransactionResolver = (transaction, tokens = null) => ({
   tokens: [{
     amount: transaction.tx.arguments?.[1]?.value, // value: int
     ...defaultToken,
@@ -280,40 +293,31 @@ export const createAllowance = (transaction, tokens = null) => ({
 });
 
 /**
- * ref: AedexV2Pair.change_allowance
- * @param transaction
- * @param tokens
- * @returns {{ tokens: [tokenIn] }}
- */
-export { createAllowance as changeAllowance };
-
-/**
  * ref: AedexV2Pair.transfer_allowance
- * @param transaction
- * @param tokens
  * @returns {{ tokens: [token], sender, recipient }}
  */
-export function transferAllowance(transaction, tokens = null) {
-  const _arguments = transaction.tx.arguments; // arguments: [sender, recipient, amount]
+const transferAllowance: TransactionResolver = (transaction, tokens = null) => {
+  const [sender, recipient, amount] = transaction.tx.arguments;
 
   // path: list(IAEX9Minimal)
   const token = {
-    amount: _arguments[3]?.value,
+    amount: amount?.value,
     ...defaultToken,
     symbol: 'Amount',
     ...tokens?.[transaction.tx.contractId],
   };
 
-  return { tokens: [token], sender: _arguments[0]?.value, recipient: _arguments[1]?.value };
-}
+  return {
+    tokens: [token],
+    sender: sender?.value,
+    recipient: recipient?.value,
+  };
+};
 
 /**
  * ref: WAE.deposit
- * @param transaction
- * @param tokens
- * @returns {{ tokens: [token] }}
  */
-export const deposit = (transaction, tokens = null) => ({
+const deposit: TransactionResolver = (transaction, tokens = null) => ({
   tokens: [{
     ...defaultToken,
     amount: transaction.tx.amount,
@@ -331,11 +335,8 @@ export const deposit = (transaction, tokens = null) => ({
 
 /**
  * ref: WAE.withdraw
- * @param transaction
- * @param tokens
- * @returns {{ tokens: [token] }}
  */
-export const withdraw = (transaction, tokens = null) => ({
+const withdraw: TransactionResolver = (transaction, tokens = null) => ({
   tokens: [{
     ...defaultToken,
     amount: transaction.tx.arguments?.[0]?.value,
@@ -350,3 +351,21 @@ export const withdraw = (transaction, tokens = null) => ({
     isAe: true,
   }],
 });
+
+export const transactionTokenInfoResolvers: TransactionResolvers = {
+  addLiquidity,
+  addLiquidityAe,
+  removeLiquidity,
+  removeLiquidityAe,
+  swapExactTokensForTokens,
+  swapExactTokensForAe,
+  swapExactAeForTokens,
+  swapTokensForExactTokens,
+  swapTokensForExactAe,
+  swapAeForExactTokens,
+  changeAllowance,
+  createAllowance: changeAllowance,
+  transferAllowance,
+  deposit,
+  withdraw,
+};

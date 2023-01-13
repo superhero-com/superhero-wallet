@@ -7,7 +7,7 @@
     <TransactionInfo
       :title="$t('pages.connectConfirm.title')"
       :sender="{ name: appName, address: app.host, url: app.url }"
-      :recipient="account"
+      :recipient="accountExtended"
     />
 
     <div
@@ -55,28 +55,35 @@
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import type {
+  IAccount,
+  IAccountLabeled,
+  IAppData,
+  IPermission,
+} from '../../../types';
 import {
+  PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
-import mixin from './mixin';
+import { useGetter, useState } from '../../../composables/vuex';
+
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
 import CheckMark from '../../../icons/check-mark.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
     TransactionInfo,
     CheckMark,
   },
-  mixins: [mixin],
   props: {
-    app: { type: Object, required: true },
+    app: { type: Object as PropType<IAppData>, required: true },
     access: {
       type: Array,
       default: () => ([
@@ -84,49 +91,47 @@ export default {
         POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       ]),
     },
+    resolve: { type: Function as PropType<() => void>, required: true },
+    // eslint-disable-next-line no-unused-vars
+    reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  data() {
+  setup(props, { root }) {
+    const isConnected = useGetter('isConnected');
+    const getExplorerPath = useGetter('getExplorerPath');
+    const account = useGetter<IAccount>('account');
+
+    const permission = useState<IPermission>('permissions', props.app.host);
+    const appName = computed(() => permission.value?.name || props.app.name);
+    const accountExtended = computed((): IAccountLabeled => ({
+      ...account.value,
+      label: root.$t('transaction.overview.accountAddress'),
+      url: getExplorerPath.value(account.value.address),
+    }));
+
+    function confirm() {
+      root.$store.commit('permissions/addPermission', {
+        ...PERMISSION_DEFAULTS,
+        ...props.app,
+        ...permission.value,
+      });
+      props.resolve();
+    }
+
+    function cancel() {
+      props.reject(new Error('Rejected by user'));
+    }
+
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+      appName,
+      isConnected,
+      accountExtended,
+      confirm,
+      cancel,
     };
   },
-  computed: {
-    ...mapGetters([
-      'isConnected',
-      'getExplorerPath',
-    ]),
-    ...mapState({
-      account(_, { account }) {
-        return {
-          ...account,
-          label: this.$t('transaction.overview.accountAddress'),
-          url: this.getExplorerPath(account.address),
-        };
-      },
-      permission(state) {
-        return state.permissions[this.app.host];
-      },
-    }),
-    appName() {
-      return this.permission?.name || this.app.name;
-    },
-  },
-  methods: {
-    confirm() {
-      this.$store.commit('permissions/addPermission', {
-        address: false,
-        messageSign: false,
-        transactionSignLimit: 0,
-        transactionSignLimitLeft: 0,
-        transactionSignFirstAskedOn: null,
-        ...this.app,
-        ...this.permission,
-      });
-      this.resolve();
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
