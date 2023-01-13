@@ -15,6 +15,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  PropType,
   ref,
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
@@ -28,14 +29,23 @@ import {
   IAccount,
   IAccountLabeled,
   ITransaction,
+  ITx,
   TransactionType,
+  TxFunction,
 } from '../../types';
 import TransactionInfo from './TransactionInfo.vue';
+
+interface TransactionData {
+  sender: IAccountLabeled
+  recipient: IAccountLabeled
+  title?: TranslateResult
+  function?: TxFunction
+}
 
 export default defineComponent({
   components: { TransactionInfo },
   props: {
-    tx: { type: Object, required: true },
+    tx: { type: Object as PropType<ITx>, required: true },
   },
   setup(props, { root }) {
     const name = ref('');
@@ -52,7 +62,7 @@ export default defineComponent({
     const {
       txType,
       direction,
-      fetchOwnershipAccount,
+      getOwnershipAccount,
       setTransaction,
     } = useTransaction({ store: root.$store });
 
@@ -65,7 +75,7 @@ export default defineComponent({
       ].includes(props.tx?.contractId),
     );
 
-    const transaction = computed(() => {
+    const transaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
 
       const { senderId, recipientId, contractId } = props.tx;
@@ -109,7 +119,6 @@ export default defineComponent({
           return {
             sender: ownershipAccount.value,
             recipient: {
-              contractCreate: true,
               label: root.$t('transaction.overview.contractCreate'),
             },
             title: root.$t('transaction.type.contractCreateTx'),
@@ -121,7 +130,6 @@ export default defineComponent({
           return {
             sender: ownershipAccount.value,
             recipient: {
-              aens: true,
               label: root.$t('transaction.overview.aens'),
             },
             title: transactionTypes[txType.value],
@@ -139,7 +147,7 @@ export default defineComponent({
 
       const sdk = await getSdk();
       const { bytecode } = await sdk.getContractByteCode(props.tx.contractId);
-      const txParams = await sdk.compilerApi.decodeCalldataBytecode({
+      const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
         bytecode,
         calldata,
       });
@@ -157,7 +165,7 @@ export default defineComponent({
       if (props.tx.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
-      ownershipAccount.value = await fetchOwnershipAccount(transactionOwnerAddress);
+      ownershipAccount.value = getOwnershipAccount(transactionOwnerAddress);
     });
 
     return {

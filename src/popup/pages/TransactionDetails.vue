@@ -169,7 +169,10 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, ref, onMounted,
+  computed,
+  defineComponent,
+  ref,
+  onMounted,
 } from '@vue/composition-api';
 import {
   FUNCTION_TYPE_DEX,
@@ -182,8 +185,9 @@ import {
   getPayload,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
-import type { ITransaction } from '../../types';
+import type { ITransaction, TxFunctionRaw } from '../../types';
 import { useTransaction } from '../../composables';
+
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
@@ -244,8 +248,13 @@ export default defineComponent({
     const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
 
     const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
-    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
-    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
+    const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
+    const isSwap = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
+    );
+    const isPool = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
+    );
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerPath = computed(() => getExplorerPath.value(props.hash));
 

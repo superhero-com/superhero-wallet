@@ -4,28 +4,30 @@ import type { Store } from 'vuex';
 import { TranslateResult } from 'vue-i18n';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import type {
-  ITransaction,
-  ITokenTransactionComposable,
-  TransactionType,
   IDexContracts,
   IAccount,
   IAccountLabeled,
+  ITransaction,
   ITokenList,
+  ITokenResolved,
+  TransactionType,
   INetwork,
+  TxFunctionRaw,
+  TxFunctionParsed,
 } from '../types';
 import { i18n } from '../store/plugins/languages';
-import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
+import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
 import {
   AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
   MAGNITUDE,
   RETURN_TYPE_OK,
   TRANSACTION_OWNERSHIP_STATUS,
-  convertToken,
-  AENS,
-  DEX,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
+  AENS,
+  DEX,
+  convertToken,
 } from '../popup/utils';
 
 interface UseTransactionOptions {
@@ -69,13 +71,15 @@ export function useTransaction({
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 
-  const isAllowance = computed((): boolean => !!(transaction.value
-    && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function)
-    && availableTokens.value[transaction.value.tx.contractId]));
+  const isAllowance = computed((): boolean => (
+    !!transaction.value
+    && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function as TxFunctionRaw)
+    && !!availableTokens.value[transaction.value.tx.contractId]
+  ));
 
   const txOwnerAddress = computed(() => (
-      transaction.value?.tx.accountId
-      || transaction.value?.tx.callerId
+    transaction.value?.tx.accountId
+    || transaction.value?.tx.callerId
   ));
 
   const ownershipStatus = computed(
@@ -91,12 +95,11 @@ export function useTransaction({
   );
 
   const transactionFunction = computed(() => {
-    if (transaction.value) {
-      const functionName = camelCase(transaction.value.tx.function || '');
+    if (transaction.value?.tx?.function) {
+      const functionName = camelCase(transaction.value.tx.function) as TxFunctionParsed;
 
       // TODO this line needs refactoring in TransactionResolver
-      // @ts-ignore
-      return TransactionResolver[functionName as string];
+      return transactionTokenInfoResolvers[functionName];
     }
     return null;
   });
@@ -111,7 +114,7 @@ export function useTransaction({
         )
   ));
 
-  const tokens = computed<ITokenTransactionComposable[]>(() => {
+  const tokens = computed((): ITokenResolved[] => {
     if (
       transaction.value
       && transactionFunction.value
@@ -174,7 +177,8 @@ export function useTransaction({
     }
     if (isDex.value) {
       return [
-        DEX, FUNCTION_TYPE_DEX.pool.includes(transaction.value.tx.function)
+        DEX,
+        FUNCTION_TYPE_DEX.pool.includes(transaction.value.tx.function as TxFunctionRaw)
           ? i18n.t('transaction.dexType.pool')
           : i18n.t('transaction.dexType.swap'),
       ];
@@ -222,9 +226,9 @@ export function useTransaction({
     return transaction.value.pending ? [] : [transactionTypes[txType.value]];
   });
 
-  async function fetchOwnershipAccount(
+  function getOwnershipAccount(
     externalOwnerAddress: string | undefined,
-  ): Promise<IAccountLabeled> {
+  ): IAccountLabeled {
     switch (ownershipStatus.value) {
       case TRANSACTION_OWNERSHIP_STATUS.current:
         return {
@@ -242,7 +246,7 @@ export function useTransaction({
 
         return {
           name: getPreferred.value(address) || '',
-          address: address!,
+          address,
         };
       }
     }
@@ -257,7 +261,7 @@ export function useTransaction({
     txOwnerAddress,
     ownershipStatus,
     direction,
-    fetchOwnershipAccount,
+    getOwnershipAccount,
     setTransaction,
     labels,
   };
