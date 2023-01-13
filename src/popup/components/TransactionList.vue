@@ -1,23 +1,10 @@
 <template>
   <div class="transaction-list">
-    <div
-      v-if="showSearch && showSearchAndFilters"
-      class="search-bar-wrapper"
-    >
-      <InputSearch
-        v-model="searchTerm"
-        :placeholder="$t('pages.recentTransactions.searchPlaceholder')"
-      />
-    </div>
-    <Filters
-      v-if="showSearchAndFilters"
-      v-model="displayMode"
-      :filters="filters"
-      :scroll-top-threshold="scrollTopThreshold"
-    />
-    <div
+    <InfiniteScroll
       class="list"
       data-cy="list"
+      is-more-data
+      @loadMore="loadMore"
     >
       <TransactionItem
         v-for="transaction in filteredTransactions"
@@ -25,7 +12,7 @@
         :transaction="transaction"
         :data-cy="transaction.pending && 'pending-txs'"
       />
-    </div>
+    </InfiniteScroll>
     <AnimatedSpinner
       v-if="loading"
       class="spinner"
@@ -53,6 +40,7 @@
 </template>
 
 <script lang="ts">
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -60,43 +48,33 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
   INetwork,
   ITokenList,
-  ITransaction,
-  ObjectValues,
 } from '../../types';
 import {
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
+  compareCaseInsensitive,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
-import Filters, { IFilterInputPayload, IFilters } from './Filters.vue';
+import {
+  useTransactionAndTokenFilter,
+} from '../../composables';
+
 import TransactionItem from './TransactionItem.vue';
-import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import Visible from '../../icons/visible.svg?vue-component';
-
-const FILTER_MODE = {
-  all: 'all',
-  in: 'in',
-  out: 'out',
-  dex: 'dex',
-} as const;
-
-type TransactionsFilterMode = ObjectValues<typeof FILTER_MODE>;
-type TransactionsFilters = IFilters<TransactionsFilterMode>;
-type TransactionsFilterPayload = IFilterInputPayload<TransactionsFilterMode>;
+import { ITransaction } from '../../types';
+import InfiniteScroll from './InfiniteScroll.vue';
 
 export default defineComponent({
   components: {
-    Filters,
+    InfiniteScroll,
     TransactionItem,
-    InputSearch,
     AnimatedSpinner,
     Visible,
   },
@@ -110,14 +88,12 @@ export default defineComponent({
   setup(props, { root }) {
     const loading = ref(false);
     const isDestroyed = ref(false);
-    const searchTerm = ref('');
-    const displayMode = ref<TransactionsFilterPayload>({ rotated: true, key: FILTER_MODE.all });
-    const filters = ref<TransactionsFilters>({
-      all: { name: root.$t('filters.all') },
-      in: { name: root.$t('filters.in') },
-      out: { name: root.$t('filters.out') },
-      dex: { name: root.$t('filters.dex') },
-    });
+
+    const {
+      searchPhrase,
+      displayMode,
+      FILTER_MODE,
+    } = useTransactionAndTokenFilter();
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const transactions = useState('transactions');
@@ -128,16 +104,8 @@ export default defineComponent({
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
     const getTxSymbol = useGetter('getTxSymbol');
 
-    function compareCaseInsensitive(
-      str1: string,
-      str2: string,
-    ) {
-      return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
-    }
-
     function isFungibleTokenTx(tr: ITransaction) {
-      return Object.keys(availableTokens.value)
-        .includes(tr.tx.contractId);
+      return Object.keys(availableTokens.value).includes(tr.tx.contractId);
     }
 
     const filteredTransactions = computed(
@@ -177,11 +145,11 @@ export default defineComponent({
           }
         })
         .filter(
-          (tr) => !searchTerm.value
+          (tr) => !searchPhrase.value
             || getTxSymbol.value(tr)
               .toLocaleLowerCase()
               .includes(
-                searchTerm.value.toLocaleLowerCase(),
+                searchPhrase.value.toLocaleLowerCase(),
               ),
         )
         .sort((a, b) => {
@@ -194,7 +162,7 @@ export default defineComponent({
     const showSearchAndFilters = computed(() => (
       props.showFilters
       || displayMode.value.key !== FILTER_MODE.all
-      || searchTerm.value
+      || searchPhrase.value
     ));
 
     function checkLoadMore() {
@@ -238,14 +206,7 @@ export default defineComponent({
     onMounted(() => {
       loadMore();
       const polling = setInterval(() => getLatest(), 10000);
-      const appInner = document.querySelector('.app-inner')!;
-
-      appInner.addEventListener('scroll', checkLoadMore);
-      window.addEventListener('scroll', checkLoadMore);
-
       root.$once('hook:destroyed', () => {
-        appInner.removeEventListener('scroll', checkLoadMore);
-        window.removeEventListener('scroll', checkLoadMore);
         clearInterval(polling);
         isDestroyed.value = true;
       });
@@ -263,8 +224,7 @@ export default defineComponent({
       getTxSymbol,
       filteredTransactions,
       showSearchAndFilters,
-      filters,
-      searchTerm,
+      loadMore,
     };
   },
 });
@@ -355,13 +315,6 @@ export default defineComponent({
         opacity: 0.44;
       }
     }
-  }
-
-  .search-bar-wrapper {
-    background: var(--screen-bg-color);
-    margin-left: calc(-1 * var(--screen-padding-x));
-    margin-right: calc(-1 * var(--screen-padding-x));
-    padding-inline: var(--screen-padding-x);
   }
 }
 </style>

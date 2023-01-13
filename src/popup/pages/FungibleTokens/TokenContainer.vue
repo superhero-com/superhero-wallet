@@ -59,6 +59,10 @@
           :text="tab.text"
         />
       </Tabs>
+      <TransactionAndTokenFilter
+        :key="routeName"
+        :show-filters="showFilterBar"
+      />
     </div>
     <transition
       name="fade-transition"
@@ -99,6 +103,7 @@ import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
 import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
+import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
@@ -109,6 +114,7 @@ import BuyIcon from '../../../icons/buy.svg?vue-component';
 export default defineComponent({
   name: 'TokenContainer',
   components: {
+    TransactionAndTokenFilter,
     ArrowSendIcon,
     ArrowReceiveIcon,
     BuyIcon,
@@ -153,8 +159,9 @@ export default defineComponent({
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const aePublicData = computed(() => root.$store.state.fungibleTokens.aePublicData);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
-
+    const routeName = computed(() => root.$route.name);
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
+    const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
 
     const tokenData = computed(() => {
       const defaultData = {
@@ -208,7 +215,9 @@ export default defineComponent({
       tokenData,
       tokenPairs,
       tokens,
+      showFilterBar,
       convertedBalance,
+      routeName,
       openTransferReceiveModal,
       openTransferSendModal,
     };
@@ -258,7 +267,6 @@ export default defineComponent({
     --buttons-height: 40px;
 
     padding-top: 12px;
-    height: 56px;
     position: sticky;
     top: calc(var(--buttons-height) + env(safe-area-inset-top));
   }

@@ -92,7 +92,9 @@ export const routes: WalletAppRouteConfig[] = [
         name: ROUTE_ACCOUNT_DETAILS,
         component: AccountDetailsTokens,
         meta: {
+          showFilterBar: true,
           hideHeader: true,
+          hideFilterButton: true,
         },
       },
       {
@@ -101,6 +103,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: AccountDetailsTransactions,
         meta: {
           hideHeader: true,
+          showFilterBar: true,
         },
       },
       {
@@ -114,6 +117,7 @@ export const routes: WalletAppRouteConfig[] = [
             props: true,
             meta: {
               hideHeader: true,
+              showNamesNavigation: true,
             },
           },
           {
@@ -123,6 +127,7 @@ export const routes: WalletAppRouteConfig[] = [
             name: 'account-details-names-auctions',
             meta: {
               hideHeader: true,
+              showNamesNavigation: true,
             },
           },
           {
@@ -132,6 +137,7 @@ export const routes: WalletAppRouteConfig[] = [
             name: 'account-details-names-claim',
             meta: {
               hideHeader: true,
+              showNamesNavigation: true,
             },
           },
         ],
@@ -405,6 +411,7 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'auction',
           showHeaderNavigation: true,
+          showNamesNavigation: true,
         },
       },
       {
@@ -416,6 +423,7 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
           showHeaderNavigation: true,
+          showNamesNavigation: true,
         },
       },
     ],
@@ -461,6 +469,8 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'coin-details',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
+          showFilterBar: true,
+          hideSearchBar: true,
         },
       },
       {
@@ -489,6 +499,8 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'token-details',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
+          showFilterBar: true,
+          hideSearchBar: true,
         },
       },
       {

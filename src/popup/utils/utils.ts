@@ -162,3 +162,10 @@ export function getPayload(transaction: ITransaction) {
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;
 }
+
+export function compareCaseInsensitive(
+  str1: string,
+  str2: string,
+) {
+  return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
+}

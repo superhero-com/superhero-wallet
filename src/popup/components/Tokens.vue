@@ -82,7 +82,7 @@ export default {
     },
     shrinkString(text) {
       const maxLength = this.getAvailableCharLength();
-      return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
+      return `${String(text).substring(0, maxLength)}${text?.length > maxLength ? '...' : ''}`;
     },
     mapToken(token) {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;

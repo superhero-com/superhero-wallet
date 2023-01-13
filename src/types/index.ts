@@ -7,6 +7,7 @@ import { POPUP_TYPES, INPUT_MESSAGE_STATUSES } from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
+export * from './filter';
 
 /**
  * Convert `key: val` objects into union of values.

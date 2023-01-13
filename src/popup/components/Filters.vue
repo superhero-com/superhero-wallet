@@ -22,20 +22,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
 import { useViewport } from '../../composables/viewport';
 import FilterArrowIcon from '../../icons/filter-arrow.svg?vue-component';
 import SortIcon from '../../icons/sort.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
-
-export interface IFilterOptions {
-  name: TranslateResult
-  rotated?: boolean // undefined means that user won't be able to change order
-}
-export type IFilters<T extends string = string> = Record<T, IFilterOptions>;
-export interface IFilterInputPayload<T extends string = string> extends Omit<IFilterOptions, 'name'> {
-  key: T
-}
+import { IFilterInputPayload, IFilters } from '../../types';
 
 export default defineComponent({
   components: {
@@ -101,6 +92,7 @@ export default defineComponent({
     display: flex;
     align-items: center;
     padding: 2px 8px;
+    max-height: 24px;
     gap: 2px;
     transition: all 0.08s ease-out;
     border-radius: 12px;
