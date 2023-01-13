@@ -1,38 +1,33 @@
 <template>
   <div class="token-list-wrapper">
-    <div
-      v-if="showFilters || searchTerm.length"
-      class="search-bar-wrapper"
-    >
-      <InputSearch
-        v-model="searchTerm"
-        :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
-      />
-    </div>
     <TokensList
-      :search-term="searchTerm"
+      :search-term="searchPhrase"
     />
   </div>
 </template>
 
 <script>
+import {
+  defineComponent,
+} from '@vue/composition-api';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
-import InputSearch from '../components/InputSearch.vue';
+import { useTransactionAndTokenFilter } from '../../composables';
 
-export default {
+export default defineComponent({
   components: {
     TokensList,
-    InputSearch,
   },
   props: {
     showFilters: Boolean,
   },
-  data() {
+  setup() {
+    const { searchPhrase } = useTransactionAndTokenFilter();
+
     return {
-      searchTerm: '',
+      searchPhrase,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

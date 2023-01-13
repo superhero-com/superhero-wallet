@@ -14,43 +14,37 @@
         :to="{ name: 'account' }"
       />
     </div>
+    <div>
+      <BalanceInfo :account-idx="activeIdx" />
 
-    <BalanceInfo :account-idx="activeIdx" />
+      <div class="buttons">
+        <BtnBox
+          v-for="(action, index) in actions"
+          :key="index"
+          :disabled="action.disabled"
+          @click="action.onClick"
+        >
+          <Component :is="action.icon" />
+          <div>{{ action.text }}</div>
+        </BtnBox>
+      </div>
 
-    <div class="buttons">
-      <BtnBox
-        v-for="(action, index) in actions"
-        :key="index"
-        :disabled="action.disabled"
-        @click="action.onClick"
-      >
-        <Component :is="action.icon" />
-        <div>{{ action.text }}</div>
-      </BtnBox>
-    </div>
-
-    <div class="header">
-      <Tabs>
-        <Tab
-          v-for="tab in tabs"
-          :key="tab.routeName"
-          :exact-path="tab.exact"
-          :to="{ name: tab.routeName }"
-          :text="tab.text"
-          :data-cy="tab.routeName"
-        />
-      </Tabs>
-    </div>
-
-    <div class="tabs-content">
-      <transition
-        name="fade-transition"
-        mode="out-in"
-      >
-        <RouterView
+      <div class="header">
+        <AccountDetailsNavigation />
+        <TransactionAndTokenFilter
+          :key="routeName"
           :show-filters="showFilters"
         />
-      </transition>
+      </div>
+
+      <div class="tabs-content">
+        <transition
+          name="fade-transition"
+          mode="out-in"
+        >
+          <RouterView />
+        </transition>
+      </div>
     </div>
   </div>
 </template>
@@ -79,22 +73,25 @@ import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnPlain from '../components/buttons/BtnPlain.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
-import Tabs from '../components/tabs/Tabs.vue';
-import Tab from '../components/tabs/Tab.vue';
+import TransactionAndTokenFilter from '../components/TransactionAndTokenFilter.vue';
+import AccountDetailsNavigation from '../components/AccountDetailsNavigation.vue';
 
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
+import { useTransactionAndTokenFilter } from '../../composables';
+import BtnPill from '../components/buttons/BtnPill.vue';
 
 export default defineComponent({
   name: 'AccountDetails',
   components: {
+    AccountDetailsNavigation,
+    BtnPill,
+    TransactionAndTokenFilter,
     AccountInfo,
     BalanceInfo,
     BtnPlain,
-    Tabs,
-    Tab,
     BtnBox,
     BtnClose,
   },
@@ -102,16 +99,21 @@ export default defineComponent({
     const ACCOUNT_INFO_HEIGHT = 120;
     const BALANCE_AND_ACTIONS_HEIGHT = 280;
     const accountDetailsElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
+    const clientHeight = ref<number>(0);
+    const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
+
+    const { resetFilter } = useTransactionAndTokenFilter();
+
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
     );
-    const appInnerScrollTop = ref<number>(0);
-    const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
-    const clientHeight = ref<number>(0);
     const isConnected = computed(() => root.$store.getters.isConnected);
     const account = computed(() => root.$store.getters.account);
     const activeIdx = computed(() => root.$store.state.accounts.activeIdx);
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
+    const showNamesNavigation = computed(() => !!root.$route?.meta?.showNamesNavigation);
+    const routeName = computed(() => root.$route.name);
 
     const actions = computed(() => [
       {
@@ -141,23 +143,7 @@ export default defineComponent({
       },
     ]);
 
-    const tabs = [
-      {
-        text: root.$t('modals.account-details.assets'),
-        routeName: 'account-details',
-        exact: true,
-      },
-      {
-        text: root.$t('modals.account-details.transactions'),
-        routeName: 'account-details-transactions',
-      },
-      {
-        text: root.$t('modals.account-details.names'),
-        routeName: 'account-details-names',
-      },
-    ];
-
-    const showFilters = computed<boolean>(() => !!(
+    const showFilters = computed<boolean>(() => (
       clientHeight.value > initialClientHeight.value
       && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
     ));
@@ -183,6 +169,7 @@ export default defineComponent({
       () => root.$route,
       () => {
         clientHeight.value = 0;
+        resetFilter();
       },
     );
 
@@ -210,11 +197,12 @@ export default defineComponent({
 
     return {
       actions,
-      tabs,
       activeIdx,
       showFilters,
       isConnected,
       accountDetailsElem,
+      showNamesNavigation,
+      routeName,
     };
   },
 });
@@ -228,6 +216,8 @@ export default defineComponent({
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
+  --screen-bg-color: #{variables.$color-bg-modal};
+  --header-height: 64px;
 
   border-radius: variables.$border-radius-app;
   min-height: 100%;
@@ -241,13 +231,6 @@ export default defineComponent({
     min-height: 100vh;
   }
 
-  ::v-deep .search-bar-wrapper {
-    position: sticky;
-    top: calc(var(--account-info-height) + 6px);
-    z-index: 1;
-    background-color: var(--screen-bg-color);
-  }
-
   .account-info-wrapper {
     position: sticky;
     top: env(safe-area-inset-top);
@@ -256,6 +239,7 @@ export default defineComponent({
     justify-content: space-between;
     padding: 8px 6px 6px;
     background-color: var(--screen-bg-color);
+    height: var(--header-height);
 
     .button-plain {
       width: 24px;
@@ -294,7 +278,7 @@ export default defineComponent({
   .header {
     position: sticky;
     z-index: variables.$z-index-header;
-    top: calc(env(safe-area-inset-top) + 62px);
+    top: calc(env(safe-area-inset-top) + var(--header-height));
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);
   }

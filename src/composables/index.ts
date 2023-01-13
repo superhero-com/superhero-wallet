@@ -6,3 +6,4 @@ export * from './sdk';
 export * from './tokensList';
 export * from './topHeader';
 export * from './transactionToken';
+export * from './transactionAndTokenFilter';

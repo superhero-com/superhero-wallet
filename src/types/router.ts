@@ -44,6 +44,9 @@ export interface WalletRouteMeta {
    * @default: false
    */
   showScrollbar?: boolean
+  showFilterBar?: boolean
+  hideSearchBar?: boolean
+  hideFilterButton?: boolean
 }
 
 export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {

@@ -101,6 +101,7 @@
 <script lang="ts">
 import {
   computed,
+  watch,
   defineComponent,
   getCurrentInstance,
   PropType,
@@ -190,6 +191,11 @@ export default defineComponent({
       const { value } = event.target as HTMLInputElement;
       emit('input', props.type === 'number' ? value?.replace(',', '.') : value);
     }
+
+    watch(
+      () => focused.value,
+      (val) => emit('focus-change', val),
+    );
 
     return {
       focused,

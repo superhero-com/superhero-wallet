@@ -47,12 +47,17 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
-import type { IActiveAuction, ObjectValues } from '../../../types';
 import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
-import { useTopHeaderData } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
+import type {
+  IActiveAuction,
+  ObjectValues,
+  IFilters,
+  IFilterInputPayload,
+} from '../../../types';
+import { useTopHeaderData } from '../../../composables';
 
-import Filters, { IFilters, IFilterInputPayload } from '../../components/Filters.vue';
+import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import RegisterName from '../../components/RegisterName.vue';
