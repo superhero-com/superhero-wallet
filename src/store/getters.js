@@ -14,6 +14,10 @@ import {
   NODE_STATUS_CONNECTED,
   TX_TYPE_MDW,
   ACCOUNT_HD_WALLET,
+  TRANSACTION_DIRECTION_SENT,
+  TRANSACTION_DIRECTION_RECEIVED,
+  TX_FUNCTION_TIP,
+  TX_FUNCTION_CLAIM,
   validateHash,
   convertToken,
   aettosToAe,
@@ -119,19 +123,31 @@ export default {
   getTxFee: () => (transaction) => +aettosToAe(
     new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
-  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'].map((key) => tx?.[key]).includes(address)
-    ? 'sent'
-    : 'received'),
+  getTxDirection: (_, { account: { address }, getTxType }) => ({ tx }, externalAddress) => {
+    if (getTxType({ tx }) === SCHEMA.TX_TYPE.spend) {
+      return tx.recipientId === address
+        ? TRANSACTION_DIRECTION_RECEIVED
+        : TRANSACTION_DIRECTION_SENT;
+    }
+    return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
+      .map((key) => tx?.[key])
+      .includes(externalAddress || address)
+      ? TRANSACTION_DIRECTION_SENT
+      : TRANSACTION_DIRECTION_RECEIVED;
+  },
   getTxTipUrl: () => (transaction) => (
     transaction.tipUrl
-      || transaction.url
-      || (!transaction.pending
-        && !transaction.claim
-        && transaction.tx.log?.[0]
-        && transaction.function === 'tip'
-        && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
-      || categorizeContractCallTxObject(transaction)?.url
-      || ''
+        || transaction.url
+        || (!transaction.pending
+            && !transaction.claim
+            && transaction.tx.log?.[0]
+            && [
+              TX_FUNCTION_TIP,
+              TX_FUNCTION_CLAIM,
+            ].includes(transaction.function || transaction.tx?.function)
+            && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
+        || categorizeContractCallTxObject(transaction)?.url
+        || ''
   ),
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token

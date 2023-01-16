@@ -8,103 +8,164 @@
   />
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
+import {
+  TRANSACTION_DIRECTION_RECEIVED,
+  TRANSACTION_DIRECTION_SENT,
+  TX_FUNCTION_CLAIM,
+  watchUntilTruthy,
+} from '../utils';
+import { useSdk, useTransaction } from '../../composables';
+import { useState, useGetter } from '../../composables/vuex';
+import {
+  IAccount,
+  IAccountLabeled,
+  ITransaction,
+  TransactionType,
+} from '../../types';
 import TransactionInfo from './TransactionInfo.vue';
 
-export default {
+export default defineComponent({
   components: { TransactionInfo },
   props: {
     tx: { type: Object, required: true },
-    isDex: { type: Boolean, default: false },
   },
-  data: () => ({ name: '' }),
-  computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getDexContracts']),
-    ...mapGetters('names', ['getPreferred']),
-    ...mapState({
-      account(_, { account }) {
-        return {
-          ...account,
-          label: this.$t('transaction.overview.accountAddress'),
-          url: this.getExplorerPath(account.address),
-        };
-      },
-      isDexRecipient() {
-        return [...this.getDexContracts.router, ...this.getDexContracts.wae]
-          .includes(this.tx?.contractId);
-      },
-    }),
-    transaction() {
-      switch (this.txType) {
+  setup(props, { root }) {
+    const name = ref('');
+    const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
+
+    const middleware = useState('middleware');
+
+    const getExplorerPath = useGetter('getExplorerPath');
+    const getDexContracts = useGetter('getDexContracts');
+    const getPreferred = useGetter('names/getPreferred');
+
+    const { getSdk } = useSdk({ store: root.$store });
+
+    const {
+      txType,
+      direction,
+      fetchOwnershipAccount,
+      setTransaction,
+    } = useTransaction({ store: root.$store });
+
+    setTransaction({ tx: props.tx } as ITransaction);
+
+    const isDexRecipient = computed(
+      () => [
+        ...getDexContracts.value.router,
+        ...getDexContracts.value.wae,
+      ].includes(props.tx?.contractId),
+    );
+
+    const transaction = computed(() => {
+      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
+
+      const { senderId, recipientId, contractId } = props.tx;
+
+      switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
           return {
             sender: {
-              address: this.tx.senderId,
-              name: this.getPreferred(this.tx.senderId),
-              url: this.getExplorerPath(this.tx.senderId),
-              label: this.$t('transaction.overview.accountAddress'),
+              address: senderId,
+              name: getPreferred.value(senderId),
+              url: getExplorerPath.value(senderId),
+              label: root.$t('transaction.overview.accountAddress'),
             },
             recipient: {
-              address: this.tx.recipientId,
-              name: this.name || this.getPreferred(this.tx.recipientId),
-              url: this.getExplorerPath(this.tx.recipientId),
-              label: this.$t('transaction.overview.accountAddress'),
+              address: recipientId,
+              name: name.value || getPreferred.value(recipientId),
+              url: getExplorerPath.value(recipientId),
+              label: root.$t('transaction.overview.accountAddress'),
             },
-            title: this.$t('transaction.type.spendTx'),
+            title: root.$t('transaction.type.spendTx'),
           };
         case SCHEMA.TX_TYPE.contractCall: {
-          const direction = this.getTxDirection({ tx: this.tx });
           const contract = {
-            address: this.tx.contractId,
-            url: this.getExplorerPath(this.tx.contractId),
-            label: this.$t(`transaction.overview.${this.isDexRecipient ? 'superheroDex' : 'contract'}`),
+            address: contractId,
+            url: getExplorerPath.value(contractId),
+            label: root.$t(`transaction.overview.${isDexRecipient.value ? 'superheroDex' : 'contract'}`),
           };
+
           return {
-            sender: direction === 'sent' ? this.account : contract,
-            recipient: direction === 'received' ? this.account : contract,
-            title: this.$t('transaction.type.contractCallTx'),
-            function: this.tx.function,
+            sender: direction.value === TRANSACTION_DIRECTION_SENT
+              ? ownershipAccount.value
+              : contract,
+            recipient: direction.value === TRANSACTION_DIRECTION_RECEIVED
+              ? ownershipAccount.value
+              : contract,
+            title: root.$t('transaction.type.contractCallTx'),
+            function: props.tx.function,
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
           return {
-            sender: this.account,
+            sender: ownershipAccount.value,
             recipient: {
               contractCreate: true,
-              label: this.$t('transaction.overview.contractCreate'),
+              label: root.$t('transaction.overview.contractCreate'),
             },
-            title: this.$t('transaction.type.contractCreateTx'),
+            title: root.$t('transaction.type.contractCreateTx'),
           };
         case SCHEMA.TX_TYPE.namePreClaim:
         case SCHEMA.TX_TYPE.nameClaim:
         case SCHEMA.TX_TYPE.nameBid:
         case SCHEMA.TX_TYPE.nameUpdate:
           return {
-            sender: this.account,
+            sender: ownershipAccount.value,
             recipient: {
               aens: true,
-              label: this.$t('transaction.overview.aens'),
+              label: root.$t('transaction.overview.aens'),
             },
-            title: this.$t('transaction.type')[this.txType],
+            title: transactionTypes[txType.value],
           };
         default:
           throw new Error('Unsupported transaction type');
       }
-    },
-    txType() {
-      return this.getTxType({ tx: this.tx });
-    },
-  },
-  async mounted() {
-    await watchUntilTruthy(() => this.$store.state.middleware);
-    if (this.tx.recipientId?.startsWith('nm_')) {
-      this.name = (await this.$store.state.middleware.getNameById(this.tx.recipientId)).name;
+    });
+
+    async function decodeClaimTransactionAccount(): Promise<string> {
+      // eslint-disable-next-line camelcase
+      const calldata = props.tx.callData || props.tx.call_data;
+
+      if (!(props.tx.contractId && calldata)) return '';
+
+      const sdk = await getSdk();
+      const { bytecode } = await sdk.getContractByteCode(props.tx.contractId);
+      const txParams = await sdk.compilerApi.decodeCalldataBytecode({
+        bytecode,
+        calldata,
+      });
+      if (!txParams) return '';
+
+      return txParams.arguments?.find((param: any) => param.type === 'address')?.value;
     }
+
+    onMounted(async () => {
+      await watchUntilTruthy(() => middleware.value);
+      if (props.tx.recipientId?.startsWith('nm_')) {
+        name.value = (await middleware.value.getNameById(props.tx.recipientId)).name;
+      }
+      let transactionOwnerAddress;
+      if (props.tx.function === TX_FUNCTION_CLAIM) {
+        transactionOwnerAddress = await decodeClaimTransactionAccount();
+      }
+      ownershipAccount.value = await fetchOwnershipAccount(transactionOwnerAddress);
+    });
+
+    return {
+      transaction,
+    };
   },
-};
+});
 </script>
 
 <style scoped lang="scss">

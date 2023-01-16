@@ -447,3 +447,15 @@ export const INPUT_MESSAGE_STATUSES = {
   warning: 'warning',
   error: 'error',
 } as const;
+
+export const TRANSACTION_DIRECTION_SENT = 'sent';
+export const TRANSACTION_DIRECTION_RECEIVED = 'received';
+
+export const TRANSACTION_OWNERSHIP_STATUS = {
+  other: 0,
+  current: 1,
+  subAccount: 2,
+};
+
+export const TX_FUNCTION_TIP = 'tip';
+export const TX_FUNCTION_CLAIM = 'claim';

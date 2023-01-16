@@ -133,7 +133,7 @@ export default defineComponent({
     const redirectInfo = computed(() => !isWallet.value ? root.$t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
       ? props.notification.title || ''
-      : chainName.value || address.value || 'Fellow Superhero');
+      : chainName.value || address.value || root.$t('fellowSuperhero'));
     const initialStatus = props.notification.status;
     const isUnread = computed(() => (IS_EXTENSION
       ? initialStatus
