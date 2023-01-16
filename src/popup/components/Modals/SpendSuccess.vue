@@ -5,6 +5,7 @@
     from-bottom
     centered
     :body-without-padding-bottom="hasPayload"
+    data-cy="spend-success"
     @close="resolve"
   >
     <ModalHeader

@@ -25,8 +25,9 @@
       <BtnMain
         v-if="showEditButton"
         variant="muted"
-        text="Edit"
+        :text="$t('pages.send.edit')"
         class="button-action-secondary"
+        data-cy="edit"
         @click="editTransfer"
       />
       <BtnMain
@@ -34,6 +35,7 @@
         :disabled="error || !isConnected || !transferData.address || !transferData.amount"
         :has-icon="showSendButton"
         :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
+        data-cy="next-step-button"
         @click="proceedToNextStep"
       >
         {{ showSendButton ? $t('pages.send.send') : $t('modals.send.next') }}

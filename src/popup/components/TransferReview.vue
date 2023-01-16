@@ -46,7 +46,6 @@
     >
       <template #value>
         <TokenAmount
-          data-cy="review-total"
           :amount="+transferData.amount"
           :symbol="tokenSymbol"
           :hide-fiat="isSelectedAssetAex9"
@@ -80,7 +79,7 @@
           symbol="AE"
           hide-fiat
           high-precision
-          data-cy="review-fee"
+          data-cy="review-total"
         />
       </template>
     </DetailsItem>

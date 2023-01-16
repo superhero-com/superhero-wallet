@@ -21,6 +21,7 @@
           :disabled="!isConnected"
           clickable
           dense
+          data-cy="send"
           @click="openTransferSendModal()"
         >
           <template #icon>
