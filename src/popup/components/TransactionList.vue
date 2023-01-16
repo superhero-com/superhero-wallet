@@ -110,8 +110,8 @@ export default defineComponent({
 
     const filteredTransactions = computed(
       () => [
-        ...transactions.value.loaded,
         ...getAccountPendingTransactions.value,
+        ...transactions.value.loaded,
       ]
         .filter((tr) => (!props.token
           || (props.token !== AETERNITY_CONTRACT_ID
@@ -154,7 +154,11 @@ export default defineComponent({
         )
         .sort((a, b) => {
           const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
-          return a.pending || (bMicroTime - aMicroTime);
+          return (
+            (a.pending && !b.pending && -1)
+            || (b.pending && !a.pending && 1)
+            || bMicroTime - aMicroTime
+          );
         })
         .slice(0, props.maxLength || Infinity),
     );
