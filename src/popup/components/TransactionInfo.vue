@@ -14,14 +14,20 @@
     </div>
 
     <div class="parties">
-      <Avatar v-bind="sender" />
+      <Avatar
+        v-if="sender.address"
+        :name="sender.name || sender.label"
+        :address="sender.address"
+      />
       <div class="mid">
         <TriangleRight class="triangle" />
         <div class="line" />
       </div>
+
       <Avatar
         v-if="recipient.address"
-        v-bind="recipient"
+        :address="recipient.address"
+        :name="recipient.name || recipient.label"
       />
       <div
         v-else

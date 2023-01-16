@@ -82,6 +82,11 @@ export interface IAccount {
   type: string
 }
 
+export interface IAccountLabeled extends Partial<IAccount>{
+  url?: string,
+  label?: TranslateResult,
+}
+
 export interface INetwork {
   backendUrl: string
   compilerUrl: string
@@ -177,12 +182,22 @@ export interface ITx {
   returnType: string,
   type: string,
   callerId: string,
+  accountId?: string,
   senderId?: string,
   recipientId?: string,
   selectedTokenContractId?: string,
   arguments: ITxArguments[],
   payload?: string
 }
+
+export interface ITokenTransactionComposable extends ITx {
+  decimals?: number,
+  amount: number,
+  symbol: string,
+  isReceived: string,
+  isAe: string
+}
+
 export interface ITransaction {
   blockHeight: number;
   hash: string,
@@ -252,6 +267,8 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
+  getContractByteCode(contractId: string): Promise<{ bytecode: any }>;
+  compilerApi: any;
   api: Record<string, (a?: string) => any>
   Ae: Record<string, any>
   pool: Map<string, any>

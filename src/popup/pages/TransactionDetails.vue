@@ -21,7 +21,7 @@
         />
       </div>
       <div class="content">
-        <TransactionOverview v-bind="transaction" />
+        <TransactionOverview :tx="transaction.tx" />
         <div class="explorer">
           <LinkButton :to="explorerPath">
             {{ $t('pages.transactionDetails.explorer') }}
@@ -181,10 +181,9 @@ import {
   AETERNITY_SYMBOL,
   getPayload,
 } from '../utils';
-import type { ITransaction } from '../../types';
-import { useTransactionToken } from '../../composables';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
-
+import type { ITransaction } from '../../types';
+import { useTransaction } from '../../composables';
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
@@ -226,13 +225,11 @@ export default defineComponent({
   setup(props, { root }) {
     const {
       setTransaction,
-      getTxSymbol,
-      getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
       tokens,
       isDex,
-    } = useTransactionToken({
+    } = useTransaction({
       store: root.$store,
       showDetailedAllowanceInfo: true,
     });
@@ -243,12 +240,14 @@ export default defineComponent({
     const getTxTipUrl = computed(() => root.$store.getters.getTxTipUrl);
     const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
     const isTxAex9 = computed(() => root.$store.getters.isTxAex9);
+    const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
+    const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
 
     const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
-    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerPath = computed(() => getExplorerPath.value(props.hash));
     const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
     const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
+    const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
+    const explorerPath = computed(() => getExplorerPath.value(props.hash));
 
     onMounted(async () => {
       transaction.value = getTx.value(props.hash);

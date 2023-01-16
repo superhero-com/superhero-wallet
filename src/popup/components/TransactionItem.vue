@@ -53,23 +53,33 @@
 
 <script lang="ts">
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
 import {
   FUNCTION_TYPE_DEX,
+  TRANSACTION_DIRECTION_SENT,
+  AENS,
+  DEX,
   amountRounded,
   convertToken,
   formatDate,
   formatTime,
-  AENS,
-  DEX,
 } from '../utils';
 import Pending from '../../icons/animated-pending.svg?vue-component';
 import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransactionToken } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { ITransaction, TransactionType } from '../../types';
+import { useTransaction } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
+import type {
+  ITokenList,
+  ITransaction,
+  TransactionType,
+} from '../../types';
 
 export default defineComponent({
   components: {
@@ -82,25 +92,29 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props, { root }) {
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+
     const getAmountFiat = useGetter('getAmountFiat');
     const activeNetwork = useGetter('activeNetwork');
     const account = useGetter('account');
 
     const {
       txType,
-      getTxDirection,
       isAllowance,
       isDex,
-      availableTokens,
       tokens,
+      direction,
       isErrorTransaction,
-    } = useTransactionToken({
+      setTransaction,
+    } = useTransaction({
       store: root.$store,
       initTransaction: props.transaction,
     });
 
+    setTransaction(props.transaction);
+
     const labels = computed(() => {
-      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;
+      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
 
       if (txType.value?.startsWith('name')) {
         return [AENS, transactionTypes[txType.value]];
@@ -108,7 +122,7 @@ export default defineComponent({
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         return [
           root.$t('transaction.type.spendTx'),
-          getTxDirection.value(props.transaction) === 'sent'
+          direction.value === TRANSACTION_DIRECTION_SENT
             ? root.$t('transaction.spendType.out')
             : root.$t('transaction.spendType.in'),
         ];

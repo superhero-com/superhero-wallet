@@ -2,7 +2,8 @@ import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
-import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils/constants';
+import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils';
+import { testAccount } from '../../src/popup/utils/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -115,11 +116,13 @@ function mountComponent({ hasError = false } = {}) {
       getTxType: () => () => 'provide liquidity',
       getTxSymbol: () => AETERNITY_SYMBOL,
       getDexContracts: () => DEX_CONTRACTS.ae_uat,
-      getTxTipUrl: () => () => '',
       getTxAmountTotal: () => 1,
       getTxDirection: () => 'sent',
       getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTxAex9: () => true,
+      getTxTipUrl: () => () => '',
+      account: () => testAccount,
+      accounts: () => [testAccount],
     },
   });
 

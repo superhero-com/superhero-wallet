@@ -33,7 +33,11 @@
 
 <script>
 import { mapState } from 'vuex';
-import { AETERNITY_SYMBOL } from '../utils/constants';
+import {
+  AETERNITY_SYMBOL,
+  TRANSACTION_DIRECTION_RECEIVED,
+  TRANSACTION_DIRECTION_SENT,
+} from '../utils';
 
 export default {
   props: {
@@ -45,7 +49,10 @@ export default {
     hideFiat: Boolean,
     direction: {
       type: String,
-      validator: (value) => ['sent', 'received'].includes(value),
+      validator: (value) => [
+        TRANSACTION_DIRECTION_SENT,
+        TRANSACTION_DIRECTION_RECEIVED,
+      ].includes(value),
       default: undefined,
     },
     large: Boolean,

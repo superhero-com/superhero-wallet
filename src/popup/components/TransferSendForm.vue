@@ -302,7 +302,7 @@ export default defineComponent({
       100);
     };
 
-    // Method called from a parent scope - avoid changing it's name.
+    // Method called from a parent scope - avoid changing its name.
     const submit = async () => {
       const isValid = !(await (root as any).$validator._base.anyExcept('address', WARNING_RULES));
       if (isValid) {

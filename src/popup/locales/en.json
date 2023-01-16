@@ -3,6 +3,7 @@
   "ae": "AE",
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
+  "fellowSuperhero": "Fellow Superhero",
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"

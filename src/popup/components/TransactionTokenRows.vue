@@ -3,39 +3,56 @@
     <div
       v-for="token in tokens.filter(({ amount }) => amount != null)"
       :key="token.symbol"
-      :class="['token-row', token.isReceived ? 'received': 'sent', { error }]"
+      :class="[
+        'token-row',
+        token.isReceived ? TRANSACTION_DIRECTION_RECEIVED : TRANSACTION_DIRECTION_SENT,
+        { error }
+      ]"
     >
       <Tokens
         :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
         :icon-size="iconSize"
       />
       <span class="amount">
-        {{
-          `${token.isReceived ? '+' : '−'}
-          ${amountRounded(token.decimals
-          ? convertToken(token.amount || 0, -token.decimals) : token.amount)}`
-        }}
+        {{ tokenAmount(token) }}
       </span>
     </div>
   </div>
 </template>
 
-<script>
-import { amountRounded, convertToken } from '../utils';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import {
+  amountRounded,
+  convertToken,
+  TRANSACTION_DIRECTION_RECEIVED,
+  TRANSACTION_DIRECTION_SENT,
+} from '../utils';
+import { ITokenTransactionComposable } from '../../types';
 import Tokens from './Tokens.vue';
 
-export default {
+export default defineComponent({
   components: { Tokens },
   props: {
     tokens: { type: Array, required: true },
     iconSize: { type: String, default: 'rg' },
     error: Boolean,
   },
-  methods: {
-    convertToken,
-    amountRounded,
+  setup() {
+    function tokenAmount(token: ITokenTransactionComposable) {
+      const sign = token.isReceived ? '+' : '−';
+      const amount = amountRounded(token.decimals
+        ? convertToken(token.amount || 0, -token.decimals)
+        : token.amount);
+      return `${sign} ${amount}`;
+    }
+    return {
+      tokenAmount,
+      TRANSACTION_DIRECTION_RECEIVED,
+      TRANSACTION_DIRECTION_SENT,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
