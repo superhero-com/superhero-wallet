@@ -24,6 +24,7 @@ import {
   MAGNITUDE,
   SEED_LENGTH,
   AENS_NAME_MAX_LENGTH,
+  TIPPING_V1_ACI,
 } from './constants';
 import { testAccount, txParams } from './config';
 import runMigrations from '../../store/migrations';
@@ -159,9 +160,9 @@ export const setContractInstance = async (tx, sdk, contractAddress = null) => {
     if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
       backend = 'aevm';
     }
-    contractInstance = await sdk.getContractInstance({
-      source: tx.source,
-      contractAddress,
+    contractInstance = await sdk.initializeContract({
+      aci: TIPPING_V1_ACI,
+      address: contractAddress,
     });
     contractInstance.setOptions({ backend });
   } catch (e) {

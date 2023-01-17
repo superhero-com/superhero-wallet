@@ -1,4 +1,3 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
   ICurrency,
@@ -7,6 +6,12 @@ import type {
   INotificationSetting,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
+
+export { default as TIPPING_V1_ACI } from './contracts/tippingV1aci';
+export { default as TIPPING_V2_ACI } from './contracts/tippingV2aci';
+export { default as FUNGIBLE_TOKEN_CONTRACT_ACI } from './contracts/fungibleContractAci';
+export { default as PAIR_CONTRACT_ACI } from './contracts/pairContractAci';
+export { default as ZEIT_TOKEN_CONTRACT_ACI } from './contracts/zeitTokenAci';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -17,17 +22,6 @@ export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
-
-export const TX_TYPE_MDW = {
-  SpendTx: SCHEMA.TX_TYPE.spend,
-  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
-  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
-  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
-  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
-  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
-  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
-  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
-};
 
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
@@ -340,13 +334,6 @@ export const FUNCTION_TYPE_DEX = {
   ],
   allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
 };
-
-export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
-contract interface PoS =
-  stateful entrypoint set_paid : (int, int) => unit
-main contract FungibleTokenFull =
-  stateful entrypoint burn_trigger_pos : (int, PoS, int) => unit
-  entrypoint balance : (address) => option(int)`;
 
 export const APP_LINK_WEB = 'https://wallet.superhero.com';
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';

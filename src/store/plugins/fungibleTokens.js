@@ -1,8 +1,6 @@
 import Vue from 'vue';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { isEmpty, uniqBy } from 'lodash-es';
-import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import { Tag } from '@aeternity/aepp-sdk';
 import {
   convertToken,
@@ -12,8 +10,11 @@ import {
   AETERNITY_SYMBOL,
   getAllPages,
   watchUntilTruthy,
+  FUNGIBLE_TOKEN_CONTRACT_ACI,
+  PAIR_CONTRACT_ACI,
+  ZEIT_TOKEN_CONTRACT_ACI,
 } from '../../popup/utils';
-import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
+import { CURRENCY_URL, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -133,9 +134,9 @@ export default (store) => {
       ) {
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
-        const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: selectedToken.contractId,
+        const tokenContract = await sdk.initializeContract({
+          aci: FUNGIBLE_TOKEN_CONTRACT_ACI,
+          address: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
           from_account: account.address,
@@ -156,9 +157,9 @@ export default (store) => {
         contractAddress,
       ) {
         try {
-          const tokenContract = await sdk.getContractInstance({
-            source: pairInterface,
-            contractAddress,
+          const tokenContract = await sdk.initializeContract({
+            aci: PAIR_CONTRACT_ACI,
+            address: contractAddress,
           });
 
           const [
@@ -204,21 +205,21 @@ export default (store) => {
         { rootGetters: { 'sdkPlugin/sdk': sdk } },
         [contractId, toAccount, amount, option],
       ) {
-        const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
-          contractAddress: contractId,
+        const tokenContract = await sdk.initializeContract({
+          aci: FUNGIBLE_TOKEN_CONTRACT_ACI,
+          address: contractId,
         });
-        return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
+        return tokenContract.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(
         { rootGetters: { 'sdkPlugin/sdk': sdk } },
         [contractId, amount, posAddress, invoiceId, option],
       ) {
-        const tokenContract = await sdk.getContractInstance({
-          source: ZEIT_TOKEN_INTERFACE,
-          contractAddress: contractId,
+        const tokenContract = await sdk.initializeContract({
+          source: ZEIT_TOKEN_CONTRACT_ACI,
+          address: contractId,
         });
-        return tokenContract.methods.burn_trigger_pos(
+        return tokenContract.burn_trigger_pos(
           amount.toFixed(), posAddress, invoiceId, option,
         );
       },

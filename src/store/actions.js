@@ -1,8 +1,6 @@
 import {
   flatten, orderBy, uniq, uniqBy,
 } from 'lodash-es';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { Tag } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import JsonBig from '@aeternity/json-bigint';
@@ -14,10 +12,11 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
   executeAndSetInterval,
-  watchUntilTruthy,
   fetchRespondChallenge,
   CURRENCIES_URL,
   MODAL_DEFAULT,
+  TIPPING_V1_ACI,
+  TIPPING_V2_ACI,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
 
@@ -202,14 +201,14 @@ export default {
       contractInstanceV1,
       contractInstanceV2,
     ] = await Promise.all([
-      sdk.getContractInstance({
-        source: TIPPING_V1_INTERFACE,
-        contractAddress: activeNetwork.tipContractV1,
+      sdk.initializeContract({
+        aci: TIPPING_V1_ACI,
+        address: activeNetwork.tipContractV1,
       }),
       activeNetwork.tipContractV2
-        ? sdk.getContractInstance({
-          source: TIPPING_V2_INTERFACE,
-          contractAddress: activeNetwork.tipContractV2,
+        ? sdk.initializeContract({
+          aci: TIPPING_V2_ACI,
+          address: activeNetwork.tipContractV2,
         })
         : null,
     ]);

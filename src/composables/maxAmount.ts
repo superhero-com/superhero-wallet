@@ -20,9 +20,11 @@ import {
   validateTipUrl,
   checkAensName,
   handleUnknownError,
+  FUNGIBLE_TOKEN_CONTRACT_ACI,
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { useBalances } from './balances';
+import { IFungibleContractApi } from '../types/fungibleContract';
 
 export interface IFormModel {
   amount: number | string;
@@ -37,6 +39,8 @@ export interface MaxAmountOptions {
   store: Store<any>
   formModel: Ref<IFormModel>
 }
+
+let tokenInstance: Contract<IFungibleContractApi>;
 
 /**
  * Composable that allows to use real max amount of selected token
@@ -68,13 +72,11 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (!val?.selectedAsset) return;
 
       if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-        if (
-          !tokenInstance.value
-          || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId
-        ) {
-          tokenInstance.value = await sdk.getContractInstance({
-            source: FUNGIBLE_TOKEN_CONTRACT,
-            contractAddress: val.selectedAsset.contractId,
+        if (!tokenInstance
+          || tokenInstance.$options.address !== val.selectedAsset.contractId) {
+          tokenInstance = await sdk.value.initializeContract({
+            aci: FUNGIBLE_TOKEN_CONTRACT_ACI,
+            address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
