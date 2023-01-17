@@ -224,10 +224,9 @@ export default (store) => {
       async getTokensHistory(
         {
           state: { transactions },
-          rootGetters: { activeNetwork, account, getDexContracts }, commit,
-        }, { recent, multipleAccount },
+          rootGetters: { activeNetwork, getDexContracts }, commit,
+        }, { recent, address, multipleAccounts },
       ) {
-        const { address } = account;
         if (transactions[address]?.length && !recent) return transactions[address];
 
         let rawTransactions = [];
@@ -271,7 +270,7 @@ export default (store) => {
             hash: tx.tx_hash,
           }));
 
-        if (!multipleAccount) {
+        if (!multipleAccounts) {
           if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
             commit('setTransactions', {
               address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),

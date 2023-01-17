@@ -97,9 +97,6 @@ export default {
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
   },
-  toggleMinifiedCard(state) {
-    state.cardMinified = !state.cardMinified;
-  },
   setQrScanner(state, payload) {
     state.qrScannerOpen = payload;
   },

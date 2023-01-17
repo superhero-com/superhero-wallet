@@ -62,8 +62,10 @@ export default {
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
-  async fetchTipWithdrawnTransactions({ state, getters, commit }, recent) {
-    const { address } = getters.account;
+  async fetchTipWithdrawnTransactions(
+    { state, getters, commit },
+    { recent, address, multipleAccounts },
+  ) {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
@@ -86,7 +88,9 @@ export default {
       blockHeight: height,
       claim: true,
     })));
-    commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    if (!multipleAccounts) {
+      commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    }
     return tipWithdrawnTransactions;
   },
   async fetchTransactions({
@@ -110,8 +114,8 @@ export default {
     console.log({ txs });
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent }),
-      dispatch('fetchTipWithdrawnTransactions', recent)]))
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent, address }),
+      dispatch('fetchTipWithdrawnTransactions', { recent, address })]))
       .forEach((f) => {
         if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
           txs[0].push(f);
@@ -128,40 +132,6 @@ export default {
     }
     console.log(1, txs);
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-  },
-  // eslint-disable-next-line no-unused-vars
-  async fetchTransactionsForAllAccounts({ state, getters, dispatch }, { limit }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null)) return [];
-
-    const txs = await Promise.all(getters.accounts.flatMap((acc) => [
-      state.middleware.getTxByAccount(acc.address, limit, 1)
-        .then(({ data }) => camelcaseKeysDeep(data))
-        .catch(() => []),
-      dispatch('fetchPendingTransactions', acc.address),
-    ]));
-
-    console.log({ txs });
-
-    // const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
-    // const amountOfTx = flatten(txs).length;
-    // flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent: true }),
-    //   dispatch('fetchTipWithdrawnTransactions', recent)]))
-    //   .forEach((f) => {
-    //     if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
-    //       txs[0].push(f);
-    //     }
-    //   });
-    // txs = orderBy(flatten(txs), ['microTime'], ['desc']);
-    // const network = getters.activeNetwork.networkId;
-    // if (state.transactions.pending[network]) {
-    //   state.transactions.pending[network].forEach(({ hash }) => {
-    //     if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
-    //       commit('removePendingTransactionByHash', { hash, network });
-    //     }
-    //   });
-    // }
-    // commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-    return flatten(txs).slice(0, 3);
   },
   pollCurrencies({ commit }) {
     return executeAndSetInterval(async () => {

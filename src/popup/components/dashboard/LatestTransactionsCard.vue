@@ -17,11 +17,11 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
+import { uniqBy } from 'lodash-es';
 import TransactionItem from '../TransactionItem.vue';
 import {
   IAccount,
   IDashboardTransaction,
-  ITokenList,
   ITransaction,
 } from '../../../types';
 import {
@@ -31,7 +31,6 @@ import {
 } from '../../utils';
 import {
   useGetter,
-  useState,
 } from '../../../composables/vuex';
 
 export default defineComponent({
@@ -40,13 +39,13 @@ export default defineComponent({
   setup(_, { root, emit }) {
     const latestTransactions = ref<IDashboardTransaction[]>([]);
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    // const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
     const accounts = useGetter<IAccount[]>('accounts');
 
-    function isFungibleTokenTx(transaction: IDashboardTransaction) {
-      return Object.keys(availableTokens.value).includes(transaction.tx.contractId);
-    }
+    // function isFungibleTokenTx(transaction: IDashboardTransaction) {
+    //   return Object.keys(availableTokens.value).includes(transaction.tx.contractId);
+    // }
 
     function assignTransactionToOwner(transaction: ITransaction, address: string) {
       return {
@@ -55,37 +54,87 @@ export default defineComponent({
       };
     }
 
+    function prepareDashboardTransaction(
+      callback: Function, address: string, resultKey?: string,
+    ) {
+      return callback().then((res: any) => {
+        const result = resultKey ? res[resultKey] : res;
+        console.log({ result, resultKey });
+        return (
+          result.map((transaction: ITransaction) => ({
+            ...transaction,
+            transactionOwner: address,
+          }))
+        );
+      });
+    }
+
     onMounted(async () => {
       await watchUntilTruthy(() => root.$store.state.middleware);
 
-      const allTransactionsPromise = accounts.value.map((account) => (
-        root.$store.state.middleware.getTxByAccount(account?.address, 3, 1).then((res: any) => (
-          res.data.map((transaction: ITransaction) => {
-            console.log({ transaction });
-            return (
-              assignTransactionToOwner(transaction, account.address)
-            );
-          })
-        ))
+      // const allTransactionsPromise = accounts.value.map(({ address }) => (
+      //   root.$store.state.middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
+      //     .then((res: any) => (
+      //       res.data.map((transaction: ITransaction) => {
+      //         console.log({ transaction });
+      //         return (
+      //           assignTransactionToOwner(transaction, address)
+      //         );
+      //       })
+      //     ))
+      // ));
+
+      const allTransactionsPromise = accounts.value.map(({ address }) => (
+        prepareDashboardTransaction(
+          () => root.$store.state.middleware.getTxByAccount(
+            address, DASHBOARD_TRANSACTION_LIMIT + 20,
+            1,
+          ),
+          address,
+          'data',
+        )
       ));
-      const allPendingTransactionsPromise = accounts.value.map((account) => (
-        root.$store.dispatch('fetchPendingTransactions', account?.address).then((res) => (
+
+      // eslint-disable-next-line no-unused-vars
+      const allPendingTransactionsPromise = accounts.value.map(({ address }) => (
+        root.$store.dispatch('fetchPendingTransactions', address).then((res) => (
           res.map((transaction: ITransaction) => (
-            assignTransactionToOwner(transaction, account.address)
+            assignTransactionToOwner(transaction, address)
           ))
         ))
       ));
 
-      const allTransactions = await Promise.all([
+      // eslint-disable-next-line no-unused-vars
+      const allTokenTransactionsPromise = accounts.value.map(({ address }) => (
+        root.$store.dispatch('fungibleTokens/getTokensHistory', { address, multipleAccounts: true })
+          .then((res) => (
+            res.map((transaction: ITransaction) => (
+              assignTransactionToOwner(transaction, address)
+            ))
+          ))
+      ));
+
+      const fetchTipWithdrawnTransactionsPromise = accounts.value.map(({ address }) => (
+        root.$store.dispatch('fetchTipWithdrawnTransactions', { address, multipleAccounts: true })
+          .then((res) => (
+            res.map((transaction: ITransaction) => (
+              assignTransactionToOwner(transaction, address)
+            ))
+          ))
+      ));
+
+      const allTransactions = await Promise.any([
         ...allTransactionsPromise,
         ...allPendingTransactionsPromise,
+        ...allTokenTransactionsPromise,
+        ...fetchTipWithdrawnTransactionsPromise,
       ]);
 
-      latestTransactions.value = [...allTransactions]
+      latestTransactions.value = uniqBy(allTransactions
         .flat()
-        .filter((t) => !t.tx.contractId || !isFungibleTokenTx(t))
-        .sort(sortTransactions)
-        .slice(0, DASHBOARD_TRANSACTION_LIMIT);
+        .sort(sortTransactions),
+      // .slice(0, DASHBOARD_TRANSACTION_LIMIT);
+      'hash');
 
       console.log('loaded');
       emit('loaded');

@@ -107,10 +107,14 @@ export function useTransactionToken({
     },
   );
 
-  const isDex = computed(() => transaction.value
-    && getDexContracts.value && transaction.value.tx.contractId && (
-    getDexContracts.value.router.includes(transaction.value.tx.contractId)
-    || getDexContracts.value.wae.includes(transaction.value.tx.contractId)
+  const isDex = computed(() => (
+    transaction.value
+      && getDexContracts.value
+      && transaction.value.tx.contractId
+      && (
+        getDexContracts.value.router.includes(transaction.value.tx.contractId)
+        || getDexContracts.value.wae.includes(transaction.value.tx.contractId)
+      )
   ));
 
   return {
