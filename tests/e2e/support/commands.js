@@ -1,7 +1,14 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
+import { STUB_CURRENCY } from '../../../src/popup/utils/config';
+import {
+  formatDate,
+  formatTime,
+  getLoginState,
+  CURRENCY_URL,
+  CURRENCIES_URL,
+} from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -41,7 +48,13 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('login', (options = {}, route) => {
+Cypress.Commands.add('mockExternalRequests', () => {
+  cy.intercept('GET', CURRENCY_URL, STUB_CURRENCY);
+  cy.intercept('GET', CURRENCIES_URL, { aeternity: { usd: 0.05 } });
+});
+
+Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
+  if (isMockingExternalRequests) cy.mockExternalRequests();
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
