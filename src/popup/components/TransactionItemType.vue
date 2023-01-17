@@ -24,6 +24,7 @@
       <span
         v-else-if="!transaction.pending"
         class="type"
+        :class="{ gray: transaction.transactionOwner }"
       >
         {{ label.text || label }}
       </span>
@@ -35,13 +36,13 @@
       </span>
       <span
         v-if="transaction.pending"
-        :class="{ date: !label.customPending }"
+        :class="{ gray: !label.customPending || transaction.transactionOwner }"
       >
         {{ label.customPending || $t('transaction.type.pending') }}...
       </span>
       <span
         v-else-if="!transaction.transactionOwner"
-        class="date"
+        class="gray"
       >{{ transactionDate }}</span>
       <span v-if="transaction.transactionOwner">
         {{ $t('by') }} {{ ownerName }}
@@ -189,7 +190,7 @@ export default defineComponent({
     }
   }
 
-  .date {
+  .gray {
     @extend %face-sans-12-regular;
 
     color: rgba(variables.$color-white, 0.75);

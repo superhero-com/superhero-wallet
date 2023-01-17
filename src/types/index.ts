@@ -178,7 +178,7 @@ export interface ITransaction {
 }
 
 export interface IDashboardTransaction extends ITransaction {
-  transactionOwner: string,
+  transactionOwner?: string,
 }
 
 export interface IPendingTransaction {

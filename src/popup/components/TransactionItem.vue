@@ -7,7 +7,6 @@
       :tokens="tokens"
       :error="isErrorTransaction"
     />
-    {{ isDex }}
     <div class="footer">
       <TransactionItemType
         :transaction="transaction"
@@ -81,7 +80,6 @@ export default defineComponent({
       transactionDate,
       isErrorTransaction,
       tokens,
-      isDex,
       formatDate,
       formatTime,
     };

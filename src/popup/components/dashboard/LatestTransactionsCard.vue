@@ -25,7 +25,7 @@ import {
   ITransaction,
 } from '../../../types';
 import {
-  DASHBOARD_TRANSACTION_LIMIT,
+  DASHBOARD_TRANSACTION_LIMIT, handleUnknownError,
   sortTransactions,
   watchUntilTruthy,
 } from '../../utils';
@@ -39,55 +39,29 @@ export default defineComponent({
   setup(_, { root, emit }) {
     const latestTransactions = ref<IDashboardTransaction[]>([]);
 
-    // const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-
     const accounts = useGetter<IAccount[]>('accounts');
-
-    // function isFungibleTokenTx(transaction: IDashboardTransaction) {
-    //   return Object.keys(availableTokens.value).includes(transaction.tx.contractId);
-    // }
-
-    function assignTransactionToOwner(transaction: ITransaction, address: string) {
-      return {
-        ...transaction,
-        transactionOwner: address,
-      };
-    }
 
     function prepareDashboardTransaction(
       callback: Function, address: string, resultKey?: string,
     ) {
       return callback().then((res: any) => {
         const result = resultKey ? res[resultKey] : res;
-        console.log({ result, resultKey });
         return (
           result.map((transaction: ITransaction) => ({
             ...transaction,
             transactionOwner: address,
           }))
         );
-      });
+      }).catch(handleUnknownError);
     }
 
     onMounted(async () => {
       await watchUntilTruthy(() => root.$store.state.middleware);
 
-      // const allTransactionsPromise = accounts.value.map(({ address }) => (
-      //   root.$store.state.middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
-      //     .then((res: any) => (
-      //       res.data.map((transaction: ITransaction) => {
-      //         console.log({ transaction });
-      //         return (
-      //           assignTransactionToOwner(transaction, address)
-      //         );
-      //       })
-      //     ))
-      // ));
-
       const allTransactionsPromise = accounts.value.map(({ address }) => (
         prepareDashboardTransaction(
           () => root.$store.state.middleware.getTxByAccount(
-            address, DASHBOARD_TRANSACTION_LIMIT + 20,
+            address, DASHBOARD_TRANSACTION_LIMIT,
             1,
           ),
           address,
@@ -95,35 +69,28 @@ export default defineComponent({
         )
       ));
 
-      // eslint-disable-next-line no-unused-vars
       const allPendingTransactionsPromise = accounts.value.map(({ address }) => (
-        root.$store.dispatch('fetchPendingTransactions', address).then((res) => (
-          res.map((transaction: ITransaction) => (
-            assignTransactionToOwner(transaction, address)
-          ))
-        ))
+        prepareDashboardTransaction(
+          () => root.$store.dispatch('fetchPendingTransactions', address),
+          address,
+        )
       ));
 
-      // eslint-disable-next-line no-unused-vars
       const allTokenTransactionsPromise = accounts.value.map(({ address }) => (
-        root.$store.dispatch('fungibleTokens/getTokensHistory', { address, multipleAccounts: true })
-          .then((res) => (
-            res.map((transaction: ITransaction) => (
-              assignTransactionToOwner(transaction, address)
-            ))
-          ))
+        prepareDashboardTransaction(
+          () => root.$store.dispatch('fungibleTokens/getTokensHistory', { address, multipleAccounts: true }),
+          address,
+        )
       ));
 
       const fetchTipWithdrawnTransactionsPromise = accounts.value.map(({ address }) => (
-        root.$store.dispatch('fetchTipWithdrawnTransactions', { address, multipleAccounts: true })
-          .then((res) => (
-            res.map((transaction: ITransaction) => (
-              assignTransactionToOwner(transaction, address)
-            ))
-          ))
+        prepareDashboardTransaction(
+          () => root.$store.dispatch('fetchTipWithdrawnTransactions', { address, multipleAccounts: true }),
+          address,
+        )
       ));
 
-      const allTransactions = await Promise.any([
+      const allTransactions = await Promise.all([
         ...allTransactionsPromise,
         ...allPendingTransactionsPromise,
         ...allTokenTransactionsPromise,
