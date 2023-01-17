@@ -40,7 +40,7 @@ export const showPopup = async (aepp, type, params) => {
           host,
         },
         ...(params?.message && { message: params.message }),
-        ...(params?.txObject && { transaction: params.txObject.params }),
+        ...(params?.txObject && { transaction: params.txObject.tx }),
       },
     };
   });

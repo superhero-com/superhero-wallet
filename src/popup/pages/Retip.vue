@@ -64,13 +64,13 @@ import {
   ref,
   computed,
 } from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   IAccount,
   IToken,
   IPendingTransaction,
-  ISdk,
+  ISuperHeroAeSdk,
 } from '../../types';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
@@ -80,7 +80,7 @@ import {
   IFormModel,
   useBalances,
 } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -112,10 +112,10 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const sdk = useGetter<ISuperHeroAeSdk>('sdkPlugin/sdk');
     const account = useGetter<IAccount>('account');
-    const tippingV1 = useState('tippingV1');
-    const tippingV2 = useState('tippingV2');
+    const tippingV1 = useGetter('tippingPlugin/tippingV1');
+    const tippingV2 = useGetter('tippingPlugin/tippingV2');
     const tippingSupported = useGetter('tippingSupported');
     const minTipAmount = useGetter('minTipAmount');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
@@ -181,7 +181,7 @@ export default defineComponent({
           tx: {
             callerId: account.value.address,
             contractId: tippingContract.value.deployInfo.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            type: Tag[Tag.ContractCallTx],
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
           },

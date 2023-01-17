@@ -1,6 +1,5 @@
-import { genSwaggerClient } from '@aeternity/aepp-sdk';
-import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
+import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
+import { genSwaggerClient } from '@aeternity/aepp-sdk-11';
 import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
@@ -9,7 +8,7 @@ import {
   NODE_STATUS_ERROR,
   fetchJson,
   executeAndSetInterval,
-  watchUntilTruthy,
+  mapObject,
 } from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';
@@ -103,7 +102,6 @@ export default async function initSdk() {
   store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
   try {
     await store.dispatch('sdkPlugin/initialize');
-    await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
         window.parent,
@@ -127,13 +125,13 @@ export default async function initSdk() {
                 onMessage(data, origin, source);
               });
             };
-            store.getters['sdkPlugin/sdk'].addRpcClient(connection);
+            const clientId = store.getters['sdkPlugin/sdk'].addRpcClient(connection);
             intervalId = executeAndSetInterval(() => {
               if (!getArrayOfAvailableFrames().includes(target)) {
                 clearInterval(intervalId);
                 return;
               }
-              store.getters['sdkPlugin/sdk'].shareWalletInfo(connection.sendMessage.bind(connection));
+              store.getters['sdkPlugin/sdk'].shareWalletInfo(clientId);
             }, 3000);
           }),
         3000,

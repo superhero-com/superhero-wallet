@@ -95,7 +95,7 @@ import {
   isContract,
 } from '../../utils';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useBalances, useSdk } from '../../../composables';
+import { useBalances } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -127,7 +127,6 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
@@ -197,7 +196,6 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
-        await getSdk();
         tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;

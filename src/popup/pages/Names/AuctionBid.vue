@@ -21,7 +21,7 @@
         <DetailsItem :label="$t('total')">
           <template #value>
             <TokenAmount
-              :amount="+amountTotal"
+              :amount="+totalsAmount"
             />
           </template>
         </DetailsItem>
@@ -43,6 +43,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
+import { AensName } from '@aeternity/aepp-sdk';
 import { IAuctionBid } from '../../../types';
 import { useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
@@ -72,7 +73,7 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+    const { sdk } = useSdk({ store: root.$store });
 
     const loading = ref(false);
     const amount = ref('');
@@ -92,11 +93,10 @@ export default defineComponent({
     });
 
     async function bid() {
-      const sdk = await getSdk();
       if (amountError.value) return;
       try {
         loading.value = true;
-        await sdk.aensBid(props.name, aeToAettos(amount.value));
+        await sdk.value.aensBid(props.name as AensName, aeToAettos(amount.value), {});
         root.$store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),

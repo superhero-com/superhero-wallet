@@ -25,11 +25,9 @@ export default (store) => {
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
-      getDefault: ({ defaults }, getters, _, { activeNetwork }) => (address) => {
-        const sdk = store.getters['sdkPlugin/sdk'];
+      getDefault: ({ defaults }, _, __, { activeNetwork }) => (address) => {
         if (!defaults) return '';
-        let { networkId } = activeNetwork;
-        if (sdk) networkId = sdk.getNetworkId();
+        const { networkId } = activeNetwork;
         return defaults[`${address}-${networkId}`];
       },
       getPreferred: (
@@ -52,8 +50,7 @@ export default (store) => {
         state.owned = names;
       },
       async setDefault({ defaults }, { address, name }) {
-        const sdk = await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-        const networkId = sdk.getNetworkId();
+        const networkId = await store.getters['sdkPlugin/sdk'].api.getNetworkId();
         if (name) Vue.set(defaults, `${address}-${networkId}`, name);
         else Vue.delete(defaults, `${address}-${networkId}`);
       },
@@ -61,8 +58,8 @@ export default (store) => {
         const index = state.owned.findIndex((n) => n.name === name);
         Vue.set(state.owned[index], 'autoExtend', value);
       },
-      setPreferred({ preferred }, { address, name }) {
-        const networkId = store.getters['sdkPlugin/sdk'].getNetworkId();
+      async setPreferred({ preferred }, { address, name }) {
+        const { networkId } = await store.getters['sdkPlugin/sdk'].api.getNetworkId();
         if (name) Vue.set(preferred, `${address}-${networkId}`, name);
         else Vue.delete(preferred, `${address}-${networkId}`);
       },
@@ -210,7 +207,7 @@ export default (store) => {
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).height();
+      const height = await (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).getHeight();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)

@@ -3,7 +3,7 @@ import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/v
 import { required } from 'vee-validate/dist/rules.esm';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { Crypto } from '@aeternity/aepp-sdk';
+import { isAddressValid } from '@aeternity/aepp-sdk';
 import { i18n } from './languages';
 import {
   isNotFoundError,
@@ -40,7 +40,7 @@ Object.assign(ErrorBag.prototype, {
 
 Validator.extend('url', (url) => isValidURL(url));
 Validator.extend('required', required);
-Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
+Validator.extend('account', (value) => isAddressValid(value) || checkAensName(value));
 Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
@@ -115,7 +115,7 @@ export default (store) => {
 
   const checkNameRegisteredAddress = async (value) => {
     try {
-      return Crypto.isAddressValid(value) || await checkName(NAME_STATES.REGISTERED_ADDRESS)(
+      return isAddressValid(value) || await checkName(NAME_STATES.REGISTERED_ADDRESS)(
         value, [],
       );
     } catch (error) {
@@ -142,7 +142,7 @@ export default (store) => {
   });
   Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
-    : Crypto.isAddressValid(value) || validateTipUrl(value)));
+    : isAddressValid(value) || validateTipUrl(value)));
   Validator.extend('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);

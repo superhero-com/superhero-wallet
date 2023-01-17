@@ -57,8 +57,8 @@ export default {
       return dispatch(`${getModule(active).name}/sign`, data);
     },
 
-    signTransaction({ getters: { active, getModule }, dispatch }, txBase64) {
-      return dispatch(`${getModule(active).name}/signTransaction`, txBase64);
+    signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, options }) {
+      return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, options });
     },
   },
 };

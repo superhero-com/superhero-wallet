@@ -3,21 +3,17 @@
 </template>
 
 <script>
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk';
 import { MODAL_DEFAULT } from '../utils';
-import { useSdk } from '../../composables';
 
 export default {
   props: {
     secretKey: { type: String, required: true },
   },
   async mounted() {
-    const { getSdk } = useSdk({ store: this.$store });
-    await getSdk();
-
     try {
       // sg_ prefix was chosen as a dummy to decode from base58Check
-      await this.$store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${this.secretKey}`, 'sg'));
+      await this.$store.dispatch('invites/claim', decode(`sg_${this.secretKey}`, 'sg'));
       await this.$store.dispatch('modals/open', {
         name: MODAL_DEFAULT,
         msg: 'You have successfully claimed tokens by the invite link',

@@ -57,7 +57,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { getMinimumNameFee } from '@aeternity/aepp-sdk';
 import {
   MAGNITUDE,
   MODAL_DEFAULT,
@@ -96,7 +96,7 @@ export default {
     },
     nameFee() {
       return convertToken(
-        TxBuilderHelper.getMinimumNameFee(`${this.name}${AENS_DOMAIN}`),
+        getMinimumNameFee(`${this.name}${AENS_DOMAIN}`),
         -MAGNITUDE,
       ).toFixed(4);
     },

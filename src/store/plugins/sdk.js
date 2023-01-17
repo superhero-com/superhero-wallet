@@ -1,12 +1,22 @@
-import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
+import {
+  AeSdkWallet,
+  sign,
+  Node,
+  WALLET_TYPE,
+  messageToHash,
+  unpackTx,
+  RpcRejectedByUserError,
+  CompilerHttp,
+} from '@aeternity/aepp-sdk';
 import { isEmpty, isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
-import { getAeppUrl, showPopup } from '../../background/popupHandler';
+import { showPopup } from '../../background/popupHandler';
 import { MODAL_CONFIRM_CONNECT, watchUntilTruthy } from '../../popup/utils';
-import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
+import { IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../../lib/environment';
 
 export default (store) => {
   let sdk;
+  const aeppInfo = {};
 
   store.registerModule('sdkPlugin', {
     namespaced: true,
@@ -30,141 +40,130 @@ export default (store) => {
 
         const { activeNetwork } = store.getters;
 
-        const cbAccept = (_, { accept }) => accept();
-        const signCb = async (_, action, origin) => {
-          const { method, params } = action;
+        const signCb = async (payload, options, origin = null) => {
           try {
-            const originUrl = new URL(origin);
-            const permission = await store.dispatch('permissions/checkPermissions', {
-              host: originUrl.host,
-              method,
-              params: params?.txObject?.params,
-            });
-            if (method === 'message.sign') {
-              if (!permission) {
-                await store.dispatch('modals/open', {
-                  name: 'confirm-message-sign',
-                  message: params.message,
-                  app: {
-                    name: originUrl.host,
-                    host: originUrl.host,
-                    protocol: originUrl.protocol,
-                  },
-                });
-              }
-              action.accept({ onAccount: { sign: () => {}, address: () => {} } });
-              return;
-            }
-            action.accept(null, {
-              onAccount: {
-                sign: async () => store.dispatch('accounts/signTransaction', {
-                  txBase64: params.tx,
-                  opt: {
-                    modal: !permission,
-                    host: originUrl.host,
-                  },
-                }),
-                address: () => {},
+            const host = origin ? new URL(origin).host : null;
+            const permission = (!host && IS_CORDOVA)
+              ? true
+              : await store.dispatch('permissions/checkPermissions', {
+                host,
+                method: 'sign',
+                params: payload,
+              });
+
+            return store.dispatch('accounts/signTransaction', {
+              txBase64: payload,
+              options: {
+                ...options,
+                modal: !permission,
+                host,
               },
             });
           } catch (error) {
-            action.deny();
-            if (error.message !== 'Rejected by user') throw error;
+            throw new RpcRejectedByUserError(error.message);
           }
-          action.deny();
         };
 
-        const signCbBackground = async (type, aepp, action) => {
-          const { method, params } = action;
+        const signCbBackground = async (method, payload, options) => {
+          const aepp = aeppInfo[options.aeppRpcClientId];
           if (
             (await store.dispatch('permissions/checkPermissions', {
-              host: getAeppUrl(aepp).hostname,
+              host: new URL(aepp.origin).host,
               method,
-              params: params?.txObject?.params,
+              params: options,
             }))
-            || (await showPopup(aepp, type, params).then(
+            || (await showPopup(
+              aepp.origin,
+              method === 'transaction.sign' ? 'sign' : 'messageSign',
+              { ...options, ...(method === 'transaction.sign') ? { tx: payload, txObject: unpackTx(payload) } : { message: payload } },
+            ).then(
               () => true,
               () => false,
             ))
           ) {
-            action.accept.apply(null, [
-              ...(method === 'message.sign' ? [] : [null]),
-              { onAccount: { sign: () => {}, address: () => {} } },
-            ]);
-            return;
+            if (method === 'message.sign') {
+              return store.dispatch('accounts/sign', messageToHash(payload));
+            }
+            return store.dispatch('accounts/signTransaction', {
+              txBase64: payload,
+              options: {
+                ...options,
+                modal: false,
+                host: aepp.origin,
+              },
+            });
           }
-          action.deny();
+          throw new RpcRejectedByUserError('Rejected by user');
         };
 
-        sdk = await RpcWallet.compose({
-          methods: {
-            getApp(aeppUrl) {
-              return new App(aeppUrl);
-            },
-            async address(...args) {
-              const { address } = store.getters.account;
-              const app = args.pop();
-              if (
-                app instanceof App
-                && !(await store.dispatch('permissions/requestAddressForHost', {
-                  host: app.host.host,
-                  name: app.host.hostname,
-                  address,
-                  connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
-                    ? showPopup(app.host.href, 'connectConfirm')
-                    : store.dispatch('modals/open', {
-                      name: MODAL_CONFIRM_CONNECT,
-                      app: {
-                        name: app.host.hostname,
-                        icons: [],
-                        protocol: app.host.protocol,
-                        host: app.host.host,
-                      },
-                    })),
-                }))
-              ) return Promise.reject(new Error('Rejected by user'));
-              return address;
-            },
-            sign: (data) => (IS_EXTENSION_BACKGROUND
-              ? Crypto.sign(data, store.getters.account.secretKey)
-              : store.dispatch('accounts/sign', data)),
-            ...(IS_EXTENSION_BACKGROUND ? {} : {
-              signTransaction: (txBase64, opt) => (opt.onAccount
-                ? opt.onAccount.sign()
-                : store.dispatch('accounts/signTransaction', { txBase64, opt })),
-            }),
-          },
-        })({
-          nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
-          compilerUrl: activeNetwork.compilerUrl,
+        // TODO: move this to a seperate file with typescript and combine the custom type
+        class SuperheroSdk extends AeSdkWallet {
+          _resolveAccount = () => ({
+            address: store.getters.account.address,
+            sign: (unsigned) => (IS_EXTENSION_BACKGROUND
+              ? sign(unsigned, store.getters.account.secretKey)
+              : store.dispatch('accounts/sign', unsigned)),
+            signMessage: (message, options) => IS_EXTENSION_BACKGROUND
+              ? signCbBackground('message.sign', message, options)
+              : store.dispatch('accounts/sign', messageToHash(message)),
+            signTransaction: (txBase64, options, origin) => IS_EXTENSION_BACKGROUND
+              ? signCbBackground('transaction.sign', txBase64, options)
+              : signCb(txBase64, options, origin),
+          });
+
+            getAccounts = () => ({
+              current: { [store.getters.account.address]: {} },
+              connected: {
+                ...store.getters.accounts
+                  .reduce((p, { address }) => ({
+                    ...p, ...address !== store.getters.account.address ? { [address]: {} } : {},
+                  }), {}),
+              },
+            });
+
+            addresses = () => store.getters.accounts.map(
+              (account) => account.address,
+            );
+        }
+
+        sdk = new SuperheroSdk({
           name: 'Superhero',
-          onConnection: cbAccept,
+          nodes: [{ name: activeNetwork.name, instance: new Node(activeNetwork.url) }],
+          id: 'Superhero Wallet',
+          type: WALLET_TYPE.extension,
+          onCompiler: new CompilerHttp(activeNetwork.compilerUrl),
+          onConnection(aeppId, params, origin) {
+            aeppInfo[aeppId] = { ...params, origin };
+          },
           onDisconnect(_, client) {
             client.disconnect();
           },
-          async onSubscription(aepp, { accept, deny }, origin) {
-            let activeAccount;
-            try {
-              const url = IS_EXTENSION_BACKGROUND ? getAeppUrl(aepp) : new URL(origin);
-              activeAccount = await this.address(this.getApp(url));
-            } catch (e) {
-              deny();
-              return;
-            }
-            accept({
-              accounts: {
-                current: { [activeAccount]: {} },
-                connected: {
-                  ...store.getters.accounts
-                    .reduce((p, { address }) => ({
-                      ...p, ...address !== activeAccount ? { [address]: {} } : {},
-                    }), {}),
-                },
-              },
-            });
+          async onSubscription(aeppId) {
+            const aepp = aeppInfo[aeppId];
+            const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
+            const app = new App(url);
+            const { address } = store.getters.account;
+            if (
+              app instanceof App
+              && !(await store.dispatch('permissions/requestAddressForHost', {
+                host: app.host.host,
+                name: app.host.hostname,
+                address,
+                connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
+                  ? showPopup(app.host.href, 'connectConfirm')
+                  : store.dispatch('modals/open', {
+                    name: MODAL_CONFIRM_CONNECT,
+                    app: {
+                      name: app.host.hostname,
+                      icons: [],
+                      protocol: app.host.protocol,
+                      host: app.host.host,
+                    },
+                  })),
+              }))
+            ) return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+            return address;
           },
-          onSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'sign') : signCb,
-          onMessageSign: IS_EXTENSION_BACKGROUND ? signCbBackground.bind(null, 'messageSign') : signCb,
           onAskAccounts: (_, { accept }) => accept(store.getters.accounts
             .map(({ address }) => address)),
         });
@@ -179,7 +178,7 @@ export default (store) => {
       if (isEqual(network, oldNetwork)) return;
       await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
       sdk.pool.delete(network.name);
-      sdk.addNode(network.name, await Node({ url: network.url }), true);
+      sdk.addNode(network.name, new Node(network.url), true);
     },
   );
 
@@ -187,7 +186,7 @@ export default (store) => {
     ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
     async () => {
       await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-      Object.values(sdk.rpcClients)
+      Object.values(sdk._clients)
         .filter((client) => client.isConnected() && client.isSubscribed())
         .forEach((client) => client.setAccounts({
           current: { [store.getters.account.address]: {} },

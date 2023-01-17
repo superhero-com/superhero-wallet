@@ -2,11 +2,17 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { isFQDN, isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
-  SCHEMA,
-  Crypto,
-  AmountFormatter,
-  TxBuilder,
-  TxBuilderHelper,
+  Tag,
+  genSalt,
+  isAddressValid,
+  AE_AMOUNT_FORMATS,
+  getMinimumNameFee,
+  formatAmount,
+  ABI_VERSIONS,
+  VM_VERSIONS,
+  NAME_TTL,
+  buildTx as rawBuildTx,
+  encode,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import {
@@ -26,13 +32,13 @@ import { IS_FIREFOX } from '../../lib/environment';
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
-export const aeToAettos = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+export const aeToAettos = (v) => formatAmount(v.toString(), {
+  denomination: AE_AMOUNT_FORMATS.AE,
+  targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
 });
-export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+export const aettosToAe = (v) => formatAmount(v.toString(), {
+  denomination: AE_AMOUNT_FORMATS.AETTOS,
+  targetDenomination: AE_AMOUNT_FORMATS.AE,
 });
 
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
@@ -44,34 +50,33 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   return amount.toFixed(0);
 };
 
-export const calculateFee = (type, params) => {
-  const MIN_FEE = TxBuilder.calculateMinFee(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
+export const calculateFee = (type, options) => {
+  const params = {
+    ...type === Tag.SpendTx ? {
+      senderId: STUB_ADDRESS,
+      recipientId: STUB_ADDRESS,
+    } : {},
+    amount: MAX_UINT256,
+    ttl: MAX_UINT256,
+    nonce: MAX_UINT256,
+    ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
+    abiVersion: ABI_VERSIONS.SOPHIA,
+    callData: STUB_CALLDATA,
+    gas: 0,
+    ...options,
+    ...type === Tag.NameClaimTx ? { vsn: 2 } : {},
+  };
+  const { fee } = rawBuildTx(params, type).txObject;
+  return BigNumber(fee).shiftedBy(-MAGNITUDE);
 };
 
-export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+export const calculateNameClaimFee = (name) => calculateFee(Tag.NameClaimTx, {
   accountId: STUB_ADDRESS,
   name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
+  nameSalt: genSalt(),
+  nameFee: getMinimumNameFee(name),
   nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
+  ttl: NAME_TTL,
 });
 
 export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
@@ -108,11 +113,11 @@ export const postJson = (url, options) => fetchJson(url, {
   body: options.body && JSON.stringify(options.body),
 });
 
-export const checkAddress = (value) => Crypto.isAddressValid(value, 'ak')
-  || Crypto.isAddressValid(value, 'ct')
-  || Crypto.isAddressValid(value, 'ok');
+export const checkAddress = (value) => isAddressValid(value, 'ak')
+  || isAddressValid(value, 'ct')
+  || isAddressValid(value, 'ok');
 
-export const checkAddressOrChannel = (value) => checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+export const checkAddressOrChannel = (value) => checkAddress(value) || isAddressValid(value, 'ch');
 
 export const checkAensName = (value) => (
   value.length <= AENS_NAME_MAX_LENGTH
@@ -172,10 +177,10 @@ export const getTwitterAccountUrl = (url) => {
 
 export const isNotFoundError = (error) => error.statusCode === 404;
 
-export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
+export const isAccountNotFoundError = (error) => isNotFoundError(error) && error.response.parsedBody.reason === 'Account not found';
 
 export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
+  if (Tag[transaction.tx.type] !== Tag.ContractCallTx) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
@@ -277,7 +282,7 @@ export const getHdWalletAccount = (wallet, accountIdx = 0) => {
   return {
     ...keyPair,
     idx: accountIdx,
-    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+    address: encode(keyPair.publicKey, 'ak'),
   };
 };
 
@@ -306,9 +311,8 @@ export const getLoginState = async ({
   };
 };
 
-export const buildTx = (txtype) => TxBuilder.buildTx({ ...txParams[txtype] }, txtype);
-
 export const isValidURL = (url) => {
   const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
   return isURL(url) || !!pattern.test(url);
 };
+export const buildTx = (txtype) => rawBuildTx({ ...txParams[txtype] }, txtype);

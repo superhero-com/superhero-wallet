@@ -1,5 +1,10 @@
-import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import {
+  sign,
+  unpackTx,
+  Tag,
+  decode,
+  buildTx,
+} from '@aeternity/aepp-sdk';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -44,30 +49,30 @@ export default {
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { account } }, data) {
-      return Crypto.sign(data, account.secretKey);
+      return sign(data, account.secretKey);
     },
     async confirmRawDataSigning({ dispatch }, data) {
       await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data }, { root: true });
     },
-    async confirmTxSigning({ dispatch }, { encodedTx, host }) {
+    async confirmTxSigning({ dispatch }, { txBase64, host }) {
       let txObject;
       try {
-        txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+        txObject = unpackTx(txBase64).tx;
       } catch (e) {
-        await dispatch('confirmRawDataSigning', encodedTx);
+        await dispatch('confirmRawDataSigning', txBase64);
         return;
       }
       const SUPPORTED_TX_TYPES = [
-        SCHEMA.TX_TYPE.spend,
-        SCHEMA.TX_TYPE.contractCreate,
-        SCHEMA.TX_TYPE.contractCall,
-        SCHEMA.TX_TYPE.namePreClaim,
-        SCHEMA.TX_TYPE.nameClaim,
-        SCHEMA.TX_TYPE.nameUpdate,
-        SCHEMA.TX_TYPE.nameTransfer,
+        Tag.SpendTx,
+        Tag.ContractCreateTx,
+        Tag.ContractCallTx,
+        Tag.NamePreclaimTx,
+        Tag.NameClaimTx,
+        Tag.NameUpdateTx,
+        Tag.NameTransferTx,
       ];
-      if (!SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag])) {
-        await dispatch('confirmRawDataSigning', encodedTx);
+      if (!SUPPORTED_TX_TYPES.includes(txObject.tag)) {
+        await dispatch('confirmRawDataSigning', txBase64);
         return;
       }
 
@@ -87,18 +92,17 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', data);
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction({ dispatch }, {
       txBase64,
-      opt: { modal = true, host = null },
+      options: { modal = true, host = null },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) await dispatch('confirmTxSigning', { txBase64, host });
       const signature = await dispatch(
         'signWithoutConfirmation',
-        Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+        Buffer.concat([Buffer.from(await this.getters['sdkPlugin/sdk'].api.getNetworkId()), Buffer.from(encodedTx)]),
       );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+      return buildTx({ encodedTx, signatures: [signature] }, Tag.SignedTx).tx;
     },
   },
 };

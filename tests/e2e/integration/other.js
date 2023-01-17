@@ -1,4 +1,4 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { STUB_CONTRACT_ADDRESS, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
 
 const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
@@ -11,7 +11,7 @@ const txs = [
     tipUrl: 'http://test.com',
     time: Date.now(),
     tx: {
-      type: SCHEMA.TX_TYPE.contractCall,
+      type: Tag.ContractCallTx,
       callerId: ACCOUNT_ADDRESS,
       contractId: STUB_CONTRACT_ADDRESS,
       function: 'tip',
@@ -27,7 +27,7 @@ const txs = [
     tx: {
       senderId: ACCOUNT_ADDRESS,
       recipientId: ACCOUNT_ADDRESS,
-      type: SCHEMA.TX_TYPE.spend,
+      type: Tag.SpendTx,
     },
   },
   {
@@ -41,7 +41,7 @@ const txs = [
     tx: {
       callerId: ACCOUNT_ADDRESS,
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      type: SCHEMA.TX_TYPE.contractCall,
+      type: Tag.ContractCallTx,
       function: 'transfer',
     },
   },

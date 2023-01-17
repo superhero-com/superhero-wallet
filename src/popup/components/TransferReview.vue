@@ -96,7 +96,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { useDeepLinkApi } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
@@ -105,7 +105,7 @@ import {
   convertToken,
   escapeSpecialChars,
 } from '../utils';
-import { IAccount, IPendingTransaction, ISdk } from '../../types';
+import { IAccount, IPendingTransaction, ISuperHeroAeSdk } from '../../types';
 import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -136,14 +136,14 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const loading = ref<boolean>(false);
     const account = computed<IAccount>(() => root.$store.getters.account);
-    const tippingV1 = computed(() => root.$store.state.tippingV1);
-    const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const tippingV1 = computed(() => root.$store.getters['tippingPlugin/tippingV1']);
+    const tippingV2 = computed(() => root.$store.getters['tippingPlugin/tippingV2']);
+    const sdk = useGetter<ISuperHeroAeSdk>('sdkPlugin/sdk');
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
-    const tippingContract = computed(() => tippingV2.value || tippingV1.value);
+    const tippingContract = tippingV2.value || tippingV1.value;
     const isSelectedAssetAex9 = computed(() => (
       !!props.transferData.selectedAsset
       && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
@@ -195,7 +195,7 @@ export default defineComponent({
             tx: {
               callerId: account.value.address,
               contractId: selectedAsset.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
+              type: Tag[Tag.ContractCallTx],
               function: 'transfer',
             },
           };
@@ -209,7 +209,7 @@ export default defineComponent({
             tx: {
               senderId: account.value.address,
               recipientId: recipient,
-              type: SCHEMA.TX_TYPE.spend,
+              type: Tag[Tag.SpendTx],
             },
           };
 
@@ -238,16 +238,15 @@ export default defineComponent({
             selectedAsset.contractId,
             props.amount,
           ]);
-          txResult = await tippingV2.value.methods.tip_token(
+          txResult = await tippingV2.value.tip_token(
             recipient,
             escapeSpecialChars(note),
             selectedAsset.contractId,
             amount,
           );
         } else {
-          txResult = await tippingContract.value.call(
-            'tip',
-            [recipient, escapeSpecialChars(note)],
+          txResult = await tippingContract.tip(
+            recipient, escapeSpecialChars(note),
             {
               amount,
               waitMined: false,
@@ -261,8 +260,8 @@ export default defineComponent({
           tipUrl: recipient,
           tx: {
             callerId: account.value.address,
-            contractId: tippingContract.value.deployInfo.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            contractId: tippingContract.$options.address,
+            type: Tag[Tag.ContractCallTx],
             function: 'tip',
             selectedTokenContractId: selectedAsset.contractId,
           },

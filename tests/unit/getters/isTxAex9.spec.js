@@ -1,3 +1,4 @@
+import { Tag } from '@aeternity/aepp-sdk';
 import getters from '../../../src/store/getters';
 import { AETERNITY_CONTRACT_ID, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
 
@@ -17,7 +18,7 @@ const tests = [{
       ],
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
       function: 'change_allowance',
-      type: 'ContractCallTx',
+      type: Tag[Tag.ContractCallTx],
     },
   },
   result: true,
@@ -25,7 +26,7 @@ const tests = [{
   transaction: {
     type: 'spend',
     tx: {
-      type: 'SpendTx',
+      type: Tag[Tag.SpendTx],
     },
   },
   result: false,
@@ -44,7 +45,7 @@ const tests = [{
       ],
       contractId: 'ct_2qFg7M6MFdQioY3LQMUJh4b4awhK6rsEdi9pCf4cigkmFjQGkv',
       function: 'transfer',
-      type: 'ContractCallTx',
+      type: Tag[Tag.ContractCallTx],
     },
   },
   result: true,
@@ -55,7 +56,7 @@ const tests = [{
       amount: 743000000000000000,
       recipientId: 'nm_UHPJ119gp9HoFJuTxukbP29z52Nm2jHNjJXvfRe77X3X5yXEv',
       senderId: 'ak_BrJErWKWYUNqGcXzDniXf13saPV6H1dsh1NaDsm913vbPGAH6',
-      type: 'SpendTx',
+      type: Tag[Tag.SpendTx],
     },
   },
   result: false,
@@ -67,19 +68,7 @@ const tests = [{
       callerId: 'ak_2ZjEWgr4BaLrqEHwRvgWwp4E834xnsknJ1HxSnCkdsHH2Mm5No',
       contractId: 'ct_7tTzPfvv3Vx8pCEcuk1kmgtn4sFsYCQDzLi1LvFs8T5PJqgsC',
       recipientId: 'ak_2AVeRypSdS4ZosdKWW1C4avWU4eeC2Yq7oP7guBGy8jkxdYVUy',
-      type: 'ContractCallTx',
-    },
-  },
-  result: true,
-}, {
-  transaction: {
-    amount: 195697771897021980,
-    incomplete: true,
-    tx: {
-      callerId: 'ak_2ZjEWgr4BaLrqEHwRvgWwp4E834xnsknJ1HxSnCkdsHH2Mm5No',
-      contractId: 'ct_7tTzPfvv3Vx8pCEcuk1kmgtn4sFsYCQDzLi1LvFs8T5PJqgsC',
-      recipientId: 'ak_2AVeRypSdS4ZosdKWW1C4avWU4eeC2Yq7oP7guBGy8jkxdYVUy',
-      type: 'contractCallTx', // should be case insensitive
+      type: Tag[Tag.ContractCallTx],
     },
   },
   result: true,
@@ -90,7 +79,7 @@ const tests = [{
       callerId: 'ak_2AVeRypSdS4ZosdKWW1C4avWU4eeC2Yq7oP7guBGy8jkxdYVUy',
       contractId: 'ct_2qFg7M6MFdQioY3LQMUJh4b4awhK6rsEdi9pCf4cigkmFjQGkv',
       function: 'tip',
-      type: 'ContractCallTx',
+      type: Tag[Tag.ContractCallTx],
       selectedTokenContractId: AETERNITY_CONTRACT_ID,
     },
   },
@@ -102,7 +91,7 @@ const tests = [{
       callerId: 'ak_2AVeRypSdS4ZosdKWW1C4avWU4eeC2Yq7oP7guBGy8jkxdYVUy',
       contractId: 'ct_2qFg7M6MFdQioY3LQMUJh4b4awhK6rsEdi9pCf4cigkmFjQGkv',
       function: 'tip',
-      type: 'ContractCallTx',
+      type: Tag[Tag.ContractCallTx],
       selectedTokenContractId: 'ct_7tTzPfvv3Vx8pCEcuk1kmgtn4sFsYCQDzLi1LvFs8T5PJqgsC',
     },
   },

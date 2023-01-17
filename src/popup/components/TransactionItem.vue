@@ -52,8 +52,9 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { lowerFirst } from 'lodash-es';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -69,7 +70,7 @@ import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
 import { useTransactionToken } from '../../composables';
 import { useGetter } from '../../composables/vuex';
-import { ITransaction, TransactionType } from '../../types';
+import { ITransaction } from '../../types';
 
 export default defineComponent({
   components: {
@@ -100,12 +101,18 @@ export default defineComponent({
     });
 
     const labels = computed(() => {
-      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;
+      const transactionTypes = (root.$t('transaction.type') as Record<string, any>);
 
-      if (txType.value?.startsWith('name')) {
-        return [AENS, transactionTypes[txType.value]];
+      if (txType.value === null) return [];
+      if (txType.value === Tag.NamePreclaimTx
+          || txType.value === Tag.NameClaimTx
+          || txType.value === Tag.NameTransferTx
+          || txType.value === Tag.NameUpdateTx
+          || txType.value === Tag.NameRevokeTx
+      ) {
+        return [AENS, transactionTypes[lowerFirst(Tag[txType.value])]];
       }
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
+      if (txType.value === Tag.SpendTx) {
         return [
           root.$t('transaction.type.spendTx'),
           getTxDirection.value(props.transaction) === 'sent'
@@ -141,8 +148,7 @@ export default defineComponent({
             : root.$t('transaction.spendType.out'),
         ];
       }
-      if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
+      if (txType.value === Tag.ContractCallTx
         && availableTokens.value[props.transaction.tx.contractId]
         && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)
       ) {
@@ -153,8 +159,7 @@ export default defineComponent({
             : root.$t('transaction.spendType.in'),
         ];
       }
-
-      return props.transaction.pending ? [] : [transactionTypes[txType.value]];
+      return (props.transaction.pending) ? [] : [transactionTypes[lowerFirst(Tag[txType.value])]];
     });
 
     const fiatAmount = computed(() => {

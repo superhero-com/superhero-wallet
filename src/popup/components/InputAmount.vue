@@ -36,10 +36,10 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { AETERNITY_SYMBOL, calculateFee } from '../utils';
-import { useBalances, useSdk } from '../../composables';
+import { useBalances } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import InputField from './InputField.vue';
 
@@ -52,7 +52,6 @@ export default defineComponent({
     noToken: Boolean,
   },
   setup(props, { emit, root }) {
-    const { getSdk } = useSdk({ store: root.$store });
     const { balance } = useBalances({ store: root.$store });
 
     const fee = ref(new BigNumber(0));
@@ -63,8 +62,7 @@ export default defineComponent({
     const currencyAmount = computed(() => convertToCurrencyFormatted.value(props.value || 0));
 
     onMounted(async () => {
-      const sdk = await getSdk();
-      fee.value = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
+      fee.value = await calculateFee(Tag.SpendTx);
     });
 
     watch(hasError, (val) => emit('error', val));

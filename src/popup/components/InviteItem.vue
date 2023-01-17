@@ -64,8 +64,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
-import { APP_LINK_WEB, watchUntilTruthy, formatDate } from '../utils';
+import { AE_AMOUNT_FORMATS, encode, getAddressFromPriv } from '@aeternity/aepp-sdk';
+import { APP_LINK_WEB, formatDate } from '../utils';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
@@ -92,7 +92,7 @@ export default {
     ...mapGetters('sdkPlugin', ['sdk']),
     link() {
       // sg_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (TxBuilderHelper.encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);
+      const secretKey = (encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);
       return new URL(
         this.$router
           .resolve({ name: 'invite-claim', params: { secretKey } })
@@ -101,7 +101,7 @@ export default {
       );
     },
     address() {
-      return Crypto.getAddressFromPriv(this.secretKey);
+      return getAddressFromPriv(this.secretKey);
     },
   },
   watch: {
@@ -118,10 +118,9 @@ export default {
       this.$store.commit('invites/delete', this.secretKey);
     },
     async updateBalance() {
-      await watchUntilTruthy(() => this.sdk);
       this.inviteLinkBalance = parseFloat(
         await this.sdk
-          .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
+          .getBalance(this.address, { format: AE_AMOUNT_FORMATS.AE })
           .catch(() => 0),
       );
     },
@@ -147,7 +146,7 @@ export default {
         if (this.topUpAmount > 0) {
           await this.sdk.spend(this.topUpAmount, this.address, {
             payload: 'referral',
-            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+            denomination: AE_AMOUNT_FORMATS.AE,
           });
           await this.updateBalance();
         }

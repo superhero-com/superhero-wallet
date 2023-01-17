@@ -1,4 +1,4 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { ABI_VERSIONS, VM_VERSIONS, Tag } from '@aeternity/aepp-sdk';
 import { MAX_UINT256 } from './constants';
 
 export const testAccount = {
@@ -100,24 +100,24 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-  abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+  ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
+  abiVersion: ABI_VERSIONS.SOPHIA,
   callData:
     'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF',
 };
 export const txParams = {
-  [SCHEMA.TX_TYPE.contractCreate]: {
+  [Tag.ContractCreateTx]: {
     ownerId: testAccount.address,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.contractCall]: {
+  [Tag.ContractCallTx]: {
     contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
     callerId: testAccount.address,
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.spend]: {
+  [Tag.SpendTx]: {
     senderId: testAccount.address,
     recipientId,
     ...commonParams,

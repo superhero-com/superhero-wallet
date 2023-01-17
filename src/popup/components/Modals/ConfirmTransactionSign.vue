@@ -119,6 +119,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
@@ -230,7 +231,7 @@ export default {
       return this.swapDirection === 'maxSpent' ? this.tokenList[0] : this.tokenList[1];
     },
     completeTransaction() {
-      return { ...this.transaction, function: this.txFunction };
+      return { ...this.transaction, function: this.txFunction, type: Tag[this.transaction.tag] };
     },
     isProvideLiquidity() {
       return DEX_TRANSACTION_TAGS[this.txFunction] === DEX_PROVIDE_LIQUIDITY;
@@ -240,11 +241,10 @@ export default {
     if (this.transaction.contractId) {
       try {
         this.loading = true;
-        const { getSdk } = useSdk({ store: this.$store });
+        const { sdk } = useSdk({ store: this.$store });
         setTimeout(() => { this.loading = false; }, 20000);
-        const sdk = await getSdk();
-        const { bytecode } = await sdk.getContractByteCode(this.transaction.contractId);
-        const txParams = await sdk.compilerApi.decodeCalldataBytecode({
+        const { bytecode } = await sdk.value.getContractByteCode(this.transaction.contractId);
+        const txParams = await sdk.value.compilerApi.decodeCalldataBytecode({
           bytecode,
           calldata: this.transaction.callData,
         });

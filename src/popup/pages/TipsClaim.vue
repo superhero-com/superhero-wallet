@@ -88,12 +88,12 @@ export default {
     async claimTips() {
       const url = this.normalizedUrl;
       this.loading = true;
-      await watchUntilTruthy(() => this.sdk && this.tippingV1);
+      await watchUntilTruthy(() => this.sdk && this.$store.getters['tippingPlugin/tippingV1']);
       try {
         const claimAmount = parseFloat(
           aettosToAe(
-            await this.tippingV1.methods
-              .unclaimed_for_url(url)
+            await this.$store.getters['tippingPlugin/tippingV1'].unclaimed_for_url(url,
+              { callerId: this.account.address })
               .then((r) => r.decodedResult)
               .catch(() => 1),
           ),

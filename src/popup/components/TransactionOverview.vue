@@ -9,8 +9,9 @@
 </template>
 
 <script>
+import { Tag } from '@aeternity/aepp-sdk';
 import { mapState, mapGetters } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { camelCase } from 'lodash-es';
 import { watchUntilTruthy } from '../utils';
 import TransactionInfo from './TransactionInfo.vue';
 
@@ -22,7 +23,7 @@ export default {
   },
   data: () => ({ name: '' }),
   computed: {
-    ...mapGetters(['getTxType', 'getTxDirection', 'getExplorerPath', 'getDexContracts']),
+    ...mapGetters(['getTxDirection', 'getExplorerPath', 'getDexContracts']),
     ...mapGetters('names', ['getPreferred']),
     ...mapState({
       account(_, { account }) {
@@ -38,8 +39,8 @@ export default {
       },
     }),
     transaction() {
-      switch (this.txType) {
-        case SCHEMA.TX_TYPE.spend:
+      switch (Tag[this.tx.type]) {
+        case Tag.SpendTx:
           return {
             sender: {
               address: this.tx.senderId,
@@ -55,7 +56,7 @@ export default {
             },
             title: this.$t('transaction.type.spendTx'),
           };
-        case SCHEMA.TX_TYPE.contractCall: {
+        case Tag.ContractCallTx: {
           const direction = this.getTxDirection({ tx: this.tx });
           const contract = {
             address: this.tx.contractId,
@@ -69,7 +70,7 @@ export default {
             function: this.tx.function,
           };
         }
-        case SCHEMA.TX_TYPE.contractCreate:
+        case Tag.ContractCreateTx:
           return {
             sender: this.account,
             recipient: {
@@ -78,24 +79,20 @@ export default {
             },
             title: this.$t('transaction.type.contractCreateTx'),
           };
-        case SCHEMA.TX_TYPE.namePreClaim:
-        case SCHEMA.TX_TYPE.nameClaim:
-        case SCHEMA.TX_TYPE.nameBid:
-        case SCHEMA.TX_TYPE.nameUpdate:
+        case Tag.NamePreclaimTx:
+        case Tag.NameClaimTx:
+        case Tag.NameUpdateTx:
           return {
             sender: this.account,
             recipient: {
               aens: true,
               label: this.$t('transaction.overview.aens'),
             },
-            title: this.$t('transaction.type')[this.txType],
+            title: this.$t('transaction.type')[camelCase(this.tx.type)],
           };
         default:
-          throw new Error('Unsupported transaction type');
+          throw new Error(`Unsupported transaction type ${this.tx.type}`);
       }
-    },
-    txType() {
-      return this.getTxType({ tx: this.tx });
     },
   },
   async mounted() {

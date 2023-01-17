@@ -7,6 +7,7 @@ import {
   aettosToAe,
   isNotFoundError,
   handleUnknownError,
+  watchUntilTruthy,
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -51,7 +52,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
  * to live update the values. If no components are using it the polling stops.
  */
 export function useBalances({ store }: UseBalancesOptions) {
-  const { getSdk } = useSdk({ store });
+  const { sdk } = useSdk({ store });
 
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
@@ -61,9 +62,9 @@ export function useBalances({ store }: UseBalancesOptions) {
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
 
   async function updateBalances() {
-    const sdk = await getSdk();
+    await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
     const balancesPromises = accounts.value.map(
-      ({ address }) => sdk.balance(address).catch((error) => {
+      ({ address }) => sdk.value.getBalance(address).catch((error: Error) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }

@@ -1,3 +1,4 @@
+import { Tag } from '@aeternity/aepp-sdk';
 import { categorizeContractCallTxObject } from '../../../src/popup/utils/helper';
 
 const expectedKeys = {
@@ -15,7 +16,7 @@ const testCases = [{
     ],
     contractId: 'contractId',
     function: 'transfer',
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
   },
   returnKeys: expectedKeys.other,
 },
@@ -28,7 +29,7 @@ const testCases = [{
     ],
     contractId: 'contractId',
     function: 'retip_token',
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
   },
   returnKeys: expectedKeys.retip_token,
 }, {
@@ -41,7 +42,7 @@ const testCases = [{
     ],
     function: 'tip_token',
     contractId: 'contractId',
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
   },
   returnKeys: expectedKeys.tip_token,
 }, {
@@ -51,7 +52,7 @@ const testCases = [{
       testArgument,
     ],
     contractId: 'contractId',
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
     function: 'change_allowance',
   },
   returnKeys: expectedKeys.other,
@@ -62,7 +63,7 @@ const testCases = [{
       testArgument,
     ],
     contractId: 'contractId',
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
     function: 'create_allowance',
   },
   returnKeys: expectedKeys.other,
@@ -75,7 +76,7 @@ const testCases = [{
 },
 {
   tx: {
-    type: 'ContractCallTx',
+    type: Tag[Tag.ContractCallTx],
     function: 'tip',
   },
   returnNull: true,

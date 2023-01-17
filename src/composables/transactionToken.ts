@@ -1,8 +1,9 @@
 import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type { Store } from 'vuex';
+import { Tag } from '@aeternity/aepp-sdk';
 import type {
-  ITransaction, ITokenList, ITx, TransactionType, IDexContracts,
+  ITransaction, ITokenList, ITx, IDexContracts, Maybe,
 } from '../types';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 import {
@@ -48,12 +49,12 @@ export function useTransactionToken({
   const isTxAex9 = computed(() => store.getters.isTxAex9);
 
   const getTxSymbol = computed(() => store.getters.getTxSymbol);
-  const getTxType = computed(() => store.getters.getTxType);
   const getTxDirection = computed(() => store.getters.getTxDirection);
   const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
 
-  const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
-
+  const txType = computed<Maybe<Tag>>(() => transaction.value
+    ? Tag[transaction.value.tx.type as keyof typeof Tag]
+    : null);
   const isAllowance = computed(() => transaction.value
     && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function)
     && availableTokens.value[transaction.value.tx.contractId]);
@@ -117,7 +118,6 @@ export function useTransactionToken({
     availableTokens,
     getTxAmountTotal,
     getTxSymbol,
-    getTxType,
     getTxDirection,
     getDexContracts,
     setTransaction,

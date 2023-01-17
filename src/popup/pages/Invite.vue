@@ -42,8 +42,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils';
+import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 import InputAmount from '../components/InputAmountV2.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
@@ -70,14 +69,13 @@ export default {
   methods: {
     async generate() {
       this.loading = true;
-      const { publicKey, secretKey } = Crypto.generateKeyPair();
+      const { publicKey, secretKey } = generateKeyPair();
 
       try {
         if (this.amount > 0) {
-          await watchUntilTruthy(() => this.sdk);
           await this.sdk.spend(this.amount, publicKey, {
             payload: 'referral',
-            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+            denomination: AE_AMOUNT_FORMATS.AE,
           });
         }
       } catch (error) {

@@ -26,7 +26,7 @@ import {
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
 import { MODAL_DEFAULT } from '../utils';
-import { useDeepLinkApi, useSdk } from '../../composables';
+import { useDeepLinkApi } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
@@ -36,7 +36,6 @@ export default defineComponent({
     BtnMain,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
 
     const id = ref<string>('');
@@ -44,6 +43,7 @@ export default defineComponent({
     const text = ref<string>('');
     const loading = ref<boolean>(false);
     const tippingSupported = useGetter('tippingSupported');
+    const account = useGetter('account');
 
     watch(
       () => root.$route,
@@ -61,12 +61,11 @@ export default defineComponent({
 
     async function sendComment() {
       loading.value = true;
-      const sdk = await getSdk();
       try {
         await root.$store.dispatch('sendTipComment', [
           id,
           text,
-          await sdk.address(),
+          account.value.address,
           parentId,
         ]);
         openCallbackOrGoHome(true);
@@ -82,13 +81,6 @@ export default defineComponent({
         loading.value = false;
       }
     }
-
-    // Wait until the `tippingSupported` is established by the SDK
-    (async () => {
-      loading.value = true;
-      await getSdk();
-      loading.value = false;
-    })();
 
     return {
       id,

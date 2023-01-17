@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -58,7 +58,6 @@ import {
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
-  compareCaseInsensitive,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -127,18 +126,18 @@ export default defineComponent({
                 || getDexContracts.value.wae?.includes(tr.tx.contractId)
               );
             case FILTER_MODE.out:
-              return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+              return (tr.tx.type === Tag.SpendTx
                   && tr.tx.senderId === account.value.address)
                 || (isFungibleTokenTx(tr)
-                  && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                  && tr.tx.type === Tag.ContractCallTx
                   && tr.tx.callerId === account.value.address);
             case FILTER_MODE.in:
-              return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+              return (tr.tx.type === Tag.SpendTx
                   && (tr.tx.recipientId === account.value.address
                     || (tr.tx.senderId !== account.value.address
                       && tr.tx.recipientId.startsWith('nm_'))))
                 || (isFungibleTokenTx(tr)
-                  && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
+                  && tr.tx.type === Tag.ContractCallTx
                   && tr.recipient === account.value.address);
             default:
               throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);

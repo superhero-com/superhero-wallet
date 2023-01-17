@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { Tag } from '@aeternity/aepp-sdk';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
 import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils/constants';
 
@@ -32,7 +33,7 @@ function mountComponent({ hasError = false } = {}) {
       result: hasError ? 'abort' : 'ok',
       return: hasError ? 'AedexV2Router: INSUFFICIENT_B_AMOUNT' : {},
       returnType: hasError ? 'revert' : 'ok',
-      type: 'ContractCallTx',
+      type: Tag[Tag.ContractCallTx],
       arguments: [
         {
           type: 'contract',

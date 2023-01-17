@@ -3,6 +3,7 @@ import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullI
 import BigNumber from 'bignumber.js';
 import { isEmpty, uniqBy } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   convertToken,
   fetchJson,
@@ -263,7 +264,7 @@ export default (store) => {
               senderId: tx.sender,
               recipientId: tx.recipient,
               callerId: tx.sender,
-              type: 'ContractCallTx',
+              type: Tag[Tag.ContractCallTx],
             },
             recipient: tx.recipient,
             incomplete: true,

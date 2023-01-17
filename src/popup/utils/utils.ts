@@ -4,7 +4,7 @@ import VueCompositionApi, {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -17,7 +17,7 @@ import dayjs from '../plugins/dayjsConfig';
 import type {
   IRespondChallenge,
   IResponseChallenge,
-  ISdk,
+  ISuperHeroAeSdk,
   ITransaction,
 } from '../../types';
 
@@ -144,7 +144,7 @@ export function relativeTimeTo(date: string): string {
 
 // TODO - move to sdk.ts composable after the removal of action.js file
 export async function fetchRespondChallenge(
-  sdk: ISdk,
+  sdk: ISuperHeroAeSdk,
   responseChallenge: IResponseChallenge,
 ): Promise<IRespondChallenge> {
   const signedChallenge = Buffer.from(
@@ -159,7 +159,7 @@ export async function fetchRespondChallenge(
 
 export function getPayload(transaction: ITransaction) {
   return (transaction.tx?.payload)
-    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+    ? decode(transaction.tx?.payload).toString()
     : null;
 }
 
@@ -169,3 +169,10 @@ export function compareCaseInsensitive(
 ) {
   return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
 }
+export const mapObject = <InputV, OutputV>(
+  object: { [k: string]: InputV },
+  fn: (
+    // eslint-disable-next-line no-unused-vars
+    value: [string, InputV], index: number, array: Array<[string, InputV]>
+  ) => [number | string, OutputV],
+): { [k: string]: OutputV } => Object.fromEntries(Object.entries(object).map(fn));

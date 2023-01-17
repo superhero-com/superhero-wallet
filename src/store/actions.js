@@ -3,8 +3,9 @@ import {
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
+import JsonBig from '@aeternity/json-bigint';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -45,10 +46,9 @@ export default {
   async fetchPendingTransactions(
     { state: { transactions }, getters }, address,
   ) {
-    const sdk = await watchUntilTruthy(() => getters['sdkPlugin/sdk']);
     return (
-      await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-        (r) => r.transactions,
+      await getters['sdkPlugin/sdk'].api.getPendingAccountTransactionsByPubkey(address).then(
+        (r) => JsonBig.parse(JsonBig.stringify(r.transactions)),
         (error) => {
           if (!isAccountNotFoundError(error)) {
             handleUnknownError(error);
@@ -79,7 +79,7 @@ export default {
         address,
         amount,
         contractId: contract,
-        type: SCHEMA.TX_TYPE.contractCall,
+        type: Tag[Tag.ContractCallTx],
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
@@ -194,7 +194,7 @@ export default {
   },
   async initTippingContractInstances({
     getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
-    commit,
+    dispatch,
   }) {
     if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
 
@@ -213,8 +213,7 @@ export default {
         })
         : null,
     ]);
-
-    commit('setTipping', [contractInstanceV1, contractInstanceV2]);
+    dispatch('tippingPlugin/initialize', [contractInstanceV1, contractInstanceV2]);
   },
   async share(_, options) {
     await (process.env.IS_CORDOVA

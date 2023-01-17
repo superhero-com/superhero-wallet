@@ -3,18 +3,19 @@ import {
   defineComponent,
   onMounted,
 } from '@vue/composition-api';
+import { Encoded } from '@aeternity/aepp-sdk/es/utils/encoder';
 import { useDeepLinkApi, useSdk } from '../../composables';
-import { MODAL_DEFAULT, handleUnknownError } from '../utils';
+import { MODAL_DEFAULT, handleUnknownError, watchUntilTruthy } from '../utils';
 
 export default defineComponent({
   name: 'SignTransaction',
   setup(props, { root }) {
     onMounted(async () => {
       const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { getSdk } = useSdk({ store: root.$store });
 
       try {
-        const sdk = await getSdk();
+        const { sdk } = useSdk({ store: root.$store });
+        await watchUntilTruthy(() => sdk);
         const { transaction, networkId, broadcast } = root.$route.query;
         const currentNetworkId = root.$store.getters.activeNetwork.networkId;
 
@@ -30,10 +31,13 @@ export default defineComponent({
           return;
         }
 
-        const signedTransaction = await sdk.signTransaction(transaction, { networkId });
+        const signedTransaction = await sdk.value.signTransaction(
+          transaction as Encoded.Transaction,
+          { networkId: currentNetworkId },
+        );
 
         if (broadcast) {
-          const result = await sdk.sendTransaction(signedTransaction, { waitMined: true });
+          const result = await sdk.value.sendTransaction(signedTransaction, { waitMined: true });
           openCallbackOrGoHome(true, { 'transaction-hash': result.hash });
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });

@@ -36,7 +36,7 @@ const notificationsWallet = ref<INotification[]>([]);
 export function useNotifications({
   requirePolling = false,
 }: UseNotificationsOptions = {}) {
-  const { getSdk } = useSdk({ store });
+  const { sdk } = useSdk({ store });
 
   const activeNetwork = useGetter<INetwork>('activeNetwork');
   const account = useGetter<IAccount>('account');
@@ -74,11 +74,10 @@ export function useNotifications({
 
   async function fetchAllNotifications(): Promise<INotification[]> {
     const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${account.value.address}`;
-    const [responseChallenge, sdk] = await Promise.all([
+    const [responseChallenge] = await Promise.all([
       fetchJson(fetchUrl),
-      getSdk(),
     ]);
-    const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
+    const respondChallenge = await fetchRespondChallenge(sdk.value, responseChallenge);
     const url = new URL(fetchUrl);
     Object.entries(respondChallenge).forEach(([key, value]) => url.searchParams.append(key, value));
     return fetchJson(url.toString());
@@ -90,11 +89,8 @@ export function useNotifications({
   ) {
     if (!ids.length) return;
     const backendMethod = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/notification`, { body });
-    const [responseChallenge, sdk] = await Promise.all([
-      backendMethod({ ids, status, author: account.value.address }),
-      getSdk(),
-    ]);
-    const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
+    const responseChallenge = await backendMethod({ ids, status, author: account.value.address });
+    const respondChallenge = await fetchRespondChallenge(sdk.value, responseChallenge);
     await backendMethod(respondChallenge);
   }
 

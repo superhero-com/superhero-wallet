@@ -4,6 +4,7 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
+import tippingPlugin from './plugins/tipping';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
@@ -40,8 +41,6 @@ export default new Vuex.Store({
       tipWithdrawnTransactions: [],
     },
     middleware: null,
-    tippingV1: null,
-    tippingV2: null,
     nodeStatus: NODE_STATUS_OFFLINE,
     currencies: {},
     notificationSettings: [],
@@ -64,6 +63,7 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
+    tippingPlugin,
     modals,
     tipUrl,
     namesPlugin,

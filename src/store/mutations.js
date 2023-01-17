@@ -51,10 +51,6 @@ export default {
   setMiddleware(state, payload) {
     state.middleware = payload;
   },
-  setTipping(state, [tippingV1, tippingV2]) {
-    state.tippingV1 = tippingV1 || null;
-    state.tippingV2 = tippingV2 || null;
-  },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
 

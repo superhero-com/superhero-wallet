@@ -37,13 +37,14 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { getSdk } = useSdk({ store: root.$store });
+    const { sdk } = useSdk({ store: root.$store });
 
     const sendAddress = async () => {
-      const sdk = await getSdk();
-      const signature = await sdk.signMessage(root.$route.query.message);
-      const signatureHex = Buffer.from(signature).toString('hex');
-      openCallbackOrGoHome(true, { signature: signatureHex });
+      if (typeof root.$route.query.message === 'string') {
+        const signature = await sdk.value.signMessage(root.$route.query.message);
+        const signatureHex = Buffer.from(signature).toString('hex');
+        openCallbackOrGoHome(true, { signature: signatureHex });
+      }
     };
 
     return {
