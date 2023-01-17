@@ -2,32 +2,28 @@ import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const waitTransactionMined = async ({
-    hash, type, amount, tipUrl, recipient: recipientId,
+    hash, type = null, amount, tipUrl,
+    recipient: recipientId, ...pendingTransaction
   }) => {
     const network = store.getters.activeNetwork?.networkId;
     try {
       const transaction = await store.getters['sdkPlugin/sdk'].poll(hash);
-      const showSpendModal = () => store.dispatch('modals/open', {
-        name: MODAL_SPEND_SUCCESS,
-        transaction: {
-          tipUrl,
-          ...transaction,
-          ...(type === 'spendToken')
-            ? { tx: { ...transaction.tx, recipientId, amount } }
-            : {},
-        },
-      });
 
-      switch (type) {
-        case 'tip':
-        case 'spend':
-          showSpendModal();
-          break;
-        case 'spendToken':
-          store.dispatch('fungibleTokens/loadTokenBalances');
-          showSpendModal();
-          break;
-        default:
+      if (type) {
+        if (type === 'spendToken') store.dispatch('fungibleTokens/loadTokenBalances');
+        store.dispatch('modals/open', {
+          name: MODAL_SPEND_SUCCESS,
+          transaction: {
+            tipUrl,
+            type,
+            amount,
+            ...pendingTransaction,
+            ...transaction,
+            ...(type === 'spendToken')
+              ? { tx: { ...transaction.tx, recipientId, amount } }
+              : {},
+          },
+        });
       }
       store.commit('setPendingTransactionSentByHash', { hash, network });
     } catch (e) {

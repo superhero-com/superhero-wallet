@@ -258,6 +258,7 @@ export default defineComponent({
           hash: txResult.hash,
           amount,
           tipUrl: recipient,
+          type: 'tip',
           tx: {
             callerId: account.value.address,
             contractId: tippingContract.$options.address,

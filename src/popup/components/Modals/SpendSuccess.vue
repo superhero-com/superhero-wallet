@@ -18,8 +18,8 @@
     </div>
     <TokenAmount
       :amount="getTxAmountTotal(transaction)"
-      :symbol="getSymbol(transaction)"
-      :hide-fiat="!isAe"
+      :symbol="getTxSymbol(transaction)"
+      :hide-fiat="isTxAex9(transaction)"
     />
     <span class="sending-to">
       {{ transaction.tipUrl ? $t('pages.send.sentTo') : $t('pages.send.sendingTo') }}
@@ -67,14 +67,14 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
-import { getPayload, watchUntilTruthy, AETERNITY_SYMBOL } from '../../utils';
+import { getPayload, watchUntilTruthy } from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
 
@@ -98,13 +98,7 @@ export default {
     nameRecipient: null,
   }),
   computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
     ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath', 'isTxAex9']),
-    ...mapGetters('names', ['getPreferred']),
-    isAe() {
-      return !(this.transaction.tx.contractId
-        && this.availableTokens[this.transaction.tx.contractId]?.symbol);
-    },
     payload() {
       return getPayload(this.transaction);
     },
@@ -114,18 +108,11 @@ export default {
   },
   async mounted() {
     const { recipientId } = this.transaction.tx;
-    await watchUntilTruthy(() => this.$store.state.middleware);
-    if (recipientId.includes('nm_')) {
+    if (recipientId?.includes('nm_')) {
+      await watchUntilTruthy(() => this.$store.state.middleware);
       this.hideAvatar = true;
       this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
     }
-  },
-  methods: {
-    getSymbol() {
-      return this.transaction.tx.contractId
-        ? this.availableTokens[this.transaction.tx.contractId].symbol
-        : AETERNITY_SYMBOL;
-    },
   },
 };
 </script>

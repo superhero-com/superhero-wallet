@@ -178,6 +178,7 @@ export default defineComponent({
           hash: retipResponse.hash,
           amount,
           tipUrl: tip.value.url,
+          type: 'retip',
           tx: {
             callerId: account.value.address,
             contractId: tippingContract.value.deployInfo.address,
