@@ -31,6 +31,8 @@ export interface IAppData {
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
 
+export type TxFunctionTypes = ObjectValues<typeof TX_FUNCTIONS>;
+
 /**
  * Input fields message prop type
  */
