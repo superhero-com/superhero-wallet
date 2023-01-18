@@ -248,6 +248,7 @@
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter address, .chain name or URL",
+      "edit": "Edit",
       "next": "Next",
       "payload": "Payload"
     },

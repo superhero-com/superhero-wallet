@@ -46,6 +46,7 @@
         min_tip_amount: isTipUrl,
       }"
       name="amount"
+      data-cy="amount"
       class="amount-input"
       show-tokens-with-balance
       :message="errors.first('amount')"

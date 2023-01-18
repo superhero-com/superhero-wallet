@@ -1,4 +1,7 @@
+import BigNumber from 'bignumber.js';
+
 const address = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
+const amount = 0.1;
 
 describe('Test cases for Withdraw Page', () => {
   it('Opens Withdraw page, uses scan button, validates entered amount, reviews and sends ', () => {
@@ -9,26 +12,26 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .get('.qr-code-reader video')
       .should('be.visible')
-      .get('.modal .button-plain.close')
+      .get('.modal.qr-code-reader [data-cy=btn-close]')
       .click()
 
-      .enterInputAmount(0.2)
-      .get('[data-cy=input-wrapper]')
+      .enterInputAmount(amount)
+      .get('[data-cy=amount]')
       .should('not.have.class', 'error')
       .enterAddress('asd')
-      .inputShouldHaveError('[data-cy=address] [data-cy=input-wrapper]')
+      .inputShouldHaveError('[data-cy=address]')
       .enterAddress(0)
-      .inputShouldHaveError('[data-cy=address] [data-cy=input-wrapper]')
+      .inputShouldHaveError('[data-cy=address]')
       .enterAddress('test.chain')
       .should('not.have.class', 'error')
       .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
-      .get('[data-cy=address] [data-cy=input-wrapper]')
+      .get('[data-cy=address]')
       .should('not.have.class', 'error')
 
-      .get('[data-cy=review-withdraw]')
+      .get('[data-cy=next-step-button]')
       .should('not.have.class', 'disabled')
       .click()
-      .get('div.review-buttons')
+      .get('[data-cy=next-step-button]')
       .should('be.visible')
 
       // check on step2 if everything is OK
@@ -43,23 +46,31 @@ describe('Test cases for Withdraw Page', () => {
         const n1 = getNum(total);
         cy.get('[data-cy=review-fee]').invoke('text').then((fee) => {
           const n2 = getNum(fee);
-          cy.expect(n1 - n2).to.eq(0.2);
+          cy.expect(BigNumber(n1).minus(n2).toNumber()).to.eq(amount);
         });
       })
 
-      // edit sending address to .chain name
-      .get('[data-cy=reivew-editTxDetails-button]')
+      // edit, sending to your own account
+      .get('[data-cy=edit]')
       .click()
-      .enterAddress('test.chain')
-      .get('[data-cy=review-withdraw]')
+      .enterAddress(address)
+      .get('[data-cy=address]')
+      .should('have.class', 'warning')
+      .get('[data-cy=next-step-button]')
+      .should('not.have.class', 'disabled')
       .click()
       .get('[data-cy=review-recipient] > .value')
-      .should('contain', 'test.chain')
+      .should('contain', address)
 
       // send
-      .get('[data-cy="review-send-button"]')
+      .get('[data-cy=edit] + [data-cy=next-step-button]')
       .should('be.visible')
       .click()
+      .get('[data-cy=spend-success]', { timeout: 10000 })
+      .should('be.visible')
+      .get('[data-cy=btn-close]')
+      .click()
+      .openTransactions()
       .get('[data-cy=pending-txs]')
       .should('be.visible');
   });

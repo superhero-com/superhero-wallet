@@ -6,6 +6,10 @@ export const testAccount = {
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
 };
 
+export const STUB_CURRENCY = [{
+  id: 'aeternity', symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', current_price: 0.076783, market_cap: 31487891, market_cap_rank: 523, fully_diluted_valuation: null, total_volume: 217034, high_24h: 0.078539, low_24h: 0.076793, price_change_24h: -0.001092194951687525, price_change_percentage_24h: -1.4025, market_cap_change_24h: -429134.39267925173, market_cap_change_percentage_24h: -1.34453, circulating_supply: 409885828.49932, total_supply: 536306702.0, max_supply: null, ath: 5.69, ath_change_percentage: -98.65091, ath_date: '2018-04-29T03:50:39.593Z', atl: 0.059135, atl_change_percentage: 29.84246, atl_date: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, last_updated: '2023-01-17T11:38:23.610Z',
+}];
+
 export const popupProps = {
   connectConfirm: {
     type: 'connectConfirm',
