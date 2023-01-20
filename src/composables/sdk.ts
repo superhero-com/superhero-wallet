@@ -1,5 +1,6 @@
 import { computed } from '@vue/composition-api';
 import type { Store } from 'vuex';
+import { Universal, Node } from '@aeternity/aepp-sdk';
 import { ISdk } from '../types';
 import { watchUntilTruthy } from '../popup/utils';
 
@@ -9,6 +10,8 @@ interface UseSdkOptions {
    */
   store: Store<any>
 }
+
+let drySdk: ISdk;
 
 /**
  * Composable that will replace the Vuex SDK plugin.
@@ -30,11 +33,30 @@ export function useSdk({ store }: UseSdkOptions) {
     return watchUntilTruthy(() => sdk.value);
   }
 
+  /**
+   * drySdk is the sdk instance with no accounts attached.
+   * To use for multisig operations.
+   */
+  async function getDrySdk(): Promise<ISdk> {
+    if (!drySdk) {
+      const { compilerUrl, name, url } = store.getters.activeNetwork;
+      drySdk = await Universal({
+        nodes: [{
+          name,
+          instance: await Node({ url }),
+        }],
+        compilerUrl,
+      });
+    }
+    return drySdk;
+  }
+
   return {
     isNodeReady,
     isNodeConnecting,
     isNodeError,
     isSdkReady,
     getSdk,
+    getDrySdk,
   };
 }

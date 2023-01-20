@@ -3,7 +3,7 @@
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { POPUP_TYPES, INPUT_MESSAGE_STATUSES } from '../popup/utils';
+import { POPUP_TYPES, INPUT_MESSAGE_STATUSES, MULTISIG_CREATION_STEPS } from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
@@ -267,6 +267,19 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
+  gaAttachTx: (options: {
+    ownerId: any;
+    code: any;
+    callData: any;
+    authFun: any;
+    gas: any;
+    options: { innerTx: boolean };
+  }) => Promise<any>;
+  send: (tx: any, arg1: {
+    innerTx: boolean;
+    onAccount: any; }) => { rawTx: any; } | PromiseLike<{ rawTx: any; }>;
+  payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>;
+  getAccount: (publicKey: any) => Promise<any>;
   getContractByteCode(contractId: string): Promise<{ bytecode: any }>;
   compilerApi: any;
   api: Record<string, (a?: string) => any>
@@ -365,4 +378,11 @@ export interface IActiveAuction {
   expiration: number
   lastBid: IActiveAuctionBid
   name: string
+}
+
+export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS;
+
+export interface IMultisigAccount {
+  gaContractId: string,
+  gaAccountId: string,
 }

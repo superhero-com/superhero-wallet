@@ -3,13 +3,13 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { MODAL_DEFAULT } from '../../../popup/utils';
+import { MODAL_DEFAULT, ACCOUNT_LEDEGR_WALLET } from '../../../popup/utils';
 
 export default {
   namespaced: true,
 
   account: {
-    type: 'ledger',
+    type: ACCOUNT_LEDEGR_WALLET,
   },
 
   getters: {
@@ -49,7 +49,7 @@ export default {
       let address;
       try {
         address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
-        commit('accounts/add', { address, type: 'ledger', idx: nextIdx }, { root: true });
+        commit('accounts/add', { address, type: ACCOUNT_LEDEGR_WALLET, idx: nextIdx }, { root: true });
       } catch (error) {
         dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'address not confirmed' }, { root: true });
       }
