@@ -1,5 +1,5 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { isFQDN, isURL } from 'validator';
+import { isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
@@ -73,17 +73,6 @@ export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameC
   nonce: STUB_NONCE,
   ttl: SCHEMA.NAME_TTL,
 });
-
-export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
-
-export const validateTipUrl = (urlAsString) => {
-  try {
-    const url = toURL(urlAsString);
-    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
-  } catch (e) {
-    return false;
-  }
-};
 
 export const detectConnectionType = (port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';

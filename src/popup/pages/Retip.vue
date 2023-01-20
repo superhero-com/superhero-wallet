@@ -97,7 +97,6 @@ export default defineComponent({
   setup(props, { root }) {
     const formModel = ref<IFormModel>({
       amount: 0,
-      selectedAsset: null,
     });
 
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
@@ -135,7 +134,7 @@ export default defineComponent({
         return { error: true, msg: root.$t('pages.tipPage.v1FungibleTokenTipError') };
       }
       if (formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
-        && +formModel.value.amount < minTipAmount.value) {
+        && +(formModel.value.amount || 0) < minTipAmount.value) {
         return { error: true, msg: root.$t('pages.tipPage.minAmountError') };
       }
       return { error: false };
@@ -143,7 +142,7 @@ export default defineComponent({
 
     async function sendTip() {
       const amount = convertToken(
-        +formModel.value.amount,
+        +(formModel.value.amount || 0),
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
           : MAGNITUDE,

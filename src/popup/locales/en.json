@@ -307,12 +307,21 @@
       "next": "Next",
       "payload": "Payload"
     },
+    "multisigTxProposal": {
+      "title": "Multisig Transaction Proposal",
+      "multisigVault": "Multisig vault",
+      "amount": "Propose amount",
+      "amountProposed": "Amount proposed",
+      "signingAddress": "Signing address",
+      "signingAccount": "Signing account",
+      "fee": "Proposal transaction fee"
+    },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
       "button": "Dismiss"
     },
-    "account-details": {
+    "accountDetails": {
       "assets": "Assets",
       "transactions": "Transactions",
       "names": "Names",

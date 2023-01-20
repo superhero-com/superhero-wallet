@@ -2,6 +2,8 @@ import Vue from 'vue';
 import VueCompositionApi, {
   watch,
 } from '@vue/composition-api';
+
+import { isFQDN } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
@@ -51,6 +53,19 @@ export function formatTime(time: number) {
   return new Date(+time).toLocaleTimeString(navigator.language, {
     timeStyle: 'short',
   });
+}
+
+export function toURL(url: string): URL {
+  return new URL(url.includes('://') ? url : `https://${url}`);
+}
+
+export function validateTipUrl(urlAsString: string): boolean {
+  try {
+    const url = toURL(urlAsString);
+    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
+  } catch (e) {
+    return false;
+  }
 }
 
 export const validateHash = (fullHash?: string) => {

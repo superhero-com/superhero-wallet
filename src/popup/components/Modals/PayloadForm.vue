@@ -56,7 +56,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    payload: { type: String, required: true },
+    payload: { type: String, default: '' },
   },
   setup: (props) => ({ value: ref(props.payload) }),
 });

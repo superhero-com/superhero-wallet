@@ -79,9 +79,9 @@ export default defineComponent({
     const error = ref(false);
 
     // eslint-disable-next-line no-unused-vars
-    const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
+    const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
-    const highestBid = computed(() => getHighestBid.value(props.name).nameFee);
+    const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
     const txFee = computed<BigNumber>(() => calculateNameClaimFee(props.name));
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {

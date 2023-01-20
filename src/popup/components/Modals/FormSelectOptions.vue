@@ -23,10 +23,16 @@
         v-for="(option, index) in optionsFiltered"
         :key="index"
         :selected="(option.value === value)"
-        class="option"
         @click.prevent="resolve(option.value)"
       >
-        {{ option.text }}
+        <div class="option-wrapper">
+          <Avatar
+            v-if="option.address"
+            :address="option.address"
+            size="sm"
+          />
+          {{ option.text }}
+        </div>
       </ListItemWrapper>
     </div>
   </Modal>
@@ -43,12 +49,14 @@ import type { FormSelectOption } from '../form/FormSelect.vue';
 import InputSearch from '../InputSearch.vue';
 import Modal from '../Modal.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
+import Avatar from '../Avatar.vue';
 
 export default defineComponent({
   components: {
     Modal,
     ListItemWrapper,
     InputSearch,
+    Avatar,
   },
   props: {
     // eslint-disable-next-line no-unused-vars
@@ -95,8 +103,11 @@ export default defineComponent({
     margin-bottom: var(--gap);
   }
 
-  .option {
-    padding-block: 10px;
+  .option-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-block: 4px;
   }
 }
 </style>

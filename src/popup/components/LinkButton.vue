@@ -26,13 +26,13 @@ export default {
 
   padding: 0;
   display: inline-flex;
+  gap: 4px;
   align-items: center;
   color: variables.$color-success;
 
   svg {
     width: 24px;
     height: 24px;
-    margin-right: 4px;
     opacity: 0.44;
     color: variables.$color-white;
   }

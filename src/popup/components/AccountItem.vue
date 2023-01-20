@@ -1,38 +1,68 @@
 <template>
   <div
     class="account-item"
-    :class="{ 'has-name': name }"
   >
-    <div
-      v-if="name"
-      class="head"
-    >
-      <Avatar
-        :address="address"
-        :name="name"
-        size="md"
-      />
-      <span class="name">{{ name }}</span>
-    </div>
     <Avatar
+      :address="address"
+      :name="name"
+      size="sm"
+    />
+
+    <span
+      v-if="name"
+      class="name"
+      v-text="name"
+    />
+    <AddressTruncated
       v-else
       :address="address"
-      size="md"
     />
-    <span class="address">{{ address }}</span>
+
+    <LinkButton
+      v-if="explorerUrl"
+      :to="explorerUrl"
+      target="_blank"
+      class="external-link"
+    >
+      <ExternalLinkIcon class="external-link-icon" />
+    </LinkButton>
   </div>
 </template>
 
-<script>
-import Avatar from './Avatar.vue';
+<script lang="ts">
+import { defineComponent, computed } from '@vue/composition-api';
+import type { INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
 
-export default {
-  components: { Avatar },
+import AddressTruncated from './AddressTruncated.vue';
+import Avatar from './Avatar.vue';
+import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
+import LinkButton from './LinkButton.vue';
+
+export default defineComponent({
+  components: {
+    Avatar,
+    AddressTruncated,
+    ExternalLinkIcon,
+    LinkButton,
+  },
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
   },
-};
+  setup(props) {
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const explorerUrl = computed(
+      () => (props.address)
+        ? `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`
+        : null,
+    );
+
+    return {
+      explorerUrl,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -55,18 +85,13 @@ export default {
     word-break: break-all;
   }
 
-  &.has-name {
-    flex-direction: column;
-    align-items: flex-start;
+  .external-link {
+    color: inherit;
+    flex-shrink: 0;
 
-    .head {
-      display: flex;
-      align-items: center;
-      margin-bottom: 4px;
-
-      .name {
-        @extend %face-sans-14-bold;
-      }
+    .external-link-icon {
+      width: 22px;
+      height: 22px;
     }
   }
 }

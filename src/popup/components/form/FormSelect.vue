@@ -18,6 +18,7 @@ import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
 export interface FormSelectOption {
   text: string
   value: string | number
+  address?: string
 }
 
 export default defineComponent({
@@ -63,7 +64,7 @@ export default defineComponent({
         },
       )
         .then((val) => emit('select', val))
-        .catch(() => null);
+        .catch(() => null); // Closing the modal does nothing
     }
 
     return {

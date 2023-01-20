@@ -5,7 +5,7 @@
     type="number"
     placeholder="0.00"
     :value="value"
-    :label="label || $t('pages.tipPage.amountLabel')"
+    :label="label"
     :message="$attrs['message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >

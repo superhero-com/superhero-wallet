@@ -11,6 +11,7 @@
       />
       <Eraser
         v-else
+        class="erase-icon"
         @click="$emit('input', '')"
       />
     </template>
@@ -30,3 +31,15 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.input-search {
+  .erase-icon {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+</style>
