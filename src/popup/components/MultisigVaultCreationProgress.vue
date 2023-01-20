@@ -42,7 +42,7 @@
         mode="out-in"
       >
         <AvatarWithChainName
-          :address="multisigAccount.gaAccountId"
+          :address="multisigAccount.multisigAccountId"
           class="ae-address"
           show-address
           :column-count="9"
@@ -61,7 +61,7 @@ import {
 import {
   MULTISIG_CREATION_STEPS,
 } from '../utils';
-import { IMultisigAccount, IMultisigCreationStep } from '../../types';
+import { IMultisigAccountBase, IMultisigCreationStep } from '../../types';
 
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -76,7 +76,7 @@ export default defineComponent({
     CheckSuccessCircleIcon,
   },
   props: {
-    multisigAccount: { type: Object as PropType<IMultisigAccount>, default: null },
+    multisigAccount: { type: Object as PropType<IMultisigAccountBase>, default: null },
     progress: { type: String as PropType<IMultisigCreationStep>, required: true },
   },
   setup(props, { root }) {
