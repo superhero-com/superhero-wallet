@@ -91,12 +91,12 @@ export interface IAsset {
   symbol: string
   total_supply: number
   total_volume: number
-  decimals?: number,
+  decimals: number,
 }
 
 export interface IAccount {
   address: string
-  idx: number
+  idx?: number
   name: string // .chain
   publicKey: Uint8Array
   secretKey: Uint8Array

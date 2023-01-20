@@ -36,6 +36,10 @@ export default defineComponent({
 .address-truncated {
   @extend %face-mono-12-medium;
 
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
   letter-spacing: 0.07em;
 
   .dots {

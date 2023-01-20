@@ -9,8 +9,9 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
   checkAensName,
-  validateTipUrl, isValidURL,
-} from '../../popup/utils/helper';
+  validateTipUrl,
+  isValidURL,
+} from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
 import { useBalances } from '../../composables';
 

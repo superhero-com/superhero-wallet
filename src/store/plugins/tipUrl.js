@@ -1,4 +1,4 @@
-import { getTwitterAccountUrl, fetchJson, validateTipUrl } from '../../popup/utils/helper';
+import { getTwitterAccountUrl, fetchJson, validateTipUrl } from '../../popup/utils';
 
 export default (store) => store.registerModule('tipUrl', {
   namespaced: true,

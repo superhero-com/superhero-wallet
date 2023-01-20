@@ -118,15 +118,9 @@ export default defineComponent({
     }
 
     .ae-address {
-      @extend %face-mono-12-medium;
-
-      display: flex;
-      align-items: center;
-      gap: 2px;
       padding: 4px 0;
       color: rgba(variables.$color-white, 0.85);
       opacity: 0.85;
-      letter-spacing: 0.07em;
 
       .icon {
         width: 22px;

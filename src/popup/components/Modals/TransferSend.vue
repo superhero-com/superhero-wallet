@@ -1,10 +1,9 @@
 <template>
   <Modal
-    :key="currentStep"
     class="transfer-send-modal"
     has-close-button
     from-bottom
-    :body-without-padding-bottom="currentStep === STEP_FORM"
+    :body-without-padding-bottom="currentStep === STEPS.form"
     @close="closeModal"
   >
     <div class="relative">
@@ -13,6 +12,7 @@
           :is="currentStepConfig.component"
           ref="currentRenderedComponent"
           v-model="transferData"
+          :is-multisig="isMultisig"
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"
           @success="currentStepConfig.onSuccess"
@@ -43,9 +43,14 @@
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import { MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
+import type { ITokenList, ObjectValues } from '../../../types';
+import { IFormModel } from '../../../composables';
+import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
+import { useGetter, useState } from '../../../composables/vuex';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TransferSendForm from '../TransferSendForm.vue';
@@ -53,11 +58,22 @@ import TransferReview from '../TransferReview.vue';
 import TransferReviewTip from '../TransferReviewTip.vue';
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
 
-const STEP_FORM = 'form';
-const STEP_REVIEW = 'review';
-const STEP_REVIEW_TIP = 'tip';
+export interface TransferFormModel extends IFormModel {
+  fee?: BigNumber
+  total?: number
+  invoiceContract?: any
+  invoiceId?: any
+  note?: string
+}
 
-export default {
+const STEPS = {
+  form: 'form',
+  review: 'review',
+  reviewTip: 'tip',
+} as const;
+type Step = ObjectValues<typeof STEPS>;
+
+export default defineComponent({
   name: 'TransferSend',
   components: {
     Modal,
@@ -66,92 +82,105 @@ export default {
   props: {
     tokenContractId: { type: String, default: null },
     address: { type: String, default: null },
+    isMultisig: Boolean,
   },
-  data() {
-    return {
-      STEP_FORM,
-      STEP_REVIEW,
-      STEP_REVIEW_TIP,
-      ArrowSendIcon,
-      currentStep: STEP_FORM,
-      error: false,
-      transferData: {
-        address: '',
-        amount: null,
-        selectedAsset: null,
-        payload: '',
-      },
-      steps: {
-        [STEP_FORM]: {
-          component: TransferSendForm,
-          onSuccess: this.handleSendFormSuccess,
-        },
-        [STEP_REVIEW_TIP]: {
-          component: TransferReviewTip,
-          onSuccess: this.handleReviewTipSuccess,
-        },
-        [STEP_REVIEW]: {
-          component: TransferReview,
-          onSuccess: this.handleReviewSuccess,
-        },
-      },
-    };
-  },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['isConnected']),
-    currentStepConfig() {
-      return this.steps[this.currentStep];
-    },
-    showEditButton() {
-      return [STEP_REVIEW_TIP, STEP_REVIEW].includes(this.currentStep);
-    },
-    showSendButton() {
-      return this.currentStep === STEP_REVIEW;
-    },
-    isAddressChain() {
-      return this.transferData.address.endsWith('.chain');
-    },
-    isAddressUrl() {
-      return !this.isAddressChain && validateTipUrl(this.transferData.address);
-    },
-  },
-  created() {
-    if (this.tokenContractId && this.availableTokens[this.tokenContractId]) {
-      this.transferData.selectedAsset = this.availableTokens[this.tokenContractId];
+  setup(props, { root }) {
+    const currentRenderedComponent = ref<Vue.Component>();
+    const currentStep = ref<Step>(STEPS.form);
+    const error = ref(false);
+    const transferData = ref<TransferFormModel>({});
+
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const isConnected = useGetter<boolean>('isConnected');
+
+    const showEditButton = computed(() => [
+      STEPS.review,
+      STEPS.reviewTip,
+    ].includes(currentStep.value as any));
+    const showSendButton = computed(() => currentStep.value === STEPS.review);
+    const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AENS_DOMAIN));
+    const isAddressUrl = computed(() => (
+      !isAddressChain.value
+      && transferData.value.address
+      && validateTipUrl(transferData.value.address)
+    ));
+
+    function closeModal() {
+      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
     }
-    if (this.address) this.transferData.address = this.address;
-  },
-  methods: {
-    closeModal() {
-      this.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
-    },
-    proceedToNextStep() {
-      this.$refs.currentRenderedComponent.submit();
-    },
-    handleSendFormSuccess(data) {
-      this.transferData = data;
-      this.currentStep = (this.isAddressUrl)
-        ? STEP_REVIEW_TIP
-        : STEP_REVIEW;
-    },
-    handleReviewTipSuccess() {
-      this.currentStep = STEP_REVIEW;
-    },
+
+    function proceedToNextStep() {
+      (currentRenderedComponent.value as any).submit();
+    }
+
+    function handleSendFormSuccess() {
+      currentStep.value = (isAddressUrl.value)
+        ? STEPS.reviewTip
+        : STEPS.review;
+    }
+
+    function handleReviewTipSuccess() {
+      currentStep.value = STEPS.review;
+    }
+
     /**
      * Review success means that the transfer has been initiated
      * and the summary modal will be displayed by the `pendingTransactionHandler`
      * after the transfer is finished.
      */
-    handleReviewSuccess() {
-      this.closeModal();
-    },
-    editTransfer() {
-      this.error = false;
-      this.currentStep = STEP_FORM;
-    },
+    function handleReviewSuccess() {
+      closeModal();
+    }
+
+    function editTransfer() {
+      error.value = false;
+      currentStep.value = STEPS.form;
+    }
+
+    const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
+      [STEPS.form]: {
+        component: TransferSendForm,
+        onSuccess: handleSendFormSuccess,
+      },
+      [STEPS.reviewTip]: {
+        component: TransferReviewTip,
+        onSuccess: handleReviewTipSuccess,
+      },
+      [STEPS.review]: {
+        component: TransferReview,
+        onSuccess: handleReviewSuccess,
+      },
+    };
+
+    const currentStepConfig = computed(() => steps[currentStep.value]);
+
+    if (props.tokenContractId && availableTokens.value[props.tokenContractId]) {
+      transferData.value.selectedAsset = availableTokens.value[props.tokenContractId];
+    }
+    if (props.address) {
+      transferData.value.address = props.address;
+    }
+
+    return {
+      STEPS,
+      ArrowSendIcon,
+      isConnected,
+      currentRenderedComponent,
+      steps,
+      currentStep,
+      error,
+      transferData,
+      currentStepConfig,
+      isAddressChain,
+      isAddressUrl,
+      showEditButton,
+      showSendButton,
+      closeModal,
+      proceedToNextStep,
+      editTransfer,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -134,7 +134,7 @@ export default defineComponent({
     function getAccountId(selectedAccount: IMultisigAccount | IAccount) {
       return isMultisigDashboard.value
         ? (selectedAccount as IMultisigAccount).multisigAccountId
-        : (selectedAccount as IAccount).idx;
+        : (selectedAccount as IAccount).idx as number;
     }
 
     function selectAccount(idx: number | string) {
@@ -150,7 +150,7 @@ export default defineComponent({
       const selectedAccount = visibleAccounts.value[realIndex];
       if (
         swiper.value.realIndex < visibleAccounts.value.length
-          && selectedAccount
+        && selectedAccount
       ) {
         selectAccount(getAccountId(selectedAccount));
       }

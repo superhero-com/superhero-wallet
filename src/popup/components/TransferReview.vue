@@ -1,12 +1,12 @@
 <template>
   <div class="review-wrapper">
     <ModalHeader
-      :title="$t('pages.send.reviewtx')"
-      :subtitle="$t('pages.send.checkalert')"
+      :title="isMultisig ? $t('modals.multisigTxProposal.title') : $t('pages.send.reviewtx')"
+      :subtitle="isMultisig ? null : $t('pages.send.checkalert')"
     />
 
     <DetailsItem
-      :label="$t('pages.send.sender')"
+      :label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : $t('pages.send.sender')"
       data-cy="review-sender"
     >
       <template #value>
@@ -41,7 +41,11 @@
     </DetailsItem>
 
     <DetailsItem
-      :label="$t('pages.tipPage.amountLabel')"
+      :label="
+        (isMultisig)
+          ? $t('modals.multisigTxProposal.amountProposed')
+          : $t('pages.tipPage.amountLabel')
+      "
       class="details-item"
     >
       <template #value>
@@ -54,13 +58,30 @@
     </DetailsItem>
 
     <DetailsItem
+      v-if="isMultisig"
+      class="details-item"
+      :label="$t('modals.multisigTxProposal.fee')"
+    >
+      <template #value>
+        <!-- TODO provide correct fee for the multisig -->
+        <TokenAmount
+          :amount="+transferData.fee.toFixed()"
+          :symbol="AETERNITY_SYMBOL"
+          hide-fiat
+          high-precision
+          data-cy="multisig-review-fee"
+        />
+      </template>
+    </DetailsItem>
+
+    <DetailsItem
       class="details-item"
       :label="$t('pages.signTransaction.fee')"
     >
       <template #value>
         <TokenAmount
           :amount="+transferData.fee.toFixed()"
-          symbol="AE"
+          :symbol="AETERNITY_SYMBOL"
           hide-fiat
           high-precision
           data-cy="review-fee"
@@ -76,7 +97,7 @@
       <template #value>
         <TokenAmount
           :amount="+transferData.total"
-          symbol="AE"
+          :symbol="AETERNITY_SYMBOL"
           hide-fiat
           high-precision
           data-cy="review-total"
@@ -94,18 +115,26 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  ref,
+} from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { useDeepLinkApi } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
+  AETERNITY_CONTRACT_ID,
+  AETERNITY_SYMBOL,
+  MODAL_DEFAULT,
   aeToAettos,
   checkAensName,
   convertToken,
   escapeSpecialChars,
 } from '../utils';
 import { IAccount, IPendingTransaction, ISdk } from '../../types';
-import { MODAL_DEFAULT, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
@@ -125,9 +154,10 @@ export default defineComponent({
     prop: 'transferData',
   },
   props: {
-    transferData: { type: Object, required: true },
+    transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
+    isMultisig: Boolean,
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
   },
@@ -279,7 +309,15 @@ export default defineComponent({
       }
     }
 
-    async function submit() {
+    // TODO
+    function proposeMultisigTransaction() {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_DEFAULT,
+        title: 'Multisig transaction proposal: feature in development...',
+      });
+    }
+
+    function submit(): any {
       const {
         amount: amountRaw,
         address: recipient,
@@ -288,30 +326,33 @@ export default defineComponent({
       } = props.transferData;
 
       if (!amountRaw || !recipient || !selectedAsset) {
-        return;
+        return null;
       }
 
       const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : convertToken(amountRaw, selectedAsset.decimals);
+        : convertToken(+amountRaw, selectedAsset.decimals);
 
+      if (props.isMultisig) {
+        return proposeMultisigTransaction();
+      }
       if (props.isAddressUrl) {
-        sendTip({
+        return sendTip({
           amount,
           recipient,
           selectedAsset,
           note,
         });
-      } else {
-        transfer({
-          amount,
-          recipient,
-          selectedAsset,
-        });
       }
+      return transfer({
+        amount,
+        recipient,
+        selectedAsset,
+      });
     }
 
     return {
+      AETERNITY_SYMBOL,
       AETERNITY_CONTRACT_ID,
       loading,
       submit,
@@ -325,7 +366,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-  .details-item {
-    margin-top: 16px;
-  }
+.details-item {
+  margin-top: 16px;
+}
 </style>

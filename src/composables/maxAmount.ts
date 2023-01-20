@@ -25,8 +25,8 @@ import { useSdk } from './sdk';
 import { useBalances } from './balances';
 
 export interface IFormModel {
-  amount: number | string;
-  selectedAsset: IToken | IAsset | null;
+  amount?: number | string;
+  selectedAsset?: IToken | IAsset;
   address?: string;
   payload?: string;
 }
@@ -48,7 +48,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
-  const fee = ref(new BigNumber(0));
+  const fee = ref<BigNumber>(new BigNumber(0));
   const selectedTokenBalance = ref(new BigNumber(0));
   const tokenInstance = ref<any>(null);
   const nonce = ref(0);
@@ -82,6 +82,9 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
+      const numericAmount = (val.amount && val.amount > 0) ? val.amount : 0;
+      const amount = new BigNumber(numericAmount).shiftedBy(MAGNITUDE);
+
       if (
         val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
         || (
@@ -93,9 +96,9 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
             ...sdk.Ae.defaults,
             ttl: 0,
             nonce: nonce.value + 1,
-            amount: (new BigNumber(val.amount > 0 ? val.amount : 0)).shiftedBy(MAGNITUDE),
+            amount,
             callerId: account.value.address,
-            contractId: validateTipUrl(val.address)
+            contractId: (val.address && validateTipUrl(val.address))
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId,
           },
@@ -109,7 +112,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           ...sdk.Ae.defaults,
           senderId: account.value.address,
           recipientId: account.value.address,
-          amount: new BigNumber(val.amount > 0 ? val.amount : 0).shiftedBy(MAGNITUDE),
+          amount,
           ttl: 0,
           nonce: nonce.value + 1,
           payload: val.payload,

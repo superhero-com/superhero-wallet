@@ -47,23 +47,23 @@ interface NavigationElement {
 }
 
 const navItemAssets: NavigationElement = {
-  text: 'modals.account-details.assets',
+  text: 'modals.accountDetails.assets',
   routeName: ROUTE_ACCOUNT_DETAILS,
   exact: true,
 };
 
 const navItemTransactions: NavigationElement = {
-  text: 'modals.account-details.transactions',
+  text: 'modals.accountDetails.transactions',
   routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
 };
 
 const navItemDetails: NavigationElement = {
-  text: 'modals.account-details.details',
+  text: 'modals.accountDetails.details',
   routeName: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
 };
 
 const navItemNames: NavigationElement = {
-  text: 'modals.account-details.names',
+  text: 'modals.accountDetails.names',
   routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
   children: [
     {

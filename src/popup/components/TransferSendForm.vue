@@ -1,14 +1,54 @@
 <template>
-  <div class="transfer-send">
-    <ModalHeader :title="$t('modals.send.sendTitle')" />
-    <AccountRow />
+  <div class="transfer-send-form">
+    <template v-if="isMultisig">
+      <ModalHeader :title="$t('modals.multisigTxProposal.title')" />
+      <div class="multisig-addresses-row">
+        <DetailsItem
+          class="multisig-address-item"
+        >
+          <template #label>
+            <FormSelect
+              v-if="multisigVaultOwnedByManyAccounts"
+              v-model="selectedAccountAddress"
+              :options="accountsAllowedToProposeTxSelectOptions"
+              :default-text="$t('modals.multisigTxProposal.signingAccount')"
+              class="account-selector"
+              persistent-default-text
+              unstyled
+            />
+            <template v-else>
+              {{ getAccountNameToDisplay(selectedAccountAddress) }}
+            </template>
+          </template>
+          <template #value>
+            <AccountItem
+              :address="selectedAccountAddress"
+            />
+          </template>
+        </DetailsItem>
+
+        <DetailsItem
+          class="multisig-address-item"
+          :label="$t('modals.multisigTxProposal.multisigVault')"
+        >
+          <template #value>
+            <AccountItem :address="multisigVaultAddress" />
+          </template>
+        </DetailsItem>
+      </div>
+    </template>
+    <template v-else>
+      <ModalHeader :title="$t('modals.send.sendTitle')" />
+      <AccountRow />
+    </template>
+
     <InputField
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
         not_same_as: account.address,
         name_registered_address_or_url: true,
-        token_to_an_address: { isToken },
+        token_to_an_address: { isToken: !isAe },
       }"
       name="address"
       data-cy="address"
@@ -49,6 +89,7 @@
       data-cy="amount"
       class="amount-input"
       show-tokens-with-balance
+      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
       :message="errors.first('amount')"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
@@ -64,7 +105,7 @@
       </template>
     </InputAmount>
 
-    <template v-if="showPayloadForm">
+    <template v-if="isAe">
       <div
         v-if="!(formModel.payload && formModel.payload.length)"
         class="payload-add-wrapper"
@@ -123,7 +164,9 @@ import {
   watch,
   onMounted,
   PropType,
+  nextTick,
 } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
 import type {
   IAccount,
   IInputMessage,
@@ -142,11 +185,11 @@ import {
   checkAensName,
 } from '../utils';
 import {
-  IFormModel,
   useBalances,
   useMaxAmount,
 } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
+import { TransferFormModel } from './Modals/TransferSend.vue';
 import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -159,6 +202,8 @@ import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import BtnText from './buttons/BtnText.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
+import AccountItem from './AccountItem.vue';
+import FormSelect, { FormSelectOption } from './form/FormSelect.vue';
 
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
 import EditIcon from '../../icons/pencil.svg?vue-component';
@@ -173,14 +218,16 @@ export default defineComponent({
     BtnText,
     BtnHelp,
     BtnIcon,
+    BtnPlain,
     PayloadDetails,
     ModalHeader,
     AccountRow,
+    AccountItem,
     InputField,
     InputAmount,
-    BtnPlain,
     DetailsItem,
     TokenAmount,
+    FormSelect,
     UrlStatus,
     QrScanIcon,
   },
@@ -188,12 +235,13 @@ export default defineComponent({
     prop: 'transferData',
   },
   props: {
-    transferData: { type: Object as PropType<IFormModel>, required: true },
+    transferData: { type: Object as PropType<TransferFormModel>, required: true },
+    isMultisig: Boolean,
   },
   setup(props, { root, emit }) {
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
-    const formModel = ref<IFormModel>(props.transferData);
+    const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
@@ -201,6 +249,9 @@ export default defineComponent({
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
 
     const account = useGetter<IAccount>('account');
+    const accounts = useGetter<IAccount[]>('accounts');
+    // TODO need to be used for the multisig transfer proposal
+    const selectedAccountAddress = ref<string>(account.value.address);
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -218,9 +269,11 @@ export default defineComponent({
     const urlStatus = computed(
       () => root.$store.getters['tipUrl/status'](formModel.value.address),
     );
-    const isTipUrl = computed(
-      () => validateTipUrl(formModel.value.address) && !checkAensName(formModel.value.address),
-    );
+    const isTipUrl = computed(() => (
+      !!formModel.value.address
+      && validateTipUrl(formModel.value.address)
+      && !checkAensName(formModel.value.address)
+    ));
 
     const message = computed((): IInputMessage => {
       if (isTipUrl.value) {
@@ -245,39 +298,56 @@ export default defineComponent({
       return { status: 'success' };
     });
 
-    const hasError = computed<boolean>(
-      () => !!addressErrorMsg.value || !!(root as any).errors.first('amount'),
+    const hasError = computed(
+      (): boolean => !!addressErrorMsg.value || !!(root as any).errors.first('amount'),
     );
-    const isToken = computed<boolean>(
-      () => formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID,
+    const isAe = computed(
+      () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
     );
     const isMaxValue = computed<boolean>(() => {
-      const amountInt = +formModel.value.amount;
+      const amountInt = +(formModel.value?.amount || 0);
       return amountInt > 0 && amountInt === +max.value;
     });
-    const showPayloadForm = computed<boolean>(
-      () => formModel.value.selectedAsset?.id === AETERNITY_CONTRACT_ID,
+
+    // TODO
+    const multisigVaultAddress = computed(() => 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q');
+
+    /**
+     * Determines if more than one of current user's accounts can approve this vault's txs.
+     * TODO
+     */
+    const multisigVaultOwnedByManyAccounts = computed(() => (
+      accounts.value.length > 1
+      && true // TODO
+    ));
+
+    function getAccountNameToDisplay(acc: IAccount) {
+      return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
+    }
+
+    const accountsAllowedToProposeTxSelectOptions = computed(
+      (): FormSelectOption[] => accounts.value
+        .map((acc): FormSelectOption => ({
+          text: getAccountNameToDisplay(acc),
+          value: acc.address,
+          address: acc.address,
+        }))
+        .filter(() => true), // TODO filter accounts allowed to propose TX
     );
 
-    watch(
-      () => hasError.value,
-      (val) => emit('error', val),
-    );
+    function emitCurrentFormModelState() {
+      const inputPayload: TransferFormModel = {
+        ...formModel.value,
+        fee: fee.value as BigNumber,
+        total: (isAe.value ? +fee.value.toFixed() : 0) + +(formModel.value?.amount || 0),
+        invoiceId: invoiceId.value,
+        invoiceContract: invoiceContract.value,
+      };
+      emit('input', inputPayload);
+      return nextTick();
+    }
 
-    watch(
-      () => formModel.value,
-      (val) => emit('input', {
-        ...val,
-        fee: fee.value,
-        total: (val.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
-          ? +fee.value.toFixed() : 0) + +val.amount,
-      }),
-      {
-        deep: true,
-      },
-    );
-
-    const queryHandler = async (query: any) => {
+    async function queryHandler(query: any) {
       formModel.value.selectedAsset = availableTokens.value[query.token]
         || getAeternityToken.value({
           tokenBalance: balance.value,
@@ -285,9 +355,9 @@ export default defineComponent({
         });
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
-    };
+    }
 
-    const setMaxValue = () => {
+    function setMaxValue() {
       const _fee = fee.value;
       formModel.value.amount = max.value;
       setTimeout(() => {
@@ -296,37 +366,28 @@ export default defineComponent({
         }
       },
       100);
-    };
+    }
 
     // Method called from a parent scope - avoid changing its name.
-    const submit = async () => {
+    async function submit() {
       const isValid = !(await (root as any).$validator._base.anyExcept('address', WARNING_RULES));
       if (isValid) {
-        const {
-          address, amount, selectedAsset, payload,
-        } = formModel.value;
-        emit('success', {
-          address,
-          amount,
-          selectedAsset,
-          payload: showPayloadForm.value ? payload : '',
-          fee: fee.value,
-          total: (selectedAsset?.contractId === AETERNITY_CONTRACT_ID ? +fee.value : 0) + +amount,
-          invoiceId: invoiceId.value,
-          invoiceContract: invoiceContract.value,
-        });
+        await emitCurrentFormModelState();
+        emit('success');
       }
-    };
+    }
 
-    const showRecipientHelp = () => root.$store.dispatch('modals/open', {
-      name: MODAL_RECIPIENT_INFO,
-    });
+    function showRecipientHelp() {
+      root.$store.dispatch('modals/open', {
+        name: MODAL_RECIPIENT_INFO,
+      });
+    }
 
-    const handleAssetChange = (selectedAsset: any) => {
+    function handleAssetChange(selectedAsset: IToken) {
       formModel.value.selectedAsset = selectedAsset;
-    };
+    }
 
-    const openScanQrModal = async () => {
+    async function openScanQrModal() {
       const scanResult = await root.$store.dispatch('modals/open', {
         name: MODAL_READ_QR_CODE,
         title: root.$t('pages.send.scanAddress'),
@@ -381,29 +442,40 @@ export default defineComponent({
         invoiceId.value = null;
       }
       if (!formModel.value.address) formModel.value.address = '';
-    };
+    }
 
-    const openPayloadInformation = () => {
+    function openPayloadInformation() {
       root.$store.dispatch('modals/open', {
         name: MODAL_HELP,
         title: root.$t('modals.payloadInfo.title'),
         msg: root.$t('modals.payloadInfo.msg'),
         textCenter: true,
       });
-    };
+    }
 
-    const editPayload = () => {
+    function editPayload() {
       root.$store.dispatch('modals/open', {
         name: MODAL_PAYLOAD_FORM,
         payload: formModel.value.payload,
       }).then((text) => {
         formModel.value.payload = text;
       }).catch(() => null);
-    };
+    }
 
-    const clearPayload = () => {
+    function clearPayload() {
       formModel.value.payload = '';
-    };
+    }
+
+    watch(
+      () => hasError.value,
+      (val) => emit('error', val),
+    );
+
+    watch(
+      () => formModel.value,
+      () => emitCurrentFormModelState(),
+      { deep: true },
+    );
 
     onMounted(async () => {
       const tipUrlEncoded: any = root.$route.query.url;
@@ -425,7 +497,7 @@ export default defineComponent({
       EditIcon,
       DeleteIcon,
       PlusCircleIcon,
-      isToken,
+      isAe,
       isMaxValue,
       invoiceId,
       invoiceContract,
@@ -436,10 +508,16 @@ export default defineComponent({
       addressWarningMsg,
       availableTokens,
       account,
+      accounts,
+      accountsAllowedToProposeTxSelectOptions,
+      selectedAccountAddress,
       urlStatus,
       isTipUrl,
       message,
       hasError,
+      multisigVaultAddress,
+      multisigVaultOwnedByManyAccounts,
+      getAccountNameToDisplay,
       openScanQrModal,
       setMaxValue,
       showRecipientHelp,
@@ -451,7 +529,6 @@ export default defineComponent({
       editPayload,
       openPayloadInformation,
       clearPayload,
-      showPayloadForm,
     };
   },
 });
@@ -461,7 +538,36 @@ export default defineComponent({
 @use '../../styles/variables';
 @use '../../styles/typography';
 
-.transfer-send {
+.transfer-send-form {
+  .multisig-addresses-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+
+    .multisig-address-item {
+      width: 50%;
+      margin-bottom: 0;
+    }
+
+    .multisig-select-account {
+      appearance: none; // Temporary solution that removes any styling from <select>
+      padding: 0;
+      color: inherit;
+      background: none;
+      border: none;
+      font: inherit;
+      outline: none;
+
+      &:hover {
+        color: variables.$color-white;
+      }
+    }
+  }
+
+  .account-selector {
+    color: rgba(variables.$color-white, 0.75);
+  }
+
   .scan-button {
     color: variables.$color-white;
     display: block;

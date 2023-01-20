@@ -19,7 +19,7 @@
           :disabled="!isConnected"
           data-cy="propose"
           is-big
-          @click="openProposeTxModal()"
+          @click="openMultisigTxProposeModal()"
         />
         <BtnBox
           v-else
@@ -135,6 +135,7 @@ export default defineComponent({
     const isConnected = useGetter('isConnected');
 
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
+    const query = computed(() => root.$route.query);
 
     function openTransferReceiveModal() {
       root.$store.dispatch('modals/open', {
@@ -146,16 +147,14 @@ export default defineComponent({
         name: MODAL_TRANSFER_SEND,
       });
     }
-    function openProposeTxModal() {
-      // TODO - open proper modal
+    function openMultisigTxProposeModal() {
       root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
+        isMultisig: true,
       });
     }
 
     watch(activeIdx, () => root.$store.commit('initTransactions'));
-
-    const query = computed(() => root.$route.query);
 
     watch(query, (value) => {
       if (!isEmpty(value)) {
@@ -180,7 +179,7 @@ export default defineComponent({
       chainNameBackground,
       openTransferReceiveModal,
       openTransferSendModal,
-      openProposeTxModal,
+      openMultisigTxProposeModal,
     };
   },
 });
