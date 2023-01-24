@@ -47,7 +47,7 @@ export default {
   width: 100%;
   min-height: 80px;
   margin-bottom: 16px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: variables.$border-radius-interactive;
   color: variables.$color-white;
 
@@ -56,6 +56,7 @@ export default {
 
     gap: 16px;
     margin-right: auto;
+    text-align: left;
   }
 
   .message {

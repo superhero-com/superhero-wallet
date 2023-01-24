@@ -15,15 +15,15 @@
     </p>
 
     <BtnSubheader
-      :header="$t('modals.createAccount.plainAccount.btnText')"
-      :subheader="$t('modals.createAccount.plainAccount.btnSubtitle')"
-      :icon="plusCircleIcon"
+      :header="$t('modals.createAccount.btnText')"
+      :subheader="$t('modals.createAccount.btnSubtitle')"
+      :icon="PlusCircleIcon"
       @click="createPlainAccount()"
     />
     <BtnSubheader
-      :header="$t('modals.createAccount.multisigAccount.btnText')"
-      :subheader="$t('modals.createAccount.multisigAccount.btnSubtitle')"
-      :icon="plusCircleIcon"
+      :header="$t('modals.createMultisigAccount.btnText')"
+      :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
+      :icon="PlusCircleIcon"
       @click="createMultisigAccount()"
     />
 
@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from '@vue/composition-api';
-import { useMultisig } from '../../../composables';
+import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
@@ -49,8 +49,6 @@ export default defineComponent({
     resolve: { type: Function as PropType<() => void>, required: true },
   },
   setup(props, { root }) {
-    const { deployMultisigAccount, multisigProgress } = useMultisig({ store: root.$store });
-    const plusCircleIcon = ref(PlusCircleIcon);
     const loading = ref(false);
 
     async function createPlainAccount() {
@@ -61,16 +59,15 @@ export default defineComponent({
     }
 
     async function createMultisigAccount() {
-      loading.value = true;
-      await deployMultisigAccount(2, ['ak_aWUod4pwwhGmBLF3AYEpfm3SYQtsEJBuncTkGWmW7sf2f84My', 'ak_2cWZgLBL4rRgpiCoWVwwtDCJJFiTeETprvZsshEEYDQjdKyLpK']);
-      loading.value = false;
+      await root.$store.dispatch('modals/open', {
+        name: MODAL_MULTISIG_VAULT_CREATE,
+      });
       props.resolve();
     }
 
     return {
-      plusCircleIcon,
+      PlusCircleIcon,
       loading,
-      multisigProgress,
       createPlainAccount,
       createMultisigAccount,
     };

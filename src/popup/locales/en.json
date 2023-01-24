@@ -72,13 +72,48 @@
     "createAccount": {
       "title": "Add account",
       "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
-      "plainAccount": {
-        "btnText": "Create account",
-        "btnSubtitle": "and add it to your wallet"
+      "btnText": "Add account",
+      "btnSubtitle": "Derive another account from your seed"
+    },
+    "createMultisigAccount": {
+      "title": "Create new multisig vault",
+      "btnText": "Create vault",
+      "btnSubtitle": "Manage funds with multiple accounts",
+      "signer": "Signer",
+      "signerInputPlaceholder": "Signer's account address",
+      "addSigner": "Add Signer",
+      "addSignerHelpTitle": "Authorized signers",
+      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br /> <br />As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
+      "consensusRequiredDesc": "Consensus required for tx confirmation:",
+      "consensusRequiredContent": "out of {0} signatures",
+      "consensusRequiredHelpTitle": "Consensus required",
+      "consensusRequiredHelpMsg": "As the creator of this multisig vault you can determine the authorized signers and set the consensus needed for a transaction confirmation (how many signatures are required to confirm each transaction).",
+      "createMultisigVault": "Create Vault",
+      "errorDuplicatingSigner": "Cannot add the same address as a signer twice"
+    },
+    "creatingMultisigAccount": {
+      "title": "Creating vault progress",
+      "btnText": "Go to multisig vault",
+      "vaultCreatedMessage": "Your new multisig vault is ready!",
+      "step1": {
+        "pending": "Prepare multisig vault",
+        "inProgress": "Preparing multisig vault...",
+        "done": "Multisig vault has been prepared"
       },
-      "multisigAccount": {
-        "btnText": "Multisig vault",
-        "btnSubtitle": "to manage funds with multiple accounts"
+      "step2": {
+        "pending": "Compile smart contract",
+        "inProgress": "Compiling smart contract...",
+        "done": "Smart contract has been compiled"
+      },
+      "step3": {
+        "pending": "Deploy smart contract",
+        "inProgress": "Deploying smart contract...",
+        "done": "Smart contract has been deployed"
+      },
+      "step4": {
+        "pending": "Create multisig vault account",
+        "inProgress": "Creating multisig vault account...",
+        "done": "Multisig vault account has been created"
       }
     },
     "removeAccount": {

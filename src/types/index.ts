@@ -386,3 +386,7 @@ export interface IMultisigAccount {
   gaContractId: string,
   gaAccountId: string,
 }
+
+export interface ICreateMultisigAccount {
+  address: string
+}

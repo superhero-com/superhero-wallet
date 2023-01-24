@@ -21,6 +21,7 @@ import {
   MODAL_RECIPIENT_INFO,
   MODAL_RECIPIENT_HELPER,
   MODAL_PAYLOAD_FORM,
+  MODAL_MULTISIG_VAULT_CREATE,
 } from '../utils/constants';
 
 import Default from '../components/Modals/Default.vue';
@@ -41,6 +42,7 @@ import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
+import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -71,4 +73,5 @@ export default () => {
   registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
   registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
   registerModal({ name: MODAL_PAYLOAD_FORM, component: PayloadForm });
+  registerModal({ name: MODAL_MULTISIG_VAULT_CREATE, component: MultisigVaultCreate });
 };

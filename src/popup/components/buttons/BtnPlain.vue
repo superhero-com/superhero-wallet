@@ -35,5 +35,9 @@ export default {
   &.extend {
     width: 100%;
   }
+
+  &:disabled {
+    opacity: 0.7;
+  }
 }
 </style>
