@@ -370,6 +370,7 @@ export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/
 
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
+export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
@@ -467,3 +468,5 @@ export const MULTISIG_CREATION_STEPS = {
   deployed: 'deployed',
   created: 'created',
 } as const;
+
+export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;

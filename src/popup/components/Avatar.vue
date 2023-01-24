@@ -3,12 +3,14 @@
     class="avatar"
     :src="error ? avatar : profileImage"
     :class="[size, { 'with-border': withBorder }]"
+    :style="avatarStyle"
     @error="error = true"
   >
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import { getAddressColor } from '../utils/avatar';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
@@ -23,6 +25,7 @@ export default {
     },
     src: { type: String, default: '' },
     withBorder: Boolean,
+    colorfulBorder: Boolean,
   },
   data: () => ({
     error: false,
@@ -36,6 +39,16 @@ export default {
     },
     avatar(state, { getAvatar }) {
       return getAvatar(this.name || this.address);
+    },
+    color() {
+      return this.address ? getAddressColor(this.address) : null;
+    },
+    avatarStyle() {
+      if (!this.colorfulBorder) return null;
+
+      return {
+        'border-color': this.color,
+      };
     },
   }),
 };

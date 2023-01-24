@@ -4,6 +4,7 @@
     :class="{
       'has-icon': !!icon,
     }"
+    :disabled="disabled"
     @click="$emit('click')"
   >
     <Component
@@ -26,6 +27,7 @@ export default defineComponent({
   props: {
     text: { type: String, default: '' },
     icon: { type: Object, default: null },
+    disabled: Boolean,
   },
 });
 </script>
@@ -45,7 +47,7 @@ export default defineComponent({
   gap: 4px;
   width: fit-content;
 
-  &:hover {
+  &:hover:not([disabled]) {
     border-radius: 8px;
     background: rgba(variables.$color-primary, 0.15);
   }

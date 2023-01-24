@@ -5,6 +5,7 @@
   >
     <Avatar
       v-if="!hideAvatar"
+      v-bind="$attrs"
       :size="avatarSize"
       :address="address"
     />
@@ -18,6 +19,7 @@
     </div>
     <AddressFormatted
       v-else
+      v-bind="$attrs"
       :address="address"
       columns
     />
