@@ -15,44 +15,67 @@
     </p>
 
     <BtnSubheader
-      :header="$t('modals.createAccount.btnText')"
-      :subheader="$t('modals.createAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      @click="createAccount()"
+      :header="$t('modals.createAccount.plainAccount.btnText')"
+      :subheader="$t('modals.createAccount.plainAccount.btnSubtitle')"
+      :icon="plusCircleIcon"
+      @click="createPlainAccount()"
+    />
+    <BtnSubheader
+      :header="$t('modals.createAccount.multisigAccount.btnText')"
+      :subheader="$t('modals.createAccount.multisigAccount.btnSubtitle')"
+      :icon="plusCircleIcon"
+      @click="createMultisigAccount()"
     />
 
     <Loader v-if="loading" />
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { useMultisig } from '../../../composables';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 import Loader from '../Loader.vue';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnSubheader,
     Loader,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<() => void>, required: true },
   },
-  data: () => ({
-    PlusCircleIcon,
-    loading: false,
-  }),
-  methods: {
-    async createAccount() {
-      this.loading = true;
-      await this.$store.dispatch('accounts/hdWallet/create');
-      this.loading = false;
-      this.resolve();
-    },
+  setup(props, { root }) {
+    const { deployMultisigAccount, multisigProgress } = useMultisig({ store: root.$store });
+    const plusCircleIcon = ref(PlusCircleIcon);
+    const loading = ref(false);
+
+    async function createPlainAccount() {
+      loading.value = true;
+      await root.$store.dispatch('accounts/hdWallet/create');
+      loading.value = false;
+      props.resolve();
+    }
+
+    async function createMultisigAccount() {
+      loading.value = true;
+      await deployMultisigAccount(2, ['ak_aWUod4pwwhGmBLF3AYEpfm3SYQtsEJBuncTkGWmW7sf2f84My', 'ak_2cWZgLBL4rRgpiCoWVwwtDCJJFiTeETprvZsshEEYDQjdKyLpK']);
+      loading.value = false;
+      props.resolve();
+    }
+
+    return {
+      plusCircleIcon,
+      loading,
+      multisigProgress,
+      createPlainAccount,
+      createMultisigAccount,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

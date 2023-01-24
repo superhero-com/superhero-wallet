@@ -50,6 +50,7 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
+export const ACCOUNT_LEDEGR_WALLET = 'ledger';
 
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
@@ -459,3 +460,10 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
 
 export const TX_FUNCTION_TIP = 'tip';
 export const TX_FUNCTION_CLAIM = 'claim';
+
+export const MULTISIG_CREATION_STEPS = {
+  preparing: 'preparing',
+  compiled: 'compiled',
+  deployed: 'deployed',
+  created: 'created',
+} as const;
