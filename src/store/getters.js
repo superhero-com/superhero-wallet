@@ -14,10 +14,7 @@ import {
   NODE_STATUS_CONNECTED,
   TX_TYPE_MDW,
   ACCOUNT_HD_WALLET,
-  TRANSACTION_DIRECTION_SENT,
-  TRANSACTION_DIRECTION_RECEIVED,
-  TX_FUNCTION_TIP,
-  TX_FUNCTION_CLAIM,
+  TX_FUNCTIONS,
   validateHash,
   convertToken,
   aettosToAe,
@@ -126,14 +123,14 @@ export default {
   getTxDirection: (_, { account: { address }, getTxType }) => ({ tx }, externalAddress) => {
     if (getTxType({ tx }) === SCHEMA.TX_TYPE.spend) {
       return tx.recipientId === address
-        ? TRANSACTION_DIRECTION_RECEIVED
-        : TRANSACTION_DIRECTION_SENT;
+        ? TX_FUNCTIONS.received
+        : TX_FUNCTIONS.sent;
     }
     return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
       .map((key) => tx?.[key])
       .includes(externalAddress || address)
-      ? TRANSACTION_DIRECTION_SENT
-      : TRANSACTION_DIRECTION_RECEIVED;
+      ? TX_FUNCTIONS.sent
+      : TX_FUNCTIONS.received;
   },
   getTxTipUrl: () => (transaction) => (
     transaction.tipUrl
@@ -142,8 +139,8 @@ export default {
             && !transaction.claim
             && transaction.tx.log?.[0]
             && [
-              TX_FUNCTION_TIP,
-              TX_FUNCTION_CLAIM,
+              TX_FUNCTIONS.tip,
+              TX_FUNCTIONS.claim,
             ].includes(transaction.function || transaction.tx?.function)
             && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
         || categorizeContractCallTxObject(transaction)?.url

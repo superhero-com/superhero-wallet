@@ -19,9 +19,7 @@ import {
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
 import {
-  TRANSACTION_DIRECTION_RECEIVED,
-  TRANSACTION_DIRECTION_SENT,
-  TX_FUNCTION_CLAIM,
+  TX_FUNCTIONS,
   watchUntilTruthy,
 } from '../utils';
 import { useSdk, useTransaction } from '../../composables';
@@ -97,10 +95,10 @@ export default defineComponent({
           };
 
           return {
-            sender: direction.value === TRANSACTION_DIRECTION_SENT
+            sender: direction.value === TX_FUNCTIONS.sent
               ? ownershipAccount.value
               : contract,
-            recipient: direction.value === TRANSACTION_DIRECTION_RECEIVED
+            recipient: direction.value === TX_FUNCTIONS.received
               ? ownershipAccount.value
               : contract,
             title: root.$t('transaction.type.contractCallTx'),
@@ -156,7 +154,7 @@ export default defineComponent({
         name.value = (await middleware.value.getNameById(props.tx.recipientId)).name;
       }
       let transactionOwnerAddress;
-      if (props.tx.function === TX_FUNCTION_CLAIM) {
+      if (props.tx.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
       ownershipAccount.value = await fetchOwnershipAccount(transactionOwnerAddress);

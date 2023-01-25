@@ -4,7 +4,7 @@ import { uniqBy } from 'lodash-es';
 import {
   NODE_STATUS_CONNECTION_DONE,
   NODE_STATUS_CONNECTED,
-  TRANSACTION_DIRECTION_SENT,
+  TX_FUNCTIONS,
   defaultNetwork,
 } from '../popup/utils';
 
@@ -40,7 +40,7 @@ export default {
   },
   setPendingTransactionSentByHash(state, { network, hash }) {
     const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
-    Vue.set(state.transactions.pending[network][index], TRANSACTION_DIRECTION_SENT, true);
+    Vue.set(state.transactions.pending[network][index], TX_FUNCTIONS.sent, true);
   },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) Vue.set(state.userNetworks, index, network);

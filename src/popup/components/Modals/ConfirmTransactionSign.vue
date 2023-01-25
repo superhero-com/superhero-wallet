@@ -124,7 +124,7 @@ import {
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
   AETERNITY_SYMBOL,
-  TRANSACTION_DIRECTION_RECEIVED,
+  TX_FUNCTIONS,
   convertToken,
 } from '../../utils';
 import * as transactionTokenInfoResolvers from '../../utils/transactionTokenInfoResolvers';
@@ -210,7 +210,7 @@ export default {
     },
     singleToken() {
       return {
-        isReceived: this.getTxDirection(this.transaction) === TRANSACTION_DIRECTION_RECEIVED,
+        isReceived: this.getTxDirection(this.transaction) === TX_FUNCTIONS.received,
         amount: this.getTxAmountTotal(this.transaction),
         symbol: this.getTxSymbol(this.transaction),
         isAex9: this.isTxAex9(this.transaction),
