@@ -2,14 +2,11 @@
   <div class="transaction-info">
     <div class="title-tag-wrapper">
       <TransactionTag
-        :tx-type="getTitle"
-        data-cy="title"
-      />
-      <TransactionTag
-        v-if="txFunction && getTxType"
-        :tx-type="getTxType"
+        v-for="label in labels"
+        :key="label"
+        :tx-type="label"
         class="title-tag"
-        data-cy="tx-function"
+        data-cy="label"
       />
     </div>
 
@@ -58,16 +55,25 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  defineComponent,
+  PropType,
+} from '@vue/composition-api';
+import type {
+  ITransaction,
+  ITx,
+} from '../../types';
+import { useTransaction } from '../../composables/transaction';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
 import Avatar from './Avatar.vue';
 import TransactionTag from './TransactionTag.vue';
 import TransactionInfoDetailsParty from './TransactionInfoDetailsParty.vue';
-import { DEX_TRANSACTION_TAGS, FUNCTION_TYPE_DEX } from '../utils';
 
-export default {
+export default defineComponent({
+  name: 'TransactionInfo',
   components: {
     TransactionInfoDetailsParty,
     TriangleRight,
@@ -81,20 +87,19 @@ export default {
     txFunction: { type: String, default: null },
     sender: { type: Object, required: true },
     recipient: { type: Object, required: true },
+    tx: { type: Object as PropType<ITx>, default: null },
   },
-  computed: {
-    getTxType() {
-      return this.$te(`transaction.dexType.${DEX_TRANSACTION_TAGS[this.txFunction] || this.txFunction}`)
-        ? this.$t(`transaction.dexType.${DEX_TRANSACTION_TAGS[this.txFunction] || this.txFunction}`)
-        : '';
-    },
-    getTitle() {
-      return FUNCTION_TYPE_DEX.pool.includes(this.txFunction)
-        ? this.$t('transaction.dexType.pool')
-        : this.title;
-    },
+  setup(props, { root }) {
+    const { labels } = useTransaction({
+      store: root.$store,
+      initTransaction: { tx: props.tx } as ITransaction,
+    });
+
+    return {
+      labels,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

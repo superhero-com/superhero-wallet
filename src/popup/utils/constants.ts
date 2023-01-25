@@ -470,3 +470,27 @@ export const MULTISIG_CREATION_STEPS = {
 } as const;
 
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
+
+export const TX_FUNCTIONS = {
+  tip: 'tip',
+  retip: 'retip',
+  transfer: 'transfer',
+  sent: 'sent',
+  received: 'received',
+  deposit: 'deposit',
+  addLiquidity: 'add_liquidity',
+  addLiquidityAe: 'add_liquidity_ae',
+  removeLiquidity: 'remove_liquidity',
+  removeLiquidityAe: 'remove_liquidity_ae',
+  swapExactTokensForTokens: 'swap_exact_tokens_for_tokens',
+  swapTokensForExactTokens: 'swap_tokens_for_exact_tokens',
+  swapExactAeForTokens: 'swap_exact_ae_for_tokens',
+  swapTokensForExactAe: 'swap_tokens_for_exact_ae',
+  swapExactTokensForAe: 'swap_exact_tokens_for_ae',
+  swapAeForExactTokens: 'swap_ae_for_exact_tokens',
+  createAllowance: 'create_allowance',
+  changeAllowance: 'change_allowance',
+  transferAllowance: 'transfer_allowance',
+  withdraw: 'withdraw',
+  claim: 'claim',
+} as const;

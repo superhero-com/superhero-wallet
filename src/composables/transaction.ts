@@ -1,13 +1,19 @@
 import { computed, ref } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type { Store } from 'vuex';
+import { TranslateResult } from 'vue-i18n';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import type {
   ITransaction,
   ITokenTransactionComposable,
   TransactionType,
   IDexContracts,
-  IAccount, IAccountLabeled,
+  IAccount,
+  IAccountLabeled,
+  ITokenList,
+  INetwork,
 } from '../types';
+import { i18n } from '../store/plugins/languages';
 import * as TransactionResolver from '../popup/utils/transactionTokenInfoResolvers';
 import {
   AETERNITY_SYMBOL,
@@ -18,24 +24,28 @@ import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTION_CLAIM,
   convertToken,
+  AENS,
+  DEX,
+  TX_FUNCTIONS,
+  TX_TYPE_MDW,
 } from '../popup/utils';
-import { i18n } from '../store/plugins/languages';
-import { ITokenList } from '../types';
 
-interface UseTransactionTokenOptions {
+interface UseTransactionOptions {
   /**
    * TODO: Temporary solution to avoid dependency circle
    */
   store: Store<any>
   initTransaction?: ITransaction
-  showDetailedAllowanceInfo?: boolean
+  showDetailedAllowanceInfo?: boolean,
+  defaultLabels?: string[],
 }
 
 export function useTransaction({
   store,
   initTransaction,
   showDetailedAllowanceInfo = false,
-}: UseTransactionTokenOptions) {
+  defaultLabels = [],
+}: UseTransactionOptions) {
   const transaction = ref<ITransaction | undefined>(initTransaction);
 
   function setTransaction(newTransaction: ITransaction) {
@@ -48,6 +58,7 @@ export function useTransaction({
 
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   const isTxAex9 = computed(() => store.getters.isTxAex9);
   const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
@@ -60,9 +71,9 @@ export function useTransaction({
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 
-  const isAllowance = computed(() => transaction.value
+  const isAllowance = computed((): boolean => !!(transaction.value
     && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function)
-    && availableTokens.value[transaction.value.tx.contractId]);
+    && availableTokens.value[transaction.value.tx.contractId]));
 
   const txOwnerAddress = computed(() => (
       transaction.value?.tx.accountId
@@ -128,8 +139,8 @@ export function useTransaction({
     }];
   });
 
-  const isErrorTransaction = computed<boolean>(
-    () => {
+  const isErrorTransaction = computed(
+    (): boolean => {
       if (!transaction.value) {
         return false;
       }
@@ -138,11 +149,80 @@ export function useTransaction({
     },
   );
 
-  const isDex = computed(() => transaction.value
+  const isDex = computed<boolean>(() => !!(transaction.value
     && getDexContracts.value && transaction.value.tx.contractId && (
     getDexContracts.value.router.includes(transaction.value.tx.contractId)
     || getDexContracts.value.wae.includes(transaction.value.tx.contractId)
-  ));
+  )));
+
+  const labels = computed<(string | TranslateResult)[]>(() => {
+    if (!transaction.value?.tx) return defaultLabels;
+
+    const transactionTypes = i18n.t('transaction.type') as Record<TransactionType, TranslateResult>;
+
+    if (txType.value?.startsWith('name')) {
+      return [AENS, transactionTypes[txType.value]];
+    }
+    if (txType.value === SCHEMA.TX_TYPE.spend) {
+      return [
+        i18n.t('transaction.type.spendTx'),
+        getTxDirection.value(transaction) === TX_FUNCTIONS.received
+          ? i18n.t('transaction.spendType.out')
+          : i18n.t('transaction.spendType.in'),
+      ];
+    }
+    if (isAllowance.value) {
+      return [i18n.t('transaction.dexType.allow_token')];
+    }
+    if (isDex.value) {
+      return [
+        DEX, FUNCTION_TYPE_DEX.pool.includes(transaction.value.tx.function)
+          ? i18n.t('transaction.dexType.pool')
+          : i18n.t('transaction.dexType.swap'),
+      ];
+    }
+    if (
+      (
+        transaction.value.tx.contractId
+        && (
+          activeNetwork.value.tipContractV1 === transaction.value.tx.contractId
+          || activeNetwork.value.tipContractV2 === transaction.value.tx.contractId
+        )
+        && (
+          transaction.value.tx.function === TX_FUNCTIONS.tip
+          || transaction.value.tx.function === TX_FUNCTIONS.retip
+        )
+      )
+      || transaction.value.claim
+    ) {
+      return [
+        i18n.t('pages.token-details.tip'),
+        transaction.value.claim
+          ? i18n.t('transaction.spendType.in')
+          : i18n.t('transaction.spendType.out'),
+      ];
+    }
+    if (
+      txType.value === SCHEMA.TX_TYPE.contractCall
+      && availableTokens.value[transaction.value.tx.contractId]
+      && (transaction.value.tx.function === TX_FUNCTIONS.transfer || transaction.value.incomplete)
+    ) {
+      return [
+        i18n.t('transaction.type.spendTx'),
+        transaction.value.tx.callerId === account.value.address
+          ? i18n.t('transaction.spendType.out')
+          : i18n.t('transaction.spendType.in'),
+      ];
+    }
+
+    if (txType.value === TX_TYPE_MDW.PayingForTx) {
+      return [
+        i18n.t('transaction.type.payingForTx'),
+      ];
+    }
+
+    return transaction.value.pending ? [] : [transactionTypes[txType.value]];
+  });
 
   async function fetchOwnershipAccount(
     externalOwnerAddress: string | undefined,
@@ -181,5 +261,6 @@ export function useTransaction({
     direction,
     fetchOwnershipAccount,
     setTransaction,
+    labels,
   };
 }

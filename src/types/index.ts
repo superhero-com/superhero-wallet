@@ -3,7 +3,12 @@
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { POPUP_TYPES, INPUT_MESSAGE_STATUSES, MULTISIG_CREATION_STEPS } from '../popup/utils';
+import {
+  POPUP_TYPES,
+  INPUT_MESSAGE_STATUSES,
+  MULTISIG_CREATION_STEPS,
+  TX_FUNCTIONS,
+} from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
@@ -15,6 +20,8 @@ export * from './filter';
 export type ObjectValues<T> = T[keyof T];
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
+
+export type TxFunctionTypes = ObjectValues<typeof TX_FUNCTIONS>;
 
 /**
  * Input fields message prop type
@@ -217,6 +224,20 @@ export interface IPendingTransaction {
   pendingTokenTx?: boolean,
   tipUrl?: string,
   tx: Partial<ITx>
+}
+
+export interface IAccountOverView extends Partial<IAccount> {
+  url?: string,
+  contractCreate?: boolean,
+  aens?: boolean,
+  label: TranslateResult,
+}
+
+export interface ITransactionOverview {
+  sender: IAccountOverView | IAccount,
+  recipient: IAccountOverView | IAccount,
+  title: TranslateResult,
+  function?: any,
 }
 
 export type TransactionType =

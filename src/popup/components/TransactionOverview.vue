@@ -5,6 +5,7 @@
     :sender="transaction.sender"
     :recipient="transaction.recipient"
     :tx-function="transaction.function"
+    :tx="tx"
   />
 </template>
 
