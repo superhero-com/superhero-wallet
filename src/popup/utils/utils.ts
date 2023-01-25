@@ -9,6 +9,7 @@ import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
   HASH_PREFIX_CONTRACT,
+  HASH_PREFIX_NAME,
   HASH_REGEX,
   SIMPLEX_URL,
 } from './constants';
@@ -84,6 +85,11 @@ export function getMdwEndpointPrefixForHash(fullHash: string) {
 export function isContract(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
   return (valid && prefix === HASH_PREFIX_CONTRACT);
+}
+
+export function isAensName(fullHash: string) {
+  const { valid, prefix } = validateHash(fullHash);
+  return (valid && prefix === HASH_PREFIX_NAME);
 }
 
 export function escapeSpecialChars(str = '') {

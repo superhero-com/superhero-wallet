@@ -82,7 +82,7 @@ describe('Tests cases for AEX-2 popups', () => {
         receiver = 'Contract create';
       }
       cy.openAex2Popup('sign', txType)
-        .get('[data-cy=title]')
+        .get('[data-cy=label]')
         .should('be.visible')
         .should('contain', locale.transaction.type[txType]);
 

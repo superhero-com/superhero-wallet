@@ -33,7 +33,7 @@ export default {
   }),
   computed: {
     nameComponent() {
-      return this.str.endsWith(AENS_DOMAIN) ? this.str.replace(AENS_DOMAIN, '') : '';
+      return this.str?.endsWith(AENS_DOMAIN) ? this.str.replace(AENS_DOMAIN, '') : '';
     },
     cssVars() {
       if (this.fixed) {

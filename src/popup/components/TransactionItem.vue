@@ -42,7 +42,7 @@
             v-for="label in labels"
             :key="label"
           >
-            {{ label.toUpperCase() }}
+            {{ label }}
           </label>
         </div>
         <span v-if="fiatAmount">{{ fiatAmount }}</span>
@@ -52,18 +52,13 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
   PropType,
 } from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
 import {
   FUNCTION_TYPE_DEX,
-  TRANSACTION_DIRECTION_SENT,
-  AENS,
-  DEX,
   amountRounded,
   convertToken,
   formatDate,
@@ -74,11 +69,9 @@ import Reverted from '../../icons/refresh.svg?vue-component';
 import Warning from '../../icons/warning.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
 import { useTransaction } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 import type {
-  ITokenList,
   ITransaction,
-  TransactionType,
 } from '../../types';
 
 export default defineComponent({
@@ -92,83 +85,16 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props, { root }) {
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-
     const getAmountFiat = useGetter('getAmountFiat');
-    const activeNetwork = useGetter('activeNetwork');
-    const account = useGetter('account');
 
     const {
-      txType,
-      isAllowance,
       isDex,
       tokens,
-      direction,
       isErrorTransaction,
-      setTransaction,
+      labels,
     } = useTransaction({
       store: root.$store,
       initTransaction: props.transaction,
-    });
-
-    setTransaction(props.transaction);
-
-    const labels = computed(() => {
-      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
-
-      if (txType.value?.startsWith('name')) {
-        return [AENS, transactionTypes[txType.value]];
-      }
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
-        return [
-          root.$t('transaction.type.spendTx'),
-          direction.value === TRANSACTION_DIRECTION_SENT
-            ? root.$t('transaction.spendType.out')
-            : root.$t('transaction.spendType.in'),
-        ];
-      }
-      if (isAllowance.value) {
-        return [root.$t('transaction.dexType.allow_token')];
-      }
-      if (isDex.value) {
-        return [
-          DEX, FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function)
-            ? root.$t('transaction.dexType.pool')
-            : root.$t('transaction.dexType.swap'),
-        ];
-      }
-      if (
-        (
-          props.transaction.tx.contractId
-          && (
-            activeNetwork.value.tipContractV1 === props.transaction.tx.contractId
-            || activeNetwork.value.tipContractV2 === props.transaction.tx.contractId
-          )
-          && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')
-        )
-        || props.transaction.claim
-      ) {
-        return [
-          root.$t('pages.token-details.tip'),
-          props.transaction.claim
-            ? root.$t('transaction.spendType.in')
-            : root.$t('transaction.spendType.out'),
-        ];
-      }
-      if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
-        && availableTokens.value[props.transaction.tx.contractId]
-        && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)
-      ) {
-        return [
-          root.$t('transaction.type.spendTx'),
-          props.transaction.tx.callerId === account.value.address
-            ? root.$t('transaction.spendType.out')
-            : root.$t('transaction.spendType.in'),
-        ];
-      }
-
-      return props.transaction.pending ? [] : [transactionTypes[txType.value]];
     });
 
     const fiatAmount = computed(() => {
@@ -291,6 +217,7 @@ export default defineComponent({
           border-radius: 4px;
           color: variables.$color-grey-dark;
           font-weight: 500;
+          text-transform: uppercase;
         }
       }
     }
