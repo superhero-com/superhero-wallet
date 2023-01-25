@@ -56,6 +56,7 @@ import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
+import MultisigTransactionDetails from '../pages/MultisigTransactionDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
@@ -368,6 +369,16 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'tx-details',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    path: '/account-details/multisig-transactions/:hash',
+    name: 'multisig-tx-details',
+    component: MultisigTransactionDetails,
+    props: true,
+    meta: {
+      title: 'multisig-tx-details',
       showHeaderNavigation: true,
     },
   },

@@ -450,3 +450,11 @@ export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS;
 export interface ICreateMultisigAccount {
   address: string
 }
+
+export interface ITransactionConsensus {
+  confirmationRequired: number
+  confirmedBy: string[]
+  expirationHeight: number
+  expired: boolean
+  hasConsensus: boolean
+}

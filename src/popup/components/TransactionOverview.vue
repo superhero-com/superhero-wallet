@@ -21,6 +21,7 @@ import {
 import { TranslateResult } from 'vue-i18n';
 import {
   TX_FUNCTIONS,
+  TX_TYPE_MDW,
   watchUntilTruthy,
 } from '../utils';
 import { useSdk, useTransaction } from '../../composables';
@@ -64,6 +65,7 @@ export default defineComponent({
       direction,
       getOwnershipAccount,
       setTransaction,
+      isMultisig,
     } = useTransaction({ store: root.$store });
 
     setTransaction({ tx: props.tx } as ITransaction);
@@ -78,7 +80,11 @@ export default defineComponent({
     const transaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
 
-      const { senderId, recipientId, contractId } = props.tx;
+      const {
+        senderId,
+        recipientId,
+        contractId,
+      } = props.tx;
 
       switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
@@ -134,6 +140,33 @@ export default defineComponent({
             },
             title: transactionTypes[txType.value],
           };
+        case TX_TYPE_MDW.PayingForTx: {
+          if (isMultisig) {
+            const multisigTx = props.tx.tx.tx;
+            return {
+              sender: {
+                address: multisigTx.ownerId,
+                name: getPreferred.value(multisigTx.ownerId),
+                url: getExplorerPath.value(multisigTx.ownerId),
+                label: 'Multisig vault',
+              },
+              recipient: {
+                address: multisigTx.contractId,
+                url: getExplorerPath.value(multisigTx.contractId),
+                label: root.$t('transaction.overview.contract'),
+              },
+              title: root.$t('transaction.type.payingForTx'),
+              function: props.tx.function,
+            };
+          }
+
+          return {
+            sender: {},
+            recipient: {},
+            title: root.$t('transaction.type.payingForTx'),
+            function: props.tx.function,
+          };
+        }
         default:
           throw new Error('Unsupported transaction type');
       }
@@ -157,6 +190,11 @@ export default defineComponent({
     }
 
     onMounted(async () => {
+      console.info('========================');
+      console.info('props.tx ::', props.tx);
+      console.info('SCHEMA.TX_TYPE ::', SCHEMA.TX_TYPE);
+      console.info('========================');
+
       await watchUntilTruthy(() => middleware.value);
       if (props.tx.recipientId?.startsWith('nm_')) {
         name.value = (await middleware.value.getNameById(props.tx.recipientId)).name;

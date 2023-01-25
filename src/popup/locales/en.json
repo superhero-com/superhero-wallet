@@ -348,6 +348,7 @@
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
       "payingForTx": "Paying For Transaction",
+      "GAAttachTx": "GA Attach Tx",
       "pending": "Pending..."
     },
     "dexType": {
@@ -421,6 +422,7 @@
       "sign-transaction": "Sign Transaction",
       "invite": "Invite",
       "tx-details": "Transaction details",
+      "multisig-tx-details": "Multisig Tx details",
       "token-details": "Token details",
       "coin-details": "Coin details",
       "wallet-home": "Wallet Home",

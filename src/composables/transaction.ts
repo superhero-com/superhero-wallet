@@ -1,4 +1,7 @@
-import { computed, ref } from '@vue/composition-api';
+import {
+  computed,
+  ref,
+} from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type { Store } from 'vuex';
 import { TranslateResult } from 'vue-i18n';
@@ -48,7 +51,7 @@ export function useTransaction({
 }: UseTransactionOptions) {
   const transaction = ref<ITransaction | undefined>(initTransaction);
 
-  function setTransaction(newTransaction: ITransaction) {
+  async function setTransaction(newTransaction: ITransaction) {
     transaction.value = newTransaction;
   }
 
@@ -71,6 +74,10 @@ export function useTransaction({
 
   const txType = computed<TransactionType>(() => getTxType.value(transaction.value));
 
+  const isMultisig = computed<boolean>(
+    // Need a better way go know if this is a multisig tx
+    () => !!(transaction.value?.tx as any).tx?.tx?.type,
+  );
   const isAllowance = computed((): boolean => (
     !!transaction.value
     && FUNCTION_TYPE_DEX.allowance.includes(transaction.value.tx.function as TxFunctionRaw)
@@ -217,6 +224,14 @@ export function useTransaction({
       ];
     }
 
+    // if (isMultisig) {
+    //   return [
+    //     // 'Contract Call',
+    //     // 'Multisig Proposal',
+    //     ...txTypes.value,
+    //   ];
+    // }
+
     if (txType.value === TX_TYPE_MDW.PayingForTx) {
       return [
         i18n.t('transaction.type.payingForTx'),
@@ -258,6 +273,7 @@ export function useTransaction({
     isAllowance,
     isErrorTransaction,
     isDex,
+    isMultisig,
     txOwnerAddress,
     ownershipStatus,
     direction,

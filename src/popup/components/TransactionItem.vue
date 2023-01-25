@@ -1,7 +1,7 @@
 <template>
   <RouterLink
     class="transaction-item"
-    :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
+    :to="{ name: routeName, params: { hash: transaction.hash } }"
   >
     <div class="header">
       <span />
@@ -93,6 +93,7 @@ export default defineComponent({
       tokens,
       isErrorTransaction,
       labels,
+      isMultisig,
     } = useTransaction({
       store: root.$store,
       initTransaction: props.transaction,
@@ -116,6 +117,8 @@ export default defineComponent({
       ));
     });
 
+    const routeName = computed(() => isMultisig ? 'multisig-tx-details' : 'tx-details');
+
     return {
       labels,
       fiatAmount,
@@ -123,6 +126,7 @@ export default defineComponent({
       formatTime,
       isErrorTransaction,
       tokens,
+      routeName,
     };
   },
 });

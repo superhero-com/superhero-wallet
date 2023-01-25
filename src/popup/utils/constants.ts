@@ -53,6 +53,7 @@ export const TX_TYPE_MDW = {
   NameBidTx: SCHEMA.TX_TYPE.nameClaim,
   NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
   PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
+  GAAttachTx: 'gAAttachTx',
 };
 
 export const CONNECTION_TYPES = {
