@@ -21,7 +21,17 @@ export type ObjectValues<T> = T[keyof T];
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
 
-export type TxFunctionTypes = ObjectValues<typeof TX_FUNCTIONS>;
+/**
+ * TxFunction names coming directly from the API or ready to be sent.
+ */
+export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
+
+/**
+ * TxFunctions used internally by the app.
+ */
+export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
+
+export type TxFunction = TxFunctionRaw | TxFunctionParsed;
 
 /**
  * Input fields message prop type
@@ -157,22 +167,6 @@ export interface ITxArguments {
   type: string,
   value: string | number | any[],
 }
-
-export type TxFunction =
-  | 'addLiquidity'
-  | 'addLiquidityAe'
-  | 'removeLiquidity'
-  | 'removeLiquidityAe'
-  | 'swapExactTokensForTokens'
-  | 'swapTokensForExactTokens'
-  | 'swapExactAeForTokens'
-  | 'swapTokensForExactAe'
-  | 'swapExactTokensForAe'
-  | 'swapAeForExactTokens'
-  | 'changeAllowance'
-  | 'transferAllowance'
-  | 'deposit'
-  | 'withdraw'
 
 export interface ITx {
   abiVersion: number,

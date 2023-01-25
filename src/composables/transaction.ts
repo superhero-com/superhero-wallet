@@ -20,9 +20,7 @@ import {
   FUNCTION_TYPE_DEX,
   MAGNITUDE,
   RETURN_TYPE_OK,
-  TRANSACTION_DIRECTION_RECEIVED,
   TRANSACTION_OWNERSHIP_STATUS,
-  TX_FUNCTION_CLAIM,
   convertToken,
   AENS,
   DEX,
@@ -104,8 +102,8 @@ export function useTransaction({
   });
 
   const direction = computed(() => (
-      transaction.value?.tx.function === TX_FUNCTION_CLAIM
-        ? TRANSACTION_DIRECTION_RECEIVED
+      transaction.value?.tx.function === TX_FUNCTIONS.claim
+        ? TX_FUNCTIONS.received
         : getTxDirection.value(
           transaction.value,
           ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
@@ -129,7 +127,7 @@ export function useTransaction({
         ? convertToken(transaction.value.tx.fee, -MAGNITUDE)
         : getTxAmountTotal.value(transaction.value),
       symbol: isAllowance.value ? AETERNITY_SYMBOL : getTxSymbol.value(transaction.value),
-      isReceived: direction.value === TRANSACTION_DIRECTION_RECEIVED,
+      isReceived: direction.value === TX_FUNCTIONS.received,
       isAe:
         isAllowance.value
         || (
@@ -149,7 +147,7 @@ export function useTransaction({
     },
   );
 
-  const isDex = computed<boolean>(() => !!(transaction.value
+  const isDex = computed((): boolean => !!(transaction.value
     && getDexContracts.value && transaction.value.tx.contractId && (
     getDexContracts.value.router.includes(transaction.value.tx.contractId)
     || getDexContracts.value.wae.includes(transaction.value.tx.contractId)

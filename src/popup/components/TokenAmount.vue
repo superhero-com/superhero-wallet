@@ -35,8 +35,7 @@
 import { mapState } from 'vuex';
 import {
   AETERNITY_SYMBOL,
-  TRANSACTION_DIRECTION_RECEIVED,
-  TRANSACTION_DIRECTION_SENT,
+  TX_FUNCTIONS,
 } from '../utils';
 
 export default {
@@ -50,8 +49,8 @@ export default {
     direction: {
       type: String,
       validator: (value) => [
-        TRANSACTION_DIRECTION_SENT,
-        TRANSACTION_DIRECTION_RECEIVED,
+        TX_FUNCTIONS.sent,
+        TX_FUNCTIONS.received,
       ].includes(value),
       default: undefined,
     },

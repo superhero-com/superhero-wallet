@@ -5,7 +5,7 @@
       :key="token.symbol"
       :class="[
         'token-row',
-        token.isReceived ? TRANSACTION_DIRECTION_RECEIVED : TRANSACTION_DIRECTION_SENT,
+        token.isReceived ? TX_FUNCTIONS.received : TX_FUNCTIONS.sent,
         { error }
       ]"
     >
@@ -25,8 +25,7 @@ import { defineComponent } from '@vue/composition-api';
 import {
   amountRounded,
   convertToken,
-  TRANSACTION_DIRECTION_RECEIVED,
-  TRANSACTION_DIRECTION_SENT,
+  TX_FUNCTIONS,
 } from '../utils';
 import { ITokenTransactionComposable } from '../../types';
 import Tokens from './Tokens.vue';
@@ -48,8 +47,7 @@ export default defineComponent({
     }
     return {
       tokenAmount,
-      TRANSACTION_DIRECTION_RECEIVED,
-      TRANSACTION_DIRECTION_SENT,
+      TX_FUNCTIONS,
     };
   },
 });
