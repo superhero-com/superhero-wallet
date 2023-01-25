@@ -73,7 +73,7 @@
 import { mapGetters } from 'vuex';
 import ModalHeader from './ModalHeader.vue';
 import TokenAmount from './TokenAmount.vue';
-import FormTextarea from './FormTextarea.vue';
+import FormTextarea from './form/FormTextarea.vue';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
 import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';

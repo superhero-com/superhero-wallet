@@ -2,14 +2,14 @@
   <Modal
     full-screen
     from-bottom
-    no-padding
     has-close-button
+    dense
     class="asset-selector"
     @close="reject()"
     @opened="onModalOpen"
   >
     <template #header>
-      <span class="title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
+      <span class="text-heading-3 title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
       <InputSearch
         v-model="searchTerm"
         class="search-bar"
@@ -28,10 +28,9 @@
         v-for="token in filteredTokens"
         :key="token.contractId || token.id"
         :token-data="token"
-        :class="{ selected: isTokenSelected(token) }"
-        prevent-navigation
+        :selected="isTokenSelected(token)"
         show-current-price
-        asset-selector
+        prevent-navigation
         @click="resolve(token)"
       />
     </div>
@@ -122,13 +121,10 @@ export default defineComponent({
   }
 
   .title {
-    @extend %face-sans-15-medium;
-
     margin-left: 16px;
     margin-bottom: 0;
     line-height: 48px;
     text-align: left;
-    color: rgba(variables.$color-white, 0.75);
   }
 
   .appearing-element {

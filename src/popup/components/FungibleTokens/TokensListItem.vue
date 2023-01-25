@@ -1,16 +1,15 @@
 <template>
-  <Component
-    :is="preventNavigation ? 'BtnPlain' : 'RouterLink'"
+  <ListItemWrapper
     v-if="tokenData"
     class="tokens-list-item"
-    :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
     :to="preventNavigation ? null : {
       name: targetRouteName,
       params: {
         id: tokenData.contractId,
       },
     }"
-    @click="(event) => $emit('click', event)"
+    :selected="selected"
+    v-on="$listeners"
   >
     <div class="row">
       <div class="left">
@@ -38,7 +37,7 @@
         {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
       </div>
     </div>
-  </Component>
+  </ListItemWrapper>
 </template>
 
 <script>
@@ -46,20 +45,20 @@ import { mapGetters, mapState } from 'vuex';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import TokenAmount from '../TokenAmount.vue';
-import BtnPlain from '../buttons/BtnPlain.vue';
 import Tokens from '../Tokens.vue';
+import ListItemWrapper from '../ListItemWrapper.vue';
 
 export default {
   components: {
     TokenAmount,
     Tokens,
-    BtnPlain,
+    ListItemWrapper,
   },
   props: {
     tokenData: { type: Object, default: null },
     preventNavigation: Boolean,
     showCurrentPrice: Boolean,
-    assetSelector: Boolean,
+    selected: Boolean,
   },
   data: () => ({
     AETERNITY_CONTRACT_ID,
@@ -84,21 +83,6 @@ export default {
 @use '../../../styles/typography';
 
 .tokens-list-item {
-  display: block;
-  padding: 8px var(--screen-padding-x);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  color: unset;
-  text-decoration: unset;
-
-  &:hover {
-    background-color: variables.$color-bg-4-hover;
-  }
-
-  &:active {
-    opacity: 0.5;
-  }
-
   .row {
     display: flex;
     align-items: center;
@@ -138,24 +122,6 @@ export default {
     color: rgba(variables.$color-white, 0.75);
     font-weight: 100;
     margin-top: -5px;
-  }
-
-  &.asset-selector {
-    padding: 8px;
-    transition: background-color 0.12s ease-in-out;
-    background-color: variables.$color-bg-4;
-
-    &.selected {
-      background-color: rgba(variables.$color-primary, 0.2);
-    }
-
-    &:hover {
-      background-color: variables.$color-bg-4-hover;
-    }
-
-    .price {
-      font-weight: 400;
-    }
   }
 }
 </style>

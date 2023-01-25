@@ -135,7 +135,7 @@ import {
   watch,
 } from '@vue/composition-api';
 import {
-  NODAL_CONFIRM,
+  MODAL_CONFIRM,
   blocksToRelativeTime,
   checkAddressOrChannel,
   readValueFromClipboard,
@@ -210,7 +210,7 @@ export default defineComponent({
     async function setAutoExtend() {
       if (!props.autoExtend) {
         await root.$store.dispatch('modals/open', {
-          name: NODAL_CONFIRM,
+          name: MODAL_CONFIRM,
           icon: 'info',
           title: root.$t('modals.autoextend-help.title'),
           msg: root.$t('modals.autoextend-help.msg'),

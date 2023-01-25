@@ -139,6 +139,12 @@ button {
     color: $color-white;
   }
 
+  &-heading-3 {
+    @extend %face-sans-15-medium;
+
+    color: rgba($color-white, 0.75);
+  }
+
   &-description {
     @extend %face-sans-15-regular;
 

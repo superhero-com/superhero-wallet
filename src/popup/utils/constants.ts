@@ -374,7 +374,7 @@ export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
-export const NODAL_CONFIRM = 'confirm';
+export const MODAL_CONFIRM = 'confirm';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
@@ -389,6 +389,7 @@ export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
+export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 
 export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
 export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';

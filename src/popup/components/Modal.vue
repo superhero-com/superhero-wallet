@@ -13,6 +13,7 @@
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
+        'semi-dense': semiDense,
         'blur-bg': !(IS_FIREFOX && IS_EXTENSION)
       }"
     >
@@ -91,6 +92,7 @@ export default defineComponent({
     fullScreen: Boolean,
     fromBottom: Boolean,
     dense: Boolean,
+    semiDense: Boolean,
     noPadding: Boolean,
     centered: Boolean,
     bodyWithoutPaddingBottom: Boolean,
@@ -255,6 +257,10 @@ export default defineComponent({
 
   &.dense {
     --screen-padding-x: 8px;
+  }
+
+  &.semi-dense {
+    --screen-padding-x: 12px;
   }
 
   &.no-padding {
