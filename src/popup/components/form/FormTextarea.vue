@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import InputField from './InputField.vue';
+import InputField from '../InputField.vue';
 
 const SIZES = ['xs', 'sm', 'rg', 'md'];
 
@@ -59,8 +59,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '../../../styles/variables';
+@use '../../../styles/typography';
 
 .textarea {
   --base-line-height: 1.4em;

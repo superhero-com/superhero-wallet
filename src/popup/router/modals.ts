@@ -7,11 +7,12 @@ import {
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
-  NODAL_CONFIRM,
+  MODAL_CONFIRM,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_CONNECT,
   MODAL_ERROR_LOG,
+  MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
   MODAL_READ_QR_CODE,
   MODAL_MESSAGE_SIGN,
@@ -31,6 +32,7 @@ import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import SpendSuccess from '../components/Modals/SpendSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ErrorLog from '../components/Modals/ErrorLog.vue';
+import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
@@ -50,8 +52,9 @@ export default () => {
   registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
-  registerModal({ name: NODAL_CONFIRM, component: Confirm });
+  registerModal({ name: MODAL_CONFIRM, component: Confirm });
   registerModal({ name: MODAL_ERROR_LOG, component: ErrorLog });
+  registerModal({ name: MODAL_FORM_SELECT_OPTIONS, component: FormSelectOptions });
   registerModal({ name: MODAL_HELP, component: Help });
   registerModal({
     name: MODAL_CONFIRM_TRANSACTION_SIGN,

@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import FormTextarea from '../components/FormTextarea.vue';
+import FormTextarea from '../components/form/FormTextarea.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
 export default {

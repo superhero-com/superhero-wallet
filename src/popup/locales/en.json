@@ -1313,5 +1313,6 @@
   "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total",
-  "priceNotAvailable": "price: n/a"
+  "priceNotAvailable": "price: n/a",
+  "search": "Search"
 }

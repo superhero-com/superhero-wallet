@@ -43,7 +43,7 @@
 <script lang="ts">
 import { ref, defineComponent } from '@vue/composition-api';
 import Modal from '../Modal.vue';
-import FormTextarea from '../FormTextarea.vue';
+import FormTextarea from '../form/FormTextarea.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
 export default defineComponent({
