@@ -315,7 +315,8 @@
     "account-details": {
       "assets": "Assets",
       "transactions": "Transactions",
-      "names": "Names"
+      "names": "Names",
+      "details": "Details"
     }
   },
   "filters": {
@@ -633,6 +634,7 @@
     "token-details": {
       "details": "Token Details",
       "send": "Send",
+      "proposeTx": "Propose Tx",
       "receive": "Receive",
       "buy": "Buy",
       "swap": "Swap",
@@ -1299,6 +1301,17 @@
       "warningConfirm": "Are you sure you would like to proceed?",
       "cancel": "Cancel",
       "reset": "Reset"
+    },
+    "multisigDetails": {
+      "address": "Multisig vault address",
+      "contractId": "Contract id",
+      "version": "Contract version",
+      "currentNonce": "Current nonce",
+      "authorizedAccount": "Authorized accounts",
+      "signers": "Authorized signers:",
+      "consensus": "Consensus",
+      "approval": "Needed for approval:",
+      "explorerLink": "View smart contract in blockchain explorer"
     }
   },
   "validation": {
