@@ -104,7 +104,7 @@ export interface IAccount {
   type: string
 }
 
-export interface IAccountLabeled extends Partial<IAccount>{
+export interface IAccountLabeled extends Partial<IAccount> {
   url?: string
   label?: TranslateResult
 }
@@ -374,9 +374,9 @@ export interface IMiddlewareCustomMethods {
   fetchByPath: (p: string) => Promise<any>
 }
 
-export interface IMiddleware extends
-  IMiddlewareClient,
-  IMiddlewareCustomMethods {}
+export interface IMiddleware extends IMiddlewareClient,
+  IMiddlewareCustomMethods {
+}
 
 export interface IMiddlewareStatus {
   mdw_async_tasks: Record<string, number>

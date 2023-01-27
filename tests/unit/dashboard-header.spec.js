@@ -1,7 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Vue from 'vue';
-import AccountSwitcher from '../../src/popup/components/AccountSwitcher.vue';
+import DashboardHeader from '../../src/popup/components/DashboardHeader.vue';
+import { NETWORK_TESTNET } from '../../src/popup/utils';
 
 Vue.use(Vuex);
 
@@ -15,6 +16,7 @@ const store = new Vuex.Store({
       idx: 1,
       showed: true,
     }],
+    activeNetwork: () => (NETWORK_TESTNET),
   },
   modules: {
     accounts: {
@@ -31,11 +33,11 @@ const store = new Vuex.Store({
   },
 });
 
-describe('Account switcher', () => {
+describe('Dashboard header', () => {
   it('should render', () => {
-    const wrapper = shallowMount(AccountSwitcher, {
+    const wrapper = shallowMount(DashboardHeader, {
       store,
     });
-    expect(wrapper.find('.account-switcher').exists()).toBeTruthy();
+    expect(wrapper.find('.dashboard-header').exists()).toBeTruthy();
   });
 });

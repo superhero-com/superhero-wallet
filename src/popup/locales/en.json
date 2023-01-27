@@ -1,6 +1,7 @@
 {
   "ok": "OK",
   "ae": "AE",
+  "of": "of",
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
   "fellowSuperhero": "Fellow Superhero",
@@ -9,29 +10,42 @@
     "notVerified": "Not verified"
   },
   "dashboard": {
-    "receive-card": {
+    "receiveCard": {
       "title": "Receive",
       "description": "from existing wallet"
     },
-    "send-card": {
+    "sendCard": {
       "title": "Send",
       "description": "assets to others"
     },
-    "back-up-card": {
+    "proposeCard": {
+      "title": "Propose Tx",
+      "description": "to other signers"
+    },
+    "backUpCard": {
       "title": "Back up your seed phrase",
       "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
       "button": "Back up now"
     },
-    "buy-card": {
+    "buyCard": {
       "title": "Buy AE coin",
       "description": "Use Simplex to buy AE coins with your credit card or bank account.",
       "button": "Buy AE"
     },
-    "name-card": {
+    "nameCard": {
       "title": "Claim your own .chain name",
       "description": "Get a human-readable name for your account and receive funds with it.",
       "button": "Claim a name"
     }
+  },
+  "multisig": {
+    "backToMainAccounts": "Back to main accounts",
+    "showMultisigVaults": "Show multisig vaults",
+    "consensus": "Consensus",
+    "signatureRequested": "Your signature is requested.",
+    "transactionSigned": "You have signed the transaction.",
+    "transactionReady": "Transaction is ready to be sent",
+    "multisigVault": "Multisig vault"
   },
   "modals": {
     "transaction-failed": {
@@ -1313,6 +1327,7 @@
   "copy": "Copy",
   "tx-fee": "Transaction fee",
   "total": "Total",
+  "totalMultisig": "Total in multisig vaults",
   "priceNotAvailable": "price: n/a",
   "search": "Search"
 }

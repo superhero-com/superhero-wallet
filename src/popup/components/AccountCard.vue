@@ -8,59 +8,60 @@
   >
     <div class="top">
       <AccountInfo
-        :account-idx="accountIdx"
+        :account="account"
         :color="color"
       />
     </div>
 
     <div class="middle">
-      <BalanceInfo
-        :account-idx="accountIdx"
-      />
+      <BalanceInfo :account="account" />
     </div>
 
-    <div class="misc">
-      <div class="total-tokens">
-        <span class="digit">
-          {{ totalTokens }}
-        </span>
-        <span class="wording">
-          {{ $t('pages.fungible-tokens.tokens') }}
-        </span>
-      </div>
-    </div>
+    <AccountCardConsensus
+      v-if="isMultisigDashboard"
+      :current-account="account"
+    />
+    <AccountCardTotalTokens
+      v-else
+      :current-account="account"
+      :selected="selected"
+    />
   </BtnBase>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
-import { IAccount } from '../../types';
-import { useGetter } from '../../composables/vuex';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { getAddressColor } from '../utils/avatar';
+
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import BtnBase from './buttons/BtnBase.vue';
+import AccountCardTotalTokens from './AccountCardTotalTokens.vue';
+import AccountCardConsensus from './AccountCardConsensus.vue';
+
+import type { IAccount, IMultisigAccount } from '../../types';
+import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   components: {
+    AccountCardConsensus,
+    AccountCardTotalTokens,
     AccountInfo,
     BalanceInfo,
     BtnBase,
   },
   props: {
-    accountIdx: { type: Number, required: true },
+    account: { type: Object as PropType<IAccount | IMultisigAccount>, required: true },
     selected: Boolean,
   },
-  setup(props) {
-    const getTokenBalance = useGetter('fungibleTokens/getTokenBalance');
-    const accounts = useGetter<IAccount[]>('accounts');
-    const account = computed(() => accounts.value[props.accountIdx]);
-    const totalTokens = computed(() => getTokenBalance.value(account.value.address).length);
-    const color = computed(() => getAddressColor(account.value.address));
+  setup(props, { root }) {
+    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
+
+    const color = computed(() => getAddressColor(props.account.address));
 
     return {
-      totalTokens,
       color,
+      isMultisigDashboard,
     };
   },
 });
@@ -68,7 +69,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
-@use '../../styles/typography';
 
 .account-card {
   display: flex;
@@ -81,40 +81,19 @@ export default defineComponent({
 
   &.selected {
     .account-info,
-    .middle,
-    .misc {
+    .middle {
       opacity: 1;
     }
   }
 
   .account-info,
-  .middle,
-  .misc {
+  .middle {
     opacity: 0.5;
   }
 
   .middle {
     margin-top: 5px;
     text-align: center;
-  }
-
-  .misc {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: auto;
-
-    .total-tokens {
-      @extend %face-sans-14-medium;
-
-      line-height: 16px;
-
-      .wording {
-        opacity: 0.85;
-      }
-    }
   }
 }
 </style>

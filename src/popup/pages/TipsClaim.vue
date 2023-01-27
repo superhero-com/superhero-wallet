@@ -1,6 +1,6 @@
 <template>
   <div class="tips-claim">
-    <AccountInfo :account-idx="activeIdx" />
+    <AccountInfo :account="activeAccount" />
 
     <div class="header">
       <p class="text-description">
@@ -74,6 +74,9 @@ export default {
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
       return toURL(this.url).toString();
+    },
+    activeAccount() {
+      return this.accounts[this.activeIdx];
     },
   },
   async mounted() {

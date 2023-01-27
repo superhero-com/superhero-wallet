@@ -1,19 +1,30 @@
 <template>
   <div class="dashboard">
-    <AccountSwitcher :notification="!backedUpSeed" />
+    <DashboardHeader />
 
     <div class="dashboard-cards">
       <div class="buttons-row">
         <BtnBox
-          :text="$t('dashboard.receive-card.title')"
-          :subtitle="$t('dashboard.receive-card.description')"
+          :text="$t('dashboard.receiveCard.title')"
+          :subtitle="$t('dashboard.receiveCard.description')"
           :icon="ArrowReceiveIcon"
           is-big
           @click="openTransferReceiveModal()"
         />
         <BtnBox
-          :text="$t('dashboard.send-card.title')"
-          :subtitle="$t('dashboard.send-card.description')"
+          v-if="isMultisigDashboard"
+          :text="$t('dashboard.proposeCard.title')"
+          :subtitle="$t('dashboard.proposeCard.description')"
+          :icon="ArrowSendIcon"
+          :disabled="!isConnected"
+          data-cy="propose"
+          is-big
+          @click="openProposeTxModal()"
+        />
+        <BtnBox
+          v-else
+          :text="$t('dashboard.sendCard.title')"
+          :subtitle="$t('dashboard.sendCard.description')"
           :icon="ArrowSendIcon"
           :disabled="!isConnected"
           data-cy="send"
@@ -24,8 +35,8 @@
 
       <Card
         v-if="!backedUpSeed"
-        :text="$t('dashboard.back-up-card.title')"
-        :description="$t('dashboard.back-up-card.description')"
+        :text="$t('dashboard.backUpCard.title')"
+        :description="$t('dashboard.backUpCard.description')"
         :icon="SubtractIcon"
         data-cy="backup-seed-phrase"
       >
@@ -33,20 +44,21 @@
           class="card-button"
           variant="danger"
           inline
-          :text="$t('dashboard.back-up-card.button')"
+          :text="$t('dashboard.backUpCard.button')"
           :to="{ name: 'settings-seed-phrase' }"
         />
       </Card>
 
       <Card
-        :text="$t('dashboard.buy-card.title')"
-        :description="$t('dashboard.buy-card.description')"
+        v-if="!isMultisigDashboard"
+        :text="$t('dashboard.buyCard.title')"
+        :description="$t('dashboard.buyCard.description')"
         :background="buyBackground"
         :icon="CardIcon"
       >
         <BtnMain
           class="card-button"
-          :text="$t('dashboard.buy-card.button')"
+          :text="$t('dashboard.buyCard.button')"
           :href="simplexLink"
           variant="secondary"
           inline
@@ -54,8 +66,9 @@
       </Card>
 
       <Card
-        :text="$t('dashboard.name-card.title')"
-        :description="$t('dashboard.name-card.description')"
+        v-if="!isMultisigDashboard"
+        :text="$t('dashboard.nameCard.title')"
+        :description="$t('dashboard.nameCard.description')"
         :background="chainNameBackground"
         :icon="MenuCardIcon"
       >
@@ -63,7 +76,7 @@
           class="card-button"
           variant="purple"
           inline
-          :text="$t('dashboard.name-card.button')"
+          :text="$t('dashboard.nameCard.button')"
           :to="{ name: 'account-details-names-claim' }"
         />
       </Card>
@@ -71,18 +84,25 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
 import { isEmpty } from 'lodash-es';
+import {
+  computed,
+  defineComponent,
+  watch,
+} from '@vue/composition-api';
+
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   buildSimplexLink,
 } from '../utils';
+import { useGetter, useState } from '../../composables/vuex';
+import { useMultisigAccounts } from '../../composables';
 
 import Card from '../components/Card.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
-import AccountSwitcher from '../components/AccountSwitcher.vue';
+import DashboardHeader from '../components/DashboardHeader.vue';
 
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
@@ -93,58 +113,77 @@ import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
 import BtnBox from '../components/buttons/BtnBox.vue';
+import { ITransaction } from '../../types';
 
-export default {
+export default defineComponent({
   name: 'Dashboard',
   components: {
+    DashboardHeader,
     Card,
-    AccountSwitcher,
     BtnMain,
     BtnBox,
   },
-  data: () => ({
-    SubtractIcon,
-    CardIcon,
-    MenuCardIcon,
-    ArrowReceiveIcon,
-    ArrowSendIcon,
-    buyBackground,
-    chainNameBackground,
-  }),
-  computed: {
-    ...mapState(['backedUpSeed', 'transactions']),
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['getAccountPendingTransactions', 'account', 'isConnected']),
-    simplexLink() {
-      return buildSimplexLink(this.account.address);
-    },
-  },
-  watch: {
-    activeIdx() { // TODO: remove it, maybe by extracting transactions entity
-      this.$store.commit('initTransactions');
-    },
-    $route: {
-      immediate: true,
-      handler({ query }) {
-        if (!isEmpty(query)) {
-          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
-        }
-      },
-    },
-  },
-  methods: {
-    openTransferReceiveModal() {
-      this.$store.dispatch('modals/open', {
+  setup(props, { root }) {
+    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
+
+    const backedUpSeed = useState('backedUpSeed');
+    const transactions = useState<ITransaction>('transactions');
+    const activeIdx = useState('accounts', 'activeIdx');
+
+    const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
+    const account = useGetter('account');
+    const isConnected = useGetter('isConnected');
+
+    const simplexLink = computed(() => buildSimplexLink(account.value.address));
+
+    function openTransferReceiveModal() {
+      root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
       });
-    },
-    openTransferSendModal() {
-      this.$store.dispatch('modals/open', {
+    }
+    function openTransferSendModal() {
+      root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
       });
-    },
+    }
+    function openProposeTxModal() {
+      // TODO - open proper modal
+      root.$store.dispatch('modals/open', {
+        name: MODAL_TRANSFER_SEND,
+      });
+    }
+
+    watch(activeIdx, () => root.$store.commit('initTransactions'));
+
+    const query = computed(() => root.$route.query);
+
+    watch(query, (value) => {
+      if (!isEmpty(value)) {
+        root.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
+      }
+    });
+
+    return {
+      ArrowReceiveIcon,
+      ArrowSendIcon,
+      SubtractIcon,
+      CardIcon,
+      MenuCardIcon,
+      isMultisigDashboard,
+      backedUpSeed,
+      transactions,
+      activeIdx,
+      getAccountPendingTransactions,
+      isConnected,
+      simplexLink,
+      buyBackground,
+      chainNameBackground,
+      openTransferReceiveModal,
+      openTransferSendModal,
+      openProposeTxModal,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
