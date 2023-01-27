@@ -40,12 +40,19 @@
                 <QrScanIcon />
               </a>
             </template>
+            <template #after>
+              <PlusCircleIcon
+                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+                class="btn-remove-signer"
+                @click="removeSigner(index)"
+              />
+            </template>
           </InputField>
         </div>
 
         <div class="signers-add-wrapper">
           <BtnText
-            :icon="PlusCircle"
+            :icon="PlusCircleIcon"
             :text="$t('modals.createMultisigAccount.addSigner')"
             @click="addNewSigner"
           />
@@ -63,8 +70,9 @@
 
           <div class="signers-count">
             <select
+              v-if="signers.length > 2"
               v-model="requiredNumOfConfirmations"
-              class="num-of-singers-selector"
+              class="num-of-signers-selector"
             >
               <template
                 v-for="signerIdx of signers.length"
@@ -78,15 +86,19 @@
                 </option>
               </template>
             </select>
+            <span
+              v-else
+              class="text-emphasis"
+            >
+              {{ minNumOfSigners }}
+            </span>
 
             <i18n
               path="modals.createMultisigAccount.consensusRequiredContent"
-              tag="div"
+              tag="span"
               class="text"
             >
-              <span>
-                {{ minNumOfSigners }}
-              </span>
+              <span class="text-emphasis">{{ minNumOfSigners }}</span>
             </i18n>
 
             <BtnHelp
@@ -97,25 +109,24 @@
         </div>
       </div>
     </template>
+
     <template #footer>
       <BtnMain
         v-if="showVaultCreationProgress"
         inline
         nowrap
+        :text="$t('modals.creatingMultisigAccount.btnText')"
         :disabled="isCreatingVault"
         @click="navigateToMultisigVault"
-      >
-        {{ $t('modals.creatingMultisigAccount.btnText') }}
-      </BtnMain>
+      />
       <BtnMain
         v-else
         inline
         nowrap
+        :text="$t('modals.createMultisigAccount.btnText')"
         :disabled="!canCreateMultisig"
         @click="createMultisigAccount"
-      >
-        {{ $t('modals.createMultisigAccount.btnText') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
@@ -138,14 +149,16 @@ import {
 import { ICreateMultisigAccount, IMultisigAccountBase } from '../../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../../router/routeNames';
 import { useMultisigAccounts } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import InputField from '../InputField.vue';
 import MultisigVaultCreationProgress from '../MultisigVaultCreationProgress.vue';
+
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
-import PlusCircle from '../../../icons/plus-circle-fill.svg?vue-component';
+import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   name: 'MultisigVaultCreate',
@@ -157,6 +170,7 @@ export default defineComponent({
     InputField,
     MultisigVaultCreationProgress,
     QrScanIcon,
+    PlusCircleIcon,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -203,6 +217,10 @@ export default defineComponent({
       signers.value.push({
         address: '',
       });
+    }
+
+    function removeSigner(index: number) {
+      signers.value.splice(index, 1);
     }
 
     /**
@@ -276,6 +294,8 @@ export default defineComponent({
     });
 
     return {
+      PlusCircleIcon,
+      MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       requiredNumOfConfirmations,
       signers,
       minNumOfSigners,
@@ -284,6 +304,7 @@ export default defineComponent({
       createMultisigAccount,
       openScanQrModal,
       addNewSigner,
+      removeSigner,
       getSignerLabel,
       isCreatingVault,
       multisigProgress,
@@ -291,7 +312,6 @@ export default defineComponent({
       navigateToMultisigVault,
       showVaultCreationProgress,
       checkIfSignerAddressDuplicated,
-      PlusCircle,
     };
   },
 });
@@ -333,23 +353,53 @@ export default defineComponent({
       }
     }
 
+    .btn-remove-signer {
+      width: 20px !important;
+      margin: -4px -6px -4px 0;
+      transform: rotate(45deg);
+      cursor: pointer;
+      transition: variables.$transition-interactive;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    .description,
+    .signers-count {
+      color: rgba(variables.$color-white, 0.5);
+    }
+
     .signers-count {
       display: flex;
       align-items: center;
       padding: 6px 0;
 
-      .num-of-singers-selector {
+      .text-emphasis {
+        color: variables.$color-white;
+      }
+
+      .num-of-signers-selector {
+        @extend %face-sans-15-regular;
+
         width: 45px;
         height: 40px;
+        margin-right: 10px;
         border-radius: 10px;
         text-align: center;
         color: variables.$color-white;
-        border-color: rgba(variables.$color-white, 0.08);
+        border: 2px solid rgba(variables.$color-white, 0.08);
         background-color: rgba(variables.$color-white, 0.08);
+
+        option {
+          color: variables.$color-white;
+          background-color: variables.$color-bg-6;
+        }
       }
 
       .text {
-        margin: 0 8px 0 10px;
+        margin-left: 4px;
+        margin-right: 8px;
       }
     }
   }

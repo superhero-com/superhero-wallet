@@ -284,6 +284,7 @@ export default defineComponent({
     background-color: var(--color-bg);
     border: none;
     border-radius: variables.$border-radius-interactive;
+    overflow: hidden;
     box-shadow: inset 0 0 0 2px var(--color-border);
     transition: 100ms ease-in-out;
     cursor: text;
@@ -292,7 +293,6 @@ export default defineComponent({
       display: flex;
       align-items: center;
       width: 100%;
-      overflow: hidden;
 
       .icon {
         width: 24px;
