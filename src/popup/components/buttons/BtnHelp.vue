@@ -38,6 +38,8 @@ export default {
 @use '../../../styles/variables';
 
 .btn-help {
+  display: inline-flex;
+
   svg {
     width: 24px;
     height: 24px;

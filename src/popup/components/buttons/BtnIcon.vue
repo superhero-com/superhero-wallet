@@ -90,6 +90,8 @@ export default {
   }
 
   &:hover {
+    transition-duration: 100ms;
+
     .icon {
       opacity: var(--icon-opacity-hover);
       color: var(--icon-color-hover);
@@ -97,6 +99,8 @@ export default {
   }
 
   &:active {
+    transform: scale(0.92);
+
     .icon {
       opacity: 1;
     }
