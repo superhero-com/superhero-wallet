@@ -48,18 +48,6 @@ async function initMiddleware() {
         ],
       },
     },
-    // TODO: remove after mainnet middleware would be updated to a > 1.7.3 version
-    '/names/owned_by/{id}': {
-      get: {
-        operationId: 'getNamesOwnedBy',
-        parameters: [{
-          in: 'path',
-          name: 'id',
-          required: true,
-          type: 'string',
-        }],
-      },
-    },
   };
   spec.basePath = '/mdw/';
   // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/160
