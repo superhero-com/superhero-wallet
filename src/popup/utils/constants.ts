@@ -118,6 +118,7 @@ export const NETWORK_MAINNET: INetwork = {
   compilerUrl: 'https://compiler.aepps.com',
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
+  multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
   name: 'Mainnet',
 };
 
@@ -130,6 +131,7 @@ export const NETWORK_TESTNET: INetwork = {
   backendUrl: 'https://testnet.superhero.aeternity.art',
   tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
   tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
+  multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
   name: 'Testnet',
 };
 

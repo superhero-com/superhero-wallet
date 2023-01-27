@@ -135,9 +135,9 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   handleUnknownError,
 } from '../../utils';
-import { ICreateMultisigAccount, IMultisigAccount } from '../../../types';
+import { ICreateMultisigAccount, IMultisigAccountBase } from '../../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../../router/routeNames';
-import { useMultisig } from '../../../composables';
+import { useMultisigAccounts } from '../../../composables';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
@@ -163,8 +163,8 @@ export default defineComponent({
     reject: { type: Function, required: true },
   },
   setup(props, { root }) {
-    const { deployMultisigAccount, multisigProgress } = useMultisig({ store: root.$store });
-    const multisigAccount = ref<IMultisigAccount | null>(null);
+    const { deployMultisigAccount, multisigProgress } = useMultisigAccounts({ store: root.$store });
+    const multisigAccount = ref<IMultisigAccountBase | null>(null);
     const signers = ref<ICreateMultisigAccount[]>([]);
     const isCreatingVault = ref<boolean>(false);
     const requiredNumOfConfirmations = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);

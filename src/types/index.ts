@@ -109,6 +109,29 @@ export interface IAccountLabeled extends Partial<IAccount>{
   label?: TranslateResult
 }
 
+export interface IMultisigAccountBase {
+  contractId: string
+  multisigAccountId: string
+}
+
+export interface IMultisigAccount extends IMultisigAccountBase {
+  signerId: string
+  height: number
+  createdAt: string
+  updatedAt: string
+  balance?: string
+  confirmedBy: string[]
+  expirationHeight: number
+  confirmationsRequired: number
+  txHash: string
+  nonce: number
+  signers: string[]
+  version: string
+  hasConsensus: boolean,
+  address: string,
+  gaAccountId?: string,
+}
+
 export interface INetwork {
   backendUrl: string
   compilerUrl: string
@@ -118,6 +141,7 @@ export interface INetwork {
   networkId: string
   tipContractV1: string
   tipContractV2?: string
+  multisigBackendUrl: string
   url: string
 }
 
@@ -316,18 +340,21 @@ export interface ISdk {
   }) => Promise<any>
   getContractInstance: (o: any) => any
   getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
+  getNetworkId: () => string
   payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
     tx: any,
     arg1: {
-      innerTx: boolean
-      onAccount: any
+      innerTx?: boolean,
+      onAccount: any,
+      authData?: any,
     }
   ) => Promise<{ rawTx: any; }>
   sendTransaction: (t: any, o: any) => Promise<any>
   spend: (a: any, r: any, o: any) => Promise<any>
+  spendTx: (a: any) => Promise<any>
   address: () => Promise<string>
   aensBid: (name: string, aettos: any) => Promise<any>
   balance: (address: string) => Promise<number>
@@ -417,11 +444,6 @@ export interface IActiveAuction {
 }
 
 export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS;
-
-export interface IMultisigAccount {
-  gaContractId: string,
-  gaAccountId: string,
-}
 
 export interface ICreateMultisigAccount {
   address: string
