@@ -183,11 +183,7 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
         if (!a.txHash && b.txHash) return 1;
         if (isSignatureRequested(a) && !isSignatureRequested(b)) return -1;
         if (!isSignatureRequested(a) && isSignatureRequested(b)) return 1;
-        if (
-          isSignatureRequested(a)
-          && isSignatureRequested(b)
-          && b.confirmedBy.length !== a.confirmedBy.length
-        ) {
+        if (b.confirmedBy.length && a.confirmedBy.length) {
           return b.confirmedBy.length - a.confirmedBy.length;
         }
         return b.balance - a.balance;

@@ -13,8 +13,9 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { IAccount } from '../../types';
-import { useBalances } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useBalances, useMultisigAccounts } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+import { convertToken, MAGNITUDE } from '../utils';
 import AeBalance from './AeBalance.vue';
 
 export default defineComponent({
@@ -22,20 +23,26 @@ export default defineComponent({
     AeBalance,
   },
   props: {
-    accountIdx: { type: Number, default: -1 },
+    account: { type: Object, default: null },
   },
   setup(props, { root }) {
     const { balances } = useBalances({ store: root.$store });
+    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
 
-    const activeIdx = useState<number>('accounts', 'activeIdx');
-    const accounts = useGetter<IAccount[]>('accounts');
+    const account = useGetter<IAccount>('account');
     const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
 
-    const idx = computed(() => props.accountIdx === -1 ? activeIdx.value : props.accountIdx);
+    const currentAccount = computed(() => props.account || account.value);
+
     const balance = computed(
-      () => balances.value[accounts.value[idx.value].address]?.toNumber() || 0,
+      () => (isMultisigDashboard.value
+        ? convertToken(currentAccount.value.balance, -MAGNITUDE)
+        : balances.value[currentAccount.value.address])?.toNumber() || 0,
     );
-    const currencyFormatted = computed(() => convertToCurrencyFormatted.value(balance.value));
+
+    const currencyFormatted = computed(
+      () => convertToCurrencyFormatted.value(balance.value),
+    );
 
     return {
       balances,

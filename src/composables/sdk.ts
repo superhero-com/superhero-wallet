@@ -15,7 +15,7 @@ let drySdk: ISdk;
 
 /**
  * Composable that will replace the Vuex SDK plugin.
- * For now it works as an abstraction layer.
+ * For now, it works as an abstraction layer.
  */
 export function useSdk({ store }: UseSdkOptions) {
   const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);

@@ -5,14 +5,20 @@
   >
     <Avatar
       class="avatar"
-      :address="activeAccount.address"
-      :name="activeAccount.name"
+      :address="account.address"
+      :name="account.name"
     />
     <div class="account-details">
+      <div
+        v-if="isMultisigDashboard"
+        class="account-name"
+      >
+        {{ $t('multisig.multisigVault') }}
+      </div>
       <Truncate
-        v-if="activeAccount.name"
+        v-else-if="account.name"
         class="account-name-truncated"
-        :str="activeAccount.name"
+        :str="account.name"
         :gradient-color="color"
       />
       <div
@@ -20,10 +26,10 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
+        {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
       </div>
       <div
-        v-if="truncatedAddress && truncatedAddress.length"
+        v-if="address && address.length"
         class="account-address"
       >
         <CopyText
@@ -41,15 +47,16 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { truncateAddress } from '../utils';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
+import { useGetter } from '../../composables/vuex';
+import { useMultisigAccounts } from '../../composables';
 
-export default {
+export default defineComponent({
   components: {
     AddressTruncated,
     Avatar,
@@ -59,25 +66,24 @@ export default {
   props: {
     color: { type: String, default: '#212121' },
     canCopyAddress: Boolean,
-    accountIdx: { type: Number, required: true },
+    account: { type: Object, required: true },
   },
-  computed: {
-    ...mapGetters(['accounts', 'activeNetwork']),
-    activeAccount() {
-      return this.accounts[this.accountIdx];
-    },
-    explorerUrl() {
-      const { address } = this.activeAccount;
-      return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
-    },
-    address() {
-      return this.activeAccount?.address;
-    },
-    truncatedAddress() {
-      return truncateAddress(this.address);
-    },
+  setup(props, { root }) {
+    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
+
+    const activeNetwork = useGetter('activeNetwork');
+
+    const address = computed(() => props.account.address);
+
+    const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${address.value}`);
+
+    return {
+      address,
+      explorerUrl,
+      isMultisigDashboard,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -103,7 +109,7 @@ export default {
     font-weight: 500;
 
     .account-name-truncated,
-    .account-name-number {
+    .account-name {
       @extend %face-sans-16-medium;
 
       margin-top: 4px;

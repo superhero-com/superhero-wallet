@@ -5,7 +5,7 @@
   >
     <div class="account-info-wrapper">
       <AccountInfo
-        :account-idx="activeIdx"
+        :account="account"
         can-copy-address
       />
 
@@ -15,7 +15,7 @@
       />
     </div>
     <div>
-      <BalanceInfo :account-idx="activeIdx" />
+      <BalanceInfo />
 
       <div class="buttons">
         <BtnBox
@@ -200,6 +200,7 @@ export default defineComponent({
 
     return {
       actions,
+      account,
       activeIdx,
       showFilters,
       isConnected,
