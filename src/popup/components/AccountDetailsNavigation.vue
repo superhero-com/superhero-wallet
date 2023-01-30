@@ -2,7 +2,7 @@
   <div class="account-details-navigation">
     <Tabs>
       <Tab
-        v-for="tab in navigationConfig"
+        v-for="tab in currentTabs"
         :key="tab.routeName"
         :exact-path="tab.exact"
         :to="{ name: tab.routeName }"
@@ -30,6 +30,14 @@ import { computed, defineComponent } from '@vue/composition-api';
 import BtnPill from './buttons/BtnPill.vue';
 import Tab from './tabs/Tab.vue';
 import Tabs from './tabs/Tabs.vue';
+import {
+  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+  ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+} from '../router/routeNames';
 
 interface NavigationElement {
   text: string,
@@ -38,35 +46,52 @@ interface NavigationElement {
   children?: NavigationElement[]
 }
 
-const navigationConfig: NavigationElement[] = [
-  {
-    text: 'modals.account-details.assets',
-    routeName: 'account-details',
-    exact: true,
-  },
-  {
-    text: 'modals.account-details.transactions',
-    routeName: 'account-details-transactions',
-  },
-  {
-    text: 'modals.account-details.names',
-    routeName: 'account-details-names',
-    children: [
-      {
-        text: 'pages.names.tabs.my-names',
-        routeName: 'account-details-names',
-        exact: true,
-      },
-      {
-        text: 'pages.names.tabs.auctions',
-        routeName: 'account-details-names-auctions',
-      },
-      {
-        text: 'pages.names.tabs.register',
-        routeName: 'account-details-names-claim',
-      },
-    ],
-  },
+const navItemAssets: NavigationElement = {
+  text: 'modals.account-details.assets',
+  routeName: ROUTE_ACCOUNT_DETAILS,
+  exact: true,
+};
+
+const navItemTransactions: NavigationElement = {
+  text: 'modals.account-details.transactions',
+  routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+};
+
+const navItemDetails: NavigationElement = {
+  text: 'modals.account-details.details',
+  routeName: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
+};
+
+const navItemNames: NavigationElement = {
+  text: 'modals.account-details.names',
+  routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+  children: [
+    {
+      text: 'pages.names.tabs.my-names',
+      routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+      exact: true,
+    },
+    {
+      text: 'pages.names.tabs.auctions',
+      routeName: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+    },
+    {
+      text: 'pages.names.tabs.register',
+      routeName: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+    },
+  ],
+};
+
+const navigationConfigRegular: NavigationElement[] = [
+  navItemAssets,
+  navItemTransactions,
+  navItemNames,
+];
+
+const navigationConfigMultisig: NavigationElement[] = [
+  navItemAssets,
+  navItemTransactions,
+  navItemDetails,
 ];
 
 export default defineComponent({
@@ -76,9 +101,16 @@ export default defineComponent({
     Tab,
     BtnPill,
   },
+  props: {
+    isMultisig: Boolean,
+  },
   setup(props, { root }) {
+    const currentTabs = computed(() => (
+      props.isMultisig ? navigationConfigMultisig : navigationConfigRegular
+    ));
+
     const currentSubTabs = computed(
-      () => (navigationConfig.find(
+      () => (currentTabs.value.find(
         ({ children }) => children?.some(
           ({ routeName }) => routeName === root.$route.name,
         ),
@@ -86,8 +118,8 @@ export default defineComponent({
     );
 
     return {
+      currentTabs,
       currentSubTabs,
-      navigationConfig,
     };
   },
 });

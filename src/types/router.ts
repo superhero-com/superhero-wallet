@@ -47,6 +47,7 @@ export interface WalletRouteMeta {
   showFilterBar?: boolean
   hideSearchBar?: boolean
   hideFilterButton?: boolean
+  showNamesNavigation?: boolean
 }
 
 export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {

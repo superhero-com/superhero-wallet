@@ -5,7 +5,7 @@
   >
     <div class="account-info-wrapper">
       <AccountInfo
-        :account="account"
+        :account="activeAccount"
         can-copy-address
       />
 
@@ -15,7 +15,7 @@
       />
     </div>
     <div>
-      <BalanceInfo />
+      <BalanceInfo :account="activeAccount" />
 
       <div class="buttons">
         <BtnBox
@@ -29,7 +29,7 @@
       </div>
 
       <div class="header">
-        <AccountDetailsNavigation />
+        <AccountDetailsNavigation :is-multisig="isMultisigDashboard" />
         <TransactionAndTokenFilter
           :key="routeName"
           :show-filters="showFilters"
@@ -66,16 +66,18 @@ import {
   EXTENSION_HEIGHT,
   buildSimplexLink,
 } from '../utils';
+import { useTransactionAndTokenFilter, useMultisigAccounts } from '../../composables';
+import { useDispatch, useGetter, useState } from '../../composables/vuex';
+import { IAccount } from '../../types';
 import { IS_CORDOVA } from '../../lib/environment';
-import { useTransactionAndTokenFilter } from '../../composables';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import BtnBox from '../components/buttons/BtnBox.vue';
 import BtnClose from '../components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '../components/TransactionAndTokenFilter.vue';
-import AccountDetailsNavigation from '../components/AccountDetailsNavigation.vue';
 
+import AccountDetailsNavigation from '../components/AccountDetailsNavigation.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
@@ -107,29 +109,42 @@ export default defineComponent({
     const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
 
     const { resetFilter } = useTransactionAndTokenFilter();
+    const {
+      isMultisigDashboard, activeMultisigAccount,
+    } = useMultisigAccounts({ store: root.$store });
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
     );
-    const isConnected = computed(() => root.$store.getters.isConnected);
-    const account = computed(() => root.$store.getters.account);
-    const activeIdx = computed(() => root.$store.state.accounts.activeIdx);
+    const activeIdx = useState('accounts', 'activeIdx');
+    const isConnected = useGetter('isConnected');
+    const account = useGetter<IAccount>('account');
+    const openModal = useDispatch('modals/open');
+
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
     const showNamesNavigation = computed(() => !!root.$route?.meta?.showNamesNavigation);
+
+    const activeAccount = computed(() => isMultisigDashboard.value
+      ? activeMultisigAccount.value
+      : account.value);
+
     const routeName = computed(() => root.$route.name);
 
-    const actions = computed((): ButtonAction[] => [
+    const actions = computed((): ButtonAction[] => ([
       {
         text: root.$t('pages.token-details.receive'),
-        onClick: () => root.$store.dispatch('modals/open', {
+        onClick: () => openModal({
           name: MODAL_TRANSFER_RECEIVE,
         }),
         icon: ArrowReceiveIcon,
       },
       {
-        text: root.$t('pages.token-details.send'),
-        onClick: () => root.$store.dispatch('modals/open', {
+        text: isMultisigDashboard.value
+          ? root.$t('pages.token-details.proposeTx')
+          : root.$t('pages.token-details.send'),
+        onClick: () => openModal({
           name: MODAL_TRANSFER_SEND,
+          isMultisig: isMultisigDashboard.value,
         }),
         icon: ArrowSendIcon,
         disabled: !isConnected.value,
@@ -139,12 +154,12 @@ export default defineComponent({
         onClick: () => window.open(simplexLink.value, '_blank'),
         icon: CreditCardIcon,
       },
-      {
+      ...(!isMultisigDashboard.value ? [{
         text: root.$t('pages.token-details.swap'),
         onClick: () => window.open(DEX_URL, '_blank'),
         icon: SwapIcon,
-      },
-    ]);
+      }] : []),
+    ]));
 
     const showFilters = computed<boolean>(() => (
       clientHeight.value > initialClientHeight.value
@@ -200,10 +215,11 @@ export default defineComponent({
 
     return {
       actions,
-      account,
+      activeAccount,
       activeIdx,
       showFilters,
       isConnected,
+      isMultisigDashboard,
       accountDetailsElem,
       showNamesNavigation,
       routeName,

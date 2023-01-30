@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="address-truncated">
     <span>{{ truncatedAddress[0] }}</span>
     <span
       class="dots"
@@ -33,12 +33,19 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/typography';
 
-.dots {
-  @extend %face-mono-15-regular;
+.address-truncated {
+  @extend %face-mono-12-medium;
 
-  letter-spacing: -0.25em;
-  text-align: center;
-  margin-left: -1px;
-  margin-right: 3px;
+  letter-spacing: 0.07em;
+
+  .dots {
+    @extend %face-mono-16-regular;
+
+    letter-spacing: -0.25em;
+    text-align: center;
+    margin-left: -1px;
+    margin-right: 3px;
+  }
 }
+
 </style>

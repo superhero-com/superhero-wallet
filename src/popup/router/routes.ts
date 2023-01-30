@@ -9,6 +9,9 @@ import {
   ROUTE_COIN,
   ROUTE_TOKEN,
   ROUTE_NOT_FOUND,
+  ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -60,6 +63,7 @@ import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
+import MultisigDetails from '../pages/MultisigDetails.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -107,37 +111,42 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
+        path: 'multisig-details',
+        name: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
+        component: MultisigDetails,
+        meta: {
+          hideHeader: true,
+        },
+      },
+      {
         path: 'names',
         component: AccountDetailsNames,
         children: [
           {
             path: '',
-            name: 'account-details-names',
+            name: ROUTE_ACCOUNT_DETAILS_NAMES,
             component: NamesList,
             props: true,
             meta: {
               hideHeader: true,
-              showNamesNavigation: true,
             },
           },
           {
             path: 'auctions',
             component: AuctionList,
             props: true,
-            name: 'account-details-names-auctions',
+            name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
             meta: {
               hideHeader: true,
-              showNamesNavigation: true,
             },
           },
           {
             path: 'claim',
             component: NameClaim,
             props: true,
-            name: 'account-details-names-claim',
+            name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
             meta: {
               hideHeader: true,
-              showNamesNavigation: true,
             },
           },
         ],
