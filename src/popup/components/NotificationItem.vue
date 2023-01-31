@@ -33,7 +33,6 @@
         v-if="!chainName && address"
         :address="address"
         class="address"
-        medium-dots
       />
       <Truncate
         v-else

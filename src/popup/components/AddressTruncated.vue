@@ -1,10 +1,7 @@
 <template>
   <div class="address-truncated">
     <span>{{ truncatedAddress[0] }}</span>
-    <span
-      class="dots"
-      :class="{ 'medium-dots': mediumDots }"
-    >
+    <span class="dots">
       &middot;&middot;&middot;
     </span>
     <span>{{ truncatedAddress[1] }}</span>
@@ -18,7 +15,6 @@ import { truncateAddress } from '../utils';
 export default defineComponent({
   props: {
     address: { type: String, required: true },
-    mediumDots: Boolean,
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));
