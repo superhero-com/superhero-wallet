@@ -9,20 +9,20 @@
           <template #label>
             <FormSelect
               v-if="multisigVaultOwnedByManyAccounts"
-              v-model="selectedAccountAddress"
               :options="accountsAllowedToProposeTxSelectOptions"
               :default-text="$t('modals.multisigTxProposal.signingAccount')"
               class="account-selector"
               persistent-default-text
               unstyled
+              @select="selectAccount($event)"
             />
             <template v-else>
-              {{ getAccountNameToDisplay(selectedAccountAddress) }}
+              {{ getAccountNameToDisplay(account.address) }}
             </template>
           </template>
           <template #value>
             <AccountItem
-              :address="selectedAccountAddress"
+              :address="account.address"
             />
           </template>
         </DetailsItem>
@@ -96,6 +96,7 @@
     >
       <template #label-after>
         <BtnPlain
+          v-if="!isMultisig"
           class="max-button"
           :class="{ chosen: isMaxValue }"
           @click="setMaxValue"
@@ -187,6 +188,7 @@ import {
 import {
   useBalances,
   useMaxAmount,
+  useMultisigAccounts,
 } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
@@ -247,11 +249,10 @@ export default defineComponent({
 
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const account = useGetter<IAccount>('account');
     const accounts = useGetter<IAccount[]>('accounts');
-    // TODO need to be used for the multisig transfer proposal
-    const selectedAccountAddress = ref<string>(account.value.address);
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -309,31 +310,38 @@ export default defineComponent({
       return amountInt > 0 && amountInt === +max.value;
     });
 
-    // TODO
-    const multisigVaultAddress = computed(() => 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q');
+    const multisigVaultAddress = computed(() => activeMultisigAccount.value?.address);
+
+    const mySignerAccounts = accounts.value.filter(
+      ({ address }) => activeMultisigAccount.value?.signers.includes(address),
+    );
 
     /**
      * Determines if more than one of current user's accounts can approve this vault's txs.
-     * TODO
      */
-    const multisigVaultOwnedByManyAccounts = computed(() => (
-      accounts.value.length > 1
-      && true // TODO
-    ));
+    const multisigVaultOwnedByManyAccounts = computed(() => mySignerAccounts?.length > 1);
 
     function getAccountNameToDisplay(acc: IAccount) {
       return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
     }
 
     const accountsAllowedToProposeTxSelectOptions = computed(
-      (): FormSelectOption[] => accounts.value
+      (): FormSelectOption[] => mySignerAccounts
         .map((acc): FormSelectOption => ({
           text: getAccountNameToDisplay(acc),
           value: acc.address,
           address: acc.address,
-        }))
-        .filter(() => true), // TODO filter accounts allowed to propose TX
+        })),
     );
+
+    function selectAccount(val: string) {
+      if (val) {
+        root.$store.commit(
+          'accounts/setActiveIdx',
+          accounts.value.find(({ address }) => address === val)?.idx,
+        );
+      }
+    }
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -478,6 +486,12 @@ export default defineComponent({
     );
 
     onMounted(async () => {
+      if (
+        props.isMultisig
+        && !activeMultisigAccount.value?.signers.includes(account.value.address)
+      ) {
+        root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+      }
       const tipUrlEncoded: any = root.$route.query.url;
       if (tipUrlEncoded) {
         const tipUrl = decodeURIComponent(tipUrlEncoded);
@@ -510,7 +524,6 @@ export default defineComponent({
       account,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
-      selectedAccountAddress,
       urlStatus,
       isTipUrl,
       message,
@@ -519,6 +532,7 @@ export default defineComponent({
       multisigVaultOwnedByManyAccounts,
       getAccountNameToDisplay,
       openScanQrModal,
+      selectAccount,
       setMaxValue,
       showRecipientHelp,
       handleAssetChange,

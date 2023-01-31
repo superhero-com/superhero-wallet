@@ -32,6 +32,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
     senderId: string,
     recipientId: string,
     amount: number,
+    payload: string,
   ) {
     const sdk = await getSdk();
 
@@ -39,6 +40,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
       senderId,
       recipientId,
       amount,
+      payload,
     });
   }
 

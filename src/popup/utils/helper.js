@@ -87,6 +87,7 @@ export const detectConnectionType = (port) => {
 
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
+  if (response.status === 204) return null;
   return response.json();
 };
 
