@@ -1,18 +1,14 @@
 import { computed } from '@vue/composition-api';
 import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
 import type { Store } from 'vuex';
-import {
-  MemoryAccount, Crypto,
-} from '@aeternity/aepp-sdk';
+import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 
 import {
   fetchJson,
   postJson,
 } from '../popup/utils';
-import type {
-  INetwork,
-} from '../types';
+import type { IActiveMultisigTx, INetwork, IRawMultisigTx } from '../types';
 import { useSdk } from './sdk';
 
 interface UseMultisigTransactionsOptions {
@@ -42,8 +38,44 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
     });
   }
 
-  async function getTransactionByHash(txHash: string) {
-    return fetchJson(`${activeNetwork.value.multisigBackendUrl}/tx/${txHash}`);
+  /**
+   * Get raw proposed transaction from multisig backend
+   * @param txHash
+   * @returns returns transaction if exists or null
+   */
+  async function fetchTransactionByHash(txHash: string): Promise<IRawMultisigTx | null> {
+    return fetchJson(`${activeNetwork.value.multisigBackendUrl}/tx/${txHash}`)
+      .then((res) => res)
+      .catch(null);
+  }
+
+  /**
+   * Get current active multisig transaction
+   * @param contractAddress multisig contract
+   * @returns transaction with consensus details if exists or null
+   */
+  async function fetchActiveMultisigTx(contractAddress: string): Promise<IActiveMultisigTx | null> {
+    const sdk = await getSdk();
+
+    const gaContractRpc = await sdk.getContractInstance({
+      source: multisigContract,
+      contractAddress,
+    });
+    const txConsensus = (await gaContractRpc.methods.get_consensus_info()).decodedResult;
+
+    if (txConsensus.tx_hash) {
+      const hash = Buffer.from(txConsensus.tx_hash).toString('hex');
+      const rawTx = await fetchTransactionByHash(hash);
+      return {
+        totalConfirmations: txConsensus.confirmed_by.length,
+        confirmationsRequired: txConsensus.confirmations_required,
+        confirmedBy: txConsensus.confirmed_by,
+        hasConsensus: txConsensus.hasConsensus,
+        hash,
+        tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
+      };
+    }
+    return null;
   }
 
   async function postSpendTx(tx: string, txHash: string) {
@@ -104,13 +136,15 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
       onAccount: MemoryAccount({ gaId: accountId }),
     });
   }
+
   return {
     buildSpendTx,
     postSpendTx,
     proposeTx,
     confirmTx,
     revokeTx,
-    getTransactionByHash,
+    fetchTransactionByHash,
     sendTx,
+    fetchActiveMultisigTx,
   };
 }

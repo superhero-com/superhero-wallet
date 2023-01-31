@@ -448,3 +448,20 @@ export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS;
 export interface ICreateMultisigAccount {
   address: string
 }
+
+export interface IActiveMultisigTx {
+  totalConfirmations: number
+  confirmationsRequired: number
+  confirmedBy: string[]
+  hasConsensus: boolean
+  hash?: string
+  tx?: ITx
+}
+
+export interface IRawMultisigTx {
+  id: number
+  hash: string
+  tx: string
+  createdAt: Date
+  updatedAt: Date
+}
