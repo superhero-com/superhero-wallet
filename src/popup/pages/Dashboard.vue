@@ -12,19 +12,12 @@
           @click="openTransferReceiveModal()"
         />
         <BtnBox
-          v-if="isMultisigDashboard"
-          :text="$t('dashboard.proposeCard.title')"
-          :subtitle="$t('dashboard.proposeCard.description')"
-          :icon="ArrowSendIcon"
-          :disabled="!isConnected"
-          data-cy="propose"
-          is-big
-          @click="openMultisigTxProposeModal()"
-        />
-        <BtnBox
-          v-else
-          :text="$t('dashboard.sendCard.title')"
-          :subtitle="$t('dashboard.sendCard.description')"
+          :text="isMultisigDashboard
+            ? $t('dashboard.proposeCard.title')
+            : $t('dashboard.sendCard.title')"
+          :subtitle="isMultisigDashboard
+            ? $t('dashboard.proposeCard.description')
+            : $t('dashboard.sendCard.description')"
           :icon="ArrowSendIcon"
           :disabled="!isConnected"
           data-cy="send"
@@ -145,12 +138,7 @@ export default defineComponent({
     function openTransferSendModal() {
       root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
-      });
-    }
-    function openMultisigTxProposeModal() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_SEND,
-        isMultisig: true,
+        isMultisig: isMultisigDashboard.value,
       });
     }
 
@@ -179,7 +167,6 @@ export default defineComponent({
       chainNameBackground,
       openTransferReceiveModal,
       openTransferSendModal,
-      openMultisigTxProposeModal,
     };
   },
 });

@@ -65,7 +65,7 @@
       <template #value>
         <!-- TODO provide correct fee for the multisig -->
         <TokenAmount
-          :amount="+transferData.fee.toFixed()"
+          :amount="PROPOSE_TRANSACTION_FEE"
           :symbol="AETERNITY_SYMBOL"
           hide-fiat
           high-precision
@@ -122,7 +122,7 @@ import {
   ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi } from '../../composables';
+import { useDeepLinkApi, useMultisigAccounts, useMultisigTransactions } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
@@ -177,6 +177,9 @@ export default defineComponent({
       !!props.transferData.selectedAsset
       && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
     ));
+
+    // TODO provide correct fee for the multisig
+    const PROPOSE_TRANSACTION_FEE = 0.000182940;
 
     function openTransactionFailedModal() {
       root.$store.dispatch('modals/open', {
@@ -309,12 +312,30 @@ export default defineComponent({
       }
     }
 
-    // TODO
-    function proposeMultisigTransaction() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_DEFAULT,
-        title: 'Multisig transaction proposal: feature in development...',
-      });
+    async function proposeMultisigTransaction() {
+      try {
+        const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+        const {
+          buildSpendTx, proposeTx, postSpendTx,
+        } = useMultisigTransactions({ store: root.$store });
+        if (activeMultisigAccount.value) {
+          const txToPropose = await buildSpendTx(
+            activeMultisigAccount.value.address,
+            props.transferData.address!,
+            aeToAettos(props.transferData.amount),
+            props.transferData.payload || '',
+          );
+          const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
+
+          await postSpendTx(txToPropose, txHash);
+        }
+      } catch (e) {
+        // TODO: fix that when dry run calls will not fire in case of the used nonce
+        // eslint-disable-next-line no-console
+        console.log(e);
+      } finally {
+        emit('success');
+      }
     }
 
     function submit(): any {
@@ -354,6 +375,7 @@ export default defineComponent({
     return {
       AETERNITY_SYMBOL,
       AETERNITY_CONTRACT_ID,
+      PROPOSE_TRANSACTION_FEE,
       loading,
       submit,
       isRecipientName,
