@@ -2,6 +2,7 @@ import { computed } from '@vue/composition-api';
 import type { Store } from 'vuex';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 
@@ -135,7 +136,8 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
   async function sendTx(accountId: string, spendTx: string, nonce: number) {
     const drySdk = await getDrySdk();
     await drySdk.send(spendTx, {
-      authData: { aci: SimpleGAMultiSigAci, args: [nonce] },
+      // TODO: use aci after update to a newer sdk
+      authData: { source: multisigContract, args: [nonce] },
       onAccount: MemoryAccount({ gaId: accountId }),
     });
   }
