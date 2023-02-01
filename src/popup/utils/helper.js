@@ -140,45 +140,6 @@ export const isNotFoundError = (error) => error.statusCode === 404;
 
 export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
 
-export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
-    return null;
-  }
-  if (transaction.incomplete || transaction.pending) {
-    return {
-      amount: transaction.amount,
-      token: transaction.tx.selectedTokenContractId ?? transaction.tx.contractId,
-      to: transaction.incomplete ? transaction.tx.recipientId : transaction.tx.callerId,
-    };
-  }
-  switch (transaction.tx.function) {
-    case 'transfer':
-    case 'transfer_payload':
-    case 'change_allowance':
-    case 'create_allowance':
-      return {
-        to: transaction.tx.arguments[0].value,
-        amount: transaction.tx.arguments[1].value,
-        token: transaction.tx.contractId,
-      };
-    case 'tip_token':
-      return {
-        url: transaction.tx.arguments[0].value,
-        note: transaction.tx.arguments[1].value,
-        amount: transaction.tx.arguments[3].value,
-        token: transaction.tx.arguments[2].value,
-      };
-    case 'retip_token':
-      return {
-        url: transaction.tx.arguments[0].value,
-        amount: transaction.tx.arguments[2].value,
-        token: transaction.tx.arguments[1].value,
-      };
-    default:
-      return null;
-  }
-};
-
 export const readValueFromClipboard = async () => {
   if (!process.env.UNFINISHED_FEATURES) return undefined;
   let value = '';

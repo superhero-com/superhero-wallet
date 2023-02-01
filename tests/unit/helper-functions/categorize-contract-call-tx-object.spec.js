@@ -1,4 +1,4 @@
-import { categorizeContractCallTxObject } from '../../../src/popup/utils/helper';
+import { categorizeContractCallTxObject } from '../../../src/popup/utils';
 
 const expectedKeys = {
   retip_token: ['url', 'amount', 'token'],
