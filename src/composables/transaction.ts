@@ -168,8 +168,8 @@ export function useTransaction({
       return [
         i18n.t('transaction.type.spendTx'),
         getTxDirection.value(transaction) === TX_FUNCTIONS.received
-          ? i18n.t('transaction.spendType.out')
-          : i18n.t('transaction.spendType.in'),
+          ? i18n.t('transaction.spendType.in')
+          : i18n.t('transaction.spendType.out'),
       ];
     }
     if (isAllowance.value) {
