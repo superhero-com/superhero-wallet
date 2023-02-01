@@ -1,8 +1,9 @@
 import { computed } from '@vue/composition-api';
-import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
 import type { Store } from 'vuex';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 
 import {
   fetchJson,
@@ -60,7 +61,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
     const sdk = await getSdk();
 
     const gaContractRpc = await sdk.getContractInstance({
-      source: multisigContract,
+      aci: SimpleGAMultiSigAci,
       contractAddress,
     });
     const txConsensus = (await gaContractRpc.methods.get_consensus_info()).decodedResult;
@@ -94,7 +95,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
     ));
 
     const gaContractRpc = await sdk.getContractInstance({
-      source: multisigContract,
+      aci: SimpleGAMultiSigAci,
       contractAddress: contractId,
     });
 
@@ -110,7 +111,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
     (await sdk.api.getTopHeader())?.height + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT
     );
     const gaContractRpc = await sdk.getContractInstance({
-      source: multisigContract,
+      aci: SimpleGAMultiSigAci,
       contractAddress: contractId,
     });
 
@@ -122,7 +123,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
   async function revokeTx(spendTxHash: string, contractId: string) {
     const sdk = await getSdk();
     const gaContractRpc = await sdk.getContractInstance({
-      source: multisigContract,
+      aci: SimpleGAMultiSigAci,
       contractAddress: contractId,
     });
 
@@ -134,7 +135,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
   async function sendTx(accountId: string, spendTx: string, nonce: number) {
     const drySdk = await getDrySdk();
     await drySdk.send(spendTx, {
-      authData: { source: multisigContract, args: [nonce] },
+      authData: { aci: SimpleGAMultiSigAci, args: [nonce] },
       onAccount: MemoryAccount({ gaId: accountId }),
     });
   }
