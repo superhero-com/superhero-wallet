@@ -224,8 +224,9 @@ export default defineComponent({
             amount,
             recipient,
             hash: actionResult.hash,
-            type: 'spendToken',
             pendingTokenTx: true,
+            pending: true,
+            type: 'spendToken',
             tx: {
               callerId: account.value.address,
               contractId: selectedAsset.contractId,
@@ -239,6 +240,7 @@ export default defineComponent({
           const transaction: IPendingTransaction = {
             hash: actionResult.hash,
             amount,
+            pending: true,
             type: 'spend',
             tx: {
               senderId: account.value.address,
@@ -290,8 +292,9 @@ export default defineComponent({
           );
         }
         const transaction: IPendingTransaction = {
-          hash: txResult.hash,
           amount,
+          hash: txResult.hash,
+          pending: true,
           tipUrl: recipient,
           tx: {
             callerId: account.value.address,

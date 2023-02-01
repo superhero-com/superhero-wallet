@@ -361,8 +361,8 @@ export interface ITransaction {
   microIndex: number;
   microTime: number;
   claim: any; // TODO find type
-  incomplete: any; // TODO find type
-  pending: any; // TODO find type
+  incomplete?: boolean;
+  pending: boolean; // There are cases that not only the IPendingTransaction can be pending
   rawTx?: any; // TODO find type
   tx: ITx;
 }
@@ -371,11 +371,15 @@ export interface IDashboardTransaction extends ITransaction {
   transactionOwner?: string,
 }
 
+export type PendingTransactionType = 'spend' | 'spendToken';
+
 export interface IPendingTransaction {
   hash: string;
   amount: number | string;
-  type?: string;
+  type?: PendingTransactionType;
   recipient?: string;
+  incomplete?: boolean;
+  pending: true;
   pendingTokenTx?: boolean;
   tipUrl?: string;
   tx: Partial<ITx>;

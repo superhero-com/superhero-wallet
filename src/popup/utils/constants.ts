@@ -25,6 +25,8 @@ export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 export const TX_FUNCTIONS = {
   tip: 'tip',
   retip: 'retip',
+  tipToken: 'tip_token',
+  retipToken: 'retip_token',
   transfer: 'transfer',
   sent: 'sent',
   received: 'received',
@@ -43,6 +45,7 @@ export const TX_FUNCTIONS = {
   createAllowance: 'create_allowance',
   changeAllowance: 'change_allowance',
   transferAllowance: 'transfer_allowance',
+  transferPayload: 'transfer_payload',
   withdraw: 'withdraw',
   claim: 'claim',
 } as const;
@@ -466,9 +469,12 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   withdraw: DEX_SWAP,
 
   // TODO establish transaction tags for the following tx functions:
-  retip: '',
   tip: '',
+  retip: '',
+  tip_token: '',
+  retip_token: '',
   transfer: '',
+  transfer_payload: '',
   claim: '',
   received: '',
   sent: '',

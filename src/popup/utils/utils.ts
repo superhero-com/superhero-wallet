@@ -5,7 +5,11 @@ import VueCompositionApi, {
 import { isFQDN } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
-import { SCHEMA, TxBuilder, TxBuilderHelper } from '@aeternity/aepp-sdk';
+import {
+  SCHEMA,
+  TxBuilder,
+  TxBuilderHelper,
+} from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -31,6 +35,7 @@ import type {
   TxType,
   IDashboardTransaction,
   BigNumberPublic,
+  IPendingTransaction,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -233,10 +238,57 @@ export function getPayload(transaction: ITransaction) {
 }
 
 export function compareCaseInsensitive(
-  str1: string,
-  str2: string,
+  str1?: string,
+  str2?: string,
 ) {
-  return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
+  return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
+}
+
+export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
+  amount: string | number
+  to?: string
+  token?: string
+  url?: string
+  note?: string
+} | null {
+  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
+    return null;
+  }
+  if (transaction.incomplete || transaction.pending) {
+    const { amount, tx } = transaction as IPendingTransaction;
+    return {
+      amount,
+      token: tx.selectedTokenContractId ?? tx.contractId,
+      to: transaction.incomplete ? tx.recipientId : tx.callerId,
+    };
+  }
+  const { tx } = transaction as ITransaction;
+  switch (tx.function) {
+    case 'transfer':
+    case 'transfer_payload':
+    case 'change_allowance':
+    case 'create_allowance':
+      return {
+        to: tx.arguments[0].value,
+        amount: tx.arguments[1].value,
+        token: tx.contractId,
+      };
+    case 'tip_token':
+      return {
+        url: tx.arguments[0].value,
+        note: tx.arguments[1].value,
+        amount: tx.arguments[3].value,
+        token: tx.arguments[2].value,
+      };
+    case 'retip_token':
+      return {
+        url: tx.arguments[0].value,
+        amount: tx.arguments[2].value,
+        token: tx.arguments[1].value,
+      };
+    default:
+      return null;
+  }
 }
 
 /**
