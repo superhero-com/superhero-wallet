@@ -30,6 +30,7 @@
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/ledger-app-api": "0.2.1",
+    "@aeternity/ga-multisig-contract": "github:aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b",
     "@fontsource/ibm-plex-mono": "^4.5.7",
     "@fontsource/ibm-plex-sans": "^4.5.7",
     "@ledgerhq/hw-transport-webusb": "^6.27.1",
