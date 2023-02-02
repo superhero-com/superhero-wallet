@@ -19,7 +19,7 @@
     </DetailsItem>
 
     <DetailsItem
-      :label="$t('multisig.contractId')"
+      :label="$t('common.contractId')"
     >
       <template #value>
         <div class="address-row">
