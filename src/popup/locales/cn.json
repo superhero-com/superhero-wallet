@@ -2,6 +2,9 @@
   "ok": "好的",
   "ae": "AE",
   "mainAccount": "主账户",
+  "common": {
+    "callData": "呼叫数据"
+  },
   "badges": {
     "verified": "已验证",
     "notVerified": "未验证"
@@ -65,7 +68,7 @@
       "title": "你的错误报告未被发送",
       "msg": "发送你的错误报告时发生了某个问题。"
     },
-    "confirm-transaction-sign": {
+    "confirmTransactionSign": {
       "unknown": "Unknown",
       "contract-create": "合约创建",
       "aens": "AENS",
@@ -117,6 +120,7 @@
     "confirm": "确认"
   },
   "transaction": {
+    "fee": "交易费",
     "type": {
       "SpendTx": "花费",
       "ContractCreateTx": "创建合约",
@@ -590,14 +594,13 @@
       "name": "名称",
       "nameSalt": "名称随机数",
       "nameId": "名称Id",
-      "fee": "转账费",
       "total": "总共",
       "reject": "拒绝",
       "confirm": "确认",
       "contractCall": "调用合约",
       "contractCalling": "正在调用合约方法。请不要关闭窗口",
       "insufficientBalance": "余额不足",
-      "inccorectAddress": "地址错误",
+      "incorrectAddress": "地址错误",
       "compiledCode": "编译后的代码",
       "callData": "调用数据",
       "payload": "附言",
@@ -660,7 +663,6 @@
       "check": "检查",
       "selectAmount": "选择数量",
       "amountToTip": "打赏数量",
-      "transactionFee": "交易费",
       "balance": "余额",
       "sendTipBtn": "发送小费",
       "tipDetails": "细节",
@@ -699,7 +701,6 @@
       "date": "日期",
       "type": "类型",
       "amount": "数量",
-      "fee": "交易费",
       "total": "合计",
       "txFrom": "从",
       "txTo": "到",

@@ -6,126 +6,153 @@
     class="multisig-vault-create"
     @close="reject()"
   >
-    <MultisigVaultCreationProgress
-      v-if="showVaultCreationProgress"
+    <!--
+      Step 1: The form
+    -->
+    <form
+      v-if="currentStep === STEPS.form"
+      class="multisig-vault-create-form"
+      @submit.prevent="openReviewStep"
+    >
+      <h2 class="text-heading-1">
+        {{ $t('modals.createMultisigAccount.title') }}
+      </h2>
+      <div
+        v-for="(signer, index) in signers"
+        :key="`signer${index}`"
+      >
+        <InputField
+          v-model.trim="signer.address"
+          v-validate="{
+            required: true,
+            name_registered_address_or_url: true,
+          }"
+          :label="getSignerLabel(index)"
+          :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
+          :name="`signer-address-${index}`"
+          :message="errors.first(`signer-address-${index}`)"
+          :class="{
+            error: checkIfSignerAddressDuplicated(signer)
+          }"
+        >
+          <template #label-after>
+            <a
+              class="scan-button"
+              @click.prevent="openScanQrModal(index)"
+            >
+              <QrScanIcon />
+            </a>
+          </template>
+          <template #after>
+            <PlusCircleIcon
+              v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+              class="btn-remove-signer"
+              @click="removeSigner(index)"
+            />
+          </template>
+        </InputField>
+      </div>
+
+      <div class="signers-add-wrapper">
+        <BtnText
+          :icon="PlusCircleIcon"
+          :text="$t('modals.createMultisigAccount.addSigner')"
+          @click="addNewSigner"
+        />
+
+        <BtnHelp
+          :title="$t('multisig.authorizedSigners')"
+          :msg="$t('modals.createMultisigAccount.addSignerHelpMsg')"
+        />
+      </div>
+
+      <div class="consensus">
+        <div class="description">
+          {{ $t('modals.createMultisigAccount.consensusRequiredDesc') }}
+        </div>
+
+        <div class="signers-count">
+          <select
+            v-if="signers.length > 2"
+            v-model="confirmationsRequired"
+            class="num-of-signers-selector"
+          >
+            <template
+              v-for="signerIdx of signers.length"
+            >
+              <option
+                v-if="signerIdx !== 1"
+                :key="`option-item-${signerIdx}`"
+                :value="signerIdx"
+              >
+                {{ signerIdx }}
+              </option>
+            </template>
+          </select>
+          <span
+            v-else
+            class="text-emphasis"
+          >
+            {{ minNumOfSigners }}
+          </span>
+
+          <i18n
+            path="modals.createMultisigAccount.consensusRequiredContent"
+            tag="span"
+            class="text"
+          >
+            <span class="text-emphasis">{{ minNumOfSigners }}</span>
+          </i18n>
+
+          <BtnHelp
+            :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
+            :msg="$t('modals.createMultisigAccount.consensusRequiredHelpMsg')"
+          />
+        </div>
+      </div>
+    </form>
+
+    <!--
+      Step 2: Review
+    -->
+    <MultisigVaultCreateReview
+      v-else-if="currentStep === STEPS.review"
+      :signers="signers"
+      :confirmations-required="confirmationsRequired"
+    />
+
+    <!--
+      Step 3: Creation progress summary
+    -->
+    <MultisigVaultCreateProgress
+      v-else-if="currentStep === STEPS.progress"
       :progress="multisigProgress"
       :multisig-account="multisigAccount"
     />
-    <template v-else>
-      <div class="content">
-        <h2 class="title">
-          {{ $t('modals.createMultisigAccount.title') }}
-        </h2>
-        <div
-          v-for="(signer, index) in signers"
-          :key="`signer${index}`"
-        >
-          <InputField
-            v-model.trim="signer.address"
-            v-validate="{
-              required: true,
-              name_registered_address_or_url: true,
-            }"
-            :label="getSignerLabel(index)"
-            :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
-            :class="{
-              error: checkIfSignerAddressDuplicated(signer)
-            }"
-          >
-            <template #label-after>
-              <a
-                class="scan-button"
-                @click.prevent="openScanQrModal(index)"
-              >
-                <QrScanIcon />
-              </a>
-            </template>
-            <template #after>
-              <PlusCircleIcon
-                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
-                class="btn-remove-signer"
-                @click="removeSigner(index)"
-              />
-            </template>
-          </InputField>
-        </div>
-
-        <div class="signers-add-wrapper">
-          <BtnText
-            :icon="PlusCircleIcon"
-            :text="$t('modals.createMultisigAccount.addSigner')"
-            @click="addNewSigner"
-          />
-
-          <BtnHelp
-            :title="$t('modals.createMultisigAccount.addSignerHelpTitle')"
-            :msg="$t('modals.createMultisigAccount.addSignerHelpMsg')"
-          />
-        </div>
-
-        <div class="consensus">
-          <div class="description">
-            {{ $t('modals.createMultisigAccount.consensusRequiredDesc') }}
-          </div>
-
-          <div class="signers-count">
-            <select
-              v-if="signers.length > 2"
-              v-model="requiredNumOfConfirmations"
-              class="num-of-signers-selector"
-            >
-              <template
-                v-for="signerIdx of signers.length"
-              >
-                <option
-                  v-if="signerIdx !== 1"
-                  :key="`option-item-${signerIdx}`"
-                  :value="signerIdx"
-                >
-                  {{ signerIdx }}
-                </option>
-              </template>
-            </select>
-            <span
-              v-else
-              class="text-emphasis"
-            >
-              {{ minNumOfSigners }}
-            </span>
-
-            <i18n
-              path="modals.createMultisigAccount.consensusRequiredContent"
-              tag="span"
-              class="text"
-            >
-              <span class="text-emphasis">{{ minNumOfSigners }}</span>
-            </i18n>
-
-            <BtnHelp
-              :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
-              :msg="$t('modals.createMultisigAccount.consensusRequiredHelpMsg')"
-            />
-          </div>
-        </div>
-      </div>
-    </template>
 
     <template #footer>
       <BtnMain
-        v-if="showVaultCreationProgress"
-        inline
-        nowrap
-        :text="$t('modals.creatingMultisigAccount.btnText')"
-        :disabled="isCreatingVault"
-        @click="navigateToMultisigVault"
-      />
-      <BtnMain
-        v-else
-        inline
-        nowrap
+        v-if="currentStep === STEPS.form"
         :text="$t('modals.createMultisigAccount.btnText')"
         :disabled="!canCreateMultisig"
-        @click="createMultisigAccount"
+        @click="openReviewStep"
+      />
+      <template v-else-if="currentStep === STEPS.review">
+        <BtnMain
+          variant="muted"
+          text="Edit"
+          @click="openFormStep"
+        />
+        <BtnMain
+          text="Confirm"
+          @click="createMultisigAccount"
+        />
+      </template>
+      <BtnMain
+        v-else-if="currentStep === STEPS.processing"
+        :text="$t('modals.creatingMultisigAccount.btnText')"
+        :disabled="true"
+        @click="navigateToMultisigVault"
       />
     </template>
   </Modal>
@@ -142,11 +169,15 @@ import {
 import {
   MODAL_READ_QR_CODE,
   MODAL_DEFAULT,
-  validateHash,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  validateHash,
   handleUnknownError,
 } from '../../utils';
-import { ICreateMultisigAccount, IMultisigAccountBase } from '../../../types';
+import {
+  ICreateMultisigAccount,
+  IMultisigAccountBase,
+  ObjectValues,
+} from '../../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../../router/routeNames';
 import { useMultisigAccounts } from '../../../composables';
 
@@ -155,10 +186,18 @@ import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import InputField from '../InputField.vue';
-import MultisigVaultCreationProgress from '../MultisigVaultCreationProgress.vue';
+import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
+import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
 
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
+
+const STEPS = {
+  form: 'form',
+  review: 'review',
+  processing: 'processing',
+} as const;
+type Step = ObjectValues<typeof STEPS>;
 
 export default defineComponent({
   name: 'MultisigVaultCreate',
@@ -168,32 +207,34 @@ export default defineComponent({
     BtnText,
     BtnHelp,
     InputField,
-    MultisigVaultCreationProgress,
+    MultisigVaultCreateProgress,
     QrScanIcon,
     PlusCircleIcon,
+    MultisigVaultCreateReview,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function, required: true },
   },
   setup(props, { root }) {
-    const { deployMultisigAccount, multisigProgress } = useMultisigAccounts({ store: root.$store });
+    const {
+      deployMultisigAccount,
+      multisigProgress,
+    } = useMultisigAccounts({ store: root.$store });
+
+    const currentStep = ref<Step>(STEPS.form);
     const multisigAccount = ref<IMultisigAccountBase | null>(null);
     const signers = ref<ICreateMultisigAccount[]>([]);
-    const isCreatingVault = ref<boolean>(false);
-    const requiredNumOfConfirmations = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
+    const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
     const minNumOfSigners = computed(
       () => signers.value.length < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         ? MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         : signers.value.length,
     );
 
-    function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount) {
+    function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       if (!validateHash(signer.address).valid) return false;
-
-      return signers.value.filter(
-        (_singer) => signer.address === _singer.address,
-      ).length >= 2;
+      return signers.value.filter(({ address }) => signer.address === address).length >= 2;
     }
     const isValidSigners = computed(
       () => !signers.value.filter(
@@ -208,9 +249,6 @@ export default defineComponent({
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
       ),
-    );
-    const showVaultCreationProgress = computed<boolean>(
-      () => isCreatingVault.value || !!multisigAccount.value,
     );
 
     function addNewSigner() {
@@ -266,18 +304,31 @@ export default defineComponent({
       return `${root.$t('modals.createMultisigAccount.signer')} ${index + 1}`;
     }
 
+    function openFormStep() {
+      currentStep.value = STEPS.form;
+    }
+
+    function openReviewStep() {
+      currentStep.value = STEPS.review;
+    }
+
     async function createMultisigAccount() {
-      isCreatingVault.value = true;
+      currentStep.value = STEPS.processing;
       try {
         multisigAccount.value = await deployMultisigAccount(
-          requiredNumOfConfirmations.value,
+          confirmationsRequired.value,
           signers.value.map((signer) => signer.address) as [string, string, ...string[]],
         );
         signers.value = [];
       } catch (error) {
         handleUnknownError(error);
+        await root.$store.dispatch('modals/open', {
+          name: MODAL_DEFAULT,
+          title: root.$t('multisig.multisigVaultCreationFailed'),
+          icon: 'critical',
+        });
+        currentStep.value = STEPS.form;
       }
-      isCreatingVault.value = false;
     }
 
     async function navigateToMultisigVault() {
@@ -296,21 +347,23 @@ export default defineComponent({
     return {
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-      requiredNumOfConfirmations,
+      STEPS,
+      currentStep,
+      confirmationsRequired,
       signers,
       minNumOfSigners,
       isValidSigners,
       canCreateMultisig,
+      openFormStep,
+      openReviewStep,
       createMultisigAccount,
       openScanQrModal,
       addNewSigner,
       removeSigner,
       getSignerLabel,
-      isCreatingVault,
       multisigProgress,
       multisigAccount,
       navigateToMultisigVault,
-      showVaultCreationProgress,
       checkIfSignerAddressDuplicated,
     };
   },
@@ -325,16 +378,8 @@ export default defineComponent({
 .multisig-vault-create {
   padding-top: env(safe-area-inset-top);
 
-  .content {
-    .title {
-      @extend %face-sans-18-medium;
-
-      margin-bottom: 20px;
-      line-height: 24px;
-      text-align: center;
-      color: variables.$color-white;
-    }
-
+  // Step 1
+  &-form {
     .scan-button {
       color: variables.$color-white;
       display: block;

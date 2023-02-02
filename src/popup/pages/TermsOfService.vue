@@ -1004,7 +1004,8 @@ export default {
   .accordion-item-title {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
+    margin-block: 5px;
     color: variables.$color-success;
     font-size: 14px;
     font-weight: 500;

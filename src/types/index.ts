@@ -230,6 +230,7 @@ export type TransactionType =
   | 'ChannelSnapshotSoloTx';
 
 export interface ITx {
+  VSN: string
   abiVersion: number
   accountId?: string
   amount: number

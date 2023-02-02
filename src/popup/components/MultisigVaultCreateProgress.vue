@@ -1,6 +1,6 @@
 <template>
   <div class="multisig-vault-creation-progress">
-    <h2 class="title">
+    <h2 class="text-heading-1">
       {{ $t('modals.creatingMultisigAccount.title') }}
     </h2>
     <ProgressBar :progress="progressPercentage" />
@@ -74,7 +74,7 @@ import CheckSuccessCircleIcon from '../../icons/check-success-circle.svg?vue-com
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
-  name: 'MultisigVaultCreationProgress',
+  name: 'MultisigVaultCreateProgress',
   components: {
     ProgressBar,
     AvatarWithChainName,
@@ -136,15 +136,6 @@ export default defineComponent({
   $step-icon-size: 24px;
 
   padding-top: env(safe-area-inset-top);
-
-  .title {
-    @extend %face-sans-18-medium;
-
-    margin-bottom: 20px;
-    line-height: 24px;
-    text-align: center;
-    color: variables.$color-white;
-  }
 
   .steps-list {
     padding-top: 24px;

@@ -10,7 +10,7 @@
         @error="(val) => error = val"
       />
       <div class="tx-details">
-        <DetailsItem :label="$t('tx-fee')">
+        <DetailsItem :label="$t('transaction.fee')">
           <template #value>
             <TokenAmount
               :amount="+txFee"

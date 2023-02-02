@@ -24,7 +24,7 @@
 
     <DetailsItem
       v-if="getNameFee(transaction)"
-      :label="$t('modals.confirm-transaction-sign.nameFee')"
+      :label="$t('modals.confirmTransactionSign.nameFee')"
       class="name-fee"
     >
       <template #value>
@@ -75,7 +75,7 @@
       <DetailsItem
         v-for="key in filteredTxFields"
         :key="key"
-        :label="$t('modals.confirm-transaction-sign')[key]"
+        :label="$t('modals.confirmTransactionSign')[key]"
         :value="transaction[key]"
         :class="{ 'hash-field': isHash(key) }"
       />

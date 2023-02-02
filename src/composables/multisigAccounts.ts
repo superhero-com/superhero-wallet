@@ -64,6 +64,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
 export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
 
+  const multisigProgress = ref<IMultisigCreationStep>(null);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -71,7 +72,25 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
     multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
   }
 
-  const multisigProgress = ref<IMultisigCreationStep>(null);
+  async function createMultisigContractInstance() {
+    const drySdk = await getDrySdk();
+    return drySdk.getContractInstance({
+      aci: SimpleGAMultiSigAci,
+      bytecode: SimpleGAMultiSigBytecode,
+    });
+  }
+
+  /**
+   * Estimate the amount of AE tokens to be payed for the multisig account creation.
+   */
+  async function estimateMultisigAccountDeployGasFee(
+    multisigContractInstance: any,
+    noOfConfirmations: number,
+    signersAddresses: string[],
+  ): Promise<number> {
+    return (multisigContractInstance || await createMultisigContractInstance())
+      ._estimateGas('init', [noOfConfirmations, signersAddresses]);
+  }
 
   /**
    * @param {number} noOfConfirmations no of minimum confirmation needed to process a transaction
@@ -79,23 +98,18 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
    */
   async function deployMultisigAccount(
     noOfConfirmations: number,
-    signersAddresses: [string, string, ...string[]],
+    signersAddresses: string[],
   ): Promise<IMultisigAccountBase> {
     if (noOfConfirmations > signersAddresses.length) throw Error('Number of confirmations exceed amount of signers');
 
+    const contractArgs = [noOfConfirmations, signersAddresses];
     const [sdk, drySdk] = await Promise.all([getSdk(), getDrySdk()]);
 
     // Create a temporary account
     const gaAccount = Crypto.generateKeyPair();
 
-    const multisigContractInstance = await drySdk.getContractInstance({
-      aci: SimpleGAMultiSigAci,
-      bytecode: SimpleGAMultiSigBytecode,
-    });
-
+    const multisigContractInstance = await createMultisigContractInstance();
     multisigProgress.value = MULTISIG_CREATION_STEPS.prepared;
-
-    const contractArgs = [noOfConfirmations, signersAddresses];
 
     // Build Attach transaction
     const attachTX = await drySdk.gaAttachTx({
@@ -103,7 +117,11 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
       code: multisigContractInstance.bytecode,
       callData: multisigContractInstance.calldata.encode(multisigContractInstance._name, 'init', contractArgs),
       authFun: Crypto.hash('authorize'),
-      gas: await multisigContractInstance._estimateGas('init', contractArgs),
+      gas: await estimateMultisigAccountDeployGasFee(
+        multisigContractInstance,
+        noOfConfirmations,
+        signersAddresses,
+      ),
       options: {
         innerTx: true,
       },
@@ -179,7 +197,7 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
           consensus.confirmations_required = Number(consensus.confirmations_required);
 
           const consensusLabel = (
-            `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('outOf')} ${signers?.length}`
+            `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('common.of')} ${signers?.length}`
           );
 
           return {
@@ -246,6 +264,7 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
     isMultisigDashboard,
     activeMultisigAccountId,
     activeMultisigAccount,
+    estimateMultisigAccountDeployGasFee,
     deployMultisigAccount,
     setActiveMultisigAccountId,
     toggleMultisigDashboard,

@@ -28,7 +28,7 @@
     </div>
 
     <DetailsItem
-      :label="$t('modals.confirm-transaction-sign.data-sign')"
+      :label="$t('modals.confirmTransactionSign.data-sign')"
       :value="dataAsString"
       data-cy="data"
     >

@@ -27,6 +27,7 @@ export const TX_FUNCTIONS = {
   sent: 'sent',
   received: 'received',
   deposit: 'deposit',
+  propose: 'propose', // Multisig
   addLiquidity: 'add_liquidity',
   addLiquidityAe: 'add_liquidity_ae',
   removeLiquidity: 'remove_liquidity',
@@ -454,6 +455,7 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   claim: '',
   received: '',
   sent: '',
+  propose: '',
 } as const;
 
 export const RETURN_TYPE_OK = 'ok';

@@ -31,6 +31,7 @@ import {
   AENS,
   DEX,
   FUNCTION_TYPE_DEX,
+  includes,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
 } from '../utils';
@@ -38,7 +39,9 @@ import {
 import TransactionTag from './TransactionTag.vue';
 
 export default defineComponent({
-  components: { TransactionTag },
+  components: {
+    TransactionTag,
+  },
   props: {
     tx: { type: Object as PropType<ITx>, default: null },
     isIncomplete: Boolean,
@@ -62,9 +65,11 @@ export default defineComponent({
       if (!props.tx) return [];
 
       const transactionTypes = i18n.t('transaction.type') as Record<string, TranslateResult>;
+      const txTransactionType = transactionTypes[txType.value];
+      const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
       if (txType.value?.startsWith('name')) {
-        return [AENS, transactionTypes[txType.value]];
+        return [AENS, txTransactionType];
       }
       if (txType.value === SCHEMA.TX_TYPE.gaMeta) {
         return [
@@ -81,7 +86,7 @@ export default defineComponent({
         ];
       }
       if (isAllowance.value) {
-        return [i18n.t('transaction.dexType.allow_token')];
+        return [i18n.t('transaction.dexType.allowToken')];
       }
       if (isDex.value) {
         return [
@@ -94,14 +99,8 @@ export default defineComponent({
       if (
         (
           props.tx.contractId
-          && (
-            activeNetwork.value.tipContractV1 === props.tx.contractId
-            || activeNetwork.value.tipContractV2 === props.tx.contractId
-          )
-          && (
-            props.tx.function === TX_FUNCTIONS.tip
-            || props.tx.function === TX_FUNCTIONS.retip
-          )
+          && [tipContractV1, tipContractV2].includes(props.tx.contractId)
+          && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], props.tx.function)
         ) || props.isClaim
       ) {
         return [
@@ -113,11 +112,11 @@ export default defineComponent({
       }
       if (
         txType.value === SCHEMA.TX_TYPE.contractCall
-          && availableTokens.value[props.tx.contractId]
-          && (
-            props.tx.function === TX_FUNCTIONS.transfer
-            || props.isIncomplete
-          )
+        && availableTokens.value[props.tx.contractId]
+        && (
+          props.tx.function === TX_FUNCTIONS.transfer
+          || props.isIncomplete
+        )
       ) {
         return [
           i18n.t('transaction.type.spendTx'),
@@ -131,7 +130,10 @@ export default defineComponent({
           i18n.t('transaction.type.payingForTx'),
         ];
       }
-      return props.isPending ? [] : [transactionTypes[txType.value]];
+      if (props.isPending) {
+        return [];
+      }
+      return [txTransactionType];
     });
 
     return {

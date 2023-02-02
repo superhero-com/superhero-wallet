@@ -2,22 +2,26 @@ import Vue from 'vue';
 import VueCompositionApi, {
   watch,
 } from '@vue/composition-api';
-
 import { isFQDN } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { SCHEMA, TxBuilder, TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
+  MAGNITUDE,
+  MAX_UINT256,
   SIMPLEX_URL,
+  STUB_ADDRESS,
+  STUB_CALLDATA,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
 import type {
+  IAccount,
   IRespondChallenge,
   IResponseChallenge,
   ISdk,
@@ -25,6 +29,14 @@ import type {
 } from '../../types';
 
 Vue.use(VueCompositionApi);
+
+/**
+ * Replacement for `Array.includes` which has some TypeScript issues.
+ * @link https://github.com/microsoft/TypeScript/issues/26255
+ */
+export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
+  return arr.includes(elem as any);
+}
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
@@ -66,6 +78,16 @@ export function validateTipUrl(urlAsString: string): boolean {
   } catch (e) {
     return false;
   }
+}
+
+export function truncateAddress(address: string): [string, string] {
+  const addressLength = address.length;
+  const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
+  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g) as string[];
+  return [
+    firstPart?.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
+    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
+  ];
 }
 
 export const validateHash = (fullHash?: string) => {
@@ -163,6 +185,27 @@ export function relativeTimeTo(date: string): string {
   return dayjs().to(dayjs(date));
 }
 
+export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): BigNumber {
+  const minFee = TxBuilder.calculateMinFee(type, {
+    params: {
+      ...type === 'spendTx' ? {
+        senderId: STUB_ADDRESS,
+        recipientId: STUB_ADDRESS,
+      } : {},
+      amount: MAX_UINT256,
+      ttl: MAX_UINT256,
+      nonce: MAX_UINT256,
+      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+      callData: STUB_CALLDATA,
+      gas: 0,
+      ...params,
+    },
+    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
+  });
+  return new BigNumber(minFee).shiftedBy(-MAGNITUDE);
+}
+
 // TODO - move to sdk.ts composable after the removal of action.js file
 export async function fetchRespondChallenge(
   sdk: ISdk,
@@ -189,4 +232,12 @@ export function compareCaseInsensitive(
   str2: string,
 ) {
   return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
+}
+
+/**
+ * Prepare human readable name from the user account object.
+ * Eg.: `somehuman.chain`, `Account 2`
+ */
+export function getAccountNameToDisplay(acc: IAccount) {
+  return acc.name || `${i18n.t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
 }

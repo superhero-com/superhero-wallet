@@ -76,7 +76,7 @@
 
     <DetailsItem
       class="details-item"
-      :label="$t('pages.signTransaction.fee')"
+      :label="$t('transaction.fee')"
     >
       <template #value>
         <TokenAmount

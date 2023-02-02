@@ -56,8 +56,10 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
-import type { ITx } from '../../types';
-
+import type {
+  IAccountOverView,
+  ITx,
+} from '../../types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -79,8 +81,8 @@ export default defineComponent({
   props: {
     title: { type: String, required: true },
     txFunction: { type: String, default: null },
-    sender: { type: Object, required: true },
-    recipient: { type: Object, required: true },
+    sender: { type: Object as PropType<IAccountOverView>, required: true },
+    recipient: { type: Object as PropType<IAccountOverView>, required: true },
     tx: { type: Object as PropType<ITx>, default: null },
     isIncomplete: Boolean,
     isPending: Boolean,
