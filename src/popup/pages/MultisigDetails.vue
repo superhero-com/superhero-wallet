@@ -78,7 +78,7 @@ import { IMultisigAccount } from '../../types';
 import DetailsItem from '../components/DetailsItem.vue';
 import AddressFormatted from '../components/AddressFormatted.vue';
 import Avatar from '../components/Avatar.vue';
-import AuthorizedAccounts from './AuthorizedAccounts.vue';
+import AuthorizedAccounts from '../components/AuthorizedAccounts.vue';
 import LinkButton from '../components/LinkButton.vue';
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 
