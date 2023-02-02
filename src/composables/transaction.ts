@@ -167,7 +167,7 @@ export function useTransaction({
     if (txType.value === SCHEMA.TX_TYPE.spend) {
       return [
         i18n.t('transaction.type.spendTx'),
-        getTxDirection.value(transaction) === TX_FUNCTIONS.received
+        getTxDirection.value(transaction.value) === TX_FUNCTIONS.received
           ? i18n.t('transaction.spendType.in')
           : i18n.t('transaction.spendType.out'),
       ];
