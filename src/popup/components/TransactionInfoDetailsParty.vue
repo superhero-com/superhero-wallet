@@ -38,7 +38,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, PropType } from '@vue/composition-api';
+import { IAccountOverView } from '../../types';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -52,7 +53,7 @@ export default defineComponent({
   props: {
     isRecipient: Boolean,
     txParty: {
-      type: Object,
+      type: Object as PropType<IAccountOverView>,
       required: true,
     },
   },

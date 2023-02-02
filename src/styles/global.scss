@@ -81,6 +81,12 @@ button {
   }
 }
 
+hr {
+  margin: 20px calc(-1 * var(--screen-padding-x));
+  border: none;
+  border-bottom: 1px solid rgba($color-white, 0.06);
+}
+
 .error-msg {
   color: $color-danger;
   margin-top: 22px;
@@ -125,7 +131,7 @@ button {
   }
 
   &-heading-1 {
-    @extend %face-sans-18-regular;
+    @extend %face-sans-18-medium;
 
     margin-bottom: 18px;
     color: $color-white;

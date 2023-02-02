@@ -1,38 +1,41 @@
 <template>
   <div class="multisig-vault-creation-progress">
-    <h2 class="title">
+    <h2 class="text-heading-1">
       {{ $t('modals.creatingMultisigAccount.title') }}
     </h2>
+
     <ProgressBar :progress="progressPercentage" />
-    <div class="steps-list">
+
+    <div class="phase-list">
       <div
-        v-for="(step, index) in steps"
+        v-for="(localPhase, index) in localPhases"
         :key="index"
         :class="{
-          completed: isStepCompleted(index) || isStepCurrent(index),
+          completed: isPhaseCompleted(index) || isPhaseCurrent(index),
         }"
-        class="step-item"
+        class="phase-item"
       >
         <PendingIcon
-          v-if="isStepCurrent(index)"
-          class="step-pending-icon"
+          v-if="isPhaseCurrent(index)"
+          class="phase-pending-icon"
         />
         <CheckSuccessCircleIcon
-          v-else-if="isStepCompleted(index)"
-          class="step-success-icon"
+          v-else-if="isPhaseCompleted(index)"
+          class="phase-success-icon"
         />
         <div
           v-else
-          class="step-number"
+          class="phase-number"
         >
           {{ index + 1 }}
         </div>
 
-        <div class="step-item-name">
-          {{ step.text }}<span v-if="isStepCurrent(index)">&hellip;</span>
+        <div class="phase-item-name">
+          {{ localPhase.text }}<span v-if="isPhaseCurrent(index)">&hellip;</span>
         </div>
       </div>
     </div>
+
     <div
       v-if="!!multisigAccount"
       class="multisig-account-created"
@@ -63,9 +66,9 @@ import {
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
 import {
-  MULTISIG_CREATION_STEPS,
+  MULTISIG_CREATION_PHASES,
 } from '../utils';
-import { IMultisigAccountBase, IMultisigCreationStep } from '../../types';
+import { IMultisigAccountBase, IMultisigCreationPhase } from '../../types';
 
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -74,7 +77,7 @@ import CheckSuccessCircleIcon from '../../icons/check-success-circle.svg?vue-com
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
-  name: 'MultisigVaultCreationProgress',
+  name: 'MultisigVaultCreateProgress',
   components: {
     ProgressBar,
     AvatarWithChainName,
@@ -83,45 +86,45 @@ export default defineComponent({
   },
   props: {
     multisigAccount: { type: Object as PropType<IMultisigAccountBase>, default: null },
-    progress: { type: String as PropType<IMultisigCreationStep>, default: null },
+    phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
   },
   setup(props, { root }) {
-    const steps: { key: IMultisigCreationStep, text: TranslateResult }[] = [
+    const localPhases: { key: IMultisigCreationPhase, text: TranslateResult }[] = [
       {
-        key: MULTISIG_CREATION_STEPS.prepared,
+        key: MULTISIG_CREATION_PHASES.prepared,
         text: root.$t('modals.creatingMultisigAccount.preparingMultisigVault'),
       },
       {
-        key: MULTISIG_CREATION_STEPS.deployed,
+        key: MULTISIG_CREATION_PHASES.deployed,
         text: root.$t('modals.creatingMultisigAccount.deployingSmartContract'),
       },
       {
-        key: MULTISIG_CREATION_STEPS.created,
+        key: MULTISIG_CREATION_PHASES.created,
         text: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
       },
     ];
 
-    const currentProgressStepIndex = computed(
-      () => steps.findIndex(({ key }) => key === props.progress),
+    const currentPhaseIndex = computed(
+      () => localPhases.findIndex(({ key }) => key === props.phase),
     );
     const progressPercentage = computed(
-      (): number => (100 / steps.length) * (currentProgressStepIndex.value + 1),
+      (): number => (100 / localPhases.length) * (currentPhaseIndex.value + 1),
     );
 
-    function isStepCurrent(index: number) {
-      return index === currentProgressStepIndex.value + 1;
+    function isPhaseCurrent(index: number) {
+      return index === currentPhaseIndex.value + 1;
     }
 
-    function isStepCompleted(index: number) {
-      return !!props.multisigAccount || index <= currentProgressStepIndex.value;
+    function isPhaseCompleted(index: number) {
+      return !!props.multisigAccount || index <= currentPhaseIndex.value;
     }
 
     return {
       PlusCircle,
-      steps,
+      localPhases,
       progressPercentage,
-      isStepCurrent,
-      isStepCompleted,
+      isPhaseCurrent,
+      isPhaseCompleted,
     };
   },
 });
@@ -133,23 +136,14 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .multisig-vault-creation-progress {
-  $step-icon-size: 24px;
+  $phase-icon-size: 24px;
 
   padding-top: env(safe-area-inset-top);
 
-  .title {
-    @extend %face-sans-18-medium;
-
-    margin-bottom: 20px;
-    line-height: 24px;
-    text-align: center;
-    color: variables.$color-white;
-  }
-
-  .steps-list {
+  .phase-list {
     padding-top: 24px;
 
-    .step-item {
+    .phase-item {
       @extend %face-sans-14-medium;
 
       display: inline-flex;
@@ -162,14 +156,14 @@ export default defineComponent({
         opacity: 1;
       }
 
-      .step-number,
-      .step-pending-icon,
-      .step-success-icon {
-        width: $step-icon-size;
-        height: $step-icon-size;
+      .phase-number,
+      .phase-pending-icon,
+      .phase-success-icon {
+        width: $phase-icon-size;
+        height: $phase-icon-size;
       }
 
-      .step-number {
+      .phase-number {
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -179,7 +173,7 @@ export default defineComponent({
         border-radius: 100%;
       }
 
-      .step-success-icon {
+      .phase-success-icon {
         color: variables.$color-success-dark;
         background-color: rgba(variables.$color-success-dark, 0.15);
         border-radius: 100%;
