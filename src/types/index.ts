@@ -338,7 +338,7 @@ export interface ISdk {
     gas: any
     options: { innerTx: boolean }
   }) => Promise<any>
-  getContractInstance: (o: any) => any
+  getContractInstance: (o: any) => Promise<any>
   getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
   getNetworkId: () => string
   payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>
