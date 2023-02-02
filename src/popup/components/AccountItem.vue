@@ -26,37 +26,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
-import type { INetwork } from '../../types';
-import { useGetter } from '../../composables/vuex';
+import { defineComponent } from '@vue/composition-api';
 
 import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';
-import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
-import LinkButton from './LinkButton.vue';
 
 export default defineComponent({
   components: {
     Avatar,
     AddressTruncated,
-    ExternalLinkIcon,
-    LinkButton,
   },
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
-  },
-  setup(props) {
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const explorerUrl = computed(
-      () => (props.address)
-        ? `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`
-        : null,
-    );
-
-    return {
-      explorerUrl,
-    };
   },
 });
 </script>

@@ -56,8 +56,10 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
-import type { ITx } from '../../types';
-
+import type {
+  IAccountOverView,
+  ITx,
+} from '../../types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -77,8 +79,8 @@ export default defineComponent({
     Avatar,
   },
   props: {
-    sender: { type: Object, required: true },
-    recipient: { type: Object, required: true },
+    sender: { type: Object as PropType<IAccountOverView>, required: true },
+    recipient: { type: Object as PropType<IAccountOverView>, required: true },
     tx: { type: Object as PropType<ITx>, default: null },
     isIncomplete: Boolean,
     isPending: Boolean,
@@ -92,15 +94,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .transaction-info {
-  .title {
-    @extend %face-sans-15-regular;
-
-    color: variables.$color-white;
-    text-align: center;
-    display: block;
-    margin-bottom: -8px;
-  }
-
   .parties {
     display: flex;
     padding-bottom: 8px;

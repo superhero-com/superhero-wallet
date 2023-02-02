@@ -12,10 +12,7 @@ import BigNumber from 'bignumber.js';
 import {
   CONNECTION_TYPES,
   STUB_ADDRESS,
-  STUB_CALLDATA,
   STUB_NONCE,
-  MAX_UINT256,
-  MAGNITUDE,
   SEED_LENGTH,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
@@ -42,27 +39,6 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   const share = BigNumber(_balance).times(100).div(_totalSupply);
   const amount = BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
-};
-
-export const calculateFee = (type, params) => {
-  const MIN_FEE = TxBuilder.calculateMinFee(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
 };
 
 export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
@@ -250,16 +226,6 @@ export const amountRounded = (rawAmount) => {
     return amount.toFixed();
   }
   return amount.toFixed((amount < 0.01) ? 9 : 2);
-};
-
-export const truncateAddress = (address) => {
-  const addressLength = address.length;
-  const firstPart = address.slice(0, 6).match(/.{3}/g);
-  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
-  return [
-    firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
-    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
-  ];
 };
 
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {

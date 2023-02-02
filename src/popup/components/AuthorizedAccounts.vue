@@ -14,8 +14,9 @@
           <DialogBox
             v-if="address === activeMultisigAccount.signerId"
             class="dialog"
+            dense
           >
-            {{ $t('multisig.you') }}
+            {{ $t('common.you') }}
           </DialogBox>
         </div>
       </div>

@@ -11,7 +11,7 @@
           <span class="pending">
             {{ $t('multisig.consensusPending') }}
             {{ getConsensusInfo.confirmedBy }}/{{ getConsensusInfo.confirmationsRequired }}
-            {{ $t('of') }}
+            {{ $t('common.of') }}
             {{ getConsensusInfo.totalSigners }}
           </span>
         </template>

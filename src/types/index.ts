@@ -11,7 +11,7 @@ import { Store } from 'vuex';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
-  MULTISIG_CREATION_STEPS,
+  MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
   FUNCTION_TYPE_MULTISIG,
 } from '../popup/utils';
@@ -75,6 +75,7 @@ export interface IAsset {
   contractId: string
   convertedBalance: typeof BigNumber
   current_price: number
+  decimals: number
   fully_diluted_valuation: any
   high_24h: number
   id: string
@@ -93,9 +94,13 @@ export interface IAsset {
   symbol: string
   total_supply: number
   total_volume: number
-  decimals: number,
 }
 
+export type AccountKind = 'basic'; // TODO establish other possible values
+
+/**
+ * Account stored on the application store.
+ */
 export interface IAccount {
   address: string
   idx?: number
@@ -104,6 +109,17 @@ export interface IAccount {
   secretKey: Uint8Array
   showed: boolean
   type: string
+}
+
+/**
+ * Account fetched from the node with the use of `sdk.api.getAccountByPubkey`
+ */
+export interface IAccountFetched {
+  balance: string;
+  id: string; // ak_* hash
+  kind: AccountKind;
+  nonce: number;
+  payable: boolean;
 }
 
 export interface IAccountLabeled extends Partial<IAccount> {
@@ -131,11 +147,17 @@ export interface IMultisigAccount extends IMultisigAccountBase {
   nonce: number
   signers: string[]
   version: string
-  hasConsensus: boolean,
-  address: string,
-  proposedBy: string,
-  gaAccountId?: string,
+  hasConsensus: boolean
+  address: string
+  proposedBy: string
+  gaAccountId?: string
   consensusLabel?: string
+}
+
+export interface IMultisigAccountCreationTx {
+  fee: number;
+  rawTx: string;
+  accountId: string;
 }
 
 export interface INetwork {
@@ -246,10 +268,11 @@ export interface IGAMetaTx {
 
 export interface IGAMeta {
   signatures: string[];
-  tx: IGAMetaTx
+  tx: IGAMetaTx;
 }
 
 export interface ITx {
+  VSN: string
   abiVersion: number
   accountId?: string
   amount: number
@@ -286,43 +309,43 @@ export interface ITx {
 
 export interface ITransaction {
   blockHeight: number;
-  hash: string,
-  microIndex: number,
-  microTime: number,
-  claim: any, // TODO find type
-  incomplete: any // TODO find type
-  pending: any // TODO find type
-  rawTx?: any // TODO find type
-  tx: ITx
+  hash: string;
+  microIndex: number;
+  microTime: number;
+  claim: any; // TODO find type
+  incomplete: any; // TODO find type
+  pending: any; // TODO find type
+  rawTx?: any; // TODO find type
+  tx: ITx;
 }
 
 export interface IPendingTransaction {
-  hash: string,
-  amount: number | string,
-  type?: string,
-  recipient?: string,
-  pendingTokenTx?: boolean,
-  tipUrl?: string,
-  tx: Partial<ITx>
+  hash: string;
+  amount: number | string;
+  type?: string;
+  recipient?: string;
+  pendingTokenTx?: boolean;
+  tipUrl?: string;
+  tx: Partial<ITx>;
 }
 
 export interface IAccountOverView extends Partial<IAccount> {
-  url?: string,
-  contractCreate?: boolean,
-  aens?: boolean,
-  label: TranslateResult,
+  url?: string;
+  contractCreate?: boolean;
+  aens?: boolean;
+  label: TranslateResult;
 }
 
 export interface ITransactionOverview {
-  sender: IAccountOverView | IAccount,
-  recipient: IAccountOverView | IAccount,
-  title: TranslateResult,
-  function?: any,
+  sender: IAccountOverView | IAccount;
+  recipient: IAccountOverView | IAccount;
+  title: TranslateResult;
+  function?: any;
 }
 
 export interface IDexContracts {
-  router: string[],
-  wae: string[],
+  router: string[];
+  wae: string[];
 }
 
 /**
@@ -350,7 +373,7 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
-  api: Record<string, (a?: string) => any>
+  api: Record<string, (a?: any) => any>
   compilerApi: Record<string, (...args: any[]) => Promise<any>>
   Ae: Record<string, any>
   pool: Map<string, any>
@@ -366,14 +389,22 @@ export interface ISdk {
   getContractInstance: (o: any) => Promise<any>
   getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
   getNetworkId: () => string
-  payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>
+  payForTransaction: (
+    rawTx: string,
+    options: {
+      waitMined: boolean;
+      modal: boolean;
+      innerTx?: boolean
+    }
+  ) => Promise<{ hash: string, rawTx: string }>
+  poll: (txHash: string) => any
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
     tx: any,
-    arg1: {
+    options?: {
       innerTx?: boolean,
-      onAccount: any,
+      onAccount: string,
       authData?: any,
     }
   ) => Promise<ITransaction>
@@ -468,7 +499,7 @@ export interface IActiveAuction {
   name: string
 }
 
-export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS | null;
+export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | null;
 
 export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
 
@@ -493,6 +524,11 @@ export interface IRawMultisigTx {
   tx: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface IKeyPair {
+  publicKey: string;
+  secretKey: string;
 }
 
 export interface IDefaultComposableOptions {

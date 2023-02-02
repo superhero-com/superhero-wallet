@@ -146,7 +146,7 @@
       </PayloadDetails>
     </template>
 
-    <DetailsItem :label="$t('pages.signTransaction.fee')">
+    <DetailsItem :label="$t('transaction.fee')">
       <template #value>
         <TokenAmount
           :amount="+fee.toFixed()"
@@ -185,6 +185,7 @@ import {
   convertToken,
   validateTipUrl,
   checkAensName,
+  getAccountNameToDisplay,
 } from '../utils';
 import {
   useBalances,
@@ -321,10 +322,6 @@ export default defineComponent({
      * Determines if more than one of current user's accounts can approve this vault's txs.
      */
     const multisigVaultOwnedByManyAccounts = computed(() => mySignerAccounts?.length > 1);
-
-    function getAccountNameToDisplay(acc: IAccount) {
-      return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
-    }
 
     const accountsAllowedToProposeTxSelectOptions = computed(
       (): FormSelectOption[] => mySignerAccounts

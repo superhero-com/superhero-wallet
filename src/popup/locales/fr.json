@@ -69,6 +69,7 @@
     "confirm": "Confirm"
   },
   "transaction": {
+    "fee": "Frais de transaction",
     "type": {
       "SpendTx": "Spend",
       "ContractCreateTx": "Contract create",
@@ -525,14 +526,13 @@
       "name": "Prénom",
       "nameSalt": "Nom Salt",
       "nameId": "Nom Id",
-      "fee": "Frais de transaction",
       "total": "Total",
       "reject": "Rejeter",
       "confirm": "Confirmer",
       "contractCall": "Appel du contrat",
       "contractCalling": "Appel de la méthode du contrat. S'il vous plaît ne fermez pas la fenêtre",
       "insufficientBalance": "Solde insuffisant",
-      "inccorectAddress": "Adresse incorrecte",
+      "incorrectAddress": "Adresse incorrecte",
       "compiledCode": "Compiled Code",
       "callData": "Call Data",
       "payload": "Payload",
@@ -596,7 +596,6 @@
       "check": "Vérifier",
       "selectAmount": "Sélectionner le montant",
       "amountToTip": "Montant de pointe",
-      "transactionFee": "Frais de transaction",
       "balance": "Équilibre",
       "sendTipBtn": "Envoyer une astuce",
       "tipDetails": "Details",
@@ -635,7 +634,6 @@
       "date": "Rendez-vous amoureux",
       "type": "Type",
       "amount": "Montant",
-      "fee": "Frais de transaction",
       "total": "Total",
       "txFrom": "De",
       "txTo": "À",
@@ -770,6 +768,5 @@
       "cancel": "Cancel",
       "donate": "Donate Data"
     }
-  },
-  "redirecting": "Redirecting"
+  }
 }
