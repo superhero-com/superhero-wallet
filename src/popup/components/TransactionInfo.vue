@@ -13,7 +13,7 @@
     <div class="parties">
       <Avatar
         v-if="sender.address"
-        :name="sender.name || sender.label"
+        :name="sender.name"
         :address="sender.address"
       />
       <div class="mid">
@@ -24,7 +24,7 @@
       <Avatar
         v-if="recipient.address"
         :address="recipient.address"
-        :name="recipient.name || recipient.label"
+        :name="recipient.name"
       />
       <div
         v-else
