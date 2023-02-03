@@ -1,13 +1,22 @@
 <template>
   <RouterLink
     class="transaction-item"
-    :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
+    :to="redirectRoute"
   >
     <div class="header">
       <span />
       <div class="status">
-        <template v-if="transaction.pending">
-          <Pending class="icon" />
+        <template v-if="!!multisigTransaction && !hasConsensus">
+          <PendingIcon class="icon" />
+          <span class="pending">
+            {{ $t('multisig.consensusPending') }}
+            {{ getConsensusInfo.confirmedBy }}/{{ getConsensusInfo.confirmationsRequired }}
+            {{ $t('of') }}
+            {{ getConsensusInfo.totalSigners }}
+          </span>
+        </template>
+        <template v-else-if="transaction.pending">
+          <PendingIcon class="icon" />
           <span class="pending">{{ $t('transaction.type.pending') }}</span>
         </template>
         <template v-else>
@@ -17,15 +26,15 @@
             v-if="isErrorTransaction"
             class="error"
           >
-            <Warning
-              v-if="transaction.tx.returnType === 'abort'"
+            <WarningIcon
+              v-if="currentTx.returnType === 'abort'"
               class="icon"
             />
-            <Reverted
+            <RevertedIcon
               v-else
               class="icon"
             />
-            <span>{{ $t('transaction.returnType')[transaction.tx.returnType] }}</span>
+            <span>{{ $t('transaction.returnType')[currentTx.returnType] }}</span>
           </div>
         </template>
       </div>
@@ -33,18 +42,17 @@
     </div>
     <div class="body">
       <TransactionTokens
-        :tokens="tokens"
+        :ext-tokens="tokens"
         :error="isErrorTransaction"
       />
       <div class="footer">
-        <div class="labels">
-          <label
-            v-for="label in labels"
-            :key="label"
-          >
-            {{ label }}
-          </label>
-        </div>
+        <TransactionTagList
+          :tx="currentTx"
+          :is-incomplete="!!transaction && transaction.incomplete"
+          :is-pending="!!transaction && transaction.pending"
+          :is-claim="!!transaction && transaction.claim"
+          dense
+        />
         <span v-if="fiatAmount">{{ fiatAmount }}</span>
       </div>
     </div>
@@ -57,8 +65,12 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
+import { Location } from 'vue-router';
+
 import type {
+  IActiveMultisigTx,
   ITransaction,
+  ITx,
   TxFunctionRaw,
 } from '../../types';
 import {
@@ -68,45 +80,75 @@ import {
   formatDate,
   formatTime,
 } from '../utils';
-import { useTransaction } from '../../composables';
+import { useTransactionTx, useTransactionTokens } from '../../composables';
 import { useGetter } from '../../composables/vuex';
+
 import TransactionTokens from './TransactionTokenRows.vue';
-import Pending from '../../icons/animated-pending.svg?vue-component';
-import Reverted from '../../icons/refresh.svg?vue-component';
-import Warning from '../../icons/warning.svg?vue-component';
+
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
+import RevertedIcon from '../../icons/refresh.svg?vue-component';
+import WarningIcon from '../../icons/warning.svg?vue-component';
+import TransactionTagList from './TransactionTagList.vue';
 
 export default defineComponent({
   components: {
-    Pending,
-    Reverted,
-    Warning,
+    TransactionTagList,
+    PendingIcon,
+    RevertedIcon,
+    WarningIcon,
     TransactionTokens,
   },
   props: {
-    transaction: { type: Object as PropType<ITransaction>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, default: null },
+    multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
+    hasConsensus: Boolean,
   },
   setup(props, { root }) {
     const getAmountFiat = useGetter('getAmountFiat');
 
+    const currentTx = computed<ITx | undefined>(
+      () => (props.multisigTransaction || props.transaction)?.tx,
+    );
+
     const {
       isDex,
-      tokens,
       isErrorTransaction,
-      labels,
-    } = useTransaction({
+      direction,
+      isAllowance,
+    } = useTransactionTx({
       store: root.$store,
-      initTransaction: props.transaction,
+      tx: currentTx.value,
     });
 
+    const { tokens } = useTransactionTokens({
+      store: root.$store,
+      direction: direction.value,
+      isAllowance: isAllowance.value,
+      // TODO - refactor useTransactionTokens to use only tx
+      transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
+    });
+
+    const redirectRoute = computed<Location>(() => {
+      if (props.multisigTransaction) {
+        return { name: 'multisig-proposal-details' };
+      }
+      return { name: 'tx-details', params: { hash: props.transaction.hash } };
+    });
+
+    const getConsensusInfo = computed(() => ({
+      confirmedBy: props.multisigTransaction.confirmedBy?.length || 0,
+      totalSigners: props.multisigTransaction.signers?.length || 0,
+      confirmationsRequired: props.multisigTransaction.confirmationsRequired?.toString(),
+    }));
+
     const fiatAmount = computed(() => {
-      // TODO add type to tokens
-      const aeToken = tokens.value?.find((t: any) => t?.isAe);
+      const aeToken = tokens.value?.find((t) => t?.isAe);
       if (
         !aeToken
         || isErrorTransaction.value
         || (
           isDex.value
-          && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function as TxFunctionRaw)
+          && FUNCTION_TYPE_DEX.pool.includes(currentTx.value?.function as TxFunctionRaw)
         )
       ) return 0;
       return getAmountFiat.value(amountRounded(
@@ -117,12 +159,16 @@ export default defineComponent({
     });
 
     return {
-      labels,
       fiatAmount,
       formatDate,
       formatTime,
+      getConsensusInfo,
       isErrorTransaction,
       tokens,
+      isAllowance,
+      direction,
+      currentTx,
+      redirectRoute,
     };
   },
 });
@@ -205,24 +251,6 @@ export default defineComponent({
         color: variables.$color-grey-light;
 
         @extend %face-sans-15-medium;
-      }
-
-      .labels {
-        display: flex;
-        width: 100%;
-
-        label {
-          @extend %face-sans-11-regular;
-
-          height: 22px;
-          margin-right: 4px;
-          padding: 2px 5px;
-          border: 1px solid variables.$color-grey-dark;
-          border-radius: 4px;
-          color: variables.$color-grey-dark;
-          font-weight: 500;
-          text-transform: uppercase;
-        }
       }
     }
   }

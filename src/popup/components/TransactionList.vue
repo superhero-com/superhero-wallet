@@ -9,7 +9,8 @@
       <TransactionItem
         v-for="transaction in filteredTransactions"
         :key="transaction.hash"
-        :transaction="transaction"
+        :transaction="!transaction.isMultisigTransaction ? transaction : null"
+        :multisig-transaction="transaction.isMultisigTransaction ? transaction : null"
         :data-cy="transaction.pending && 'pending-txs'"
       />
     </InfiniteScroll>
@@ -62,6 +63,8 @@ import {
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
 } from '../../composables';
 
@@ -90,6 +93,13 @@ export default defineComponent({
     const isDestroyed = ref(false);
 
     const {
+      activeMultisigAccount,
+      isMultisigDashboard,
+    } = useMultisigAccounts({ store: root.$store });
+
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+
+    const {
       searchPhrase,
       displayMode,
       FILTER_MODE,
@@ -108,59 +118,97 @@ export default defineComponent({
       return Object.keys(availableTokens.value).includes(tr.tx.contractId);
     }
 
+    const currentAddress = computed(() => isMultisigDashboard.value
+      ? activeMultisigAccount.value?.address
+      : account.value.address);
+
     const filteredTransactions = computed(
-      () => [
-        ...getAccountPendingTransactions.value,
-        ...transactions.value.loaded,
-      ]
-        .filter((tr) => (!props.token
-          || (props.token !== AETERNITY_CONTRACT_ID
-            ? tr.tx?.contractId === props.token
-            : (!tr.tx.contractId || !isFungibleTokenTx(tr)))))
-        .filter((tr) => {
-          switch (displayMode.value.key) {
-            case FILTER_MODE.all:
-              return true;
-            case FILTER_MODE.dex:
-              return getDexContracts.value && tr.tx.contractId && (
-                getDexContracts.value.router.includes(tr.tx.contractId)
-                || getDexContracts.value.wae?.includes(tr.tx.contractId)
-              );
-            case FILTER_MODE.out:
-              return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                  && tr.tx.senderId === account.value.address)
-                || (isFungibleTokenTx(tr)
+      () => {
+        const transactionListLocal = [
+          ...getAccountPendingTransactions.value,
+          ...transactions.value.loaded,
+        ];
+
+        if (isMultisigDashboard.value && pendingMultisigTransaction.value?.tx) {
+          transactionListLocal.push(pendingMultisigTransaction.value);
+        }
+
+        return transactionListLocal
+          .filter((tr) => (
+            !props.token
+              || (
+                props.token !== AETERNITY_CONTRACT_ID
+                  ? tr.tx?.contractId === props.token
+                  : (!tr.tx.contractId || !isFungibleTokenTx(tr))
+              )
+          ))
+          .filter((tr) => {
+            switch (displayMode.value.key) {
+              case FILTER_MODE.all:
+                return true;
+              case FILTER_MODE.dex:
+                return (
+                  getDexContracts.value && tr.tx.contractId
+                    && (
+                      getDexContracts.value.router.includes(tr.tx.contractId)
+                      || getDexContracts.value.wae?.includes(tr.tx.contractId)
+                    )
+                );
+              case FILTER_MODE.out:
+                return (
+                  compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+                  && tr.tx.senderId === currentAddress.value
+                ) || (
+                  isFungibleTokenTx(tr)
                   && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.tx.callerId === account.value.address);
-            case FILTER_MODE.in:
-              return (compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                  && (tr.tx.recipientId === account.value.address
-                    || (tr.tx.senderId !== account.value.address
-                      && tr.tx.recipientId.startsWith('nm_'))))
-                || (isFungibleTokenTx(tr)
+                  && tr.tx.callerId === currentAddress.value
+                );
+              case FILTER_MODE.in:
+                return (
+                  compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
+                    && (
+                      tr.tx.recipientId === currentAddress.value
+                      || (
+                        tr.tx.senderId !== currentAddress.value
+                          && tr.tx.recipientId.startsWith('nm_')
+                      )
+                    )
+                ) || (
+                  isFungibleTokenTx(tr)
                   && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.recipient === account.value.address);
-            default:
-              throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
-          }
-        })
-        .filter(
-          (tr) => !searchPhrase.value
-            || getTxSymbol.value(tr)
+                  && tr.recipient === currentAddress.value
+                );
+              default:
+                throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            }
+          })
+          .filter(
+            (tr) => !searchPhrase.value || getTxSymbol.value(tr)
               .toLocaleLowerCase()
-              .includes(
-                searchPhrase.value.toLocaleLowerCase(),
-              ),
-        )
-        .sort((a, b) => {
-          const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
-          return (
-            (a.pending && !b.pending && -1)
-            || (b.pending && !a.pending && 1)
-            || bMicroTime - aMicroTime
-          );
-        })
-        .slice(0, props.maxLength || Infinity),
+              .includes(searchPhrase.value.toLocaleLowerCase()),
+          )
+          .sort((a, b) => {
+            const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+            const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
+
+            const compareMicroTime = () => {
+              const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
+                (time) => Number.isNaN(time),
+              );
+
+              if (withoutTimeIndex === 0) {
+                return -1;
+              }
+              if (withoutTimeIndex === 1) {
+                return 1;
+              }
+              return bMicroTime - aMicroTime;
+            };
+
+            return pending || compareMicroTime();
+          })
+          .slice(0, props.maxLength || Infinity);
+      },
     );
 
     const showSearchAndFilters = computed(() => (
@@ -173,7 +221,7 @@ export default defineComponent({
       if (isDestroyed.value || !transactions.value.nextPageUrl) return;
       // TODO - use viewport.ts composable after rewriting component to Vue 3
       const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
-        || process.env.IS_EXTENSION;
+          || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = (isDesktop
         ? document.querySelector('.app-inner') : document.documentElement)!;
       if (props.maxLength && filteredTransactions.value.length >= props.maxLength) return;
@@ -188,7 +236,7 @@ export default defineComponent({
       loading.value = true;
       try {
         await watchUntilTruthy(() => root.$store.state.middleware);
-        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE });
+        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
       } finally {
         loading.value = false;
       }
@@ -197,7 +245,7 @@ export default defineComponent({
 
     async function getLatest() {
       try {
-        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true });
+        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
       } finally {
         loading.value = false;
       }
@@ -207,7 +255,7 @@ export default defineComponent({
       checkLoadMore();
     });
 
-    onMounted(() => {
+    onMounted(async () => {
       loadMore();
       const polling = setInterval(() => getLatest(), 10000);
       root.$once('hook:destroyed', () => {

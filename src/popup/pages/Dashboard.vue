@@ -19,12 +19,14 @@
             ? $t('dashboard.proposeCard.description')
             : $t('dashboard.sendCard.description')"
           :icon="ArrowSendIcon"
-          :disabled="!isConnected"
+          :disabled="!isConnected || (isMultisigDashboard && !!pendingMultisigTransaction)"
           data-cy="send"
           is-big
           @click="openTransferSendModal()"
         />
       </div>
+
+      <PendingMultisigTransactionCard v-if="isMultisigDashboard" />
 
       <Card
         v-if="!backedUpSeed"
@@ -91,11 +93,12 @@ import {
   buildSimplexLink,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
-import { useMultisigAccounts } from '../../composables';
+import { useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
 
 import Card from '../components/Card.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import DashboardHeader from '../components/DashboardHeader.vue';
+import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
 
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
@@ -111,6 +114,7 @@ import { ITransaction } from '../../types';
 export default defineComponent({
   name: 'Dashboard',
   components: {
+    PendingMultisigTransactionCard,
     DashboardHeader,
     Card,
     BtnMain,
@@ -118,6 +122,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
     const backedUpSeed = useState('backedUpSeed');
     const transactions = useState<ITransaction>('transactions');
@@ -142,7 +147,8 @@ export default defineComponent({
       });
     }
 
-    watch(activeIdx, () => root.$store.commit('initTransactions'));
+    watch(() => activeIdx.value, () => root.$store.commit('initTransactions'));
+    watch(() => isMultisigDashboard.value, () => root.$store.commit('initTransactions'));
 
     watch(query, (value) => {
       if (!isEmpty(value)) {
@@ -151,6 +157,7 @@ export default defineComponent({
     });
 
     return {
+      pendingMultisigTransaction,
       ArrowReceiveIcon,
       ArrowSendIcon,
       SubtractIcon,

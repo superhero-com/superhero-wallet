@@ -62,8 +62,7 @@ export default {
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
-  async fetchTipWithdrawnTransactions({ state, getters, commit }, recent) {
-    const { address } = getters.account;
+  async fetchTipWithdrawnTransactions({ state, getters, commit }, { recent, address }) {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
@@ -91,9 +90,11 @@ export default {
   },
   async fetchTransactions({
     state, getters, dispatch, commit,
-  }, { limit, recent }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) return;
-    const { address } = getters.account;
+  }, { limit, recent, address }) {
+    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) {
+      return;
+    }
+
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
         ? state.middleware.getTxByAccount(address, limit, 1)
@@ -109,8 +110,8 @@ export default {
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', recent),
-      dispatch('fetchTipWithdrawnTransactions', recent)]))
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent, address }),
+      dispatch('fetchTipWithdrawnTransactions', { recent, address })]))
       .forEach((f) => {
         if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
           txs[0].push(f);

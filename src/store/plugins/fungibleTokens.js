@@ -46,10 +46,8 @@ export default (store) => {
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokens(state) {
+      resetTokensAndTransactions(state) {
         state.tokens = {};
-      },
-      resetTransactions(state) {
         state.transactions = {};
       },
       addTokenBalance(state, { address, balances }) {
@@ -223,18 +221,17 @@ export default (store) => {
       async getTokensHistory(
         {
           state: { transactions },
-          rootGetters: { activeNetwork, account, getDexContracts }, commit,
-        }, recent,
+          rootGetters: { activeNetwork, getDexContracts }, commit,
+        }, { recent, address },
       ) {
-        const { address } = account;
         if (transactions[address]?.length && !recent) return transactions[address];
 
         let rawTransactions = [];
         const lastTransaction = transactions[address]?.[0];
         if (recent) {
           let nextPageUrl;
-          let isAllNewTransactionsLoadded = false;
-          while (nextPageUrl !== null && !isAllNewTransactionsLoadded) {
+          let isAllNewTransactionsLoaded = false;
+          while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
             // eslint-disable-next-line no-await-in-loop
             const { data, next } = await (fetchJson(nextPageUrl
               ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
@@ -242,7 +239,7 @@ export default (store) => {
             if (data?.length) rawTransactions.push(...data);
             if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
             || !transactions[address]?.length) {
-              isAllNewTransactionsLoadded = true;
+              isAllNewTransactionsLoaded = true;
             }
             nextPageUrl = next || null;
           }
@@ -286,8 +283,7 @@ export default (store) => {
     (state, { activeNetwork }) => activeNetwork,
     async (network, oldNetwork) => {
       if (network?.middlewareUrl === oldNetwork?.middlewareUrl) return;
-      store.commit('fungibleTokens/resetTokens');
-      store.commit('fungibleTokens/resetTransactions');
+      store.commit('fungibleTokens/resetTokensAndTransactions');
 
       await store.dispatch('fungibleTokens/loadAvailableTokens');
       await store.dispatch('fungibleTokens/loadTokenBalances');

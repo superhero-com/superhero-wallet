@@ -90,10 +90,10 @@ export default {
   },
   getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-  getTxType: () => (transaction) => transaction.tx
-    && (TX_TYPE_MDW[transaction.tx.type]
-      || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
-      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
+  getTxType: () => (tx) => tx
+    && (TX_TYPE_MDW[tx.type]
+      || SCHEMA.OBJECT_ID_TX_TYPE[tx.tag]
+      || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -120,8 +120,8 @@ export default {
   getTxFee: () => (transaction) => +aettosToAe(
     new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
-  getTxDirection: (_, { account: { address }, getTxType }) => ({ tx }, externalAddress) => {
-    if (getTxType({ tx }) === SCHEMA.TX_TYPE.spend) {
+  getTxDirection: (_, { account: { address }, getTxType }) => (tx, externalAddress) => {
+    if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
       return tx.recipientId === address
         ? TX_FUNCTIONS.received
         : TX_FUNCTIONS.sent;

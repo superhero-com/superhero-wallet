@@ -5,6 +5,9 @@
     :sender="transaction.sender"
     :recipient="transaction.recipient"
     :tx-function="transaction.function"
+    :is-incomplete="transaction.incomplete"
+    :is-pending="transaction.pending"
+    :is-claim="transaction.claim"
     :tx="tx"
   />
 </template>
@@ -23,12 +26,11 @@ import {
   TX_FUNCTIONS,
   watchUntilTruthy,
 } from '../utils';
-import { useSdk, useTransaction } from '../../composables';
+import { useSdk, useTransactionTx } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
 import {
   IAccount,
   IAccountLabeled,
-  ITransaction,
   ITx,
   TransactionType,
   TxFunction,
@@ -63,10 +65,10 @@ export default defineComponent({
       txType,
       direction,
       getOwnershipAccount,
-      setTransaction,
-    } = useTransaction({ store: root.$store });
-
-    setTransaction({ tx: props.tx } as ITransaction);
+    } = useTransactionTx({
+      store: root.$store,
+      tx: props.tx,
+    });
 
     const isDexRecipient = computed(
       () => [

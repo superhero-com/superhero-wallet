@@ -22,7 +22,7 @@ export default {
 .transaction-tag {
   @extend %face-sans-11-medium;
 
-  padding: 1px 5px;
+  padding: 2px 5px;
   color: variables.$color-grey-dark;
   border: 1px solid variables.$color-grey-dark;
   border-radius: 4px;

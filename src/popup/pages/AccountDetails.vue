@@ -66,7 +66,7 @@ import {
   EXTENSION_HEIGHT,
   buildSimplexLink,
 } from '../utils';
-import { useTransactionAndTokenFilter, useMultisigAccounts } from '../../composables';
+import { useTransactionAndTokenFilter, useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import { IAccount } from '../../types';
 import { IS_CORDOVA } from '../../lib/environment';
@@ -109,9 +109,13 @@ export default defineComponent({
     const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
 
     const { resetFilter } = useTransactionAndTokenFilter();
+
     const {
-      isMultisigDashboard, activeMultisigAccount,
+      isMultisigDashboard,
+      activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
+
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
@@ -147,7 +151,13 @@ export default defineComponent({
           isMultisig: isMultisigDashboard.value,
         }),
         icon: ArrowSendIcon,
-        disabled: !isConnected.value,
+        disabled: (
+          !isConnected.value
+          || (
+            isMultisigDashboard.value
+            && !!pendingMultisigTransaction.value
+          )
+        ),
       },
       {
         text: root.$t('pages.token-details.buy'),
