@@ -64,7 +64,7 @@
       <DetailsItem
         class="details-item"
         :label="$t('pages.multisigDetails.consensus')"
-        :value="consensus"
+        :value="consensusLabel"
       />
     </div>
   </div>
@@ -99,8 +99,14 @@ export default defineComponent({
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const {
-      multisigAccountId, contractId, version, confirmedBy,
-      nonce, signers, confirmationsRequired,
+      multisigAccountId,
+      contractId,
+      version,
+      confirmedBy,
+      nonce,
+      signers,
+      confirmationsRequired,
+      consensusLabel,
     } = activeMultisigAccount.value || {} as IMultisigAccount;
 
     const consensus = computed(() => (
@@ -115,6 +121,7 @@ export default defineComponent({
       version,
       nonce,
       consensus,
+      consensusLabel,
     };
   },
 });
