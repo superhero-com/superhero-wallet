@@ -308,13 +308,14 @@
       "payload": "Payload"
     },
     "multisigTxProposal": {
-      "title": "Multisig Transaction Proposal",
+      "title": "Multisig transaction proposal",
       "multisigVault": "Multisig vault",
       "amount": "Propose amount",
-      "amountProposed": "Amount proposed",
+      "amountProposed": "Proposed amount",
       "signingAddress": "Signing address",
       "signingAccount": "Signing account",
-      "fee": "Proposal transaction fee"
+      "fee": "Proposal transaction fee",
+      "proposeAndApprove": "Propose and approve"
     },
     "wrongNetwork": {
       "title": "Network discrepancy",

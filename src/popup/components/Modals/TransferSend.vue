@@ -34,8 +34,8 @@
       <BtnMain
         class="button-action-primary"
         :disabled="error || !isConnected || !transferData.address || !transferData.amount"
-        :icon="showSendButton ? ArrowSendIcon : null"
-        :text="showSendButton ? $t('pages.send.send') : $t('modals.send.next')"
+        :icon="(showSendButton && !isMultisig) ? ArrowSendIcon : null"
+        :text="primaryButtonText"
         data-cy="next-step-button"
         @click="proceedToNextStep"
       />
@@ -104,6 +104,15 @@ export default defineComponent({
       && transferData.value.address
       && validateTipUrl(transferData.value.address)
     ));
+    const primaryButtonText = computed(() => {
+      if (!showSendButton.value) {
+        return root.$t('modals.send.next');
+      }
+      if (props.isMultisig) {
+        return root.$t('modals.multisigTxProposal.proposeAndApprove');
+      }
+      return root.$t('pages.send.send');
+    });
 
     function closeModal() {
       root.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
@@ -175,6 +184,7 @@ export default defineComponent({
       isAddressUrl,
       showEditButton,
       showSendButton,
+      primaryButtonText,
       closeModal,
       proceedToNextStep,
       editTransfer,
