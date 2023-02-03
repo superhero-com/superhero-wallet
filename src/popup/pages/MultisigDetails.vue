@@ -36,6 +36,14 @@
       </template>
     </DetailsItem>
 
+    <LinkButton
+      class="explorer-link"
+      :to="getExplorerPath(contractId)"
+    >
+      {{ $t('pages.multisigDetails.explorerLink') }}
+      <ExternalLinkIcon class="external-icon" />
+    </LinkButton>
+
     <div class="row">
       <DetailsItem
         class="details-item"
@@ -49,28 +57,21 @@
       />
     </div>
 
-    <DetailsItem
-      class="details-item"
-      :label="$t('pages.multisigDetails.consensus')"
-      :value="`${confirmedBy.length}/${confirmationsRequired} ${$t('of')} ${signers.length}`"
-    />
-
-    <AuthorizedAccounts
-      :address-list="signers"
-      :required-confirmations="confirmationsRequired"
-    />
-    <LinkButton
-      class="explorer-link"
-      :to="getExplorerPath(contractId)"
-    >
-      {{ $t('pages.multisigDetails.explorerLink') }}
-      <ExternalLinkIcon class="external-icon" />
-    </LinkButton>
+    <div class="row">
+      <AuthorizedAccounts
+        :address-list="signers"
+      />
+      <DetailsItem
+        class="details-item"
+        :label="$t('pages.multisigDetails.consensus')"
+        :value="consensus"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
 import { useMultisigAccounts } from '../../composables';
 
@@ -102,15 +103,18 @@ export default defineComponent({
       nonce, signers, confirmationsRequired,
     } = activeMultisigAccount.value || {} as IMultisigAccount;
 
+    const consensus = computed(() => (
+      `${confirmedBy.length}/${confirmationsRequired} ${root.$t('of')} ${signers.length}`
+    ));
+
     return {
-      confirmedBy,
       multisigAccountId,
       contractId,
       getExplorerPath,
       signers,
       version,
       nonce,
-      confirmationsRequired,
+      consensus,
     };
   },
 });
@@ -145,7 +149,7 @@ export default defineComponent({
 
   .explorer-link {
     color: rgba(variables.$color-white, 0.75);
-    margin-bottom: 26px;
+    margin-block: 4px;
 
     .external-icon {
       opacity: 1;

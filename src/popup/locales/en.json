@@ -1317,6 +1317,7 @@
       "version": "Contract version",
       "currentNonce": "Current nonce",
       "authorizedAccount": "Authorized accounts",
+      "authorizedSigners": "Authorized signers",
       "signers": "Authorized signers:",
       "consensus": "Consensus",
       "approval": "Needed for approval:",

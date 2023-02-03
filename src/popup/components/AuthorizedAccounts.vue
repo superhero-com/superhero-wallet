@@ -1,33 +1,17 @@
 <template>
   <DetailsItem
-    :label="$t('pages.multisigDetails.authorizedAccount')"
+    :label="$t('pages.multisigDetails.authorizedSigners')"
+    class="authorized-accounts"
   >
     <template #value>
-      <div class="authorized-accounts">
-        <div class="account-list">
-          <div
-            v-for="address in addressList"
-            :key="address"
-            class="account-row"
-          >
-            <AccountItem :address="address" />
-          </div>
+      <div class="account-list">
+        <div
+          v-for="address in addressList"
+          :key="address"
+          class="account-row"
+        >
+          <AccountItem :address="address" />
         </div>
-
-        <DialogBox>
-          <div>
-            {{ $t('pages.multisigDetails.signers') }}
-            <strong class="count-value">
-              {{ addressList.length }}
-            </strong>
-          </div>
-          <div>
-            {{ $t('pages.multisigDetails.approval') }}
-            <strong class="count-value">
-              {{ requiredConfirmations }}
-            </strong>
-          </div>
-        </DialogBox>
       </div>
     </template>
   </DetailsItem>
@@ -37,21 +21,18 @@
 import { defineComponent, PropType } from '@vue/composition-api';
 import DetailsItem from './DetailsItem.vue';
 import AccountItem from './AccountItem.vue';
-import DialogBox from './DialogBox.vue';
 
 export default defineComponent({
   name: 'AuthorizedAccounts',
   components: {
     DetailsItem,
     AccountItem,
-    DialogBox,
   },
   props: {
     addressList: {
       type: Array as PropType<string[]>,
       default: () => [],
     },
-    requiredConfirmations: { type: Number, required: true },
   },
 });
 </script>
@@ -61,10 +42,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .authorized-accounts {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
   .account-row {
     display: flex;
     align-items: center;
