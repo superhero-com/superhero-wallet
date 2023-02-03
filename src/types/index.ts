@@ -454,8 +454,10 @@ export interface IActiveMultisigTx {
   confirmationsRequired: number
   confirmedBy: string[]
   hasConsensus: boolean
+  signers: string[],
   hash?: string
   tx?: ITx
+  isMultisigTransaction: boolean
 }
 
 export interface IRawMultisigTx {

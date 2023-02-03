@@ -9,6 +9,7 @@ import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import {
   fetchJson,
   postJson,
+  handleUnknownError,
 } from '../popup/utils';
 import type { IActiveMultisigTx, INetwork, IRawMultisigTx } from '../types';
 import { useSdk } from './sdk';
@@ -24,6 +25,7 @@ const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 50;
 
 export function useMultisigTransactions({ store }: UseMultisigTransactionsOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
+
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   async function buildSpendTx(
@@ -50,7 +52,7 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
   async function fetchTransactionByHash(txHash: string): Promise<IRawMultisigTx | null> {
     return fetchJson(`${activeNetwork.value.multisigBackendUrl}/tx/${txHash}`)
       .then((res) => res)
-      .catch(null);
+      .catch(handleUnknownError);
   }
 
   /**
@@ -66,17 +68,21 @@ export function useMultisigTransactions({ store }: UseMultisigTransactionsOption
       contractAddress,
     });
     const txConsensus = (await gaContractRpc.methods.get_consensus_info()).decodedResult;
+    const signers = (await gaContractRpc.methods.get_signers()).decodedResult;
 
     if (txConsensus.tx_hash) {
       const hash = Buffer.from(txConsensus.tx_hash).toString('hex');
       const rawTx = await fetchTransactionByHash(hash);
+
       return {
         totalConfirmations: txConsensus.confirmed_by.length,
         confirmationsRequired: txConsensus.confirmations_required,
         confirmedBy: txConsensus.confirmed_by,
         hasConsensus: txConsensus.hasConsensus,
+        signers,
         hash,
         tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
+        isMultisigTransaction: true,
       };
     }
     return null;

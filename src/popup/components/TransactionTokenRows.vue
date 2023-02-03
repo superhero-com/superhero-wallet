@@ -1,7 +1,10 @@
 <template>
-  <div class="transaction-token-rows">
+  <div
+    v-if="filteredTokens.length"
+    class="transaction-token-rows"
+  >
     <div
-      v-for="token in tokens.filter(({ amount }) => amount != null)"
+      v-for="token in filteredTokens"
       :key="token.symbol"
       :class="[
         'token-row',
@@ -10,7 +13,7 @@
       ]"
     >
       <Tokens
-        :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+        :tokens="token.isPool ? [filteredTokens[0], filteredTokens[1]] : [token]"
         :icon-size="iconSize"
       />
       <span class="amount">
@@ -21,23 +24,48 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import {
+  computed, defineComponent, PropType, ref,
+} from '@vue/composition-api';
 import {
   amountRounded,
   convertToken,
   TX_FUNCTIONS,
 } from '../utils';
-import { ITokenResolved } from '../../types';
+import { useTransactionTokens } from '../../composables';
+import { ITokenResolved, ITransaction } from '../../types';
+
 import Tokens from './Tokens.vue';
 
 export default defineComponent({
   components: { Tokens },
   props: {
-    tokens: { type: Array, required: true },
+    transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
+    extTokens: { type: Array as PropType<ITokenResolved[] | undefined>, default: null },
     iconSize: { type: String, default: 'rg' },
+    direction: { type: String, default: '' },
     error: Boolean,
+    isAllowance: Boolean,
   },
-  setup() {
+  setup(props, { root }) {
+    const localTokens = ref();
+
+    if (!props.extTokens && !!props.transaction) {
+      const { tokens } = useTransactionTokens({
+        store: root.$store,
+        transaction: props.transaction,
+        direction: props.direction,
+        isAllowance: props.isAllowance,
+        showDetailedAllowanceInfo: true,
+      });
+
+      localTokens.value = tokens.value;
+    }
+
+    const filteredTokens = computed(() => (props.extTokens || localTokens.value)?.filter(
+      ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
+    ) || []);
+
     function tokenAmount(token: ITokenResolved) {
       const sign = token.isReceived ? '+' : '-';
       const amount = amountRounded(token.decimals
@@ -46,6 +74,7 @@ export default defineComponent({
       return `${sign} ${amount}`;
     }
     return {
+      filteredTokens,
       tokenAmount,
       TX_FUNCTIONS,
     };

@@ -36,6 +36,9 @@
       "title": "Claim your own .chain name",
       "description": "Get a human-readable name for your account and receive funds with it.",
       "button": "Claim a name"
+    },
+    "pendingMultisigCard": {
+      "title": "Pending multisig transaction"
     }
   },
   "multisig": {
@@ -45,7 +48,8 @@
     "signatureRequested": "Your signature is requested.",
     "transactionSigned": "You have signed the transaction.",
     "transactionReady": "Transaction is ready to be sent",
-    "multisigVault": "Multisig vault"
+    "multisigVault": "Multisig vault",
+    "consensusPending": "Consensus pending"
   },
   "modals": {
     "transaction-failed": {
@@ -359,7 +363,8 @@
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
       "payingForTx": "Paying For Transaction",
-      "pending": "Pending..."
+      "pending": "Pending...",
+      "multisigProposal": "Multisig Proposal"
     },
     "dexType": {
       "provide_liquidity": "provide liquidity",
@@ -1352,5 +1357,6 @@
   "total": "Total",
   "totalMultisig": "Total in multisig vaults",
   "priceNotAvailable": "price: n/a",
-  "search": "Search"
+  "search": "Search",
+  "tx": "Tx"
 }

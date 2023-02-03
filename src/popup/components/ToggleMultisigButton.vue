@@ -11,10 +11,13 @@
       {{ $t('multisig.backToMainAccounts') }}
     </span>
     <template v-else>
-      <PendingIcon
-        v-if="hasPendingMultisigTransaction"
-        class="animated-pending-icon"
-      />
+      <div class="icon-wrapper">
+        <PendingIcon
+          v-if="hasPendingMultisigTransaction"
+          class="animated-pending-icon"
+        />
+        <span class="tx-text">{{ $t('tx') }}</span>
+      </div>
       <span class="text">{{ $t('multisig.showMultisigVaults') }}</span>
     </template>
   </BtnPlain>
@@ -70,18 +73,34 @@ export default defineComponent({
 
   padding: 4px 8px;
   margin-right: var(--screen-padding-x);
+  background: $color-bg-app;
+  border-radius: 12px;
 
   .text {
     @extend %face-sans-14-medium;
 
     color: rgba($color-white, 0.5);
+    line-height: 16px;
     transition: $transition-interactive;
   }
 
-  .animated-pending-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
+  .icon-wrapper {
+    @include mixins.flex(flex-start, center, row);
+
+    margin-right: 6px;
+
+    .tx-text {
+      @extend %face-sans-12-medium;
+
+      color: rgba($color-warning, 0.75);
+      line-height: 16px;
+    }
+
+    .animated-pending-icon {
+      width: 16px;
+      height: 16px;
+      color: $color-warning;
+    }
   }
 
   &:hover,
@@ -89,6 +108,14 @@ export default defineComponent({
     .text {
       color: $color-white;
     }
+  }
+
+  &:hover {
+    background: $color-bg-6;
+  }
+
+  &:active {
+    background: $color-disabled;
   }
 }
 </style>

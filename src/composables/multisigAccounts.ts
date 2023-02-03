@@ -206,6 +206,7 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
 
   function toggleMultisigDashboard() {
     isMultisigDashboard.value = !isMultisigDashboard.value;
+    store.commit('fungibleTokens/resetTokensAndTransactions');
   }
 
   const activeMultisigAccount = computed(() => multisigAccounts.value

@@ -1,15 +1,11 @@
 <template>
   <div class="transaction-info">
-    <div class="title-tag-wrapper">
-      <TransactionTag
-        v-for="label in labels"
-        :key="label"
-        :tx-type="label"
-        class="title-tag"
-        data-cy="label"
-      />
-    </div>
-
+    <TransactionTagList
+      :tx="tx"
+      :is-incomplete="isIncomplete"
+      :is-pending="isPending"
+      :is-claim="isClaim"
+    />
     <div class="parties">
       <Avatar
         v-if="sender.address"
@@ -60,27 +56,25 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
-import type {
-  ITransaction,
-  ITx,
-} from '../../types';
-import { useTransaction } from '../../composables/transaction';
+import type { ITx } from '../../types';
+
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
+
 import Avatar from './Avatar.vue';
-import TransactionTag from './TransactionTag.vue';
 import TransactionInfoDetailsParty from './TransactionInfoDetailsParty.vue';
+import TransactionTagList from './TransactionTagList.vue';
 
 export default defineComponent({
   name: 'TransactionInfo',
   components: {
+    TransactionTagList,
     TransactionInfoDetailsParty,
     TriangleRight,
     ActionIcon,
     AensIcon,
     Avatar,
-    TransactionTag,
   },
   props: {
     title: { type: String, required: true },
@@ -88,16 +82,9 @@ export default defineComponent({
     sender: { type: Object, required: true },
     recipient: { type: Object, required: true },
     tx: { type: Object as PropType<ITx>, default: null },
-  },
-  setup(props, { root }) {
-    const { labels } = useTransaction({
-      store: root.$store,
-      initTransaction: { tx: props.tx } as ITransaction,
-    });
-
-    return {
-      labels,
-    };
+    isIncomplete: Boolean,
+    isPending: Boolean,
+    isClaim: Boolean,
   },
 });
 </script>
@@ -105,7 +92,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
-@use '../../styles/mixins';
 
 .transaction-info {
   .title {
@@ -114,13 +100,6 @@ export default defineComponent({
     color: variables.$color-white;
     text-align: center;
     display: block;
-    margin-bottom: -8px;
-  }
-
-  .title-tag-wrapper {
-    @include mixins.flex(center, center);
-
-    gap: 8px;
     margin-bottom: -8px;
   }
 

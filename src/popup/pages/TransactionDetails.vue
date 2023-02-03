@@ -14,7 +14,9 @@
           :return-type="transaction.tx.returnType"
         />
         <TransactionTokens
-          :tokens="tokens"
+          :transaction="transaction"
+          :direction="direction"
+          :is-allowance="isAllowance"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
           icon-size="md"
@@ -41,8 +43,9 @@
             data-cy="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance) && tokens"
-            :tokens="tokens"
+            v-if="(isPool || isAllowance)"
+            :transaction="transaction"
+            :direction="direction"
             :tx-function="transaction.tx.function"
             :is-allowance="isAllowance"
             :class="{ reverse: isPool }"
@@ -186,7 +189,7 @@ import {
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw } from '../../types';
-import { useTransaction } from '../../composables';
+import { useTransactionTx } from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -228,14 +231,13 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const {
-      setTransaction,
+      setTransactionTx,
+      direction,
       isErrorTransaction,
       isAllowance,
-      tokens,
       isDex,
-    } = useTransaction({
+    } = useTransactionTx({
       store: root.$store,
-      showDetailedAllowanceInfo: true,
     });
 
     const transaction = ref<ITransaction>();
@@ -270,7 +272,9 @@ export default defineComponent({
 
         root.$store.commit('setTransactionByHash', transaction.value);
       }
-      if (transaction.value) setTransaction(transaction.value);
+      if (transaction.value?.tx) {
+        setTransactionTx(transaction.value.tx);
+      }
     });
 
     return {
@@ -282,11 +286,11 @@ export default defineComponent({
       getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
-      tokens,
       isDex,
       isTxAex9,
       tipUrl,
       tipLink,
+      direction,
       explorerPath,
       getPayload,
       splitAddress,
