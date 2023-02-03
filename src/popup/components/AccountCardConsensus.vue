@@ -26,13 +26,16 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { useAccounts } from '../../composables';
+import { IMultisigAccount } from '../../types';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import CheckCircleFillIcon from '../../icons/check-circle-fill.svg?vue-component';
-import { useGetter } from '../../composables/vuex';
-import { IAccount, IMultisigAccount } from '../../types';
 
 export default defineComponent({
-  components: { PendingIcon, CheckCircleFillIcon },
+  components: {
+    PendingIcon,
+    CheckCircleFillIcon,
+  },
   props: {
     currentAccount: {
       type: Object as PropType<IMultisigAccount>,
@@ -40,14 +43,12 @@ export default defineComponent({
     },
   },
   setup(props, { root }) {
-    const accounts = useGetter('accounts');
-
-    const accountsAddressArray = computed(() => accounts.value.map((acc: IAccount) => acc.address));
+    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
     const isSigned = computed(
       () => {
         const mySignerAddressArray = props.currentAccount.signers.filter(
-          (signer) => accountsAddressArray.value.includes(signer),
+          (signer) => isLocalAccountAddress(signer),
         );
         return mySignerAddressArray.every(
           (address) => props.currentAccount.confirmedBy.includes(address),
@@ -64,9 +65,7 @@ export default defineComponent({
       if (isSigned.value) {
         return root.$t('multisig.transactionSigned');
       }
-      if (props.currentAccount.signers.some(
-        (signer) => accountsAddressArray.value.includes(signer),
-      )) {
+      if (props.currentAccount.signers.some((signer) => isLocalAccountAddress(signer))) {
         return root.$t('multisig.signatureRequested');
       }
       return null;
