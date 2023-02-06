@@ -9,9 +9,7 @@
       <PendingIcon class="icon pending" />
       {{ $t('multisig.consensus') }}
       <span class="highlighted">
-        {{ currentAccount.confirmedBy.length }}/{{ currentAccount.confirmationsRequired }}
-        {{ $t('of') }}
-        {{ totalSignatures }}
+        {{ currentAccount.consensusLabel }}
       </span>
     </div>
     <div

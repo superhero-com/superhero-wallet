@@ -2,6 +2,7 @@
   "ok": "OK",
   "ae": "AE",
   "of": "of",
+  "outOf": "out of",
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
   "fellowSuperhero": "Fellow Superhero",
@@ -49,6 +50,16 @@
     "transactionSigned": "You have signed the transaction.",
     "transactionReady": "Transaction is ready to be sent",
     "multisigVault": "Multisig vault",
+    "address": "Multisig vault address",
+    "contractId": "Contract id",
+    "version": "Contract version",
+    "currentNonce": "Current nonce",
+    "authorizedAccount": "Authorized accounts",
+    "authorizedSigners": "Authorized signers",
+    "signers": "Authorized signers:",
+    "approval": "Needed for approval:",
+    "explorerLink": "View smart contract in blockchain explorer",
+    "you": "You",
     "consensusPending": "Consensus pending"
   },
   "modals": {
@@ -1299,17 +1310,6 @@
       "warningConfirm": "Are you sure you would like to proceed?",
       "cancel": "Cancel",
       "reset": "Reset"
-    },
-    "multisigDetails": {
-      "address": "Multisig vault address",
-      "contractId": "Contract id",
-      "version": "Contract version",
-      "currentNonce": "Current nonce",
-      "authorizedAccount": "Authorized accounts",
-      "signers": "Authorized signers:",
-      "consensus": "Consensus",
-      "approval": "Needed for approval:",
-      "explorerLink": "View smart contract in blockchain explorer"
     }
   },
   "validation": {

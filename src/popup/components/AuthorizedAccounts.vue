@@ -1,33 +1,23 @@
 <template>
   <DetailsItem
-    :label="$t('pages.multisigDetails.authorizedAccount')"
+    :label="$t('multisig.authorizedSigners')"
+    class="authorized-accounts"
   >
     <template #value>
-      <div class="authorized-accounts">
-        <div class="account-list">
-          <div
-            v-for="address in addressList"
-            :key="address"
-            class="account-row"
+      <div class="account-list">
+        <div
+          v-for="address in addressList"
+          :key="address"
+          class="account-row"
+        >
+          <AccountItem :address="address" />
+          <DialogBox
+            v-if="address === activeMultisigAccount.signerId"
+            class="dialog"
           >
-            <AccountItem :address="address" />
-          </div>
+            {{ $t('multisig.you') }}
+          </DialogBox>
         </div>
-
-        <DialogBox>
-          <div>
-            {{ $t('pages.multisigDetails.signers') }}
-            <strong class="count-value">
-              {{ addressList.length }}
-            </strong>
-          </div>
-          <div>
-            {{ $t('pages.multisigDetails.approval') }}
-            <strong class="count-value">
-              {{ requiredConfirmations }}
-            </strong>
-          </div>
-        </DialogBox>
       </div>
     </template>
   </DetailsItem>
@@ -38,20 +28,29 @@ import { defineComponent, PropType } from '@vue/composition-api';
 import DetailsItem from './DetailsItem.vue';
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
+import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   name: 'AuthorizedAccounts',
   components: {
+    DialogBox,
     DetailsItem,
     AccountItem,
-    DialogBox,
   },
   props: {
     addressList: {
       type: Array as PropType<string[]>,
       default: () => [],
     },
-    requiredConfirmations: { type: Number, required: true },
+  },
+  setup(props, { root }) {
+    const {
+      activeMultisigAccount,
+    } = useMultisigAccounts({ store: root.$store });
+
+    return {
+      activeMultisigAccount,
+    };
   },
 });
 </script>
@@ -61,10 +60,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .authorized-accounts {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
   .account-row {
     display: flex;
     align-items: center;
@@ -89,6 +84,12 @@ export default defineComponent({
     @extend %face-sans-14-bold;
 
     line-height: 19px;
+  }
+
+  .dialog {
+    padding: 4px;
+    border-radius: 4px;
+    margin-left: 9px;
   }
 }
 </style>
