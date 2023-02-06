@@ -22,6 +22,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/variables' as *;
+
 .button-plain {
   padding: 0;
   border: none;
@@ -31,6 +33,7 @@ export default {
   color: inherit;
   cursor: pointer;
   user-select: none;
+  transition: $transition-interactive;
 
   &.extend {
     width: 100%;

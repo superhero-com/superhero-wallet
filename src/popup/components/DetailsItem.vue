@@ -1,8 +1,16 @@
 <template>
   <div
     class="details-item"
+    :class="{
+      expandable,
+      expanded,
+    }"
   >
-    <div class="label">
+    <Component
+      :is="expandable ? 'BtnPlain' : 'div'"
+      class="label"
+      @click="toggleExpanded()"
+    >
       {{ label }}
       <span
         v-if="$slots.label"
@@ -10,38 +18,72 @@
       >
         <slot name="label" />
       </span>
-    </div>
-    <div
-      class="value"
-      :class="{ small, highlight }"
-    >
-      {{ value }}
-      <span
-        v-if="secondary"
-        class="secondary"
+
+      <ChevronDownIcon
+        v-if="expandable"
+        class="expand-arrow"
+      />
+    </Component>
+
+    <Transition name="fade-transition">
+      <div
+        v-if="expanded"
+        class="value"
+        :class="{ small, highlight }"
       >
-        {{ secondary }}
-      </span>
-      <slot name="value" />
-    </div>
+        <slot>
+          {{ value }}
+          <span
+            v-if="secondary"
+            class="secondary"
+          >
+            {{ secondary }}
+          </span>
+          <slot name="value" />
+        </slot>
+      </div>
+    </Transition>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent, ref } from '@vue/composition-api';
+import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
+import BtnPlain from './buttons/BtnPlain.vue';
+
+export default defineComponent({
   name: 'DetailsItem',
+  components: {
+    ChevronDownIcon,
+    BtnPlain,
+  },
   props: {
     label: { type: String, default: '' },
     value: { type: [String, Number, Array], default: '' },
     secondary: { type: String, default: '' },
+    expandable: Boolean,
     small: Boolean,
     highlight: Boolean,
   },
-};
+  setup(props) {
+    const expanded = ref(!props.expandable);
+
+    function toggleExpanded() {
+      if (props.expandable) {
+        expanded.value = !expanded.value;
+      }
+    }
+
+    return {
+      expanded,
+      toggleExpanded,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 @use '../../styles/typography';
 
 .details-item {
@@ -54,10 +96,19 @@ export default {
     align-items: center;
     margin-bottom: 4px;
     line-height: 16px;
-    color: rgba(variables.$color-white, 0.5);
+    color: rgba($color-white, 0.5);
 
     .indent {
       margin-left: 8px;
+    }
+
+    .expand-arrow {
+      width: 14px;
+      height: 14px;
+      color: $color-grey-dark;
+      opacity: 0.7;
+      margin-left: 8px;
+      transition: inherit;
     }
   }
 
@@ -65,11 +116,11 @@ export default {
     @extend %face-sans-15-regular;
 
     letter-spacing: 0.05em;
-    color: variables.$color-white;
+    color: $color-white;
     margin-bottom: 8px;
 
     .secondary {
-      color: variables.$color-grey-light;
+      color: $color-grey-light;
       margin-left: 4px;
       white-space: nowrap;
     }
@@ -79,7 +130,35 @@ export default {
     }
 
     &.highlight {
-      color: variables.$color-danger;
+      color: $color-danger;
+    }
+  }
+
+  &.expandable {
+    > .label {
+      &:hover {
+        color: rgba($color-white, 0.8);
+
+        .expand-arrow {
+          opacity: 1;
+        }
+      }
+    }
+
+    > .value {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: $color-border;
+      border: 1px solid $color-border-hover;
+      border-radius: 6px;
+    }
+
+    &.expanded {
+      > .label {
+        .expand-arrow {
+          transform: scaleY(-1);
+        }
+      }
     }
   }
 }

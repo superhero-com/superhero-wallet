@@ -52,7 +52,7 @@
         </div>
       </div>
       <BtnPlain @click="expand = !expand">
-        <Arrow :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
+        <ChevronDownIcon :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
       </BtnPlain>
     </div>
     <span v-show="!expand && !nameEntry.pending && !!addressOrFirstPointer">
@@ -152,7 +152,7 @@ import BtnHelp from './buttons/BtnHelp.vue';
 import DetailsItem from './DetailsItem.vue';
 
 import Pending from '../../icons/animated-pending.svg?vue-component';
-import Arrow from '../../icons/arrow.svg?vue-component';
+import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import Save from '../../icons/account-card/btn-save.svg?vue-component';
 import Paste from '../../icons/paste.svg?vue-component';
 
@@ -165,7 +165,7 @@ export default defineComponent({
     BtnPlain,
     BtnHelp,
     DetailsItem,
-    Arrow,
+    ChevronDownIcon,
     Save,
     Paste,
   },

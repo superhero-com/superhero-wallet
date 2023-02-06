@@ -62,7 +62,7 @@
         data-cy="accordion-item"
         @click="toggleAccordionItem(index)"
       >
-        <Arrow
+        <ChevronDownIcon
           :class="['icon', { rotated: item.open }]"
           data-cy="accordion-item-open"
         />
@@ -937,7 +937,7 @@
 </template>
 
 <script>
-import Arrow from '../../icons/arrow.svg?vue-component';
+import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import {
   APP_LINK_WEB,
   APP_LINK_CHROME,
@@ -948,7 +948,7 @@ import {
 } from '../utils/constants';
 
 export default {
-  components: { Arrow },
+  components: { ChevronDownIcon },
   data() {
     return {
       details: Object.entries(this.$t('pages.termsOfService'))
