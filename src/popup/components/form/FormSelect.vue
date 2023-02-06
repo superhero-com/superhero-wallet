@@ -1,18 +1,35 @@
 <template>
   <BtnPlain
-    class="form-select"
-    :class="{ unstyled }"
+    v-if="unstyled"
+    class="form-select unstyled"
     @click="openOptionsModal"
   >
     {{ currentText }}
     <ChevronDownIcon class="arrow-icon" />
   </BtnPlain>
+  <InputField
+    v-else
+    v-bind="$attrs"
+    class="form-select"
+    @click="openOptionsModal"
+  >
+    <div class="input-field-text-wrapper">
+      {{ currentText }}
+    </div>
+
+    <template #after>
+      <ChevronDownIcon class="arrow-icon" />
+    </template>
+  </InputField>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
+
 import BtnPlain from '../buttons/BtnPlain.vue';
+import InputField from '../InputField.vue';
+
 import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
 
 export interface FormSelectOption {
@@ -26,6 +43,7 @@ export default defineComponent({
   components: {
     BtnPlain,
     ChevronDownIcon,
+    InputField,
   },
   model: {
     event: 'select',
@@ -77,25 +95,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../../styles/variables' as *;
+@use '../../../styles/typography';
 
 .form-select {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  .arrow-icon {
-    flex-shrink: 0;
-    width: 8px;
-    opacity: 0.75;
-  }
-
-  &:not(.unstyled) {
-    padding: 8px 12px;
-    background-color: rgba($color-white, 0.08);
-    border-radius: $border-radius-interactive;
-  }
-
   &.unstyled {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font: inherit;
     transition: 200ms;
 
@@ -103,6 +109,17 @@ export default defineComponent({
     &:active {
       color: $color-success-hover;
     }
+  }
+
+  .arrow-icon {
+    flex-shrink: 0;
+    width: 8px !important;
+    height: 5px !important;
+    opacity: 0.75;
+  }
+
+  .input-field-text-wrapper {
+    flex-grow: 1;
   }
 }
 </style>

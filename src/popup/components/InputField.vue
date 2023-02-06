@@ -15,6 +15,7 @@
       <label
         :for="inputId"
         class="label-text"
+        @click="$emit('click', $event)"
       >
         <slot name="label">{{ label }}</slot>
       </label>
@@ -40,6 +41,7 @@
     <label
       data-cy="input-wrapper"
       class="input-wrapper"
+      @click="$emit('click', $event)"
     >
       <div class="main-inner">
         <slot
@@ -53,12 +55,12 @@
           <input
             :id="inputId"
             v-bind="$attrs"
-            :type="type"
             class="input"
             autocomplete="off"
             step="any"
+            data-cy="input"
+            :type="type"
             :value="value"
-            :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
             :maxlength="textLimit"
             :inputmode="inputMode"
