@@ -39,62 +39,47 @@
         v-if="isSwap"
         :label="$t(`pages.signTransaction.${swapDirection}`)"
       >
-        <template #value>
-          <TokenAmount
-            :amount="tokenAmount"
-            :symbol="tokenSymbol"
-            :aex9="isTxAex9(transaction)"
-            :hide-fiat="!swapTokenAmountData.isAe"
-            data-cy="total"
-          />
-        </template>
+        <TokenAmount
+          :amount="tokenAmount"
+          :symbol="tokenSymbol"
+          :aex9="isTxAex9(transaction)"
+          :hide-fiat="!swapTokenAmountData.isAe"
+          data-cy="total"
+        />
       </DetailsItem>
-      <DetailsItem :label="$t('pages.signTransaction.fee')">
-        <template #value>
-          <TokenAmount
-            :amount="getTxFee(transaction)"
-            data-cy="fee"
-          />
-        </template>
+
+      <DetailsItem :label="$t('transaction.fee')">
+        <TokenAmount
+          :amount="getTxFee(transaction)"
+          data-cy="fee"
+        />
       </DetailsItem>
+
       <DetailsItem
         v-if="!isDex"
         :label="$t('pages.signTransaction.total')"
       >
-        <template #value>
-          <TokenAmount
-            :amount="getTxAmountTotal(transaction)"
-            :symbol="getTxSymbol(transaction)"
-            :aex9="isTxAex9(transaction)"
-            data-cy="total"
-          />
-        </template>
+        <TokenAmount
+          :amount="getTxAmountTotal(transaction)"
+          :symbol="getTxSymbol(transaction)"
+          :aex9="isTxAex9(transaction)"
+          data-cy="total"
+        />
       </DetailsItem>
     </div>
 
-    <BtnPlain
-      class="show-advanced"
-      :class="{ active: showAdvanced }"
-      @click="showAdvanced = !showAdvanced"
+    <DetailsItem
+      expandable
+      :label="$t('transaction.advancedDetails')"
     >
-      {{ $t('pages.signTransaction.advanced') }}
-      <Arrow class="icon" />
-    </BtnPlain>
-
-    <transition name="fade-transition">
-      <div
-        v-if="showAdvanced && transaction"
-        class="advanced"
-      >
-        <DetailsItem
-          v-for="key in filteredTxFields"
-          :key="key"
-          :label="$t('modals.confirm-transaction-sign')[key]"
-          :value="transaction[key]"
-          :class="{ 'hash-field': isHash(key) }"
-        />
-      </div>
-    </transition>
+      <DetailsItem
+        v-for="key in filteredTxFields"
+        :key="key"
+        :label="$t('modals.confirm-transaction-sign')[key]"
+        :value="transaction[key]"
+        :class="{ 'hash-field': isHash(key) }"
+      />
+    </DetailsItem>
 
     <template #footer>
       <BtnMain
@@ -146,13 +131,11 @@ import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import BtnPlain from '../buttons/BtnPlain.vue';
 import TransactionOverview from '../TransactionOverview.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
-import Arrow from '../../../icons/arrow.svg?vue-component';
 
 type ITxKey = keyof ITx;
 
@@ -175,11 +158,9 @@ export default defineComponent({
   components: {
     Modal,
     BtnMain,
-    BtnPlain,
     TransactionOverview,
     DetailsItem,
     TokenAmount,
-    Arrow,
     TransactionDetailsPoolTokenRow,
     AnimatedSpinner,
   },
@@ -394,63 +375,6 @@ export default defineComponent({
 
     .details-item {
       margin-right: 24px;
-    }
-  }
-
-  .show-advanced {
-    @extend %face-sans-15-medium;
-
-    display: flex;
-    align-items: center;
-    padding-top: 8px;
-    margin-bottom: 8px;
-    width: 100%;
-    color: variables.$color-grey-dark;
-
-    .icon {
-      width: 16px;
-      height: 16px;
-      color: variables.$color-grey-dark;
-      opacity: 0.7;
-      margin-left: 8px;
-    }
-
-    &:hover {
-      color: variables.$color-grey-light;
-
-      .icon {
-        opacity: 1;
-      }
-    }
-
-    &.active .icon {
-      transform: rotateX(180deg);
-    }
-  }
-
-  .advanced {
-    padding: 16px 16px 8px;
-    background: variables.$color-border;
-    border: 1px solid variables.$color-border-hover;
-    border-radius: 6px;
-
-    .details-item::v-deep {
-      .value {
-        color: variables.$color-grey-light;
-        line-height: 24px;
-        letter-spacing: 0.05em;
-        margin-bottom: 12px;
-
-        @extend %face-sans-14-regular;
-      }
-
-      &.hash-field {
-        .value {
-          @extend %face-sans-12-regular;
-
-          line-height: 20px;
-        }
-      }
     }
   }
 
