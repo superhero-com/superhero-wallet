@@ -11,6 +11,12 @@
           class="account-row"
         >
           <AccountItem :address="address" />
+          <DialogBox
+            v-if="address === activeMultisigAccount.signerId"
+            class="dialog"
+          >
+            You
+          </DialogBox>
         </div>
       </div>
     </template>
@@ -21,10 +27,13 @@
 import { defineComponent, PropType } from '@vue/composition-api';
 import DetailsItem from './DetailsItem.vue';
 import AccountItem from './AccountItem.vue';
+import DialogBox from './DialogBox.vue';
+import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   name: 'AuthorizedAccounts',
   components: {
+    DialogBox,
     DetailsItem,
     AccountItem,
   },
@@ -33,6 +42,13 @@ export default defineComponent({
       type: Array as PropType<string[]>,
       default: () => [],
     },
+  },
+  setup(props, { root }) {
+    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+
+    return {
+      activeMultisigAccount,
+    };
   },
 });
 </script>
@@ -66,6 +82,12 @@ export default defineComponent({
     @extend %face-sans-14-bold;
 
     line-height: 19px;
+  }
+
+  .dialog {
+    padding: 4px;
+    border-radius: 4px;
+    margin-left: 9px;
   }
 }
 </style>

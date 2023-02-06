@@ -146,8 +146,9 @@ export default defineComponent({
   }
 
   .row {
-    display: flex;
-    gap: 24px;
+    display: grid;
+    grid-gap: 24px;
+    grid-template-columns: 208px auto;
   }
 
   .details-item {
