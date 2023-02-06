@@ -31,7 +31,10 @@
         <div v-else>
           {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
         </div>
-        <AddressShortening :address="account.address" />
+        <AddressTruncated
+          show-explorer-link
+          :address="account.address"
+        />
       </div>
     </div>
 
@@ -71,18 +74,18 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import ModalHeader from './ModalHeader.vue';
 import TokenAmount from './TokenAmount.vue';
 import FormTextarea from './form/FormTextarea.vue';
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
-import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import AddressShortening from './AddressShortening.vue';
+import AddressTruncated from './AddressTruncated.vue';
 
 export default {
   name: 'TransferReviewTip',
   components: {
-    AddressShortening,
+    AddressTruncated,
     ModalHeader,
     TokenAmount,
     FormTextarea,

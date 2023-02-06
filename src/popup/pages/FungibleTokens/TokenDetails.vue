@@ -23,7 +23,10 @@
       :label="$t('pages.token-details.contract')"
     >
       <template #text>
-        <AddressShortening :address="tokenData.contractId" />
+        <AddressTruncated
+          show-explorer-link
+          :address="tokenData.contractId"
+        />
       </template>
     </DetailsRow>
     <DetailsRow
@@ -167,7 +170,7 @@ import {
 import { useGetter } from '../../../composables/vuex';
 
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
-import AddressShortening from '../../components/AddressShortening.vue';
+import AddressTruncated from '../../components/AddressTruncated.vue';
 import Tokens from '../../components/Tokens.vue';
 import ExternalLink from '../../../icons/external-link.svg?vue-component';
 
@@ -175,7 +178,7 @@ export default defineComponent({
   name: 'TokenDetails',
   components: {
     DetailsRow,
-    AddressShortening,
+    AddressTruncated,
     Tokens,
     ExternalLink,
   },
