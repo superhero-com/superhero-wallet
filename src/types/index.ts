@@ -130,6 +130,7 @@ export interface IMultisigAccount extends IMultisigAccountBase {
   hasConsensus: boolean,
   address: string,
   gaAccountId?: string,
+  consensusLabel?: string
 }
 
 export interface INetwork {

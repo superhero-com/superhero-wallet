@@ -21,6 +21,7 @@ import type {
   IMultisigAccount,
 } from '../types';
 import { useSdk } from './sdk';
+import { i18n } from '../store/plugins/languages';
 
 interface UseMultisigAccountsOptions {
   /**
@@ -177,12 +178,17 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
           consensus.expiration_height = Number(consensus.expiration_height);
           consensus.confirmations_required = Number(consensus.confirmations_required);
 
+          const consensusLabel = (
+            `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('outOf')} ${signers?.length}`
+          );
+
           return {
             ...camelcaseKeysDeep(consensus),
             ...otherMultisig,
             nonce: Number(nonce),
             signers,
             version,
+            consensusLabel,
             contractId,
             balance: (gaAccountId && (await sdk.balance(gaAccountId))) || 0,
             address: gaAccountId,

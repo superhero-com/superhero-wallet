@@ -1,7 +1,7 @@
 <template>
   <div class="multisig-details">
     <DetailsItem
-      :label="$t('pages.multisigDetails.address')"
+      :label="$t('multisig.address')"
     >
       <template #value>
         <div class="address-row">
@@ -19,7 +19,7 @@
     </DetailsItem>
 
     <DetailsItem
-      :label="$t('pages.multisigDetails.contractId')"
+      :label="$t('multisig.contractId')"
     >
       <template #value>
         <div class="address-row">
@@ -36,36 +36,37 @@
       </template>
     </DetailsItem>
 
-    <div class="row">
-      <DetailsItem
-        class="details-item"
-        :label="$t('pages.multisigDetails.version')"
-        :value="version"
-      />
-      <DetailsItem
-        class="details-item"
-        :label="$t('pages.multisigDetails.currentNonce')"
-        :value="nonce"
-      />
-    </div>
-
-    <DetailsItem
-      class="details-item"
-      :label="$t('pages.multisigDetails.consensus')"
-      :value="`${confirmedBy.length}/${confirmationsRequired} ${$t('of')} ${signers.length}`"
-    />
-
-    <AuthorizedAccounts
-      :address-list="signers"
-      :required-confirmations="confirmationsRequired"
-    />
     <LinkButton
       class="explorer-link"
       :to="getExplorerPath(contractId)"
     >
-      {{ $t('pages.multisigDetails.explorerLink') }}
+      {{ $t('multisig.explorerLink') }}
       <ExternalLinkIcon class="external-icon" />
     </LinkButton>
+
+    <div class="row">
+      <DetailsItem
+        class="details-item"
+        :label="$t('multisig.version')"
+        :value="version"
+      />
+      <DetailsItem
+        class="details-item"
+        :label="$t('multisig.currentNonce')"
+        :value="nonce"
+      />
+    </div>
+
+    <div class="row">
+      <AuthorizedAccounts
+        :address-list="signers"
+      />
+      <DetailsItem
+        class="details-item"
+        :label="$t('multisig.consensus')"
+        :value="consensusLabel"
+      />
+    </div>
   </div>
 </template>
 
@@ -98,19 +99,22 @@ export default defineComponent({
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const {
-      multisigAccountId, contractId, version, confirmedBy,
-      nonce, signers, confirmationsRequired,
+      multisigAccountId,
+      contractId,
+      version,
+      nonce,
+      signers,
+      consensusLabel,
     } = activeMultisigAccount.value || {} as IMultisigAccount;
 
     return {
-      confirmedBy,
       multisigAccountId,
       contractId,
       getExplorerPath,
       signers,
       version,
       nonce,
-      confirmationsRequired,
+      consensusLabel,
     };
   },
 });
@@ -135,8 +139,9 @@ export default defineComponent({
   }
 
   .row {
-    display: flex;
-    gap: 24px;
+    display: grid;
+    grid-gap: 24px;
+    grid-template-columns: 208px auto;
   }
 
   .details-item {
@@ -145,7 +150,7 @@ export default defineComponent({
 
   .explorer-link {
     color: rgba(variables.$color-white, 0.75);
-    margin-bottom: 26px;
+    margin-block: 4px;
 
     .external-icon {
       opacity: 1;
