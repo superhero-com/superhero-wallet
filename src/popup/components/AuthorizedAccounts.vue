@@ -25,10 +25,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@vue/composition-api';
+import { useMultisigAccounts } from '../../composables';
 import DetailsItem from './DetailsItem.vue';
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
-import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   name: 'AuthorizedAccounts',
