@@ -46,7 +46,7 @@
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
-        not_same_as: account.address,
+        not_same_as: isMultisig? multisigVaultAddress : account.address,
         name_registered_address_or_url: true,
         token_to_an_address: { isToken: !isAe },
       }"
@@ -81,8 +81,8 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
-        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_ae: fee.toString(),
+        ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
+        ...isMultisig ? {} : { enough_ae: fee.toString() },
         min_tip_amount: isTipUrl,
       }"
       name="amount"
