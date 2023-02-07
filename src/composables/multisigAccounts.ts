@@ -70,7 +70,7 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
     multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
   }
 
-  const multisigProgress = ref<IMultisigCreationStep>(MULTISIG_CREATION_STEPS.preparing);
+  const multisigProgress = ref<IMultisigCreationStep>(null);
 
   /**
    * @param {number} noOfConfirmations no of minimum confirmation needed to process a transaction
@@ -81,21 +81,21 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
     signersAddresses: [string, string, ...string[]],
   ): Promise<IMultisigAccountBase> {
     if (noOfConfirmations > signersAddresses.length) throw Error('Number of confirmations exceed amount of signers');
-    multisigProgress.value = MULTISIG_CREATION_STEPS.preparing;
 
-    const sdk = await getSdk();
-    const drySdk = await getDrySdk();
+    const [sdk, drySdk] = await Promise.all([getSdk(), getDrySdk()]);
 
-    // create a temporary account
+    // Create a temporary account
     const gaAccount = Crypto.generateKeyPair();
 
     const multisigContractInstance = await drySdk.getContractInstance({
       aci: SimpleGAMultiSigAci,
       bytecode: SimpleGAMultiSigBytecode,
     });
-    multisigProgress.value = MULTISIG_CREATION_STEPS.compiled;
+
+    multisigProgress.value = MULTISIG_CREATION_STEPS.prepared;
 
     const contractArgs = [noOfConfirmations, signersAddresses];
+
     // Build Attach transaction
     const attachTX = await drySdk.gaAttachTx({
       ownerId: gaAccount.publicKey,
@@ -107,10 +107,12 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
         innerTx: true,
       },
     });
+
     const { rawTx } = await drySdk.send(attachTX.tx, {
       innerTx: true,
       onAccount: gaAccount,
     });
+
     // Submit transaction using the default account
     await sdk.payForTransaction(rawTx, {
       waitMined: true,

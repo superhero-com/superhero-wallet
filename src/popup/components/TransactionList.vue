@@ -27,7 +27,7 @@
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
     </div>
-    <router-link
+    <RouterLink
       v-if="maxLength && transactions.loaded.length > maxLength"
       to="/transactions"
       class="view-more"
@@ -36,7 +36,7 @@
       <span class="text">
         {{ $t('pages.recentTransactions.viewMore') }}
       </span>
-    </router-link>
+    </RouterLink>
   </div>
 </template>
 

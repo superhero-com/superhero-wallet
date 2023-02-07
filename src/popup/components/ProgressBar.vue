@@ -12,7 +12,7 @@ import { defineComponent } from '@vue/composition-api';
 
 export default defineComponent({
   props: {
-    progress: { type: Number, required: true },
+    progress: { type: Number, default: 0 },
   },
 });
 </script>
@@ -27,8 +27,9 @@ export default defineComponent({
   background-color: rgba($color-white, 0.1);
 
   .progress {
-    height: 12px;
+    height: 100%;
     background-color: $color-success-dark;
+    transition: width 100ms;
   }
 }
 </style>

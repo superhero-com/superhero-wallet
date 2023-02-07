@@ -443,7 +443,7 @@ export interface IActiveAuction {
   name: string
 }
 
-export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS;
+export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS | null;
 
 export interface ICreateMultisigAccount {
   address: string
