@@ -11,6 +11,8 @@ import {
   handleUnknownError,
   LOCAL_STORAGE_PREFIX,
   MULTISIG_CREATION_STEPS,
+  convertToken,
+  MAGNITUDE,
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import type {
@@ -182,7 +184,9 @@ export function useMultisigAccounts({ store }: UseMultisigAccountsOptions) {
             signers,
             version,
             contractId,
-            balance: (gaAccountId && (await sdk.balance(gaAccountId))) || 0,
+            balance: convertToken(
+              (gaAccountId && (await sdk.balance(gaAccountId))) || 0, -MAGNITUDE,
+            ),
             address: gaAccountId,
             multisigAccountId: gaAccountId,
           };

@@ -15,7 +15,6 @@ import { computed, defineComponent } from '@vue/composition-api';
 import { IAccount } from '../../types';
 import { useBalances, useMultisigAccounts } from '../../composables';
 import { useGetter } from '../../composables/vuex';
-import { convertToken, MAGNITUDE } from '../utils';
 import AeBalance from './AeBalance.vue';
 
 export default defineComponent({
@@ -36,7 +35,7 @@ export default defineComponent({
 
     const balance = computed(
       () => (isMultisigDashboard.value
-        ? convertToken(currentAccount.value.balance, -MAGNITUDE)
+        ? currentAccount.value.balance
         : balances.value[currentAccount.value.address])?.toNumber() || 0,
     );
 
