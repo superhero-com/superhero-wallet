@@ -56,7 +56,7 @@
       show-message-help
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :message="message"
+      :message="addressMessage"
       @help="showRecipientHelp()"
     >
       <template #label-after>
@@ -286,7 +286,7 @@ export default defineComponent({
       && !checkAensName(formModel.value.address)
     ));
 
-    const message = computed((): IInputMessage => {
+    const addressMessage = computed((): IInputMessage => {
       if (isTipUrl.value) {
         switch (urlStatus.value) {
           case 'verified': return { status: 'success', text: ' ', hideMessage: true };
@@ -294,7 +294,7 @@ export default defineComponent({
           case 'not-verified': return { status: 'warning', text: ' ', hideMessage: true };
           case 'blacklisted': return { status: 'error', text: ' ', hideMessage: true };
           default:
-            throw new Error(`Unknown url status: ${message.value.status}`);
+            throw new Error(`Unknown url status: ${urlStatus.value}`);
         }
       }
       return getMessageByFieldName('address');
@@ -526,7 +526,7 @@ export default defineComponent({
       accountsAllowedToProposeTxSelectOptions,
       urlStatus,
       isTipUrl,
-      message,
+      addressMessage,
       hasError,
       multisigVaultAddress,
       multisigVaultOwnedByManyAccounts,
