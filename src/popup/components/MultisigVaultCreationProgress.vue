@@ -3,30 +3,33 @@
     <h2 class="title">
       {{ $t('modals.creatingMultisigAccount.title') }}
     </h2>
-    <ProgressBar :progress="creatingVaultProgress" />
+    <ProgressBar :progress="progressPercentage" />
     <div class="steps-list">
       <div
-        v-for="step in steps"
-        :key="step.id"
-        class="step-item"
+        v-for="(step, index) in steps"
+        :key="index"
         :class="{
-          active: currentProgressStepId >= step.id,
-          completed: currentProgressStepId > step.id,
+          completed: isStepCompleted(index) || isStepCurrent(index),
         }"
+        class="step-item"
       >
+        <PendingIcon
+          v-if="isStepCurrent(index)"
+          class="step-pending-icon"
+        />
         <CheckSuccessCircleIcon
-          v-if="currentProgressStepId > step.id || !!multisigAccount"
+          v-else-if="isStepCompleted(index)"
           class="step-success-icon"
         />
         <div
           v-else
-          class="step-item-id"
+          class="step-number"
         >
-          {{ step.id }}
+          {{ index + 1 }}
         </div>
 
         <div class="step-item-name">
-          {{ getStepText(step) }}
+          {{ step.text }}<span v-if="isStepCurrent(index)">&hellip;</span>
         </div>
       </div>
     </div>
@@ -37,7 +40,7 @@
       <div class="message">
         {{ $t('modals.creatingMultisigAccount.vaultCreatedMessage') }}
       </div>
-      <transition
+      <Transition
         name="fade-transition"
         mode="out-in"
       >
@@ -47,7 +50,7 @@
           show-address
           :column-count="9"
         />
-      </transition>
+      </Transition>
     </div>
   </div>
 </template>
@@ -58,6 +61,7 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
 import {
   MULTISIG_CREATION_STEPS,
 } from '../utils';
@@ -67,6 +71,7 @@ import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckSuccessCircleIcon from '../../icons/check-success-circle.svg?vue-component';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
   name: 'MultisigVaultCreationProgress',
@@ -74,76 +79,49 @@ export default defineComponent({
     ProgressBar,
     AvatarWithChainName,
     CheckSuccessCircleIcon,
+    PendingIcon,
   },
   props: {
     multisigAccount: { type: Object as PropType<IMultisigAccountBase>, default: null },
-    progress: { type: String as PropType<IMultisigCreationStep>, required: true },
+    progress: { type: String as PropType<IMultisigCreationStep>, default: null },
   },
   setup(props, { root }) {
-    const steps = [
+    const steps: { key: IMultisigCreationStep, text: TranslateResult }[] = [
       {
-        id: 1,
-        key: MULTISIG_CREATION_STEPS.preparing,
-        text: {
-          pending: root.$t('modals.creatingMultisigAccount.step1.pending'),
-          inProgress: root.$t('modals.creatingMultisigAccount.step1.inProgress'),
-          done: root.$t('modals.creatingMultisigAccount.step1.done'),
-        },
+        key: MULTISIG_CREATION_STEPS.prepared,
+        text: root.$t('modals.creatingMultisigAccount.preparingMultisigVault'),
       },
       {
-        id: 2,
-        key: MULTISIG_CREATION_STEPS.compiled,
-        text: {
-          pending: root.$t('modals.creatingMultisigAccount.step2.pending'),
-          inProgress: root.$t('modals.creatingMultisigAccount.step2.inProgress'),
-          done: root.$t('modals.creatingMultisigAccount.step2.done'),
-        },
-      },
-      {
-        id: 3,
         key: MULTISIG_CREATION_STEPS.deployed,
-        text: {
-          pending: root.$t('modals.creatingMultisigAccount.step3.pending'),
-          inProgress: root.$t('modals.creatingMultisigAccount.step3.inProgress'),
-          done: root.$t('modals.creatingMultisigAccount.step3.done'),
-        },
+        text: root.$t('modals.creatingMultisigAccount.deployingSmartContract'),
       },
       {
-        id: 4,
         key: MULTISIG_CREATION_STEPS.created,
-        text: {
-          pending: root.$t('modals.creatingMultisigAccount.step4.pending'),
-          inProgress: root.$t('modals.creatingMultisigAccount.step4.inProgress'),
-          done: root.$t('modals.creatingMultisigAccount.step4.done'),
-        },
+        text: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
       },
     ];
 
-    const currentProgressStepId = computed<number>(
-      () => steps.find((step) => step.key === props.progress)?.id ?? 1,
+    const currentProgressStepIndex = computed(
+      () => steps.findIndex(({ key }) => key === props.progress),
     );
-    const stepProgress = 100 / steps.length;
-    const creatingVaultProgress = computed<number>(() => (
-      stepProgress * currentProgressStepId.value
-    ));
+    const progressPercentage = computed(
+      (): number => (100 / steps.length) * (currentProgressStepIndex.value + 1),
+    );
 
-    function getStepText(step: any) {
-      if (currentProgressStepId.value === step) {
-        return step.text.inProgress;
-      }
-      if (currentProgressStepId.value > step || !!props.multisigAccount) {
-        return step.text.done;
-      }
+    function isStepCurrent(index: number) {
+      return index === currentProgressStepIndex.value + 1;
+    }
 
-      return step.text.pending;
+    function isStepCompleted(index: number) {
+      return !!props.multisigAccount || index <= currentProgressStepIndex.value;
     }
 
     return {
-      steps,
-      getStepText,
-      currentProgressStepId,
-      creatingVaultProgress,
       PlusCircle,
+      steps,
+      progressPercentage,
+      isStepCurrent,
+      isStepCompleted,
     };
   },
 });
@@ -155,6 +133,8 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .multisig-vault-creation-progress {
+  $step-icon-size: 24px;
+
   padding-top: env(safe-area-inset-top);
 
   .title {
@@ -174,33 +154,35 @@ export default defineComponent({
 
       display: inline-flex;
       align-items: center;
+      gap: 12px;
       padding: 8px 0;
       opacity: 0.5;
 
-      &-id {
+      &.completed {
+        opacity: 1;
+      }
+
+      .step-number,
+      .step-pending-icon,
+      .step-success-icon {
+        width: $step-icon-size;
+        height: $step-icon-size;
+      }
+
+      .step-number {
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
         padding: 2px;
-        width: 24px;
-        height: 24px;
         border: 2px solid rgba(variables.$color-white, 0.15);
-        border-radius: 28px;
-        margin-right: 12px;
-      }
-
-      &.active {
-        opacity: 1;
+        border-radius: 100%;
       }
 
       .step-success-icon {
-        width: 24px;
-        height: 24px;
         color: variables.$color-success-dark;
         background-color: rgba(variables.$color-success-dark, 0.15);
-        margin-right: 12px;
-        border-radius: 12px;
+        border-radius: 100%;
       }
     }
   }

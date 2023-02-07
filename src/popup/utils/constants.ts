@@ -507,8 +507,7 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
 } as const;
 
 export const MULTISIG_CREATION_STEPS = {
-  preparing: 'preparing',
-  compiled: 'compiled',
+  prepared: 'prepared',
   deployed: 'deployed',
   created: 'created',
 } as const;

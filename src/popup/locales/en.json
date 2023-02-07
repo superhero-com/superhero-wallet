@@ -113,26 +113,9 @@
       "title": "Creating vault progress",
       "btnText": "Go to multisig vault",
       "vaultCreatedMessage": "Your new multisig vault is ready!",
-      "step1": {
-        "pending": "Prepare multisig vault",
-        "inProgress": "Preparing multisig vault...",
-        "done": "Multisig vault has been prepared"
-      },
-      "step2": {
-        "pending": "Compile smart contract",
-        "inProgress": "Compiling smart contract...",
-        "done": "Smart contract has been compiled"
-      },
-      "step3": {
-        "pending": "Deploy smart contract",
-        "inProgress": "Deploying smart contract...",
-        "done": "Smart contract has been deployed"
-      },
-      "step4": {
-        "pending": "Create multisig vault account",
-        "inProgress": "Creating multisig vault account...",
-        "done": "Multisig vault account has been created"
-      }
+      "preparingMultisigVault": "Preparing multisig vault",
+      "deployingSmartContract": "Deploying smart contract",
+      "creatingMultisigVault": "Creating multisig vault account"
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",

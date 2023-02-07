@@ -21,12 +21,12 @@
     >
       <Header v-if="showHeader" />
 
-      <transition name="page-transition">
+      <Transition name="page-transition">
         <RouterView
           :class="{ 'show-header': showHeader }"
           class="main"
         />
-      </transition>
+      </Transition>
 
       <NodeConnectionStatus
         v-if="!modals.length"
