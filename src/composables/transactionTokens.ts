@@ -1,7 +1,7 @@
 import { computed } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
-import { Store } from 'vuex';
-import {
+import type {
+  IDefaultComposableOptions,
   ITokenList,
   ITokenResolved,
   ITransaction,
@@ -15,11 +15,7 @@ import {
 } from '../popup/utils';
 import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
 
-interface UseTransactionTokensOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
+interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
   direction: string
   isAllowance: boolean

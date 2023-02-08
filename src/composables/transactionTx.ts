@@ -1,5 +1,4 @@
 import { computed, ref } from '@vue/composition-api';
-import type { Store } from 'vuex';
 import type {
   IDexContracts,
   IAccount,
@@ -8,6 +7,7 @@ import type {
   TransactionType,
   TxFunctionRaw,
   ITx,
+  IDefaultComposableOptions,
 } from '../types';
 import { i18n } from '../store/plugins/languages';
 import {
@@ -17,11 +17,7 @@ import {
   TX_FUNCTIONS,
 } from '../popup/utils';
 
-interface UseTransactionOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
+interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
 }
 

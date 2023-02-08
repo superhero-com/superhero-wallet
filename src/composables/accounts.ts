@@ -1,15 +1,7 @@
 import { computed } from '@vue/composition-api';
-import { Store } from 'vuex';
-import { IAccount } from '../types';
+import type { IAccount, IDefaultComposableOptions } from '../types';
 
-interface UseMultisigAccountsOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
-}
-
-export function useAccounts({ store }: UseMultisigAccountsOptions) {
+export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in th future the state of the accounts should be stored in this composable
   const accounts = computed((): IAccount[] => store.getters.accounts);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));

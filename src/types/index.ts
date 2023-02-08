@@ -7,6 +7,7 @@
 import { RawLocation } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
+import { Store } from 'vuex';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
@@ -466,4 +467,11 @@ export interface IRawMultisigTx {
   tx: string
   createdAt: Date
   updatedAt: Date
+}
+
+export interface IDefaultComposableOptions {
+  /**
+   * TODO: Temporary solution to avoid dependency circle
+   */
+  store: Store<any>
 }

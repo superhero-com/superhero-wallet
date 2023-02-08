@@ -1,5 +1,4 @@
 import { computed } from '@vue/composition-api';
-import type { Store } from 'vuex';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
@@ -11,19 +10,18 @@ import {
   postJson,
   handleUnknownError,
 } from '../popup/utils';
-import type { IActiveMultisigTx, INetwork, IRawMultisigTx } from '../types';
 import { useSdk } from './sdk';
 
-interface UseMultisigTransactionsOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
-}
+import type {
+  IActiveMultisigTx,
+  IDefaultComposableOptions,
+  INetwork,
+  IRawMultisigTx,
+} from '../types';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 50;
 
-export function useMultisigTransactions({ store }: UseMultisigTransactionsOptions) {
+export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
