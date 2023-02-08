@@ -11,7 +11,7 @@ import { Store } from 'vuex';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
-  MULTISIG_CREATION_STEPS,
+  MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
 } from '../popup/utils';
 
@@ -95,6 +95,11 @@ export interface IAsset {
   decimals: number,
 }
 
+export type IAccountKind = 'basic'; // TODO establish other possible values
+
+/**
+ * Account stored on the application store.
+ */
 export interface IAccount {
   address: string
   idx?: number
@@ -103,6 +108,17 @@ export interface IAccount {
   secretKey: Uint8Array
   showed: boolean
   type: string
+}
+
+/**
+ * Account fetched from the node with the use of `sdk.api.getAccountByPubkey`
+ */
+export interface IAccountFetched {
+  balance: string
+  id: string // ak_* hash
+  kind: IAccountKind
+  nonce: number
+  payable: boolean
 }
 
 export interface IAccountLabeled extends Partial<IAccount> {
@@ -132,6 +148,12 @@ export interface IMultisigAccount extends IMultisigAccountBase {
   address: string,
   gaAccountId?: string,
   consensusLabel?: string
+}
+
+export interface IMultisigAccountCreationTx {
+  fee: number,
+  rawTx: string,
+  accountId: string,
 }
 
 export interface INetwork {
@@ -328,7 +350,7 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
-  api: Record<string, (a?: string) => any>
+  api: Record<string, (a?: any) => any>
   compilerApi: Record<string, (...args: any[]) => Promise<any>>
   Ae: Record<string, any>
   pool: Map<string, any>
@@ -344,14 +366,22 @@ export interface ISdk {
   getContractInstance: (o: any) => Promise<any>
   getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
   getNetworkId: () => string
-  payForTransaction: (rawTx: any, arg1: { waitMined: boolean; modal: boolean; }) => Promise<any>
+  payForTransaction: (
+    rawTx: string,
+    options: {
+      waitMined: boolean;
+      modal: boolean;
+      innerTx?: boolean
+    }
+  ) => Promise<{ hash: string, rawTx: string }>
+  poll: (txHash: string) => any
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
     tx: any,
-    arg1: {
+    options?: {
       innerTx?: boolean,
-      onAccount: any,
+      onAccount: string,
       authData?: any,
     }
   ) => Promise<{ rawTx: any; }>
@@ -446,7 +476,7 @@ export interface IActiveAuction {
   name: string
 }
 
-export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS | null;
+export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | null;
 
 export interface ICreateMultisigAccount {
   address: string
@@ -476,4 +506,9 @@ export interface IDefaultComposableOptions {
    * TODO: Temporary solution to avoid dependency circle
    */
   store: Store<any>
+}
+
+export interface IKeyPair {
+  publicKey: string
+  secretKey: string
 }

@@ -118,15 +118,18 @@
     <MultisigVaultCreateReview
       v-else-if="currentStep === STEPS.review"
       :signers="signers"
+      :phase="multisigAccountCreationPhase"
       :confirmations-required="confirmationsRequired"
+      :fee="multisigAccountCreationFeeAe"
+      :call-data="multisigAccountCreationEncodedCallData"
     />
 
     <!--
       Step 3: Creation progress summary
     -->
     <MultisigVaultCreateProgress
-      v-else-if="currentStep === STEPS.progress"
-      :progress="multisigProgress"
+      v-else-if="currentStep === STEPS.processing"
+      :phase="multisigAccountCreationPhase"
       :multisig-account="multisigAccount"
     />
 
@@ -140,18 +143,18 @@
       <template v-else-if="currentStep === STEPS.review">
         <BtnMain
           variant="muted"
-          text="Edit"
+          :text="$t('common.edit')"
           @click="openFormStep"
         />
         <BtnMain
-          text="Confirm"
+          :text="$t('modals.createMultisigAccount.btnText')"
           @click="createMultisigAccount"
         />
       </template>
       <BtnMain
         v-else-if="currentStep === STEPS.processing"
         :text="$t('modals.creatingMultisigAccount.btnText')"
-        :disabled="true"
+        :disabled="!multisigAccount"
         @click="navigateToMultisigVault"
       />
     </template>
@@ -175,11 +178,10 @@ import {
 } from '../../utils';
 import {
   ICreateMultisigAccount,
-  IMultisigAccountBase,
   ObjectValues,
 } from '../../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../../router/routeNames';
-import { useMultisigAccounts } from '../../../composables';
+import { useMultisigAccountCreate } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -218,12 +220,16 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const {
-      deployMultisigAccount,
-      multisigProgress,
-    } = useMultisigAccounts({ store: root.$store });
+      multisigAccount,
+      multisigAccountCreationPhase,
+      multisigAccountCreationEncodedCallData,
+      multisigAccountCreationFeeAe,
+      multisigAccountPrepare,
+      multisigAccountCreate,
+    } = useMultisigAccountCreate({ store: root.$store });
 
     const currentStep = ref<Step>(STEPS.form);
-    const multisigAccount = ref<IMultisigAccountBase | null>(null);
+
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
     const minNumOfSigners = computed(
@@ -276,7 +282,7 @@ export default defineComponent({
 
       const { valid, isName } = validateHash(scanResult);
 
-      // check if the address is valid and it's not a name
+      // Check if the address is valid and it's not a name
       if (!(valid && !isName)) {
         root.$store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
@@ -308,18 +314,18 @@ export default defineComponent({
       currentStep.value = STEPS.form;
     }
 
-    function openReviewStep() {
+    async function openReviewStep() {
       currentStep.value = STEPS.review;
+      await multisigAccountPrepare(
+        confirmationsRequired.value,
+        signers.value.map((signer) => signer.address),
+      );
     }
 
     async function createMultisigAccount() {
       currentStep.value = STEPS.processing;
       try {
-        multisigAccount.value = await deployMultisigAccount(
-          confirmationsRequired.value,
-          signers.value.map((signer) => signer.address) as [string, string, ...string[]],
-        );
-        signers.value = [];
+        await multisigAccountCreate();
       } catch (error) {
         handleUnknownError(error);
         await root.$store.dispatch('modals/open', {
@@ -348,6 +354,10 @@ export default defineComponent({
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       STEPS,
+      multisigAccount,
+      multisigAccountCreationPhase,
+      multisigAccountCreationEncodedCallData,
+      multisigAccountCreationFeeAe,
       currentStep,
       confirmationsRequired,
       signers,
@@ -361,8 +371,6 @@ export default defineComponent({
       addNewSigner,
       removeSigner,
       getSignerLabel,
-      multisigProgress,
-      multisigAccount,
       navigateToMultisigVault,
       checkIfSignerAddressDuplicated,
     };

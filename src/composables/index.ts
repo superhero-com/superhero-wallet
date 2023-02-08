@@ -4,6 +4,7 @@ export * from './copy';
 export * from './deepLinkApi';
 export * from './maxAmount';
 export * from './multisigAccounts';
+export * from './multisigAccountCreate';
 export * from './multisigTransactions';
 export * from './pendingMultisigTransaction';
 export * from './sdk';

@@ -508,7 +508,7 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
   subAccount: 2,
 } as const;
 
-export const MULTISIG_CREATION_STEPS = {
+export const MULTISIG_CREATION_PHASES = {
   prepared: 'prepared',
   deployed: 'deployed',
   created: 'created',
