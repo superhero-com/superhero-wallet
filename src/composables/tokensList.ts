@@ -1,14 +1,9 @@
 import { computed, ref, Ref } from '@vue/composition-api';
-import type { Store } from 'vuex';
-import type { IToken, ITokenList } from '../types';
+import type { IToken, ITokenList, IDefaultComposableOptions } from '../types';
 import { AETERNITY_CONTRACT_ID } from '../popup/utils';
 import { useBalances } from './balances';
 
-export interface UseTokensListOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
+export interface UseTokensListOptions extends IDefaultComposableOptions {
   /**
    * Restrict the list to tokens owned by the user
    */

@@ -1,15 +1,7 @@
 import { computed } from '@vue/composition-api';
-import type { Store } from 'vuex';
 import { Universal, Node } from '@aeternity/aepp-sdk';
-import { ISdk } from '../types';
 import { watchUntilTruthy } from '../popup/utils';
-
-interface UseSdkOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
-}
+import type { IDefaultComposableOptions, ISdk } from '../types';
 
 let drySdk: ISdk;
 
@@ -17,7 +9,7 @@ let drySdk: ISdk;
  * Composable that will replace the Vuex SDK plugin.
  * For now, it works as an abstraction layer.
  */
-export function useSdk({ store }: UseSdkOptions) {
+export function useSdk({ store }: IDefaultComposableOptions) {
   const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);
   const isSdkReady = computed(() => !!sdk.value);
 

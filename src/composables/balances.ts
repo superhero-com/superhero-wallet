@@ -1,7 +1,6 @@
 import { computed, ref } from '@vue/composition-api';
-import type { Store } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { IAccount } from '../types';
+import type { IAccount, IDefaultComposableOptions } from '../types';
 import {
   LOCAL_STORAGE_PREFIX,
   aettosToAe,
@@ -13,13 +12,6 @@ import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 type Balances = Record<string, BigNumber>;
 type BalancesRaw = Record<string, string>;
-
-interface UseBalancesOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
-}
 
 const POLLING_INTERVAL = 3000;
 const LOCAL_STORAGE_BALANCES_KEY = `${LOCAL_STORAGE_PREFIX}_balances`;
@@ -50,7 +42,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
  * This composable detects if any app components requires balances data and polls the API
  * to live update the values. If no components are using it the polling stops.
  */
-export function useBalances({ store }: UseBalancesOptions) {
+export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
 
   const account = computed<IAccount>(() => store.getters.account);

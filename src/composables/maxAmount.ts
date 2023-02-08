@@ -9,8 +9,12 @@ import {
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import type { Store } from 'vuex';
-import type { IAccount, IAsset, IToken } from '../types';
+import type {
+  IAccount,
+  IAsset,
+  IDefaultComposableOptions,
+  IToken,
+} from '../types';
 import {
   MAGNITUDE,
   STUB_CONTRACT_ADDRESS,
@@ -30,11 +34,7 @@ export interface IFormModel {
   address?: string;
   payload?: string;
 }
-export interface MaxAmountOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>
+export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
 }
 
