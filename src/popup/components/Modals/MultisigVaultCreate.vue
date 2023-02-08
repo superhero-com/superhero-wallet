@@ -120,7 +120,7 @@
       :signers="signers"
       :phase="multisigAccountCreationPhase"
       :confirmations-required="confirmationsRequired"
-      :fee="multisigAccountCreationFeeAe"
+      :fee="multisigAccountCreationFee"
       :call-data="multisigAccountCreationEncodedCallData"
     />
 
@@ -223,7 +223,7 @@ export default defineComponent({
       multisigAccount,
       multisigAccountCreationPhase,
       multisigAccountCreationEncodedCallData,
-      multisigAccountCreationFeeAe,
+      multisigAccountCreationFee,
       multisigAccountPrepare,
       multisigAccountCreate,
     } = useMultisigAccountCreate({ store: root.$store });
@@ -345,8 +345,10 @@ export default defineComponent({
 
     onMounted(() => {
       if (!signers.value.length) {
-        addNewSigner();
-        addNewSigner();
+        // eslint-disable-next-line no-plusplus
+        for (let n = 0; n < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS; n++) {
+          addNewSigner();
+        }
       }
     });
 
@@ -357,7 +359,7 @@ export default defineComponent({
       multisigAccount,
       multisigAccountCreationPhase,
       multisigAccountCreationEncodedCallData,
-      multisigAccountCreationFeeAe,
+      multisigAccountCreationFee,
       currentStep,
       confirmationsRequired,
       signers,
