@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { AmountFormatter, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import type {
@@ -20,10 +20,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const multisigAccount = ref<IMultisigAccountBase | null>(null);
   const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
   const multisigAccountCreationEncodedCallData = ref<string>();
-  const multisigAccountCreationFee = ref<BigNumber>(new BigNumber(0));
-  const multisigAccountCreationFeeAe = computed(
-    (): number => Number(AmountFormatter.toAe(multisigAccountCreationFee.value.toFixed())),
-  );
+  const multisigAccountCreationFee = ref<number>(0);
 
   async function createMultisigContractInstance() {
     const drySdk = await getDrySdk();
@@ -104,8 +101,8 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const { tx } = TxBuilder.unpackTx(rawTx);
     const outerFee = tx.encodedTx.tx.fee;
     const innerFee = tx.encodedTx.tx.tx.tx.encodedTx.tx.fee;
-
-    multisigAccountCreationFee.value = new BigNumber(outerFee).plus(innerFee);
+    const creationFeeUnformatted = new BigNumber(outerFee).plus(innerFee).toFixed();
+    multisigAccountCreationFee.value = Number(AmountFormatter.toAe(creationFeeUnformatted));
   }
 
   /**
@@ -139,7 +136,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     multisigAccountCreationPhase,
     multisigAccountCreationEncodedCallData,
     multisigAccountCreationFee,
-    multisigAccountCreationFeeAe,
     multisigAccountPrepare,
     multisigAccountCreate,
   };

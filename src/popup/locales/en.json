@@ -6,6 +6,7 @@
   "common": {
     "you": "You",
     "of": "of",
+    "edit": "Edit",
     "nonce": "Nonce",
     "callData": "Call data",
     "contractId": "Contract ID"
@@ -62,7 +63,7 @@
     "consensusPending": "Consensus pending",
     "multisigVaultCreationFailed": "Multisig creation failed",
     "needForApproval": "Needed for approval",
-    "creatingAccount": "Creating account (pays for the transaction)"
+    "creatingAccount": "Account creator (pays for the transaction)"
   },
   "modals": {
     "transaction-failed": {
@@ -116,7 +117,7 @@
       "selectAccount": "Select an account",
       "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br><br>As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
       "consensusRequiredDesc": "Consensus required for tx confirmation:",
-      "consensusRequiredContent": "out of {0} signatures",
+      "consensusRequiredContent": "of {0} signatures",
       "consensusRequiredHelpTitle": "Consensus required",
       "consensusRequiredHelpMsg": "As the creator of this multisig vault you can determine the authorized signers and set the consensus needed for a transaction confirmation (how many signatures are required to confirm each transaction).",
       "createMultisigVault": "Create Vault",

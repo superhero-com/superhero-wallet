@@ -4,7 +4,6 @@ import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError } from '@aeternity/aepp-sdk';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
-
 import {
   LOCAL_STORAGE_PREFIX,
   MAGNITUDE,

@@ -504,18 +504,18 @@ export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | nul
 export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
 
 export interface ICreateMultisigAccount {
-  address: string
+  address: string;
 }
 
 export interface IActiveMultisigTx {
-  totalConfirmations: number
-  confirmationsRequired: number
-  confirmedBy: string[]
-  hasConsensus: boolean
-  signers: string[],
-  hash?: string
-  tx?: ITx
-  isMultisigTransaction: boolean
+  totalConfirmations: number;
+  confirmationsRequired: number;
+  confirmedBy: string[];
+  hasConsensus: boolean;
+  signers: string[];
+  hash?: string;
+  tx?: ITx;
+  isMultisigTransaction: boolean;
 }
 
 export interface IRawMultisigTx {
