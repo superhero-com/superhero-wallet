@@ -39,7 +39,12 @@
     </template>
     <template v-else>
       <ModalHeader :title="$t('modals.send.sendTitle')" />
-      <AccountRow />
+      <div class="account-row">
+        <AccountItem
+          :address="account.address"
+          :name="account.name"
+        />
+      </div>
     </template>
 
     <InputField
@@ -194,18 +199,17 @@ import {
 } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
-import AccountRow from './AccountRow.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
+import BtnText from './buttons/BtnText.vue';
+import BtnIcon from './buttons/BtnIcon.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import ModalHeader from './ModalHeader.vue';
 import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
-import BtnText from './buttons/BtnText.vue';
-import BtnIcon from './buttons/BtnIcon.vue';
 import AccountItem from './AccountItem.vue';
 import FormSelect, { FormSelectOption } from './form/FormSelect.vue';
 
@@ -225,7 +229,6 @@ export default defineComponent({
     BtnPlain,
     PayloadDetails,
     ModalHeader,
-    AccountRow,
     AccountItem,
     InputField,
     InputAmount,
@@ -574,6 +577,11 @@ export default defineComponent({
         color: variables.$color-white;
       }
     }
+  }
+
+  .account-row {
+    display: flex;
+    justify-content: center;
   }
 
   .account-selector {

@@ -139,6 +139,7 @@ export default defineComponent({
         text: root.$t('pages.token-details.receive'),
         onClick: () => openModal({
           name: MODAL_TRANSFER_RECEIVE,
+          isMultisig: isMultisigDashboard.value,
         }),
         icon: ArrowReceiveIcon,
       },
