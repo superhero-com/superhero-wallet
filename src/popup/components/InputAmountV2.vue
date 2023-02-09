@@ -27,9 +27,8 @@
       <div
         v-else
         class="ae-symbol"
-      >
-        {{ AETERNITY_SYMBOL }}
-      </div>
+        v-text="AETERNITY_SYMBOL"
+      />
     </template>
 
     <template #under="{ focused }">
@@ -163,6 +162,7 @@ export default defineComponent({
   .ae-symbol {
     @extend %face-sans-15-medium;
 
+    white-space: nowrap;
     color: variables.$color-primary;
   }
 }

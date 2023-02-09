@@ -294,6 +294,9 @@
       "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
       "shareTextWithAmount": "{amount} AE has been requested. Send to æternity address: {address} Or send with Superhero Wallet: {walletLink}"
     },
+    "receiveMultisig": {
+      "title": "Receive funds to multisig vault"
+    },
     "send": {
       "sendTitle": "Send funds",
       "reviewTitle": "Review transaction",

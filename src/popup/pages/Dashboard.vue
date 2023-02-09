@@ -138,6 +138,7 @@ export default defineComponent({
     function openTransferReceiveModal() {
       root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
+        isMultisig: isMultisigDashboard.value,
       });
     }
     function openTransferSendModal() {

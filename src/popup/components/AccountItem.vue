@@ -81,6 +81,7 @@ export default defineComponent({
   }
 
   .external-link-icon {
+    margin-top: -2px; // Compensate the icon position
     width: 22px;
     height: 22px;
   }
