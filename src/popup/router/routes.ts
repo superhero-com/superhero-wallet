@@ -12,6 +12,7 @@ import {
   ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+  ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -59,6 +60,7 @@ import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
+import MultisigProposalDetails from '../pages/MultisigProposalDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
@@ -377,6 +379,16 @@ export const routes: WalletAppRouteConfig[] = [
     props: true,
     meta: {
       title: 'tx-details',
+      showHeaderNavigation: true,
+    },
+  },
+  {
+    path: '/account-details/multisig-proposals',
+    name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS,
+    component: MultisigProposalDetails,
+    props: true,
+    meta: {
+      title: 'multisigProposalDetails',
       showHeaderNavigation: true,
     },
   },

@@ -107,7 +107,7 @@ export default defineComponent({
 
     &:hover,
     &:active {
-      color: $color-success-hover;
+      color: $color-white;
     }
   }
 

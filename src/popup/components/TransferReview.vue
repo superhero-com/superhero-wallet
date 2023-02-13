@@ -132,7 +132,9 @@ import {
   checkAensName,
   convertToken,
   escapeSpecialChars,
+  handleUnknownError,
 } from '../utils';
+import { ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS } from '../router/routeNames';
 import { IAccount, IPendingTransaction, ISdk } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
@@ -313,8 +315,12 @@ export default defineComponent({
     }
 
     async function proposeMultisigTransaction() {
+      loading.value = true;
       try {
-        const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+        const {
+          activeMultisigAccount,
+          updateMultisigAccounts,
+        } = useMultisigAccounts({ store: root.$store });
         const {
           buildSpendTx, proposeTx, postSpendTx,
         } = useMultisigTransactions({ store: root.$store });
@@ -328,13 +334,14 @@ export default defineComponent({
           const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
 
           await postSpendTx(txToPropose, txHash);
+          await updateMultisigAccounts();
+          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS });
         }
-      } catch (e) {
-        // TODO: fix that when dry run calls will not fire in case of the used nonce
-        // eslint-disable-next-line no-console
-        console.log(e);
+      } catch (error) {
+        handleUnknownError(error);
       } finally {
         emit('success');
+        loading.value = true;
       }
     }
 

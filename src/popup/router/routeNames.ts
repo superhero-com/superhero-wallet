@@ -3,6 +3,7 @@ export const ROUTE_ACCOUNT = 'account';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
 export const ROUTE_ACCOUNT_DETAILS_TRANSACTIONS = 'account-details-transactions';
 export const ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS = 'account-details-multisig-details';
+export const ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS = 'account-details-multisig-proposal-details';
 export const ROUTE_ACCOUNT_DETAILS_NAMES = 'account-details-names';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS = 'account-details-names-auctions';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM = 'account-details-names-claim';

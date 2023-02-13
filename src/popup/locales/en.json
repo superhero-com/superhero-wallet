@@ -6,6 +6,9 @@
   "mainAccount": "Main account",
   "subaccountName": "Sub-account #{idx}",
   "fellowSuperhero": "Fellow Superhero",
+  "common": {
+    "you": "You"
+  },
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
@@ -380,7 +383,8 @@
       "contractCreate": "Contract create",
       "contract": "Contract",
       "accountAddress": "Account address",
-      "superheroDex": "Superhero DEX"
+      "superheroDex": "Superhero DEX",
+      "smartContract": "Smart contract"
     },
     "returnType": {
       "abort": "Failed",
@@ -439,7 +443,8 @@
       "seed-phrase": "Seed phrase",
       "network-add": "Add custom network",
       "network-edit": "Edit network",
-      "not-found": "Feature not found"
+      "not-found": "Feature not found",
+      "multisigProposalDetails": "Multisig Tx proposal details"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -1158,6 +1163,49 @@
       "withdrawn": "Withdrawn",
       "rates": "Rates",
       "swapRoute": "Swap route"
+    },
+    "proposalDetails": {
+      "receivingAddress": "Receiving address",
+      "proposedBy": "Proposed by",
+      "revoke": "Revoke transaction proposal",
+      "refuse": "Disapprove",
+      "sign": "Approve",
+      "send": "Send",
+      "expiresAt": "Expires at height",
+      "infoBox": {
+        "signatures": "signatures",
+        "signature": "signature",
+        "expired": "Transaction proposal has been expired!!",
+        "pending": "Pending consensus: {0} more {1} is required to approve the transaction proposal.",
+        "approved": "Transaction proposal has been approved by the required number of authorized signers. Transaction can be sent by any of the authorized signers.",
+        "revoked": "Transaction proposal has been disapproved by {0} out of {1} required authorized signers. ",
+        "proposingAccountRevoked": "Transaction proposal has been revoked by the proposing account.",
+        "completed": "Transaction has been successfully sent."
+      },
+      "signDialog": {
+        "title": "Approve transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Approve",
+        "msg": "Approve transaction proposal?",
+        "cannotDoActionWithSelectedAccount": "Cannot approve the transaction proposal with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already signed this transaction proposal!"
+      },
+      "revokeDialog": {
+        "title": "Revoke transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Revoke proposal",
+        "msg": "Are you sure you would like to revoke the transaction proposal?",
+        "cannotDoActionWithSelectedAccount": "Cannot revoke transaction with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already revoked this transaction!"
+      },
+      "refuseDialog": {
+        "title": "Disapprove transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Disapprove",
+        "msg": "Are you sure you would like to disapprove the transaction?",
+        "cannotDoActionWithSelectedAccount": "Cannot disapprove this transaction proposal with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already disapproved this transaction proposal!"
+      }
     },
     "transactions": {
       "backToAccount": "Back to account",

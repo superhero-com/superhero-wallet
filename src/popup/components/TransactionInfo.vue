@@ -77,8 +77,6 @@ export default defineComponent({
     Avatar,
   },
   props: {
-    title: { type: String, required: true },
-    txFunction: { type: String, default: null },
     sender: { type: Object, required: true },
     recipient: { type: Object, required: true },
     tx: { type: Object as PropType<ITx>, default: null },

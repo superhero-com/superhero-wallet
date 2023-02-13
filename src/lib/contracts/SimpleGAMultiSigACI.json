@@ -17,7 +17,18 @@
                  ]
               },
               {
+                 "TxRefused":[
+                    "hash",
+                    "address"
+                 ]
+              },
+              {
                  "TxConsensusReached":[
+                    "hash"
+                 ]
+              },
+              {
+                 "TxConsensusLost":[
                     "hash"
                  ]
               },
@@ -100,6 +111,22 @@
                  }
               ],
               "name":"confirm",
+              "payable":false,
+              "returns":{
+                 "tuple":[
+
+                 ]
+              },
+              "stateful":true
+           },
+           {
+              "arguments":[
+                 {
+                    "name":"tx_hash",
+                    "type":"hash"
+                 }
+              ],
+              "name":"refuse",
               "payable":false,
               "returns":{
                  "tuple":[
@@ -287,6 +314,14 @@
                              "address"
                           ]
                        }
+                    },
+                    {
+                       "name":"refused_by",
+                       "type":{
+                          "Set.set":[
+                             "address"
+                          ]
+                       }
                     }
                  ]
               },
@@ -319,6 +354,14 @@
                        }
                     },
                     {
+                       "name":"refused_by",
+                       "type":{
+                          "list":[
+                             "address"
+                          ]
+                       }
+                    },
+                    {
                        "name":"has_consensus",
                        "type":"bool"
                     },
@@ -329,6 +372,14 @@
                     {
                        "name":"expired",
                        "type":"bool"
+                    },
+                    {
+                       "name":"proposed_by",
+                       "type":{
+                          "option":[
+                             "address"
+                          ]
+                       }
                     }
                  ]
               },
@@ -427,5 +478,5 @@
         }
      }
   ],
-  "interface":"\n\n\n\nnamespace Set =\n  record set('a) = {to_map : map('a, unit)}\n\n\nmain contract SimpleGAMultiSig =\n  record state = {signers : Set.set(address),confirmations_required : int,current_tx : option(SimpleGAMultiSig.transaction),fee_protection : option(SimpleGAMultiSig.fee_protection),fee_protection_enabled : bool,nonce : int,version : string}\n  datatype event = TxProposed(hash, address, int) | TxConfirmed(hash, address) | TxConsensusReached(hash) | TxRevoked(hash, address) | TxAuthorized(hash) | FeeProtectionDisabled(address)\n  record transaction = {tx_hash : hash,expires_at : int,proposed_by : address,confirmed_by : Set.set(address)}\n  record consensus_info = {tx_hash : option(hash),confirmations_required : int,confirmed_by : list(address),has_consensus : bool,expiration_height : int,expired : bool}\n  record fee_protection = {max_fee : int,max_gasprice : int}\n  stateful entrypoint init : (int, Set.set(address)) => SimpleGAMultiSig.state\n  stateful entrypoint authorize : (int) => bool\n  stateful entrypoint propose : (hash, Chain.ttl) => unit\n  stateful entrypoint confirm : (hash) => unit\n  stateful entrypoint revoke : (hash) => unit\n  stateful entrypoint update_fee_protection : (SimpleGAMultiSig.fee_protection) => unit\n  stateful entrypoint disable_fee_protection : () => unit\n  entrypoint get_version : () => string\n  entrypoint is_fee_protection_enabled : () => bool\n  entrypoint get_fee_protection : () => option(SimpleGAMultiSig.fee_protection)\n  entrypoint get_nonce : () => int\n  entrypoint get_signers : () => list(address)\n  entrypoint get_consensus_info : () => SimpleGAMultiSig.consensus_info\n"
+  "interface":"\n\n\n\nnamespace Set =\n  record set('a) = {to_map : map('a, unit)}\n\n\nmain contract SimpleGAMultiSig =\n  record state = {signers : Set.set(address),confirmations_required : int,current_tx : option(SimpleGAMultiSig.transaction),fee_protection : option(SimpleGAMultiSig.fee_protection),fee_protection_enabled : bool,nonce : int,version : string}\n  datatype event = TxProposed(hash, address, int) | TxConfirmed(hash, address) | TxRefused(hash, address) | TxConsensusReached(hash) | TxConsensusLost(hash) | TxRevoked(hash, address) | TxAuthorized(hash) | FeeProtectionDisabled(address)\n  record transaction = {tx_hash : hash,expires_at : int,proposed_by : address,confirmed_by : Set.set(address),refused_by : Set.set(address)}\n  record consensus_info = {tx_hash : option(hash),confirmations_required : int,confirmed_by : list(address),refused_by : list(address),has_consensus : bool,expiration_height : int,expired : bool,proposed_by : option(address)}\n  record fee_protection = {max_fee : int,max_gasprice : int}\n  stateful entrypoint init : (int, Set.set(address)) => SimpleGAMultiSig.state\n  stateful entrypoint authorize : (int) => bool\n  stateful entrypoint propose : (hash, Chain.ttl) => unit\n  stateful entrypoint confirm : (hash) => unit\n  stateful entrypoint refuse : (hash) => unit\n  stateful entrypoint revoke : (hash) => unit\n  stateful entrypoint update_fee_protection : (SimpleGAMultiSig.fee_protection) => unit\n  stateful entrypoint disable_fee_protection : () => unit\n  entrypoint get_version : () => string\n  entrypoint is_fee_protection_enabled : () => bool\n  entrypoint get_fee_protection : () => option(SimpleGAMultiSig.fee_protection)\n  entrypoint get_nonce : () => int\n  entrypoint get_signers : () => list(address)\n  entrypoint get_consensus_info : () => SimpleGAMultiSig.consensus_info\n"
 }

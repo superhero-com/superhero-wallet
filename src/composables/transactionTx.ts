@@ -12,6 +12,7 @@ import type {
 import { i18n } from '../store/plugins/languages';
 import {
   FUNCTION_TYPE_DEX,
+  FUNCTION_TYPE_MULTISIG,
   RETURN_TYPE_OK,
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
@@ -50,6 +51,14 @@ export function useTransactionTx({
     !!innerTx.value
     && FUNCTION_TYPE_DEX.allowance.includes(innerTx.value.function as TxFunctionRaw)
     && !!availableTokens.value[innerTx.value.contractId]
+  ));
+
+  const isMultisig = computed((): boolean => (
+    !!innerTx.value
+    && (
+      Object.values(FUNCTION_TYPE_MULTISIG).includes(innerTx.value.function as string)
+      || !!innerTx.value.payerId
+    )
   ));
 
   const isErrorTransaction = computed(
@@ -126,6 +135,7 @@ export function useTransactionTx({
     isAllowance,
     isErrorTransaction,
     isDex,
+    isMultisig,
     direction,
     getOwnershipAccount,
     setTransactionTx,

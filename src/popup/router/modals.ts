@@ -23,6 +23,7 @@ import {
   MODAL_RECIPIENT_HELPER,
   MODAL_PAYLOAD_FORM,
   MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
 } from '../utils/constants';
 
 import Default from '../components/Modals/Default.vue';
@@ -45,6 +46,7 @@ import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -77,4 +79,8 @@ export default () => {
   registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
   registerModal({ name: MODAL_PAYLOAD_FORM, component: PayloadForm });
   registerModal({ name: MODAL_MULTISIG_VAULT_CREATE, component: MultisigVaultCreate });
+  registerModal({
+    name: MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+    component: MultisigProposalConfirmActions,
+  });
 };
