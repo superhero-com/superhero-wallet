@@ -2,7 +2,7 @@ import { computed } from '@vue/composition-api';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
-// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+// aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 
 import {
@@ -11,12 +11,13 @@ import {
   handleUnknownError,
 } from '../popup/utils';
 import { useSdk } from './sdk';
-
 import type {
   IActiveMultisigTx,
   IDefaultComposableOptions,
+  IMultisigFunctionTypes,
   INetwork,
   IRawMultisigTx,
+  ITransaction,
 } from '../types';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 50;
@@ -110,7 +111,20 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     return Buffer.from(spendTxHash).toString('hex');
   }
 
-  async function confirmTx(contractId: string, spendTxHash: string) {
+  /**
+   * Used to call contract methods (confirm|refuse|revoke)
+   * (revoke): can only be used by the account who proposed this transaction
+   * (refuse|confirm): any signer can use this action
+   * @param action IMultisigFunctionTypes
+   * @param contractId string
+   * @param spendTxHash string
+   * @returns result
+   */
+  async function callContractMethod(
+    action: IMultisigFunctionTypes,
+    contractId: string,
+    spendTxHash: string,
+  ) {
     const sdk = await getSdk();
     const expirationHeight = (
     (await sdk.api.getTopHeader())?.height + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT
@@ -120,26 +134,16 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
       contractAddress: contractId,
     });
 
-    await gaContractRpc.methods.confirm.send(spendTxHash, {
+    const result = await gaContractRpc.methods[action].send(spendTxHash, {
       FixedTTL: [expirationHeight],
     });
+
+    return result;
   }
 
-  async function revokeTx(spendTxHash: string, contractId: string) {
-    const sdk = await getSdk();
-    const gaContractRpc = await sdk.getContractInstance({
-      aci: SimpleGAMultiSigAci,
-      contractAddress: contractId,
-    });
-
-    await gaContractRpc.methods.revoke.send(
-      Uint8Array.from(Buffer.from(spendTxHash, 'hex')),
-    );
-  }
-
-  async function sendTx(accountId: string, spendTx: string, nonce: number) {
+  async function sendTx(accountId: string, spendTx: string, nonce: number): Promise<ITransaction> {
     const drySdk = await getDrySdk();
-    await drySdk.send(spendTx, {
+    return drySdk.send(spendTx, {
       // TODO: use aci after update to a newer sdk
       authData: { source: multisigContract, args: [nonce] },
       onAccount: MemoryAccount({ gaId: accountId }),
@@ -150,10 +154,9 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     buildSpendTx,
     postSpendTx,
     proposeTx,
-    confirmTx,
-    revokeTx,
     fetchTransactionByHash,
     sendTx,
     fetchActiveMultisigTx,
+    callContractMethod,
   };
 }

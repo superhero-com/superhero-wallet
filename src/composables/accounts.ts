@@ -4,6 +4,7 @@ import type { IAccount, IDefaultComposableOptions } from '../types';
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in th future the state of the accounts should be stored in this composable
   const accounts = computed((): IAccount[] => store.getters.accounts);
+  const account = computed((): IAccount => store.getters.account);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
 
   /**
@@ -15,6 +16,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   return {
     accounts,
+    account,
     accountsAddressList,
     isLocalAccountAddress,
   };

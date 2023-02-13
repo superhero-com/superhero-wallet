@@ -372,6 +372,13 @@ export const FUNCTION_TYPE_DEX: Record<'pool' | 'swap' | 'allowance' | 'maxSpent
   minReceived: ['swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae'],
 };
 
+export const FUNCTION_TYPE_MULTISIG: Record<string, string> = {
+  propose: 'propose',
+  confirm: 'confirm',
+  refuse: 'refuse',
+  revoke: 'revoke',
+} as const;
+
 export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
 contract interface PoS =
   stateful entrypoint set_paid : (int, int) => unit
@@ -420,6 +427,7 @@ export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
+export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 
 export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
 export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';

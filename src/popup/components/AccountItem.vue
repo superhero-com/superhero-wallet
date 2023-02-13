@@ -1,5 +1,7 @@
 <template>
-  <div
+  <LinkButton
+    :to="explorerUrl"
+    target="_blank"
     class="account-item"
   >
     <Avatar
@@ -10,23 +12,17 @@
 
     <span
       v-if="name"
-      class="name"
+      class="name address"
       v-text="name"
     />
     <AddressTruncated
       v-else
+      class="address"
       :address="address"
     />
 
-    <LinkButton
-      v-if="explorerUrl"
-      :to="explorerUrl"
-      target="_blank"
-      class="external-link"
-    >
-      <ExternalLinkIcon class="external-link-icon" />
-    </LinkButton>
-  </div>
+    <ExternalLinkIcon class="external-link-icon" />
+  </LinkButton>
 </template>
 
 <script lang="ts">
@@ -74,24 +70,32 @@ export default defineComponent({
   align-items: center;
 
   .avatar {
-    margin-right: 8px;
+    margin-right: 4px;
   }
 
   .address {
     @extend %face-mono-10-medium;
 
-    color: variables.$color-grey-light;
     text-align: left;
     word-break: break-all;
   }
 
-  .external-link {
-    color: inherit;
-    flex-shrink: 0;
+  .external-link-icon {
+    width: 22px;
+    height: 22px;
+  }
 
-    .external-link-icon {
-      width: 22px;
-      height: 22px;
+  .icon,
+  .address {
+    color: variables.$color-white;
+    opacity: 0.85;
+  }
+
+  &:hover {
+    .icon,
+    .address {
+      color: variables.$color-white;
+      opacity: 1;
     }
   }
 }

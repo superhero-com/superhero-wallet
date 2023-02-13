@@ -82,6 +82,7 @@ import {
 } from '../utils';
 import { useTransactionTx, useTransactionTokens } from '../../composables';
 import { useGetter } from '../../composables/vuex';
+import { ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS } from '../router/routeNames';
 
 import TransactionTokens from './TransactionTokenRows.vue';
 
@@ -130,7 +131,7 @@ export default defineComponent({
 
     const redirectRoute = computed<Location>(() => {
       if (props.multisigTransaction) {
-        return { name: 'multisig-proposal-details' };
+        return { name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS };
       }
       return { name: 'tx-details', params: { hash: props.transaction.hash } };
     });

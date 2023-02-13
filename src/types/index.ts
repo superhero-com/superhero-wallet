@@ -13,6 +13,7 @@ import {
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_STEPS,
   TX_FUNCTIONS,
+  FUNCTION_TYPE_MULTISIG,
 } from '../popup/utils';
 
 export * from './cordova';
@@ -116,12 +117,14 @@ export interface IMultisigAccountBase {
 }
 
 export interface IMultisigAccount extends IMultisigAccountBase {
+  contractId: string
   signerId: string
   height: number
   createdAt: string
   updatedAt: string
   balance?: string
   confirmedBy: string[]
+  refusedBy: string[]
   expirationHeight: number
   confirmationsRequired: number
   txHash: string
@@ -130,6 +133,7 @@ export interface IMultisigAccount extends IMultisigAccountBase {
   version: string
   hasConsensus: boolean,
   address: string,
+  proposedBy: string,
   gaAccountId?: string,
   consensusLabel?: string
 }
@@ -229,6 +233,22 @@ export type TransactionType =
   | 'ChannelSettleTx'
   | 'ChannelSnapshotSoloTx';
 
+export interface IGAMetaTx {
+  amount: string;
+  fee: number;
+  nonce: number;
+  payload: string;
+  recipientId: string;
+  senderId: string;
+  type: string;
+  version: number;
+}
+
+export interface IGAMeta {
+  signatures: string[];
+  tx: IGAMetaTx
+}
+
 export interface ITx {
   abiVersion: number
   accountId?: string
@@ -237,6 +257,7 @@ export interface ITx {
   callData?: string // TODO find source
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: string
+  payerId?: string
   code: string
   commitmentId: any
   contractId: string
@@ -260,6 +281,7 @@ export interface ITx {
   senderId?: string
   selectedTokenContractId?: string
   type: TransactionType
+  tx?: IGAMeta
 }
 
 export interface ITransaction {
@@ -270,6 +292,7 @@ export interface ITransaction {
   claim: any, // TODO find type
   incomplete: any // TODO find type
   pending: any // TODO find type
+  rawTx?: any // TODO find type
   tx: ITx
 }
 
@@ -353,7 +376,7 @@ export interface ISdk {
       onAccount: any,
       authData?: any,
     }
-  ) => Promise<{ rawTx: any; }>
+  ) => Promise<ITransaction>
   sendTransaction: (t: any, o: any) => Promise<any>
   spend: (a: any, r: any, o: any) => Promise<any>
   spendTx: (a: any) => Promise<any>
@@ -446,6 +469,8 @@ export interface IActiveAuction {
 }
 
 export type IMultisigCreationStep = keyof typeof MULTISIG_CREATION_STEPS | null;
+
+export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
 
 export interface ICreateMultisigAccount {
   address: string
