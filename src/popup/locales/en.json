@@ -1325,6 +1325,7 @@
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
     "maxValue": "This field must be {0} or less",
+    "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL"
   },

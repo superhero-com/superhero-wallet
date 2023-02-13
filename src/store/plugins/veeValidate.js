@@ -46,6 +46,7 @@ Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
 Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
+Validator.extend('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
@@ -60,6 +61,7 @@ Validator.localize('en', {
     min_value: (field, [arg]) => i18n.t('validation.minValue', [arg]),
     min_value_exclusive: (field, [arg]) => i18n.t('validation.minValueExclusive', [arg]),
     max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
+    max_value_vault: (field, [arg]) => i18n.t('validation.maxValueVault', [arg]),
     enough_ae: () => i18n.t('validation.enoughAe'),
     not_token: () => i18n.t('validation.notToken'),
     name_registered_address_or_url: () => i18n.t('validation.invalidAddressChainUrl'),

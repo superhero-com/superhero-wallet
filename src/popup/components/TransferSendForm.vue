@@ -46,7 +46,7 @@
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
-        not_same_as: account.address,
+        not_same_as: isMultisig? multisigVaultAddress : account.address,
         name_registered_address_or_url: true,
         token_to_an_address: { isToken: !isAe },
       }"
@@ -56,7 +56,7 @@
       show-message-help
       :label="$t('modals.send.recipientLabel')"
       :placeholder="$t('modals.send.recipientPlaceholder')"
-      :message="message"
+      :message="addressMessage"
       @help="showRecipientHelp()"
     >
       <template #label-after>
@@ -81,8 +81,9 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
-        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_ae: fee.toString(),
+        ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
+        ...isMultisig ? {} : { enough_ae: fee.toString() },
+        ...isMultisig ? { max_value_vault: activeMultisigAccount.balance.toString() } : {},
         min_tip_amount: isTipUrl,
       }"
       name="amount"
@@ -90,7 +91,7 @@
       class="amount-input"
       show-tokens-with-balance
       :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
-      :message="errors.first('amount')"
+      :message="amountMessage"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
     >
@@ -212,7 +213,7 @@ import EditIcon from '../../icons/pencil.svg?vue-component';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
-const WARNING_RULES = ['not_same_as'];
+const WARNING_RULES = ['not_same_as', 'max_value_vault'];
 
 export default defineComponent({
   name: 'TransferSendForm',
@@ -262,11 +263,20 @@ export default defineComponent({
         .filter(({ field }: any) => field === 'address')
         .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null,
     );
-    const addressWarningMsg = computed(
-      () => (root as any).errors.items
-        .filter(({ field }: any) => field === 'address')
-        .find((_error: any) => WARNING_RULES.includes(_error.rule))?.msg || null,
-    );
+
+    function getMessageByFieldName(fieldName: string): IInputMessage {
+      const warning = (root as any).errors.items
+        .filter(({ field }: any) => field === fieldName)
+        .find((_error: any) => WARNING_RULES.includes(_error.rule))?.msg || null;
+      if (warning) return { status: 'warning', text: warning };
+      const _error = (root as any).errors.items
+        .filter(({ field }: any) => field === fieldName)
+        .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null;
+      if (_error) return { status: 'error', text: _error };
+      return { status: 'success' };
+    }
+    const amountMessage = computed(() => getMessageByFieldName('amount'));
+
     const urlStatus = computed(
       () => root.$store.getters['tipUrl/status'](formModel.value.address),
     );
@@ -276,7 +286,7 @@ export default defineComponent({
       && !checkAensName(formModel.value.address)
     ));
 
-    const message = computed((): IInputMessage => {
+    const addressMessage = computed((): IInputMessage => {
       if (isTipUrl.value) {
         switch (urlStatus.value) {
           case 'verified': return { status: 'success', text: ' ', hideMessage: true };
@@ -284,19 +294,10 @@ export default defineComponent({
           case 'not-verified': return { status: 'warning', text: ' ', hideMessage: true };
           case 'blacklisted': return { status: 'error', text: ' ', hideMessage: true };
           default:
-            throw new Error(`Unknown url status: ${message.value.status}`);
+            throw new Error(`Unknown url status: ${urlStatus.value}`);
         }
-      } else {
-        const warning = (root as any).errors.items
-          .filter(({ field }: any) => field === 'address')
-          .find((_error: any) => WARNING_RULES.includes(_error.rule))?.msg || null;
-        if (warning) return { status: 'warning', text: warning };
-        const _error = (root as any).errors.items
-          .filter(({ field }: any) => field === 'address')
-          .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null;
-        if (_error) return { status: 'error', text: _error };
       }
-      return { status: 'success' };
+      return getMessageByFieldName('address');
     });
 
     const hasError = computed(
@@ -518,18 +519,18 @@ export default defineComponent({
       formModel,
       loading,
       error,
-      addressErrorMsg,
-      addressWarningMsg,
+      amountMessage,
       availableTokens,
       account,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
       urlStatus,
       isTipUrl,
-      message,
+      addressMessage,
       hasError,
       multisigVaultAddress,
       multisigVaultOwnedByManyAccounts,
+      activeMultisigAccount,
       getAccountNameToDisplay,
       openScanQrModal,
       selectAccount,
