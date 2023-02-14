@@ -55,6 +55,8 @@ export const TX_TYPE_MDW: Partial<Record<TxType, string>> = {
   NameBidTx: SCHEMA.TX_TYPE.nameClaim,
   NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
   PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
+  GAMetaTx: 'gaMetaTx',
+  GAAttachTx: 'gaAttachTx',
 };
 
 export const CONNECTION_TYPES = {

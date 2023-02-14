@@ -255,7 +255,9 @@ export type TxType =
   | 'ChannelSlashTx'
   | 'ChannelSettleTx'
   | 'ChannelSnapshotSoloTx'
-  | 'PayingForTx';
+  | 'PayingForTx'
+  | 'GAAttachTx'
+  | 'GAMetaTx';
 
 export interface IGAAttachTx {
   contractId: string;
@@ -325,6 +327,7 @@ export interface ITx {
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
   tx?: IGAMeta | IPayingForTx
+  gaId?: string;
 }
 
 export interface ITransaction {

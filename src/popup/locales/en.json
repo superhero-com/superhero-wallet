@@ -361,6 +361,8 @@
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
       "payingForTx": "Pay For Tx",
+      "gaMetaTx": "GAMetaTx",
+      "gaAttachTx": "GAAttachTx",
       "pending": "Pending...",
       "multisigProposal": "Multisig proposal",
       "createMultisigVault": "Create Multisig Vault",
@@ -1165,7 +1167,8 @@
       "withdrawn": "Withdrawn",
       "rates": "Rates",
       "swapRoute": "Swap route",
-      "feePaidBy": "Transaction fee paid by"
+      "feePaidBy": "Transaction fee paid by",
+      "vaultContractId": "Vault contract Id"
     },
     "proposalDetails": {
       "receivingAddress": "Receiving address",

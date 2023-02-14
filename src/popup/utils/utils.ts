@@ -252,3 +252,14 @@ export function getTxType(tx: ITx): TxType {
     || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)
   );
 }
+
+export function isContainingNestedTx(tx: ITx): boolean {
+  return [
+    TX_TYPE_MDW.GAMetaTx,
+    TX_TYPE_MDW.PayingForTx,
+  ].includes(getTxType(tx));
+}
+
+export function getInnerTransaction(tx: ITx): any {
+  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+}

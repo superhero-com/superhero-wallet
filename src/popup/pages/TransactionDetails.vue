@@ -14,7 +14,7 @@
           :return-type="transaction.tx.returnType"
         />
         <TransactionTokens
-          :transaction="transaction"
+          :transaction="isContainingInternalTx ? transaction.tx.tx : transaction"
           :direction="direction"
           :is-allowance="isAllowance"
           :error="isErrorTransaction"
@@ -117,6 +117,28 @@
             </div>
           </DetailsItem>
 
+          <DetailsItem
+            v-if="multisigContractId"
+            :label="$t('pages.transactionDetails.vaultContractId')"
+            small
+          >
+            <div class="row">
+              <Avatar
+                :address="multisigContractId"
+                size="sm"
+              />
+              <CopyText
+                hide-icon
+                :value="multisigContractId"
+                :copied-text="$t('addressCopied')"
+              >
+                <span class="text-address">
+                  {{ splitAddress(multisigContractId) }}
+                </span>
+              </CopyText>
+            </div>
+          </DetailsItem>
+
           <PayloadDetails :payload="getPayload(transaction)" />
 
           <div class="span-3-columns">
@@ -211,6 +233,7 @@ import {
 } from '@vue/composition-api';
 import {
   FUNCTION_TYPE_DEX,
+  TX_TYPE_MDW,
   formatDate,
   formatTime,
   aettosToAe,
@@ -218,9 +241,12 @@ import {
   splitAddress,
   AETERNITY_SYMBOL,
   getPayload,
+  fetchJson,
+  handleUnknownError,
+  isContainingNestedTx,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
-import type { IGAAttachTx, ITransaction, TxFunctionRaw } from '../../types';
+import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
 import { useAccounts, useTransactionTx } from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
@@ -273,6 +299,7 @@ export default defineComponent({
       isAllowance,
       isDex,
       isMultisig,
+      txType,
     } = useTransactionTx({
       store: root.$store,
     });
@@ -282,6 +309,7 @@ export default defineComponent({
     });
 
     const transaction = ref<ITransaction>();
+    const multisigContractId = ref<string>();
 
     const getTx = computed(() => root.$store.getters.getTx);
     const getTxTipUrl = computed(() => root.$store.getters.getTxTipUrl);
@@ -289,6 +317,7 @@ export default defineComponent({
     const isTxAex9 = computed(() => root.$store.getters.isTxAex9);
     const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
+    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
 
     const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
@@ -302,19 +331,27 @@ export default defineComponent({
     const explorerPath = computed(() => getExplorerPath.value(props.hash));
 
     const gasPrice = computed(() => {
-      const tx = transaction.value?.tx?.tx?.tx as IGAAttachTx || transaction.value?.tx;
-      return tx?.gasPrice || null;
+      if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
+        return transaction.value.tx.tx.tx.gasPrice;
+      }
+      return transaction.value?.tx?.gasPrice;
     });
 
     const gasUsed = computed(() => {
-      const tx = transaction.value?.tx?.tx?.tx as IGAAttachTx || transaction.value?.tx;
-      return tx?.gasUsed || null;
+      if (transaction.value?.tx?.tx?.tx && 'gasUsed' in transaction.value.tx.tx.tx) {
+        return transaction.value.tx.tx.tx.gasUsed;
+      }
+      return transaction.value?.tx?.gasUsed;
     });
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
-      if (!isMultisig.value || !transaction.value?.tx) return null;
-      return transaction.value.tx.payerId ?? transaction.value.tx.callerId;
+      if (txType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      return transaction.value?.tx?.payerId ?? null;
     });
+
+    const isContainingInternalTx = computed(
+      (): boolean => !!transaction.value?.tx && isContainingNestedTx(transaction.value.tx),
+    );
 
     /**
      * Computes the total transaction fee, which is the sum of the fee of the main transaction
@@ -343,6 +380,17 @@ export default defineComponent({
       if (transaction.value?.tx) {
         setTransactionTx(transaction.value.tx);
       }
+
+      if (txType.value === TX_TYPE_MDW.GAMetaTx) {
+        try {
+          const { contract_id: contractId = null } = await fetchJson(
+            `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
+          );
+          multisigContractId.value = contractId;
+        } catch (e) {
+          handleUnknownError(e);
+        }
+      }
     });
 
     return {
@@ -354,6 +402,7 @@ export default defineComponent({
       getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
+      isContainingInternalTx,
       isDex,
       isTxAex9,
       isMultisig,
@@ -370,6 +419,7 @@ export default defineComponent({
       gasPrice,
       gasUsed,
       multisigTransactionFeePaidBy,
+      multisigContractId,
       transactionFee,
     };
   },
