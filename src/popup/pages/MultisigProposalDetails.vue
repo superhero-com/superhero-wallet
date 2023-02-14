@@ -267,6 +267,7 @@ import {
   blocksToRelativeTime,
 } from '../utils';
 import type {
+  IGAMetaTx,
   IMultisigAccount,
   IMultisigFunctionTypes,
   ITransaction,
@@ -356,7 +357,7 @@ export default defineComponent({
       }
 
       const { tx } = transaction.value;
-      const multisigTransaction = tx.tx?.tx;
+      const multisigTransaction = tx.tx?.tx as IGAMetaTx;
       if (!multisigTransaction) return 0;
 
       return (

@@ -360,9 +360,14 @@
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
-      "payingForTx": "Paying For Transaction",
+      "payingForTx": "Pay For Tx",
       "pending": "Pending...",
-      "multisigProposal": "Multisig Proposal"
+      "multisigProposal": "Multisig proposal",
+      "createMultisigVault": "Create Multisig Vault",
+      "propose": "Propose Tx",
+      "revoke": "Revoke Tx",
+      "refuse": "Disapprove Tx",
+      "confirm": "Approve Tx"
     },
     "dexType": {
       "provide_liquidity": "provide liquidity",
@@ -1159,7 +1164,8 @@
       "deposited": "Deposited",
       "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route"
+      "swapRoute": "Swap route",
+      "feePaidBy": "Transaction fee paid by"
     },
     "proposalDetails": {
       "receivingAddress": "Receiving address",

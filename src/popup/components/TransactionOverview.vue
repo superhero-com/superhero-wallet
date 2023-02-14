@@ -24,6 +24,7 @@ import {
 import { TranslateResult } from 'vue-i18n';
 import {
   TX_FUNCTIONS,
+  TX_TYPE_MDW,
   watchUntilTruthy,
 } from '../utils';
 import { useSdk, useTransactionTx } from '../../composables';
@@ -31,6 +32,7 @@ import { useState, useGetter } from '../../composables/vuex';
 import {
   IAccount,
   IAccountLabeled,
+  IGAAttachTx,
   ITx,
   TxType,
   TxFunction,
@@ -136,8 +138,23 @@ export default defineComponent({
             },
             title: txType.value ? transactionTypes[txType.value] : undefined,
           };
+        case TX_TYPE_MDW.PayingForTx: {
+          const tx = props.tx.tx?.tx as IGAAttachTx;
+          return {
+            sender: {
+              address: tx.ownerId,
+              name: getPreferred.value(tx.ownerId),
+              url: getExplorerPath.value(tx.ownerId),
+              label: root.$t('multisig.multisigVault'),
+            },
+            recipient: {
+              label: root.$t('transaction.overview.smartContract'),
+              address: tx.contractId,
+            },
+          };
+        }
         default:
-          throw new Error('Unsupported transaction type');
+          throw new Error(`Unsupported transaction type: ${txType.value}`);
       }
     });
 

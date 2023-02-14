@@ -54,6 +54,7 @@ export default defineComponent({
       txType,
       isAllowance,
       isDex,
+      isMultisig,
     } = useTransactionTx({ store: root.$store, tx: props.tx });
 
     const account = useGetter<IAccount>('account');
@@ -62,7 +63,7 @@ export default defineComponent({
     const getTxDirection = useGetter('getTxDirection');
 
     const labels = computed<(string | TranslateResult)[]>(() => {
-      if (!props.tx) return [];
+      if (!props.tx || !txType.value) return [];
 
       const transactionTypes = i18n.t('transaction.type') as Record<string, TranslateResult>;
       const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
@@ -130,6 +131,13 @@ export default defineComponent({
       }
       if (txType.value === TX_TYPE_MDW.PayingForTx) {
         return [
+          i18n.t('transaction.type.createMultisigVault'),
+          i18n.t('transaction.type.payingForTx'),
+        ];
+      }
+      if (isMultisig && props.tx.function) {
+        return [
+          transactionTypes[props.tx.function],
           i18n.t('transaction.type.payingForTx'),
         ];
       }

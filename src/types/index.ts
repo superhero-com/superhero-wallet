@@ -257,6 +257,18 @@ export type TxType =
   | 'ChannelSnapshotSoloTx'
   | 'PayingForTx';
 
+export interface IGAAttachTx {
+  contractId: string;
+  fee: number;
+  gas: number;
+  gasPrice: number;
+  gasUsed: number;
+  nonce: number;
+  ownerId: string;
+  returnType: string;
+  type: string;
+  version: number;
+}
 export interface IGAMetaTx {
   amount: string;
   fee: number;
@@ -271,6 +283,11 @@ export interface IGAMetaTx {
 export interface IGAMeta {
   signatures: string[];
   tx: IGAMetaTx;
+}
+
+export interface IPayingForTx {
+  signatures: string[];
+  tx: IGAAttachTx
 }
 
 export interface ITx {
@@ -307,7 +324,7 @@ export interface ITx {
   selectedTokenContractId?: string
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
-  tx?: IGAMeta
+  tx?: IGAMeta | IPayingForTx
 }
 
 export interface ITransaction {

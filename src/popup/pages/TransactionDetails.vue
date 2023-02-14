@@ -85,6 +85,38 @@
             </template>
           </DetailsItem>
 
+          <DetailsItem
+            v-if="multisigTransactionFeePaidBy"
+            :label="$t('pages.transactionDetails.feePaidBy')"
+            small
+          >
+            <div class="row payer-id">
+              <Avatar
+                :address="multisigTransactionFeePaidBy"
+                size="sm"
+              />
+              <div>
+                <DialogBox
+                  v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                  class="dialog-box"
+                  dense
+                  position="bottom"
+                >
+                  {{ $t('common.you') }}
+                </DialogBox>
+                <CopyText
+                  hide-icon
+                  :value="multisigTransactionFeePaidBy"
+                  :copied-text="$t('addressCopied')"
+                >
+                  <span class="text-address">
+                    {{ splitAddress(multisigTransactionFeePaidBy) }}
+                  </span>
+                </CopyText>
+              </div>
+            </div>
+          </DetailsItem>
+
           <PayloadDetails :payload="getPayload(transaction)" />
 
           <div class="span-3-columns">
@@ -121,7 +153,7 @@
             />
           </div>
           <DetailsItem
-            v-if="!(isDex || isAllowance)"
+            v-if="!(isDex || isAllowance || isMultisig)"
             :label="$t('pages.transactionDetails.amount')"
             data-cy="amount"
           >
@@ -134,32 +166,32 @@
             </template>
           </DetailsItem>
           <DetailsItem
-            v-if="transaction.tx.gasPrice"
+            v-if="gasPrice"
             :label="$t('pages.transactionDetails.gasPrice')"
             data-cy="gas-price"
           >
             <template #value>
               <TokenAmount
-                :amount="+(aettosToAe(transaction.tx.gasPrice))"
+                :amount="+(aettosToAe(gasPrice))"
                 symbol="AE"
                 hide-fiat
               />
             </template>
           </DetailsItem>
           <DetailsItem
-            v-if="transaction.tx.gasUsed"
-            :value="transaction.tx.gasUsed"
+            v-if="gasUsed"
+            :value="gasUsed"
             :label="$t('pages.transactionDetails.gasUsed')"
             data-cy="gas"
           />
           <DetailsItem
-            v-if="transaction.tx.fee"
+            v-if="transactionFee"
             :label="$t('transaction.fee')"
             data-cy="fee"
           >
             <template #value>
               <TokenAmount
-                :amount="+aettosToAe(transaction.tx.fee)"
+                :amount="+aettosToAe(transactionFee)"
                 :symbol="AETERNITY_SYMBOL"
               />
             </template>
@@ -188,8 +220,8 @@ import {
   getPayload,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
-import type { ITransaction, TxFunctionRaw } from '../../types';
-import { useTransactionTx } from '../../composables';
+import type { IGAAttachTx, ITransaction, TxFunctionRaw } from '../../types';
+import { useAccounts, useTransactionTx } from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -203,6 +235,8 @@ import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import PayloadDetails from '../components/PayloadDetails.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
+import Avatar from '../components/Avatar.vue';
+import DialogBox from '../components/DialogBox.vue';
 
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
@@ -225,6 +259,8 @@ export default defineComponent({
     AnimatedPending,
     AnimatedSpinner,
     ExternalLink,
+    Avatar,
+    DialogBox,
   },
   props: {
     hash: { type: String, required: true },
@@ -236,7 +272,12 @@ export default defineComponent({
       isErrorTransaction,
       isAllowance,
       isDex,
+      isMultisig,
     } = useTransactionTx({
+      store: root.$store,
+    });
+
+    const { isLocalAccountAddress } = useAccounts({
       store: root.$store,
     });
 
@@ -259,6 +300,33 @@ export default defineComponent({
     );
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerPath = computed(() => getExplorerPath.value(props.hash));
+
+    const gasPrice = computed(() => {
+      const tx = transaction.value?.tx?.tx?.tx as IGAAttachTx || transaction.value?.tx;
+      return tx?.gasPrice || null;
+    });
+
+    const gasUsed = computed(() => {
+      const tx = transaction.value?.tx?.tx?.tx as IGAAttachTx || transaction.value?.tx;
+      return tx?.gasUsed || null;
+    });
+
+    const multisigTransactionFeePaidBy = computed((): string | null => {
+      if (!isMultisig.value || !transaction.value?.tx) return null;
+      return transaction.value.tx.payerId ?? transaction.value.tx.callerId;
+    });
+
+    /**
+     * Computes the total transaction fee, which is the sum of the fee of the main transaction
+     * and any additional fee from nested transactions.
+     * @returns {number} The total transaction fee.
+     */
+    const transactionFee = computed((): number => {
+      const { tx } = transaction.value ?? {};
+      const fee = tx?.fee ?? 0;
+      const extraFee = tx?.tx?.tx?.fee ?? 0;
+      return fee + extraFee;
+    });
 
     onMounted(async () => {
       transaction.value = getTx.value(props.hash);
@@ -288,6 +356,7 @@ export default defineComponent({
       isAllowance,
       isDex,
       isTxAex9,
+      isMultisig,
       tipUrl,
       tipLink,
       direction,
@@ -297,6 +366,11 @@ export default defineComponent({
       aettosToAe,
       formatDate,
       formatTime,
+      isLocalAccountAddress,
+      gasPrice,
+      gasUsed,
+      multisigTransactionFeePaidBy,
+      transactionFee,
     };
   },
 });
@@ -324,6 +398,12 @@ export default defineComponent({
   .pending-icon {
     width: 16px;
     height: 16px;
+  }
+
+  .row {
+    @include mixins.flex(flex-start, center, row);
+
+    gap: 8px;
   }
 
   .header {
@@ -421,6 +501,18 @@ export default defineComponent({
             color: variables.$color-white;
           }
         }
+      }
+    }
+
+    .payer-id {
+      position: relative;
+
+      .dialog-box {
+        width: 30px;
+        height: 20px;
+        position: absolute;
+        right: 15px;
+        top: -28px;
       }
     }
   }

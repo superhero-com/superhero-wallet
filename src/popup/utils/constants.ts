@@ -524,3 +524,9 @@ export const MULTISIG_CREATION_PHASES = {
 } as const;
 
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
+
+export const MULTISIG_PROPOSAL_CONFIRM_ACTIONS = {
+  confirm: 'confirm',
+  revoke: 'revoke',
+  refuse: 'refuse',
+} as const;

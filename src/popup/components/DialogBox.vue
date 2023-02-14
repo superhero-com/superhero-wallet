@@ -1,7 +1,7 @@
 <template>
   <div
     class="dialog"
-    :class="{ dense }"
+    :class="[position, { dense }]"
   >
     <slot />
   </div>
@@ -10,10 +10,21 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
 
+export const DIALOG_BOX_POSITIONS = [
+  'left',
+  'bottom',
+] as const;
+export type DialogBoxPosition = typeof DIALOG_BOX_POSITIONS[number];
+
 export default defineComponent({
   name: 'DialogBox',
   props: {
     dense: Boolean,
+    position: {
+      type: String,
+      validator: (value: DialogBoxPosition) => DIALOG_BOX_POSITIONS.includes(value),
+      default: DIALOG_BOX_POSITIONS[0],
+    },
   },
 });
 </script>
@@ -55,6 +66,18 @@ export default defineComponent({
 
     &::after {
       left: -3px;
+    }
+  }
+
+  &.bottom {
+    &::after {
+      top: auto;
+      left: 50%;
+      bottom: -8px;
+    }
+
+    &.dense::after {
+      left: 40%;
     }
   }
 }
