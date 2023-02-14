@@ -235,7 +235,7 @@ export function compareCaseInsensitive(
 }
 
 /**
- * Prepare human readable name from the user account object.
+ * Prepare human-readable name from the user account object.
  * Eg.: `somehuman.chain`, `Account 2`
  */
 export function getAccountNameToDisplay(acc: IAccount) {

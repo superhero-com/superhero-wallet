@@ -12,7 +12,7 @@ import {
   ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-  ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS, ROUTE_NETWORK_SETTINGS,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -265,7 +265,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks',
-    name: 'network-settings',
+    name: ROUTE_NETWORK_SETTINGS,
     component: Networks,
     props: true,
     meta: {

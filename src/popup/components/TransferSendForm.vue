@@ -17,7 +17,7 @@
               @select="selectAccount($event)"
             />
             <template v-else>
-              {{ getAccountNameToDisplay(account.address) }}
+              {{ getAccountNameToDisplay(account) }}
             </template>
           </template>
           <template #value>

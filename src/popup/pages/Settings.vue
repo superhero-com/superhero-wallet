@@ -5,7 +5,7 @@
       :title="$t('pages.index.seedPhrase')"
     />
     <PanelItem
-      :to="{ name: 'network-settings' }"
+      :to="{ name: ROUTE_NETWORK_SETTINGS }"
       :title="$t('pages.titles.networks')"
       :info="activeNetwork.name"
       data-cy="networks"
@@ -42,11 +42,17 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import PanelItem from '../components/PanelItem.vue';
+import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { CURRENCIES } from '../utils/constants';
 
 export default {
   name: 'Settings',
   components: { PanelItem },
+  data() {
+    return {
+      ROUTE_NETWORK_SETTINGS,
+    };
+  },
   computed: {
     ...mapState(['saveErrorLog', 'current']),
     ...mapGetters(['activeNetwork']),
