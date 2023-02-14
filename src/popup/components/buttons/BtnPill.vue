@@ -2,7 +2,7 @@
   <BtnBase
     v-bind="$attrs"
     class="btn-pill"
-    :class="{ dense }"
+    :class="{ dense, static }"
     :to="to"
   >
     <slot>{{ text }}</slot>
@@ -21,6 +21,7 @@ export default defineComponent({
     to: { type: [String, Object], default: null },
     text: { type: String, default: null },
     dense: Boolean,
+    static: Boolean,
   },
 });
 </script>
@@ -48,6 +49,18 @@ export default defineComponent({
   &.router-link-exact-active {
     background-color: rgba(variables.$color-white, 0.15);
     color: variables.$color-white;
+  }
+
+  &:not(.static) {
+    color: rgba(variables.$color-white, 0.75);
+
+    &:hover {
+      color: rgba(variables.$color-white, 1);
+    }
+
+    &:active {
+      color: rgba(variables.$color-white, 0.75);
+    }
   }
 }
 </style>

@@ -43,16 +43,7 @@
         @click="close"
       />
       <template v-else>
-        <BtnPlain
-          :to="{ name: 'network-settings' }"
-          class="network-btn"
-        >
-          <div
-            class="circle"
-            :class="[ nodeStatus ]"
-          />
-          {{ activeNetwork.name }}
-        </BtnPlain>
+        <NetworkButton />
 
         <template v-if="isLoggedIn">
           <NotificationsIcon />
@@ -70,8 +61,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter, useState } from '../../composables/vuex';
-import { WalletRouteMeta, INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { WalletRouteMeta } from '../../types';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -85,9 +76,11 @@ import BtnClose from './buttons/BtnClose.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
+import NetworkButton from './NetworkButton.vue';
 
 export default defineComponent({
   components: {
+    NetworkButton,
     NotificationsIcon,
     BtnClose,
     BtnPlain,
@@ -97,8 +90,6 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const isLoggedIn = useGetter('isLoggedIn');
-    const nodeStatus = useState('nodeStatus');
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
     const currentHomeRouteName = computed(() => (isLoggedIn.value) ? ROUTE_ACCOUNT : ROUTE_INDEX);
     const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
@@ -134,8 +125,6 @@ export default defineComponent({
       titleTruncated,
       back,
       close,
-      nodeStatus,
-      activeNetwork,
     };
   },
 });
@@ -220,37 +209,6 @@ export default defineComponent({
     &:only-child {
       flex-grow: 2;
       margin-left: 8px;
-    }
-  }
-
-  .network-btn {
-    @extend %face-sans-14-medium;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 8px;
-    margin-left: auto;
-    color: rgba(variables.$color-white, 0.75);
-
-    .circle {
-      width: 6px;
-      height: 6px;
-      border-radius: 100%;
-      margin-right: 4px;
-      background-color: variables.$color-warning;
-
-      &.connected {
-        background-color: variables.$color-success-dark;
-      }
-
-      &.error {
-        background-color: variables.$color-danger;
-      }
-    }
-
-    &:hover {
-      color: rgba(variables.$color-white, 1);
     }
   }
 

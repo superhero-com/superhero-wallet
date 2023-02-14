@@ -48,10 +48,11 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
+import { defaultNetwork } from '../utils';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InputField from '../components/InputField.vue';
 import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
-import { defaultNetwork } from '../utils';
 
 export const NETWORK_PROPS = {
   url: null,
@@ -128,7 +129,7 @@ export default {
   methods: {
     ...mapActions(['selectNetwork']),
     goBack() {
-      this.$router.push({ name: 'network-settings' });
+      this.$router.push({ name: ROUTE_NETWORK_SETTINGS });
     },
     validatorRules(key) {
       return key === 'name' ? {
