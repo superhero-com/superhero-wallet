@@ -117,7 +117,7 @@ export default defineComponent({
     const swiper = computed(() => customSwiper.value?.$swiper);
 
     const gaAccountIdx = computed(() => multisigAccounts.value
-      .findIndex((acc) => acc.address === activeMultisigAccountId.value));
+      .findIndex((acc) => acc.gaAccountId === activeMultisigAccountId.value));
 
     const activeIdSelector = computed(
       () => isMultisigDashboard.value
@@ -126,14 +126,14 @@ export default defineComponent({
     );
 
     const visibleAccounts = computed(
-      (): (IMultisigAccount | IAccount)[] => isMultisigDashboard.value
+      () => isMultisigDashboard.value
         ? multisigAccounts.value
         : accounts.value,
     );
 
     function getAccountId(selectedAccount: IMultisigAccount | IAccount) {
       return isMultisigDashboard.value
-        ? (selectedAccount as IMultisigAccount).multisigAccountId
+        ? (selectedAccount as IMultisigAccount).gaAccountId
         : (selectedAccount as IAccount).idx as number;
     }
 
@@ -152,15 +152,19 @@ export default defineComponent({
         swiper.value.realIndex < visibleAccounts.value.length
         && selectedAccount
       ) {
-        selectAccount(getAccountId(selectedAccount));
+        selectAccount(getAccountId(selectedAccount as any));
       }
       if (currentIdx.value !== realIndex) {
         currentIdx.value = realIndex;
       }
     }
+
     function getAccountColor(idx: number) {
-      return getAddressColor(visibleAccounts.value[idx]?.address);
+      return getAddressColor(isMultisigDashboard.value
+        ? multisigAccounts.value[idx]?.gaAccountId
+        : accounts.value[idx]?.address);
     }
+
     function setCurrentSlide(idx: number, slideParams?: number) {
       if (currentIdx.value !== idx) {
         currentIdx.value = idx;

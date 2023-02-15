@@ -131,6 +131,7 @@
       v-else-if="currentStep === STEPS.processing"
       :phase="multisigAccountCreationPhase"
       :multisig-account="multisigAccount"
+      :is-accessible="isMultisigAccountAccessible"
     />
 
     <template #footer>
@@ -154,7 +155,7 @@
       <BtnMain
         v-else-if="currentStep === STEPS.processing"
         :text="$t('modals.creatingMultisigAccount.btnText')"
-        :disabled="!multisigAccount"
+        :disabled="!isMultisigAccountAccessible"
         @click="navigateToMultisigVault"
       />
     </template>
@@ -175,13 +176,14 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   validateHash,
   handleUnknownError,
+  MULTISIG_CREATION_PHASES,
 } from '../../utils';
 import {
   ICreateMultisigAccount,
   ObjectValues,
 } from '../../../types';
-import { ROUTE_ACCOUNT_DETAILS } from '../../router/routeNames';
-import { useMultisigAccountCreate } from '../../../composables';
+import { ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS } from '../../router/routeNames';
+import { useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -220,10 +222,17 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const {
+      isMultisigDashboard,
+      toggleMultisigDashboard,
+      setActiveMultisigAccountId,
+    } = useMultisigAccounts({ store: root.$store });
+
+    const {
       multisigAccount,
       multisigAccountCreationPhase,
       multisigAccountCreationEncodedCallData,
       multisigAccountCreationFee,
+      isMultisigAccountAccessible,
       multisigAccountPrepare,
       multisigAccountCreate,
     } = useMultisigAccountCreate({ store: root.$store });
@@ -338,9 +347,14 @@ export default defineComponent({
     }
 
     async function navigateToMultisigVault() {
-      await props.resolve();
-      // TODO:: change to multisig account details
-      root.$router.push({ name: ROUTE_ACCOUNT_DETAILS });
+      if (multisigAccount.value) {
+        await props.resolve();
+        if (!isMultisigDashboard.value) {
+          toggleMultisigDashboard();
+        }
+        setActiveMultisigAccountId(multisigAccount.value.multisigAccountId);
+        root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS });
+      }
     }
 
     onMounted(() => {
@@ -355,11 +369,13 @@ export default defineComponent({
     return {
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+      MULTISIG_CREATION_PHASES,
       STEPS,
       multisigAccount,
       multisigAccountCreationPhase,
       multisigAccountCreationEncodedCallData,
       multisigAccountCreationFee,
+      isMultisigAccountAccessible,
       currentStep,
       confirmationsRequired,
       signers,

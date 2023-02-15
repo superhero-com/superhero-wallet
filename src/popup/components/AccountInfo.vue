@@ -48,13 +48,15 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { IAccount, IMultisigAccount } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { useMultisigAccounts } from '../../composables';
+
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import { useGetter } from '../../composables/vuex';
-import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -66,14 +68,17 @@ export default defineComponent({
   props: {
     color: { type: String, default: '#212121' },
     canCopyAddress: Boolean,
-    account: { type: Object, required: true },
+    account: { type: Object as PropType<IAccount | IMultisigAccount>, required: true },
   },
   setup(props, { root }) {
     const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
 
     const activeNetwork = useGetter('activeNetwork');
 
-    const address = computed(() => props.account.address);
+    // TODO update this code when working on the multisig navigation
+    const address = computed(() => isMultisigDashboard.value
+      ? (props.account as IMultisigAccount).gaAccountId
+      : (props.account as IAccount).address);
 
     const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${address.value}`);
 

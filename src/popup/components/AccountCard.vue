@@ -57,7 +57,10 @@ export default defineComponent({
   setup(props, { root }) {
     const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
 
-    const color = computed(() => getAddressColor(props.account.address));
+    // TODO update this code when working on the multisig navigation
+    const color = computed(() => getAddressColor(isMultisigDashboard.value
+      ? (props.account as IMultisigAccount).gaAccountId
+      : (props.account as IAccount).address));
 
     return {
       color,

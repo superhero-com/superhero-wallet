@@ -63,7 +63,7 @@ export default {
   @include mixins.flex(flex-start, flex-start);
 
   width: 100%;
-  gap: 12px;
+  gap: 8px;
 
   .avatar {
     margin-top: 8px;

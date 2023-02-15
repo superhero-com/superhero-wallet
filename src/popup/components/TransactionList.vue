@@ -53,6 +53,7 @@ import type {
   IAccount,
   INetwork,
   ITokenList,
+  ITransaction,
 } from '../../types';
 import {
   TXS_PER_PAGE,
@@ -72,7 +73,6 @@ import {
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import Visible from '../../icons/visible.svg?vue-component';
-import { ITransaction } from '../../types';
 import InfiniteScroll from './InfiniteScroll.vue';
 
 export default defineComponent({
@@ -120,7 +120,7 @@ export default defineComponent({
     }
 
     const currentAddress = computed(() => isMultisigDashboard.value
-      ? activeMultisigAccount.value?.address
+      ? activeMultisigAccount.value?.gaAccountId
       : account.value.address);
 
     const filteredTransactions = computed(

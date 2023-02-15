@@ -130,10 +130,12 @@
     "creatingMultisigAccount": {
       "title": "Creating vault progress",
       "btnText": "Go to multisig vault",
-      "vaultCreatedMessage": "Your new multisig vault is ready!",
+      "vaultCreatedMessage": "It’s ready! Your new multisig vault is added to Superhero wallet.",
       "preparingMultisigVault": "Preparing multisig vault",
       "deployingSmartContract": "Deploying smart contract",
-      "creatingMultisigVault": "Creating multisig vault account"
+      "creatingMultisigVault": "Creating multisig vault account",
+      "addingToWallet": "Adding multisig vault to the wallet",
+      "takingLong": "This step may take a few moments."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",

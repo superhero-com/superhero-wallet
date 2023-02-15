@@ -3,7 +3,7 @@
     class="balance-info"
     data-cy="balance-info"
   >
-    <AeBalance :balance="balance" />
+    <AeBalance :balance="balanceNumeric" />
     <div class="display-value">
       {{ currencyFormatted }}
     </div>
@@ -33,19 +33,18 @@ export default defineComponent({
 
     const currentAccount = computed(() => props.account || account.value);
 
-    const balance = computed(
+    const balanceNumeric = computed(
       () => (isMultisigDashboard.value
         ? currentAccount.value.balance
         : balances.value[currentAccount.value.address])?.toNumber() || 0,
     );
 
     const currencyFormatted = computed(
-      () => convertToCurrencyFormatted.value(balance.value),
+      () => convertToCurrencyFormatted.value(balanceNumeric.value),
     );
 
     return {
-      balances,
-      balance,
+      balanceNumeric,
       currencyFormatted,
     };
   },

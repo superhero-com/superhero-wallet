@@ -1,6 +1,6 @@
 import { computed, ref } from '@vue/composition-api';
 import { uniqBy } from 'lodash-es';
-import camelcaseKeysDeep from 'camelcase-keys-deep';
+import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError } from '@aeternity/aepp-sdk';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
@@ -17,6 +17,8 @@ import type {
   IDefaultComposableOptions,
   INetwork,
   IMultisigAccount,
+  IMultisigConsensus,
+  IMultisigAccountRaw,
 } from '../types';
 import { useSdk } from './sdk';
 import { i18n } from '../store/plugins/languages';
@@ -48,23 +50,28 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const activeMultisigAccount = computed(() => multisigAccounts.value
-    .find((account) => account.address === activeMultisigAccountId.value));
+    .find((account) => account.gaAccountId === activeMultisigAccountId.value));
 
   if (!multisigAccounts.value.length) {
     multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
   }
 
-  function setActiveMultisigAccountId(multisigAccountId: string) {
-    activeMultisigAccountId.value = multisigAccountId;
+  function setActiveMultisigAccountId(gaAccountId: string) {
+    if (gaAccountId && multisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
+      activeMultisigAccountId.value = gaAccountId;
+    }
   }
 
   /**
-   * Refresh the list of the mulstisig accounts.
+   * Refresh the list of the multisig accounts.
    */
   async function updateMultisigAccounts() {
     const sdk = await getSdk();
 
-    let rawMultisigData: IMultisigAccount[] = [];
+    /**
+     * Establish the list of multisig accounts used by the regular accounts
+     */
+    let rawMultisigData: IMultisigAccountRaw[] = [];
     try {
       await Promise.all(accounts.value.map(async ({ address }) => rawMultisigData.push(
         ...(await fetchJson(`${activeNetwork.value.multisigBackendUrl}/${address}`)),
@@ -87,10 +94,17 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
       );
     }
 
-    const result = (await Promise.all(
+    /**
+     * Get extended data for all multisig accounts
+     */
+    const result: IMultisigAccount[] = (await Promise.all(
       rawMultisigData
         .filter(({ version }) => version === SUPPORTED_MULTISIG_CONTRACT_VERSION)
-        .map(async ({ contractId, gaAccountId, ...otherMultisig }) => {
+        .map(async ({
+          contractId,
+          gaAccountId,
+          ...otherMultisigData
+        }): Promise<IMultisigAccount> => {
           try {
             const contractInstance = await sdk.getContractInstance({
               aci: SimpleGAMultiSigAci,
@@ -119,40 +133,40 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
               gaAccountId ? sdk.balance(gaAccountId) : 0,
             ]);
 
-            const consensus = consensusResult.decodedResult as any;
+            const decodedConsensus = consensusResult.decodedResult;
+            const txHash = decodedConsensus.tx_hash as Uint8Array;
+            const consensus: IMultisigConsensus = camelCaseKeysDeep(decodedConsensus);
 
-            if (consensus.tx_hash) {
-              consensus.tx_hash = Buffer.from(consensus.tx_hash).toString('hex');
-            }
-            consensus.expiration_height = Number(consensus.expiration_height);
-            consensus.confirmations_required = Number(consensus.confirmations_required);
-            consensus.totalConfirmations = Number(consensus.confirmed_by.length);
+            consensus.expirationHeight = Number(consensus.expirationHeight);
+            consensus.confirmationsRequired = Number(consensus.confirmationsRequired);
 
             const consensusLabel = (
-              `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('common.of')} ${signers.decodedResult?.length}`
+              `${consensus?.confirmedBy?.length}/${consensus.confirmationsRequired} ${i18n.t('common.of')} ${signers.decodedResult?.length}`
             );
 
             return {
-              ...camelcaseKeysDeep(consensus),
-              ...otherMultisig,
-              nonce: Number(nonce.decodedResult),
-              signers: signers.decodedResult,
+              ...consensus,
+              ...otherMultisigData,
               consensusLabel,
               contractId,
+              gaAccountId,
+              nonce: Number(nonce.decodedResult),
+              signers: signers.decodedResult,
               balance: convertToken(balance, -MAGNITUDE),
-              address: gaAccountId,
-              multisigAccountId: gaAccountId,
-              hasPendingTransaction: consensus.tx_hash && !consensus.expired,
+              hasPendingTransaction: !!txHash && !consensus.expired,
+              txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
             };
           } catch (error) {
-          /**
-           * Node might throw nonce mismatch error, skip the current account update
-           * return the existing data and account details will be updated in the next poll.
-           */
+            /**
+             * Node might throw nonce mismatch error, skip the current account update
+             * return the existing data and account details will be updated in the next poll.
+             */
             if (!(error instanceof DryRunError)) {
               handleUnknownError(error);
             }
-            return multisigAccounts.value.find((account) => account.contractId === contractId);
+            return multisigAccounts.value.find(
+              (account) => account.contractId === contractId,
+            ) as IMultisigAccount;
           }
         }),
     ))
@@ -170,13 +184,13 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
           return b.confirmedBy.length - a.confirmedBy.length;
         }
         if (!b.balance.minus(a.balance).isZero()) {
-          return b.balance.minus(a.balance);
+          return b.balance.minus(a.balance).toNumber();
         }
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
 
     if (!activeMultisigAccountId.value) {
-      setActiveMultisigAccountId(result[0]?.multisigAccountId);
+      setActiveMultisigAccountId(result[0]?.gaAccountId);
     }
 
     multisigAccounts.value = result;
@@ -197,6 +211,10 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     isAdditionalInfoNeeded.value = false;
   }
 
+  function getMultisigAccountByContractId(contractId: string) {
+    return multisigAccounts.value.find((acc) => acc.contractId === contractId);
+  }
+
   initPollingWatcher(() => updateMultisigAccounts(), POLLING_INTERVAL);
 
   return {
@@ -210,5 +228,6 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     stopFetchingAdditionalInfo,
     toggleMultisigDashboard,
     updateMultisigAccounts,
+    getMultisigAccountByContractId,
   };
 }

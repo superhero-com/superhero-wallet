@@ -1,6 +1,11 @@
 import { computed, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import type { IAccount, IDefaultComposableOptions } from '../types';
+import type {
+  Balance,
+  BalanceRaw,
+  IAccount,
+  IDefaultComposableOptions,
+} from '../types';
 import {
   LOCAL_STORAGE_PREFIX,
   aettosToAe,
@@ -10,8 +15,8 @@ import {
 import { useSdk } from './sdk';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
-type Balances = Record<string, BigNumber>;
-type BalancesRaw = Record<string, string>;
+type Balances = Record<string, Balance>;
+type BalancesRaw = Record<string, BalanceRaw>;
 
 const POLLING_INTERVAL = 3000;
 const LOCAL_STORAGE_BALANCES_KEY = `${LOCAL_STORAGE_PREFIX}_balances`;

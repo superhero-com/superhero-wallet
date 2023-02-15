@@ -25,6 +25,20 @@ export * from './filter';
  */
 export type ObjectValues<T> = T[keyof T];
 
+/**
+ * Generic that allows to pick only the public properties of a class.
+ */
+type PublicPart<T> = {[K in keyof T]: T[K]};
+
+/**
+ * Replacement for the regular `BigNumber` which was causing some issues
+ * because of the private properties of the class.
+ */
+export type BigNumberPublic = PublicPart<BigNumber> | BigNumber;
+
+export type Balance = BigNumberPublic;
+export type BalanceRaw = string;
+
 export interface IAppData {
   name: string
   url: string
@@ -73,7 +87,7 @@ export interface IAsset {
   balanceCurrency: number
   circulating_supply: number
   contractId: string
-  convertedBalance: typeof BigNumber
+  convertedBalance: Balance;
   current_price: number
   decimals: number
   fully_diluted_valuation: any
@@ -132,27 +146,36 @@ export interface IMultisigAccountBase {
   multisigAccountId: string
 }
 
-export interface IMultisigAccount extends IMultisigAccountBase {
-  contractId: string
-  signerId: string
-  height: number
-  createdAt: string
-  updatedAt: string
-  balance?: string
-  confirmedBy: string[]
-  refusedBy: string[]
-  expirationHeight: number
-  confirmationsRequired: number
-  txHash: string
-  nonce: number
-  signers: string[]
-  version: string
-  hasConsensus: boolean
-  address: string
-  proposedBy: string
-  gaAccountId?: string
-  consensusLabel?: string
-  hasPendingTransaction: string
+export interface IMultisigConsensus {
+  confirmationsRequired: number;
+  confirmedBy: string[];
+  expirationHeight: number;
+  expired: boolean;
+  proposedBy: string;
+  txHash?: string;
+}
+
+export interface IMultisigAccountRaw {
+  contractId: string;
+  createdAt: string; // Date
+  gaAccountId: string; // Generalized Account used as the Multisig Account
+  height: number;
+  id: number;
+  signerId: string;
+  updatedAt: string; // Date
+  version: string; // X.X.X
+}
+
+/**
+ * Our internal account data composed out of data collected from external sources.
+ */
+export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountRaw {
+  balance: Balance;
+  refusedBy?: string[];
+  nonce: number;
+  signers: string[];
+  consensusLabel?: string;
+  hasPendingTransaction: boolean;
 }
 
 export interface IMultisigAccountCreationTx {

@@ -314,7 +314,7 @@ export default defineComponent({
       return amountInt > 0 && amountInt === +max.value;
     });
 
-    const multisigVaultAddress = computed(() => activeMultisigAccount.value?.address);
+    const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
     const mySignerAccounts = accounts.value.filter(
       ({ address }) => activeMultisigAccount.value?.signers.includes(address),

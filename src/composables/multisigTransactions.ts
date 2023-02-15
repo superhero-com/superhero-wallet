@@ -62,14 +62,15 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    */
   async function fetchActiveMultisigTx(): Promise<IActiveMultisigTx | null> {
     const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const txHash = activeMultisigAccount.value?.txHash;
 
-    if (activeMultisigAccount.value?.hasPendingTransaction) {
-      const rawTx = await fetchTransactionByHash(activeMultisigAccount.value?.txHash);
+    if (txHash && activeMultisigAccount.value?.hasPendingTransaction) {
+      const rawTx = await fetchTransactionByHash(txHash);
 
       return {
         ...activeMultisigAccount.value,
         totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
-        hash: activeMultisigAccount.value?.txHash,
+        hash: txHash,
         tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
         isMultisigTransaction: true,
       };
