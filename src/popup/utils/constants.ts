@@ -529,6 +529,7 @@ export const MULTISIG_CREATION_PHASES = {
   prepared: 'prepared',
   deployed: 'deployed',
   created: 'created',
+  accessible: 'accessible',
 } as const;
 
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;

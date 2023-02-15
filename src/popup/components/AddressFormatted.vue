@@ -24,10 +24,11 @@ export default defineComponent({
     alignRight: Boolean,
   },
   setup(props) {
-    const prepareChunk = (chunk: any) => {
-      const maxLength = 3;
+    const maxLength = 3;
+
+    function prepareChunk(chunk: any) {
       return chunk.length === maxLength ? chunk : `${chunk}${' '.repeat(maxLength - chunk.length)}`;
-    };
+    }
 
     const isAddress = computed(() => {
       const { valid, isName } = validateHash(props.address);
@@ -56,6 +57,8 @@ export default defineComponent({
 
   &-chunk {
     flex: 0 0 var(--column-width);
+    text-align: left;
+    white-space: nowrap;
 
     &.align-right {
       text-align: right;

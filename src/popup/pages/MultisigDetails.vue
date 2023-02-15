@@ -1,5 +1,8 @@
 <template>
-  <div class="multisig-details">
+  <div
+    v-if="activeMultisigAccount"
+    class="multisig-details"
+  >
     <DetailsItem
       :label="$t('multisig.address')"
     >
@@ -7,10 +10,10 @@
         <div class="address-row">
           <Avatar
             class="avatar"
-            :address="multisigAccountId"
+            :address="activeMultisigAccount.gaAccountId"
           />
           <AddressFormatted
-            :address="multisigAccountId"
+            :address="activeMultisigAccount.gaAccountId"
             :column-count="9"
             class="text-address"
           />
@@ -25,10 +28,10 @@
         <div class="address-row">
           <Avatar
             class="avatar"
-            :address="contractId"
+            :address="activeMultisigAccount.contractId"
           />
           <AddressFormatted
-            :address="contractId"
+            :address="activeMultisigAccount.contractId"
             :column-count="9"
             class="text-address"
           />
@@ -38,7 +41,7 @@
 
     <LinkButton
       class="explorer-link"
-      :to="getExplorerPath(contractId)"
+      :to="getExplorerPath(activeMultisigAccount.contractId)"
     >
       {{ $t('multisig.explorerLink') }}
       <ExternalLinkIcon class="external-icon" />
@@ -48,23 +51,23 @@
       <DetailsItem
         class="details-item"
         :label="$t('multisig.version')"
-        :value="version"
+        :value="activeMultisigAccount.version"
       />
       <DetailsItem
         class="details-item"
         :label="$t('multisig.currentNonce')"
-        :value="nonce"
+        :value="activeMultisigAccount.nonce"
       />
     </div>
 
     <div class="row">
       <AuthorizedAccounts
-        :address-list="signers"
+        :address-list="activeMultisigAccount.signers"
       />
       <DetailsItem
         class="details-item"
         :label="$t('multisig.consensus')"
-        :value="consensusLabel"
+        :value="activeMultisigAccount.consensusLabel"
       />
     </div>
   </div>
@@ -75,7 +78,6 @@ import { defineComponent, onMounted, onBeforeUnmount } from '@vue/composition-ap
 import { useGetter } from '../../composables/vuex';
 import { useMultisigAccounts } from '../../composables';
 
-import { IMultisigAccount } from '../../types';
 import DetailsItem from '../components/DetailsItem.vue';
 import AddressFormatted from '../components/AddressFormatted.vue';
 import Avatar from '../components/Avatar.vue';
@@ -102,27 +104,13 @@ export default defineComponent({
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts({ store: root.$store });
 
-    const {
-      multisigAccountId,
-      contractId,
-      version,
-      nonce,
-      signers,
-      consensusLabel,
-    } = activeMultisigAccount.value || {} as IMultisigAccount;
-
     onMounted(fetchAdditionalInfo);
 
     onBeforeUnmount(stopFetchingAdditionalInfo);
 
     return {
-      multisigAccountId,
-      contractId,
+      activeMultisigAccount,
       getExplorerPath,
-      signers,
-      version,
-      nonce,
-      consensusLabel,
     };
   },
 });

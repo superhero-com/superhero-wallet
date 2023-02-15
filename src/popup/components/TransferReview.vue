@@ -326,7 +326,7 @@ export default defineComponent({
         } = useMultisigTransactions({ store: root.$store });
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
-            activeMultisigAccount.value.address,
+            activeMultisigAccount.value.gaAccountId,
             props.transferData.address!,
             aeToAettos(props.transferData.amount),
             props.transferData.payload || '',

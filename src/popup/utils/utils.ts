@@ -30,6 +30,7 @@ import type {
   ITx,
   TxType,
   IDashboardTransaction,
+  BigNumberPublic,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -46,7 +47,7 @@ export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
 }
 
-export function convertToken(balance: number, precision: number) {
+export function convertToken(balance: number, precision: number): BigNumberPublic {
   return new BigNumber(balance).shiftedBy(precision);
 }
 
@@ -271,7 +272,7 @@ export function shrinkString(text: string, maxLength: number) {
   return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
 }
 
-export function amountRounded(rawAmount: number | BigNumber): string {
+export function amountRounded(rawAmount: number | BigNumberPublic): string {
   let amount = rawAmount;
   if (typeof rawAmount !== 'object') {
     amount = new BigNumber(rawAmount);

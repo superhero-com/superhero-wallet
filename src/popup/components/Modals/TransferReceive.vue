@@ -131,7 +131,7 @@ export default defineComponent({
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
     const account = computed<IAccount>(() => root.$store.getters.account);
     const activeAccountAddress = computed(() => props.isMultisig
-      ? activeMultisigAccount.value?.address
+      ? activeMultisigAccount.value?.gaAccountId
       : account.value.address);
     const availableTokens = computed<ITokenList>(
       () => root.$store.state.fungibleTokens.availableTokens,

@@ -1,4 +1,4 @@
-import { ref } from '@vue/composition-api';
+import { computed, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { AmountFormatter, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import type {
@@ -10,9 +10,11 @@ import type {
 import { useSdk } from './sdk';
 import { MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
+import { useMultisigAccounts } from './multisigAccounts';
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
+  const { getMultisigAccountByContractId } = useMultisigAccounts({ store });
 
   let rawTx: string;
   let accountId: string;
@@ -21,6 +23,11 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
   const multisigAccountCreationEncodedCallData = ref<string>();
   const multisigAccountCreationFee = ref<number>(0);
+
+  const isMultisigAccountAccessible = computed(() => (
+    multisigAccount.value
+    && multisigAccountCreationPhase.value === MULTISIG_CREATION_PHASES.accessible
+  ));
 
   async function createMultisigContractInstance() {
     const drySdk = await getDrySdk();
@@ -129,6 +136,21 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       contractId: gaContract.contractId,
       multisigAccountId: accountId,
     };
+
+    // Wait for the account to be discovered by the wallet to allow to open it's details.
+    // TODO in the future we could try to add the new account to the list of the accounts.
+    await new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (
+          multisigAccount.value?.contractId
+          && getMultisigAccountByContractId(multisigAccount.value.contractId)
+        ) {
+          multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.accessible;
+          resolve(true);
+          clearInterval(interval);
+        }
+      }, 1000);
+    });
   }
 
   return {
@@ -136,6 +158,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     multisigAccountCreationPhase,
     multisigAccountCreationEncodedCallData,
     multisigAccountCreationFee,
+    isMultisigAccountAccessible,
     multisigAccountPrepare,
     multisigAccountCreate,
   };

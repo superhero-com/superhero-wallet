@@ -404,7 +404,7 @@ export default defineComponent({
         });
 
         const { contractId, txHash } = activeMultisigAccount.value;
-        await callContractMethod(action, contractId, txHash);
+        await callContractMethod(action, contractId, txHash as string);
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
@@ -427,9 +427,9 @@ export default defineComponent({
 
       processingAction.value = true;
       try {
-        const { address, txHash, nonce } = activeMultisigAccount.value;
-        const rawTx = await fetchTransactionByHash(txHash);
-        transaction.value = await sendTx(address, (rawTx as any).tx, nonce);
+        const { gaAccountId, txHash, nonce } = activeMultisigAccount.value;
+        const rawTx = await fetchTransactionByHash(txHash as string);
+        transaction.value = await sendTx(gaAccountId, (rawTx as any).tx, nonce);
 
         await updateMultisigAccounts();
 

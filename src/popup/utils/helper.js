@@ -36,8 +36,8 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
     return null;
   }
-  const share = BigNumber(_balance).times(100).div(_totalSupply);
-  const amount = BigNumber(_reserve).times(share).div(100);
+  const share = new BigNumber(_balance).times(100).div(_totalSupply);
+  const amount = new BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
 };
 
