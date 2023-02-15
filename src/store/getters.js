@@ -12,7 +12,6 @@ import {
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  TX_TYPE_MDW,
   TX_FUNCTIONS,
   ACCOUNT_HD_WALLET,
   validateHash,
@@ -21,6 +20,7 @@ import {
   categorizeContractCallTxObject,
   getHdWalletAccount,
   getMdwEndpointPrefixForHash,
+  getTxType,
 } from '../popup/utils';
 
 export default {
@@ -90,10 +90,6 @@ export default {
   },
   getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-  getTxType: () => (tx) => tx
-    && (TX_TYPE_MDW[tx.type]
-      || SCHEMA.OBJECT_ID_TX_TYPE[tx.tag]
-      || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)),
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -120,7 +116,7 @@ export default {
   getTxFee: () => (transaction) => +aettosToAe(
     new BigNumber(transaction.fee || transaction.tx?.fee || 0),
   ),
-  getTxDirection: (_, { account: { address }, getTxType }) => (tx, externalAddress) => {
+  getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
       return tx.recipientId === address
         ? TX_FUNCTIONS.received
@@ -134,17 +130,17 @@ export default {
   },
   getTxTipUrl: () => (transaction) => (
     transaction.tipUrl
-        || transaction.url
-        || (!transaction.pending
-            && !transaction.claim
-            && transaction.tx.log?.[0]
-            && [
-              TX_FUNCTIONS.tip,
-              TX_FUNCTIONS.claim,
-            ].includes(transaction.function || transaction.tx?.function)
-            && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
-        || categorizeContractCallTxObject(transaction)?.url
-        || ''
+    || transaction.url
+    || (!transaction.pending
+      && !transaction.claim
+      && transaction.tx.log?.[0]
+      && [
+        TX_FUNCTIONS.tip,
+        TX_FUNCTIONS.claim,
+      ].includes(transaction.function || transaction.tx?.function)
+      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
+    || categorizeContractCallTxObject(transaction)?.url
+    || ''
   ),
   isTxAex9: () => (transaction) => transaction.tx
     && !!categorizeContractCallTxObject(transaction)?.token

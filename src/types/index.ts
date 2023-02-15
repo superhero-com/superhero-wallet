@@ -237,10 +237,11 @@ export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
 export type TxFunction = TxFunctionRaw | TxFunctionParsed;
 
-export type TransactionType =
+export type TxType =
   | 'SpendTx'
   | 'ContractCreateTx'
   | 'ContractCallTx'
+  | 'NameBidTx'
   | 'NamePreclaimTx'
   | 'NameClaimTx'
   | 'NameUpdateTx'
@@ -253,7 +254,8 @@ export type TransactionType =
   | 'ChannelCloseSoloTx'
   | 'ChannelSlashTx'
   | 'ChannelSettleTx'
-  | 'ChannelSnapshotSoloTx';
+  | 'ChannelSnapshotSoloTx'
+  | 'PayingForTx';
 
 export interface IGAMetaTx {
   amount: string;
@@ -297,13 +299,14 @@ export interface ITx {
   nonce: number
   payload?: string
   pointers: any
-  result: string,
+  result: string;
   return: ITxArguments
   returnType: string
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
-  type: TransactionType
+  tag?: string; // Allows to establish the transaction type
+  type: TxType; // Custom property we add after unpacking the Tx
   tx?: IGAMeta
 }
 
