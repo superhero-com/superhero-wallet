@@ -65,9 +65,12 @@ export default defineComponent({
       if (!props.tx) return [];
 
       const transactionTypes = i18n.t('transaction.type') as Record<string, TranslateResult>;
-      const txTransactionType = transactionTypes[txType.value];
+      const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
+      if (!txTransactionType) {
+        return [];
+      }
       if (txType.value?.startsWith('name')) {
         return [AENS, txTransactionType];
       }

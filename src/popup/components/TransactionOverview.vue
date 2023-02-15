@@ -32,7 +32,7 @@ import {
   IAccount,
   IAccountLabeled,
   ITx,
-  TransactionType,
+  TxType,
   TxFunction,
 } from '../../types';
 import TransactionInfo from './TransactionInfo.vue';
@@ -78,7 +78,7 @@ export default defineComponent({
     );
 
     const transaction = computed((): TransactionData => {
-      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, TranslateResult>;
+      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
       const { senderId, recipientId, contractId } = props.tx;
 
@@ -134,7 +134,7 @@ export default defineComponent({
             recipient: {
               label: root.$t('transaction.overview.aens'),
             },
-            title: transactionTypes[txType.value],
+            title: txType.value ? transactionTypes[txType.value] : undefined,
           };
         default:
           throw new Error('Unsupported transaction type');

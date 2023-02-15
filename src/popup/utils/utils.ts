@@ -17,6 +17,7 @@ import {
   SIMPLEX_URL,
   STUB_ADDRESS,
   STUB_CALLDATA,
+  TX_TYPE_MDW,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -26,6 +27,8 @@ import type {
   IResponseChallenge,
   ISdk,
   ITransaction,
+  ITx,
+  TxType,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -240,4 +243,12 @@ export function compareCaseInsensitive(
  */
 export function getAccountNameToDisplay(acc: IAccount) {
   return acc.name || `${i18n.t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
+}
+
+export function getTxType(tx: ITx): TxType {
+  return (
+    TX_TYPE_MDW[tx.type]
+    || (tx.tag && SCHEMA.OBJECT_ID_TX_TYPE[tx.tag])
+    || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)
+  );
 }

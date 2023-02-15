@@ -4,7 +4,6 @@ import type {
   IAccount,
   IAccountLabeled,
   ITokenList,
-  TransactionType,
   TxFunctionRaw,
   ITx,
   IDefaultComposableOptions,
@@ -16,6 +15,7 @@ import {
   RETURN_TYPE_OK,
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
+  getTxType,
 } from '../popup/utils';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
@@ -39,13 +39,12 @@ export function useTransactionTx({
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
 
-  const getTxType = computed(() => store.getters.getTxType);
   const getTxDirection = computed(() => store.getters.getTxDirection);
   const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
   const getExplorerPath = computed(() => store.getters.getExplorerPath);
   const getPreferred = computed(() => store.getters['names/getPreferred']);
 
-  const txType = computed<TransactionType>(() => getTxType.value(innerTx.value));
+  const txType = computed(() => innerTx.value ? getTxType(innerTx.value) : null);
 
   const isAllowance = computed((): boolean => (
     !!innerTx.value

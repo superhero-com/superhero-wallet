@@ -7,6 +7,7 @@ import type {
   INetwork,
   INotificationSetting,
   IPermission,
+  TxType,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
@@ -45,7 +46,7 @@ export const TX_FUNCTIONS = {
   claim: 'claim',
 } as const;
 
-export const TX_TYPE_MDW = {
+export const TX_TYPE_MDW: Partial<Record<TxType, string>> = {
   SpendTx: SCHEMA.TX_TYPE.spend,
   ContractCallTx: SCHEMA.TX_TYPE.contractCall,
   ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
