@@ -530,12 +530,8 @@ export interface ICreateMultisigAccount {
   address: string;
 }
 
-export interface IActiveMultisigTx {
+export interface IActiveMultisigTx extends IMultisigAccount {
   totalConfirmations: number;
-  confirmationsRequired: number;
-  confirmedBy: string[];
-  hasConsensus: boolean;
-  signers: string[];
   hash?: string;
   tx?: ITx;
   isMultisigTransaction: boolean;

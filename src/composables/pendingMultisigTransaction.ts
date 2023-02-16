@@ -21,9 +21,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
 
   async function assignPendingMultisigTx() {
     if (activeMultisigAccount.value) {
-      pendingMultisigTransaction.value = await fetchActiveMultisigTx(
-        activeMultisigAccount.value.contractId,
-      );
+      pendingMultisigTransaction.value = await fetchActiveMultisigTx();
     }
   }
 
