@@ -96,13 +96,11 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
           const [
             nonce,
             signers,
-            version,
             consensusResult,
             balance,
           ] = await Promise.all([
             contractInstance.methods.get_nonce(),
             contractInstance.methods.get_signers(),
-            contractInstance.methods.get_version(),
             contractInstance.methods.get_consensus_info(),
             gaAccountId ? sdk.balance(gaAccountId) : 0,
           ]);
@@ -125,7 +123,6 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
             ...otherMultisig,
             nonce: Number(nonce.decodedResult),
             signers: signers.decodedResult,
-            version: version.decodedResult,
             consensusLabel,
             contractId,
             balance: convertToken(balance, -MAGNITUDE),
