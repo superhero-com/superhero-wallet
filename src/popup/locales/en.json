@@ -74,7 +74,7 @@
     },
     "payloadInfo": {
       "title": "Payload message",
-      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br><br>Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /><br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
     },
     "payloadForm": {
       "title": "Add payload (optional)",
@@ -115,7 +115,7 @@
       "signerInputPlaceholder": "Signer's account address",
       "addSigner": "Add Signer",
       "selectAccount": "Select an account",
-      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br><br>As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
+      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br /><br />As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
       "consensusRequiredDesc": "Consensus required for tx confirmation:",
       "consensusRequiredContent": "of {0} signatures",
       "consensusRequiredHelpTitle": "Consensus required",
@@ -283,7 +283,7 @@
     },
     "autoextend-help": {
       "title": "Autoextend name",
-      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br><br> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br><br> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
+      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
     "receive": {
       "title": "Receive funds to public address",

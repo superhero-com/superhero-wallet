@@ -182,7 +182,6 @@ import type {
 } from '../../types';
 import {
   MODAL_DEFAULT,
-  MODAL_HELP,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
@@ -453,15 +452,6 @@ export default defineComponent({
       if (!formModel.value.address) formModel.value.address = '';
     }
 
-    function openPayloadInformation() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_HELP,
-        title: root.$t('modals.payloadInfo.title'),
-        msg: root.$t('modals.payloadInfo.msg'),
-        textCenter: true,
-      });
-    }
-
     function editPayload() {
       root.$store.dispatch('modals/open', {
         name: MODAL_PAYLOAD_FORM,
@@ -542,7 +532,6 @@ export default defineComponent({
       fee,
       max,
       editPayload,
-      openPayloadInformation,
       clearPayload,
     };
   },
