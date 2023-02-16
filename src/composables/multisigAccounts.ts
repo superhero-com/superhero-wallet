@@ -23,6 +23,7 @@ import { i18n } from '../store/plugins/languages';
 
 const POLLING_INTERVAL = 7000;
 const LOCAL_STORAGE_MULTISIG_KEY = `${LOCAL_STORAGE_PREFIX}_multisig`;
+const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
 
 function storeMultisigAccounts(multisigAccounts: IMultisigAccount[], networkId: string) {
   window.localStorage
@@ -86,60 +87,62 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     }
 
     const result = (await Promise.all(
-      rawMultisigData.map(async ({ contractId, gaAccountId, ...otherMultisig }) => {
-        try {
-          const contractInstance = await sdk.getContractInstance({
-            aci: SimpleGAMultiSigAci,
-            contractAddress: contractId,
-          });
+      rawMultisigData
+        .filter(({ version }) => version === SUPPORTED_MULTISIG_CONTRACT_VERSION)
+        .map(async ({ contractId, gaAccountId, ...otherMultisig }) => {
+          try {
+            const contractInstance = await sdk.getContractInstance({
+              aci: SimpleGAMultiSigAci,
+              contractAddress: contractId,
+            });
 
-          const [
-            nonce,
-            signers,
-            consensusResult,
-            balance,
-          ] = await Promise.all([
-            contractInstance.methods.get_nonce(),
-            contractInstance.methods.get_signers(),
-            contractInstance.methods.get_consensus_info(),
-            gaAccountId ? sdk.balance(gaAccountId) : 0,
-          ]);
+            const [
+              nonce,
+              signers,
+              consensusResult,
+              balance,
+            ] = await Promise.all([
+              contractInstance.methods.get_nonce(),
+              contractInstance.methods.get_signers(),
+              contractInstance.methods.get_consensus_info(),
+              gaAccountId ? sdk.balance(gaAccountId) : 0,
+            ]);
 
-          const consensus = consensusResult.decodedResult as any;
+            const consensus = consensusResult.decodedResult as any;
 
-          if (consensus.tx_hash) {
-            consensus.tx_hash = Buffer.from(consensus.tx_hash).toString('hex');
-          }
-          consensus.expiration_height = Number(consensus.expiration_height);
-          consensus.confirmations_required = Number(consensus.confirmations_required);
-          consensus.totalConfirmations = Number(consensus.confirmed_by.length);
+            if (consensus.tx_hash) {
+              consensus.tx_hash = Buffer.from(consensus.tx_hash).toString('hex');
+            }
+            consensus.expiration_height = Number(consensus.expiration_height);
+            consensus.confirmations_required = Number(consensus.confirmations_required);
+            consensus.totalConfirmations = Number(consensus.confirmed_by.length);
 
-          const consensusLabel = (
-            `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('common.of')} ${signers.decodedResult?.length}`
-          );
+            const consensusLabel = (
+              `${consensus?.confirmed_by?.length}/${consensus.confirmations_required} ${i18n.t('common.of')} ${signers.decodedResult?.length}`
+            );
 
-          return {
-            ...camelcaseKeysDeep(consensus),
-            ...otherMultisig,
-            nonce: Number(nonce.decodedResult),
-            signers: signers.decodedResult,
-            consensusLabel,
-            contractId,
-            balance: convertToken(balance, -MAGNITUDE),
-            address: gaAccountId,
-            multisigAccountId: gaAccountId,
-          };
-        } catch (error) {
+            return {
+              ...camelcaseKeysDeep(consensus),
+              ...otherMultisig,
+              nonce: Number(nonce.decodedResult),
+              signers: signers.decodedResult,
+              consensusLabel,
+              contractId,
+              balance: convertToken(balance, -MAGNITUDE),
+              address: gaAccountId,
+              multisigAccountId: gaAccountId,
+            };
+          } catch (error) {
           /**
            * Node might throw nonce mismatch error, skip the current account update
            * return the existing data and account details will be updated in the next poll.
            */
-          if (!(error instanceof DryRunError)) {
-            handleUnknownError(error);
+            if (!(error instanceof DryRunError)) {
+              handleUnknownError(error);
+            }
+            return multisigAccounts.value.find((account) => account.contractId === contractId);
           }
-          return multisigAccounts.value.find((account) => account.contractId === contractId);
-        }
-      }),
+        }),
     ))
       .filter(Boolean)
       .sort((a, b) => {
