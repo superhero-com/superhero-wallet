@@ -34,6 +34,8 @@ import {
   includes,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
+  getInnerTransaction,
+  getTxType,
 } from '../utils';
 
 import TransactionTag from './TransactionTag.vue';
@@ -50,19 +52,31 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props, { root }) {
+    const lastNestedInnerTx = getInnerTransaction(props.tx);
+
     const {
       txType,
       isAllowance,
       isDex,
-    } = useTransactionTx({ store: root.$store, tx: props.tx });
+    } = useTransactionTx({ store: root.$store, tx: lastNestedInnerTx });
 
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
+    const externalTxType = getTxType(props.tx);
 
     const labels = computed<(string | TranslateResult)[]>(() => {
       if (!props.tx) return [];
+      const externalLabels = [];
+      let innerLabels = [];
+
+      if (externalTxType === TX_TYPE_MDW.GAMetaTx) {
+        externalLabels.push(i18n.t('transaction.type.gaMetaTx'));
+      }
+      if (externalTxType === TX_TYPE_MDW.PayingForTx) {
+        externalLabels.push(i18n.t('transaction.type.payingForTx'));
+      }
 
       const transactionTypes = i18n.t('transaction.type') as Record<string, TranslateResult>;
       const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
@@ -72,71 +86,73 @@ export default defineComponent({
         return [];
       }
       if (txType.value?.startsWith('name')) {
-        return [AENS, txTransactionType];
-      }
-      if (txType.value === SCHEMA.TX_TYPE.gaMeta) {
-        return [
+        innerLabels = [AENS, txTransactionType];
+      } else if (txType.value === SCHEMA.TX_TYPE.gaMeta) {
+        innerLabels = [
           i18n.t('transaction.type.contractCallTx'),
           i18n.t('transaction.type.multisigProposal'),
         ];
-      }
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
-        return [
+      } else if (txType.value === SCHEMA.TX_TYPE.spend) {
+        innerLabels = [
           i18n.t('transaction.type.spendTx'),
-          getTxDirection.value(props.tx) === TX_FUNCTIONS.received
+          getTxDirection.value(lastNestedInnerTx) === TX_FUNCTIONS.received
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];
-      }
-      if (isAllowance.value) {
-        return [i18n.t('transaction.dexType.allowToken')];
-      }
-      if (isDex.value) {
-        return [
+      } else if (isAllowance.value) {
+        innerLabels = [i18n.t('transaction.dexType.allowToken')];
+      } else if (isDex.value) {
+        innerLabels = [
           DEX,
-          FUNCTION_TYPE_DEX.pool.includes(props.tx.function as TxFunctionRaw)
+          FUNCTION_TYPE_DEX.pool.includes(lastNestedInnerTx.function as TxFunctionRaw)
             ? i18n.t('transaction.dexType.pool')
             : i18n.t('transaction.dexType.swap'),
         ];
-      }
-      if (
+      } else if (
         (
-          props.tx.contractId
-          && [tipContractV1, tipContractV2].includes(props.tx.contractId)
-          && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], props.tx.function)
+          lastNestedInnerTx.contractId
+          && [tipContractV1, tipContractV2].includes(lastNestedInnerTx.contractId)
+          && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], lastNestedInnerTx.function)
         ) || props.isClaim
       ) {
-        return [
+        innerLabels = [
           i18n.t('pages.token-details.tip'),
           props.isClaim
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];
-      }
-      if (
+      } else if (
+        txType.value === TX_TYPE_MDW.GAAttachTx
+        && externalTxType === TX_TYPE_MDW.PayingForTx
+      ) {
+        innerLabels = [
+          i18n.t('transaction.type.createMultisigVault'),
+        ];
+      } else if (
         txType.value === SCHEMA.TX_TYPE.contractCall
-        && availableTokens.value[props.tx.contractId]
+        && availableTokens.value[lastNestedInnerTx.contractId]
         && (
-          props.tx.function === TX_FUNCTIONS.transfer
+          lastNestedInnerTx.function === TX_FUNCTIONS.transfer
           || props.isIncomplete
         )
       ) {
-        return [
+        innerLabels = [
           i18n.t('transaction.type.spendTx'),
-          props.tx.callerId === account.value.address
+          lastNestedInnerTx.callerId === account.value.address
             ? i18n.t('transaction.spendType.out')
             : i18n.t('transaction.spendType.in'),
         ];
-      }
-      if (txType.value === TX_TYPE_MDW.PayingForTx) {
-        return [
-          i18n.t('transaction.type.payingForTx'),
-        ];
-      }
-      if (props.isPending) {
+      } else if (props.isPending) {
         return [];
+      } else if (props.tx.function) {
+        innerLabels = [
+          transactionTypes[props.tx.function],
+          txTransactionType,
+        ];
+      } else {
+        innerLabels = [txTransactionType];
       }
-      return [txTransactionType];
+      return [...externalLabels, ...innerLabels];
     });
 
     return {

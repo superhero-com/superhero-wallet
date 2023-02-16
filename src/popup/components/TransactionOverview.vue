@@ -24,7 +24,9 @@ import {
 import { TranslateResult } from 'vue-i18n';
 import {
   TX_FUNCTIONS,
+  TX_TYPE_MDW,
   watchUntilTruthy,
+  getInnerTransaction,
 } from '../utils';
 import { useSdk, useTransactionTx } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
@@ -61,26 +63,28 @@ export default defineComponent({
 
     const { getSdk } = useSdk({ store: root.$store });
 
+    const lastNestedInnerTx = getInnerTransaction(props.tx);
+
     const {
       txType,
       direction,
       getOwnershipAccount,
     } = useTransactionTx({
       store: root.$store,
-      tx: props.tx,
+      tx: lastNestedInnerTx,
     });
 
     const isDexRecipient = computed(
       () => [
         ...getDexContracts.value.router,
         ...getDexContracts.value.wae,
-      ].includes(props.tx?.contractId),
+      ].includes(lastNestedInnerTx?.contractId),
     );
 
     const transaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
-      const { senderId, recipientId, contractId } = props.tx;
+      const { senderId, recipientId, contractId } = lastNestedInnerTx;
 
       switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
@@ -114,7 +118,7 @@ export default defineComponent({
               ? ownershipAccount.value
               : contract,
             title: root.$t('transaction.type.contractCallTx'),
-            function: props.tx.function,
+            function: lastNestedInnerTx.function,
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
@@ -136,19 +140,33 @@ export default defineComponent({
             },
             title: txType.value ? transactionTypes[txType.value] : undefined,
           };
+        case TX_TYPE_MDW.GAAttachTx: {
+          return {
+            sender: {
+              address: lastNestedInnerTx.ownerId,
+              name: getPreferred.value(lastNestedInnerTx.ownerId),
+              url: getExplorerPath.value(lastNestedInnerTx.ownerId),
+              label: root.$t('multisig.multisigVault'),
+            },
+            recipient: {
+              label: root.$t('transaction.overview.smartContract'),
+              address: lastNestedInnerTx.contractId,
+            },
+          };
+        }
         default:
-          throw new Error('Unsupported transaction type');
+          throw new Error(`Unsupported transaction type ${txType.value}`);
       }
     });
 
     async function decodeClaimTransactionAccount(): Promise<string> {
       // eslint-disable-next-line camelcase
-      const calldata = props.tx.callData || props.tx.call_data;
+      const calldata = lastNestedInnerTx.callData || lastNestedInnerTx.call_data;
 
-      if (!(props.tx.contractId && calldata)) return '';
+      if (!(lastNestedInnerTx.contractId && calldata)) return '';
 
       const sdk = await getSdk();
-      const { bytecode } = await sdk.getContractByteCode(props.tx.contractId);
+      const { bytecode } = await sdk.getContractByteCode(lastNestedInnerTx.contractId);
       const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
         bytecode,
         calldata,
@@ -160,17 +178,18 @@ export default defineComponent({
 
     onMounted(async () => {
       await watchUntilTruthy(() => middleware.value);
-      if (props.tx.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.value.getNameById(props.tx.recipientId)).name;
+      if (lastNestedInnerTx.recipientId?.startsWith('nm_')) {
+        name.value = (await middleware.value.getNameById(lastNestedInnerTx.recipientId)).name;
       }
       let transactionOwnerAddress;
-      if (props.tx.function === TX_FUNCTIONS.claim) {
+      if (lastNestedInnerTx.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
       ownershipAccount.value = getOwnershipAccount(transactionOwnerAddress);
     });
 
     return {
+      lastNestedInnerTx,
       transaction,
     };
   },

@@ -55,6 +55,8 @@ export const TX_TYPE_MDW: Partial<Record<TxType, string>> = {
   NameBidTx: SCHEMA.TX_TYPE.nameClaim,
   NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
   PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
+  GAMetaTx: 'gaMetaTx',
+  GAAttachTx: 'gaAttachTx',
 };
 
 export const CONNECTION_TYPES = {
@@ -524,3 +526,9 @@ export const MULTISIG_CREATION_PHASES = {
 } as const;
 
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
+
+export const MULTISIG_PROPOSAL_CONFIRM_ACTIONS = {
+  confirm: 'confirm',
+  revoke: 'revoke',
+  refuse: 'refuse',
+} as const;
