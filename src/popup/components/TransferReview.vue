@@ -96,7 +96,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
-import { Tag } from '@aeternity/aepp-sdk';
+import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
 import { useDeepLinkApi } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
@@ -181,7 +181,7 @@ export default defineComponent({
           actionResult = await sdk.value.spend(amount, recipient, {
             waitMined: false,
             modal: false,
-            payload: props.transferData.payload,
+            payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
           });
         }
 

@@ -1,3 +1,4 @@
+import { unpackTx } from '@aeternity/aepp-sdk';
 import { postMessage } from './connection';
 import { popupProps } from './config';
 import { buildTx } from './index';
@@ -10,7 +11,7 @@ const internalPostMessage = process.env.RUNNING_IN_TESTS
         const { txType } = await browser.storage.local.get('txType');
         if (txType) {
           const props = popupProps.base;
-          props.transaction = buildTx(txType).txObject;
+          props.transaction = unpackTx(buildTx(txType));
           return props;
         }
         return popupProps[POPUP_TYPE];

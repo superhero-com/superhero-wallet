@@ -70,7 +70,7 @@ export default {
     async signTransaction({ rootGetters: { account, 'sdkPlugin/sdk': sdk }, dispatch }, { txBase64 }) {
       await dispatch('ensureCurrentAccountAvailable');
 
-      const txObject = unpackTx(txBase64).tx;
+      const txObject = unpackTx(txBase64);
       const encodedTx = buildTx(
         txObject,
         Tag[txObject.tag],
@@ -86,7 +86,7 @@ export default {
         ],
       }), 'hex');
 
-      return buildTx({ encodedTx, signatures: [signature] }, Tag.SignedTx).tx;
+      return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
   },
 };

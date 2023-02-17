@@ -57,7 +57,7 @@ export default {
     async confirmTxSigning({ dispatch }, { txBase64, host }) {
       let txObject;
       try {
-        txObject = unpackTx(txBase64).tx;
+        txObject = unpackTx(txBase64);
       } catch (e) {
         await dispatch('confirmRawDataSigning', txBase64);
         return;
@@ -102,7 +102,7 @@ export default {
         'signWithoutConfirmation',
         Buffer.concat([Buffer.from(await this.getters['sdkPlugin/sdk'].api.getNetworkId()), Buffer.from(encodedTx)]),
       );
-      return buildTx({ encodedTx, signatures: [signature] }, Tag.SignedTx).tx;
+      return buildTx({ tag: Tag.SignedTx, encodedTx: unpackTx(txBase64), signatures: [signature] });
     },
   },
 };

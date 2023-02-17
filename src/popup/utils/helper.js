@@ -8,11 +8,12 @@ import {
   AE_AMOUNT_FORMATS,
   getMinimumNameFee,
   formatAmount,
-  ABI_VERSIONS,
-  VM_VERSIONS,
+  AbiVersion,
+  VmVersion,
   NAME_TTL,
   buildTx as rawBuildTx,
   encode,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import {
@@ -51,23 +52,23 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   return amount.toFixed(0);
 };
 
-export const calculateFee = (type, options) => {
+export const calculateFee = (tag, options) => {
   const params = {
-    ...type === Tag.SpendTx ? {
+    ...tag === Tag.SpendTx ? {
       senderId: STUB_ADDRESS,
       recipientId: STUB_ADDRESS,
     } : {},
     amount: MAX_UINT256,
     ttl: MAX_UINT256,
     nonce: MAX_UINT256,
-    ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-    abiVersion: ABI_VERSIONS.SOPHIA,
+    ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
+    abiVersion: AbiVersion.Sophia,
     callData: STUB_CALLDATA,
     gas: 0,
     ...options,
-    ...type === Tag.NameClaimTx ? { vsn: 2 } : {},
+    ...tag === Tag.NameClaimTx ? { vsn: 2 } : {},
   };
-  const { fee } = rawBuildTx(params, type).txObject;
+  const { fee } = unpackTx(rawBuildTx({ tag, ...params }));
   return BigNumber(fee).shiftedBy(-MAGNITUDE);
 };
 
@@ -316,4 +317,5 @@ export const isValidURL = (url) => {
   const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
   return isURL(url) || !!pattern.test(url);
 };
-export const buildTx = (txtype) => rawBuildTx({ ...txParams[txtype] }, txtype);
+
+export const buildTx = (txtype) => rawBuildTx({ tag: txtype, ...txParams[txtype] });
