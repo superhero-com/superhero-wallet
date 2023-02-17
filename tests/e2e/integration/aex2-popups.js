@@ -9,7 +9,12 @@ import { popupProps, txParams } from '../../../src/popup/utils/config';
 import locale from '../../../src/popup/locales/en.json';
 
 const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
-const txTypes = [SCHEMA.TX_TYPE.spend, SCHEMA.TX_TYPE.contractCall, SCHEMA.TX_TYPE.contractCreate];
+
+const txTypes = [
+  SCHEMA.TX_TYPE.spend,
+  SCHEMA.TX_TYPE.contractCall,
+  SCHEMA.TX_TYPE.contractCreate,
+];
 
 describe('Tests cases for AEX-2 popups', () => {
   beforeEach(() => {

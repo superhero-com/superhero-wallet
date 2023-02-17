@@ -150,7 +150,7 @@ export default {
   getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
     const converted = convertToCurrency(amount);
     if (converted < 0.01) return `<${formatCurrency(0.01)}`;
-    return `≈${formatCurrency(converted)}`;
+    return `${formatCurrency(converted)}`;
   },
   getAccountPendingTransactions: (
     { transactions: { pending } }, { activeNetwork, account: { address } },

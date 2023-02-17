@@ -20,6 +20,7 @@ export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
+export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 
 export const TX_FUNCTIONS = {
   tip: 'tip',
@@ -72,6 +73,7 @@ export const HASH_PREFIX_NAME = 'nm';
 export const HASH_PREFIX_ORACLE = 'ok';
 export const HASH_PREFIX_TRANSACTION = 'th';
 
+export const ABORT_TX_TYPE = 'abort';
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
@@ -172,6 +174,8 @@ export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 
 export const AENS = 'AENS';
 export const DEX = 'DEX';
+
+export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
@@ -364,8 +368,10 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const FUNCTION_TYPE_DEX: Record<'pool' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
+export const FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' |'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
   pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
+  removeLiquidity: ['remove_liquidity', 'remove_liquidity_ae'],
+  addLiquidity: ['add_liquidity', 'add_liquidity_ae'],
   swap: [
     'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
     'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',

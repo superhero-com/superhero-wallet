@@ -6,6 +6,7 @@
   "common": {
     "you": "You",
     "of": "of",
+    "by": "by",
     "edit": "Edit",
     "nonce": "Nonce",
     "callData": "Call data",
@@ -42,6 +43,9 @@
       "title": "Claim your own .chain name",
       "description": "Get a human-readable name for your account and receive funds with it.",
       "button": "Claim a name"
+    },
+    "latestTransactionCard": {
+      "title": "Latest transactions"
     },
     "pendingMultisigCard": {
       "title": "Pending multisig transaction"
@@ -364,23 +368,43 @@
       "gaMetaTx": "GAMetaTx",
       "gaAttachTx": "GAAttachTx",
       "pending": "Pending...",
-      "multisigProposal": "Multisig proposal",
+      "multisigProposal": "Multisig Proposal",
+      "sentTx": "Sending",
+      "receivedTx": "Receiving",
       "createMultisigVault": "Create Multisig Vault",
       "propose": "Propose Tx",
       "revoke": "Revoke Tx",
       "refuse": "Disapprove Tx",
       "confirm": "Approve Tx"
     },
+    "listType": {
+      "sentTx": "Sent",
+      "receivedTx": "Received",
+      "namePreClaimTx": "Name preclaimed",
+      "nameClaimTx": "Name claimed",
+      "nameUpdateTx": "Name updated",
+      "nameTransferTx": "Name transferred",
+      "nameRevokeTx": "Revoke name",
+      "provide_liquidity": "Liquidity provided",
+      "remove_liquidity": "Liquidity removed",
+      "tipSent": "Tip sent",
+      "tipReceived": "Tip received"
+    },
     "dexType": {
-      "provide_liquidity": "provide liquidity",
-      "remove_liquidity":"remove liquidity",
-      "swap": "swap",
-      "allowToken": "allow token",
-      "change_allowance": "allow token",
-      "transfer_allowance": "allow token",
-      "deposit": "deposit",
-      "withdraw": "withdraw",
-      "pool": "pool"
+      "provideLiquidity": "Liquidity provided",
+      "removeLiquidity": "Liquidity removed",
+      "swap": "Swap",
+      "allowToken": "Allow token",
+      "changeAllowance": "Allow token",
+      "transferAllowance": "Allow token",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw",
+      "pool": "Pool"
+    },
+    "multisigType": {
+      "send": "Send",
+      "sing": "Approved",
+      "revoke": "Revoked"
     },
     "spendType": {
       "out": "out",

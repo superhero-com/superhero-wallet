@@ -11,13 +11,19 @@
         token.isReceived ? TX_FUNCTIONS.received : TX_FUNCTIONS.sent,
         { error }
       ]"
+      :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
         :tokens="token.isPool ? [filteredTokens[0], filteredTokens[1]] : [token]"
         :icon-size="iconSize"
+        full-ae-symbol
       />
       <span class="amount">
-        {{ tokenAmount(token) }}
+        {{ token.isReceived ? '' : '−' }}
+        {{ amountRounded(tokenAmount(token)) }}
+        <span class="token-name">
+          {{ shrinkString(getTokenName(token), 5) }}
+        </span>
       </span>
     </div>
   </div>
@@ -27,9 +33,12 @@
 import {
   computed, defineComponent, PropType, ref,
 } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
 import {
   amountRounded,
   convertToken,
+  shrinkString,
+  AETERNITY_SYMBOL,
   TX_FUNCTIONS,
 } from '../utils';
 import { useTransactionTokens } from '../../composables';
@@ -62,21 +71,45 @@ export default defineComponent({
       localTokens.value = tokens.value;
     }
 
-    const filteredTokens = computed(() => (props.extTokens || localTokens.value)?.filter(
-      ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
-    ) || []);
+    const filteredTokens = computed<ITokenResolved[]>(
+      () => (props.extTokens || localTokens.value)?.filter(
+        ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
+      ) || [],
+    );
 
     function tokenAmount(token: ITokenResolved) {
-      const sign = token.isReceived ? '+' : '-';
-      const amount = amountRounded(token.decimals
+      return token.decimals
         ? convertToken(token.amount || 0, -token.decimals)
-        : token.amount);
-      return `${sign} ${amount}`;
+        : token.amount;
     }
+
+    const getTokenName = (token: ITokenResolved) => token?.isAe ? AETERNITY_SYMBOL : token.symbol;
+
+    function calculateFontSize(amountValue: BigNumber | number) {
+      const amount = BigNumber.isBigNumber(amountValue)
+        ? amountValue
+        : new BigNumber(amountValue);
+
+      if (amount.isLessThanOrEqualTo(new BigNumber(999999))) {
+        return '18px';
+      }
+      if (amount.isLessThanOrEqualTo(new BigNumber(999999999))) {
+        return '16px';
+      }
+      if (amount.isLessThanOrEqualTo(new BigNumber(999999999999))) {
+        return '14px';
+      }
+      return '12px';
+    }
+
     return {
       filteredTokens,
       tokenAmount,
+      shrinkString,
+      getTokenName,
+      amountRounded,
       TX_FUNCTIONS,
+      calculateFontSize,
     };
   },
 });
@@ -87,32 +120,33 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .transaction-token-rows {
+  @extend %face-sans-15-regular;
+
   width: 100%;
+  line-height: 20px;
 
   .token-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
+    font-size: var(--font-size);
 
-    @extend %face-sans-15-regular;
-
-    &.error .amount {
-      color: variables.$color-grey-dark;
+    .amount {
+      color: variables.$color-white;
+      font-weight: 500;
     }
 
-    &.received:not(.error) .amount {
+    &.received .amount {
       color: variables.$color-success-dark;
     }
 
-    &.sent:not(.error) .amount {
-      color: variables.$color-danger;
+    .tokens {
+      color: variables.$color-white;
     }
 
-    .tokens {
-      @extend %face-sans-15-regular;
-
-      color: variables.$color-white;
+    .token-name {
+      @extend %face-sans-16-regular;
     }
   }
 }

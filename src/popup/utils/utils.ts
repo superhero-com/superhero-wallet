@@ -29,6 +29,7 @@ import type {
   ITransaction,
   ITx,
   TxType,
+  IDashboardTransaction,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -241,8 +242,45 @@ export function compareCaseInsensitive(
  * Prepare human-readable name from the user account object.
  * Eg.: `somehuman.chain`, `Account 2`
  */
-export function getAccountNameToDisplay(acc: IAccount) {
-  return acc.name || `${i18n.t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
+export function getAccountNameToDisplay(acc: IAccount | undefined) {
+  return acc?.name || `${i18n.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
+}
+
+export function defaultTransactionSortingCallback(
+  a: ITransaction | IDashboardTransaction,
+  b: ITransaction | IDashboardTransaction,
+) {
+  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
+  const compareMicroTime = () => {
+    const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
+      (time) => Number.isNaN(time),
+    );
+    if (withoutTimeIndex === 0) {
+      return -1;
+    }
+    if (withoutTimeIndex === 1) {
+      return 1;
+    }
+    return bMicroTime - aMicroTime;
+  };
+  return pending || compareMicroTime();
+}
+
+export function shrinkString(text: string, maxLength: number) {
+  return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
+}
+
+export function amountRounded(rawAmount: number | BigNumber): string {
+  let amount = rawAmount;
+  if (typeof rawAmount !== 'object') {
+    amount = new BigNumber(rawAmount);
+  }
+
+  if (amount < 0.01 && amount.toString().length < 9 + 2) {
+    return amount.toFixed();
+  }
+  return amount.toFixed((amount < 0.01) ? 9 : 2);
 }
 
 export function getTxType(tx: ITx): TxType {

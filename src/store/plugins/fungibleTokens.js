@@ -222,7 +222,7 @@ export default (store) => {
         {
           state: { transactions },
           rootGetters: { activeNetwork, getDexContracts }, commit,
-        }, { recent, address },
+        }, { recent, address, multipleAccounts },
       ) {
         if (transactions[address]?.length && !recent) return transactions[address];
 
@@ -267,13 +267,15 @@ export default (store) => {
             hash: tx.tx_hash,
           }));
 
-        if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
-          commit('setTransactions', {
-            address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
-          });
-          return newTransactions;
+        if (!multipleAccounts) {
+          if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
+            commit('setTransactions', {
+              address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
+            });
+          } else {
+            commit('setTransactions', { address, transactions: newTransactions.reverse() });
+          }
         }
-        commit('setTransactions', { address, transactions: newTransactions.reverse() });
         return newTransactions;
       },
     },
