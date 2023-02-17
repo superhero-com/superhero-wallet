@@ -157,7 +157,10 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
         ) {
           return b.confirmedBy.length - a.confirmedBy.length;
         }
-        return b.balance - a.balance;
+        if (!b.balance.minus(a.balance).isZero()) {
+          return b.balance.minus(a.balance);
+        }
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
 
     if (!activeMultisigAccountId.value) {
