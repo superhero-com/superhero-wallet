@@ -152,6 +152,7 @@ export interface IMultisigAccount extends IMultisigAccountBase {
   proposedBy: string
   gaAccountId?: string
   consensusLabel?: string
+  hasPendingTransaction: string
 }
 
 export interface IMultisigAccountCreationTx {

@@ -44,7 +44,7 @@ export default defineComponent({
     } = useMultisigAccounts({ store: root.$store });
 
     const hasPendingMultisigTransaction = computed(
-      () => multisigAccounts.value.some((acc) => acc.txHash),
+      () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),
     );
 
     watch(() => multisigAccounts.value, () => {

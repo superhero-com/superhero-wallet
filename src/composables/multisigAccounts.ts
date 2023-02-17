@@ -78,7 +78,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
     function isSignatureRequested(account: IMultisigAccount) {
       return (
-        account.txHash
+        account.hasPendingTransaction
         && account.signers.some((signer: string) => (
           accounts.value.map(({ address }) => address).includes(signer)
           && !account.confirmedBy.includes(signer)
@@ -131,6 +131,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
               balance: convertToken(balance, -MAGNITUDE),
               address: gaAccountId,
               multisigAccountId: gaAccountId,
+              hasPendingTransaction: consensus.tx_hash && !consensus.expired,
             };
           } catch (error) {
           /**
@@ -146,8 +147,8 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     ))
       .filter(Boolean)
       .sort((a, b) => {
-        if (a.txHash && !b.txHash) return -1;
-        if (!a.txHash && b.txHash) return 1;
+        if (a.hasPendingTransaction && !b.hasPendingTransaction) return -1;
+        if (!a.hasPendingTransaction && b.hasPendingTransaction) return 1;
         if (isSignatureRequested(a) && !isSignatureRequested(b)) return -1;
         if (!isSignatureRequested(a) && isSignatureRequested(b)) return 1;
         if (
