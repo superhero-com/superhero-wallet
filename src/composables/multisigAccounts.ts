@@ -112,7 +112,9 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
               )
                 ? contractInstance.methods.get_nonce()
                 : { decodedResult: currentAccount.nonce },
-              contractInstance.methods.get_signers(),
+              currentAccount?.signers
+                ? { decodedResult: currentAccount.signers }
+                : contractInstance.methods.get_signers(),
               contractInstance.methods.get_consensus_info(),
               gaAccountId ? sdk.balance(gaAccountId) : 0,
             ]);
