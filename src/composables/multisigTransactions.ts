@@ -11,6 +11,7 @@ import {
   handleUnknownError,
 } from '../popup/utils';
 import { useSdk } from './sdk';
+import { useMultisigAccounts } from './multisigAccounts';
 import type {
   IActiveMultisigTx,
   IDefaultComposableOptions,
@@ -59,27 +60,16 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @param contractAddress multisig contract
    * @returns transaction with consensus details if exists or null
    */
-  async function fetchActiveMultisigTx(contractAddress: string): Promise<IActiveMultisigTx | null> {
-    const sdk = await getSdk();
+  async function fetchActiveMultisigTx(): Promise<IActiveMultisigTx | null> {
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
-    const gaContractRpc = await sdk.getContractInstance({
-      aci: SimpleGAMultiSigAci,
-      contractAddress,
-    });
-    const txConsensus = (await gaContractRpc.methods.get_consensus_info()).decodedResult;
-    const signers = (await gaContractRpc.methods.get_signers()).decodedResult;
-
-    if (txConsensus.tx_hash) {
-      const hash = Buffer.from(txConsensus.tx_hash).toString('hex');
-      const rawTx = await fetchTransactionByHash(hash);
+    if (activeMultisigAccount.value?.txHash) {
+      const rawTx = await fetchTransactionByHash(activeMultisigAccount.value?.txHash);
 
       return {
-        totalConfirmations: txConsensus.confirmed_by.length,
-        confirmationsRequired: txConsensus.confirmations_required,
-        confirmedBy: txConsensus.confirmed_by,
-        hasConsensus: txConsensus.hasConsensus,
-        signers,
-        hash,
+        ...activeMultisigAccount.value,
+        totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
+        hash: activeMultisigAccount.value?.txHash,
         tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
         isMultisigTransaction: true,
       };

@@ -268,7 +268,6 @@ import {
 } from '../utils';
 import type {
   IGAMetaTx,
-  IMultisigAccount,
   IMultisigFunctionTypes,
   ITransaction,
   ITx,
@@ -371,8 +370,8 @@ export default defineComponent({
         : null
     ));
 
-    async function getTransactionDetails(currentAccount: IMultisigAccount) {
-      const activeMultisigTx = await fetchActiveMultisigTx(currentAccount.contractId);
+    async function getTransactionDetails() {
+      const activeMultisigTx = await fetchActiveMultisigTx();
 
       if (!activeMultisigTx) {
         return;
@@ -440,7 +439,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (activeMultisigAccount.value) {
-        getTransactionDetails(activeMultisigAccount.value);
+        getTransactionDetails();
       }
     });
 
