@@ -38,6 +38,7 @@ function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
 const multisigAccounts = ref(<IMultisigAccount[]>[]);
 const activeMultisigAccountId = ref('');
 const isMultisigDashboard = ref(false);
+const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents();
 
@@ -96,13 +97,21 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
               contractAddress: contractId,
             });
 
+            const currentAccount = multisigAccounts.value
+              .find((account) => account.contractId === contractId);
+
             const [
               nonce,
               signers,
               consensusResult,
               balance,
             ] = await Promise.all([
-              contractInstance.methods.get_nonce(),
+              (
+                (isAdditionalInfoNeeded.value && gaAccountId === activeMultisigAccountId.value)
+                || currentAccount?.nonce == null
+              )
+                ? contractInstance.methods.get_nonce()
+                : { decodedResult: currentAccount.nonce },
               contractInstance.methods.get_signers(),
               contractInstance.methods.get_consensus_info(),
               gaAccountId ? sdk.balance(gaAccountId) : 0,
@@ -177,14 +186,26 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     store.commit('fungibleTokens/resetTokensAndTransactions');
   }
 
+  function fetchAdditionalInfo() {
+    isAdditionalInfoNeeded.value = true;
+    updateMultisigAccounts();
+  }
+
+  function stopFetchingAdditionalInfo() {
+    isAdditionalInfoNeeded.value = false;
+  }
+
   initPollingWatcher(() => updateMultisigAccounts(), POLLING_INTERVAL);
 
   return {
     multisigAccounts,
+    isAdditionalInfoNeeded,
     isMultisigDashboard,
     activeMultisigAccountId,
     activeMultisigAccount,
+    fetchAdditionalInfo,
     setActiveMultisigAccountId,
+    stopFetchingAdditionalInfo,
     toggleMultisigDashboard,
     updateMultisigAccounts,
   };
