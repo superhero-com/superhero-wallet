@@ -62,7 +62,10 @@ export default {
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
-  async fetchTipWithdrawnTransactions({ state, getters, commit }, { recent, address }) {
+  async fetchTipWithdrawnTransactions(
+    { state, getters, commit },
+    { recent, address, multipleAccounts },
+  ) {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
@@ -85,7 +88,9 @@ export default {
       blockHeight: height,
       claim: true,
     })));
-    commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    if (!multipleAccounts) {
+      commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    }
     return tipWithdrawnTransactions;
   },
   async fetchTransactions({
@@ -126,6 +131,7 @@ export default {
         }
       });
     }
+
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
   pollCurrencies({ commit }) {

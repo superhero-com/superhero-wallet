@@ -64,7 +64,7 @@ export default {
                 [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
                 {
                   delay: 2000,
-                  duration: 4000,
+                  duration: 6000,
                   direction: 'alternate',
                   iterations: Infinity,
                 },

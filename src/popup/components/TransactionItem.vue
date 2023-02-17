@@ -3,104 +3,86 @@
     class="transaction-item"
     :to="redirectRoute"
   >
-    <div class="header">
-      <span />
-      <div class="status">
-        <template v-if="!!multisigTransaction && !hasConsensus">
-          <PendingIcon class="icon" />
-          <span class="pending">
-            {{ $t('multisig.consensusPending') }}
-            {{ getConsensusInfo.confirmedBy }}/{{ getConsensusInfo.confirmationsRequired }}
-            {{ $t('common.of') }}
-            {{ getConsensusInfo.totalSigners }}
-          </span>
-        </template>
-        <template v-else-if="transaction.pending">
-          <PendingIcon class="icon" />
-          <span class="pending">{{ $t('transaction.type.pending') }}</span>
-        </template>
-        <template v-else>
-          <span data-cy="date">{{ formatDate(transaction.microTime) }}</span>
-          <span data-cy="time">{{ formatTime(transaction.microTime) }}</span>
-          <div
-            v-if="isErrorTransaction"
-            class="error"
-          >
-            <WarningIcon
-              v-if="currentTx.returnType === 'abort'"
-              class="icon"
-            />
-            <RevertedIcon
-              v-else
-              class="icon"
-            />
-            <span>{{ $t('transaction.returnType')[currentTx.returnType] }}</span>
-          </div>
-        </template>
-      </div>
-      <span />
-    </div>
     <div class="body">
       <TransactionTokens
         :ext-tokens="tokens"
         :error="isErrorTransaction"
+        icon-size="md"
       />
       <div class="footer">
-        <TransactionTagList
+        <!-- TODO consensus and other multisig stuff, is todo in my another task SW-622       -->
+        <div
+          v-if="!!multisigTransaction && !hasConsensus"
+          class="consensus"
+        >
+          <PendingIcon class="icon" />
+          <span class="pending">
+            {{ consensus }}
+          </span>
+        </div>
+
+        <TransactionLabel
+          v-else
           :tx="currentTx"
           :is-incomplete="!!transaction && transaction.incomplete"
           :is-pending="!!transaction && transaction.pending"
           :is-claim="!!transaction && transaction.claim"
+          :transaction-owner="transactionOwner"
+          :transaction-date="transactionDate"
+          :is-error-transaction="isErrorTransaction"
+          :consensus="consensus"
           dense
         />
-        <span v-if="fiatAmount">{{ fiatAmount }}</span>
+
+        <template v-if="!multisigTransaction">
+          <span v-if="fiatAmount && !transactionOwner">{{ fiatAmount }}</span>
+          <span
+            v-else-if="transactionOwner"
+            class="date"
+          >
+            {{ transactionDate }}
+          </span>
+        </template>
       </div>
     </div>
   </RouterLink>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  PropType,
-} from '@vue/composition-api';
-import { Location } from 'vue-router';
-
-import type {
-  IActiveMultisigTx,
-  ITransaction,
-  ITx,
-  TxFunctionRaw,
-} from '../../types';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import dayjs from 'dayjs';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
   convertToken,
   formatDate,
   formatTime,
+  relativeTimeTo,
 } from '../utils';
-import { useTransactionTx, useTransactionTokens } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS } from '../router/routeNames';
 
+import {
+  IActiveMultisigTx,
+  IDashboardTransaction,
+  ITransaction,
+  ITx,
+  TxFunctionRaw,
+} from '../../types';
+import {
+  useTransactionTokens,
+  useTransactionTx,
+} from '../../composables';
 import TransactionTokens from './TransactionTokenRows.vue';
-
-import PendingIcon from '../../icons/animated-pending.svg?vue-component';
-import RevertedIcon from '../../icons/refresh.svg?vue-component';
-import WarningIcon from '../../icons/warning.svg?vue-component';
-import TransactionTagList from './TransactionTagList.vue';
+import TransactionLabel from './TransactionLabel.vue';
 
 export default defineComponent({
   components: {
-    TransactionTagList,
-    PendingIcon,
-    RevertedIcon,
-    WarningIcon,
+    TransactionLabel,
     TransactionTokens,
   },
   props: {
-    transaction: { type: Object as PropType<ITransaction>, default: null },
+    transaction: { type: Object as PropType<ITransaction | IDashboardTransaction>, default: null },
     multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
     hasConsensus: Boolean,
   },
@@ -108,14 +90,14 @@ export default defineComponent({
     const getAmountFiat = useGetter('getAmountFiat');
 
     const currentTx = computed<ITx | undefined>(
-      () => (props.multisigTransaction || props.transaction)?.tx,
+      () => (props.multisigTransaction || props.transaction).tx,
     );
 
     const {
       isDex,
-      isErrorTransaction,
       direction,
       isAllowance,
+      isErrorTransaction,
     } = useTransactionTx({
       store: root.$store,
       tx: currentTx.value,
@@ -129,7 +111,13 @@ export default defineComponent({
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
-    const redirectRoute = computed<Location>(() => {
+    const transactionDate = computed(
+      () => props.transaction
+        ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
+        : undefined,
+    );
+
+    const redirectRoute = computed<any>(() => {
       if (props.multisigTransaction) {
         return { name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS };
       }
@@ -137,9 +125,9 @@ export default defineComponent({
     });
 
     const getConsensusInfo = computed(() => ({
-      confirmedBy: props.multisigTransaction.confirmedBy?.length || 0,
-      totalSigners: props.multisigTransaction.signers?.length || 0,
-      confirmationsRequired: props.multisigTransaction.confirmationsRequired?.toString(),
+      confirmedBy: props.multisigTransaction?.totalConfirmations,
+      totalSigners: props.multisigTransaction?.signers?.length,
+      confirmationsRequired: props.multisigTransaction?.confirmationsRequired?.toString(),
     }));
 
     const fiatAmount = computed(() => {
@@ -152,24 +140,33 @@ export default defineComponent({
           && FUNCTION_TYPE_DEX.pool.includes(currentTx.value?.function as TxFunctionRaw)
         )
       ) return 0;
-      return getAmountFiat.value(amountRounded(
-        aeToken.decimals
+      return getAmountFiat.value(
+        amountRounded((aeToken.decimals
           ? convertToken(aeToken.amount || 0, -aeToken.decimals)
-          : aeToken.amount,
-      ));
+          : aeToken.amount)!),
+      );
     });
 
+    const transactionOwner = computed((): string | undefined => (
+      (props.transaction as IDashboardTransaction)?.transactionOwner || undefined
+    ));
+
+    const consensus = computed(() => `${root.$t('multisig.consensusPending')}
+       ${getConsensusInfo.value.confirmedBy}/${getConsensusInfo.value.confirmationsRequired}
+       ${root.$t('common.of')} ${getConsensusInfo.value.totalSigners}`);
+
     return {
+      redirectRoute,
       fiatAmount,
-      formatDate,
-      formatTime,
-      getConsensusInfo,
+      transactionDate,
       isErrorTransaction,
       tokens,
-      isAllowance,
-      direction,
       currentTx,
-      redirectRoute,
+      transactionOwner,
+      consensus,
+      getConsensusInfo,
+      formatDate,
+      formatTime,
     };
   },
 });
@@ -178,81 +175,46 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .transaction-item {
-  padding: 4px var(--screen-padding-x) 10px;
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
+  @include mixins.flex(center, center, column);
+
+  padding: 10px var(--screen-padding-x);
+  margin: 0 calc(-1 * var(--screen-padding-x));
+  transition: all 0.25s ease-out;
 
   &:hover {
     background-color: variables.$color-bg-4-hover;
-  }
-
-  .header {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    color: variables.$color-grey-dark;
-    margin-bottom: 4px;
-
-    .icon {
-      width: 16px;
-      height: 16px;
-      color: variables.$color-white;
-      margin-right: 2px;
-    }
-
-    .status {
-      display: flex;
-      margin-left: 8px;
-      white-space: nowrap;
-      color: variables.$color-grey-dark;
-
-      @extend %face-sans-12-regular;
-
-      span {
-        margin-right: 8px;
-      }
-
-      .error {
-        display: flex;
-        color: variables.$color-warning;
-
-        .icon {
-          color: variables.$color-warning;
-        }
-      }
-
-      .pending {
-        font-weight: 500;
-      }
-    }
-
-    > span {
-      width: 100%;
-      border-bottom: 1px solid rgba(variables.$color-white, 0.15);
-    }
   }
 
   .body {
     width: 100%;
 
     .footer {
-      display: flex;
-      justify-content: space-between;
-      color: variables.$color-white;
-      padding-top: 4px;
+      @include mixins.flex(space-between, center, row);
 
-      span {
-        color: variables.$color-grey-light;
+      @extend %face-sans-12-regular;
 
-        @extend %face-sans-15-medium;
+      width: 100%;
+      color: rgba(variables.$color-white, 0.75);
+
+      .date {
+        white-space: nowrap;
       }
+    }
+  }
+
+  .consensus {
+    @extend %face-sans-12-medium;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .icon {
+      width: 16px;
+      height: 16px;
     }
   }
 }

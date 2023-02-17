@@ -5,7 +5,7 @@
 */
 
 import { RawLocation } from 'vue-router';
-import { TranslateResult } from 'vue-i18n';
+import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import {
@@ -342,6 +342,10 @@ export interface ITransaction {
   tx: ITx;
 }
 
+export interface IDashboardTransaction extends ITransaction {
+  transactionOwner?: string,
+}
+
 export interface IPendingTransaction {
   hash: string;
   amount: number | string;
@@ -552,6 +556,11 @@ export interface IRawMultisigTx {
 export interface IKeyPair {
   publicKey: string;
   secretKey: string;
+}
+
+export interface ILabel {
+  text: string | LocaleMessages | TranslateResult,
+  customPending?: string | LocaleMessages | TranslateResult
 }
 
 export interface IDefaultComposableOptions {

@@ -60,6 +60,7 @@ import {
   MOBILE_WIDTH,
   watchUntilTruthy,
   compareCaseInsensitive,
+  defaultTransactionSortingCallback,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -187,26 +188,7 @@ export default defineComponent({
               .toLocaleLowerCase()
               .includes(searchPhrase.value.toLocaleLowerCase()),
           )
-          .sort((a, b) => {
-            const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
-            const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
-
-            const compareMicroTime = () => {
-              const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
-                (time) => Number.isNaN(time),
-              );
-
-              if (withoutTimeIndex === 0) {
-                return -1;
-              }
-              if (withoutTimeIndex === 1) {
-                return 1;
-              }
-              return bMicroTime - aMicroTime;
-            };
-
-            return pending || compareMicroTime();
-          })
+          .sort(defaultTransactionSortingCallback)
           .slice(0, props.maxLength || Infinity);
       },
     );

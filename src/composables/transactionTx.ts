@@ -55,7 +55,7 @@ export function useTransactionTx({
   const isMultisig = computed((): boolean => (
     !!innerTx.value
     && (
-      Object.values(FUNCTION_TYPE_MULTISIG).includes(innerTx.value.function as string)
+      Object.values(FUNCTION_TYPE_MULTISIG).includes(innerTx.value.function as TxFunctionRaw)
       || !!innerTx.value.payerId
     )
   ));

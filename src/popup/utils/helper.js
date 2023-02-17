@@ -215,19 +215,6 @@ export const getAllPages = async (getFunction, getNextPage) => {
   }
   return result;
 };
-
-export const amountRounded = (rawAmount) => {
-  let amount = rawAmount;
-  if (typeof rawAmount !== 'object') {
-    amount = new BigNumber(rawAmount);
-  }
-
-  if (amount < 0.01 && amount.toString().length < 9 + 2) {
-    return amount.toFixed();
-  }
-  return amount.toFixed((amount < 0.01) ? 9 : 2);
-};
-
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
   const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
   return {

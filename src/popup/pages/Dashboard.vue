@@ -44,6 +44,10 @@
         />
       </Card>
 
+      <LatestTransactionsCard
+        v-if="!isMultisigDashboard"
+      />
+
       <Card
         v-if="!isMultisigDashboard"
         :text="$t('dashboard.buyCard.title')"
@@ -86,34 +90,38 @@ import {
   defineComponent,
   watch,
 } from '@vue/composition-api';
-
+import {
+  useGetter,
+  useState,
+} from '../../composables/vuex';
+import {
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+} from '../../composables';
 import {
   MODAL_TRANSFER_RECEIVE,
   MODAL_TRANSFER_SEND,
   buildSimplexLink,
 } from '../utils';
-import { useGetter, useState } from '../../composables/vuex';
-import { useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
-
+import type { ITransaction } from '../../types';
 import Card from '../components/Card.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import DashboardHeader from '../components/DashboardHeader.vue';
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
-
+import BtnBox from '../components/buttons/BtnBox.vue';
+import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import SubtractIcon from '../../icons/subtract.svg?vue-component';
 import CardIcon from '../../icons/credit-card.svg?vue-component';
 import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
-
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
-import BtnBox from '../components/buttons/BtnBox.vue';
-import { ITransaction } from '../../types';
 
 export default defineComponent({
   name: 'Dashboard',
   components: {
+    LatestTransactionsCard,
     PendingMultisigTransactionCard,
     DashboardHeader,
     Card,
