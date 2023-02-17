@@ -21,7 +21,6 @@ import { computed, defineComponent } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { useBalances, useMultisigAccounts } from '../../composables';
 import { useGetter } from '../../composables/vuex';
-import { convertToken, MAGNITUDE } from '../utils';
 
 export default defineComponent({
   setup(props, { root }) {
@@ -31,7 +30,7 @@ export default defineComponent({
     const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
 
     const multisigBalances = computed(() => multisigAccounts.value.map(
-      (acc) => convertToken(+(acc?.balance || 0), -MAGNITUDE),
+      (acc) => acc.balance,
     ));
 
     const totalAmount = computed(() => {
