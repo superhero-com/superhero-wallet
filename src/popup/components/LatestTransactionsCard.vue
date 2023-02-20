@@ -1,11 +1,12 @@
 <template>
+  <AnimatedSpinner
+    v-if="isLoading"
+    class="spinner"
+  />
   <Transition
+    v-else
     name="page-transition"
   >
-    <AnimatedSpinner
-      v-if="isLoading"
-      class="spinner"
-    />
     <div
       v-if="showWidget"
       class="latest-transaction-card"

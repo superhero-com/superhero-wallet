@@ -66,7 +66,7 @@
           class="account-name-truncated"
           :str="ownerName"
           gradient-color="transparent"
-          :style="{ width: `${truncateWidth}px` }"
+          :style="{ width: truncateWidth }"
         />
       </div>
     </div>
@@ -143,7 +143,7 @@ export default defineComponent({
 
     const transactionLabelRef = ref();
     const labelRef = ref();
-    const truncateWidth = ref({});
+    const truncateWidth = ref<string | number>('auto');
     const addComma = (text: TranslateResult) => text ? `${text},` : '';
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
@@ -240,7 +240,9 @@ export default defineComponent({
     ));
 
     onMounted(() => {
-      truncateWidth.value = transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25;
+      truncateWidth.value = `
+        ${transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25}px
+      `;
     });
 
     return {
