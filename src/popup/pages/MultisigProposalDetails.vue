@@ -252,6 +252,7 @@ import {
   defineComponent,
   ref,
   onMounted,
+  onBeforeUnmount,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
@@ -315,6 +316,8 @@ export default defineComponent({
     const {
       activeMultisigAccount,
       updateMultisigAccounts,
+      fetchAdditionalInfo,
+      stopFetchingAdditionalInfo,
     } = useMultisigAccounts({ store: root.$store });
 
     const {
@@ -440,8 +443,11 @@ export default defineComponent({
     onMounted(async () => {
       if (activeMultisigAccount.value) {
         getTransactionDetails();
+        fetchAdditionalInfo();
       }
     });
+
+    onBeforeUnmount(stopFetchingAdditionalInfo);
 
     return {
       AETERNITY_SYMBOL,

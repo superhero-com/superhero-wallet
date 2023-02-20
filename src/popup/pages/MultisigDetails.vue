@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, onMounted, onBeforeUnmount } from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
 import { useMultisigAccounts } from '../../composables';
 
@@ -96,7 +96,11 @@ export default defineComponent({
   setup(props, { root }) {
     const getExplorerPath = useGetter('getExplorerPath');
 
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const {
+      activeMultisigAccount,
+      fetchAdditionalInfo,
+      stopFetchingAdditionalInfo,
+    } = useMultisigAccounts({ store: root.$store });
 
     const {
       multisigAccountId,
@@ -106,6 +110,10 @@ export default defineComponent({
       signers,
       consensusLabel,
     } = activeMultisigAccount.value || {} as IMultisigAccount;
+
+    onMounted(fetchAdditionalInfo);
+
+    onBeforeUnmount(stopFetchingAdditionalInfo);
 
     return {
       multisigAccountId,
