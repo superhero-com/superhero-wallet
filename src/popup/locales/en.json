@@ -1212,6 +1212,7 @@
         "approved": "Transaction proposal has been approved by the required number of authorized signers. Transaction can be sent by any of the authorized signers.",
         "revoked": "Transaction proposal has been disapproved by {0} out of {1} required authorized signers. ",
         "proposingAccountRevoked": "Transaction proposal has been revoked by the proposing account.",
+        "justRevoked": "Transaction proposal has been revoked.",
         "completed": "Transaction has been successfully sent."
       },
       "signDialog": {

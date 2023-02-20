@@ -4,8 +4,20 @@ import {
   watch,
   computed,
 } from '@vue/composition-api';
-import { MULTISIG_VAULT_MIN_NUM_OF_SIGNERS, watchUntilTruthy } from '../popup/utils';
-import type { IAccount, IActiveMultisigTx, IDefaultComposableOptions } from '../types';
+import {
+  fetchJson,
+  watchUntilTruthy,
+  FUNCTION_TYPE_MULTISIG,
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  handleUnknownError,
+} from '../popup/utils';
+import type {
+  IAccount,
+  IActiveMultisigTx,
+  IDefaultComposableOptions,
+  INetwork,
+  ITransaction,
+} from '../types';
 import { useAccounts } from './accounts';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
@@ -18,11 +30,11 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
   const { accounts } = useAccounts({ store });
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+  const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 
   async function assignPendingMultisigTx() {
-    if (activeMultisigAccount.value) {
-      pendingMultisigTransaction.value = await fetchActiveMultisigTx();
-    }
+    pendingMultisigTransaction.value = await fetchActiveMultisigTx();
   }
 
   /**
@@ -136,10 +148,50 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
     ).length === pendingMultisigTxLocalSigners.value.length
   ));
 
+  /**
+   * Check if the pending proposal is still open.
+   */
+  const isPendingMultisigTxCompleted = computed((): boolean => (
+    !activeMultisigAccount.value?.txHash
+  ));
+
+  /**
+   * Check if the latest proposal action is revoked.
+   */
+  const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
+    !activeMultisigAccount.value?.txHash
+    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.revoke
+  ));
+
+  /**
+   * Check if the latest proposal action is confirmed.
+   */
+  const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
+    !activeMultisigAccount.value?.txHash
+    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.confirm
+  ));
+
+  /**
+   * Load latest multisig account action.
+   */
+  async function fetchLatestMultisigAccountTransaction() {
+    try {
+      const contractId = activeMultisigAccount.value?.contractId;
+      const { data: [latestTransaction] } = await fetchJson(`${activeNetwork.value.middlewareUrl}/txs/backward?limit=1&contract=${contractId}`);
+      latestMultisigAccountTransaction.value = latestTransaction;
+    } catch (error) {
+      handleUnknownError(error);
+    }
+  }
+
   watch(
     () => activeMultisigAccount.value,
     () => {
       assignPendingMultisigTx();
+
+      if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
+        fetchLatestMultisigAccountTransaction();
+      }
     },
   );
 
@@ -166,5 +218,8 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
     pendingMultisigTxCanBeSent,
     pendingMultisigTxLocalSigners,
     pendingMultisigTxConfirmedByLocalSigners,
+    isPendingMultisigTxCompleted,
+    isPendingMultisigTxCompletedAndRevoked,
+    isPendingMultisigTxCompletedAndConfirmed,
   };
 }
