@@ -1,9 +1,16 @@
 <template>
-  <div class="review-wrapper">
+  <div class="transfer-review">
     <ModalHeader
       :title="isMultisig ? $t('modals.multisigTxProposal.title') : $t('pages.send.reviewtx')"
       :subtitle="isMultisig ? null : $t('pages.send.checkalert')"
     />
+
+    <div
+      v-if="isMultisig"
+      class="multisig-account"
+    >
+      <AccountItem :address="activeMultisigAccount.multisigAccountId" />
+    </div>
 
     <DetailsItem
       :label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : $t('pages.send.sender')"
@@ -142,10 +149,12 @@ import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ModalHeader from './ModalHeader.vue';
 import PayloadDetails from './PayloadDetails.vue';
+import AccountItem from './AccountItem.vue';
 
 export default defineComponent({
   name: 'TransferReview',
   components: {
+    AccountItem,
     PayloadDetails,
     ModalHeader,
     AvatarWithChainName,
@@ -165,6 +174,10 @@ export default defineComponent({
   },
   setup(props, { root, emit }) {
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const {
+      activeMultisigAccount,
+      updateMultisigAccounts,
+    } = useMultisigAccounts({ store: root.$store });
     const loading = ref<boolean>(false);
     const account = computed<IAccount>(() => root.$store.getters.account);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
@@ -318,10 +331,6 @@ export default defineComponent({
       loading.value = true;
       try {
         const {
-          activeMultisigAccount,
-          updateMultisigAccounts,
-        } = useMultisigAccounts({ store: root.$store });
-        const {
           buildSpendTx, proposeTx, postSpendTx,
         } = useMultisigTransactions({ store: root.$store });
         if (activeMultisigAccount.value) {
@@ -389,13 +398,21 @@ export default defineComponent({
       isSelectedAssetAex9,
       tokenSymbol,
       account,
+      activeMultisigAccount,
     };
   },
 });
 </script>
 
 <style scoped lang="scss">
-.details-item {
-  margin-top: 16px;
+.transfer-review {
+  .details-item {
+    margin-top: 16px;
+  }
+
+  .multisig-account {
+    display: flex;
+    justify-content: center;
+  }
 }
 </style>
