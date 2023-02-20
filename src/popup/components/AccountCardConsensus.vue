@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="currentAccount.txHash"
+    v-if="currentAccount.hasPendingTransaction"
     class="account-card-consensus"
   >
     <div
