@@ -37,7 +37,7 @@ function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
   return storedMultisig ? JSON.parse(storedMultisig) : [];
 }
 
-const multisigAccounts = ref(<IMultisigAccount[]>[]);
+const multisigAccounts = ref<IMultisigAccount[]>([]);
 const activeMultisigAccountId = ref('');
 const isMultisigDashboard = ref(false);
 const isAdditionalInfoNeeded = ref(false);
@@ -49,7 +49,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-  const activeMultisigAccount = computed(() => multisigAccounts.value
+  const activeMultisigAccount = computed<IMultisigAccount | undefined>(() => multisigAccounts.value
     .find((account) => account.gaAccountId === activeMultisigAccountId.value));
 
   if (!multisigAccounts.value.length) {
