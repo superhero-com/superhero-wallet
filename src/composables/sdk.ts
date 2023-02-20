@@ -1,7 +1,7 @@
 import { computed } from '@vue/composition-api';
 import { Universal, Node } from '@aeternity/aepp-sdk';
 import { watchUntilTruthy } from '../popup/utils';
-import type { IDefaultComposableOptions, ISdk } from '../types';
+import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
 
 let drySdk: ISdk;
 
@@ -16,6 +16,7 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   const isNodeConnecting = computed<boolean>(() => store.state.sdkPlugin.isNodeConnecting);
   const isNodeReady = computed<boolean>(() => store.state.sdkPlugin.isNodeReady);
   const isNodeError = computed<boolean>(() => store.state.sdkPlugin.isNodeError);
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.
@@ -31,7 +32,7 @@ export function useSdk({ store }: IDefaultComposableOptions) {
    */
   async function getDrySdk(): Promise<ISdk> {
     if (!drySdk) {
-      const { compilerUrl, name, url } = store.getters.activeNetwork;
+      const { compilerUrl, name, url } = activeNetwork.value;
       drySdk = await Universal({
         nodes: [{
           name,
@@ -39,6 +40,9 @@ export function useSdk({ store }: IDefaultComposableOptions) {
         }],
         compilerUrl,
       });
+    } else if (activeNetwork.value.url !== drySdk.selectedNode.instance.url) {
+      drySdk.pool.delete(activeNetwork.value.name);
+      drySdk.addNode(activeNetwork.value.name, await Node({ url: activeNetwork.value.url }), true);
     }
     return drySdk;
   }
