@@ -1,13 +1,19 @@
 <template>
   <div class="transaction-multisig-consensus">
-    <div class="label">
+    <div
+      v-if="!isPendingMultisigTxCompleted"
+      class="label"
+    >
       <span> {{ $t('multisig.consensus') }} </span>
       <span class="confirmations-count">
         {{ activeMultisigAccount.consensusLabel }}
       </span>
     </div>
     <div class="consensus">
-      <div class="signers">
+      <div
+        v-if="!isPendingMultisigTxCompleted"
+        class="signers"
+      >
         <div
           v-for="signer of pendingMultisigTxSortedSigners"
           :key="signer"
@@ -86,13 +92,16 @@ export default defineComponent({
       pendingMultisigTxRequiredConfirmations,
       pendingMultisigTxPendingConfirmationsCount,
       pendingMultisigTxExpired,
+      isPendingMultisigTxCompleted,
+      isPendingMultisigTxCompletedAndRevoked,
+      isPendingMultisigTxCompletedAndConfirmed,
     } = usePendingMultisigTransaction({
       store: root.$store,
     });
     const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
 
     const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
-      if (props.proposalCompleted) {
+      if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {
         return {
           content: root.$t('pages.proposalDetails.infoBox.completed'),
           type: INFO_BOX_TYPES.success,
@@ -110,6 +119,13 @@ export default defineComponent({
         return {
           content: root.$t('pages.proposalDetails.infoBox.approved'),
           type: INFO_BOX_TYPES.default,
+        };
+      }
+
+      if (isPendingMultisigTxCompletedAndRevoked.value) {
+        return {
+          content: root.$t('pages.proposalDetails.infoBox.justRevoked'),
+          type: INFO_BOX_TYPES.danger,
         };
       }
 
@@ -150,6 +166,7 @@ export default defineComponent({
       pendingMultisigTxSortedSigners,
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
+      isPendingMultisigTxCompleted,
     };
   },
 });
