@@ -73,11 +73,13 @@ import {
   useTransactionTokens,
   useTransactionTx,
 } from '../../composables';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import TransactionTokens from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 
 export default defineComponent({
   components: {
+    PendingIcon,
     TransactionLabel,
     TransactionTokens,
   },
