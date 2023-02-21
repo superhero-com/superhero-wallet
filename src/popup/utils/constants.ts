@@ -545,3 +545,8 @@ export const MULTISIG_PROPOSAL_CONFIRM_ACTIONS = {
   revoke: 'revoke',
   refuse: 'refuse',
 } as const;
+
+export const DASHBOARD_CARD_ID = {
+  buyAe: 'buyAe',
+  claimName: 'claimName',
+} as const;
