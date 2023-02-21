@@ -12,35 +12,24 @@
     <template #cards>
       <LatestTransactionsCard />
 
-      <Card
-        :text="$t('dashboard.buyCard.title')"
+      <DashboardCard
+        :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
+        :btn-text="$t('dashboard.buyCard.button')"
         :background="buyBackground"
         :icon="CardIcon"
-      >
-        <BtnMain
-          class="card-button"
-          :text="$t('dashboard.buyCard.button')"
-          :href="simplexLink"
-          variant="secondary"
-          inline
-        />
-      </Card>
+        :href="simplexLink"
+      />
 
-      <Card
-        :text="$t('dashboard.nameCard.title')"
+      <DashboardCard
+        :title="$t('dashboard.nameCard.title')"
         :description="$t('dashboard.nameCard.description')"
+        :btn-text="$t('dashboard.nameCard.button')"
         :background="chainNameBackground"
         :icon="MenuCardIcon"
-      >
-        <BtnMain
-          class="card-button"
-          variant="purple"
-          inline
-          :text="$t('dashboard.nameCard.button')"
-          :to="{ name: 'account-details-names-claim' }"
-        />
-      </Card>
+        :to="{ name: 'account-details-names-claim' }"
+        variant="purple"
+      />
     </template>
   </DashboardWrapper>
 </template>
@@ -54,8 +43,7 @@ import {
 import { buildSimplexLink } from '../utils';
 import { useGetter } from '../../composables/vuex';
 
-import Card from '../components/Card.vue';
-import BtnMain from '../components/buttons/BtnMain.vue';
+import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
 import DashboardHeader from '../components/DashboardHeader.vue';
 import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
@@ -73,13 +61,12 @@ import chainNameBackground from '../../image/dashboard/chain-name.jpg';
 export default defineComponent({
   name: 'Dashboard',
   components: {
+    DashboardCard,
     LatestTransactionsCard,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
     DashboardHeader,
     DashboardWrapper,
-    Card,
-    BtnMain,
   },
   setup() {
     const account = useGetter('account');
@@ -98,11 +85,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.dashboard {
-  .card-button {
-    margin-top: 12px;
-  }
-}
-</style>
