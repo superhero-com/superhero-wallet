@@ -73,7 +73,7 @@
 
         <div class="signers-count">
           <select
-            v-if="signers.length > 2"
+            v-if="signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
             v-model="confirmationsRequired"
             class="num-of-signers-selector"
           >
@@ -93,7 +93,7 @@
             v-else
             class="text-emphasis"
           >
-            {{ minNumOfSigners }}
+            {{ MULTISIG_VAULT_MIN_NUM_OF_SIGNERS }}
           </span>
 
           <i18n
@@ -101,7 +101,7 @@
             tag="span"
             class="text"
           >
-            <span class="text-emphasis">{{ minNumOfSigners }}</span>
+            <span class="text-emphasis">{{ signers.length }} </span>
           </i18n>
 
           <BtnHelp
@@ -169,6 +169,7 @@ import {
   onMounted,
   PropType,
   ref,
+  watch,
 } from '@vue/composition-api';
 import {
   MODAL_READ_QR_CODE,
@@ -241,11 +242,6 @@ export default defineComponent({
 
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
-    const minNumOfSigners = computed(
-      () => signers.value.length < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
-        ? MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
-        : signers.value.length,
-    );
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       if (!validateHash(signer.address).valid) return false;
@@ -366,6 +362,15 @@ export default defineComponent({
       }
     });
 
+    watch(
+      () => signers.value.length,
+      (newSignersLength, oldSignersLength) => {
+        if (newSignersLength < oldSignersLength && newSignersLength < confirmationsRequired.value) {
+          confirmationsRequired.value = newSignersLength;
+        }
+      },
+    );
+
     return {
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -379,7 +384,6 @@ export default defineComponent({
       currentStep,
       confirmationsRequired,
       signers,
-      minNumOfSigners,
       isValidSigners,
       canCreateMultisig,
       openFormStep,
