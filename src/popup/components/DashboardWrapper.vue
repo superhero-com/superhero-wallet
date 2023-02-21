@@ -12,21 +12,16 @@
 
       <slot name="widgets" />
 
-      <Card
+      <DashboardCard
         v-if="!backedUpSeed"
-        :text="$t('dashboard.backUpCard.title')"
+        :title="$t('dashboard.backUpCard.title')"
         :description="$t('dashboard.backUpCard.description')"
+        :btn-text="$t('dashboard.backUpCard.button')"
         :icon="SubtractIcon"
+        :to="{ name: 'settings-seed-phrase' }"
         data-cy="backup-seed-phrase"
-      >
-        <BtnMain
-          class="card-button"
-          variant="danger"
-          inline
-          :text="$t('dashboard.backUpCard.button')"
-          :to="{ name: 'settings-seed-phrase' }"
-        />
-      </Card>
+        variant="danger"
+      />
 
       <slot name="cards" />
     </div>
@@ -43,16 +38,14 @@ import {
 import { MODAL_TRANSFER_SEND } from '../utils';
 import { useDispatch, useState } from '../../composables/vuex';
 
-import BtnMain from './buttons/BtnMain.vue';
-import Card from './Card.vue';
+import DashboardCard from './DashboardCard.vue';
 
 import SubtractIcon from '../../icons/subtract.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardWrapper',
   components: {
-    Card,
-    BtnMain,
+    DashboardCard,
   },
   setup(props, { root }) {
     const backedUpSeed = useState('backedUpSeed');
@@ -93,10 +86,6 @@ export default defineComponent({
     .buttons-row {
       display: flex;
       gap: var(--gap);
-    }
-
-    .card-button {
-      margin-top: 12px;
     }
   }
 }
