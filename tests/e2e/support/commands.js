@@ -1,7 +1,7 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { STUB_CURRENCY } from '../../../src/popup/utils/config';
+import { STUB_CURRENCY } from '../../../src/popup/utils/testsConfig';
 import {
   formatDate,
   formatTime,

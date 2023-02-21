@@ -5,7 +5,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
 } from '../../../src/popup/utils';
-import { popupProps, txParams } from '../../../src/popup/utils/config';
+import { popupProps, txParams } from '../../../src/popup/utils/testsConfig';
 import locale from '../../../src/popup/locales/en.json';
 
 const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
@@ -79,9 +79,9 @@ describe('Tests cases for AEX-2 popups', () => {
       const amount = tx.amount / 10 ** 18;
       const fee = tx.fee / 10 ** 18;
       let receiver;
-      if (txType === 'spendTx') {
+      if (txType === SCHEMA.TX_TYPE.spend) {
         receiver = tx.recipientId;
-      } else if (txType === 'contractCallTx') {
+      } else if (txType === SCHEMA.TX_TYPE.contractCall) {
         receiver = tx.contractId;
       } else {
         receiver = 'Contract create';

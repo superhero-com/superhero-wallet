@@ -60,7 +60,7 @@
         :label="$t('pages.signTransaction.total')"
       >
         <TokenAmount
-          :amount="getTxAmountTotal(transaction)"
+          :amount="getTxAmountTotal(txWrapped)"
           :symbol="getTxSymbol(transaction)"
           :aex9="isTxAex9(transaction)"
           data-cy="total"
@@ -187,6 +187,8 @@ export default defineComponent({
     const getTxDirection = useGetter('getTxDirection');
     const isTxAex9 = useGetter('isTxAex9');
 
+    const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
+
     const isAllowance = computed(() => (
       txFunction.value
       && FUNCTION_TYPE_DEX.allowance.includes(txFunction.value)
@@ -220,7 +222,7 @@ export default defineComponent({
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: getTxDirection.value(props.transaction) === TX_FUNCTIONS.received,
-      amount: getTxAmountTotal.value(props.transaction),
+      amount: getTxAmountTotal.value(txWrapped.value),
       symbol: getTxSymbol.value(props.transaction),
     }));
 
@@ -327,6 +329,7 @@ export default defineComponent({
       AETERNITY_SYMBOL,
       loading,
       showAdvanced,
+      txWrapped,
       filteredTxFields,
       completeTransaction,
       tokenList,

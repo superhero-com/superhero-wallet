@@ -5,7 +5,7 @@ import { mount } from '@vue/test-utils';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AETERNITY_SYMBOL } from '../../src/popup/utils';
-import { testAccount } from '../../src/popup/utils/config';
+import { testAccount } from '../../src/popup/utils/testsConfig';
 
 Object.assign(Vue.prototype, {
   $t: () => 'locale-specific-text',

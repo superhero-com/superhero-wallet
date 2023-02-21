@@ -149,7 +149,7 @@ export default defineComponent({
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
           : MAGNITUDE,
-      ).toFixed();
+      ).toNumber();
       loading.value = true;
       await watchUntilTruthy(() => tippingV1.value);
       try {
@@ -178,10 +178,10 @@ export default defineComponent({
         }
         const transaction: IPendingTransaction = {
           hash: retipResponse.hash,
-          amount,
           tipUrl: tip.value.url,
           pending: true,
           tx: {
+            amount,
             callerId: account.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
