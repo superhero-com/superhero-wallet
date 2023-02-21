@@ -43,11 +43,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .account-card-total-tokens {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-top: auto;
   width: 100%;
   opacity: 0.5;
 

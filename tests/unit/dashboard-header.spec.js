@@ -37,6 +37,13 @@ describe('Dashboard header', () => {
   it('should render', () => {
     const wrapper = shallowMount(DashboardHeader, {
       store,
+      mocks: {
+        $route: {
+          meta: {
+            isMultisigPage: false,
+          },
+        },
+      },
     });
     expect(wrapper.find('.dashboard-header').exists()).toBeTruthy();
   });

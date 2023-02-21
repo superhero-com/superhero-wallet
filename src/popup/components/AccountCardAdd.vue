@@ -47,6 +47,8 @@ export default {
   padding: 16px;
   text-align: left;
   cursor: pointer;
+  width: 100%;
+  height: 192px;
 
   .title {
     display: inline-flex;

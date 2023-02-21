@@ -19,7 +19,7 @@
       <Component
         :is="isLogoDisabled ? 'div' : 'RouterLink'"
         v-else-if="isLoggedIn"
-        :to="isLogoDisabled ? null : { name: ROUTE_ACCOUNT }"
+        :to="isLogoDisabled ? null : { name: homeRouteName }"
         :class="['home-button', { 'disabled': isLogoDisabled }]"
       >
         <Logo class="home-icon" />
@@ -64,8 +64,8 @@ import { computed, defineComponent } from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
 import { WalletRouteMeta } from '../../types';
 import {
-  ROUTE_INDEX,
   ROUTE_ACCOUNT,
+  ROUTE_INDEX,
   ROUTE_MORE,
 } from '../router/routeNames';
 import Logo from '../../icons/logo-small.svg?vue-component';
@@ -77,6 +77,7 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
+import { useUi } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -89,8 +90,15 @@ export default defineComponent({
     BtnIcon,
   },
   setup(props, { root }) {
+    const { homeRouteName } = useUi({ store: root.$store });
+
     const isLoggedIn = useGetter('isLoggedIn');
-    const currentHomeRouteName = computed(() => (isLoggedIn.value) ? ROUTE_ACCOUNT : ROUTE_INDEX);
+
+    const currentHomeRouteName = computed(
+      () => isLoggedIn.value
+        ? homeRouteName.value
+        : ROUTE_INDEX,
+    );
     const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
     const isLogoDisabled = computed(() => root.$route.name === ROUTE_ACCOUNT);
@@ -115,6 +123,7 @@ export default defineComponent({
     }
 
     return {
+      homeRouteName,
       BackIcon,
       ThreeDotsIcon,
       ROUTE_ACCOUNT,

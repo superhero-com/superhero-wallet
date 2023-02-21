@@ -1,102 +1,67 @@
 <template>
-  <BtnBase
-    :class="['account-card', { selected }]"
-    :to="{ name: 'account-details' }"
-    :disabled="!selected"
-    :bg-color="color"
-    data-cy="account-card"
+  <AccountCardBase
+    :address="account.address"
+    :selected="selected"
+    :to="{ name: ROUTE_ACCOUNT_DETAILS }"
   >
-    <div class="top">
+    <template #top="{ color }">
       <AccountInfo
-        :account="account"
+        :address="account.address"
+        :name="account.name"
+        :idx="account.idx"
         :color="color"
       />
-    </div>
+    </template>
 
-    <div class="middle">
-      <BalanceInfo :account="account" />
-    </div>
+    <template #middle>
+      <BalanceInfo :balance="numericBalance" />
+    </template>
 
-    <AccountCardConsensus
-      v-if="isMultisigDashboard"
-      :current-account="account"
-    />
-    <AccountCardTotalTokens
-      v-else
-      :current-account="account"
-      :selected="selected"
-    />
-  </BtnBase>
+    <template #bottom>
+      <AccountCardTotalTokens
+        :current-account="account"
+        :selected="selected"
+      />
+    </template>
+  </AccountCardBase>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { getAddressColor } from '../utils/avatar';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from '@vue/composition-api';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
-import BtnBase from './buttons/BtnBase.vue';
 import AccountCardTotalTokens from './AccountCardTotalTokens.vue';
-import AccountCardConsensus from './AccountCardConsensus.vue';
+import AccountCardBase from './AccountCardBase.vue';
 
-import type { IAccount, IMultisigAccount } from '../../types';
-import { useMultisigAccounts } from '../../composables';
+import type { IAccount } from '../../types';
+import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
+import { useBalances } from '../../composables';
 
 export default defineComponent({
   components: {
-    AccountCardConsensus,
+    AccountCardBase,
     AccountCardTotalTokens,
     AccountInfo,
     BalanceInfo,
-    BtnBase,
   },
   props: {
-    account: { type: Object as PropType<IAccount | IMultisigAccount>, required: true },
+    account: { type: Object as PropType<IAccount>, required: true },
     selected: Boolean,
   },
   setup(props, { root }) {
-    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
+    const { balance } = useBalances({ store: root.$store });
 
-    // TODO update this code when working on the multisig navigation
-    const color = computed(() => getAddressColor(isMultisigDashboard.value
-      ? (props.account as IMultisigAccount).gaAccountId
-      : (props.account as IAccount).address));
+    const numericBalance = computed<number>(() => balance.value.toNumber());
 
     return {
-      color,
-      isMultisigDashboard,
+      numericBalance,
+      ROUTE_ACCOUNT_DETAILS,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/variables';
-
-.account-card {
-  display: flex;
-  flex-direction: column;
-  border-radius: variables.$border-radius-card;
-  margin: 8px 16px 32px 16px;
-  padding: 12px;
-  text-decoration: none;
-  color: inherit;
-
-  &.selected {
-    .account-info,
-    .middle {
-      opacity: 1;
-    }
-  }
-
-  .account-info,
-  .middle {
-    opacity: 0.5;
-  }
-
-  .middle {
-    margin-top: 5px;
-    text-align: center;
-  }
-}
-</style>

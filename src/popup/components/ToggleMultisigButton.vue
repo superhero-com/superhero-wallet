@@ -2,10 +2,10 @@
   <BtnPlain
     v-if="multisigAccounts.length"
     class="multisig-button"
-    @click="toggleMultisigDashboard"
+    @click="toggleMultisigDashboard(!isMultisig)"
   >
     <span
-      v-if="isMultisigDashboard"
+      v-if="isMultisig"
       class="text"
     >
       {{ $t('multisig.backToMainAccounts') }}
@@ -27,36 +27,40 @@
 import { computed, defineComponent, watch } from '@vue/composition-api';
 
 import { useMultisigAccounts } from '../../composables';
+import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
-import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
   components: {
     BtnPlain,
     PendingIcon,
   },
+  props: {
+    isMultisig: Boolean,
+  },
   setup(props, { root }) {
-    const {
-      isMultisigDashboard,
-      multisigAccounts,
-      toggleMultisigDashboard,
-    } = useMultisigAccounts({ store: root.$store });
+    const { multisigAccounts } = useMultisigAccounts({ store: root.$store });
 
     const hasPendingMultisigTransaction = computed(
       () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),
     );
 
+    function toggleMultisigDashboard(showMultisigDashboard: false) {
+      root.$store.commit('fungibleTokens/resetTokensAndTransactions');
+      root.$router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
+    }
+
     watch(() => multisigAccounts.value, () => {
-      if (!multisigAccounts.value?.length && isMultisigDashboard.value) {
-        toggleMultisigDashboard();
+      if (!multisigAccounts.value?.length && props.isMultisig) {
+        toggleMultisigDashboard(false);
       }
     });
 
     return {
       multisigAccounts,
       hasPendingMultisigTransaction,
-      isMultisigDashboard,
       toggleMultisigDashboard,
     };
   },

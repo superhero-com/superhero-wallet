@@ -134,7 +134,7 @@ import {
   escapeSpecialChars,
   handleUnknownError,
 } from '../utils';
-import { ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS } from '../router/routeNames';
+import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
 import { IAccount, IPendingTransaction, ISdk } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
@@ -338,7 +338,7 @@ export default defineComponent({
 
           await postSpendTx(txToPropose, txHash);
           await updateMultisigAccounts();
-          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS });
+          root.$router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
         }
       } catch (error) {
         handleUnknownError(error);

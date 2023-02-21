@@ -191,7 +191,7 @@ import {
   ICreateMultisigAccount,
   ObjectValues,
 } from '../../../types';
-import { ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS } from '../../router/routeNames';
+import { ROUTE_MULTISIG_DETAILS_INFO } from '../../router/routeNames';
 import { useAccounts, useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
 
 import Modal from '../Modal.vue';
@@ -235,8 +235,6 @@ export default defineComponent({
     const { accountsSelectOptions } = useAccounts({ store: root.$store });
 
     const {
-      isMultisigDashboard,
-      toggleMultisigDashboard,
       setActiveMultisigAccountId,
     } = useMultisigAccounts({ store: root.$store });
 
@@ -357,11 +355,8 @@ export default defineComponent({
     async function navigateToMultisigVault() {
       if (multisigAccount.value) {
         await props.resolve();
-        if (!isMultisigDashboard.value) {
-          toggleMultisigDashboard();
-        }
         setActiveMultisigAccountId(multisigAccount.value.multisigAccountId);
-        root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS });
+        root.$router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
       }
     }
 

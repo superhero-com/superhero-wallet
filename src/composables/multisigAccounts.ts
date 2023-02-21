@@ -10,6 +10,7 @@ import {
   fetchJson,
   handleUnknownError,
   convertToken,
+  getFromLocalStorage,
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import type {
@@ -24,6 +25,7 @@ import { useSdk } from './sdk';
 import { i18n } from '../store/plugins/languages';
 
 const POLLING_INTERVAL = 7000;
+
 const LOCAL_STORAGE_MULTISIG_KEY = `${LOCAL_STORAGE_PREFIX}_multisig`;
 const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
 
@@ -39,7 +41,6 @@ function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
 const activeMultisigAccountId = ref('');
-const isMultisigDashboard = ref(false);
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents();
@@ -59,6 +60,8 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   function setActiveMultisigAccountId(gaAccountId: string) {
     if (gaAccountId && multisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
+      window.localStorage
+        .setItem(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`, JSON.stringify(gaAccountId));
     }
   }
 
@@ -190,16 +193,12 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
       });
 
     if (!activeMultisigAccountId.value) {
-      setActiveMultisigAccountId(result[0]?.gaAccountId);
+      const storedMultisigAccountId = getFromLocalStorage(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`);
+      setActiveMultisigAccountId(storedMultisigAccountId || result[0]?.gaAccountId);
     }
 
     multisigAccounts.value = result;
     storeMultisigAccounts(result, activeNetwork.value.networkId);
-  }
-
-  function toggleMultisigDashboard() {
-    isMultisigDashboard.value = !isMultisigDashboard.value;
-    store.commit('fungibleTokens/resetTokensAndTransactions');
   }
 
   function fetchAdditionalInfo() {
@@ -220,13 +219,11 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   return {
     multisigAccounts,
     isAdditionalInfoNeeded,
-    isMultisigDashboard,
     activeMultisigAccountId,
     activeMultisigAccount,
     fetchAdditionalInfo,
     setActiveMultisigAccountId,
     stopFetchingAdditionalInfo,
-    toggleMultisigDashboard,
     updateMultisigAccounts,
     getMultisigAccountByContractId,
   };

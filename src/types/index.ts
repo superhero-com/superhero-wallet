@@ -179,12 +179,6 @@ export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountRa
   hasPendingTransaction: boolean;
 }
 
-export interface IMultisigAccountCreationTx {
-  fee: number;
-  rawTx: string;
-  accountId: string;
-}
-
 export interface INetwork {
   backendUrl: string
   compilerUrl: string
