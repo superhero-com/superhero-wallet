@@ -9,7 +9,7 @@
       v-if="isMultisig"
       class="multisig-account"
     >
-      <AccountItem :address="activeMultisigAccount.multisigAccountId" />
+      <AccountItem :address="activeMultisigAccount.gaAccountId" />
     </div>
 
     <DetailsItem
