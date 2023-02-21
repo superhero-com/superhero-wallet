@@ -19,6 +19,7 @@ import {
 export * from './cordova';
 export * from './router';
 export * from './filter';
+export * from './forms';
 
 /**
  * Convert `key: val` objects into union of values.

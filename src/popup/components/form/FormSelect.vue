@@ -26,17 +26,12 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
+import type { IFormSelectOption } from '../../../types';
 
 import BtnPlain from '../buttons/BtnPlain.vue';
 import InputField from '../InputField.vue';
 
 import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
-
-export interface FormSelectOption {
-  text: string
-  value: string | number
-  address?: string
-}
 
 export default defineComponent({
   name: 'FormSelect',
@@ -50,7 +45,7 @@ export default defineComponent({
   },
   props: {
     value: { type: [String, Number], default: null },
-    options: { type: Array as PropType<FormSelectOption[]>, default: () => [] },
+    options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
     defaultText: { type: String, required: true },
     /**
      * Force to always display the text provided by the `defaultText` prop.
