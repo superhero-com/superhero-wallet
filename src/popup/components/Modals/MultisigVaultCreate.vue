@@ -73,7 +73,7 @@
 
         <div class="signers-count">
           <select
-            v-if="signers.length > 2"
+            v-if="signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
             v-model="confirmationsRequired"
             class="num-of-signers-selector"
           >
@@ -169,6 +169,7 @@ import {
   onMounted,
   PropType,
   ref,
+  watch,
 } from '@vue/composition-api';
 import {
   MODAL_READ_QR_CODE,
@@ -365,6 +366,15 @@ export default defineComponent({
         }
       }
     });
+
+    watch(
+      () => signers.value.length,
+      (newSignersLength, oldSignersLength) => {
+        if (newSignersLength < oldSignersLength && newSignersLength < confirmationsRequired.value) {
+          confirmationsRequired.value = newSignersLength;
+        }
+      },
+    );
 
     return {
       PlusCircleIcon,
