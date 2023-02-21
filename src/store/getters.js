@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
   DEX_CONTRACTS,
@@ -121,20 +121,6 @@ export default {
       ? TX_FUNCTIONS.sent
       : TX_FUNCTIONS.received;
   },
-  getTxTipUrl: () => (transaction) => (
-    transaction.tipUrl
-    || transaction.url
-    || (!transaction.pending
-      && !transaction.claim
-      && transaction.tx.log?.[0]
-      && [
-        TX_FUNCTIONS.tip,
-        TX_FUNCTIONS.claim,
-      ].includes(transaction.function || transaction.tx?.function)
-      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
-    || categorizeContractCallTxObject(transaction)?.url
-    || ''
-  ),
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
   getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
     const converted = convertToCurrency(amount);

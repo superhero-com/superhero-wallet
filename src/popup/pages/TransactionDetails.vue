@@ -241,6 +241,7 @@ import {
   watchUntilTruthy,
   splitAddress,
   getPayload,
+  getTransactionTipUrl,
   fetchJson,
   handleUnknownError,
   isContainingNestedTx,
@@ -313,13 +314,12 @@ export default defineComponent({
     const multisigContractId = ref<string>();
 
     const getTx = computed(() => root.$store.getters.getTx);
-    const getTxTipUrl = computed(() => root.$store.getters.getTxTipUrl);
     const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
     const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
     const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
 
-    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
+    const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(
       () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),

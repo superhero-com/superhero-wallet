@@ -116,7 +116,7 @@ function mountComponent({ hasError = false } = {}) {
       getTxType: () => () => 'provide liquidity',
       getTxSymbol: () => () => AETERNITY_SYMBOL,
       getDexContracts: () => DEX_CONTRACTS.ae_uat,
-      getTxTipUrl: () => () => '',
+      getTransactionTipUrl: () => () => '',
       getTxAmountTotal: () => () => 1,
       getTxDirection: () => () => 'sent',
       getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
