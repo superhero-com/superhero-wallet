@@ -19,7 +19,7 @@
           class="transaction-overview"
           :sender="{
             label: $t('multisig.multisigVault'),
-            address: activeMultisigAccount.address
+            address: activeMultisigAccount.gaAccountId
           }"
           :recipient="{
             label: $t('transaction.overview.smartContract'),
@@ -273,8 +273,12 @@ import type {
   ITransaction,
   ITx,
 } from '../../types';
-import { useMultisigTransactions } from '../../composables/multisigTransactions';
-import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
+import {
+  useAccounts,
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+  useMultisigTransactions,
+} from '../../composables';
 import { useGetter } from '../../composables/vuex';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
