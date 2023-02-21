@@ -9,9 +9,10 @@ import type {
 } from '../types';
 import {
   AETERNITY_SYMBOL,
-  convertToken,
   MAGNITUDE,
   TX_FUNCTIONS,
+  convertToken,
+  isTransactionAex9,
 } from '../popup/utils';
 import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
 
@@ -29,7 +30,6 @@ export function useTransactionTokens({
   transaction,
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
-  const isTxAex9 = computed(() => store.getters.isTxAex9);
   const getTxSymbol = computed(() => store.getters.getTxSymbol);
   const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
 
@@ -71,7 +71,7 @@ export function useTransactionTokens({
         isAllowance
         || (
           getTxSymbol.value(transaction) === AETERNITY_SYMBOL
-          && !isTxAex9.value(transaction)
+          && !isTransactionAex9(transaction)
         ),
     }];
   });

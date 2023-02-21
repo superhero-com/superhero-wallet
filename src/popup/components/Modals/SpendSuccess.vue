@@ -98,7 +98,7 @@ export default {
   }),
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath', 'isTxAex9']),
+    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
     ...mapGetters('names', ['getPreferred']),
     isAe() {
       return !(this.transaction.tx.contractId

@@ -183,7 +183,7 @@
               <TokenAmount
                 :amount="getTxAmountTotal(transaction)"
                 :symbol="getTxSymbol(transaction)"
-                :hide-fiat="isTxAex9(transaction)"
+                :hide-fiat="isTransactionAex9(transaction)"
               />
             </template>
           </DetailsItem>
@@ -232,6 +232,7 @@ import {
   onMounted,
 } from '@vue/composition-api';
 import {
+  AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
   TX_TYPE_MDW,
   formatDate,
@@ -239,11 +240,11 @@ import {
   aettosToAe,
   watchUntilTruthy,
   splitAddress,
-  AETERNITY_SYMBOL,
   getPayload,
   fetchJson,
   handleUnknownError,
   isContainingNestedTx,
+  isTransactionAex9,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
@@ -314,7 +315,6 @@ export default defineComponent({
     const getTx = computed(() => root.$store.getters.getTx);
     const getTxTipUrl = computed(() => root.$store.getters.getTxTipUrl);
     const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
-    const isTxAex9 = computed(() => root.$store.getters.isTxAex9);
     const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
     const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
@@ -404,7 +404,7 @@ export default defineComponent({
       isAllowance,
       isContainingInternalTx,
       isDex,
-      isTxAex9,
+      isTransactionAex9,
       isMultisig,
       tipUrl,
       tipLink,
