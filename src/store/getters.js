@@ -3,7 +3,6 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
 import {
-  AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   DEX_CONTRACTS,
   NETWORK_ID_MAINNET,
@@ -136,9 +135,6 @@ export default {
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   ),
-  isTxAex9: () => (transaction) => transaction.tx
-    && !!categorizeContractCallTxObject(transaction)?.token
-    && categorizeContractCallTxObject(transaction)?.token !== AETERNITY_CONTRACT_ID,
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
   getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
     const converted = convertToCurrency(amount);

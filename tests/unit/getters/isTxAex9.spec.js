@@ -1,5 +1,8 @@
-import getters from '../../../src/store/getters';
-import { AETERNITY_CONTRACT_ID, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
+import {
+  AETERNITY_CONTRACT_ID,
+  STUB_TOKEN_CONTRACT_ADDRESS,
+  isTransactionAex9,
+} from '../../../src/popup/utils';
 
 const tests = [{
   transaction: {
@@ -109,10 +112,10 @@ const tests = [{
   result: true,
 }];
 
-describe('isTxAex9', () => {
+describe('isTransactionAex9', () => {
   it('should return correct result for each type of transaction', () => {
     tests.forEach(
-      ({ transaction, result }) => expect(getters.isTxAex9()(transaction)).toBe(result),
+      ({ transaction, result }) => expect(isTransactionAex9(transaction)).toBe(result),
     );
   });
 });

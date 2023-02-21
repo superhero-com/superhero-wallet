@@ -13,6 +13,7 @@ import {
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
+  AETERNITY_CONTRACT_ID,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
@@ -351,6 +352,11 @@ export function getTxType(tx: ITx): TxType {
     || (tx.tag && SCHEMA.OBJECT_ID_TX_TYPE[tx.tag])
     || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)
   );
+}
+
+export function isTransactionAex9(transaction: ITransaction): boolean {
+  const token = categorizeContractCallTxObject(transaction)?.token;
+  return !!transaction.tx && !!token && token !== AETERNITY_CONTRACT_ID;
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {

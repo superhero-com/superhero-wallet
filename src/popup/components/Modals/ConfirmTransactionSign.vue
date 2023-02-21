@@ -42,7 +42,7 @@
         <TokenAmount
           :amount="tokenAmount"
           :symbol="tokenSymbol"
-          :aex9="isTxAex9(transaction)"
+          :aex9="isTransactionAex9(transaction)"
           :hide-fiat="!swapTokenAmountData.isAe"
           data-cy="total"
         />
@@ -62,7 +62,7 @@
         <TokenAmount
           :amount="getTxAmountTotal(txWrapped)"
           :symbol="getTxSymbol(transaction)"
-          :aex9="isTxAex9(transaction)"
+          :aex9="isTransactionAex9(txWrapped)"
           data-cy="total"
         />
       </DetailsItem>
@@ -117,6 +117,7 @@ import {
   AETERNITY_SYMBOL,
   TX_FUNCTIONS,
   convertToken,
+  isTransactionAex9,
 } from '../../utils';
 import type {
   ITokenResolved,
@@ -185,7 +186,6 @@ export default defineComponent({
     const getNameFee = useGetter('getNameFee');
     const getDexContracts = useGetter('getDexContracts');
     const getTxDirection = useGetter('getTxDirection');
-    const isTxAex9 = useGetter('isTxAex9');
 
     const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
 
@@ -340,7 +340,7 @@ export default defineComponent({
       isSwap,
       isDex,
       isHash,
-      isTxAex9,
+      isTransactionAex9,
       swapTokenAmountData,
       getTxFee,
       getTxSymbol,
