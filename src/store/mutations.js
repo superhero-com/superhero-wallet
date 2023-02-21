@@ -26,6 +26,7 @@ export default {
     Vue.set(state.transactions, 'loaded', []);
     Vue.set(state.transactions, 'nextPageUrl', '');
     Vue.set(state.transactions, 'tipWithdrawnTransactions', []);
+    Vue.set(state.transactions, 'pending', []);
   },
   setTransactionsNextPage(state, pageUrl) {
     Vue.set(state.transactions, 'nextPageUrl', pageUrl);

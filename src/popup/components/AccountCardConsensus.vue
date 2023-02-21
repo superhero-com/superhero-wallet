@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="currentAccount.hasPendingTransaction"
+    v-if="multisigAccount.hasPendingTransaction"
     class="account-card-consensus"
   >
     <div
@@ -9,9 +9,9 @@
       <PendingIcon class="icon pending" />
       {{ $t('multisig.consensus') }}
       <span class="highlighted">
-        {{ currentAccount.confirmedBy.length }}/{{ currentAccount.confirmationsRequired }}
+        {{ multisigAccount.confirmedBy.length }}/{{ multisigAccount.confirmationsRequired }}
         {{ $t('common.of') }}
-        {{ totalSignatures }}
+        {{ multisigAccount.signers.length }}
       </span>
     </div>
     <div
@@ -27,7 +27,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { useAccounts } from '../../composables';
-import { IMultisigAccount } from '../../types';
+import type { IMultisigAccount } from '../../types';
+
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import CheckCircleFillIcon from '../../icons/check-circle-fill.svg?vue-component';
 
@@ -37,7 +38,7 @@ export default defineComponent({
     CheckCircleFillIcon,
   },
   props: {
-    currentAccount: {
+    multisigAccount: {
       type: Object as PropType<IMultisigAccount>,
       required: true,
     },
@@ -47,32 +48,31 @@ export default defineComponent({
 
     const isSigned = computed(
       () => {
-        const mySignerAddressArray = props.currentAccount.signers.filter(
+        const mySignerAddressArray = props.multisigAccount.signers.filter(
           (signer) => isLocalAccountAddress(signer),
         );
         return mySignerAddressArray.every(
-          (address) => props.currentAccount.confirmedBy.includes(address),
+          (address) => props.multisigAccount.confirmedBy.includes(address),
         );
       },
     );
 
-    const totalSignatures = computed(() => props.currentAccount.signers.length);
-
     const transactionMessage = computed(() => {
-      if (props.currentAccount.confirmedBy.length === props.currentAccount.confirmationsRequired) {
+      const { confirmedBy, confirmationsRequired, signers } = props.multisigAccount;
+
+      if (confirmedBy.length === confirmationsRequired) {
         return root.$t('multisig.transactionReady');
       }
       if (isSigned.value) {
         return root.$t('multisig.transactionSigned');
       }
-      if (props.currentAccount.signers.some((signer) => isLocalAccountAddress(signer))) {
+      if (signers.some((signer) => isLocalAccountAddress(signer))) {
         return root.$t('multisig.signatureRequested');
       }
       return null;
     });
 
     return {
-      totalSignatures,
       transactionMessage,
     };
   },
@@ -87,7 +87,6 @@ export default defineComponent({
 .account-card-consensus {
   @include mixins.flex(flex-start, flex-start, column);
 
-  margin-top: auto;
   gap: 6px;
 
   .consensus-row {

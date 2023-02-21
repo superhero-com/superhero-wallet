@@ -60,8 +60,11 @@ import {
   relativeTimeTo,
 } from '../utils';
 import { useGetter } from '../../composables/vuex';
-import { ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS } from '../router/routeNames';
-
+import {
+  ROUTE_MULTISIG_TX_DETAILS,
+  ROUTE_TX_DETAILS,
+  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+} from '../router/routeNames';
 import {
   IActiveMultisigTx,
   IDashboardTransaction,
@@ -73,9 +76,10 @@ import {
   useTransactionTokens,
   useTransactionTx,
 } from '../../composables';
-import PendingIcon from '../../icons/animated-pending.svg?vue-component';
+
 import TransactionTokens from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -86,6 +90,7 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction | IDashboardTransaction>, default: null },
     multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
+    isMultisig: Boolean,
     hasConsensus: Boolean,
   },
   setup(props, { root }) {
@@ -121,9 +126,15 @@ export default defineComponent({
 
     const redirectRoute = computed<any>(() => {
       if (props.multisigTransaction) {
-        return { name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS };
+        return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }
-      return { name: 'tx-details', params: { hash: props.transaction.hash } };
+
+      return {
+        name: props.isMultisig
+          ? ROUTE_MULTISIG_TX_DETAILS
+          : ROUTE_TX_DETAILS,
+        params: { hash: props.transaction.hash },
+      };
     });
 
     const getConsensusInfo = computed(() => ({

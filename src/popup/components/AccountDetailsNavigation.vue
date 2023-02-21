@@ -32,11 +32,13 @@ import Tab from './tabs/Tab.vue';
 import Tabs from './tabs/Tabs.vue';
 import {
   ROUTE_ACCOUNT_DETAILS,
-  ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
   ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+  ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
 } from '../router/routeNames';
 
 interface NavigationElement {
@@ -46,52 +48,51 @@ interface NavigationElement {
   children?: NavigationElement[]
 }
 
-const navItemAssets: NavigationElement = {
-  text: 'modals.accountDetails.assets',
-  routeName: ROUTE_ACCOUNT_DETAILS,
-  exact: true,
-};
-
-const navItemTransactions: NavigationElement = {
-  text: 'modals.accountDetails.transactions',
-  routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
-};
-
-const navItemDetails: NavigationElement = {
-  text: 'modals.accountDetails.details',
-  routeName: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
-};
-
-const navItemNames: NavigationElement = {
-  text: 'modals.accountDetails.names',
-  routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
-  children: [
-    {
-      text: 'pages.names.tabs.my-names',
-      routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
-      exact: true,
-    },
-    {
-      text: 'pages.names.tabs.auctions',
-      routeName: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
-    },
-    {
-      text: 'pages.names.tabs.register',
-      routeName: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-    },
-  ],
-};
-
 const navigationConfigRegular: NavigationElement[] = [
-  navItemAssets,
-  navItemTransactions,
-  navItemNames,
+  {
+    text: 'modals.accountDetails.assets',
+    routeName: ROUTE_ACCOUNT_DETAILS,
+    exact: true,
+  },
+  {
+    text: 'modals.accountDetails.transactions',
+    routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+  },
+  {
+    text: 'modals.accountDetails.names',
+    routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+    children: [
+      {
+        text: 'pages.names.tabs.my-names',
+        routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+        exact: true,
+      },
+      {
+        text: 'pages.names.tabs.auctions',
+        routeName: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+      },
+      {
+        text: 'pages.names.tabs.register',
+        routeName: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+      },
+    ],
+  },
 ];
 
 const navigationConfigMultisig: NavigationElement[] = [
-  navItemAssets,
-  navItemTransactions,
-  navItemDetails,
+  {
+    text: 'modals.accountDetails.assets',
+    routeName: ROUTE_MULTISIG_DETAILS,
+    exact: true,
+  },
+  {
+    text: 'modals.accountDetails.transactions',
+    routeName: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+  },
+  {
+    text: 'modals.accountDetails.details',
+    routeName: ROUTE_MULTISIG_DETAILS_INFO,
+  },
 ];
 
 export default defineComponent({

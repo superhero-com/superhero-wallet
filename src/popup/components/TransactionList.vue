@@ -11,6 +11,7 @@
         :key="transaction.hash"
         :transaction="!transaction.isMultisigTransaction ? transaction : null"
         :multisig-transaction="transaction.isMultisigTransaction ? transaction : null"
+        :is-multisig="isMultisig"
         :data-cy="transaction.pending && 'pending-txs'"
       />
     </InfiniteScroll>
@@ -88,6 +89,7 @@ export default defineComponent({
     scrollTopThreshold: { type: Number, default: undefined },
     showFilters: Boolean,
     showSearch: Boolean,
+    isMultisig: Boolean,
   },
   setup(props, { root }) {
     const loading = ref(false);
@@ -95,7 +97,6 @@ export default defineComponent({
 
     const {
       activeMultisigAccount,
-      isMultisigDashboard,
     } = useMultisigAccounts({ store: root.$store });
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
@@ -119,7 +120,7 @@ export default defineComponent({
       return Object.keys(availableTokens.value).includes(tr.tx.contractId);
     }
 
-    const currentAddress = computed(() => isMultisigDashboard.value
+    const currentAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
       : account.value.address);
 
@@ -130,7 +131,7 @@ export default defineComponent({
           ...transactions.value.loaded,
         ];
 
-        if (isMultisigDashboard.value && pendingMultisigTransaction.value?.tx) {
+        if (props.isMultisig && pendingMultisigTransaction.value?.tx) {
           transactionListLocal.push(pendingMultisigTransaction.value);
         }
 

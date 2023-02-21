@@ -354,3 +354,8 @@ export function isContainingNestedTx(tx: ITx): boolean {
 export function getInnerTransaction(tx: ITx): any {
   return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
+
+export function getFromLocalStorage(key: string) {
+  const result = window.localStorage.getItem(key);
+  return result ? JSON.parse(result) : null;
+}

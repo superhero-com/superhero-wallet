@@ -1,6 +1,10 @@
 <template>
   <div class="tips-claim">
-    <AccountInfo :account="activeAccount" />
+    <AccountInfo
+      :address="activeAccount.address"
+      :name="activeAccount.name"
+      :idx="activeAccount.idx"
+    />
 
     <div class="header">
       <p class="text-description">

@@ -1,6 +1,6 @@
 <template>
   <div class="retip">
-    <BalanceInfo />
+    <BalanceInfo :balance="numericBalance" />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
     </div>
@@ -123,6 +123,9 @@ export default defineComponent({
         ? tippingV2.value
         : tippingV1.value,
     );
+
+    const numericBalance = computed<number>(() => balance.value.toNumber());
+
     const validationStatus = computed<{
       error: boolean, msg?: string | VueI18n.TranslateResult
     }>(() => {
@@ -231,6 +234,7 @@ export default defineComponent({
       urlStatus,
       validationStatus,
       tippingSupported,
+      numericBalance,
       sendTip,
       max,
       fee,

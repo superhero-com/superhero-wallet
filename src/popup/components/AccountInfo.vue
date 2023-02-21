@@ -5,20 +5,20 @@
   >
     <Avatar
       class="avatar"
-      :address="account.address"
-      :name="account.name"
+      :address="address"
+      :name="name"
     />
     <div class="account-details">
       <div
-        v-if="isMultisigDashboard"
+        v-if="isMultisig"
         class="account-name"
       >
         {{ $t('multisig.multisigVault') }}
       </div>
       <Truncate
-        v-else-if="account.name"
+        v-else-if="name"
         class="account-name-truncated"
-        :str="account.name"
+        :str="name"
         :gradient-color="color"
       />
       <div
@@ -26,7 +26,7 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
+        {{ $t('pages.account.heading') }} {{ idx + 1 }}
       </div>
       <div
         v-if="address && address.length"
@@ -48,15 +48,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { IAccount, IMultisigAccount } from '../../types';
-import { useGetter } from '../../composables/vuex';
-import { useMultisigAccounts } from '../../composables';
-
+import { computed, defineComponent } from '@vue/composition-api';
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
+import { useGetter } from '../../composables/vuex';
 
 export default defineComponent({
   components: {
@@ -67,25 +64,19 @@ export default defineComponent({
   },
   props: {
     color: { type: String, default: '#212121' },
+    address: { type: String, required: true },
+    name: { type: String, default: '' },
+    idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
-    account: { type: Object as PropType<IAccount | IMultisigAccount>, required: true },
+    isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const { isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
-
+  setup(props) {
     const activeNetwork = useGetter('activeNetwork');
 
-    // TODO update this code when working on the multisig navigation
-    const address = computed(() => isMultisigDashboard.value
-      ? (props.account as IMultisigAccount).gaAccountId
-      : (props.account as IAccount).address);
-
-    const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${address.value}`);
+    const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`);
 
     return {
-      address,
       explorerUrl,
-      isMultisigDashboard,
     };
   },
 });

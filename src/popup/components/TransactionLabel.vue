@@ -240,9 +240,7 @@ export default defineComponent({
     ));
 
     onMounted(() => {
-      truncateWidth.value = `
-        ${transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25}px
-      `;
+      truncateWidth.value = `${transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25}px`;
     });
 
     return {

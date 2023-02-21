@@ -1,0 +1,75 @@
+<template>
+  <div class="dashboard-header-multisig">
+    <TotalWalletAmount
+      v-if="addressList.length > 1"
+      :total-balance="multisigBalances"
+      is-multisig
+    />
+
+    <AccountSwiper
+      :active-idx="multisigAccountIdx"
+      :address-list="addressList"
+      is-multisig
+      @selectAccount="(index) => selectAccount(index)"
+    >
+      <template #slide="{ index }">
+        <AccountCardMultisig
+          :account="multisigAccounts[index]"
+          :selected="index === multisigAccountIdx"
+        />
+      </template>
+    </AccountSwiper>
+  </div>
+</template>
+
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+} from '@vue/composition-api';
+import { useMultisigAccounts } from '../../composables';
+
+import TotalWalletAmount from './TotalWalletAmount.vue';
+import AccountSwiper from './AccountSwiper.vue';
+import AccountCardMultisig from './AccountCardMultisig.vue';
+
+export default defineComponent({
+  components: {
+    AccountCardMultisig,
+    AccountSwiper,
+    TotalWalletAmount,
+  },
+  setup(props, { root }) {
+    const {
+      multisigAccounts,
+      activeMultisigAccountId,
+      setActiveMultisigAccountId,
+    } = useMultisigAccounts({ store: root.$store });
+
+    const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));
+
+    const multisigAccountIdx = computed(
+      () => multisigAccounts.value.findIndex(
+        (acc) => acc.gaAccountId === activeMultisigAccountId.value,
+      ),
+    );
+
+    const multisigBalances = computed(() => multisigAccounts.value.map((acc) => acc.balance));
+
+    function selectAccount(index: number) {
+      const selectedAccount = multisigAccounts.value[index];
+      if (selectedAccount.gaAccountId) {
+        setActiveMultisigAccountId(selectedAccount.gaAccountId);
+      }
+    }
+
+    return {
+      multisigAccounts,
+      multisigAccountIdx,
+      multisigBalances,
+      addressList,
+      selectAccount,
+    };
+  },
+});
+</script>

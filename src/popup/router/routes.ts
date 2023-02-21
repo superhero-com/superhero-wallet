@@ -9,20 +9,30 @@ import {
   ROUTE_COIN,
   ROUTE_TOKEN,
   ROUTE_NOT_FOUND,
-  ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-  ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS, ROUTE_NETWORK_SETTINGS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+  ROUTE_NETWORK_SETTINGS,
+  ROUTE_MULTISIG_ACCOUNT,
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+  ROUTE_MULTISIG_TX_DETAILS,
+  ROUTE_TX_DETAILS,
+  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+  ROUTE_DEFAULT_PAGES,
+  ROUTE_MULTISIG_DEFAULT_PAGES,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
 import AccountDetails from '../pages/AccountDetails.vue';
+import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
 import Dashboard from '../pages/Dashboard.vue';
+import DashboardMultisig from '../pages/DashboardMultisig.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
@@ -66,6 +76,8 @@ import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
+import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
+import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -81,79 +93,146 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/account',
-    name: ROUTE_ACCOUNT,
-    component: Dashboard,
-  },
-  {
-    path: '/transfer*',
-    redirect: '/account*',
-  },
-  {
-    path: '/account-details/',
-    component: AccountDetails,
+    path: '/',
+    name: ROUTE_DEFAULT_PAGES,
+    component: DefaultPagesRouter,
+    redirect: '/account',
     children: [
       {
-        path: '',
-        name: ROUTE_ACCOUNT_DETAILS,
-        component: AccountDetailsTokens,
-        meta: {
-          showFilterBar: true,
-          hideHeader: true,
-          hideFilterButton: true,
-        },
+        path: 'account',
+        name: ROUTE_ACCOUNT,
+        component: Dashboard,
       },
       {
-        path: 'transactions',
-        name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
-        component: AccountDetailsTransactions,
-        meta: {
-          hideHeader: true,
-          showFilterBar: true,
-        },
-      },
-      {
-        path: 'multisig-details',
-        name: ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS,
-        component: MultisigDetails,
-        meta: {
-          hideHeader: true,
-        },
-      },
-      {
-        path: 'names',
-        component: AccountDetailsNames,
+        path: 'account-details/',
+        component: AccountDetails,
         children: [
           {
             path: '',
-            name: ROUTE_ACCOUNT_DETAILS_NAMES,
-            component: NamesList,
-            props: true,
+            name: ROUTE_ACCOUNT_DETAILS,
+            component: AccountDetailsTokens,
             meta: {
+              showFilterBar: true,
               hideHeader: true,
+              hideFilterButton: true,
             },
           },
           {
-            path: 'auctions',
-            component: AuctionList,
-            props: true,
-            name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+            path: 'transactions',
+            name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+            component: AccountDetailsTransactions,
             meta: {
               hideHeader: true,
+              showFilterBar: true,
             },
           },
           {
-            path: 'claim',
-            component: NameClaim,
-            props: true,
-            name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+            path: 'names',
+            component: AccountDetailsNames,
+            children: [
+              {
+                path: '',
+                name: ROUTE_ACCOUNT_DETAILS_NAMES,
+                component: NamesList,
+                props: true,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+              {
+                path: 'auctions',
+                component: AuctionList,
+                props: true,
+                name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+              {
+                path: 'claim',
+                component: NameClaim,
+                props: true,
+                name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/multisig',
+    name: ROUTE_MULTISIG_DEFAULT_PAGES,
+    component: DefaultPagesRouter,
+    children: [
+      {
+        path: '',
+        name: ROUTE_MULTISIG_ACCOUNT,
+        component: DashboardMultisig,
+      },
+      {
+        path: 'details/',
+        component: AccountDetailsMultisig,
+        children: [
+          {
+            path: '',
+            name: ROUTE_MULTISIG_DETAILS,
+            component: AccountDetailsTokens,
+            meta: {
+              showFilterBar: true,
+              hideHeader: true,
+              hideFilterButton: true,
+            },
+          },
+          {
+            path: 'transactions',
+            name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+            component: AccountDetailsMultisigTransactions,
+            meta: {
+              hideHeader: true,
+              showFilterBar: true,
+            },
+          },
+          {
+            path: 'info',
+            name: ROUTE_MULTISIG_DETAILS_INFO,
+            component: MultisigDetails,
             meta: {
               hideHeader: true,
             },
           },
         ],
       },
+
+      {
+        path: 'details/transactions/:hash',
+        name: ROUTE_MULTISIG_TX_DETAILS,
+        component: TransactionDetails,
+        props: true,
+        meta: {
+          title: 'tx-details',
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        path: 'details/multisig-proposals',
+        name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+        component: MultisigProposalDetails,
+        props: true,
+        meta: {
+          title: 'multisigProposalDetails',
+          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
+          showHeaderNavigation: true,
+        },
+      },
     ],
+  },
+  {
+    path: '/transfer*',
+    redirect: '/account*',
   },
   {
     name: 'popup-sign-tx',
@@ -374,21 +453,11 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/account-details/transactions/:hash',
-    name: 'tx-details',
+    name: ROUTE_TX_DETAILS,
     component: TransactionDetails,
     props: true,
     meta: {
       title: 'tx-details',
-      showHeaderNavigation: true,
-    },
-  },
-  {
-    path: '/account-details/multisig-proposals',
-    name: ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS,
-    component: MultisigProposalDetails,
-    props: true,
-    meta: {
-      title: 'multisigProposalDetails',
       showHeaderNavigation: true,
     },
   },
@@ -432,7 +501,6 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'auction',
           showHeaderNavigation: true,
-          showNamesNavigation: true,
         },
       },
       {
@@ -444,7 +512,6 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },
           showHeaderNavigation: true,
-          showNamesNavigation: true,
         },
       },
     ],

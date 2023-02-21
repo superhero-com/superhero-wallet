@@ -1,9 +1,14 @@
 export const ROUTE_INDEX = 'index';
 export const ROUTE_ACCOUNT = 'account';
+export const ROUTE_MULTISIG_ACCOUNT = 'account-multisig';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
 export const ROUTE_ACCOUNT_DETAILS_TRANSACTIONS = 'account-details-transactions';
-export const ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS = 'account-details-multisig-details';
-export const ROUTE_ACCOUNT_DETAILS_MULTISIG_PROPOSAL_DETAILS = 'account-details-multisig-proposal-details';
+export const ROUTE_TX_DETAILS = 'tx-details';
+export const ROUTE_MULTISIG_TX_DETAILS = 'multisig-tx-details';
+export const ROUTE_MULTISIG_DETAILS = 'multisig-account-details';
+export const ROUTE_MULTISIG_DETAILS_INFO = 'multisig-account-details-info';
+export const ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS = 'account-details-multisig-proposal-details';
+export const ROUTE_MULTISIG_DETAILS_TRANSACTIONS = 'multisig-account-details-transactions';
 export const ROUTE_ACCOUNT_DETAILS_NAMES = 'account-details-names';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS = 'account-details-names-auctions';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM = 'account-details-names-claim';
@@ -13,3 +18,6 @@ export const ROUTE_COIN = 'coin';
 export const ROUTE_TOKEN = 'token';
 export const ROUTE_NOT_FOUND = 'not-found';
 export const ROUTE_NETWORK_SETTINGS = 'network-settings';
+
+export const ROUTE_DEFAULT_PAGES = 'default-pages-router';
+export const ROUTE_MULTISIG_DEFAULT_PAGES = 'multisig-default-pages-router';

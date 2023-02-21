@@ -2,43 +2,28 @@
   <div class="total-amount">
     <span>{{ totalAmount }}</span>
     <span
-      v-if="isMultisigDashboard"
       class="label"
     >
-      {{ $t('totalMultisig') }}
-    </span>
-    <span
-      v-else
-      class="label"
-    >
-      {{ $t('total') }}
+      {{ isMultisig ? $t('totalMultisig') : $t('total') }}
     </span>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import { useBalances, useMultisigAccounts } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 
 export default defineComponent({
-  setup(props, { root }) {
-    const { balances } = useBalances({ store: root.$store });
-    const { multisigAccounts, isMultisigDashboard } = useMultisigAccounts({ store: root.$store });
-
+  props: {
+    totalBalance: { type: Array as PropType<BigNumber[]>, required: true },
+    isMultisig: Boolean,
+  },
+  setup(props) {
     const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
 
-    const multisigBalances = computed(() => multisigAccounts.value.map(
-      (acc) => acc.balance,
-    ));
-
     const totalAmount = computed(() => {
-      const selectedBalance = isMultisigDashboard.value
-        ? multisigBalances.value
-        : Object.values(balances.value);
-
-      const total = selectedBalance.reduce(
+      const total = props.totalBalance.reduce(
         (previousValue, currentValue) => previousValue.plus(currentValue),
         new BigNumber(0),
       );
@@ -46,8 +31,6 @@ export default defineComponent({
     });
 
     return {
-      isMultisigDashboard,
-      balances,
       totalAmount,
     };
   },
