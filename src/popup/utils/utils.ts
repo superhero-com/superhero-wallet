@@ -22,6 +22,7 @@ import {
   SIMPLEX_URL,
   STUB_ADDRESS,
   STUB_CALLDATA,
+  TX_FUNCTIONS,
   TX_TYPE_MDW,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
@@ -51,6 +52,11 @@ export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U 
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
+}
+
+export function getFromLocalStorage(key: string) {
+  const result = window.localStorage.getItem(key);
+  return result ? JSON.parse(result) : null;
 }
 
 export function convertToken(balance: number, precision: number): BigNumberPublic {
@@ -370,7 +376,22 @@ export function getInnerTransaction(tx: ITx): any {
   return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
-export function getFromLocalStorage(key: string) {
-  const result = window.localStorage.getItem(key);
-  return result ? JSON.parse(result) : null;
+export function getTransactionTipUrl(transaction: ITransaction): string {
+  return (
+    transaction.tipUrl
+    || transaction.url
+    || (
+      !transaction.pending
+      && !transaction.claim
+      && transaction.tx.log?.[0]
+      && transaction.tx?.function
+      && includes([
+        TX_FUNCTIONS.tip,
+        TX_FUNCTIONS.claim,
+      ], transaction.tx.function)
+      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString()
+    )
+    || categorizeContractCallTxObject(transaction)?.url
+    || ''
+  );
 }

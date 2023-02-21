@@ -309,7 +309,7 @@ export interface IGAMeta {
 
 export interface IPayingForTx {
   signatures: string[];
-  tx: IGAAttachTx
+  tx: IGAAttachTx;
 }
 
 export interface ITx {
@@ -325,7 +325,7 @@ export interface ITx {
   contractId: string
   fee: number
   function?: TxFunction
-  gaId?: string;
+  gaId?: string; // Generalized Account ID
   gas: number
   gasPrice: number
   gasUsed: number
@@ -346,24 +346,26 @@ export interface ITx {
   selectedTokenContractId?: string
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
-  tx?: IGAMeta | IPayingForTx
+  tx?: IGAMeta | IPayingForTx;
   VSN: string;
 }
 
 export interface ITransaction {
   blockHeight: number;
+  claim: any; // TODO find type
   hash: string;
+  incomplete?: boolean;
   microIndex: number;
   microTime: number;
-  claim: any; // TODO find type
-  incomplete?: boolean;
   pending: boolean; // There are cases that not only the IPendingTransaction can be pending
   rawTx?: any; // TODO find type
+  tipUrl?: string;
   tx: ITx;
+  url?: string;
 }
 
 export interface IDashboardTransaction extends ITransaction {
-  transactionOwner?: string,
+  transactionOwner?: string;
 }
 
 export type PendingTransactionType = 'spend' | 'spendToken';
