@@ -72,12 +72,12 @@ import {
   PropType,
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
-import type { IAccount, IMultisigFunctionTypes } from '../../../types';
+import type { IAccount, IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
 import { FUNCTION_TYPE_MULTISIG } from '../../utils';
 
 import Modal from '../Modal.vue';
-import FormSelect, { FormSelectOption } from '../form/FormSelect.vue';
+import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountItem from '../AccountItem.vue';
 import StatusIcon from '../StatusIcon.vue';
@@ -116,8 +116,8 @@ export default defineComponent({
     }
 
     const eligibleAccounts = computed(
-      (): FormSelectOption[] => pendingMultisigTxLocalSigners.value
-        .map((acc): FormSelectOption => ({
+      (): IFormSelectOption[] => pendingMultisigTxLocalSigners.value
+        .map((acc): IFormSelectOption => ({
           text: getAccountNameToDisplay(acc),
           value: acc.address,
           address: acc.address,

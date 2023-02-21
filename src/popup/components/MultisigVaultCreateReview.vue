@@ -17,7 +17,7 @@
                 v-model="creatorAddress"
                 unstyled
                 :default-text="$t('modals.createMultisigAccount.selectAccount')"
-                :options="accountsOptions"
+                :options="accountsSelectOptions"
               />
             </BtnPill>
             <AddressTruncated
@@ -97,14 +97,12 @@ import {
   watch,
 } from '@vue/composition-api';
 import {
-  IAccount,
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '../../types';
-import { AETERNITY_SYMBOL, getAccountNameToDisplay } from '../utils';
+import { AETERNITY_SYMBOL } from '../utils';
 import { useAccounts, useSdk } from '../../composables';
-import { useGetter } from '../../composables/vuex';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -113,7 +111,7 @@ import BtnPill from './buttons/BtnPill.vue';
 import DetailsItem from './DetailsItem.vue';
 import DialogBox from './DialogBox.vue';
 import TokenAmount from './TokenAmount.vue';
-import FormSelect, { FormSelectOption } from './form/FormSelect.vue';
+import FormSelect from './form/FormSelect.vue';
 
 import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
 
@@ -137,19 +135,12 @@ export default defineComponent({
     callData: { type: String, default: null },
   },
   setup(props, { root }) {
-    const {
-      isLocalAccountAddress,
-    } = useAccounts({ store: root.$store });
+    const { accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+
+    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+
     const { getSdk } = useSdk({ store: root.$store });
 
-    const accounts = useGetter<IAccount[]>('accounts');
-    const accountsOptions = computed(
-      (): FormSelectOption[] => accounts.value.map((acc) => ({
-        text: getAccountNameToDisplay(acc),
-        value: acc.address,
-        address: acc.address,
-      })),
-    );
     const creatorAddress = ref<string>(accounts.value[0].address);
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
@@ -166,7 +157,7 @@ export default defineComponent({
 
     return {
       AETERNITY_SYMBOL,
-      accountsOptions,
+      accountsSelectOptions,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,

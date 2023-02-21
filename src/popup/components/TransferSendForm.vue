@@ -176,6 +176,7 @@ import {
 import BigNumber from 'bignumber.js';
 import type {
   IAccount,
+  IFormSelectOption,
   IInputMessage,
   IToken,
   ITokenList,
@@ -210,7 +211,7 @@ import ModalHeader from './ModalHeader.vue';
 import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import AccountItem from './AccountItem.vue';
-import FormSelect, { FormSelectOption } from './form/FormSelect.vue';
+import FormSelect from './form/FormSelect.vue';
 
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
 import EditIcon from '../../icons/pencil.svg?vue-component';
@@ -326,8 +327,8 @@ export default defineComponent({
     const multisigVaultOwnedByManyAccounts = computed(() => mySignerAccounts?.length > 1);
 
     const accountsAllowedToProposeTxSelectOptions = computed(
-      (): FormSelectOption[] => mySignerAccounts
-        .map((acc): FormSelectOption => ({
+      (): IFormSelectOption[] => mySignerAccounts
+        .map((acc): IFormSelectOption => ({
           text: getAccountNameToDisplay(acc),
           value: acc.address,
           address: acc.address,

@@ -21,7 +21,15 @@
         v-for="(signer, index) in signers"
         :key="`signer${index}`"
       >
+        <FormSelect
+          v-if="index === 0"
+          v-model.trim="signer.address"
+          :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
+          :label="getSignerLabel(index)"
+          :options="accountsSelectOptions"
+        />
         <InputField
+          v-else
           v-model.trim="signer.address"
           v-validate="{
             required: true,
@@ -183,12 +191,13 @@ import {
   ObjectValues,
 } from '../../../types';
 import { ROUTE_ACCOUNT_DETAILS_MULTISIG_DETAILS } from '../../router/routeNames';
-import { useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
+import { useAccounts, useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
+import FormSelect from '../form/FormSelect.vue';
 import InputField from '../InputField.vue';
 import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
 import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
@@ -215,12 +224,15 @@ export default defineComponent({
     QrScanIcon,
     PlusCircleIcon,
     MultisigVaultCreateReview,
+    FormSelect,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function, required: true },
   },
   setup(props, { root }) {
+    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+
     const {
       isMultisigDashboard,
       toggleMultisigDashboard,
@@ -371,6 +383,7 @@ export default defineComponent({
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
       STEPS,
+      accountsSelectOptions,
       multisigAccount,
       multisigAccountCreationPhase,
       multisigAccountCreationEncodedCallData,

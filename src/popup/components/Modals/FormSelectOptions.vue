@@ -45,7 +45,8 @@ import {
   PropType,
   ref,
 } from '@vue/composition-api';
-import type { FormSelectOption } from '../form/FormSelect.vue';
+import type { IFormSelectOption } from '../../../types';
+
 import InputSearch from '../InputSearch.vue';
 import Modal from '../Modal.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
@@ -64,11 +65,11 @@ export default defineComponent({
     reject: { type: Function, required: true },
     title: { type: String, default: null },
     value: { type: [String, Number], default: null },
-    options: { type: Array as PropType<FormSelectOption[]>, default: () => [] },
+    options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
   },
   setup(props) {
     const searchTerm = ref('');
-    const optionsFiltered = computed((): FormSelectOption[] => {
+    const optionsFiltered = computed((): IFormSelectOption[] => {
       if (searchTerm.value) {
         const searchTermLower = searchTerm.value.toLowerCase();
         return props.options.filter(({ text, value }) => (
