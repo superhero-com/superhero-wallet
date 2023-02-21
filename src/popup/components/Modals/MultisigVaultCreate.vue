@@ -93,7 +93,7 @@
             v-else
             class="text-emphasis"
           >
-            {{ minNumOfSigners }}
+            {{ MULTISIG_VAULT_MIN_NUM_OF_SIGNERS }}
           </span>
 
           <i18n
@@ -101,7 +101,7 @@
             tag="span"
             class="text"
           >
-            <span class="text-emphasis">{{ minNumOfSigners }}</span>
+            <span class="text-emphasis">{{ signers.length }} </span>
           </i18n>
 
           <BtnHelp
@@ -242,11 +242,6 @@ export default defineComponent({
 
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
-    const minNumOfSigners = computed(
-      () => signers.value.length < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
-        ? MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
-        : signers.value.length,
-    );
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       if (!validateHash(signer.address).valid) return false;
@@ -389,7 +384,6 @@ export default defineComponent({
       currentStep,
       confirmationsRequired,
       signers,
-      minNumOfSigners,
       isValidSigners,
       canCreateMultisig,
       openFormStep,
