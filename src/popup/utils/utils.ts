@@ -245,7 +245,7 @@ export function compareCaseInsensitive(
 }
 
 export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
-  amount: string | number
+  amount?: string | number
   to?: string
   token?: string
   url?: string
@@ -255,9 +255,9 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
-    const { amount, tx } = transaction as IPendingTransaction;
+    const { tx } = transaction as IPendingTransaction;
     return {
-      amount,
+      amount: tx.amount,
       token: tx.selectedTokenContractId ?? tx.contractId,
       to: transaction.incomplete ? tx.recipientId : tx.callerId,
     };

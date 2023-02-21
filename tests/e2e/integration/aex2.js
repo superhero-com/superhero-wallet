@@ -1,4 +1,4 @@
-import { testAccount } from '../../../src/popup/utils/config';
+import { testAccount } from '../../../src/popup/utils/testsConfig';
 
 require('chai').should();
 

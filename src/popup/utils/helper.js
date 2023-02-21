@@ -16,7 +16,7 @@ import {
   SEED_LENGTH,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
-import { testAccount, txParams } from './config';
+import { testAccount, txParams } from './testsConfig';
 import runMigrations from '../../store/migrations';
 import { IS_FIREFOX } from '../../lib/environment';
 

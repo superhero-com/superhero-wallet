@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
 import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils';
-import { testAccount } from '../../src/popup/utils/config';
+import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 

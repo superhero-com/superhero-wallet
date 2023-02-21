@@ -1,5 +1,5 @@
 import { postMessage } from './connection';
-import { popupProps } from './config';
+import { popupProps } from './testsConfig';
 import { buildTx } from './index';
 import { POPUP_TYPE } from '../../lib/environment';
 

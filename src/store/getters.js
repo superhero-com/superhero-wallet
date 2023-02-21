@@ -106,9 +106,8 @@ export default {
     }
     return +aettosToAe(
       new BigNumber(
-        transaction.amount || transaction.tx?.amount
-        || transaction.nameFee || transaction.tx?.nameFee || 0,
-      ).plus(transaction.fee || transaction.tx?.fee || 0),
+        transaction.tx?.amount || transaction.tx?.nameFee || 0,
+      ).plus(transaction.tx?.fee || 0),
     );
   },
   getNameFee: () => (transaction) => +aettosToAe(

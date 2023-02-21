@@ -135,6 +135,7 @@ import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   MODAL_DEFAULT,
+  TX_FUNCTIONS,
   aeToAettos,
   checkAensName,
   convertToken,
@@ -234,17 +235,17 @@ export default defineComponent({
 
         if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           const transaction: IPendingTransaction = {
-            amount,
             recipient,
             hash: actionResult.hash,
             pendingTokenTx: true,
             pending: true,
             type: 'spendToken',
             tx: {
+              amount,
               callerId: account.value.address,
               contractId: selectedAsset.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
-              function: 'transfer',
+              function: TX_FUNCTIONS.transfer,
             },
           };
 
@@ -252,10 +253,10 @@ export default defineComponent({
         } else if (actionResult) {
           const transaction: IPendingTransaction = {
             hash: actionResult.hash,
-            amount,
             pending: true,
             type: 'spend',
             tx: {
+              amount,
               senderId: account.value.address,
               recipientId: recipient,
               type: SCHEMA.TX_TYPE.spend,
@@ -305,11 +306,11 @@ export default defineComponent({
           );
         }
         const transaction: IPendingTransaction = {
-          amount,
           hash: txResult.hash,
           pending: true,
           tipUrl: recipient,
           tx: {
+            amount,
             callerId: account.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,

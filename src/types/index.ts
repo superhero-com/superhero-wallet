@@ -41,9 +41,10 @@ export type Balance = BigNumberPublic;
 export type BalanceRaw = string;
 
 export interface IAppData {
-  name: string
-  url: string
-  host: string
+  name: string;
+  url: string;
+  host: string;
+  protocol?: string;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -312,7 +313,6 @@ export interface IPayingForTx {
 }
 
 export interface ITx {
-  VSN: string
   abiVersion: number
   accountId?: string
   amount: number
@@ -320,12 +320,12 @@ export interface ITx {
   callData?: string // TODO find source
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: string
-  payerId?: string
   code: string
   commitmentId: any
   contractId: string
   fee: number
   function?: TxFunction
+  gaId?: string;
   gas: number
   gasPrice: number
   gasUsed: number
@@ -335,6 +335,7 @@ export interface ITx {
   nameId: any
   nameSalt: string
   nonce: number
+  payerId?: string
   payload?: string
   pointers: any
   result: string;
@@ -346,7 +347,7 @@ export interface ITx {
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
   tx?: IGAMeta | IPayingForTx
-  gaId?: string;
+  VSN: string;
 }
 
 export interface ITransaction {
@@ -369,7 +370,6 @@ export type PendingTransactionType = 'spend' | 'spendToken';
 
 export interface IPendingTransaction {
   hash: string;
-  amount: number | string;
   type?: PendingTransactionType;
   recipient?: string;
   incomplete?: boolean;

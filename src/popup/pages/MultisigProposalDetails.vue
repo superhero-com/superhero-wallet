@@ -350,7 +350,6 @@ export default defineComponent({
     const getExplorerPath = useGetter('getExplorerPath');
     const isTxAex9 = useGetter('isTxAex9');
     const getTxSymbol = useGetter('getTxSymbol');
-    const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
@@ -460,7 +459,6 @@ export default defineComponent({
       transaction,
       totalSpent,
       getTxSymbol,
-      getTxAmountTotal,
       isTxAex9,
       getPayload,
       splitAddress,
