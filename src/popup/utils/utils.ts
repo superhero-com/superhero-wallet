@@ -77,6 +77,15 @@ export function formatTime(time: number) {
   });
 }
 
+/**
+ * Make the number more readable by adding spaces, commas or dots.
+ * Eg.: 411149751.49932 -> 411 149 751,499 (for the europe)
+ *      411149751.49932 -> 411.149.751,499 (for the USA)
+ */
+export function formatNumber(value: number) {
+  return new Intl.NumberFormat(navigator.language).format(value);
+}
+
 export function toURL(url: string): URL {
   return new URL(url.includes('://') ? url : `https://${url}`);
 }

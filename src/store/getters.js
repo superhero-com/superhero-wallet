@@ -52,9 +52,6 @@ export default {
   formatCurrency: ({ current: { currency } }) => (value) => new Intl.NumberFormat(
     navigator.language, { style: 'currency', currencyDisplay: 'narrowSymbol', currency },
   ).format(value),
-  formatNumber: () => (value) => new Intl.NumberFormat(
-    navigator.language,
-  ).format(value),
   convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) => (
     formatCurrency(convertToCurrency(value))),
   minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
