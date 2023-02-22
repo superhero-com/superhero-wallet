@@ -166,6 +166,7 @@ import {
   DEX_URL,
   amountRounded,
   convertToken,
+  formatNumber,
 } from '../../utils';
 import { useGetter } from '../../../composables/vuex';
 
@@ -189,7 +190,6 @@ export default defineComponent({
     tokens: { type: Array, default: () => ([]) },
   },
   setup(props) {
-    const formatNumber = useGetter('formatNumber');
     const formatCurrency = useGetter('formatCurrency');
 
     const displayDexUrl = DEX_URL.replace('https://', '');
