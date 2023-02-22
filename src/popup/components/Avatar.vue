@@ -8,50 +8,46 @@
   >
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
+import type { INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { AVATAR_URL, isContract } from '../utils';
 import { getAddressColor } from '../utils/avatar';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
-export default {
+export default defineComponent({
   props: {
     address: { type: String, default: '' },
-    name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
+    name: { type: String, default: null },
     size: {
       type: String,
       default: 'rg',
-      validator: (val) => SIZES.includes(val),
+      validator: (val: string) => SIZES.includes(val),
     },
-    src: { type: String, default: '' },
     withBorder: Boolean,
     colorfulBorder: Boolean,
   },
-  data: () => ({
-    error: false,
-  }),
-  computed: mapState({
-    profileImage(state, { getProfileImage }) {
-      if (this.address.startsWith('ct_') || this.address === '') {
-        return this.src || '';
-      }
-      return getProfileImage(this.address);
-    },
-    avatar(state, { getAvatar }) {
-      return getAvatar(this.name || this.address);
-    },
-    color() {
-      return this.address ? getAddressColor(this.address) : null;
-    },
-    avatarStyle() {
-      if (!this.colorfulBorder) return null;
+  setup(props) {
+    const error = ref(false);
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const avatar = computed(() => `${AVATAR_URL}${props.name || props.address}`);
+    const color = computed(() => props.address ? getAddressColor(props.address) : null);
+    const profileImage = computed(() => (isContract(props.address) || props.address === '')
+      ? ''
+      : `${activeNetwork.value.backendUrl}/profile/image/${props.address}`);
+    const avatarStyle = computed(() => (props.colorfulBorder) ? { 'border-color': color.value } : null);
 
-      return {
-        'border-color': this.color,
-      };
-    },
-  }),
-};
+    return {
+      error,
+      avatar,
+      color,
+      profileImage,
+      avatarStyle,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
