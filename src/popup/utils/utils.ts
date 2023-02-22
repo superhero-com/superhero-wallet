@@ -7,6 +7,7 @@ import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import {
   SCHEMA,
+  AmountFormatter,
   TxBuilder,
   TxBuilderHelper,
 } from '@aeternity/aepp-sdk';
@@ -394,4 +395,25 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
+}
+
+export function aeToAettos(value: number | string) {
+  return AmountFormatter.formatAmount(value.toString(), {
+    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+  });
+}
+
+export function aettosToAe(value: number | string) {
+  return AmountFormatter.formatAmount(value.toString(), {
+    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+  });
+}
+
+/**
+ * Converts long raw values like '3280000000000000000' to human readable 3.28
+ */
+export function getAeFee(value: number | string) {
+  return +aettosToAe(new BigNumber(value || 0).toNumber());
 }

@@ -23,13 +23,13 @@
     </template>
 
     <DetailsItem
-      v-if="getNameFee(transaction)"
+      v-if="nameAeFee"
       :label="$t('modals.confirmTransactionSign.nameFee')"
       class="name-fee"
     >
       <template #value>
         <TokenAmount
-          :amount="getNameFee(transaction)"
+          :amount="nameAeFee"
         />
       </template>
     </DetailsItem>
@@ -50,7 +50,7 @@
 
       <DetailsItem :label="$t('transaction.fee')">
         <TokenAmount
-          :amount="getTxFee(transaction)"
+          :amount="txAeFee"
           data-cy="fee"
         />
       </DetailsItem>
@@ -118,6 +118,7 @@ import {
   TX_FUNCTIONS,
   convertToken,
   isTransactionAex9,
+  getAeFee,
 } from '../../utils';
 import type {
   ITokenResolved,
@@ -182,8 +183,6 @@ export default defineComponent({
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
-    const getTxFee = useGetter('getTxFee');
-    const getNameFee = useGetter('getNameFee');
     const getDexContracts = useGetter('getDexContracts');
     const getTxDirection = useGetter('getTxDirection');
 
@@ -207,6 +206,9 @@ export default defineComponent({
       || getDexContracts.value.wae.includes(props.transaction?.contractId)
       || isAllowance.value
     ));
+
+    const txAeFee = computed(() => getAeFee(props.transaction.fee));
+    const nameAeFee = computed(() => getAeFee(props.transaction.nameFee));
 
     const swapDirection = computed(() => {
       if (txFunction.value) {
@@ -342,9 +344,9 @@ export default defineComponent({
       isHash,
       isTransactionAex9,
       swapTokenAmountData,
-      getTxFee,
       getTxSymbol,
-      getNameFee,
+      txAeFee,
+      nameAeFee,
       getLabels,
       getTxAmountTotal,
       cancel,
