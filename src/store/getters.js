@@ -103,12 +103,6 @@ export default {
       ).plus(transaction.tx?.fee || 0),
     );
   },
-  getNameFee: () => (transaction) => +aettosToAe(
-    new BigNumber(transaction.nameFee || transaction.tx?.nameFee || 0),
-  ),
-  getTxFee: () => (transaction) => +aettosToAe(
-    new BigNumber(transaction.fee || transaction.tx?.fee || 0),
-  ),
   getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
       return tx.recipientId === address

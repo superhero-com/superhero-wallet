@@ -20,7 +20,7 @@
         <div class="name-wrapper">
           <div class="name">
             {{ name }}
-            <TokenAmount :amount="getNameFee(lastBid)" />
+            <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
           </div>
           <div class="expiration">
             {{ $t('pages.names.auctions.expires') }}
@@ -47,8 +47,7 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
-import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
-import { useGetter } from '../../../composables/vuex';
+import { watchUntilTruthy, blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
   ObjectValues,
@@ -96,8 +95,6 @@ export default defineComponent({
       length: { rotated: false, name: root.$t('filters.length') },
     });
 
-    const getNameFee = useGetter('getNameFee');
-
     const auctions = computed(
       () => [...activeAuctions.value]
         .sort((a, b) => {
@@ -128,7 +125,7 @@ export default defineComponent({
       auctions,
       filters,
       topBlockHeight,
-      getNameFee,
+      getAeFee,
     };
   },
 });

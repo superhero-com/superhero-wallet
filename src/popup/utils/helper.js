@@ -4,7 +4,6 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   SCHEMA,
   Crypto,
-  AmountFormatter,
   TxBuilder,
   TxBuilderHelper,
 } from '@aeternity/aepp-sdk';
@@ -22,15 +21,6 @@ import { IS_FIREFOX } from '../../lib/environment';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
-
-export const aeToAettos = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-});
-export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-});
 
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {

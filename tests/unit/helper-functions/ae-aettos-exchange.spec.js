@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { aeToAettos, aettosToAe } from '../../../src/popup/utils/helper';
+import { aeToAettos, aettosToAe } from '../../../src/popup/utils';
 
 const aeToAettosMAGNITUDE = 18;
 

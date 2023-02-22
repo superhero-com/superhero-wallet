@@ -341,7 +341,7 @@ export default defineComponent({
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId,
             props.transferData.address!,
-            aeToAettos(props.transferData.amount),
+            aeToAettos(props.transferData.amount!),
             props.transferData.payload || '',
           );
           const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
