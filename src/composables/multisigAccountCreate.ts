@@ -12,16 +12,17 @@ import { MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
 
+let rawTx: string;
+let signedAttachTx: string;
+let accountId: string;
+let multisigAccountCreationEncodedCallData: string;
+
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
   const { getMultisigAccountByContractId } = useMultisigAccounts({ store });
 
-  let rawTx: string;
-  let accountId: string;
-
   const multisigAccount = ref<IMultisigAccountBase | null>(null);
   const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
-  const multisigAccountCreationEncodedCallData = ref<string>();
   const multisigAccountCreationFee = ref<number>(0);
 
   const isMultisigAccountAccessible = computed(() => (
@@ -53,21 +54,21 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * First step of creating the multisig account
    * Prepare multisig account creation transaction
    */
-  async function multisigAccountPrepare(
+  async function prepareVaultCreationAttachTx(
     noOfConfirmations: number,
     signersAddresses: string[],
   ) {
     if (noOfConfirmations > signersAddresses.length) throw Error('Number of confirmations exceed amount of signers');
 
     const contractArgs = [noOfConfirmations, signersAddresses];
-    const [sdk, drySdk] = await Promise.all([getSdk(), getDrySdk()]);
+    const drySdk = await getDrySdk();
 
     // Create a temporary account
     const gaAccount: IKeyPair = Crypto.generateKeyPair();
 
     const multisigContractInstance = await createMultisigContractInstance();
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
-    multisigAccountCreationEncodedCallData.value = multisigContractInstance.calldata.encode(
+    multisigAccountCreationEncodedCallData = multisigContractInstance.calldata.encode(
       multisigContractInstance._name,
       'init',
       contractArgs,
@@ -77,7 +78,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const attachTX = await drySdk.gaAttachTx({
       ownerId: gaAccount.publicKey,
       code: multisigContractInstance.bytecode,
-      callData: multisigAccountCreationEncodedCallData.value,
+      callData: multisigAccountCreationEncodedCallData,
       authFun: Crypto.hash('authorize'),
       gas: await estimateMultisigAccountDeployGasFee(
         multisigContractInstance,
@@ -88,11 +89,21 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         innerTx: true,
       },
     });
+    accountId = gaAccount.publicKey;
 
-    const signedAttachTx = await drySdk.signTransaction(attachTX.tx, {
+    signedAttachTx = await drySdk.signTransaction(attachTX.tx, {
       innerTx: true,
       onAccount: gaAccount,
     });
+  }
+
+  /**
+   * First step of creating the multisig account
+   * Prepare multisig account creation transaction
+   */
+  async function prepareVaultCreationRawTx(
+  ) {
+    const sdk = await getSdk();
 
     // Wrap signed GA attach transaction
     const payedTx = await sdk.payForTransaction(signedAttachTx, {
@@ -102,7 +113,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     });
 
     rawTx = payedTx.rawTx;
-    accountId = gaAccount.publicKey;
 
     // Calculate fee
     const { tx } = TxBuilder.unpackTx(rawTx);
@@ -116,8 +126,8 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * Second step of account creation.
    * @throws Error
    */
-  async function multisigAccountCreate() {
-    if (multisigAccountCreationPhase.value !== MULTISIG_CREATION_PHASES.prepared) {
+  async function deployMultisigAccount() {
+    if (!rawTx || !accountId) {
       throw new Error('To create new multisig vault the account should be prepared first.');
     }
 
@@ -159,7 +169,8 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     multisigAccountCreationEncodedCallData,
     multisigAccountCreationFee,
     isMultisigAccountAccessible,
-    multisigAccountPrepare,
-    multisigAccountCreate,
+    prepareVaultCreationAttachTx,
+    prepareVaultCreationRawTx,
+    deployMultisigAccount,
   };
 }

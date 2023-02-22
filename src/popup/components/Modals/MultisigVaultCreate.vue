@@ -128,8 +128,6 @@
       :signers="signers"
       :phase="multisigAccountCreationPhase"
       :confirmations-required="confirmationsRequired"
-      :fee="multisigAccountCreationFee"
-      :call-data="multisigAccountCreationEncodedCallData"
     />
 
     <!--
@@ -245,8 +243,8 @@ export default defineComponent({
       multisigAccountCreationEncodedCallData,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
-      multisigAccountPrepare,
-      multisigAccountCreate,
+      prepareVaultCreationAttachTx,
+      deployMultisigAccount,
     } = useMultisigAccountCreate({ store: root.$store });
 
     const currentStep = ref<Step>(STEPS.form);
@@ -331,17 +329,17 @@ export default defineComponent({
     }
 
     async function openReviewStep() {
-      currentStep.value = STEPS.review;
-      await multisigAccountPrepare(
+      await prepareVaultCreationAttachTx(
         confirmationsRequired.value,
-        signers.value.map((signer) => signer.address),
+        signers.value.map(({ address }) => address),
       );
+      currentStep.value = STEPS.review;
     }
 
     async function createMultisigAccount() {
       currentStep.value = STEPS.processing;
       try {
-        await multisigAccountCreate();
+        await deployMultisigAccount();
       } catch (error) {
         handleUnknownError(error);
         await root.$store.dispatch('modals/open', {

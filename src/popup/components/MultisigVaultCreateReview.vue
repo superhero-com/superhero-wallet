@@ -110,8 +110,8 @@ import {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '../../types';
-import { AETERNITY_SYMBOL } from '../utils';
-import { useAccounts, useSdk } from '../../composables';
+import { AETERNITY_SYMBOL, handleUnknownError } from '../utils';
+import { useAccounts, useMultisigAccountCreate, useSdk } from '../../composables';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -142,12 +142,14 @@ export default defineComponent({
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     signers: { type: Array as PropType<ICreateMultisigAccount[]>, required: true },
     confirmationsRequired: { type: Number, required: true },
-    fee: { type: Number, required: true },
-    callData: { type: String, default: null },
   },
   setup(props, { root }) {
-    const { accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
-
+    const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+    const {
+      multisigAccountCreationFee,
+      prepareVaultCreationRawTx,
+      multisigAccountCreationEncodedCallData,
+    } = useMultisigAccountCreate({ store: root.$store });
     const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
     const { getSdk } = useSdk({ store: root.$store });
@@ -157,12 +159,27 @@ export default defineComponent({
     const creatorAccount = computed(
       () => accounts.value.find(({ address }) => address === creatorAddress.value),
     );
+    const fee = computed(() => multisigAccountCreationFee.value);
+    const callData = computed(() => multisigAccountCreationEncodedCallData);
 
     watch(creatorAddress, async (val, oldVal) => {
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
         const sdk = await getSdk();
         creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+        const { idx: activeAccountIdx } = account.value;
+        root.$store.commit(
+          'accounts/setActiveIdx',
+          accounts.value.find(({ address }) => address === val)?.idx,
+        );
+        try {
+          await prepareVaultCreationRawTx();
+        } catch (error) {
+          handleUnknownError(error);
+        } finally {
+          // Rollback active account once the multisig transaction is payed and signed
+          root.$store.commit('accounts/setActiveIdx', activeAccountIdx);
+        }
       }
     }, { immediate: true });
 
@@ -173,6 +190,8 @@ export default defineComponent({
       creatorAccount,
       creatorAccountFetched,
       isLocalAccountAddress,
+      fee,
+      callData,
     };
   },
 });
