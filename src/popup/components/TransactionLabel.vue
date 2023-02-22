@@ -96,9 +96,8 @@ import {
   ABORT_TX_TYPE,
   FUNCTION_TYPE_DEX,
   getAccountNameToDisplay,
-  getInnerTransaction,
-  getTxType,
-  TX_FUNCTIONS, TX_TYPE_MDW,
+  TX_FUNCTIONS,
+  TX_TYPE_MDW,
 } from '../utils';
 import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -125,20 +124,19 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props, { root }) {
-    const lastNestedInnerTx = getInnerTransaction(props.tx);
-
     const {
+      outerTxType,
       txType,
       isAllowance,
       isDex,
-    } = useTransactionTx({ store: root.$store, tx: lastNestedInnerTx });
+      innerTx,
+    } = useTransactionTx({ store: root.$store, tx: props.tx });
 
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
     const accounts = useGetter('accounts');
-    const externalTxType = getTxType(props.tx);
 
     const transactionLabelRef = ref();
     const labelRef = ref();
@@ -147,10 +145,10 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const externalLabel = computed(() => {
-      if (externalTxType === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         return i18n.t('transaction.type.gaMetaTx');
       }
-      if (externalTxType === TX_TYPE_MDW.PayingForTx) {
+      if (outerTxType.value === TX_TYPE_MDW.PayingForTx) {
         return i18n.t('transaction.type.payingForTx');
       }
       return '';
@@ -161,7 +159,7 @@ export default defineComponent({
       const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
 
       if (txType.value === SCHEMA.TX_TYPE.spend) {
-        const isSent = getTxDirection.value(props.tx, props.transactionOwner) === 'sent';
+        const isSent = getTxDirection.value(innerTx.value, props.transactionOwner) === 'sent';
         return {
           text: isSent
             ? root.$t('transaction.listType.sentTx')
@@ -175,11 +173,11 @@ export default defineComponent({
         return labelWrapper(root.$t('transaction.dexType.allowToken'));
       }
       if (isDex.value) {
-        if (FUNCTION_TYPE_DEX.addLiquidity.includes(lastNestedInnerTx?.function as TxFunctionRaw)) {
+        if (FUNCTION_TYPE_DEX.addLiquidity.includes(innerTx.value?.function as TxFunctionRaw)) {
           return labelWrapper(root.$t('transaction.dexType.provideLiquidity'));
         }
         if (FUNCTION_TYPE_DEX.removeLiquidity.includes(
-          lastNestedInnerTx?.function as TxFunctionRaw,
+          innerTx.value?.function as TxFunctionRaw,
         )) {
           return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
         }
@@ -187,13 +185,13 @@ export default defineComponent({
       }
       if (
         (
-          lastNestedInnerTx.contractId
+          innerTx.value.contractId
           && [
             activeNetwork.value.tipContractV1,
             activeNetwork.value.tipContractV2,
-          ].includes(lastNestedInnerTx.contractId)
+          ].includes(innerTx.value.contractId)
           && ([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip] as TxFunction[])
-            .includes(lastNestedInnerTx?.function!)
+            .includes(innerTx.value?.function!)
         )
         || props.isClaim
       ) {
@@ -203,13 +201,13 @@ export default defineComponent({
       }
       if (
         txType.value === SCHEMA.TX_TYPE.contractCall
-        && availableTokens.value[lastNestedInnerTx.contractId]
-        && (lastNestedInnerTx.function === TX_FUNCTIONS.transfer
+        && availableTokens.value[innerTx.value.contractId]
+        && (innerTx.value.function === TX_FUNCTIONS.transfer
           || props.isIncomplete)
       ) {
         const isSent = !props.transactionOwner
-          ? lastNestedInnerTx.callerId === account.value.address
-          : props.transactionOwner === props.tx.callerId;
+          ? innerTx.value.callerId === account.value.address
+          : props.transactionOwner === innerTx.value.callerId;
 
         return {
           text: isSent

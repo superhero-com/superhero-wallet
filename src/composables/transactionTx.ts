@@ -1,8 +1,8 @@
 import { computed, ref } from '@vue/composition-api';
 import type {
-  IDexContracts,
   IAccount,
   IAccountLabeled,
+  IDexContracts,
   ITokenList,
   TxFunctionRaw,
   ITx,
@@ -16,6 +16,8 @@ import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
   getTxType,
+  isContainingNestedTx,
+  getInnerTransaction,
 } from '../popup/utils';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
@@ -26,10 +28,12 @@ export function useTransactionTx({
   store,
   tx,
 }: UseTransactionOptions) {
-  const innerTx = ref<ITx | undefined>(tx);
+  const outerTx = ref<ITx | undefined>(tx);
+  const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
 
   function setTransactionTx(newTx: ITx) {
-    innerTx.value = newTx;
+    outerTx.value = newTx;
+    innerTx.value = getInnerTransaction(newTx);
   }
 
   const availableTokens = computed<ITokenList>(
@@ -44,28 +48,31 @@ export function useTransactionTx({
   const getExplorerPath = computed(() => store.getters.getExplorerPath);
   const getPreferred = computed(() => store.getters['names/getPreferred']);
 
+  const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
+
   const txType = computed(() => innerTx.value ? getTxType(innerTx.value) : null);
+  const outerTxType = computed(() => outerTx.value ? getTxType(outerTx.value) : null);
 
   const isAllowance = computed((): boolean => (
-    !!innerTx.value
+    !!innerTx.value?.function
     && FUNCTION_TYPE_DEX.allowance.includes(innerTx.value.function as TxFunctionRaw)
     && !!availableTokens.value[innerTx.value.contractId]
   ));
 
   const isMultisig = computed((): boolean => (
-    !!innerTx.value
+    !!outerTx.value?.function
     && (
-      Object.values(FUNCTION_TYPE_MULTISIG).includes(innerTx.value.function as TxFunctionRaw)
-      || !!innerTx.value.payerId
+      Object.values(FUNCTION_TYPE_MULTISIG).includes(outerTx.value.function as TxFunctionRaw)
+      || !!outerTx.value.payerId
     )
   ));
 
   const isErrorTransaction = computed(
     (): boolean => {
-      if (!innerTx.value) {
+      if (!outerTx.value) {
         return false;
       }
-      const { returnType } = innerTx.value;
+      const { returnType } = outerTx.value;
       return !!(returnType && returnType !== RETURN_TYPE_OK);
     },
   );
@@ -93,15 +100,18 @@ export function useTransactionTx({
     },
   );
 
-  const direction = computed(() => (
-    innerTx.value?.function === TX_FUNCTIONS.claim
+  const direction = computed(() => {
+    if (outerTx.value?.payerId === account.value.address) {
+      return TX_FUNCTIONS.sent;
+    }
+    return innerTx.value?.function === TX_FUNCTIONS.claim
       ? TX_FUNCTIONS.received
       : getTxDirection.value(
         innerTx.value,
         ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
         && txOwnerAddress.value,
-      )
-  ));
+      );
+  });
 
   function getOwnershipAccount(
     externalOwnerAddress: string | undefined,
@@ -130,7 +140,10 @@ export function useTransactionTx({
   }
 
   return {
+    outerTxType,
+    hasNestedTx,
     txType,
+    innerTx: innerTx as any,
     isAllowance,
     isErrorTransaction,
     isDex,

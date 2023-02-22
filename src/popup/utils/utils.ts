@@ -374,7 +374,7 @@ export function isContainingNestedTx(tx: ITx): boolean {
 }
 
 export function getInnerTransaction(tx: ITx): any {
-  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+  return tx && isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
 export function getTransactionTipUrl(transaction: ITransaction): string {

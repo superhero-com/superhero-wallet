@@ -9,7 +9,8 @@
         class="header"
       >
         <TransactionTokens
-          :transaction="multisigTx"
+          v-if="multisigTx"
+          :transaction="{ tx: multisigTx }"
           icon-size="md"
         />
       </div>

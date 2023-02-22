@@ -99,8 +99,12 @@ export default {
     }
     return +aettosToAe(
       new BigNumber(
-        transaction.tx?.amount || transaction.tx?.nameFee || 0,
-      ).plus(transaction.tx?.fee || 0),
+        transaction.tx?.amount
+        || transaction.tx?.tx?.tx?.amount
+        || transaction.tx?.nameFee || 0,
+      )
+        .plus(transaction.tx?.fee || 0)
+        .plus(transaction.tx?.tx?.tx?.fee || 0),
     );
   },
   getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {

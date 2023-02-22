@@ -26,7 +26,6 @@ import {
   TX_FUNCTIONS,
   TX_TYPE_MDW,
   watchUntilTruthy,
-  getInnerTransaction,
 } from '../utils';
 import { useSdk, useTransactionTx } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
@@ -63,28 +62,27 @@ export default defineComponent({
 
     const { getSdk } = useSdk({ store: root.$store });
 
-    const lastNestedInnerTx = getInnerTransaction(props.tx);
-
     const {
       txType,
       direction,
       getOwnershipAccount,
+      innerTx,
     } = useTransactionTx({
       store: root.$store,
-      tx: lastNestedInnerTx,
+      tx: props.tx,
     });
 
     const isDexRecipient = computed(
       () => [
         ...getDexContracts.value.router,
         ...getDexContracts.value.wae,
-      ].includes(lastNestedInnerTx?.contractId),
+      ].includes(innerTx.value?.contractId),
     );
 
     const transaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
-      const { senderId, recipientId, contractId } = lastNestedInnerTx;
+      const { senderId, recipientId, contractId } = innerTx.value;
 
       switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
@@ -118,7 +116,7 @@ export default defineComponent({
               ? ownershipAccount.value
               : contract,
             title: root.$t('transaction.type.contractCallTx'),
-            function: lastNestedInnerTx.function,
+            function: innerTx.value.function,
           };
         }
         case SCHEMA.TX_TYPE.contractCreate:
@@ -143,14 +141,14 @@ export default defineComponent({
         case TX_TYPE_MDW.GAAttachTx: {
           return {
             sender: {
-              address: lastNestedInnerTx.ownerId,
-              name: getPreferred.value(lastNestedInnerTx.ownerId),
-              url: getExplorerPath.value(lastNestedInnerTx.ownerId),
+              address: innerTx.value.ownerId,
+              name: getPreferred.value(innerTx.value.ownerId),
+              url: getExplorerPath.value(innerTx.value.ownerId),
               label: root.$t('multisig.multisigVault'),
             },
             recipient: {
               label: root.$t('transaction.overview.smartContract'),
-              address: lastNestedInnerTx.contractId,
+              address: innerTx.value.contractId,
             },
           };
         }
@@ -161,12 +159,12 @@ export default defineComponent({
 
     async function decodeClaimTransactionAccount(): Promise<string> {
       // eslint-disable-next-line camelcase
-      const calldata = lastNestedInnerTx.callData || lastNestedInnerTx.call_data;
+      const calldata = innerTx.value.callData || innerTx.value.call_data;
 
-      if (!(lastNestedInnerTx.contractId && calldata)) return '';
+      if (!(innerTx.value.contractId && calldata)) return '';
 
       const sdk = await getSdk();
-      const { bytecode } = await sdk.getContractByteCode(lastNestedInnerTx.contractId);
+      const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
       const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
         bytecode,
         calldata,
@@ -178,18 +176,17 @@ export default defineComponent({
 
     onMounted(async () => {
       await watchUntilTruthy(() => middleware.value);
-      if (lastNestedInnerTx.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.value.getNameById(lastNestedInnerTx.recipientId)).name;
+      if (innerTx.value.recipientId?.startsWith('nm_')) {
+        name.value = (await middleware.value.getNameById(innerTx.value.recipientId)).name;
       }
       let transactionOwnerAddress;
-      if (lastNestedInnerTx.function === TX_FUNCTIONS.claim) {
+      if (innerTx.value.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
       ownershipAccount.value = getOwnershipAccount(transactionOwnerAddress);
     });
 
     return {
-      lastNestedInnerTx,
       transaction,
     };
   },

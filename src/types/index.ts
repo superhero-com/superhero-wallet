@@ -302,16 +302,6 @@ export interface IGAMetaTx {
   version: number;
 }
 
-export interface IGAMeta {
-  signatures: string[];
-  tx: IGAMetaTx;
-}
-
-export interface IPayingForTx {
-  signatures: string[];
-  tx: IGAAttachTx;
-}
-
 export interface ITx {
   abiVersion: number
   accountId?: string
@@ -346,7 +336,10 @@ export interface ITx {
   selectedTokenContractId?: string
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
-  tx?: IGAMeta | IPayingForTx;
+  tx?: {
+    signatures: string[];
+    tx: ITx | IGAAttachTx | IGAMetaTx;
+  }
   VSN: string;
 }
 

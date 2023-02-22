@@ -14,7 +14,7 @@
           :return-type="transaction.tx.returnType"
         />
         <TransactionTokens
-          :transaction="isContainingInternalTx ? transaction.tx.tx : transaction"
+          :transaction="transaction"
           :direction="direction"
           :is-allowance="isAllowance"
           :error="isErrorTransaction"
@@ -244,7 +244,6 @@ import {
   getTransactionTipUrl,
   fetchJson,
   handleUnknownError,
-  isContainingNestedTx,
   isTransactionAex9,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
@@ -301,7 +300,7 @@ export default defineComponent({
       isAllowance,
       isDex,
       isMultisig,
-      txType,
+      outerTxType,
     } = useTransactionTx({
       store: root.$store,
     });
@@ -345,13 +344,9 @@ export default defineComponent({
     });
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
-      if (txType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      if (outerTxType.value !== TX_TYPE_MDW.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
     });
-
-    const isContainingInternalTx = computed(
-      (): boolean => !!transaction.value?.tx && isContainingNestedTx(transaction.value.tx),
-    );
 
     /**
      * Computes the total transaction fee, which is the sum of the fee of the main transaction
@@ -381,7 +376,7 @@ export default defineComponent({
         setTransactionTx(transaction.value.tx);
       }
 
-      if (txType.value === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         try {
           const { contract_id: contractId = null } = await fetchJson(
             `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
@@ -402,7 +397,6 @@ export default defineComponent({
       getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
-      isContainingInternalTx,
       isDex,
       isTransactionAex9,
       isMultisig,
