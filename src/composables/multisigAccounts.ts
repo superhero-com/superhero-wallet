@@ -143,8 +143,12 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
             consensus.expirationHeight = Number(consensus.expirationHeight);
             consensus.confirmationsRequired = Number(consensus.confirmationsRequired);
 
+            const hasPendingTransaction = !!txHash && !consensus.expired;
+
             const consensusLabel = (
-              `${consensus?.confirmedBy?.length}/${consensus.confirmationsRequired} ${i18n.t('common.of')} ${signers.decodedResult?.length}`
+              `${hasPendingTransaction ? consensus?.confirmedBy?.length : 0}`
+              + `/${consensus.confirmationsRequired} ${i18n.t('common.of')} `
+              + `${signers.decodedResult?.length}`
             );
 
             return {
@@ -156,7 +160,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
               nonce: Number(nonce.decodedResult),
               signers: signers.decodedResult,
               balance: convertToken(balance, -MAGNITUDE),
-              hasPendingTransaction: !!txHash && !consensus.expired,
+              hasPendingTransaction,
               txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
             };
           } catch (error) {
