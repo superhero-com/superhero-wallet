@@ -141,7 +141,7 @@ export default defineComponent({
 
     const { getSdk } = useSdk({ store: root.$store });
 
-    const creatorAddress = ref<string>(accounts.value[0].address);
+    const creatorAddress = ref<string>(props.signers[0].address || accounts.value[0].address);
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
       () => accounts.value.find(({ address }) => address === creatorAddress.value),
