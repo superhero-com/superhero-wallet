@@ -181,7 +181,7 @@
           >
             <template #value>
               <TokenAmount
-                :amount="getTxAmountTotal(transaction)"
+                :amount="getTxAmountTotal(transaction, direction)"
                 :symbol="getTxSymbol(transaction)"
                 :hide-fiat="isTransactionAex9(transaction)"
               />

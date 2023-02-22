@@ -60,7 +60,7 @@
         :label="$t('pages.signTransaction.total')"
       >
         <TokenAmount
-          :amount="getTxAmountTotal(txWrapped)"
+          :amount="totalAmount"
           :symbol="getTxSymbol(transaction)"
           :aex9="isTransactionAex9(txWrapped)"
           data-cy="total"
@@ -222,9 +222,14 @@ export default defineComponent({
       return 'total';
     });
 
+    const totalAmount = computed(() => getTxAmountTotal.value(
+      txWrapped.value,
+      getTxDirection.value(props.transaction),
+    ));
+
     const singleToken = computed((): ITokenResolved => ({
       isReceived: getTxDirection.value(props.transaction) === TX_FUNCTIONS.received,
-      amount: getTxAmountTotal.value(txWrapped.value),
+      amount: totalAmount.value,
       symbol: getTxSymbol.value(props.transaction),
     }));
 
@@ -337,6 +342,7 @@ export default defineComponent({
       tokenList,
       tokenAmount,
       tokenSymbol,
+      totalAmount,
       swapDirection,
       isAllowance,
       isSwap,
@@ -348,7 +354,6 @@ export default defineComponent({
       txAeFee,
       nameAeFee,
       getLabels,
-      getTxAmountTotal,
       cancel,
     };
   },

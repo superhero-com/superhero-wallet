@@ -89,7 +89,9 @@ export default {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
   },
-  getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+  getTxAmountTotal: (
+    { fungibleTokens: { availableTokens } },
+  ) => (transaction, direction = TX_FUNCTIONS.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
@@ -97,14 +99,16 @@ export default {
         -availableTokens[contractCallData.token].decimals,
       );
     }
+    const isReceived = direction === TX_FUNCTIONS.received;
+
     return +aettosToAe(
       new BigNumber(
         transaction.tx?.amount
         || transaction.tx?.tx?.tx?.amount
         || transaction.tx?.nameFee || 0,
       )
-        .plus(transaction.tx?.fee || 0)
-        .plus(transaction.tx?.tx?.tx?.fee || 0),
+        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+        .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
   getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {
