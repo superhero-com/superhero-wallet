@@ -100,6 +100,10 @@ export default defineComponent({
       () => (props.multisigTransaction || props.transaction).tx,
     );
 
+    const transactionOwner = computed((): string | undefined => (
+      (props.transaction as IDashboardTransaction)?.transactionOwner || undefined
+    ));
+
     const {
       isDex,
       direction,
@@ -108,6 +112,7 @@ export default defineComponent({
     } = useTransactionTx({
       store: root.$store,
       tx: currentTx.value,
+      externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
@@ -160,10 +165,6 @@ export default defineComponent({
       );
     });
 
-    const transactionOwner = computed((): string | undefined => (
-      (props.transaction as IDashboardTransaction)?.transactionOwner || undefined
-    ));
-
     const consensus = computed(() => `${root.$t('multisig.consensusPending')}
        ${getConsensusInfo.value.confirmedBy}/${getConsensusInfo.value.confirmationsRequired}
        ${root.$t('common.of')} ${getConsensusInfo.value.totalSigners}`);
@@ -178,6 +179,7 @@ export default defineComponent({
       transactionOwner,
       consensus,
       getConsensusInfo,
+      direction,
       formatDate,
       formatTime,
     };

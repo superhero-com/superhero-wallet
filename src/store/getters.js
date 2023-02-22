@@ -111,15 +111,18 @@ export default {
         .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
-  getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {
+  getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
+    const currentAddress = externalAddress || address;
+
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
-      return tx.recipientId === address
+      return tx.recipientId === currentAddress
         ? TX_FUNCTIONS.received
         : TX_FUNCTIONS.sent;
     }
+
     return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
       .map((key) => tx?.[key])
-      .includes(externalAddress || address)
+      .includes(currentAddress)
       ? TX_FUNCTIONS.sent
       : TX_FUNCTIONS.received;
   },

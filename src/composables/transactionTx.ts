@@ -22,11 +22,13 @@ import {
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
+  externalAddress?: string
 }
 
 export function useTransactionTx({
   store,
   tx,
+  externalAddress,
 }: UseTransactionOptions) {
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
@@ -108,8 +110,11 @@ export function useTransactionTx({
       ? TX_FUNCTIONS.received
       : getTxDirection.value(
         innerTx.value,
-        ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
-        && txOwnerAddress.value,
+        externalAddress
+        || (
+          ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
+          && txOwnerAddress.value
+        ),
       );
   });
 

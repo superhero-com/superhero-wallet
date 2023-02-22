@@ -30,7 +30,7 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { uniqBy } from 'lodash-es';
+import { uniqWith } from 'lodash-es';
 import type {
   IAccount,
   IDashboardTransaction,
@@ -104,10 +104,11 @@ export default defineComponent({
 
       const allTransactions = await Promise.all(allTransactionsPromises);
 
-      latestTransactions.value = uniqBy(
-        (allTransactions.flat() as IDashboardTransaction[]).sort(defaultTransactionSortingCallback),
-        'hash',
-      ).slice(0, DASHBOARD_TRANSACTION_LIMIT);
+      latestTransactions.value = uniqWith(allTransactions.flat(), (a, b) => (
+        a.hash === b.hash && a.transactionOwner === b.transactionOwner
+      ))
+        .sort(defaultTransactionSortingCallback)
+        .slice(0, DASHBOARD_TRANSACTION_LIMIT);
 
       if (latestTransactions.value.length) {
         showWidget.value = true;
