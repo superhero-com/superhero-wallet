@@ -30,7 +30,6 @@ export default new Vuex.Store({
     current: {
       network: defaultNetwork.name,
       token: 0,
-      currency: 'usd',
     },
     userNetworks: [],
     transactions: {
@@ -43,7 +42,6 @@ export default new Vuex.Store({
     tippingV1: null,
     tippingV2: null,
     nodeStatus: NODE_STATUS_OFFLINE,
-    currencies: {},
     notificationSettings: [],
     chainNames: null,
     tip: null,

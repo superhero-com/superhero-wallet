@@ -67,12 +67,6 @@ export default {
       }, 1000);
     }
   },
-  setCurrentCurrency(state, currency) {
-    state.current.currency = currency;
-  },
-  setCurrencies(state, payload) {
-    state.currencies = payload;
-  },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;
   },

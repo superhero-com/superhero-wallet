@@ -12,10 +12,8 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
-  executeAndSetInterval,
   watchUntilTruthy,
   fetchRespondChallenge,
-  CURRENCIES_URL,
   MODAL_DEFAULT,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
@@ -134,16 +132,6 @@ export default {
     }
 
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-  },
-  pollCurrencies({ commit }) {
-    return executeAndSetInterval(async () => {
-      try {
-        const { aeternity } = await fetchJson(CURRENCIES_URL);
-        commit('setCurrencies', aeternity);
-      } catch (e) {
-        handleUnknownError(e);
-      }
-    }, 3600000);
   },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });

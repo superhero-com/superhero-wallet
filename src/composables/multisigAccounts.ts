@@ -5,12 +5,12 @@ import { DryRunError } from '@aeternity/aepp-sdk';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import {
-  LOCAL_STORAGE_PREFIX,
   MAGNITUDE,
   fetchJson,
   handleUnknownError,
   convertToken,
-  getFromLocalStorage,
+  getLocalStorageItem,
+  setLocalStorageItem,
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import type {
@@ -26,17 +26,15 @@ import { i18n } from '../store/plugins/languages';
 
 const POLLING_INTERVAL = 7000;
 
-const LOCAL_STORAGE_MULTISIG_KEY = `${LOCAL_STORAGE_PREFIX}_multisig`;
+const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
 const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
 
 function storeMultisigAccounts(multisigAccounts: IMultisigAccount[], networkId: string) {
-  window.localStorage
-    .setItem(`${LOCAL_STORAGE_MULTISIG_KEY}_${networkId}`, JSON.stringify(multisigAccounts));
+  return setLocalStorageItem([LOCAL_STORAGE_MULTISIG_KEY, networkId], multisigAccounts);
 }
 
 function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
-  const storedMultisig = window.localStorage.getItem(`${LOCAL_STORAGE_MULTISIG_KEY}_${networkId}`);
-  return storedMultisig ? JSON.parse(storedMultisig) : [];
+  return getLocalStorageItem([LOCAL_STORAGE_MULTISIG_KEY, networkId]) || [];
 }
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
@@ -205,7 +203,11 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
       !activeMultisigAccountId.value
       || activeMultisigNetworkId.value !== activeNetwork.value.networkId
     ) {
-      const storedMultisigAccountId = getFromLocalStorage(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`);
+      const storedMultisigAccountId = getLocalStorageItem<string>([
+        LOCAL_STORAGE_MULTISIG_KEY,
+        'active',
+        activeNetwork.value.networkId,
+      ]);
       setActiveMultisigAccountId(storedMultisigAccountId || result[0]?.gaAccountId);
     }
 

@@ -6,16 +6,16 @@
 
     <div class="options">
       <RadioButton
-        v-for="{ code, name, symbol }, index in currencies"
+        v-for="({ code, name, symbol }, index) in CURRENCIES"
         :key="`${index}-${code}`"
-        :value="current && current.currency == code"
-        :class="{ active: current && current.currency === code }"
+        :value="currentCurrencyCode === code"
+        :class="{ active: currentCurrencyCode === code }"
         class="currency"
-        @input="switchCurrency(code)"
+        @input="setCurrentCurrency(code)"
       >
         <div
           class="row"
-          @click="switchCurrency(code)"
+          @click="setCurrentCurrency(code)"
         >
           <div class="left">
             <div class="code">
@@ -34,25 +34,26 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useCurrencies } from '../../composables';
 import RadioButton from '../components/RadioButton.vue';
-import { CURRENCIES } from '../utils/constants';
 
-export default {
-  components: { RadioButton },
-  data() {
+export default defineComponent({
+  name: 'CurrencySettings',
+  components: {
+    RadioButton,
+  },
+  setup() {
+    const { CURRENCIES, currentCurrencyCode, setCurrentCurrency } = useCurrencies();
+
     return {
-      currencies: CURRENCIES,
+      CURRENCIES,
+      currentCurrencyCode,
+      setCurrentCurrency,
     };
   },
-  computed: mapState(['current']),
-  methods: {
-    switchCurrency(selectedCurrency) {
-      this.$store.commit('setCurrentCurrency', selectedCurrency);
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

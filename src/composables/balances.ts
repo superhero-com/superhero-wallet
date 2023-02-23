@@ -14,6 +14,7 @@ import {
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import { useCurrencies } from './currencies';
 
 type Balances = Record<string, Balance>;
 type BalancesRaw = Record<string, BalanceRaw>;
@@ -49,10 +50,10 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
+  const { currentCurrencyRate } = useCurrencies();
 
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
-  const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate);
 
   const balance = computed(() => balances.value[account.value.address] || new BigNumber(0));
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);

@@ -39,31 +39,38 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import PanelItem from '../components/PanelItem.vue';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import type { INetwork } from '../../types';
+import { useGetter, useState } from '../../composables/vuex';
+import { useCurrencies } from '../../composables';
 import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
-import { CURRENCIES } from '../utils/constants';
 
-export default {
+import PanelItem from '../components/PanelItem.vue';
+
+export default defineComponent({
   name: 'Settings',
-  components: { PanelItem },
-  data() {
+  components: {
+    PanelItem,
+  },
+  setup() {
+    const { currentCurrencyInfo } = useCurrencies();
+
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const saveErrorLog = useState('saveErrorLog');
+
+    const activeCurrency = computed(
+      () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
+    );
+
     return {
       ROUTE_NETWORK_SETTINGS,
+      activeNetwork,
+      saveErrorLog,
+      activeCurrency,
     };
   },
-  computed: {
-    ...mapState(['saveErrorLog', 'current']),
-    ...mapGetters(['activeNetwork']),
-    activeCurrency() {
-      if (!this.current || !this.current.currency) return null;
-      const currency = CURRENCIES.find((_currency) => _currency.code === this.current.currency);
-      if (!currency) return null;
-      return `${String(currency.code).toUpperCase()} (${String(currency.symbol).toUpperCase()})`;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

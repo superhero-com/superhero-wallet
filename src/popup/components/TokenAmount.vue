@@ -31,14 +31,15 @@
   </span>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useCurrencies } from '../../composables';
 import {
   AETERNITY_SYMBOL,
   TX_FUNCTIONS,
 } from '../utils';
 
-export default {
+export default defineComponent({
   props: {
     amount: { type: Number, required: true },
     label: { type: String, default: null },
@@ -48,7 +49,7 @@ export default {
     hideFiat: Boolean,
     direction: {
       type: String,
-      validator: (value) => [
+      validator: (value: any) => [
         TX_FUNCTIONS.sent,
         TX_FUNCTIONS.received,
       ].includes(value),
@@ -59,23 +60,26 @@ export default {
     noSymbol: Boolean,
     highPrecision: Boolean,
   },
-  computed: {
-    amountRounded() {
-      if (Number.isInteger(this.amount)) return this.amount;
-      if (this.amount === 0) return this.amount;
-      return this.amount.toFixed((this.highPrecision || this.amount < 0.01) ? 9 : 2);
-    },
-    ...mapState({
-      amountFiat(state, { convertToCurrency, formatCurrency }) {
-        if (this.hideFiat || this.aex9) return '';
-        const converted = convertToCurrency(this.amount);
-        if (this.amount === 0) return formatCurrency(0);
-        if (converted < 0.01) return `<${formatCurrency(0.01)}`;
-        return `≈${formatCurrency(converted)}`;
-      },
-    }),
+  setup(props) {
+    const { getFormattedAndRoundedFiat } = useCurrencies();
+
+    const amountRounded = computed(() => {
+      if (Number.isInteger(props.amount) || props.amount === 0) {
+        return props.amount;
+      }
+      return props.amount.toFixed((props.highPrecision || props.amount < 0.01) ? 9 : 2);
+    });
+
+    const amountFiat = computed(
+      (): string => (props.hideFiat || props.aex9) ? '' : getFormattedAndRoundedFiat(props.amount),
+    );
+
+    return {
+      amountRounded,
+      amountFiat,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

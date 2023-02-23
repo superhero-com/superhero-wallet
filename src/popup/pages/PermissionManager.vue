@@ -133,8 +133,8 @@ import {
 } from '@vue/composition-api';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
-import { useBalances } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useBalances, useCurrencies } from '../../composables';
+import { useState } from '../../composables/vuex';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 import SwitchButton from '../components/SwitchButton.vue';
@@ -154,6 +154,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { balance } = useBalances({ store: root.$store });
+    const { currentCurrencyRate } = useCurrencies();
 
     const routeHost = root.$route.params.host as string;
     const editView = !!root.$route.meta?.isEdit;
@@ -163,7 +164,6 @@ export default defineComponent({
     const originalTransactionSignLimit = ref<number>(0);
 
     const permissions = useState<Record<string, IPermission>>('permissions');
-    const currentCurrencyRate = useGetter('currentCurrencyRate');
 
     const selectedAsset = computed(() => ({
       contractId: AETERNITY_CONTRACT_ID,

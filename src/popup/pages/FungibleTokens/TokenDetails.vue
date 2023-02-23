@@ -168,7 +168,7 @@ import {
   convertToken,
   formatNumber,
 } from '../../utils';
-import { useGetter } from '../../../composables/vuex';
+import { useCurrencies } from '../../../composables';
 
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressTruncated from '../../components/AddressTruncated.vue';
@@ -190,7 +190,7 @@ export default defineComponent({
     tokens: { type: Array, default: () => ([]) },
   },
   setup(props) {
-    const formatCurrency = useGetter('formatCurrency');
+    const { formatCurrency } = useCurrencies();
 
     const displayDexUrl = DEX_URL.replace('https://', '');
 

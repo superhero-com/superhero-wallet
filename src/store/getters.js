@@ -44,16 +44,6 @@ export default {
     return accounts[activeIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
-  currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  convertToCurrency: (state, { currentCurrencyRate }) => (value) => (
-    +(currentCurrencyRate * value).toFixed(2)),
-  // TODO: Use the current language from i18n module
-  formatCurrency: ({ current: { currency } }) => (value) => new Intl.NumberFormat(
-    navigator.language, { style: 'currency', currencyDisplay: 'narrowSymbol', currency },
-  ).format(value),
-  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) => (
-    formatCurrency(convertToCurrency(value))),
-  minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
       NETWORK_MAINNET,
@@ -127,11 +117,6 @@ export default {
       : TX_FUNCTIONS.received;
   },
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
-  getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
-    const converted = convertToCurrency(amount);
-    if (converted < 0.01) return `<${formatCurrency(0.01)}`;
-    return `${formatCurrency(converted)}`;
-  },
   getAccountPendingTransactions: (
     { transactions: { pending } }, { activeNetwork, account: { address } },
   ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]
