@@ -1,3 +1,4 @@
+import { merge } from 'lodash-es';
 import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
@@ -210,7 +211,13 @@ export const routes: WalletAppRouteConfig[] = [
       {
         path: 'details/transactions/:hash',
         name: ROUTE_MULTISIG_TX_DETAILS,
-        component: TransactionDetails,
+        component: {
+          functional: true,
+          render: (h, context) => h(
+            TransactionDetails,
+            merge({}, context, { props: { multisigDashboard: true } }),
+          ),
+        },
         props: true,
         meta: {
           title: 'tx-details',

@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
-import { AETERNITY_SYMBOL, DEX_CONTRACTS } from '../../src/popup/utils';
+import { AETERNITY_SYMBOL, DEX_CONTRACTS, NETWORK_ID_TESTNET } from '../../src/popup/utils';
 import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
@@ -123,6 +123,7 @@ function mountComponent({ hasError = false } = {}) {
       isTransactionAex9: () => () => true,
       account: () => testAccount,
       accounts: () => [testAccount],
+      activeNetwork: () => NETWORK_ID_TESTNET,
     },
   });
 

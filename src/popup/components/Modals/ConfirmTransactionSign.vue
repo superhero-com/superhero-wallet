@@ -4,7 +4,7 @@
     class="confirm-transaction-sign"
     data-cy="popup-aex2"
   >
-    <TransactionOverview :tx="completeTransaction" />
+    <TransactionOverview :transaction="completeTransaction" />
 
     <AnimatedSpinner
       v-if="loading"
@@ -251,7 +251,7 @@ export default defineComponent({
     );
 
     const completeTransaction = computed(
-      (): ITx => ({ ...props.transaction, function: txFunction.value }),
+      () => ({ tx: { ...props.transaction, function: txFunction.value } }),
     );
 
     const isProvideLiquidity = computed(

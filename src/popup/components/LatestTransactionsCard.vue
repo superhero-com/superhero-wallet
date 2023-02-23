@@ -18,6 +18,7 @@
         v-for="transaction in latestTransactions"
         :key="`${transaction.transactionOwner}-${transaction.hash}-${activeIdx}`"
         :transaction="transaction"
+        show-transaction-owner
       />
     </div>
   </Transition>
@@ -33,7 +34,6 @@ import {
 import { uniqWith } from 'lodash-es';
 import type {
   IAccount,
-  IDashboardTransaction,
   ITransaction,
 } from '../../types';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
@@ -58,7 +58,7 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup(props, { root }) {
-    const latestTransactions = ref<IDashboardTransaction[]>([]);
+    const latestTransactions = ref<ITransaction[]>([]);
     const showWidget = ref<boolean>(false);
     const isLoading = ref<boolean>(true);
 

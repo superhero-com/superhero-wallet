@@ -123,6 +123,7 @@ export default {
         }
       });
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    txs = txs.map((tx) => ({ ...tx, transactionOwner: address }));
     const network = getters.activeNetwork.networkId;
     if (state.transactions.pending[network]) {
       state.transactions.pending[network].forEach(({ hash }) => {

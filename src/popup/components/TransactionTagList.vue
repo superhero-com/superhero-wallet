@@ -20,10 +20,9 @@ import { TranslateResult } from 'vue-i18n';
 import { useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
-  IAccount,
   INetwork,
   ITokenList,
-  ITx,
+  ITransaction,
   TxFunctionRaw,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
@@ -43,7 +42,7 @@ export default defineComponent({
     TransactionTag,
   },
   props: {
-    tx: { type: Object as PropType<ITx>, default: null },
+    transaction: { type: Object as PropType<ITransaction>, default: null },
     isIncomplete: Boolean,
     isPending: Boolean,
     isClaim: Boolean,
@@ -57,14 +56,17 @@ export default defineComponent({
       isAllowance,
       isDex,
       outerTxType,
-    } = useTransactionTx({ store: root.$store, tx: props.tx });
+    } = useTransactionTx({
+      store: root.$store,
+      tx: props.transaction?.tx,
+      externalAddress: props.transaction?.transactionOwner,
+    });
 
-    const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
     const labels = computed<(string | TranslateResult)[]>(() => {
-      if (!props.tx) return [];
+      if (!props.transaction?.tx) return [];
       const externalLabels = [];
       let innerLabels = [];
 
@@ -135,15 +137,18 @@ export default defineComponent({
       ) {
         innerLabels = [
           i18n.t('transaction.type.spendTx'),
-          innerTx.value.callerId === account.value.address
+          (
+            innerTx.value.callerId === props.transaction.transactionOwner
+            || !props.transaction.transactionOwner
+          )
             ? i18n.t('transaction.spendType.out')
             : i18n.t('transaction.spendType.in'),
         ];
       } else if (props.isPending) {
         return [];
-      } else if (props.tx.function) {
+      } else if (props.transaction.tx.function) {
         innerLabels = [
-          transactionTypes[props.tx.function],
+          transactionTypes[props.transaction.tx.function],
           txTransactionType,
         ];
       } else {

@@ -26,7 +26,7 @@
             label: $t('transaction.overview.smartContract'),
             address: activeMultisigAccount.contractId
           }"
-          :tx="multisigTx"
+          :transaction="{ tx: multisigTx }"
         />
         <div class="explorer">
           <LinkButton

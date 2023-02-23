@@ -1,14 +1,14 @@
 <template>
   <TransactionInfo
     class="transaction-overview"
-    :title="transaction.title"
-    :sender="transaction.sender"
-    :recipient="transaction.recipient"
-    :tx-function="transaction.function"
+    :title="preparedTransaction.title"
+    :sender="preparedTransaction.sender"
+    :recipient="preparedTransaction.recipient"
+    :transaction-function="preparedTransaction.function"
     :is-incomplete="transaction.incomplete"
     :is-pending="transaction.pending"
     :is-claim="transaction.claim"
-    :tx="tx"
+    :transaction="transaction"
   />
 </template>
 
@@ -32,6 +32,7 @@ import { useState, useGetter } from '../../composables/vuex';
 import {
   IAccount,
   IAccountLabeled,
+  ITransaction,
   ITx,
   TxType,
   TxFunction,
@@ -48,7 +49,7 @@ interface TransactionData {
 export default defineComponent({
   components: { TransactionInfo },
   props: {
-    tx: { type: Object as PropType<ITx>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props, { root }) {
     const name = ref('');
@@ -69,7 +70,8 @@ export default defineComponent({
       innerTx,
     } = useTransactionTx({
       store: root.$store,
-      tx: props.tx,
+      tx: props.transaction.tx,
+      externalAddress: props.transaction?.transactionOwner,
     });
 
     const isDexRecipient = computed(
@@ -79,7 +81,7 @@ export default defineComponent({
       ].includes(innerTx.value?.contractId),
     );
 
-    const transaction = computed((): TransactionData => {
+    const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
       const { senderId, recipientId, contractId } = innerTx.value;
@@ -108,12 +110,22 @@ export default defineComponent({
             label: root.$t(`transaction.overview.${isDexRecipient.value ? 'superheroDex' : 'contract'}`),
           };
 
+          let transactionOwner;
+
+          if (props.transaction.transactionOwner) {
+            transactionOwner = {
+              address: props.transaction.transactionOwner,
+              label: root.$t('transaction.overview.accountAddress'),
+              url: getExplorerPath.value(props.transaction.transactionOwner),
+            };
+          }
+
           return {
             sender: direction.value === TX_FUNCTIONS.sent
               ? ownershipAccount.value
               : contract,
             recipient: direction.value === TX_FUNCTIONS.received
-              ? ownershipAccount.value
+              ? transactionOwner ?? ownershipAccount.value
               : contract,
             title: root.$t('transaction.type.contractCallTx'),
             function: innerTx.value.function,
@@ -187,7 +199,7 @@ export default defineComponent({
     });
 
     return {
-      transaction,
+      preparedTransaction,
     };
   },
 });

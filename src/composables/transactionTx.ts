@@ -32,10 +32,15 @@ export function useTransactionTx({
 }: UseTransactionOptions) {
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
+  const ownerAddress = ref<string | undefined>(externalAddress);
 
   function setTransactionTx(newTx: ITx) {
     outerTx.value = newTx;
     innerTx.value = getInnerTransaction(newTx);
+  }
+
+  function setExternalAddress(address: string) {
+    ownerAddress.value = address;
   }
 
   const availableTokens = computed<ITokenList>(
@@ -102,21 +107,16 @@ export function useTransactionTx({
     },
   );
 
-  const direction = computed(() => {
-    if (outerTx.value?.payerId === account.value.address) {
-      return TX_FUNCTIONS.sent;
-    }
-    return innerTx.value?.function === TX_FUNCTIONS.claim
-      ? TX_FUNCTIONS.received
-      : getTxDirection.value(
-        innerTx.value,
+  const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
+    ? TX_FUNCTIONS.received
+    : getTxDirection.value(
+        outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress
         || (
           ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
         ),
-      );
-  });
+    ));
 
   function getOwnershipAccount(
     externalOwnerAddress: string | undefined,
@@ -156,5 +156,6 @@ export function useTransactionTx({
     direction,
     getOwnershipAccount,
     setTransactionTx,
+    setExternalAddress,
   };
 }

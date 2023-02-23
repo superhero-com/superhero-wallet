@@ -23,21 +23,16 @@
 
         <TransactionLabel
           v-else
-          :tx="currentTx"
-          :is-incomplete="!!transaction && transaction.incomplete"
-          :is-pending="!!transaction && transaction.pending"
-          :is-claim="!!transaction && transaction.claim"
-          :transaction-owner="transactionOwner"
+          :transaction="currentTransaction"
           :transaction-date="transactionDate"
-          :is-error-transaction="isErrorTransaction"
-          :consensus="consensus"
+          :show-transaction-owner="showTransactionOwner"
           dense
         />
 
         <template v-if="!multisigTransaction">
-          <span v-if="fiatAmount && !transactionOwner">{{ fiatAmount }}</span>
+          <span v-if="fiatAmount && !showTransactionOwner">{{ fiatAmount }}</span>
           <span
-            v-else-if="transactionOwner"
+            v-else-if="showTransactionOwner"
             class="date"
           >
             {{ transactionDate }}
@@ -67,9 +62,7 @@ import {
 } from '../router/routeNames';
 import {
   IActiveMultisigTx,
-  IDashboardTransaction,
   ITransaction,
-  ITx,
   TxFunctionRaw,
 } from '../../types';
 import {
@@ -88,20 +81,21 @@ export default defineComponent({
     TransactionTokens,
   },
   props: {
-    transaction: { type: Object as PropType<ITransaction | IDashboardTransaction>, default: null },
+    transaction: { type: Object as PropType<ITransaction>, default: null },
     multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
     isMultisig: Boolean,
+    showTransactionOwner: Boolean,
     hasConsensus: Boolean,
   },
   setup(props, { root }) {
     const getAmountFiat = useGetter('getAmountFiat');
 
-    const currentTx = computed<ITx | undefined>(
-      () => (props.multisigTransaction || props.transaction).tx,
+    const currentTransaction = computed(
+      () => (props.multisigTransaction || props.transaction),
     );
 
     const transactionOwner = computed((): string | undefined => (
-      (props.transaction as IDashboardTransaction)?.transactionOwner || undefined
+      props.transaction?.transactionOwner || undefined
     ));
 
     const {
@@ -111,7 +105,7 @@ export default defineComponent({
       isErrorTransaction,
     } = useTransactionTx({
       store: root.$store,
-      tx: currentTx.value,
+      tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
@@ -138,7 +132,10 @@ export default defineComponent({
         name: props.isMultisig
           ? ROUTE_MULTISIG_TX_DETAILS
           : ROUTE_TX_DETAILS,
-        params: { hash: props.transaction.hash },
+        params: {
+          hash: props.transaction.hash,
+          transactionOwner: props.transaction.transactionOwner,
+        },
       };
     });
 
@@ -155,7 +152,7 @@ export default defineComponent({
         || isErrorTransaction.value
         || (
           isDex.value
-          && FUNCTION_TYPE_DEX.pool.includes(currentTx.value?.function as TxFunctionRaw)
+          && FUNCTION_TYPE_DEX.pool.includes(currentTransaction.value.tx?.function as TxFunctionRaw)
         )
       ) return 0;
       return getAmountFiat.value(
@@ -175,7 +172,7 @@ export default defineComponent({
       transactionDate,
       isErrorTransaction,
       tokens,
-      currentTx,
+      currentTransaction,
       transactionOwner,
       consensus,
       getConsensusInfo,

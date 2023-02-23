@@ -23,7 +23,7 @@
         />
       </div>
       <div class="content">
-        <TransactionOverview :tx="transaction.tx" />
+        <TransactionOverview :transaction="transaction" />
         <div class="explorer">
           <LinkButton :to="explorerPath">
             {{ $t('pages.transactionDetails.explorer') }}
@@ -248,7 +248,7 @@ import {
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import { useAccounts, useTransactionTx } from '../../composables';
+import { useAccounts, useTransactionTx, useMultisigAccounts } from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -291,9 +291,13 @@ export default defineComponent({
   },
   props: {
     hash: { type: String, required: true },
+    multisigDashboard: { type: Boolean },
+    transactionOwner: { type: String, default: '' },
   },
   setup(props, { root }) {
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
     const {
+      setExternalAddress,
       setTransactionTx,
       direction,
       isErrorTransaction,
@@ -303,6 +307,7 @@ export default defineComponent({
       outerTxType,
     } = useTransactionTx({
       store: root.$store,
+      externalAddress: props.transactionOwner,
     });
 
     const { isLocalAccountAddress } = useAccounts({
@@ -361,16 +366,30 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      transaction.value = getTx.value(props.hash);
-      if (!transaction.value || transaction.value.incomplete) {
+      let rawTransaction = getTx.value(props.hash);
+      if (!rawTransaction || rawTransaction.incomplete) {
         await watchUntilTruthy(() => root.$store.state.middleware);
         try {
-          transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+          rawTransaction = await root.$store.state?.middleware.getTxByHash(props.hash);
         } catch (e) {
           root.$router.push({ name: ROUTE_NOT_FOUND });
         }
 
-        root.$store.commit('setTransactionByHash', transaction.value);
+        if (rawTransaction?.tx) {
+          if (props.multisigDashboard) {
+            await watchUntilTruthy(() => activeMultisigAccountId.value);
+            setExternalAddress(activeMultisigAccountId.value);
+            transaction.value = {
+              ...rawTransaction,
+              transactionOwner: activeMultisigAccountId.value,
+            };
+          } else {
+            transaction.value = { ...rawTransaction, transactionOwner: props.transactionOwner };
+          }
+          root.$store.commit('setTransactionByHash', transaction.value);
+        }
+      } else {
+        transaction.value = rawTransaction;
       }
       if (transaction.value?.tx) {
         setTransactionTx(transaction.value.tx);

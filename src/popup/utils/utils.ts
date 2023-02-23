@@ -36,7 +36,6 @@ import type {
   ITransaction,
   ITx,
   TxType,
-  IDashboardTransaction,
   BigNumberPublic,
   IPendingTransaction,
 } from '../../types';
@@ -317,8 +316,8 @@ export function getAccountNameToDisplay(acc: IAccount | undefined) {
 }
 
 export function defaultTransactionSortingCallback(
-  a: ITransaction | IDashboardTransaction,
-  b: ITransaction | IDashboardTransaction,
+  a: ITransaction,
+  b: ITransaction,
 ) {
   const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);

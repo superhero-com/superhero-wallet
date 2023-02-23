@@ -4,7 +4,7 @@
     class="transaction-label"
   >
     <PendingIcon
-      v-if="isPending"
+      v-if="transaction.pending"
       class="icon"
     />
     <div
@@ -12,7 +12,7 @@
       class="error"
     >
       <WarningIcon
-        v-if="tx.returnType === ABORT_TX_TYPE"
+        v-if="transaction.tx.returnType === ABORT_TX_TYPE"
         class="icon"
       />
       <RevertedIcon
@@ -26,10 +26,10 @@
         {{ label.customPending }}
       </span>
       <span
-        v-else-if="!isPending"
+        v-else-if="!transaction.pending"
         ref="labelRef"
         class="type"
-        :class="{ secondary: transactionOwner }"
+        :class="{ secondary: showTransactionOwner }"
       >
         <span
           v-if="externalLabel.length"
@@ -43,21 +43,23 @@
         v-if="isErrorTransaction"
         class="error-type"
       >
-        {{ $t('transaction.returnType')[tx.returnType] }}
+        {{ $t('transaction.returnType')[transaction.tx.returnType] }}
       </span>
       <span
-        v-if="isPending"
-        :class="{ secondary: !label.customPending || transactionOwner }"
+        v-if="transaction.pending"
+        :class="{ secondary: !label.customPending || showTransactionOwner }"
       >
         {{ label.customPending || $t('transaction.type.pending') }}...
       </span>
       <span
-        v-else-if="!transactionOwner"
+        v-else-if="!showTransactionOwner"
         class="secondary"
-      >{{ transactionDate }}</span>
+      >
+        {{ transactionDate }}
+      </span>
 
       <div
-        v-if="transactionOwner"
+        v-if="showTransactionOwner"
         class="owner"
       >
         <span class="secondary">{{ $t('common.by') }}</span>
@@ -86,7 +88,7 @@ import {
   IAccount,
   INetwork,
   ITokenList,
-  ITx,
+  ITransaction,
   ILabel,
   TxFunction,
   TxFunctionRaw,
@@ -113,14 +115,9 @@ export default defineComponent({
     WarningIcon,
   },
   props: {
-    tx: { type: Object as PropType<ITx>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
     transactionDate: { type: String, default: '' },
-    transactionOwner: { type: String, default: null },
-    consensus: { type: String, default: null },
-    isErrorTransaction: Boolean,
-    isIncomplete: Boolean,
-    isPending: Boolean,
-    isClaim: Boolean,
+    showTransactionOwner: Boolean,
     dense: Boolean,
   },
   setup(props, { root }) {
@@ -130,7 +127,8 @@ export default defineComponent({
       isAllowance,
       isDex,
       innerTx,
-    } = useTransactionTx({ store: root.$store, tx: props.tx });
+      isErrorTransaction,
+    } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
 
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
@@ -159,7 +157,10 @@ export default defineComponent({
       const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
 
       if (txType.value === SCHEMA.TX_TYPE.spend) {
-        const isSent = getTxDirection.value(innerTx.value, props.transactionOwner) === 'sent';
+        const isSent = getTxDirection.value(
+          innerTx.value,
+          props.transaction.transactionOwner,
+        ) === 'sent';
         return {
           text: isSent
             ? root.$t('transaction.listType.sentTx')
@@ -193,9 +194,9 @@ export default defineComponent({
           && ([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip] as TxFunction[])
             .includes(innerTx.value?.function!)
         )
-        || props.isClaim
+        || props.transaction.claim
       ) {
-        return labelWrapper(props.isClaim
+        return labelWrapper(props.transaction.claim
           ? root.$t('transaction.listType.tipReceived')
           : root.$t('transaction.listType.tipSent'));
       }
@@ -203,11 +204,11 @@ export default defineComponent({
         txType.value === SCHEMA.TX_TYPE.contractCall
         && availableTokens.value[innerTx.value.contractId]
         && (innerTx.value.function === TX_FUNCTIONS.transfer
-          || props.isIncomplete)
+          || props.transaction.incomplete)
       ) {
-        const isSent = !props.transactionOwner
+        const isSent = !props.transaction.transactionOwner
           ? innerTx.value.callerId === account.value.address
-          : props.transactionOwner === innerTx.value.callerId;
+          : props.transaction.transactionOwner === innerTx.value.callerId;
 
         return {
           text: isSent
@@ -226,13 +227,13 @@ export default defineComponent({
       }
 
       return labelWrapper(
-        props.transactionOwner ? translation : addComma(translation),
+        props.transaction.transactionOwner ? translation : addComma(translation),
       );
     });
 
     const ownerName = computed(() => getAccountNameToDisplay(
       accounts.value.find((acc: IAccount) => (
-        acc.address === props.transactionOwner
+        acc.address === props.transaction.transactionOwner
       )),
     ));
 
@@ -241,6 +242,7 @@ export default defineComponent({
     });
 
     return {
+      isErrorTransaction,
       ownerName,
       label,
       externalLabel,

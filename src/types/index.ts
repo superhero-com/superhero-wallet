@@ -353,12 +353,9 @@ export interface ITransaction {
   pending: boolean; // There are cases that not only the IPendingTransaction can be pending
   rawTx?: any; // TODO find type
   tipUrl?: string;
+  transactionOwner?: string;
   tx: ITx;
   url?: string;
-}
-
-export interface IDashboardTransaction extends ITransaction {
-  transactionOwner?: string;
 }
 
 export type PendingTransactionType = 'spend' | 'spendToken';

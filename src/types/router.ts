@@ -51,6 +51,9 @@ export interface WalletRouteMeta {
 
 export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {
   meta?: WalletRouteMeta
-  component?: typeof Vue | ComponentOptions<Vue>,
+  component?: typeof Vue | ComponentOptions<Vue> | {
+    functional: boolean
+    render: any
+  },
   children?: WalletAppRouteConfig[],
 }
