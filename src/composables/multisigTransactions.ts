@@ -21,7 +21,7 @@ import type {
   ITransaction,
 } from '../types';
 
-const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 50;
+const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
