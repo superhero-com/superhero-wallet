@@ -12,7 +12,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import { useGetter } from '../../composables/vuex';
+import { useCurrencies } from '../../composables';
 
 export default defineComponent({
   props: {
@@ -20,14 +20,14 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+    const { getFormattedFiat } = useCurrencies();
 
     const totalAmount = computed(() => {
       const total = props.totalBalance.reduce(
         (previousValue, currentValue) => previousValue.plus(currentValue),
         new BigNumber(0),
       );
-      return convertToCurrencyFormatted.value(total.toNumber());
+      return getFormattedFiat(total.toNumber());
     });
 
     return {

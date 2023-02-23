@@ -35,52 +35,66 @@
         @ {{ price }}
       </div>
       <div class="price">
-        {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
+        {{ balanceFormatted }}
       </div>
     </div>
   </ListItemWrapper>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import type { IAsset, IToken } from '../../../types';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
+import { useCurrencies } from '../../../composables';
+import { useState } from '../../../composables/vuex';
+
 import TokenAmount from '../TokenAmount.vue';
 import Tokens from '../Tokens.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
 
-export default {
+export default defineComponent({
   components: {
     TokenAmount,
     Tokens,
     ListItemWrapper,
   },
   props: {
-    tokenData: { type: Object, default: null },
+    tokenData: { type: Object as PropType<IToken>, default: null },
     preventNavigation: Boolean,
     showCurrentPrice: Boolean,
     selected: Boolean,
     isMultisig: Boolean,
   },
-  data: () => ({
-    AETERNITY_CONTRACT_ID,
-  }),
-  computed: {
-    ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
-    ...mapState('fungibleTokens', ['aePublicData']),
-    price() {
-      return this.formatCurrency(this.aePublicData?.current_price || 0);
-    },
-    targetRouteName() {
-      if (this.isMultisig) {
+  setup(props) {
+    const { getFormattedFiat, formatCurrency } = useCurrencies();
+
+    const aePublicData = useState<IAsset>('fungibleTokens', 'aePublicData');
+
+    const price = computed(() => formatCurrency(aePublicData.value?.current_price || 0));
+
+    const balanceFormatted = computed(
+      () => getFormattedFiat(props.tokenData.convertedBalance || 0),
+    );
+
+    const targetRouteName = computed(() => {
+      if (props.isMultisig) {
         return ROUTE_MULTISIG_COIN;
       }
-      return (this.tokenData.contractId === AETERNITY_CONTRACT_ID)
-        ? ROUTE_COIN
-        : ROUTE_TOKEN;
-    },
+      if (props.tokenData.contractId === AETERNITY_CONTRACT_ID) {
+        return ROUTE_COIN;
+      }
+      return ROUTE_TOKEN;
+    });
+
+    return {
+      AETERNITY_CONTRACT_ID,
+      price,
+      targetRouteName,
+      balanceFormatted,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

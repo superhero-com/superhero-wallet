@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
+import { useCurrencies } from '../../composables';
 import AeBalance from './AeBalance.vue';
 
 export default defineComponent({
@@ -23,11 +23,9 @@ export default defineComponent({
     balance: { type: Number, required: true },
   },
   setup(props) {
-    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+    const { getFormattedFiat } = useCurrencies();
 
-    const currencyFormatted = computed(
-      () => convertToCurrencyFormatted.value(props.balance),
-    );
+    const currencyFormatted = computed(() => getFormattedFiat(props.balance));
 
     return {
       currencyFormatted,

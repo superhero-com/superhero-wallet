@@ -42,7 +42,7 @@
           data-cy="total-amount-currency"
         >
           <span v-if="value">&thickapprox;</span>
-          {{ formatCurrency(totalAmount) }}
+          {{ totalAmountFormatted }}
         </span>
 
         <span
@@ -51,7 +51,7 @@
         >
           @{{
             (currentTokenFiatPrice)
-              ? formatCurrency(currentTokenFiatPrice)
+              ? currentTokenFiatPriceFormatted
               : $t('priceNotAvailable')
           }}
         </span>
@@ -68,7 +68,7 @@ import {
   PropType,
   watch,
 } from '@vue/composition-api';
-import { useBalances } from '../../composables';
+import { useBalances, useCurrencies } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import type { IAsset } from '../../types';
 import { AETERNITY_SYMBOL } from '../utils';
@@ -89,10 +89,10 @@ export default defineComponent({
   },
   setup(props, { root, emit }) {
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { formatCurrency } = useCurrencies();
 
     // eslint-disable-next-line no-unused-vars
     const getAeternityToken = useGetter<(o: any) => IAsset>('fungibleTokens/getAeternityToken');
-    const formatCurrency = useGetter('formatCurrency');
 
     const aeToken = getAeternityToken.value({
       tokenBalance: balance.value,
@@ -101,12 +101,15 @@ export default defineComponent({
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeToken);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
-    const totalAmount = computed(
-      () => (currentAsset.value?.current_price)
-        ? ((+props.value || 0) * currentAsset.value.current_price).toFixed(2)
+    const totalAmountFormatted = computed(() => formatCurrency(
+      (currentAsset.value?.current_price)
+        ? (+props.value || 0) * currentAsset.value.current_price
         : 0,
+    ));
+    const currentTokenFiatPrice = computed(() => currentAsset.value?.current_price);
+    const currentTokenFiatPriceFormatted = computed(
+      () => formatCurrency(currentTokenFiatPrice.value),
     );
-    const currentTokenFiatPrice = computed(() => currentAsset.value?.current_price?.toFixed(2));
 
     function handleAssetSelected(asset: IAsset) {
       emit('asset-selected', asset);
@@ -122,8 +125,9 @@ export default defineComponent({
 
     return {
       AETERNITY_SYMBOL,
-      totalAmount,
+      totalAmountFormatted,
       currentTokenFiatPrice,
+      currentTokenFiatPriceFormatted,
       currentAsset,
       hasError,
       formatCurrency,

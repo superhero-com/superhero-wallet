@@ -39,8 +39,7 @@ import {
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { AETERNITY_SYMBOL, calculateFee } from '../utils';
-import { useBalances, useSdk } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { useBalances, useCurrencies, useSdk } from '../../composables';
 import InputField from './InputField.vue';
 
 export default defineComponent({
@@ -54,13 +53,13 @@ export default defineComponent({
   setup(props, { emit, root }) {
     const { getSdk } = useSdk({ store: root.$store });
     const { balance } = useBalances({ store: root.$store });
+    const { getFormattedFiat } = useCurrencies();
 
     const fee = ref(new BigNumber(0));
 
-    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const max = computed(() => balance.value.minus(fee.value).toNumber());
-    const currencyAmount = computed(() => convertToCurrencyFormatted.value(props.value || 0));
+    const currencyAmount = computed(() => getFormattedFiat(+props.value || 0));
 
     onMounted(async () => {
       const sdk = await getSdk();

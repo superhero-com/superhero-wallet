@@ -180,7 +180,7 @@ export const getLoginState = async ({
     account,
     mnemonic,
     backedUpSeed,
-    current: { network: network || 'Testnet', token: 0, currency: 'usd' },
+    current: { network: network || 'Testnet', token: 0 },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction

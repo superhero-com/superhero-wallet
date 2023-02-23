@@ -54,7 +54,6 @@ import {
   formatTime,
   relativeTimeTo,
 } from '../utils';
-import { useGetter } from '../../composables/vuex';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
@@ -66,6 +65,7 @@ import {
   TxFunctionRaw,
 } from '../../types';
 import {
+  useCurrencies,
   useTransactionTokens,
   useTransactionTx,
 } from '../../composables';
@@ -88,7 +88,7 @@ export default defineComponent({
     hasConsensus: Boolean,
   },
   setup(props, { root }) {
-    const getAmountFiat = useGetter('getAmountFiat');
+    const { getFormattedAndRoundedFiat } = useCurrencies();
 
     const currentTransaction = computed(
       () => (props.multisigTransaction || props.transaction),
@@ -155,8 +155,8 @@ export default defineComponent({
           && FUNCTION_TYPE_DEX.pool.includes(currentTransaction.value.tx?.function as TxFunctionRaw)
         )
       ) return 0;
-      return getAmountFiat.value(
-        amountRounded((aeToken.decimals
+      return getFormattedAndRoundedFiat(
+        +amountRounded((aeToken.decimals
           ? convertToken(aeToken.amount || 0, -aeToken.decimals)
           : aeToken.amount)!),
       );
