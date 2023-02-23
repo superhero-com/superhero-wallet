@@ -255,6 +255,7 @@ export default (store) => {
           .map((tx) => ({
             ...tx,
             tx: {
+              amount: tx.amount,
               contractId: tx.contract_id,
               senderId: tx.sender,
               recipientId: tx.recipient,
