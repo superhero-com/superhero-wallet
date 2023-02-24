@@ -47,6 +47,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from '@vue/composition-api';
@@ -63,6 +64,7 @@ import {
   watchUntilTruthy,
   compareCaseInsensitive,
   defaultTransactionSortingCallback,
+  isAensName,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -94,6 +96,7 @@ export default defineComponent({
   setup(props, { root }) {
     const loading = ref(false);
     const isDestroyed = ref(false);
+    let polling: NodeJS.Timeout | null = null;
 
     const {
       activeMultisigAccount,
@@ -136,13 +139,13 @@ export default defineComponent({
         }
 
         return transactionListLocal
-          .filter((tr) => (
+          .filter((tr: ITransaction) => (
             !props.token
-              || (
-                props.token !== AETERNITY_CONTRACT_ID
-                  ? tr.tx?.contractId === props.token
-                  : (!tr.tx.contractId || !isFungibleTokenTx(tr))
-              )
+            || (
+              props.token !== AETERNITY_CONTRACT_ID
+                ? tr.tx?.contractId === props.token
+                : (!tr.tx.contractId || !isFungibleTokenTx(tr))
+            )
           ))
           .filter((tr) => {
             switch (displayMode.value.key) {
@@ -151,10 +154,10 @@ export default defineComponent({
               case FILTER_MODE.dex:
                 return (
                   getDexContracts.value && tr.tx.contractId
-                    && (
-                      getDexContracts.value.router.includes(tr.tx.contractId)
-                      || getDexContracts.value.wae?.includes(tr.tx.contractId)
-                    )
+                  && (
+                    getDexContracts.value.router.includes(tr.tx.contractId)
+                    || getDexContracts.value.wae?.includes(tr.tx.contractId)
+                  )
                 );
               case FILTER_MODE.out:
                 return (
@@ -168,13 +171,13 @@ export default defineComponent({
               case FILTER_MODE.in:
                 return (
                   compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                    && (
-                      tr.tx.recipientId === currentAddress.value
-                      || (
-                        tr.tx.senderId !== currentAddress.value
-                          && tr.tx.recipientId.startsWith('nm_')
-                      )
+                  && (
+                    tr.tx.recipientId === currentAddress.value
+                    || (
+                      tr.tx.senderId !== currentAddress.value
+                      && isAensName(tr.tx.recipientId)
                     )
+                  )
                 ) || (
                   isFungibleTokenTx(tr)
                   && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
@@ -204,7 +207,7 @@ export default defineComponent({
       if (isDestroyed.value || !transactions.value.nextPageUrl) return;
       // TODO - use viewport.ts composable after rewriting component to Vue 3
       const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
-          || process.env.IS_EXTENSION;
+        || process.env.IS_EXTENSION;
       const { scrollHeight, scrollTop, clientHeight } = (isDesktop
         ? document.querySelector('.app-inner') : document.documentElement)!;
       if (props.maxLength && filteredTransactions.value.length >= props.maxLength) return;
@@ -214,24 +217,22 @@ export default defineComponent({
       }
     }
 
-    async function loadMore() {
-      if (loading.value) return;
+    async function loadMore(recent: boolean = false) {
+      if (isDestroyed.value || loading.value) {
+        return;
+      }
       loading.value = true;
       try {
         await watchUntilTruthy(() => root.$store.state.middleware);
-        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
+        await root.$store.dispatch('fetchTransactions', {
+          limit: recent ? 10 : TXS_PER_PAGE,
+          recent,
+          address: currentAddress.value,
+        });
       } finally {
         loading.value = false;
       }
       checkLoadMore();
-    }
-
-    async function getLatest() {
-      try {
-        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
-      } finally {
-        loading.value = false;
-      }
     }
 
     watch(displayMode, () => {
@@ -239,17 +240,17 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      loadMore();
-      const polling = setInterval(() => getLatest(), 10000);
-      root.$once('hook:destroyed', () => {
-        clearInterval(polling);
-        isDestroyed.value = true;
-      });
+      await loadMore();
+      polling = setInterval(() => loadMore(true), 10000);
+    });
+
+    onUnmounted(() => {
+      clearInterval(polling!);
+      isDestroyed.value = true;
     });
 
     return {
       loading,
-      isDestroyed,
       displayMode,
       availableTokens,
       transactions,

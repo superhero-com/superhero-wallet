@@ -62,7 +62,6 @@
       >
         <span class="secondary">{{ $t('common.by') }}</span>
         <Truncate
-          :key="truncateWidth"
           class="account-name-truncated"
           :str="ownerName"
           gradient-color="transparent"
@@ -88,7 +87,7 @@ import {
   INetwork,
   ITokenList,
   ITx,
-  ILabel,
+  ITransactionLabel,
   TxFunction,
   TxFunctionRaw,
   TxType,
@@ -145,7 +144,7 @@ export default defineComponent({
     const labelRef = ref();
     const truncateWidth = ref<string | number>('auto');
     const addComma = (text: TranslateResult) => text ? `${text},` : '';
-    const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
+    const labelWrapper = (text: TranslateResult = ''): ITransactionLabel => ({ text });
 
     const externalLabel = computed(() => {
       if (externalTxType === TX_TYPE_MDW.GAMetaTx) {
@@ -157,7 +156,7 @@ export default defineComponent({
       return '';
     });
 
-    const label = computed((): ILabel => {
+    const label = computed((): ITransactionLabel => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
       const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
 
@@ -240,7 +239,9 @@ export default defineComponent({
     ));
 
     onMounted(() => {
-      truncateWidth.value = `${transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25}px`;
+      truncateWidth.value = `
+        ${transactionLabelRef.value.clientWidth - (labelRef.value?.clientWidth || 0) - 25}px
+      `;
     });
 
     return {

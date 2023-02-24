@@ -579,7 +579,7 @@ export interface IKeyPair {
   secretKey: string;
 }
 
-export interface ILabel {
+export interface ITransactionLabel {
   text: string | LocaleMessages | TranslateResult,
   customPending?: string | LocaleMessages | TranslateResult
 }
