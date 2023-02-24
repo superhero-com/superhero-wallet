@@ -18,7 +18,16 @@
                 unstyled
                 :default-text="$t('modals.createMultisigAccount.selectAccount')"
                 :options="accountsSelectOptions"
-              />
+              >
+                <template #current-text="{ text }">
+                  <div>
+                    <Truncate
+                      class="account-select-text"
+                      :str="text"
+                    />
+                  </div>
+                </template>
+              </FormSelect>
             </BtnPill>
             <AddressTruncated
               show-explorer-link
@@ -110,8 +119,9 @@ import AccountItem from './AccountItem.vue';
 import BtnPill from './buttons/BtnPill.vue';
 import DetailsItem from './DetailsItem.vue';
 import DialogBox from './DialogBox.vue';
-import TokenAmount from './TokenAmount.vue';
 import FormSelect from './form/FormSelect.vue';
+import TokenAmount from './TokenAmount.vue';
+import Truncate from './Truncate.vue';
 
 import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
 
@@ -126,6 +136,7 @@ export default defineComponent({
     AddressTruncated,
     FormSelect,
     LoadingIcon,
+    Truncate,
   },
   props: {
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
@@ -186,6 +197,10 @@ export default defineComponent({
     margin-bottom: 4px;
     margin-left: -3px; // Compensate roundness
     color: $color-white;
+  }
+
+  .account-select-text {
+    max-width: 220px;
   }
 
   .review-details-row {

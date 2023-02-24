@@ -8,6 +8,7 @@
         third,
         inline,
         nowrap,
+        wide,
         'extra-padded': extraPadded,
         'has-icon': !!icon,
       },
@@ -39,6 +40,8 @@ export default defineComponent({
     third: Boolean,
     inline: Boolean,
     nowrap: Boolean,
+    // Used for footer buttons that should take 60% of the space
+    wide: Boolean,
     // Add more inner space on the sides. Useful with buttons with short text like 'OK'.
     extraPadded: Boolean,
   },
@@ -93,6 +96,10 @@ export default defineComponent({
       height: 20px;
       color: inherit;
     }
+  }
+
+  &.wide {
+    flex-basis: 60%;
   }
 
   &.extend {
