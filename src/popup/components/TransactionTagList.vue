@@ -148,7 +148,7 @@ export default defineComponent({
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [
-          transactionTypes[props.transaction.tx.function],
+          transactionTypes[props.transaction.tx.function] ?? props.transaction.tx.function,
           txTransactionType,
         ];
       } else {
