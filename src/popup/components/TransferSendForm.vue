@@ -17,7 +17,7 @@
               @select="selectAccount($event)"
             />
             <template v-else>
-              {{ getAccountNameToDisplay(account) }}
+              {{ $t('modals.multisigTxProposal.signingAccount') }}
             </template>
           </template>
           <template #value>
@@ -43,6 +43,7 @@
         <AccountItem
           :address="account.address"
           :name="account.name"
+          size="md"
         />
       </div>
     </template>
@@ -60,7 +61,9 @@
       show-help
       show-message-help
       :label="$t('modals.send.recipientLabel')"
-      :placeholder="$t('modals.send.recipientPlaceholder')"
+      :placeholder="isMultisig
+        ? $t('modals.send.recipientPlaceholder')
+        : $t('modals.send.recipientPlaceholderUrl')"
       :message="addressMessage"
       @help="showRecipientHelp()"
     >
@@ -95,6 +98,7 @@
       data-cy="amount"
       class="amount-input"
       show-tokens-with-balance
+      ae-only
       :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
       :message="amountMessage"
       :selected-asset="formModel.selectedAsset"
