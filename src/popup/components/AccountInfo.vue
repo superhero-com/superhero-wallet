@@ -19,7 +19,6 @@
         v-else-if="name"
         class="account-name-truncated"
         :str="name"
-        :gradient-color="color"
       />
       <div
         v-else

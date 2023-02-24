@@ -4,7 +4,12 @@
     class="form-select unstyled"
     @click="openOptionsModal"
   >
-    {{ currentText }}
+    <slot
+      name="current-text"
+      :text="currentText"
+    >
+      {{ currentText }}
+    </slot>
     <ChevronDownIcon class="arrow-icon" />
   </BtnPlain>
   <InputField

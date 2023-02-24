@@ -157,6 +157,7 @@
         />
         <BtnMain
           :text="$t('modals.createMultisigAccount.btnText')"
+          wide
           @click="createMultisigAccount"
         />
       </template>

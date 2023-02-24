@@ -65,7 +65,6 @@
           :key="truncateWidth"
           class="account-name-truncated"
           :str="ownerName"
-          gradient-color="transparent"
           :style="{ width: truncateWidth }"
         />
       </div>
