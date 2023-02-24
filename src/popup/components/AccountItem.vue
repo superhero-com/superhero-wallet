@@ -13,6 +13,7 @@
     <span
       v-if="name"
       class="name address"
+      :class="[size]"
       v-text="name"
     />
     <AddressTruncated
@@ -35,6 +36,10 @@ import Avatar from './Avatar.vue';
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 import LinkButton from './LinkButton.vue';
 
+const SIZE = ['rg', 'md'] as const;
+
+type SizeType = typeof SIZE[number]
+
 export default defineComponent({
   components: {
     Avatar,
@@ -45,6 +50,11 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
+    size: {
+      type: String,
+      default: 'rg',
+      validator: (value: SizeType) => SIZE.includes(value),
+    },
   },
   setup(props) {
     const activeNetwork = useGetter<INetwork>('activeNetwork');
@@ -74,10 +84,16 @@ export default defineComponent({
   }
 
   .address {
-    @extend %face-mono-10-medium;
-
     text-align: left;
     word-break: break-all;
+
+    &.rg {
+      @extend %face-mono-10-medium;
+    }
+
+    &.md {
+      @extend %face-sans-16-medium;
+    }
   }
 
   .external-link-icon {
@@ -89,7 +105,7 @@ export default defineComponent({
   .icon,
   .address {
     color: variables.$color-white;
-    opacity: 0.85;
+    opacity: 0.75;
   }
 
   &:hover {
