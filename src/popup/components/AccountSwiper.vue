@@ -83,12 +83,12 @@ export default defineComponent({
 
     function setCurrentSlide(idx: number, slideParams?: number) {
       if (currentIdx.value !== idx) {
-        root.$store.commit('initTransactions');
         swiper.value.slideTo(idx, slideParams);
       }
     }
 
     function onSlideChange() {
+      root.$store.commit('initTransactions');
       const { realIndex } = swiper.value;
       if (realIndex < props.addressList.length && realIndex >= 0) {
         emit('selectAccount', realIndex);
