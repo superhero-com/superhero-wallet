@@ -3,36 +3,53 @@
     class="account-card-add"
     @click="openCreateAccountModal()"
   >
-    <div class="title">
+    <span class="title">
       <PlusCircle />
-      {{ $t('pages.accounts.add-account') }}
-    </div>
-    <div class="description">
-      {{ $t('pages.accounts.add-account-description') }}
-    </div>
+      {{
+        isMultisig
+          ? $t('pages.vaults.addVault')
+          : $t('pages.accounts.addAccount')
+      }}
+    </span>
+    <span class="description">
+      {{
+        isMultisig
+          ? $t('pages.vaults.addVaultDescription')
+          : $t('pages.accounts.addAccountDescription')
+      }}
+    </span>
   </button>
 </template>
 
-<script>
-import { mapActions } from 'vuex';
-import { MODAL_ACCOUNT_CREATE } from '../utils/constants';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { MODAL_ACCOUNT_CREATE } from '../utils';
+import { useDispatch } from '../../composables/vuex';
+
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     PlusCircle,
   },
-  methods: {
-    ...mapActions('modals', {
-      openModal: 'open',
-    }),
-    openCreateAccountModal() {
-      this.openModal({
-        name: MODAL_ACCOUNT_CREATE,
-      });
-    },
+  props: {
+    isMultisig: Boolean,
   },
-};
+  setup(props) {
+    const openModal = useDispatch('modals/open');
+
+    function openCreateAccountModal() {
+      openModal({
+        name: MODAL_ACCOUNT_CREATE,
+        isMultisig: props.isMultisig,
+      });
+    }
+
+    return {
+      openCreateAccountModal,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -68,7 +85,7 @@ export default {
 
   .description {
     text-align: center;
-    padding: 0 16px;
+    padding: 0 4px 0 12px;
     color: rgba(variables.$color-white, 0.85);
     line-height: 22px;
 

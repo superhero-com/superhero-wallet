@@ -67,7 +67,7 @@
     "consensusPending": "Consensus pending",
     "multisigVaultCreationFailed": "Multisig creation failed",
     "needForApproval": "Needed for approval",
-    "creatingAccount": "Account creator (pays for the transaction)"
+    "creatingAccount": "Creating account (pays for the transaction)"
   },
   "modals": {
     "transaction-failed": {
@@ -107,13 +107,15 @@
     },
     "createAccount": {
       "title": "Add account",
+      "titleMultisig": "Add multisig vault",
       "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
       "btnText": "Add account",
       "btnSubtitle": "Derive another account from your seed"
     },
     "createMultisigAccount": {
       "title": "Create new multisig vault",
-      "btnText": "Create vault",
+      "btnText": "Create multisig vault",
       "btnSubtitle": "Manage funds with multiple accounts",
       "signer": "Signer",
       "signerInputPlaceholder": "Signer's account address",
@@ -373,6 +375,7 @@
       "multisigProposal": "Multisig Proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
+      "createVault": "Create Multisig Vault",
       "createMultisigVault": "Create Multisig Vault",
       "propose": "Propose Tx",
       "revoke": "Revoke Tx",
@@ -514,9 +517,12 @@
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
-      "showWallet": "Show on Wallet Home",
-      "add-account": "Add account",
-      "add-account-description": "Add an account to your wallet to manage funds separately."
+      "addAccount": "Add account",
+      "addAccountDescription": "Add an account to your wallet to manage funds separately."
+    },
+    "vaults": {
+      "addVault": "Add vault",
+      "addVaultDescription": "Add a multisig vault to your wallet to manage funds with multiple accounts."
     },
     "claim": {
       "claim": "Claim tips",

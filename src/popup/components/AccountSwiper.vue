@@ -21,7 +21,7 @@
         hide-next
         @slide="() => setCurrentSlide(addressList.length - 1)"
       >
-        <AccountCardAdd />
+        <AccountCardAdd :is-multisig="isMultisig" />
       </AccountSwiperSlide>
     </swiper>
     <div class="swiper-row">
