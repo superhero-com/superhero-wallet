@@ -7,14 +7,23 @@
     @close="resolve"
   >
     <h2 class="text-heading-2">
-      {{ $t('modals.createAccount.title') }}
+      {{
+        isMultisig
+          ? $t('modals.createAccount.titleMultisig')
+          : $t('modals.createAccount.title')
+      }}
     </h2>
 
     <p class="message">
-      {{ $t('modals.createAccount.msg') }}
+      {{
+        isMultisig
+          ? $t('modals.createAccount.msgMultisig')
+          : $t('modals.createAccount.msg')
+      }}
     </p>
 
     <BtnSubheader
+      v-if="!isMultisig"
       :header="$t('modals.createAccount.btnText')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
       :icon="PlusCircleIcon"
@@ -47,6 +56,7 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
+    isMultisig: Boolean,
   },
   setup(props, { root }) {
     const loading = ref(false);
@@ -76,8 +86,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '../../../styles/typography';
+
 .account-create {
   .message {
+    @extend %face-sans-16-medium;
+
+    line-height: 24px;
     max-width: 280px;
     margin: 0 auto 36px;
   }
