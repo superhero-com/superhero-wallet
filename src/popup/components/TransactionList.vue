@@ -47,6 +47,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from '@vue/composition-api';
@@ -238,13 +239,18 @@ export default defineComponent({
       checkLoadMore();
     });
 
-    onMounted(async () => {
+    let polling: NodeJS.Timer | null = null;
+
+    onMounted(() => {
       loadMore();
-      const polling = setInterval(() => getLatest(), 10000);
-      root.$once('hook:destroyed', () => {
+      polling = setInterval(() => getLatest(), 10000);
+    });
+
+    onUnmounted(() => {
+      if (polling) {
         clearInterval(polling);
-        isDestroyed.value = true;
-      });
+      }
+      isDestroyed.value = true;
     });
 
     return {
