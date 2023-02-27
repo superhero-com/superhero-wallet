@@ -115,9 +115,9 @@ export default {
     const currentAddress = externalAddress || address;
 
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
-      return tx.recipientId === currentAddress
-        ? TX_FUNCTIONS.received
-        : TX_FUNCTIONS.sent;
+      return tx.senderId === currentAddress
+        ? TX_FUNCTIONS.sent
+        : TX_FUNCTIONS.received;
     }
 
     return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
