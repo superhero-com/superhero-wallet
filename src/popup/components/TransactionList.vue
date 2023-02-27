@@ -42,7 +42,6 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -55,21 +54,23 @@ import type {
   IAccount,
   INetwork,
   ITokenList,
-  ITransaction,
+  ITx,
 } from '../../types';
 import {
+  TX_FUNCTIONS,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
-  compareCaseInsensitive,
   defaultTransactionSortingCallback,
+  getInnerTransaction,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
+  useTransactionTx,
 } from '../../composables';
 
 import TransactionItem from './TransactionItem.vue';
@@ -117,8 +118,8 @@ export default defineComponent({
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
     const getTxSymbol = useGetter('getTxSymbol');
 
-    function isFungibleTokenTx(tr: ITransaction) {
-      return Object.keys(availableTokens.value).includes(tr.tx.contractId);
+    function isFungibleTokenTx(tx: ITx) {
+      return Object.keys(availableTokens.value).includes(tx.contractId);
     }
 
     const currentAddress = computed(() => props.isMultisig
@@ -137,50 +138,37 @@ export default defineComponent({
         }
 
         return transactionListLocal
-          .filter((tr) => (
-            !props.token
+          .filter((tr) => {
+            const innerTx = getInnerTransaction(tr.tx);
+            return !props.token
               || (
                 props.token !== AETERNITY_CONTRACT_ID
-                  ? tr.tx?.contractId === props.token
-                  : (!tr.tx.contractId || !isFungibleTokenTx(tr))
-              )
-          ))
+                  ? innerTx?.contractId === props.token
+                  : (!innerTx.contractId || !isFungibleTokenTx(innerTx))
+              );
+          })
           .filter((tr) => {
+            const innerTx = getInnerTransaction(tr.tx);
+            const { direction } = useTransactionTx({
+              store: root.$store,
+              tx: tr.tx,
+              externalAddress: tr.transactionOwner,
+            });
             switch (displayMode.value.key) {
               case FILTER_MODE.all:
                 return true;
               case FILTER_MODE.dex:
                 return (
-                  getDexContracts.value && tr.tx.contractId
+                  getDexContracts.value && innerTx.contractId
                     && (
-                      getDexContracts.value.router.includes(tr.tx.contractId)
-                      || getDexContracts.value.wae?.includes(tr.tx.contractId)
+                      getDexContracts.value.router.includes(innerTx.contractId)
+                      || getDexContracts.value.wae?.includes(innerTx.contractId)
                     )
                 );
               case FILTER_MODE.out:
-                return (
-                  compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                  && tr.tx.senderId === currentAddress.value
-                ) || (
-                  isFungibleTokenTx(tr)
-                  && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.tx.callerId === currentAddress.value
-                );
+                return direction.value === TX_FUNCTIONS.sent;
               case FILTER_MODE.in:
-                return (
-                  compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                    && (
-                      tr.tx.recipientId === currentAddress.value
-                      || (
-                        tr.tx.senderId !== currentAddress.value
-                          && tr.tx.recipientId.startsWith('nm_')
-                      )
-                    )
-                ) || (
-                  isFungibleTokenTx(tr)
-                  && compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                  && tr.recipient === currentAddress.value
-                );
+                return direction.value === TX_FUNCTIONS.received;
               default:
                 throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
             }
