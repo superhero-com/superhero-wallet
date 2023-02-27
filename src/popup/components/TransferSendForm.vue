@@ -98,7 +98,7 @@
       data-cy="amount"
       class="amount-input"
       show-tokens-with-balance
-      ae-only
+      :ae-only="isMultisig"
       :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
       :message="amountMessage"
       :selected-asset="formModel.selectedAsset"
