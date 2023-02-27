@@ -42,7 +42,7 @@
         <TokenAmount
           :amount="tokenAmount"
           :symbol="tokenSymbol"
-          :aex9="isTransactionAex9(transaction)"
+          :aex9="isTransactionAex9(txWrapped)"
           :hide-fiat="!swapTokenAmountData.isAe"
           data-cy="total"
         />
