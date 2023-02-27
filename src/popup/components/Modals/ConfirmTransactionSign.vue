@@ -128,7 +128,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk } from '../../../composables';
+import { useSdk, useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -175,6 +175,16 @@ export default defineComponent({
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
 
+    const {
+      direction,
+      isAllowance,
+      isDex,
+      setTransactionTx,
+    } = useTransactionTx({
+      store: root.$store,
+      tx: props.transaction,
+    });
+
     const showAdvanced = ref(false);
     const tokenList = ref<ITokenResolved[]>([]);
     const txFunction = ref<TxFunctionRaw | undefined>();
@@ -183,15 +193,8 @@ export default defineComponent({
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
-    const getDexContracts = useGetter('getDexContracts');
-    const getTxDirection = useGetter('getTxDirection');
 
     const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
-
-    const isAllowance = computed(() => (
-      txFunction.value
-      && FUNCTION_TYPE_DEX.allowance.includes(txFunction.value)
-    ));
 
     const isSwap = computed(
       () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
@@ -200,12 +203,6 @@ export default defineComponent({
     const isPool = computed(
       () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
-
-    const isDex = computed(() => (
-      getDexContracts.value.router.includes(props.transaction?.contractId)
-      || getDexContracts.value.wae.includes(props.transaction?.contractId)
-      || isAllowance.value
-    ));
 
     const txAeFee = computed(() => getAeFee(props.transaction.fee));
     const nameAeFee = computed(() => getAeFee(props.transaction.nameFee));
@@ -222,13 +219,10 @@ export default defineComponent({
       return 'total';
     });
 
-    const totalAmount = computed(() => getTxAmountTotal.value(
-      txWrapped.value,
-      getTxDirection.value(props.transaction),
-    ));
+    const totalAmount = computed(() => getTxAmountTotal.value(txWrapped.value, direction.value));
 
     const singleToken = computed((): ITokenResolved => ({
-      isReceived: getTxDirection.value(props.transaction) === TX_FUNCTIONS.received,
+      isReceived: direction.value === TX_FUNCTIONS.received,
       amount: totalAmount.value,
       symbol: getTxSymbol.value(props.transaction),
     }));
@@ -315,6 +309,9 @@ export default defineComponent({
             calldata: props.transaction.callData,
           });
           txFunction.value = txParams.function as TxFunctionRaw;
+
+          setTransactionTx({ ...txParams, ...props.transaction });
+
           const allTokens = getTokens(txParams);
 
           tokenList.value = allTokens.map((token) => ({

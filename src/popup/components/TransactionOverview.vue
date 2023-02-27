@@ -58,12 +58,12 @@ export default defineComponent({
     const middleware = useState('middleware');
 
     const getExplorerPath = useGetter('getExplorerPath');
-    const getDexContracts = useGetter('getDexContracts');
     const getPreferred = useGetter('names/getPreferred');
 
     const { getSdk } = useSdk({ store: root.$store });
 
     const {
+      isDex,
       txType,
       direction,
       getOwnershipAccount,
@@ -73,13 +73,6 @@ export default defineComponent({
       tx: props.transaction.tx,
       externalAddress: props.transaction?.transactionOwner,
     });
-
-    const isDexRecipient = computed(
-      () => [
-        ...getDexContracts.value.router,
-        ...getDexContracts.value.wae,
-      ].includes(innerTx.value?.contractId),
-    );
 
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
@@ -107,7 +100,7 @@ export default defineComponent({
           const contract = {
             address: contractId,
             url: getExplorerPath.value(contractId),
-            label: root.$t(`transaction.overview.${isDexRecipient.value ? 'superheroDex' : 'contract'}`),
+            label: root.$t(`transaction.overview.${isDex.value ? 'superheroDex' : 'contract'}`),
           };
 
           let transactionOwner;

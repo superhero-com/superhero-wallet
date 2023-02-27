@@ -111,8 +111,6 @@ export default defineComponent({
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const transactions = useState('transactions');
-
-    const getDexContracts = useGetter('getDexContracts');
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
@@ -148,8 +146,7 @@ export default defineComponent({
               );
           })
           .filter((tr) => {
-            const innerTx = getInnerTransaction(tr.tx);
-            const { direction } = useTransactionTx({
+            const { direction, isDex } = useTransactionTx({
               store: root.$store,
               tx: tr.tx,
               externalAddress: tr.transactionOwner,
@@ -158,13 +155,7 @@ export default defineComponent({
               case FILTER_MODE.all:
                 return true;
               case FILTER_MODE.dex:
-                return (
-                  getDexContracts.value && innerTx.contractId
-                    && (
-                      getDexContracts.value.router.includes(innerTx.contractId)
-                      || getDexContracts.value.wae?.includes(innerTx.contractId)
-                    )
-                );
+                return isDex.value;
               case FILTER_MODE.out:
                 return direction.value === TX_FUNCTIONS.sent;
               case FILTER_MODE.in:
