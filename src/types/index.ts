@@ -302,16 +302,6 @@ export interface IGAMetaTx {
   version: number;
 }
 
-export interface IGAMeta {
-  signatures: string[];
-  tx: IGAMetaTx;
-}
-
-export interface IPayingForTx {
-  signatures: string[];
-  tx: IGAAttachTx;
-}
-
 export interface ITx {
   abiVersion: number
   accountId?: string
@@ -346,7 +336,10 @@ export interface ITx {
   selectedTokenContractId?: string
   tag?: string; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
-  tx?: IGAMeta | IPayingForTx;
+  tx?: {
+    signatures: string[];
+    tx: ITx | IGAAttachTx | IGAMetaTx;
+  }
   VSN: string;
 }
 
@@ -360,12 +353,9 @@ export interface ITransaction {
   pending: boolean; // There are cases that not only the IPendingTransaction can be pending
   rawTx?: any; // TODO find type
   tipUrl?: string;
+  transactionOwner?: string;
   tx: ITx;
   url?: string;
-}
-
-export interface IDashboardTransaction extends ITransaction {
-  transactionOwner?: string;
 }
 
 export type PendingTransactionType = 'spend' | 'spendToken';

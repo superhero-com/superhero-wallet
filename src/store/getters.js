@@ -89,7 +89,9 @@ export default {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
   },
-  getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+  getTxAmountTotal: (
+    { fungibleTokens: { availableTokens } },
+  ) => (transaction, direction = TX_FUNCTIONS.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
@@ -97,21 +99,30 @@ export default {
         -availableTokens[contractCallData.token].decimals,
       );
     }
+    const isReceived = direction === TX_FUNCTIONS.received;
+
     return +aettosToAe(
       new BigNumber(
-        transaction.tx?.amount || transaction.tx?.nameFee || 0,
-      ).plus(transaction.tx?.fee || 0),
+        transaction.tx?.amount
+        || transaction.tx?.tx?.tx?.amount
+        || transaction.tx?.nameFee || 0,
+      )
+        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+        .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
-  getTxDirection: (_, { account: { address } }) => (tx, externalAddress) => {
+  getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
+    const currentAddress = externalAddress || address;
+
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
-      return tx.recipientId === address
+      return tx.recipientId === currentAddress
         ? TX_FUNCTIONS.received
         : TX_FUNCTIONS.sent;
     }
+
     return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
       .map((key) => tx?.[key])
-      .includes(externalAddress || address)
+      .includes(currentAddress)
       ? TX_FUNCTIONS.sent
       : TX_FUNCTIONS.received;
   },

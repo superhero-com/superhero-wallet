@@ -4,7 +4,7 @@
     class="transaction-label"
   >
     <PendingIcon
-      v-if="isPending"
+      v-if="transaction.pending"
       class="icon"
     />
     <div
@@ -12,7 +12,7 @@
       class="error"
     >
       <WarningIcon
-        v-if="tx.returnType === ABORT_TX_TYPE"
+        v-if="transaction.tx.returnType === ABORT_TX_TYPE"
         class="icon"
       />
       <RevertedIcon
@@ -26,10 +26,10 @@
         {{ label.customPending }}
       </span>
       <span
-        v-else-if="!isPending"
+        v-else-if="!transaction.pending"
         ref="labelRef"
         class="type"
-        :class="{ secondary: transactionOwner }"
+        :class="{ secondary: showTransactionOwner }"
       >
         <span
           v-if="externalLabel.length"
@@ -43,21 +43,23 @@
         v-if="isErrorTransaction"
         class="error-type"
       >
-        {{ $t('transaction.returnType')[tx.returnType] }}
+        {{ $t('transaction.returnType')[transaction.tx.returnType] }}
       </span>
       <span
-        v-if="isPending"
-        :class="{ secondary: !label.customPending || transactionOwner }"
+        v-if="transaction.pending"
+        :class="{ secondary: !label.customPending || showTransactionOwner }"
       >
         {{ label.customPending || $t('transaction.type.pending') }}...
       </span>
       <span
-        v-else-if="!transactionOwner"
+        v-else-if="!showTransactionOwner"
         class="secondary"
-      >{{ transactionDate }}</span>
+      >
+        {{ transactionDate }}
+      </span>
 
       <div
-        v-if="transactionOwner"
+        v-if="showTransactionOwner"
         class="owner"
       >
         <span class="secondary">{{ $t('common.by') }}</span>
@@ -86,7 +88,7 @@ import {
   IAccount,
   INetwork,
   ITokenList,
-  ITx,
+  ITransaction,
   ILabel,
   TxFunction,
   TxFunctionRaw,
@@ -96,9 +98,8 @@ import {
   ABORT_TX_TYPE,
   FUNCTION_TYPE_DEX,
   getAccountNameToDisplay,
-  getInnerTransaction,
-  getTxType,
-  TX_FUNCTIONS, TX_TYPE_MDW,
+  TX_FUNCTIONS,
+  TX_TYPE_MDW,
 } from '../utils';
 import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -114,31 +115,26 @@ export default defineComponent({
     WarningIcon,
   },
   props: {
-    tx: { type: Object as PropType<ITx>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
     transactionDate: { type: String, default: '' },
-    transactionOwner: { type: String, default: null },
-    consensus: { type: String, default: null },
-    isErrorTransaction: Boolean,
-    isIncomplete: Boolean,
-    isPending: Boolean,
-    isClaim: Boolean,
+    showTransactionOwner: Boolean,
     dense: Boolean,
   },
   setup(props, { root }) {
-    const lastNestedInnerTx = getInnerTransaction(props.tx);
-
     const {
+      outerTxType,
       txType,
       isAllowance,
       isDex,
-    } = useTransactionTx({ store: root.$store, tx: lastNestedInnerTx });
+      innerTx,
+      isErrorTransaction,
+    } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
 
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
     const accounts = useGetter('accounts');
-    const externalTxType = getTxType(props.tx);
 
     const transactionLabelRef = ref();
     const labelRef = ref();
@@ -147,10 +143,10 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const externalLabel = computed(() => {
-      if (externalTxType === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         return i18n.t('transaction.type.gaMetaTx');
       }
-      if (externalTxType === TX_TYPE_MDW.PayingForTx) {
+      if (outerTxType.value === TX_TYPE_MDW.PayingForTx) {
         return i18n.t('transaction.type.payingForTx');
       }
       return '';
@@ -161,7 +157,10 @@ export default defineComponent({
       const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
 
       if (txType.value === SCHEMA.TX_TYPE.spend) {
-        const isSent = getTxDirection.value(props.tx, props.transactionOwner) === 'sent';
+        const isSent = getTxDirection.value(
+          innerTx.value,
+          props.transaction.transactionOwner,
+        ) === 'sent';
         return {
           text: isSent
             ? root.$t('transaction.listType.sentTx')
@@ -175,11 +174,11 @@ export default defineComponent({
         return labelWrapper(root.$t('transaction.dexType.allowToken'));
       }
       if (isDex.value) {
-        if (FUNCTION_TYPE_DEX.addLiquidity.includes(lastNestedInnerTx?.function as TxFunctionRaw)) {
+        if (FUNCTION_TYPE_DEX.addLiquidity.includes(innerTx.value?.function as TxFunctionRaw)) {
           return labelWrapper(root.$t('transaction.dexType.provideLiquidity'));
         }
         if (FUNCTION_TYPE_DEX.removeLiquidity.includes(
-          lastNestedInnerTx?.function as TxFunctionRaw,
+          innerTx.value?.function as TxFunctionRaw,
         )) {
           return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
         }
@@ -187,29 +186,29 @@ export default defineComponent({
       }
       if (
         (
-          lastNestedInnerTx.contractId
+          innerTx.value.contractId
           && [
             activeNetwork.value.tipContractV1,
             activeNetwork.value.tipContractV2,
-          ].includes(lastNestedInnerTx.contractId)
+          ].includes(innerTx.value.contractId)
           && ([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip] as TxFunction[])
-            .includes(lastNestedInnerTx?.function!)
+            .includes(innerTx.value?.function!)
         )
-        || props.isClaim
+        || props.transaction.claim
       ) {
-        return labelWrapper(props.isClaim
+        return labelWrapper(props.transaction.claim
           ? root.$t('transaction.listType.tipReceived')
           : root.$t('transaction.listType.tipSent'));
       }
       if (
         txType.value === SCHEMA.TX_TYPE.contractCall
-        && availableTokens.value[lastNestedInnerTx.contractId]
-        && (lastNestedInnerTx.function === TX_FUNCTIONS.transfer
-          || props.isIncomplete)
+        && availableTokens.value[innerTx.value.contractId]
+        && (innerTx.value.function === TX_FUNCTIONS.transfer
+          || props.transaction.incomplete)
       ) {
-        const isSent = !props.transactionOwner
-          ? lastNestedInnerTx.callerId === account.value.address
-          : props.transactionOwner === props.tx.callerId;
+        const isSent = !props.transaction.transactionOwner
+          ? innerTx.value.callerId === account.value.address
+          : props.transaction.transactionOwner === innerTx.value.callerId;
 
         return {
           text: isSent
@@ -228,13 +227,13 @@ export default defineComponent({
       }
 
       return labelWrapper(
-        props.transactionOwner ? translation : addComma(translation),
+        props.transaction.transactionOwner ? translation : addComma(translation),
       );
     });
 
     const ownerName = computed(() => getAccountNameToDisplay(
       accounts.value.find((acc: IAccount) => (
-        acc.address === props.transactionOwner
+        acc.address === props.transaction.transactionOwner
       )),
     ));
 
@@ -243,6 +242,7 @@ export default defineComponent({
     });
 
     return {
+      isErrorTransaction,
       ownerName,
       label,
       externalLabel,

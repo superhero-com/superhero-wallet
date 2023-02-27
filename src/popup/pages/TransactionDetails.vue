@@ -14,7 +14,7 @@
           :return-type="transaction.tx.returnType"
         />
         <TransactionTokens
-          :transaction="isContainingInternalTx ? transaction.tx.tx : transaction"
+          :transaction="transaction"
           :direction="direction"
           :is-allowance="isAllowance"
           :error="isErrorTransaction"
@@ -23,7 +23,7 @@
         />
       </div>
       <div class="content">
-        <TransactionOverview :tx="transaction.tx" />
+        <TransactionOverview :transaction="transaction" />
         <div class="explorer">
           <LinkButton :to="explorerPath">
             {{ $t('pages.transactionDetails.explorer') }}
@@ -181,7 +181,7 @@
           >
             <template #value>
               <TokenAmount
-                :amount="getTxAmountTotal(transaction)"
+                :amount="getTxAmountTotal(transaction, direction)"
                 :symbol="getTxSymbol(transaction)"
                 :hide-fiat="isTransactionAex9(transaction)"
               />
@@ -244,12 +244,11 @@ import {
   getTransactionTipUrl,
   fetchJson,
   handleUnknownError,
-  isContainingNestedTx,
   isTransactionAex9,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import { useAccounts, useTransactionTx } from '../../composables';
+import { useAccounts, useTransactionTx, useMultisigAccounts } from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -292,18 +291,23 @@ export default defineComponent({
   },
   props: {
     hash: { type: String, required: true },
+    multisigDashboard: { type: Boolean },
+    transactionOwner: { type: String, default: '' },
   },
   setup(props, { root }) {
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
     const {
+      setExternalAddress,
       setTransactionTx,
       direction,
       isErrorTransaction,
       isAllowance,
       isDex,
       isMultisig,
-      txType,
+      outerTxType,
     } = useTransactionTx({
       store: root.$store,
+      externalAddress: props.transactionOwner,
     });
 
     const { isLocalAccountAddress } = useAccounts({
@@ -345,13 +349,9 @@ export default defineComponent({
     });
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
-      if (txType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      if (outerTxType.value !== TX_TYPE_MDW.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
     });
-
-    const isContainingInternalTx = computed(
-      (): boolean => !!transaction.value?.tx && isContainingNestedTx(transaction.value.tx),
-    );
 
     /**
      * Computes the total transaction fee, which is the sum of the fee of the main transaction
@@ -366,22 +366,36 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      transaction.value = getTx.value(props.hash);
-      if (!transaction.value || transaction.value.incomplete) {
+      let rawTransaction = getTx.value(props.hash);
+      if (!rawTransaction || rawTransaction.incomplete) {
         await watchUntilTruthy(() => root.$store.state.middleware);
         try {
-          transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
+          rawTransaction = await root.$store.state?.middleware.getTxByHash(props.hash);
         } catch (e) {
           root.$router.push({ name: ROUTE_NOT_FOUND });
         }
 
-        root.$store.commit('setTransactionByHash', transaction.value);
+        if (rawTransaction?.tx) {
+          if (props.multisigDashboard) {
+            await watchUntilTruthy(() => activeMultisigAccountId.value);
+            setExternalAddress(activeMultisigAccountId.value);
+            transaction.value = {
+              ...rawTransaction,
+              transactionOwner: activeMultisigAccountId.value,
+            };
+          } else {
+            transaction.value = { ...rawTransaction, transactionOwner: props.transactionOwner };
+          }
+          root.$store.commit('setTransactionByHash', transaction.value);
+        }
+      } else {
+        transaction.value = rawTransaction;
       }
       if (transaction.value?.tx) {
         setTransactionTx(transaction.value.tx);
       }
 
-      if (txType.value === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         try {
           const { contract_id: contractId = null } = await fetchJson(
             `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
@@ -402,7 +416,6 @@ export default defineComponent({
       getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
-      isContainingInternalTx,
       isDex,
       isTransactionAex9,
       isMultisig,

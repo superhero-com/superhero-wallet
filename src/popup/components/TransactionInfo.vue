@@ -1,11 +1,6 @@
 <template>
   <div class="transaction-info">
-    <TransactionTagList
-      :tx="tx"
-      :is-incomplete="isIncomplete"
-      :is-pending="isPending"
-      :is-claim="isClaim"
-    />
+    <TransactionTagList v-bind="$attrs" />
     <div class="parties">
       <Avatar
         v-if="sender.address"
@@ -58,7 +53,6 @@ import {
 } from '@vue/composition-api';
 import type {
   IAccountOverView,
-  ITx,
 } from '../../types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
@@ -81,10 +75,6 @@ export default defineComponent({
   props: {
     sender: { type: Object as PropType<IAccountOverView>, required: true },
     recipient: { type: Object as PropType<IAccountOverView>, required: true },
-    tx: { type: Object as PropType<ITx>, default: null },
-    isIncomplete: Boolean,
-    isPending: Boolean,
-    isClaim: Boolean,
   },
 });
 </script>

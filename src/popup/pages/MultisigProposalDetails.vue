@@ -9,7 +9,8 @@
         class="header"
       >
         <TransactionTokens
-          :transaction="multisigTx"
+          v-if="multisigTx"
+          :transaction="{ tx: multisigTx }"
           icon-size="md"
         />
       </div>
@@ -25,7 +26,7 @@
             label: $t('transaction.overview.smartContract'),
             address: activeMultisigAccount.contractId
           }"
-          :tx="multisigTx"
+          :transaction="{ tx: multisigTx }"
         />
         <div class="explorer">
           <LinkButton

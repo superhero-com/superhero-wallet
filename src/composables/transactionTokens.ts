@@ -13,6 +13,7 @@ import {
   TX_FUNCTIONS,
   convertToken,
   isTransactionAex9,
+  getInnerTransaction,
 } from '../popup/utils';
 import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
 
@@ -32,14 +33,15 @@ export function useTransactionTokens({
 }: UseTransactionTokensOptions) {
   const getTxSymbol = computed(() => store.getters.getTxSymbol);
   const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
+  const innerTx = computed(() => getInnerTransaction(transaction.tx));
 
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
 
   const transactionFunction = computed(() => {
-    if (transaction?.tx.function) {
-      const functionName = camelCase(transaction.tx.function) as TxFunctionParsed;
+    if (innerTx.value?.function) {
+      const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
 
       // TODO this line needs refactoring in TransactionResolver
       return transactionTokenInfoResolvers[functionName];
@@ -49,7 +51,7 @@ export function useTransactionTokens({
 
   const tokens = computed((): ITokenResolved[] => {
     if (
-      transaction?.tx
+      innerTx.value
       && transactionFunction.value
       && (!isAllowance || showDetailedAllowanceInfo)
     ) {
@@ -61,10 +63,10 @@ export function useTransactionTokens({
     if (!transaction) return [];
 
     return [{
-      ...transaction.tx || {},
+      ...innerTx.value || {},
       amount: isAllowance
-        ? convertToken(transaction.tx?.fee || 0, -MAGNITUDE)
-        : getTxAmountTotal.value(transaction),
+        ? convertToken(innerTx.value?.fee || 0, -MAGNITUDE)
+        : getTxAmountTotal.value(transaction, direction),
       symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
       isReceived: direction === TX_FUNCTIONS.received,
       isAe:

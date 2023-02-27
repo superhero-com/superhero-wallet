@@ -18,6 +18,7 @@
         v-for="transaction in latestTransactions"
         :key="`${transaction.transactionOwner}-${transaction.hash}-${activeIdx}`"
         :transaction="transaction"
+        show-transaction-owner
       />
     </div>
   </Transition>
@@ -30,10 +31,9 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { uniqBy } from 'lodash-es';
+import { uniqWith } from 'lodash-es';
 import type {
   IAccount,
-  IDashboardTransaction,
   ITransaction,
 } from '../../types';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
@@ -58,7 +58,7 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup(props, { root }) {
-    const latestTransactions = ref<IDashboardTransaction[]>([]);
+    const latestTransactions = ref<ITransaction[]>([]);
     const showWidget = ref<boolean>(false);
     const isLoading = ref<boolean>(true);
 
@@ -104,10 +104,11 @@ export default defineComponent({
 
       const allTransactions = await Promise.all(allTransactionsPromises);
 
-      latestTransactions.value = uniqBy(
-        (allTransactions.flat() as IDashboardTransaction[]).sort(defaultTransactionSortingCallback),
-        'hash',
-      ).slice(0, DASHBOARD_TRANSACTION_LIMIT);
+      latestTransactions.value = uniqWith(allTransactions.flat(), (a, b) => (
+        a.hash === b.hash && a.transactionOwner === b.transactionOwner
+      ))
+        .sort(defaultTransactionSortingCallback)
+        .slice(0, DASHBOARD_TRANSACTION_LIMIT);
 
       if (latestTransactions.value.length) {
         showWidget.value = true;
