@@ -376,7 +376,7 @@
       "multisigProposal": "Multisig Proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
-      "createVault": "Create Multisig Vault",
+      "multisigVaultCreated": "Multisig vault created",
       "createMultisigVault": "Create Multisig Vault",
       "propose": "Propose Tx",
       "revoke": "Revoke Tx",
