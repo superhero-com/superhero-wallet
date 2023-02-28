@@ -47,7 +47,7 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
-import { watchUntilTruthy, blocksToRelativeTime, getAeFee } from '../../utils';
+import { blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
   ObjectValues,
@@ -112,7 +112,6 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      await watchUntilTruthy(() => root.$store.state.middleware);
       activeAuctions.value = await root.$store.dispatch('names/fetchAuctions');
       loading.value = false;
     });

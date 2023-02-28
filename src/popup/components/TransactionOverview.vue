@@ -25,10 +25,9 @@ import { TranslateResult } from 'vue-i18n';
 import {
   TX_FUNCTIONS,
   TX_TYPE_MDW,
-  watchUntilTruthy,
 } from '../utils';
-import { useSdk, useTransactionTx } from '../../composables';
-import { useState, useGetter } from '../../composables/vuex';
+import { useMiddleware, useSdk, useTransactionTx } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import {
   IAccount,
   IAccountLabeled,
@@ -55,12 +54,11 @@ export default defineComponent({
     const name = ref('');
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
 
-    const middleware = useState('middleware');
-
     const getExplorerPath = useGetter('getExplorerPath');
     const getPreferred = useGetter('names/getPreferred');
 
     const { getSdk } = useSdk({ store: root.$store });
+    const { getMiddleware } = useMiddleware({ store: root.$store });
 
     const {
       isDex,
@@ -180,9 +178,9 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await watchUntilTruthy(() => middleware.value);
+      const middleware = await getMiddleware();
       if (innerTx.value.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.value.getNameById(innerTx.value.recipientId)).name;
+        name.value = (await middleware.getNameById(innerTx.value.recipientId)).name;
       }
       let transactionOwnerAddress;
       if (innerTx.value.function === TX_FUNCTIONS.claim) {

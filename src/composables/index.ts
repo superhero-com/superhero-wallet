@@ -5,6 +5,7 @@ export * from './connection';
 export * from './currencies';
 export * from './deepLinkApi';
 export * from './maxAmount';
+export * from './middleware';
 export * from './multisigAccounts';
 export * from './multisigAccountCreate';
 export * from './multisigTransactions';

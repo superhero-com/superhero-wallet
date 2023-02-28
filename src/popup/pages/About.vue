@@ -27,7 +27,7 @@
           {{ $t('pages.about.software-version') }}
         </div>
         <div class="value">
-          {{ extensionVersion }}
+          v.{{ extensionVersion }}
         </div>
       </div>
       <div class="table-item">
@@ -38,34 +38,34 @@
           {{ sdkVersion }}
         </div>
       </div>
-      <a
-        v-if="activeNetwork"
-        class="table-item link"
-        target="_blank"
-        :href="`${activeNetwork.middlewareUrl}/status`"
-      >
-        <div class="name">
-          {{ $t('pages.about.middleware-version') }}
-        </div>
-        <div class="value">
-          {{ mdw.mdw_version }}
-          <ExternalLink class="compensate-icon-margin" />
-        </div>
-      </a>
-      <a
-        v-if="activeNetwork"
-        class="table-item link"
-        target="_blank"
-        :href="`${activeNetwork.middlewareUrl}/status`"
-      >
-        <div class="name">
-          {{ $t('pages.about.node-version') }}
-        </div>
-        <div class="value">
-          {{ mdw.node_version }}
-          <ExternalLink class="compensate-icon-margin" />
-        </div>
-      </a>
+      <template v-if="activeNetwork && mdwStatus">
+        <a
+          class="table-item link"
+          target="_blank"
+          :href="`${activeNetwork.middlewareUrl}/status`"
+        >
+          <div class="name">
+            {{ $t('pages.about.middleware-version') }}
+          </div>
+          <div class="value">
+            {{ mdwStatus.mdwVersion }}
+            <ExternalLink class="compensate-icon-margin" />
+          </div>
+        </a>
+        <a
+          class="table-item link"
+          target="_blank"
+          :href="`${activeNetwork.middlewareUrl}/status`"
+        >
+          <div class="name">
+            {{ $t('pages.about.node-version') }}
+          </div>
+          <div class="value">
+            {{ mdwStatus.nodeVersion }}
+            <ExternalLink class="compensate-icon-margin" />
+          </div>
+        </a>
+      </template>
     </div>
 
     <div class="additional-links">
@@ -89,50 +89,49 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import type { IMiddlewareStatus, INetwork } from '../../types';
+import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
+import { useMiddleware } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+
 import PanelItem from '../components/PanelItem.vue';
 import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
-import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
-import { fetchJson } from '../utils/helper';
 
 const extPackageJson = require('../../../package.json');
 
-export default {
+export default defineComponent({
   components: {
     PanelItem,
     Terms,
     Github,
     ExternalLink,
   },
-  data() {
+  setup(props, { root }) {
+    const { fetchMiddlewareStatus } = useMiddleware({ store: root.$store });
+    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
+    const mdwStatus = ref<IMiddlewareStatus>();
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+
+    onMounted(async () => {
+      mdwStatus.value = await fetchMiddlewareStatus();
+    });
+
     return {
-      extensionVersion: `v.${process.env.npm_package_version}`,
-      commitHash: process.env.COMMIT_HASH,
       BUG_REPORT_URL,
       AGGREGATOR_URL,
       COMMIT_URL,
-      mdw: {},
-      sdkVersion: null,
+      extensionVersion: process.env.npm_package_version,
+      commitHash: process.env.COMMIT_HASH,
+      sdkVersion,
+      mdwStatus,
+      activeNetwork,
     };
   },
-  computed: mapGetters(['activeNetwork']),
-  mounted() {
-    this.fetchMiddlewareVersion();
-    this.sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
-  },
-  methods: {
-    async fetchMiddlewareVersion() {
-      try {
-        this.mdw = await fetchJson(`${this.activeNetwork.middlewareUrl}/status`);
-      } catch (error) {
-        //
-      }
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

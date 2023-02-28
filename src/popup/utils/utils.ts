@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueCompositionApi, {
   watch,
+  WatchSource,
 } from '@vue/composition-api';
 import { isFQDN } from 'validator';
 import BigNumber from 'bignumber.js';
@@ -41,6 +42,7 @@ import type {
   TxType,
   BigNumberPublic,
   IPendingTransaction,
+  IPageableResponse,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -199,14 +201,15 @@ export function buildSimplexLink(address: string) {
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
  */
-export function watchUntilTruthy<T>(getter: () => T): Promise<NonNullable<T>> {
+export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>> {
   return new Promise((resolve) => {
     const unwatch = watch(
       getter,
       (value) => {
-        if (!value) return;
-        resolve(getter() as NonNullable<T>);
-        defer(() => unwatch());
+        if (value) {
+          resolve(value as NonNullable<T>);
+          defer(() => unwatch());
+        }
       },
       { immediate: true },
     );
@@ -252,6 +255,29 @@ export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
     ttl: SCHEMA.NAME_TTL,
   },
 );
+
+export async function fetchAllPages<T = any>(
+  getFunction: () => Promise<IPageableResponse<T>>,
+  // eslint-disable-next-line no-unused-vars
+  getNextPage: (url: string) => Promise<IPageableResponse<T>>,
+) {
+  const result = [];
+  let nextPageUrl: string | null = null;
+
+  while (nextPageUrl !== null) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, next } = await (nextPageUrl
+      ? getNextPage(nextPageUrl)
+      : getFunction()) as IPageableResponse<T>;
+
+    if (data?.length) {
+      result.push(...data);
+    }
+
+    nextPageUrl = next || null;
+  }
+  return result;
+}
 
 // TODO - move to sdk.ts composable after the removal of action.js file
 export async function fetchRespondChallenge(

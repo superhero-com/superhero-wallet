@@ -5,15 +5,16 @@ import { isEmpty, uniqBy } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken,
-  fetchJson,
   handleUnknownError,
   calculateSupplyAmount,
-  getAllPages,
-  watchUntilTruthy,
+  fetchAllPages,
 } from '../../popup/utils';
 import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { useMiddleware } from '../../composables';
 
 export default (store) => {
+  const { fetchFromMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store });
+
   store.registerModule('fungibleTokens', {
     namespaced: true,
     state: {
@@ -46,10 +47,9 @@ export default (store) => {
       },
     },
     actions: {
-      async loadAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
-        const response = await fetchJson(
-          `${activeNetwork.middlewareUrl}/aex9/by_name`,
-        ).catch(handleUnknownError);
+      async loadAvailableTokens({ commit }) {
+        const response = await fetchFromMiddleware('/aex9/by_name')
+          .catch(handleUnknownError);
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
@@ -59,20 +59,16 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { activeNetwork, accounts },
-        rootState: { middleware },
+        rootGetters: { accounts },
         state: { availableTokens },
         commit,
       }) {
         accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
-            await watchUntilTruthy(() => middleware);
-            const tokens = await getAllPages(
-              () => fetchJson(
-                `${activeNetwork.middlewareUrl}/v2/aex9/account-balances/${address}?limit=100`,
-              ),
-              middleware.fetchByPath,
+            const tokens = await fetchAllPages(
+              () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+              fetchFromMiddlewareCamelCased,
             );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
@@ -197,7 +193,7 @@ export default (store) => {
       async getTokensHistory(
         {
           state: { transactions },
-          rootGetters: { activeNetwork, getDexContracts }, commit,
+          rootGetters: { getDexContracts }, commit,
         }, { recent, address, multipleAccounts },
       ) {
         if (!address) {
@@ -214,9 +210,9 @@ export default (store) => {
           let isAllNewTransactionsLoaded = false;
           while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
             // eslint-disable-next-line no-await-in-loop
-            const { data, next } = await (fetchJson(nextPageUrl
-              ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
-              : `${activeNetwork.middlewareUrl}/v2/aex9/transfers/to/${address}`));
+            const { data, next } = await fetchFromMiddleware(nextPageUrl
+              ? `/${nextPageUrl}`
+              : `/v2/aex9/transfers/to/${address}`);
             if (data?.length) rawTransactions.push(...data);
             if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
             || !transactions[address]?.length) {
@@ -228,7 +224,7 @@ export default (store) => {
             return transactions[address].slice(0, 10);
           }
         } else {
-          rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+          rawTransactions = await fetchFromMiddleware(`/aex9/transfers/to/${address}`);
         }
 
         const newTransactions = rawTransactions
@@ -278,7 +274,6 @@ export default (store) => {
   store.watch(
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
-      if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');
     },
   );

@@ -38,12 +38,11 @@ import type {
   ITransaction,
 } from '../../types';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
-import { useBalances, useConnection } from '../../composables';
+import { useBalances, useConnection, useMiddleware } from '../../composables';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   handleUnknownError,
   defaultTransactionSortingCallback,
-  watchUntilTruthy,
 } from '../utils';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
@@ -61,6 +60,7 @@ export default defineComponent({
   setup(props, { root }) {
     const { isOnline } = useConnection();
     const { balances } = useBalances({ store: root.$store });
+    const { getMiddleware } = useMiddleware({ store: root.$store });
 
     const latestTransactions = ref<ITransaction[]>([]);
     const isLoading = ref<boolean>(true);
@@ -94,9 +94,9 @@ export default defineComponent({
     }
 
     async function updateData() {
-      await watchUntilTruthy(() => root.$store.state.middleware);
+      const middleware = await getMiddleware();
       const getTxByAccountAddress = (address: string) => (
-        root.$store.state.middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
+        middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
       );
 
       const allTransactionsPromises = [

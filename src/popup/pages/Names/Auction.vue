@@ -20,13 +20,21 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  defineComponent,
+  ref,
+  onBeforeUnmount,
+  watch,
+} from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import { aettosToAe, watchUntilTruthy } from '../../utils';
+import { aettosToAe, executeAndSetInterval } from '../../utils';
+import { useMiddleware } from '../../../composables';
+
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
-export default {
+export default defineComponent({
   name: 'Auction',
   components: {
     Tabs,
@@ -35,44 +43,50 @@ export default {
   props: {
     name: { type: String, required: true },
   },
-  data: () => ({ loading: true }),
-  mounted() {
-    const id = setInterval(() => this.updateAuctionEntry(), 3000);
-    this.$once('hook:destroyed', () => clearInterval(id));
-    this.$watch(
-      ({ name }) => name,
-      () => {
-        this.loading = true;
-        this.updateAuctionEntry();
-      },
-      { immediate: true },
-    );
-  },
-  methods: {
-    async updateAuctionEntry() {
-      await watchUntilTruthy(() => this.$store.state.middleware);
+  setup(props, { root }) {
+    const { getMiddleware } = useMiddleware({ store: root.$store });
+
+    const loading = ref(true);
+
+    async function updateAuctionEntry() {
+      const middleware = await getMiddleware();
       try {
-        const res = await this.$store.state.middleware.getNameById(this.name);
+        const res = await middleware.getNameById(props.name);
         const { auctionEnd, bids } = res.info;
-        const loadedBids = await Promise.all(bids.map(async (txId) => {
-          const { tx } = await this.$store.state.middleware.getTxByIndex(txId);
+        const loadedBids = await Promise.all(bids.map(async (txId: number) => {
+          const { tx } = await middleware.getTxByIndex(txId);
           return {
             nameFee: new BigNumber(aettosToAe(tx.nameFee)),
             accountId: tx.accountId,
           };
         }));
-        this.$store.commit('names/setAuctionEntry', {
-          name: this.name,
+        root.$store.commit('names/setAuctionEntry', {
+          name: props.name,
           expiration: auctionEnd,
           bids: loadedBids,
         });
       } catch (error) {
-        this.$router.push({ name: 'auction-bid' });
+        root.$router.push({ name: 'auction-bid' });
       }
-      this.loading = false;
-    },
+      loading.value = false;
+    }
+
+    const intervalId = executeAndSetInterval(() => updateAuctionEntry(), 3000);
+
+    onBeforeUnmount(() => {
+      clearInterval(intervalId);
+    });
+
+    watch(
+      () => props.name,
+      () => updateAuctionEntry(),
+    );
+
+    return {
+      loading,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

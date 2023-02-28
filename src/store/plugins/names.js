@@ -6,13 +6,20 @@ import {
   postJson,
   checkAddress,
   checkAensName,
-  getAllPages,
+  fetchAllPages,
   watchUntilTruthy,
   fetchRespondChallenge,
 } from '../../popup/utils';
 import { i18n } from './languages';
+import { useMiddleware } from '../../composables';
 
 export default (store) => {
+  const {
+    isMiddlewareReady,
+    getMiddleware,
+    fetchFromMiddlewareCamelCased,
+  } = useMiddleware({ store });
+
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -77,11 +84,9 @@ export default (store) => {
       async fetchOwned({
         state: { owned, pendingAutoExtendNames },
         rootGetters: { accounts },
-        rootState: { middleware },
         commit,
         dispatch,
       }) {
-        await watchUntilTruthy(() => middleware);
         commit('setAreNamesFetching', true);
         const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true })
           .then((transactions) => transactions
@@ -92,6 +97,7 @@ export default (store) => {
               owner: tx.accountId,
             })));
 
+        const middleware = await getMiddleware();
         const names = await Promise.all(
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
@@ -114,14 +120,14 @@ export default (store) => {
         commit('set', names);
         commit('setAreNamesFetching', false);
       },
-      async fetchAuctions({ rootState: { middleware } }) {
-        await watchUntilTruthy(() => middleware);
+      async fetchAuctions() {
+        const middleware = await getMiddleware();
 
         // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
-          await getAllPages(
+          await fetchAllPages(
             () => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
-            middleware.fetchByPath,
+            fetchFromMiddlewareCamelCased,
           )
         ).map(({ name, info }) => ({
           name,
@@ -176,9 +182,10 @@ export default (store) => {
         });
         commit('setDefault', { name, address });
       },
-      async getAddress({ rootState: { middleware } }, id) {
+      async getAddress(context, id) {
         if (checkAddress(id)) return id;
         if (checkAensName(id)) {
+          const middleware = await getMiddleware();
           const { info: nameEntry } = await middleware.getNameById(id);
           return nameEntry.pointers?.accountPubkey;
         }
@@ -224,7 +231,9 @@ export default (store) => {
   store.watch(
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
-      if (!store.state.middleware) return;
+      if (!isMiddlewareReady.value) {
+        return;
+      }
       await Promise.all([
         store.dispatch('names/fetchOwned').catch(() => {}),
         store.dispatch('names/setDefaults'),
