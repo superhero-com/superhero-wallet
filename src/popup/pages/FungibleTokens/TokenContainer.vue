@@ -91,7 +91,7 @@ import {
   isContract,
 } from '../../utils';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useBalances, useFungibleTokens } from '../../../composables';
+import { useAccounts, useBalances, useFungibleTokens } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 import type { IDexTokenPairs } from '../../../types';
 
@@ -120,12 +120,13 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
+    const { account } = useAccounts({ store: root.$store });
     const {
       availableTokens,
       aePublicData,
       tokenBalances,
       fetchContractTokenPairs,
-    } = useFungibleTokens({ store: root.$store });
+    } = useFungibleTokens({ store: root.$store, accountAddress: account.value.address });
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
@@ -151,7 +152,6 @@ export default defineComponent({
     ];
     const loading = ref<boolean>(true);
     const tokenPairs = ref<IDexTokenPairs | null>(null);
-    const account = useGetter('account');
     const isConnected = useGetter('isConnected');
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);

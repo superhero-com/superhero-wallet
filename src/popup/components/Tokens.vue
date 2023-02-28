@@ -11,7 +11,7 @@
         :title="toToken.symbol"
       >
       <img
-        v-if="!noIcons"
+        v-if="fromToken && !noIcons"
         :src="fromToken.img"
         :class="{
           border: fromToken.imgBorder,

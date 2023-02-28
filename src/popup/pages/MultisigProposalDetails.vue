@@ -349,7 +349,6 @@ export default defineComponent({
     });
 
     const getExplorerPath = useGetter('getExplorerPath');
-
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
