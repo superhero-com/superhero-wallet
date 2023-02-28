@@ -2,7 +2,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
-  SCHEMA,
   Crypto,
   TxBuilder,
   TxBuilderHelper,
@@ -10,8 +9,6 @@ import {
 import BigNumber from 'bignumber.js';
 import {
   CONNECTION_TYPES,
-  STUB_ADDRESS,
-  STUB_NONCE,
   SEED_LENGTH,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
@@ -30,15 +27,6 @@ export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   const amount = new BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
 };
-
-export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
 
 export const detectConnectionType = (port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';

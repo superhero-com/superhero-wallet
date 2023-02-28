@@ -8,6 +8,7 @@ import { defer } from 'lodash-es';
 import {
   SCHEMA,
   AmountFormatter,
+  Crypto,
   TxBuilder,
   TxBuilderHelper,
 } from '@aeternity/aepp-sdk';
@@ -23,6 +24,7 @@ import {
   SIMPLEX_URL,
   STUB_ADDRESS,
   STUB_CALLDATA,
+  STUB_NONCE,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
 } from './constants';
@@ -231,6 +233,17 @@ export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): 
   });
   return new BigNumber(minFee).shiftedBy(-MAGNITUDE);
 }
+
+export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
+  SCHEMA.TX_TYPE.nameClaim, {
+    accountId: STUB_ADDRESS,
+    name,
+    nameSalt: Crypto.salt(),
+    nameFee: TxBuilderHelper.getMinimumNameFee(name),
+    nonce: STUB_NONCE,
+    ttl: SCHEMA.NAME_TTL,
+  },
+);
 
 // TODO - move to sdk.ts composable after the removal of action.js file
 export async function fetchRespondChallenge(
