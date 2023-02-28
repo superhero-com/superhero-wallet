@@ -10,7 +10,8 @@
     "edit": "Edit",
     "nonce": "Nonce",
     "callData": "Call data",
-    "contractId": "Contract ID"
+    "contractId": "Contract ID",
+    "max": "MAX"
   },
   "badges": {
     "verified": "Verified",

@@ -53,7 +53,7 @@
       v-validate="{
         required: true,
         not_same_as: isMultisig? multisigVaultAddress : account.address,
-        name_registered_address_or_url: true,
+        name_registered_address: true,
         token_to_an_address: { isToken: !isAe },
       }"
       name="address"
@@ -77,12 +77,6 @@
         </a>
       </template>
     </InputField>
-    <div class="status">
-      <UrlStatus
-        v-show="isTipUrl"
-        :status="urlStatus"
-      />
-    </div>
 
     <InputAmount
       v-model="formModel.amount"
@@ -92,7 +86,6 @@
         ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
         ...isMultisig ? {} : { enough_ae: fee.toString() },
         ...isMultisig ? { max_value_vault: activeMultisigAccount.balance.toString() } : {},
-        min_tip_amount: isTipUrl,
       }"
       name="amount"
       data-cy="amount"
@@ -111,7 +104,7 @@
           :class="{ chosen: isMaxValue }"
           @click="setMaxValue"
         >
-          MAX
+          {{ $t('common.max') }}
         </BtnPlain>
       </template>
     </InputAmount>
@@ -192,8 +185,6 @@ import {
   MODAL_PAYLOAD_FORM,
   AETERNITY_CONTRACT_ID,
   convertToken,
-  validateTipUrl,
-  checkAensName,
   getAccountNameToDisplay,
 } from '../utils';
 import {
@@ -212,7 +203,6 @@ import BtnIcon from './buttons/BtnIcon.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import ModalHeader from './ModalHeader.vue';
-import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import AccountItem from './AccountItem.vue';
 import FormSelect from './form/FormSelect.vue';
@@ -239,7 +229,6 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     FormSelect,
-    UrlStatus,
     QrScanIcon,
   },
   model: {
@@ -285,28 +274,7 @@ export default defineComponent({
     }
     const amountMessage = computed(() => getMessageByFieldName('amount'));
 
-    const urlStatus = computed(
-      () => root.$store.getters['tipUrl/status'](formModel.value.address),
-    );
-    const isTipUrl = computed(() => (
-      !!formModel.value.address
-      && validateTipUrl(formModel.value.address)
-      && !checkAensName(formModel.value.address)
-    ));
-
-    const addressMessage = computed((): IInputMessage => {
-      if (isTipUrl.value) {
-        switch (urlStatus.value) {
-          case 'verified': return { status: 'success', text: ' ', hideMessage: true };
-          case 'not-secure': return { status: 'warning', text: ' ', hideMessage: true };
-          case 'not-verified': return { status: 'warning', text: ' ', hideMessage: true };
-          case 'blacklisted': return { status: 'error', text: ' ', hideMessage: true };
-          default:
-            throw new Error(`Unknown url status: ${urlStatus.value}`);
-        }
-      }
-      return getMessageByFieldName('address');
-    });
+    const addressMessage = computed((): IInputMessage => getMessageByFieldName('address'));
 
     const hasError = computed(
       (): boolean => !!addressErrorMsg.value || !!(root as any).errors.first('amount'),
@@ -488,17 +456,11 @@ export default defineComponent({
       ) {
         root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
-      const tipUrlEncoded: any = root.$route.query.url;
-      if (tipUrlEncoded) {
-        const tipUrl = decodeURIComponent(tipUrlEncoded);
-        const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
-        formModel.value.address = tipUrlNormalised.toString();
-      }
-
       const { query } = root.$route;
 
       queryHandler({
         ...query,
+        url: undefined,
         token: formModel.value?.selectedAsset?.contractId || query.token,
       });
     });
@@ -519,14 +481,11 @@ export default defineComponent({
       account,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
-      urlStatus,
-      isTipUrl,
-      addressMessage,
       hasError,
+      addressMessage,
       multisigVaultAddress,
       multisigVaultOwnedByManyAccounts,
       activeMultisigAccount,
-      getAccountNameToDisplay,
       openScanQrModal,
       selectAccount,
       setMaxValue,
