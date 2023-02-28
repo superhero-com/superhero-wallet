@@ -146,7 +146,10 @@ export default defineComponent({
       if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         return i18n.t('transaction.type.gaMetaTx');
       }
-      if (outerTxType.value === TX_TYPE_MDW.PayingForTx) {
+      if (
+        outerTxType.value === TX_TYPE_MDW.PayingForTx
+        && txType.value !== TX_TYPE_MDW.GAAttachTx
+      ) {
         return i18n.t('transaction.type.payingForTx');
       }
       return '';
@@ -169,6 +172,12 @@ export default defineComponent({
             ? root.$t('transaction.type.sentTx')
             : root.$t('transaction.type.receivedTx'),
         };
+      }
+      if (
+        txType.value === TX_TYPE_MDW.GAAttachTx
+        && outerTxType.value === TX_TYPE_MDW.PayingForTx
+      ) {
+        return labelWrapper(root.$t('transaction.type.multisigVaultCreated'));
       }
       if (isAllowance.value) {
         return labelWrapper(root.$t('transaction.dexType.allowToken'));
