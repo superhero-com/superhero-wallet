@@ -27,6 +27,8 @@
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
           :options="accountsSelectOptions"
+          :message="noEnoughBalanceToCreateMultisig
+            ? $t('modals.createMultisigAccount.errorNoEnoughBalanceToCreateVault') : null"
         />
         <InputField
           v-else
@@ -193,7 +195,12 @@ import {
   ObjectValues,
 } from '../../../types';
 import { ROUTE_MULTISIG_DETAILS_INFO } from '../../router/routeNames';
-import { useAccounts, useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
+import {
+  useAccounts,
+  useBalances,
+  useMultisigAccountCreate,
+  useMultisigAccounts,
+} from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -234,6 +241,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { accountsSelectOptions } = useAccounts({ store: root.$store });
+    const { balances } = useBalances({ store: root.$store });
 
     const {
       setActiveMultisigAccountId,
@@ -266,10 +274,15 @@ export default defineComponent({
         ),
       ).length,
     );
+    const noEnoughBalanceToCreateMultisig = computed((): boolean => (
+      !!signers.value[0].address
+      && balances.value[signers.value[0].address]?.isLessThan(1)
+    ));
     const canCreateMultisig = computed(
       () => (
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
+        && noEnoughBalanceToCreateMultisig.value
       ),
     );
 
@@ -404,6 +417,7 @@ export default defineComponent({
       getSignerLabel,
       navigateToMultisigVault,
       checkIfSignerAddressDuplicated,
+      noEnoughBalanceToCreateMultisig,
     };
   },
 });
