@@ -16,7 +16,6 @@ import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
 import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
-import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
 import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
@@ -67,7 +66,6 @@ export default new Vuex.Store({
     modals,
     tipUrl,
     namesPlugin,
-    fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
     openErrorModalPlugin,

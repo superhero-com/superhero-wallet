@@ -24,6 +24,7 @@ export default {
     disabled: Boolean,
     focused: Boolean,
     showTokensWithBalance: Boolean,
+    currentAddress: { type: String, default: null },
   },
   computed: {
     displayToken() {
@@ -45,6 +46,7 @@ export default {
           name: MODAL_ASSET_SELECTOR,
           selectedToken: this.value,
           showTokensWithBalance: this.showTokensWithBalance,
+          currentAddress: this.currentAddress,
           resolve: (token) => token,
         }).then((token) => this.handleChange(token));
     },

@@ -349,7 +349,6 @@ export default defineComponent({
     });
 
     const getExplorerPath = useGetter('getExplorerPath');
-    const getTxSymbol = useGetter('getTxSymbol');
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
@@ -458,7 +457,6 @@ export default defineComponent({
       multisigTx,
       transaction,
       totalSpent,
-      getTxSymbol,
       getPayload,
       splitAddress,
       aettosToAe,

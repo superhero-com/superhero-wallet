@@ -53,23 +53,23 @@ import {
 import type {
   IAccount,
   INetwork,
-  ITokenList,
   ITx,
 } from '../../types';
 import {
   TX_FUNCTIONS,
-  TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
   watchUntilTruthy,
   defaultTransactionSortingCallback,
   getInnerTransaction,
 } from '../utils';
-import { useGetter, useState } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 import {
+  useFungibleTokens,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
+  useTransactions,
   useTransactionTx,
 } from '../../composables';
 
@@ -100,8 +100,20 @@ export default defineComponent({
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
+    const account = useGetter<IAccount>('account');
 
+    const { availableTokens, getTxSymbol } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.isMultisig
+        ? activeMultisigAccount.value?.gaAccountId
+        : account.value.address,
+    });
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+
+    const {
+      transactions,
+      fetchTransactions,
+    } = useTransactions({ store: root.$store });
 
     const {
       searchPhrase,
@@ -109,14 +121,9 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-    const transactions = useState('transactions');
-
     const getDexContracts = useGetter('getDexContracts');
-    const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
-    const getTxSymbol = useGetter('getTxSymbol');
 
     function isFungibleTokenTx(tx: ITx) {
       return Object.keys(availableTokens.value).includes(tx.contractId);
@@ -174,7 +181,7 @@ export default defineComponent({
             }
           })
           .filter(
-            (tr) => !searchPhrase.value || getTxSymbol.value(tr)
+            (tr) => !searchPhrase.value || getTxSymbol(tr)
               .toLocaleLowerCase()
               .includes(searchPhrase.value.toLocaleLowerCase()),
           )
@@ -204,11 +211,11 @@ export default defineComponent({
     }
 
     async function loadMore() {
-      if (loading.value) return;
+      if (loading.value || !currentAddress.value) return;
       loading.value = true;
       try {
         await watchUntilTruthy(() => root.$store.state.middleware);
-        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
+        await fetchTransactions({ address: currentAddress.value, recent: false });
       } finally {
         loading.value = false;
       }
@@ -217,7 +224,9 @@ export default defineComponent({
 
     async function getLatest() {
       try {
-        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
+        if (currentAddress.value) {
+          await fetchTransactions({ address: currentAddress.value });
+        }
       } finally {
         loading.value = false;
       }
@@ -250,7 +259,6 @@ export default defineComponent({
       account,
       activeNetwork,
       getAccountPendingTransactions,
-      getTxSymbol,
       filteredTransactions,
       showSearchAndFilters,
       loadMore,

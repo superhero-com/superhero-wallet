@@ -128,8 +128,8 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk } from '../../../composables';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useFungibleTokens, useSdk } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -174,15 +174,20 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const {
+      availableTokens,
+      getTxSymbol,
+      getTxAmountTotal,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.transaction.callerId,
+    });
 
     const showAdvanced = ref(false);
     const tokenList = ref<ITokenResolved[]>([]);
     const txFunction = ref<TxFunctionRaw | undefined>();
     const loading = ref(false);
 
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
-    const getTxSymbol = useGetter('getTxSymbol');
-    const getTxAmountTotal = useGetter('getTxAmountTotal');
     const getDexContracts = useGetter('getDexContracts');
     const getTxDirection = useGetter('getTxDirection');
 
@@ -222,7 +227,7 @@ export default defineComponent({
       return 'total';
     });
 
-    const totalAmount = computed(() => getTxAmountTotal.value(
+    const totalAmount = computed(() => getTxAmountTotal(
       txWrapped.value,
       getTxDirection.value(props.transaction),
     ));
@@ -230,7 +235,7 @@ export default defineComponent({
     const singleToken = computed((): ITokenResolved => ({
       isReceived: getTxDirection.value(props.transaction) === TX_FUNCTIONS.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(props.transaction),
+      symbol: getTxSymbol(txWrapped.value),
     }));
 
     const filteredTxFields = computed(

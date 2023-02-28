@@ -65,6 +65,7 @@ export default defineComponent({
     reject: { type: Function, required: true },
     selectedToken: { type: Object as PropType<IToken>, default: null },
     showTokensWithBalance: Boolean,
+    currentAddress: { type: String, default: null },
   },
   setup(props, { root }) {
     const loading = ref(true);
@@ -75,6 +76,7 @@ export default defineComponent({
       store: root.$store,
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
+      accountAddress: props.currentAddress,
     });
 
     function isTokenSelected(token: IToken): boolean {

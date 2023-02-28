@@ -11,6 +11,7 @@ import {
   handleUnknownError,
   convertToken,
   getFromLocalStorage,
+  NETWORK_ID_TESTNET,
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import type {
@@ -54,7 +55,9 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     .find((account) => account.gaAccountId === activeMultisigAccountId.value));
 
   if (!multisigAccounts.value.length) {
-    multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
+    multisigAccounts.value = getStoredMultisigAccounts(
+      activeNetwork.value?.networkId || NETWORK_ID_TESTNET,
+    );
   }
 
   function setActiveMultisigAccountId(gaAccountId: string) {

@@ -1,7 +1,7 @@
 import { computed, ref, Ref } from '@vue/composition-api';
-import type { IToken, ITokenList, IDefaultComposableOptions } from '../types';
+import type { IToken, IDefaultComposableOptions } from '../types';
 import { AETERNITY_CONTRACT_ID } from '../popup/utils';
-import { useBalances } from './balances';
+import { useFungibleTokens } from './fungibleTokens';
 
 export interface UseTokensListOptions extends IDefaultComposableOptions {
   /**
@@ -16,6 +16,10 @@ export interface UseTokensListOptions extends IDefaultComposableOptions {
    * Search the list by the symbol, name or contractId
    */
   searchTerm?: Ref<string>
+  /**
+   * Restrict the list to this account address.
+   */
+  accountAddress: string
 }
 
 export function useTokensList({
@@ -23,22 +27,13 @@ export function useTokensList({
   ownedOnly = false,
   withBalanceOnly = false,
   searchTerm = ref(''),
+  accountAddress,
 }: UseTokensListOptions) {
-  const { balance, balanceCurrency } = useBalances({ store });
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
-  const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
-  const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
-
-  /**
-   * Returns the default aeternity meta information
-   */
-  const aeternityToken = computed<IToken | null>(() => getAeternityToken.value({
-    tokenBalance: balance.value,
-    balanceCurrency: balanceCurrency.value,
-  }));
+  const {
+    availableTokens,
+    tokenBalances,
+    aeternityToken,
+  } = useFungibleTokens({ store, accountAddress });
 
   /**
    * Converts the token information object into an array and put the AE at the beginning
@@ -88,7 +83,6 @@ export function useTokensList({
   });
 
   return {
-    aeternityToken,
     allTokens,
     filteredTokens,
   };

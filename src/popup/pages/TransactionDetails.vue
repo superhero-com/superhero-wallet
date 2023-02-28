@@ -248,7 +248,12 @@ import {
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import { useAccounts, useTransactionTx, useMultisigAccounts } from '../../composables';
+import {
+  useAccounts,
+  useTransactionTx,
+  useMultisigAccounts,
+  useFungibleTokens,
+} from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -314,13 +319,16 @@ export default defineComponent({
       store: root.$store,
     });
 
+    const {
+      getTxAmountTotal,
+      getTxSymbol,
+    } = useFungibleTokens({ store: root.$store });
+
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
     const getTx = computed(() => root.$store.getters.getTx);
     const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
-    const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
-    const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
     const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
@@ -412,8 +420,8 @@ export default defineComponent({
       transaction,
       isSwap,
       isPool,
-      getTxSymbol,
       getTxAmountTotal,
+      getTxSymbol,
       isErrorTransaction,
       isAllowance,
       isDex,
