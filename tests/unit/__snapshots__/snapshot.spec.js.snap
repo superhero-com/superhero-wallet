@@ -65,7 +65,7 @@ exports[`Pages About 1`] = `
         class="value"
       >
         
-        version-specific-text
+        v.version-specific-text
       
       </div>
     </div>
@@ -90,55 +90,7 @@ exports[`Pages About 1`] = `
       </div>
     </div>
      
-    <a
-      class="table-item link"
-      href="undefined/status"
-      target="_blank"
-    >
-      <div
-        class="name"
-      >
-        
-        locale-specific-text
-      
-      </div>
-       
-      <div
-        class="value"
-      >
-        
-        
-        
-        <svg
-          class="compensate-icon-margin"
-        />
-      </div>
-    </a>
-     
-    <a
-      class="table-item link"
-      href="undefined/status"
-      target="_blank"
-    >
-      <div
-        class="name"
-      >
-        
-        locale-specific-text
-      
-      </div>
-       
-      <div
-        class="value"
-      >
-        
-        
-        
-        <svg
-          class="compensate-icon-margin"
-        />
-      </div>
-    </a>
+    <!---->
   </div>
    
   <div

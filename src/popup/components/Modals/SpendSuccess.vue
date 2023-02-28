@@ -67,13 +67,16 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { getPayload, AETERNITY_SYMBOL } from '../../utils';
+import { useMiddleware } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
-import { getPayload, watchUntilTruthy, AETERNITY_SYMBOL } from '../../utils';
+
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
 
@@ -112,11 +115,12 @@ export default {
     },
   },
   async mounted() {
+    const { getMiddleware } = useMiddleware({ store: this.$store });
+    const middleware = await getMiddleware();
     const { recipientId } = this.transaction.tx;
-    await watchUntilTruthy(() => this.$store.state.middleware);
     if (recipientId.includes('nm_')) {
       this.hideAvatar = true;
-      this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
+      this.nameRecipient = (await middleware.getNameById(recipientId)).name;
     }
   },
   methods: {

@@ -5,7 +5,6 @@ import {
   computed,
 } from '@vue/composition-api';
 import {
-  fetchJson,
   watchUntilTruthy,
   FUNCTION_TYPE_MULTISIG,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -15,10 +14,10 @@ import type {
   IAccount,
   IActiveMultisigTx,
   IDefaultComposableOptions,
-  INetwork,
   ITransaction,
 } from '../types';
 import { useAccounts } from './accounts';
+import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
 import { useTopHeaderData } from './topHeader';
@@ -26,11 +25,12 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTx | null>();
 
 export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
+  const { fetchFromMiddleware } = useMiddleware({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
   const { accounts } = useAccounts({ store });
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 
   async function assignPendingMultisigTx() {
@@ -177,7 +177,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   async function fetchLatestMultisigAccountTransaction() {
     try {
       const contractId = activeMultisigAccount.value?.contractId;
-      const { data: [latestTransaction] } = await fetchJson(`${activeNetwork.value.middlewareUrl}/txs/backward?limit=1&contract=${contractId}`);
+      const { data: [latestTransaction] } = await fetchFromMiddleware(`/txs/backward?limit=1&contract=${contractId}`);
       latestMultisigAccountTransaction.value = latestTransaction;
     } catch (error) {
       handleUnknownError(error);

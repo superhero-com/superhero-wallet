@@ -248,7 +248,12 @@ import {
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import { useAccounts, useTransactionTx, useMultisigAccounts } from '../../composables';
+import {
+  useAccounts,
+  useTransactionTx,
+  useMultisigAccounts,
+  useMiddleware,
+} from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -295,6 +300,7 @@ export default defineComponent({
     transactionOwner: { type: String, default: '' },
   },
   setup(props, { root }) {
+    const { getMiddleware } = useMiddleware({ store: root.$store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
     const {
       setExternalAddress,
@@ -368,9 +374,9 @@ export default defineComponent({
     onMounted(async () => {
       let rawTransaction = getTx.value(props.hash);
       if (!rawTransaction || rawTransaction.incomplete) {
-        await watchUntilTruthy(() => root.$store.state.middleware);
+        const middleware = await getMiddleware();
         try {
-          rawTransaction = await root.$store.state?.middleware.getTxByHash(props.hash);
+          rawTransaction = await middleware.getTxByHash(props.hash);
         } catch (e) {
           root.$router.push({ name: ROUTE_NOT_FOUND });
         }

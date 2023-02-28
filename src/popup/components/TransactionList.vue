@@ -61,7 +61,6 @@ import {
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
-  watchUntilTruthy,
   defaultTransactionSortingCallback,
   getInnerTransaction,
 } from '../utils';
@@ -198,7 +197,6 @@ export default defineComponent({
       if (loading.value) return;
       loading.value = true;
       try {
-        await watchUntilTruthy(() => root.$store.state.middleware);
         await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
       } finally {
         loading.value = false;

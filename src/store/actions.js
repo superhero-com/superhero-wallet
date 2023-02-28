@@ -17,11 +17,11 @@ import {
   MODAL_DEFAULT,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
+import { useMiddleware } from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
-    commit('setMiddleware', null);
     commit('initTransactions');
   },
 
@@ -91,17 +91,21 @@ export default {
     }
     return tipWithdrawnTransactions;
   },
-  async fetchTransactions({
-    state, getters, dispatch, commit,
-  }, { limit, recent, address }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) {
+  async fetchTransactions(context, { limit, recent, address }) {
+    const {
+      state, getters, dispatch, commit,
+    } = context;
+    if (!!state.transactions.nextPageUrl && !recent) {
       return;
     }
 
+    const { getMiddleware, fetchFromMiddleware } = useMiddleware({ store: context });
+    const middleware = await getMiddleware();
+
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
+        ? middleware.getTxByAccount(address, limit, 1)
+        : fetchFromMiddleware(state.transactions.nextPageUrl))
         .then(({ data, next }) => {
           const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
