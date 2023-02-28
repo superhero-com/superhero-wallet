@@ -30,67 +30,105 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import Tokens from './Tokens.vue';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
 import { DEX_CONTRACTS, FUNCTION_TYPE_DEX } from '../utils/constants';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
+import type {
+  INetwork,
+  ITransaction,
+  TxFunctionParsed,
+  TxFunctionRaw,
+} from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { useFungibleTokens } from '../../composables';
 
-export default {
+export default defineComponent({
   components: {
     Tokens,
     ArrowHead,
   },
   props: {
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['activeNetwork']),
-    tokens() {
-      if (!FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) return [];
-      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
-      if (!resolver) return [];
-      let { tokens } = resolver(this.transaction, this.availableTokens);
-      const index = this.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
-      if (index >= 0 && this.transaction.tx.arguments[index].value.length > tokens.length) {
-        tokens = [
-          tokens[0],
-          ...this.transaction.tx.arguments[index].value
-            .slice(1, this.transaction.tx.arguments[index].value.length - 1)
-            .map(({ value }) => this.availableTokens[value]),
-          tokens[1],
+  setup(props, { root }) {
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { availableTokens } = useFungibleTokens({ store: root.$store });
+
+    const tokens = computed(() => {
+      if (
+        !FUNCTION_TYPE_DEX.swap.includes(props.transaction.tx.function as TxFunctionRaw)
+      ) {
+        return [];
+      }
+      const functionName = camelCase(props.transaction.tx.function) as TxFunctionParsed;
+      const resolver = transactionTokenInfoResolvers[functionName];
+      if (!resolver) {
+        return [];
+      }
+      let { tokens: newTokens } = resolver(props.transaction, availableTokens.value);
+      const index = props.transaction.tx.arguments.findIndex(({ type }: any) => type === 'list');
+      if (index >= 0 && props.transaction.tx.arguments[index].value.length > newTokens.length) {
+        newTokens = [
+          newTokens[0],
+          ...props.transaction.tx.arguments[index].value
+            .slice(1, props.transaction.tx.arguments[index].value.length - 1)
+            .map(({ value }: any) => availableTokens.value[value]),
+          newTokens[1],
         ];
       }
-      const waeContract = DEX_CONTRACTS[this.activeNetwork.networkId]?.wae;
-      if (tokens[0].isAe && waeContract && !waeContract?.includes(tokens[1].contractId)) {
-        tokens.unshift({
-          ...tokens[0],
+      const waeContract = DEX_CONTRACTS[activeNetwork.value.networkId]?.wae;
+      if (
+        newTokens[0].isAe
+        && waeContract
+        && newTokens[1].contractId
+        && !waeContract?.includes(newTokens[1].contractId)
+      ) {
+        newTokens.unshift({
+          ...newTokens[0],
           isAe: true,
         });
-        tokens[1].isAe = false;
+        newTokens[1].isAe = false;
       }
-      if (tokens[tokens.length - 1].isAe && waeContract
-        && !waeContract?.includes(tokens[tokens.length - 2].contractId)) {
-        tokens[tokens.length - 1].isAe = false;
-        tokens.push({ ...tokens[tokens.length - 1], isAe: true });
+      if (
+        newTokens[newTokens.length - 1].isAe
+        && waeContract
+        && !waeContract?.includes(newTokens[newTokens.length - 2].contractId as string)
+      ) {
+        newTokens[newTokens.length - 1].isAe = false;
+        newTokens.push({ ...newTokens[newTokens.length - 1], isAe: true });
       }
-      return tokens;
-    },
+      return newTokens;
+    });
+
+    function checkWaeAeTx(idx: number) {
+      if (idx === tokens.value.length - 1) {
+        return false;
+      }
+      const contracts = DEX_CONTRACTS[activeNetwork.value.networkId];
+      const [firstToken, secondToken] = tokens.value;
+      return (
+        (
+          contracts?.wae?.includes(firstToken.contractId as string)
+          && secondToken.isAe
+        )
+        || (
+          contracts?.wae?.includes(secondToken.contractId as string)
+          && firstToken.isAe
+        )
+      );
+    }
+
+    return {
+      tokens,
+      checkWaeAeTx,
+    };
   },
-  methods: {
-    checkWaeAeTx(idx) {
-      if (idx === this.tokens.length - 1) return false;
-      const contracts = DEX_CONTRACTS[this.activeNetwork.networkId];
-      return (contracts?.wae?.includes(this.tokens[idx].contractId)
-        && this.tokens[idx + 1].isAe)
-        || (contracts?.wae?.includes(this.tokens[idx + 1].contractId)
-        && this.tokens[idx].isAe);
-    },
-  },
-};
+
+});
 </script>
 
 <style lang="scss" scoped>

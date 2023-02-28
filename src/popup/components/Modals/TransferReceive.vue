@@ -86,11 +86,10 @@ import type {
   IAccount,
   IAsset,
   IToken,
-  ITokenList,
 } from '../../../types';
 import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
-import { useCopy, useMultisigAccounts } from '../../../composables';
+import { useCopy, useFungibleTokens, useMultisigAccounts } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
@@ -133,9 +132,10 @@ export default defineComponent({
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
       : account.value.address);
-    const availableTokens = computed<ITokenList>(
-      () => root.$store.state.fungibleTokens.availableTokens,
-    );
+    const { availableTokens } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: activeAccountAddress.value,
+    });
 
     const selectedAsset = ref<IAsset | IToken | null>(null);
 

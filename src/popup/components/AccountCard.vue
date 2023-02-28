@@ -31,6 +31,7 @@ import {
   computed,
   defineComponent,
   PropType,
+  watch,
 } from '@vue/composition-api';
 
 import AccountInfo from './AccountInfo.vue';
@@ -40,7 +41,7 @@ import AccountCardBase from './AccountCardBase.vue';
 
 import type { IAccount } from '../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
-import { useBalances } from '../../composables';
+import { useBalances, useFungibleTokens } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -54,9 +55,19 @@ export default defineComponent({
     selected: Boolean,
   },
   setup(props, { root }) {
+    const { loadTokenBalances } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.account.address,
+    });
     const { balance } = useBalances({ store: root.$store });
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
+
+    watch(
+      () => props.selected,
+      (selected) => selected && loadTokenBalances(),
+      { immediate: true },
+    );
 
     return {
       numericBalance,

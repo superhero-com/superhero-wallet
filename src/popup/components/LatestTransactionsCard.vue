@@ -37,7 +37,7 @@ import type {
   ITransaction,
 } from '../../types';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
-import { useBalances } from '../../composables';
+import { useBalances, useFungibleTokens } from '../../composables';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   handleUnknownError,
@@ -58,6 +58,7 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup(props, { root }) {
+    const { fetchTokensHistory } = useFungibleTokens({ store: root.$store });
     const latestTransactions = ref<ITransaction[]>([]);
     const showWidget = ref<boolean>(false);
     const isLoading = ref<boolean>(true);
@@ -67,7 +68,6 @@ export default defineComponent({
     const accounts = useGetter<IAccount[]>('accounts');
     const activeIdx = useState('accounts', 'activeIdx');
     const fetchPendingTransactions = useDispatch('fetchPendingTransactions');
-    const getTokensHistory = useDispatch('fungibleTokens/getTokensHistory');
     const fetchTipWithdrawnTransactions = useDispatch('fetchTipWithdrawnTransactions');
 
     function fetchForAllAccount(func: CallbackFunction, isMultiple?: boolean) {
@@ -94,11 +94,14 @@ export default defineComponent({
       const getTxByAccountAddress = (address: string) => (
         root.$store.state.middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
       );
+      const getAccountTokensHistory = async (address: string) => (
+        fetchTokensHistory(address, true)
+      );
 
       const allTransactionsPromises = [
         ...fetchForAllAccount(getTxByAccountAddress as CallbackFunction),
         ...fetchForAllAccount(fetchPendingTransactions),
-        ...fetchForAllAccount(getTokensHistory, true),
+        ...fetchForAllAccount(getAccountTokensHistory as CallbackFunction),
         ...fetchForAllAccount(fetchTipWithdrawnTransactions, true),
       ];
 

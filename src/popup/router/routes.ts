@@ -79,6 +79,7 @@ import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
 import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
+import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -181,7 +182,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_MULTISIG_DETAILS,
-            component: AccountDetailsTokens,
+            component: AccountDetailsMultisigTokens,
             meta: {
               showFilterBar: true,
               hideHeader: true,

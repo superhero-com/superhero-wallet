@@ -24,7 +24,7 @@ export const handleUnknownError = (error) => console.warn('Unknown rejection', e
 
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
-    return null;
+    return 0;
   }
   const share = new BigNumber(_balance).times(100).div(_totalSupply);
   const amount = new BigNumber(_reserve).times(share).div(100);

@@ -62,7 +62,8 @@ export type IInputMessageRaw = string | IInputMessage;
 
 export interface IToken {
   contractId: string
-  convertedBalance?: number
+  convertedBalance?: Balance | string
+  balanceCurrency?: number | Balance
   decimals: number
   id?: string // Only for the Aeternity coin
   name: string
@@ -70,8 +71,26 @@ export interface IToken {
   extension?: string[]
 }
 
+export interface ITokenBalance extends IToken {
+  value: string
+  text: string
+  balance: BigNumberPublic
+}
+
+export interface IAex9Balance {
+  amount: number
+  blockHash: string
+  contractId: string
+  height: number
+  tokenName: string
+  tokenSymbol:string
+  txHash: string
+  txIndex: number
+  txType: string
+}
+
 export interface ITokenResolved extends Partial<IToken> {
-  amount?: number
+  amount: number
   isAe?: boolean
   isPool?: boolean
   isReceived?: boolean
@@ -86,7 +105,7 @@ export interface IAsset {
   atl: number
   atl_change_percentage: number
   atl_date: string
-  balanceCurrency: number
+  balanceCurrency: number | Balance
   circulating_supply: number
   contractId: string
   convertedBalance: Balance;
@@ -358,6 +377,19 @@ export interface ITransaction {
   url?: string;
 }
 
+export interface IRawTokenTransaction {
+  amount: number
+  blockHeight: number
+  callTxi: number
+  contractId: string
+  logIdx: number
+  microIndex: number
+  microTime: number
+  recipient: string
+  sender: string
+  txHash: string
+}
+
 export type PendingTransactionType = 'spend' | 'spendToken';
 
 export interface IPendingTransaction {
@@ -388,6 +420,19 @@ export interface ITransactionOverview {
 export interface IDexContracts {
   router: string[];
   wae: string[];
+}
+
+export interface IDexToken extends IToken {
+  amount: number
+  reserve: number
+}
+
+export interface IDexTokenPairs {
+  token0: IDexToken
+  token1: IDexToken
+  totalSupply: number,
+  balance: number
+  balances: Record<string, number>
 }
 
 /**

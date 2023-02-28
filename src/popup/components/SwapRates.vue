@@ -37,39 +37,45 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
 import { FUNCTION_TYPE_DEX } from '../utils/constants';
+import { useFungibleTokens } from '../../composables';
+import { ITransaction, TxFunctionParsed, TxFunctionRaw } from '../../types';
 
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
-export default {
+export default defineComponent({
   components: {
     Tokens,
     TokenAmount,
   },
   props: {
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    isSwapTx() {
-      return [
-        ...FUNCTION_TYPE_DEX.swap,
-        ...FUNCTION_TYPE_DEX.pool,
-      ].includes(this.transaction.tx.function);
-    },
-    rates() {
-      if (!this.isSwapTx) return [];
+  setup(props, { root }) {
+    const { availableTokens } = useFungibleTokens({ store: root.$store });
 
-      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
+    const isSwapTx = computed(() => ([
+      ...FUNCTION_TYPE_DEX.swap,
+      ...FUNCTION_TYPE_DEX.pool,
+    ].includes(props.transaction.tx.function as TxFunctionRaw)));
+
+    const rates = computed(() => {
+      if (!isSwapTx.value) {
+        return [];
+      }
+
+      const functionName = camelCase(props.transaction.tx.function) as TxFunctionParsed;
+
+      const resolver = transactionTokenInfoResolvers[functionName];
 
       if (!resolver) return [];
 
-      const { tokens } = resolver(this.transaction, this.availableTokens);
+      const { tokens } = resolver(props.transaction, availableTokens.value);
 
       if (tokens.length <= 1) return [];
 
@@ -84,9 +90,14 @@ export default {
           price: tokens[0].amount / tokens[1].amount,
         },
       ];
-    },
+    });
+
+    return {
+      isSwapTx,
+      rates,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

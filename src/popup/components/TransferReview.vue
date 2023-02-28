@@ -129,7 +129,12 @@ import {
   ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi, useMultisigAccounts, useMultisigTransactions } from '../../composables';
+import {
+  useDeepLinkApi,
+  useFungibleTokens,
+  useMultisigAccounts,
+  useMultisigTransactions,
+} from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
@@ -181,6 +186,16 @@ export default defineComponent({
     } = useMultisigAccounts({ store: root.$store });
     const loading = ref<boolean>(false);
     const account = computed<IAccount>(() => root.$store.getters.account);
+    const {
+      burnTriggerPoS,
+      transferTokens,
+      createOrChangeAllowance,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.isMultisig
+        ? activeMultisigAccount.value?.gaAccountId
+        : account.value.address,
+    });
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
@@ -211,20 +226,20 @@ export default defineComponent({
         let actionResult;
 
         if (props.transferData.invoiceId !== null) {
-          actionResult = await root.$store.dispatch('fungibleTokens/burnTriggerPoS', [
-            selectedAsset.contractId,
+          actionResult = await burnTriggerPoS({
+            contractId: selectedAsset.contractId,
             amount,
-            props.transferData.invoiceContract,
-            props.transferData.invoiceId,
-            { waitMined: false, modal: false },
-          ]);
+            posAddress: props.transferData.invoiceContract,
+            invoiceId: props.transferData.invoiceId,
+            options: { waitMined: false, modal: false },
+          });
         } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          actionResult = await root.$store.dispatch('fungibleTokens/transfer', [
-            selectedAsset.contractId,
+          actionResult = await transferTokens({
+            contractId: selectedAsset.contractId,
             recipient,
             amount,
-            { waitMined: false, modal: false },
-          ]);
+            options: { waitMined: false, modal: false },
+          });
         } else {
           actionResult = await sdk.value.spend(amount, recipient, {
             waitMined: false,
@@ -284,7 +299,7 @@ export default defineComponent({
       try {
         let txResult = null;
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
+          await createOrChangeAllowance([
             selectedAsset.contractId,
             props.amount,
           ]);

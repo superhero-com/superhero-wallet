@@ -46,10 +46,10 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import type { ITokenList, ObjectValues } from '../../../types';
-import { IFormModel } from '../../../composables';
+import type { ObjectValues } from '../../../types';
+import { IFormModel, useFungibleTokens } from '../../../composables';
 import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useGetter } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -89,9 +89,11 @@ export default defineComponent({
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({});
-
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const isConnected = useGetter<boolean>('isConnected');
+    const { availableTokens } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.address,
+    });
 
     const showEditButton = computed(() => [
       STEPS.review,

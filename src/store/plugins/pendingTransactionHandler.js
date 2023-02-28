@@ -24,7 +24,6 @@ export default async (store) => {
           showSpendModal();
           break;
         case 'spendToken':
-          store.dispatch('fungibleTokens/loadTokenBalances');
           showSpendModal();
           break;
         default:

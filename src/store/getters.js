@@ -1,9 +1,7 @@
-import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
-  AETERNITY_SYMBOL,
   DEX_CONTRACTS,
   NETWORK_ID_MAINNET,
   NETWORK_ID_TESTNET,
@@ -13,9 +11,6 @@ import {
   TX_FUNCTIONS,
   ACCOUNT_HD_WALLET,
   validateHash,
-  convertToken,
-  aettosToAe,
-  categorizeContractCallTxObject,
   getHdWalletAccount,
   getMdwEndpointPrefixForHash,
   getTxType,
@@ -83,37 +78,8 @@ export default {
   },
   getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-
-  getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
-    if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
-    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
-  },
-  getTxAmountTotal: (
-    { fungibleTokens: { availableTokens } },
-  ) => (transaction, direction = TX_FUNCTIONS.sent) => {
-    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (contractCallData && availableTokens[contractCallData.token]) {
-      return +convertToken(
-        contractCallData.amount,
-        -availableTokens[contractCallData.token].decimals,
-      );
-    }
-    const isReceived = direction === TX_FUNCTIONS.received;
-
-    return +aettosToAe(
-      new BigNumber(
-        transaction.tx?.amount
-        || transaction.tx?.tx?.tx?.amount
-        || transaction.tx?.nameFee || 0,
-      )
-        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
-        .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
-    );
-  },
   getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
     const currentAddress = externalAddress || address;
-
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
       return tx.senderId === currentAddress
         ? TX_FUNCTIONS.sent

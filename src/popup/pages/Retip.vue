@@ -79,6 +79,7 @@ import {
   useMaxAmount,
   IFormModel,
   useBalances,
+  useFungibleTokens,
 } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -100,7 +101,7 @@ export default defineComponent({
     });
 
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { balance } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
 
     const tipId = root.$route.query.id;
@@ -110,7 +111,6 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-    const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
@@ -118,6 +118,13 @@ export default defineComponent({
     const tippingSupported = useGetter('tippingSupported');
     const minTipAmount = useGetter('minTipAmount');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
+    const {
+      aeternityAsset,
+      createOrChangeAllowance,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: account.value.address,
+    });
     const tippingContract = computed(
       () => tipId.includes('_v2') || tipId.includes('_v3')
         ? tippingV2.value
@@ -155,12 +162,10 @@ export default defineComponent({
       try {
         let retipResponse = null;
         if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
-          await root.$store.dispatch(
-            'fungibleTokens/createOrChangeAllowance',
-            [
+          await createOrChangeAllowance([
               formModel.value.selectedAsset?.contractId,
-              formModel.value.amount],
-          );
+              formModel.value.amount,
+          ]);
 
           retipResponse = await tippingV2.value.methods.retip_token(
             +tip.value.id.split('_')[0],
@@ -210,10 +215,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = getAeternityToken.value({
-        tokenBalance: balance.value,
-        balanceCurrency: balanceCurrency.value,
-      });
+      formModel.value.selectedAsset = aeternityAsset.value;
 
       if (!tipId) throw new Error('"id" param is missing');
 

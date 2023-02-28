@@ -70,6 +70,8 @@ import {
   IS_FIREFOX,
   RUNNING_IN_POPUP,
 } from '../lib/environment';
+import { useFungibleTokens } from '../composables';
+
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
@@ -84,6 +86,7 @@ export default defineComponent({
     Close,
   },
   setup(props, { root }) {
+    const { loadAeternityData } = useFungibleTokens({ store: root.$store });
     const innerElement = ref<HTMLDivElement>();
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
@@ -164,7 +167,7 @@ export default defineComponent({
       await watchUntilTruthy(() => isRestored.value);
       setNotificationSettings();
 
-      root.$store.dispatch('fungibleTokens/getAeternityData');
+      loadAeternityData();
       root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     });
 
