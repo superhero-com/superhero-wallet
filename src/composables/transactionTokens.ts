@@ -2,10 +2,10 @@ import { computed } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
 import type {
   IDefaultComposableOptions,
-  ITokenList,
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
+  TxFunctionRaw,
 } from '../types';
 import {
   AETERNITY_SYMBOL,
@@ -16,6 +16,7 @@ import {
   getInnerTransaction,
 } from '../popup/utils';
 import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
+import { useFungibleTokens } from './fungibleTokens';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -31,13 +32,12 @@ export function useTransactionTokens({
   transaction,
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
-  const getTxSymbol = computed(() => store.getters.getTxSymbol);
-  const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
+  const {
+    availableTokens,
+    getTxSymbol,
+    getTxAmountTotal,
+  } = useFungibleTokens({ store });
   const innerTx = computed(() => getInnerTransaction(transaction.tx));
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
 
   const transactionFunction = computed(() => {
     if (innerTx.value?.function) {
@@ -66,13 +66,13 @@ export function useTransactionTokens({
       ...innerTx.value || {},
       amount: isAllowance
         ? convertToken(innerTx.value?.fee || 0, -MAGNITUDE)
-        : getTxAmountTotal.value(transaction, direction),
-      symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
+        : getTxAmountTotal(transaction, direction as TxFunctionRaw),
+      symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol(transaction),
       isReceived: direction === TX_FUNCTIONS.received,
       isAe:
         isAllowance
         || (
-          getTxSymbol.value(transaction) === AETERNITY_SYMBOL
+          getTxSymbol(transaction) === AETERNITY_SYMBOL
           && !isTransactionAex9(transaction)
         ),
     }];

@@ -26,7 +26,7 @@
 <script lang="ts">
 import { computed, defineComponent, watch } from '@vue/composition-api';
 
-import { useMultisigAccounts } from '../../composables';
+import { useFungibleTokens, useMultisigAccounts } from '../../composables';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -42,13 +42,14 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { multisigAccounts } = useMultisigAccounts({ store: root.$store });
+    const { resetTokensAndTransactions } = useFungibleTokens({ store: root.$store });
 
     const hasPendingMultisigTransaction = computed(
       () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),
     );
 
     function toggleMultisigDashboard(showMultisigDashboard: false) {
-      root.$store.commit('fungibleTokens/resetTokensAndTransactions');
+      resetTokensAndTransactions();
       root.$store.commit('initTransactions');
       root.$router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }

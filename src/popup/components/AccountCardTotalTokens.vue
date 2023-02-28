@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
+import { useFungibleTokens } from '../../composables';
 import { IAccount } from '../../types';
 
 export default defineComponent({
@@ -27,10 +27,13 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
-    const getTokenBalance = useGetter('fungibleTokens/getTokenBalance');
+  setup(props, { root }) {
+    const { tokenBalances } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.currentAccount.address,
+    });
 
-    const totalTokens = computed(() => getTokenBalance.value(props.currentAccount.address).length);
+    const totalTokens = computed(() => tokenBalances.value.length);
 
     return {
       totalTokens,

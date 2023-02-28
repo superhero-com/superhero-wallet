@@ -1,10 +1,7 @@
-import {
-  flatten, orderBy, uniq, uniqBy,
-} from 'lodash-es';
+import { uniq, uniqBy } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
@@ -92,48 +89,6 @@ export default {
       commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
     }
     return tipWithdrawnTransactions;
-  },
-  async fetchTransactions({
-    state, getters, dispatch, commit,
-  }, { limit, recent, address }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) {
-      return;
-    }
-
-    let txs = await Promise.all([
-      (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
-        .then(({ data, next }) => {
-          const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
-          if (!recent) commit('setTransactionsNextPage', next);
-          return result;
-        })
-        .catch(() => []),
-      dispatch('fetchPendingTransactions', address),
-    ]);
-
-    const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
-    const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent, address }),
-      dispatch('fetchTipWithdrawnTransactions', { recent, address })]))
-      .forEach((f) => {
-        if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
-          txs[0].push(f);
-        }
-      });
-    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
-    txs = txs.map((tx) => ({ ...tx, transactionOwner: address }));
-    const network = getters.activeNetwork.networkId;
-    if (state.transactions.pending[network]) {
-      state.transactions.pending[network].forEach(({ hash }) => {
-        if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
-          commit('removePendingTransactionByHash', { hash, network });
-        }
-      });
-    }
-
-    commit('addTransactions', recent ? txs.slice(0, limit) : txs);
   },
   pollCurrencies({ commit }) {
     return executeAndSetInterval(async () => {

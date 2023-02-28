@@ -6,7 +6,7 @@
     centered
     :body-without-padding-bottom="hasPayload"
     data-cy="spend-success"
-    @close="resolve"
+    @close="closeModal()"
   >
     <ModalHeader
       class="header"
@@ -19,7 +19,7 @@
     </div>
     <TokenAmount
       :amount="getTxAmountTotal(transaction)"
-      :symbol="getSymbol(transaction)"
+      :symbol="getTxSymbol(transaction)"
       :hide-fiat="!isAe"
     />
     <span class="sending-to">
@@ -59,25 +59,39 @@
         inline
         nowrap
         :text="$t('ok')"
-        @click="resolve"
+        @click="closeModal()"
       />
     </template>
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import {
+  computed,
+  ref,
+  defineComponent,
+  PropType,
+  onMounted,
+} from '@vue/composition-api';
+import { useFungibleTokens } from '../../../composables';
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
-import { getPayload, watchUntilTruthy, AETERNITY_SYMBOL } from '../../utils';
+import {
+  AETERNITY_SYMBOL,
+  getPayload,
+  isAensName,
+  watchUntilTruthy,
+} from '../../utils';
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
+import { useGetter, useState } from '../../../composables/vuex';
+import type { ITransaction } from '../../../types';
 
-export default {
+export default defineComponent({
   components: {
     PayloadDetails,
     ModalHeader,
@@ -88,45 +102,61 @@ export default {
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
-    transaction: { type: Object, required: true },
+    resolve: { type: Function as PropType<() => void>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  data: () => ({
-    ExternalLink,
-    hideAvatar: false,
-    nameRecipient: null,
-  }),
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
-    ...mapGetters('names', ['getPreferred']),
-    isAe() {
-      return !(this.transaction.tx.contractId
-        && this.availableTokens[this.transaction.tx.contractId]?.symbol);
-    },
-    payload() {
-      return getPayload(this.transaction);
-    },
-    hasPayload() {
-      return this.payload && this.payload.length;
-    },
-  },
-  async mounted() {
-    const { recipientId } = this.transaction.tx;
-    await watchUntilTruthy(() => this.$store.state.middleware);
-    if (recipientId.includes('nm_')) {
-      this.hideAvatar = true;
-      this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
+  setup(props, { root }) {
+    const {
+      getTxAmountTotal,
+      getTxSymbol,
+      loadTokenBalances,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.transaction.tx.callerId,
+    });
+    const middleware = useState('middleware');
+    const getExplorerPath = useGetter('getExplorerPath');
+    const getPreferred = useGetter('names/getPreferred');
+
+    const hideAvatar = ref<boolean>(false);
+    const nameRecipient = ref<string>();
+
+    const isAe = computed((): boolean => (
+      getTxSymbol(props.transaction) === AETERNITY_SYMBOL
+    ));
+
+    const payload = computed(() => getPayload(props.transaction));
+    const hasPayload = computed((): boolean => payload.value?.length);
+
+    function closeModal() {
+      loadTokenBalances();
+      props.resolve();
     }
+
+    onMounted(async () => {
+      const { recipientId } = props.transaction.tx;
+      await watchUntilTruthy(() => middleware.value);
+      if (recipientId && isAensName(recipientId)) {
+        hideAvatar.value = true;
+        nameRecipient.value = (await middleware.value.getNameById(recipientId)).name;
+      }
+    });
+
+    return {
+      getTxAmountTotal,
+      getTxSymbol,
+      getExplorerPath,
+      getPreferred,
+      isAe,
+      hideAvatar,
+      nameRecipient,
+      payload,
+      hasPayload,
+      ExternalLink,
+      closeModal,
+    };
   },
-  methods: {
-    getSymbol() {
-      return this.transaction.tx.contractId
-        ? this.availableTokens[this.transaction.tx.contractId].symbol
-        : AETERNITY_SYMBOL;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

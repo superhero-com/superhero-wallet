@@ -101,6 +101,7 @@
       :ae-only="isMultisig"
       :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
       :message="amountMessage"
+      :current-address="currentAddress"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
     >
@@ -183,7 +184,6 @@ import type {
   IFormSelectOption,
   IInputMessage,
   IToken,
-  ITokenList,
 } from '../../types';
 import {
   MODAL_DEFAULT,
@@ -198,10 +198,11 @@ import {
 } from '../utils';
 import {
   useBalances,
+  useFungibleTokens,
   useMaxAmount,
   useMultisigAccounts,
 } from '../../composables';
-import { useState, useGetter } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -256,21 +257,32 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { max, fee, updateCalculatedFee } = useMaxAmount({ formModel, store: root.$store });
+    const { balance } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const account = useGetter<IAccount>('account');
     const accounts = useGetter<IAccount[]>('accounts');
-    const fungibleTokens = useState('fungibleTokens');
-    const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
-    const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
-    const getAeternityToken = computed(() => root.$store.getters['fungibleTokens/getAeternityToken']);
     const addressErrorMsg = computed(
       () => (root as any).errors.items
         .filter(({ field }: any) => field === 'address')
         .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null,
     );
+
+    const currentAddress = computed(() => (
+      props.isMultisig
+        ? activeMultisigAccount.value?.gaAccountId
+        : account.value.address
+    ));
+
+    const {
+      aeternityAsset,
+      availableTokens,
+      tokenBalances,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: currentAddress.value,
+    });
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
       const warning = (root as any).errors.items
@@ -308,16 +320,15 @@ export default defineComponent({
       return getMessageByFieldName('address');
     });
 
-    const hasError = computed(
-      (): boolean => !!addressErrorMsg.value || !!(root as any).errors.first('amount'),
-    );
-    const isAe = computed(
-      () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
-    );
-    const isMaxValue = computed<boolean>(() => {
-      const amountInt = +(formModel.value?.amount || 0);
-      return amountInt > 0 && amountInt === +max.value;
-    });
+    const hasError = computed((): boolean => (
+      !!addressErrorMsg.value || !!(root as any).errors.first('amount')
+    ));
+    const isAe = computed((): boolean => (
+      formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
+    ));
+    const isMaxValue = computed((): boolean => (
+      +(max.value) > 0 && +(formModel.value?.amount || 0) === +(max.value)
+    ));
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
@@ -361,18 +372,18 @@ export default defineComponent({
     }
 
     async function queryHandler(query: any) {
-      formModel.value.selectedAsset = availableTokens.value[query.token]
-        || getAeternityToken.value({
-          tokenBalance: balance.value,
-          balanceCurrency: balanceCurrency.value,
-        });
+      formModel.value.selectedAsset = tokenBalances.value
+        .find(({ contractId }) => contractId === query.token)
+        || availableTokens.value[query.token]
+        || aeternityAsset.value;
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
     }
 
-    function setMaxValue() {
+    async function setMaxValue() {
       const _fee = fee.value;
       formModel.value.amount = max.value;
+      await updateCalculatedFee();
       setTimeout(() => {
         if (_fee !== fee.value) {
           formModel.value.amount = max.value;
@@ -538,6 +549,7 @@ export default defineComponent({
       max,
       editPayload,
       clearPayload,
+      currentAddress,
     };
   },
 });

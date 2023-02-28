@@ -61,7 +61,7 @@
       >
         <TokenAmount
           :amount="totalAmount"
-          :symbol="getTxSymbol(transaction)"
+          :symbol="getTxSymbol(txWrapped)"
           :aex9="isTransactionAex9(txWrapped)"
           data-cy="total"
         />
@@ -128,8 +128,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk, useTransactionTx } from '../../../composables';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useSdk, useTransactionTx, useFungibleTokens } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -174,6 +173,14 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const {
+      availableTokens,
+      getTxSymbol,
+      getTxAmountTotal,
+    } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.transaction.callerId,
+    });
 
     const {
       direction,
@@ -189,10 +196,6 @@ export default defineComponent({
     const tokenList = ref<ITokenResolved[]>([]);
     const txFunction = ref<TxFunctionRaw | undefined>();
     const loading = ref(false);
-
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
-    const getTxSymbol = useGetter('getTxSymbol');
-    const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
 
@@ -219,12 +222,12 @@ export default defineComponent({
       return 'total';
     });
 
-    const totalAmount = computed(() => getTxAmountTotal.value(txWrapped.value, direction.value));
+    const totalAmount = computed(() => getTxAmountTotal(txWrapped.value, direction.value));
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_FUNCTIONS.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(props.transaction),
+      symbol: getTxSymbol(txWrapped.value),
     }));
 
     const filteredTxFields = computed(

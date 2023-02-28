@@ -91,8 +91,9 @@ import {
   isContract,
 } from '../../utils';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useBalances, useSdk } from '../../../composables';
+import { useAccounts, useBalances, useFungibleTokens } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
+import type { IDexTokenPairs } from '../../../types';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -119,7 +120,13 @@ export default defineComponent({
     Tab,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+    const { account } = useAccounts({ store: root.$store });
+    const {
+      availableTokens,
+      aePublicData,
+      tokenBalances,
+      fetchContractTokenPairs,
+    } = useFungibleTokens({ store: root.$store, accountAddress: account.value.address });
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
@@ -144,12 +151,8 @@ export default defineComponent({
       },
     ];
     const loading = ref<boolean>(true);
-    const tokenPairs = ref({ token0: null, token1: null });
-    const account = useGetter('account');
+    const tokenPairs = ref<IDexTokenPairs | null>(null);
     const isConnected = useGetter('isConnected');
-    const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
-    const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
-    const aePublicData = computed(() => root.$store.state.fungibleTokens.aePublicData);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
@@ -173,10 +176,18 @@ export default defineComponent({
         ) || { ...fungibleToken.value, contractId };
     });
     const tokens = computed(() => {
+      if (!tokenPairs.value) {
+        return [];
+      }
       const [token0, token1] = [tokenPairs.value.token0, tokenPairs.value.token1];
       return token0 && token1 ? [token0, token1] : [tokenData.value];
     });
-    const convertedBalance = computed(() => +tokenData.value.convertedBalance || 0);
+    const convertedBalance = computed(() => {
+      if (!tokenData.value?.convertedBalance) {
+        return 0;
+      }
+      return +tokenData.value.convertedBalance;
+    });
 
     const openTransferReceiveModal = () => root.$store.dispatch('modals/open', {
       name: MODAL_TRANSFER_RECEIVE,
@@ -189,8 +200,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
-        await getSdk();
-        tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        tokenPairs.value = await fetchContractTokenPairs(contractId);
       }
       loading.value = false;
     });

@@ -22,6 +22,7 @@
         :value="currentAsset"
         :focused="focused"
         :show-tokens-with-balance="showTokensWithBalance"
+        :current-address="currentAddress"
         @input="handleAssetSelected($event)"
       />
       <div
@@ -68,7 +69,7 @@ import {
   PropType,
   watch,
 } from '@vue/composition-api';
-import { useBalances } from '../../composables';
+import { useFungibleTokens } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import type { IAsset } from '../../types';
 import { AETERNITY_SYMBOL } from '../utils';
@@ -86,20 +87,14 @@ export default defineComponent({
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
+    currentAddress: { type: String, default: null },
   },
   setup(props, { root, emit }) {
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { aeternityAsset } = useFungibleTokens({ store: root.$store });
 
-    // eslint-disable-next-line no-unused-vars
-    const getAeternityToken = useGetter<(o: any) => IAsset>('fungibleTokens/getAeternityToken');
     const formatCurrency = useGetter('formatCurrency');
 
-    const aeToken = getAeternityToken.value({
-      tokenBalance: balance.value,
-      balanceCurrency: balanceCurrency.value,
-    });
-
-    const currentAsset = computed((): IAsset => props.selectedAsset || aeToken);
+    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityAsset.value);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const totalAmount = computed(
       () => (currentAsset.value?.current_price)
@@ -116,7 +111,7 @@ export default defineComponent({
 
     onMounted(() => {
       if (!props.selectedAsset) {
-        handleAssetSelected(aeToken);
+        handleAssetSelected(aeternityAsset.value);
       }
     });
 

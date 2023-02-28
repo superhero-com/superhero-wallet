@@ -3,7 +3,6 @@ import type {
   IAccount,
   IAccountLabeled,
   IDexContracts,
-  ITokenList,
   TxFunctionRaw,
   ITx,
   IDefaultComposableOptions,
@@ -19,6 +18,7 @@ import {
   isContainingNestedTx,
   getInnerTransaction,
 } from '../popup/utils';
+import { useFungibleTokens } from './fungibleTokens';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
@@ -33,6 +33,7 @@ export function useTransactionTx({
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<string | undefined>(externalAddress);
+  const { availableTokens } = useFungibleTokens({ store });
 
   function setTransactionTx(newTx: ITx) {
     outerTx.value = newTx;
@@ -42,10 +43,6 @@ export function useTransactionTx({
   function setExternalAddress(address: string) {
     ownerAddress.value = address;
   }
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
 
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);

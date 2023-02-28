@@ -28,8 +28,10 @@
 import {
   defineComponent,
   PropType,
+  watch,
 } from '@vue/composition-api';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
+import { useFungibleTokens } from '../../composables';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
@@ -49,7 +51,18 @@ export default defineComponent({
     account: { type: Object as PropType<IMultisigAccount>, required: true },
     selected: Boolean,
   },
-  setup() {
+  setup(props, { root }) {
+    const { loadTokenBalances } = useFungibleTokens({
+      store: root.$store,
+      accountAddress: props.account.gaAccountId,
+    });
+
+    watch(
+      () => props.selected,
+      (selected) => selected && loadTokenBalances(),
+      { immediate: true },
+    );
+
     return {
       ROUTE_MULTISIG_DETAILS,
     };

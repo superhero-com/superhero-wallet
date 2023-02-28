@@ -64,7 +64,6 @@
       >
         <span class="secondary">{{ $t('common.by') }}</span>
         <Truncate
-          :key="truncateWidth"
           class="account-name-truncated"
           :str="ownerName"
           :style="{ width: truncateWidth }"
@@ -82,12 +81,11 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
-import { useTransactionTx } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useFungibleTokens, useTransactionTx } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import {
   IAccount,
   INetwork,
-  ITokenList,
   ITransaction,
   ILabel,
   TxFunction,
@@ -130,9 +128,10 @@ export default defineComponent({
       isErrorTransaction,
     } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
 
+    const { availableTokens } = useFungibleTokens({ store: root.$store });
+
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
     const accounts = useGetter('accounts');
 

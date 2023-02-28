@@ -20,6 +20,8 @@ export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
+export const AETERNITY_NAME = 'Aeternity';
+export const AETERNITY_DECIMALS = 18;
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 
 export const TX_FUNCTIONS = {

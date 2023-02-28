@@ -40,15 +40,18 @@
   </ListItemWrapper>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
+import { useFungibleTokens } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
+
 import TokenAmount from '../TokenAmount.vue';
 import Tokens from '../Tokens.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
 
-export default {
+export default defineComponent({
   components: {
     TokenAmount,
     Tokens,
@@ -60,22 +63,27 @@ export default {
     showCurrentPrice: Boolean,
     selected: Boolean,
   },
-  data: () => ({
-    AETERNITY_CONTRACT_ID,
-  }),
-  computed: {
-    ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
-    ...mapState('fungibleTokens', ['aePublicData']),
-    price() {
-      return this.formatCurrency(this.aePublicData?.current_price || 0);
-    },
-    targetRouteName() {
-      return (this.tokenData.contractId === AETERNITY_CONTRACT_ID)
+  setup(props, { root }) {
+    const { aePublicData } = useFungibleTokens({ store: root.$store });
+    const formatCurrency = useGetter('formatCurrency');
+    const convertToCurrencyFormatted = useGetter('convertToCurrencyFormatted');
+
+    const price = computed(() => formatCurrency.value(aePublicData.value?.current_price || 0));
+
+    const targetRouteName = computed(() => (
+      (props.tokenData.contractId === AETERNITY_CONTRACT_ID)
         ? ROUTE_COIN
-        : ROUTE_TOKEN;
-    },
+        : ROUTE_TOKEN
+    ));
+
+    return {
+      price,
+      targetRouteName,
+      convertToCurrencyFormatted,
+      AETERNITY_CONTRACT_ID,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
