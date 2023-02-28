@@ -27,6 +27,7 @@
 <script lang="ts">
 import {
   defineComponent,
+  onMounted,
   PropType,
   watch,
 } from '@vue/composition-api';
