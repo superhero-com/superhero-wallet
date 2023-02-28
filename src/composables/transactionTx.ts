@@ -89,6 +89,11 @@ export function useTransactionTx({
 
     return !!(
       innerTx.value?.contractId
+      && innerTx.value?.function
+      && (
+        Object.values(FUNCTION_TYPE_DEX).flat()
+          .includes(innerTx.value?.function as TxFunctionRaw)
+      )
       && [...wae, ...router].includes(innerTx.value.contractId)
     );
   });
