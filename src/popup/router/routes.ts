@@ -29,6 +29,7 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
 import AccountDetails from '../pages/AccountDetails.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
+import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
@@ -181,7 +182,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_MULTISIG_DETAILS,
-            component: AccountDetailsTokens,
+            component: AccountDetailsMultisigTokens,
             meta: {
               showFilterBar: true,
               hideHeader: true,
