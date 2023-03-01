@@ -256,7 +256,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { max, fee, updateCalculatedFee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, balanceCurrency } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
@@ -314,10 +314,9 @@ export default defineComponent({
     const isAe = computed(
       () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
     );
-    const isMaxValue = computed<boolean>(() => {
-      const amountInt = +(formModel.value?.amount || 0);
-      return amountInt > 0 && amountInt === +max.value;
-    });
+    const isMaxValue = computed((): boolean => (
+      +(max.value) > 0 && +(formModel.value?.amount || 0) === +(max.value)
+    ));
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
@@ -370,9 +369,10 @@ export default defineComponent({
       if (query.amount) formModel.value.amount = query.amount;
     }
 
-    function setMaxValue() {
+    async function setMaxValue() {
       const _fee = fee.value;
       formModel.value.amount = max.value;
+      await updateCalculatedFee();
       setTimeout(() => {
         if (_fee !== fee.value) {
           formModel.value.amount = max.value;
