@@ -350,7 +350,9 @@ export function defaultTransactionSortingCallback(
 }
 
 export function shrinkString(text: string, maxLength: number) {
-  return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
+  return (text?.length)
+    ? `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`
+    : '';
 }
 
 export function amountRounded(rawAmount: number | BigNumberPublic): string {
