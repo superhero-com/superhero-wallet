@@ -101,17 +101,27 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * First step of creating the multisig account
    * Prepare multisig account creation transaction
    */
-  async function prepareVaultCreationRawTx(
-  ) {
+  async function prepareVaultCreationRawTx(payerId: string) {
     const sdk = await getSdk();
 
     // Wrap signed GA attach transaction
-    const payedTx = await sdk.payForTransaction(signedAttachTx, {
-      waitMined: true,
-      modal: false,
-      innerTx: true,
-    });
-
+    const opt = {
+      ...sdk.Ae.defaults,
+      ...{
+        waitMined: true,
+        modal: false,
+        innerTx: true,
+        fromAccount: payerId,
+      },
+    };
+    const payedTx = await sdk.send(
+      await sdk.payingForTx({
+        ...opt,
+        payerId,
+        tx: signedAttachTx,
+      }),
+      opt,
+    );
     rawTx = payedTx.rawTx;
 
     // Calculate fee

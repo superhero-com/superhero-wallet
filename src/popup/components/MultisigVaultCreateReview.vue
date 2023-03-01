@@ -110,7 +110,7 @@ import {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '../../types';
-import { AETERNITY_SYMBOL, handleUnknownError } from '../utils';
+import { AETERNITY_SYMBOL } from '../utils';
 import { useAccounts, useMultisigAccountCreate, useSdk } from '../../composables';
 
 import Avatar from './Avatar.vue';
@@ -144,7 +144,7 @@ export default defineComponent({
     confirmationsRequired: { type: Number, required: true },
   },
   setup(props, { root }) {
-    const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+    const { accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
@@ -167,19 +167,7 @@ export default defineComponent({
         creatorAccountFetched.value = undefined;
         const sdk = await getSdk();
         creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
-        const { idx: activeAccountIdx } = account.value;
-        root.$store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === val)?.idx,
-        );
-        try {
-          await prepareVaultCreationRawTx();
-        } catch (error) {
-          handleUnknownError(error);
-        } finally {
-          // Rollback active account once the multisig transaction is payed and signed
-          root.$store.commit('accounts/setActiveIdx', activeAccountIdx);
-        }
+        await prepareVaultCreationRawTx(val);
       }
     }, { immediate: true });
 

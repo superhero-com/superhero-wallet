@@ -415,6 +415,7 @@ export interface ITopHeader {
 export type ISignMessage = (m: any) => Promise<any>
 
 export interface ISdk {
+  payingForTx(arg0: any): any;
   addNode: (name: string, node: any, select: boolean) => void
   api: Record<string, (a?: any) => any>
   compilerApi: Record<string, (...args: any[]) => Promise<any>>
@@ -457,7 +458,7 @@ export interface ISdk {
   spendTx: (a: any) => Promise<any>
   address: () => Promise<string>
   aensBid: (name: string, aettos: any) => Promise<any>
-  balance: (address: string) => Promise<number>
+  balance: (address: string) => Promise<number>,
 }
 
 /**

@@ -103,13 +103,19 @@ export default {
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
-    async signTransactionFromAccount({ dispatch, rootGetters }, { txBase64, opt }) {
+    async signTransactionFromAccount({ dispatch, rootGetters }, {
+      txBase64,
+      opt: { modal = true, host = null, fromAccount },
+    }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
-      if (opt.modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
       const signature = await dispatch(
         'signWithoutConfirmation',
-        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]), opt },
+        {
+          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+          opt: { fromAccount },
+        },
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
