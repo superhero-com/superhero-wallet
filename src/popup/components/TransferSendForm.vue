@@ -266,11 +266,6 @@ export default defineComponent({
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
     const getAeternityToken = computed(() => root.$store.getters['fungibleTokens/getAeternityToken']);
-    const addressErrorMsg = computed(
-      () => (root as any).errors.items
-        .filter(({ field }: any) => field === 'address')
-        .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null,
-    );
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
       const warning = (root as any).errors.items
@@ -308,9 +303,9 @@ export default defineComponent({
       return getMessageByFieldName('address');
     });
 
-    const hasError = computed(
-      (): boolean => !!addressErrorMsg.value || !!(root as any).errors.first('amount'),
-    );
+    const hasError = computed((): boolean => (
+      amountMessage.value.status === 'error' || addressMessage.value.status === 'error'
+    ));
     const isAe = computed(
       () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
     );
