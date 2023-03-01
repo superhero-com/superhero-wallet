@@ -48,7 +48,6 @@ export default defineComponent({
     );
 
     function toggleMultisigDashboard(showMultisigDashboard: false) {
-      root.$store.commit('fungibleTokens/resetTokensAndTransactions');
       root.$store.commit('initTransactions');
       root.$router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }

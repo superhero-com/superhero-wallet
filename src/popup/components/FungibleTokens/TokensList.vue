@@ -19,12 +19,14 @@ export default defineComponent({
   },
   props: {
     searchTerm: { type: String, default: '' },
+    isMultisig: Boolean,
   },
   setup(props, { root }) {
     const { filteredTokens } = useTokensList({
       store: root.$store,
       ownedOnly: true,
       searchTerm: computed(() => props.searchTerm),
+      isMultisig: props.isMultisig,
     });
 
     return {

@@ -1,7 +1,8 @@
 <template>
-  <div class="token-list-wrapper">
+  <div class="multisig-token-list-wrapper">
     <TokensList
       :search-term="searchPhrase"
+      is-multisig
     />
   </div>
 </template>
@@ -31,7 +32,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.token-list-wrapper {
+.multisig-token-list-wrapper {
   position: relative;
   padding-top: 4px;
 }

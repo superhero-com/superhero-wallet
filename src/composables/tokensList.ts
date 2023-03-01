@@ -1,7 +1,9 @@
+import BigNumber from 'bignumber.js';
 import { computed, ref, Ref } from '@vue/composition-api';
 import type { IToken, ITokenList, IDefaultComposableOptions } from '../types';
 import { AETERNITY_CONTRACT_ID } from '../popup/utils';
 import { useBalances } from './balances';
+import { useMultisigAccounts } from './multisigAccounts';
 
 export interface UseTokensListOptions extends IDefaultComposableOptions {
   /**
@@ -16,6 +18,11 @@ export interface UseTokensListOptions extends IDefaultComposableOptions {
    * Search the list by the symbol, name or contractId
    */
   searchTerm?: Ref<string>
+
+  /**
+   * Restrict the tokens list based on the account type.
+   */
+  isMultisig?: boolean
 }
 
 export function useTokensList({
@@ -23,21 +30,31 @@ export function useTokensList({
   ownedOnly = false,
   withBalanceOnly = false,
   searchTerm = ref(''),
+  isMultisig,
 }: UseTokensListOptions) {
-  const { balance, balanceCurrency } = useBalances({ store });
+  const { balance } = useBalances({ store });
+  const { activeMultisigAccount } = useMultisigAccounts({ store });
+  const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate);
 
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
+  const availableTokens = computed<ITokenList>(() => (
+    isMultisig
+      ? []
+      : (store.state as any).fungibleTokens.availableTokens
+  ));
   const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
   const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
 
+  const aeTokenBalance = computed(() => (
+    isMultisig
+      ? activeMultisigAccount.value?.balance || new BigNumber(0)
+      : balance.value || new BigNumber(0)
+  ));
   /**
    * Returns the default aeternity meta information
    */
   const aeternityToken = computed<IToken | null>(() => getAeternityToken.value({
-    tokenBalance: balance.value,
-    balanceCurrency: balanceCurrency.value,
+    tokenBalance: aeTokenBalance.value,
+    balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
   }));
 
   /**
