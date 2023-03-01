@@ -88,7 +88,7 @@ export default defineComponent({
     const currentRenderedComponent = ref<Vue.Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
-    const transferData = ref<TransferFormModel>({ address: '', amount: 0, selectedAsset: undefined });
+    const transferData = ref<TransferFormModel>({ address: '', amount: '', selectedAsset: undefined });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const isConnected = useGetter<boolean>('isConnected');

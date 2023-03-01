@@ -432,10 +432,10 @@ export default defineComponent({
 
         // SET result data
         formModel.value.address = parsedScanResult.tokenContract;
-        formModel.value.amount = +convertToken(
+        formModel.value.amount = convertToken(
           parsedScanResult.amount,
           -(formModel.value.selectedAsset as IToken)?.decimals,
-        );
+        ).toString();
         invoiceId.value = parsedScanResult.invoiceId;
         invoiceContract.value = parsedScanResult.invoiceContract;
         await (root as any).validate();

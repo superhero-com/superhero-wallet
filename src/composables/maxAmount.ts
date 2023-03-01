@@ -29,7 +29,7 @@ import { useSdk } from './sdk';
 import { useBalances } from './balances';
 
 export interface IFormModel {
-  amount?: number | string;
+  amount?: string;
   selectedAsset?: IToken | IAsset;
   address?: string;
   payload?: string;
@@ -82,7 +82,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
-      const numericAmount = (val.amount && val.amount > 0) ? val.amount : 0;
+      const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
       const amount = new BigNumber(numericAmount).shiftedBy(MAGNITUDE);
 
       if (

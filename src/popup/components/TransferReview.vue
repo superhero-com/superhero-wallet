@@ -372,7 +372,7 @@ export default defineComponent({
 
       const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : convertToken(+amountRaw, selectedAsset.decimals);
+        : convertToken(amountRaw, selectedAsset.decimals);
 
       if (props.isMultisig) {
         return proposeMultisigTransaction();
