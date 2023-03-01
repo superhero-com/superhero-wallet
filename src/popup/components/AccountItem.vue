@@ -12,10 +12,13 @@
 
     <span
       v-if="name"
-      class="name address"
-      :class="[size]"
-      v-text="name"
-    />
+      class="name"
+    >
+      <Truncate
+        :class="[size]"
+        :str="name"
+      />
+    </span>
     <AddressTruncated
       v-else
       class="address"
@@ -33,8 +36,10 @@ import { useGetter } from '../../composables/vuex';
 
 import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';
-import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 import LinkButton from './LinkButton.vue';
+import Truncate from './Truncate.vue';
+
+import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 
 const SIZE = ['rg', 'md'] as const;
 
@@ -46,6 +51,7 @@ export default defineComponent({
     AddressTruncated,
     ExternalLinkIcon,
     LinkButton,
+    Truncate,
   },
   props: {
     address: { type: String, required: true },
@@ -83,6 +89,7 @@ export default defineComponent({
     margin-right: 4px;
   }
 
+  .name,
   .address {
     text-align: left;
     word-break: break-all;
@@ -96,21 +103,29 @@ export default defineComponent({
     }
   }
 
+  .name {
+    max-width: 230px;
+  }
+
   .external-link-icon {
+    flex-shrink: 0;
     margin-top: -2px; // Compensate the icon position
     width: 22px;
     height: 22px;
   }
 
-  .icon,
-  .address {
+  .name,
+  .address,
+  .external-link-icon {
     color: variables.$color-white;
     opacity: 0.75;
+    transition: 100ms;
   }
 
   &:hover {
-    .icon,
-    .address {
+    .name,
+    .address,
+    .external-link-icon {
       color: variables.$color-white;
       opacity: 1;
     }
