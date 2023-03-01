@@ -106,6 +106,13 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         return;
       }
 
+      if (
+        val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+        && tokenInstance.value
+      ) {
+        tokenInstance.value = null;
+      }
+
       const minFee: BigNumber = new BigNumber(TxBuilder.calculateMinFee('spendTx', {
         gas: sdk.Ae.defaults.gas,
         params: {
