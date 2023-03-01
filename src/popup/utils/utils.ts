@@ -61,7 +61,7 @@ export function getFromLocalStorage(key: string) {
   return result ? JSON.parse(result) : null;
 }
 
-export function convertToken(balance: number, precision: number): BigNumberPublic {
+export function convertToken(balance: number | string, precision: number): BigNumberPublic {
   return new BigNumber(balance).shiftedBy(precision);
 }
 

@@ -96,7 +96,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const formModel = ref<IFormModel>({
-      amount: 0,
+      amount: '',
     });
 
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
