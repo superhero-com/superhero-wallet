@@ -2,7 +2,7 @@ import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const waitTransactionMined = async ({
-    hash, type, amount, tipUrl, recipient: recipientId,
+    hash, type, tipUrl, recipient: recipientId, tx,
   }) => {
     const network = store.getters.activeNetwork?.networkId;
     try {
@@ -13,7 +13,7 @@ export default async (store) => {
           tipUrl,
           ...transaction,
           ...(type === 'spendToken')
-            ? { tx: { ...transaction.tx, recipientId, amount } }
+            ? { tx: { ...transaction.tx, recipientId, amount: tx.amount } }
             : {},
         },
       });
