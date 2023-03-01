@@ -8,6 +8,7 @@
         id: tokenData.contractId,
       },
     }"
+    :extend="preventNavigation"
     :selected="selected"
     v-on="$listeners"
   >

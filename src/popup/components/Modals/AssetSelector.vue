@@ -128,6 +128,8 @@ export default defineComponent({
   }
 
   .appearing-element {
+    position: fixed;
+    width: 100%;
     opacity: 0;
     z-index: -1;
     transition: opacity 0.25s ease-in-out;
