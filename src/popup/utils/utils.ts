@@ -431,3 +431,7 @@ export function aettosToAe(value: number | string) {
 export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
 }
+
+export function openInNewWindow(url: string) {
+  window.open(url, '_blank');
+}

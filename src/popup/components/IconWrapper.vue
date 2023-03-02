@@ -29,8 +29,8 @@ export default defineComponent({
   transition: $transition-interactive;
 
   .icon-wrapper-icon {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     color: inherit;
   }
 

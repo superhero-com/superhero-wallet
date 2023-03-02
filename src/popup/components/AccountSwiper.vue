@@ -10,6 +10,9 @@
         v-for="(address, index) in addressList"
         :key="address"
         :idx="index"
+        :selected="index === activeIdx"
+        :to="to"
+        :address="address"
         @slide="(newIndex) => setCurrentSlide(newIndex)"
       >
         <slot
@@ -48,6 +51,7 @@ import {
   watch,
 } from '@vue/composition-api';
 import { Swiper } from 'vue-awesome-swiper';
+import { Location } from 'vue-router';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -66,6 +70,7 @@ export default defineComponent({
   },
   props: {
     activeIdx: { type: Number, required: true },
+    to: { type: Object as PropType<Location>, required: true },
     addressList: { type: Array as PropType<string[]>, required: true },
     isMultisig: Boolean,
   },

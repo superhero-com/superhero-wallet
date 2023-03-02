@@ -1,15 +1,10 @@
 <template>
-  <AccountCardBase
-    :address="account.address"
-    :selected="selected"
-    :to="{ name: ROUTE_ACCOUNT_DETAILS }"
-  >
-    <template #top="{ color }">
+  <AccountCardBase :selected="selected">
+    <template #top>
       <AccountInfo
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
-        :color="color"
       />
     </template>
 

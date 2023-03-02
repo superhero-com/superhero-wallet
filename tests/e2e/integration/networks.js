@@ -72,7 +72,7 @@ describe('Test cases for networks page', () => {
       .goBack()
       .goBack()
       .goBack()
-      .get('.account-card')
+      .get('.account-card-base')
       .should('exist')
 
       .openNetworks()

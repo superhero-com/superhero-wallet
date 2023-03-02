@@ -8,6 +8,7 @@
     <AccountSwiper
       :active-idx="activeIdx"
       :address-list="addressList"
+      :to="{ name: ROUTE_ACCOUNT_DETAILS }"
       @selectAccount="(index) => selectAccount(index)"
     >
       <template #slide="{ index }">
@@ -32,6 +33,7 @@ import AccountCard from './AccountCard.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
 import AccountSwiper from './AccountSwiper.vue';
 import { useBalances } from '../../composables';
+import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -57,6 +59,7 @@ export default defineComponent({
       activeIdx,
       addressList,
       totalBalance,
+      ROUTE_ACCOUNT_DETAILS,
       selectAccount,
     };
   },
