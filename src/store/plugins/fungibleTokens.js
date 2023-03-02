@@ -224,7 +224,12 @@ export default (store) => {
           rootGetters: { activeNetwork, getDexContracts }, commit,
         }, { recent, address, multipleAccounts },
       ) {
-        if (transactions[address]?.length && !recent) return transactions[address];
+        if (!address) {
+          return [];
+        }
+        if (transactions[address]?.length && !recent) {
+          return transactions[address];
+        }
 
         let rawTransactions = [];
         const lastTransaction = transactions[address]?.[0];

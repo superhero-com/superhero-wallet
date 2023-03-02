@@ -22,6 +22,10 @@ import {
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
   ROUTE_DEFAULT_PAGES,
   ROUTE_MULTISIG_DEFAULT_PAGES,
+  ROUTE_MULTISIG_COIN,
+  ROUTE_MULTISIG_COIN_DETAILS,
+  ROUTE_COIN_DETAILS,
+  ROUTE_TOKEN_DETAILS,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -235,6 +239,38 @@ export const routes: WalletAppRouteConfig[] = [
           backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
           showHeaderNavigation: true,
         },
+      },
+      {
+        path: 'coins/:id',
+        component: TokenContainer,
+        children: [
+          {
+            name: ROUTE_MULTISIG_COIN,
+            path: '',
+            component: TokenTransactions,
+            props: true,
+            meta: {
+              title: 'coin-details',
+              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              showHeaderNavigation: true,
+              showFilterBar: true,
+              hideSearchBar: true,
+              isMultisig: true,
+            },
+          },
+          {
+            name: ROUTE_MULTISIG_COIN_DETAILS,
+            path: 'details',
+            component: TokenDetails,
+            props: true,
+            meta: {
+              title: 'coin-details',
+              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              showHeaderNavigation: true,
+              isMultisig: true,
+            },
+          },
+        ],
       },
     ],
   },
@@ -570,7 +606,7 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
-        name: 'coin-details',
+        name: ROUTE_COIN_DETAILS,
         path: 'details',
         component: TokenDetails,
         props: true,
@@ -600,7 +636,7 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
-        name: 'token-details',
+        name: ROUTE_TOKEN_DETAILS,
         path: 'details',
         component: TokenDetails,
         props: true,

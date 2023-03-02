@@ -108,5 +108,6 @@ export function useTokensList({
     aeternityToken,
     allTokens,
     filteredTokens,
+    aeTokenBalance,
   };
 }
