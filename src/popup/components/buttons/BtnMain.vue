@@ -19,6 +19,7 @@
       :is="icon"
       v-if="icon"
       class="btn-main-icon"
+      :class="{ 'lg': bigIcon }"
     />
 
     <slot>{{ text }}</slot>
@@ -44,6 +45,8 @@ export default defineComponent({
     wide: Boolean,
     // Add more inner space on the sides. Useful with buttons with short text like 'OK'.
     extraPadded: Boolean,
+    // Enlarges the icon from 20px to 24px
+    bigIcon: Boolean,
   },
 });
 </script>
@@ -91,10 +94,16 @@ export default defineComponent({
     gap: 4px;
 
     .btn-main-icon {
+      --icon-size: 20px;
+
       flex-shrink: 0;
-      width: 20px;
-      height: 20px;
+      width: var(--icon-size);
+      height: var(--icon-size);
       color: inherit;
+
+      &.lg {
+        --icon-size: 24px;
+      }
     }
   }
 

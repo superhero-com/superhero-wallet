@@ -52,6 +52,7 @@
 <script>
 import { mapMutations } from 'vuex';
 import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
+import { openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import { handleUnknownError } from '../../utils/helper';
@@ -90,9 +91,8 @@ export default {
           try {
             await new Promise((resolve, reject) => {
               if (IS_EXTENSION) {
-                window.open(
+                openInNewWindow(
                   browser.extension.getURL('./CameraRequestPermission.html'),
-                  '_blank',
                 );
                 reject();
               }

@@ -229,7 +229,7 @@ Cypress.Commands.add('selectNetwork', () => {
 });
 
 Cypress.Commands.add('openTransactions', () => {
-  cy.get('[data-cy=account-card]')
+  cy.get('[data-cy=account-card-base]')
     .click()
     .get(`[data-cy=${ROUTE_ACCOUNT_DETAILS_TRANSACTIONS}]`)
     .click()

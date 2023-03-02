@@ -11,6 +11,7 @@
       <BtnMain
         variant="dark"
         class="copy-btn"
+        big-icon
         :icon="copied ? CheckSuccessCircle : CopyOutlined"
         @click="copy(mnemonic)"
       >

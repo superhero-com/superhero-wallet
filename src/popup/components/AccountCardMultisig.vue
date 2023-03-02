@@ -1,13 +1,8 @@
 <template>
-  <AccountCardBase
-    :address="account.gaAccountId"
-    :selected="selected"
-    :to="{ name: ROUTE_MULTISIG_DETAILS }"
-  >
-    <template #top="{ color }">
+  <AccountCardBase :selected="selected">
+    <template #top>
       <AccountInfo
         :address="account.gaAccountId"
-        :color="color"
         is-multisig
       />
     </template>

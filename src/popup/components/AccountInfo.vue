@@ -62,7 +62,6 @@ export default defineComponent({
     CopyText,
   },
   props: {
-    color: { type: String, default: '#212121' },
     address: { type: String, required: true },
     name: { type: String, default: '' },
     idx: { type: Number, default: 0 },

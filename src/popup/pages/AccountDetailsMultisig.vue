@@ -18,7 +18,7 @@
       <BtnBox
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
-        @click="window.open(simplexLink, '_blank')"
+        :href="simplexLink"
       />
     </template>
 
@@ -31,6 +31,7 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { useMultisigAccounts } from '../../composables';
+import { buildSimplexLink } from '../utils';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -41,7 +42,6 @@ import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveMod
 import OpenTransferProposeModalButton from '../components/OpenTransferProposeModalButton.vue';
 
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
-import { buildSimplexLink } from '../utils';
 
 export default defineComponent({
   components: {
@@ -57,7 +57,7 @@ export default defineComponent({
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const simplexLink = computed(
-      () => activeMultisigAccount.value
+      () => (activeMultisigAccount.value)
         ? buildSimplexLink(activeMultisigAccount.value.gaAccountId)
         : '',
     );

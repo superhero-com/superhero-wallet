@@ -9,6 +9,7 @@
     <AccountSwiper
       :active-idx="multisigAccountIdx"
       :address-list="addressList"
+      :to="{ name: ROUTE_MULTISIG_DETAILS }"
       is-multisig
       @selectAccount="(index) => selectAccount(index)"
     >
@@ -28,6 +29,7 @@ import {
   defineComponent,
 } from '@vue/composition-api';
 import { useMultisigAccounts } from '../../composables';
+import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
 import TotalWalletAmount from './TotalWalletAmount.vue';
 import AccountSwiper from './AccountSwiper.vue';
@@ -68,6 +70,7 @@ export default defineComponent({
       multisigAccountIdx,
       multisigBalances,
       addressList,
+      ROUTE_MULTISIG_DETAILS,
       selectAccount,
     };
   },

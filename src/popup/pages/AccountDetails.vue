@@ -19,12 +19,12 @@
       <BtnBox
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
-        @click="window.open(simplexLink, '_blank')"
+        :href="simplexLink"
       />
       <BtnBox
         :icon="SwapIcon"
         :text="$t('pages.token-details.swap')"
-        @click="window.open(DEX_URL, '_blank')"
+        :href="DEX_URL"
       />
     </template>
 
