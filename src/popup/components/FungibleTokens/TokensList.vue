@@ -4,6 +4,7 @@
       v-for="value in filteredTokens"
       :key="value.contractId || value.id"
       :token-data="value"
+      :is-multisig="isMultisig"
     />
   </div>
 </template>

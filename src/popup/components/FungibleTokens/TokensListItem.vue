@@ -44,7 +44,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
-import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
+import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import TokenAmount from '../TokenAmount.vue';
 import Tokens from '../Tokens.vue';
 import ListItemWrapper from '../ListItemWrapper.vue';
@@ -60,6 +60,7 @@ export default {
     preventNavigation: Boolean,
     showCurrentPrice: Boolean,
     selected: Boolean,
+    isMultisig: Boolean,
   },
   data: () => ({
     AETERNITY_CONTRACT_ID,
@@ -71,6 +72,9 @@ export default {
       return this.formatCurrency(this.aePublicData?.current_price || 0);
     },
     targetRouteName() {
+      if (this.isMultisig) {
+        return ROUTE_MULTISIG_COIN;
+      }
       return (this.tokenData.contractId === AETERNITY_CONTRACT_ID)
         ? ROUTE_COIN
         : ROUTE_TOKEN;

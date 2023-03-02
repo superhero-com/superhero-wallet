@@ -20,17 +20,9 @@
     </div>
 
     <div class="token-actions">
-      <BtnBox
-        :text="$t('pages.token-details.receive')"
-        :icon="ArrowReceiveIcon"
-        @click="openTransferReceiveModal()"
-      />
-      <BtnBox
-        :text="$t('pages.token-details.send')"
-        :disabled="!(convertedBalance && isConnected)"
-        :icon="ArrowSendIcon"
-        @click="openTransferSendModal()"
-      />
+      <OpenTransferReceiveModalButton :is-multisig="isMultisig" />
+      <OpenTransferProposeModalButton v-if="isMultisig" />
+      <OpenTransferSendModalButton v-else />
       <BtnBox
         v-if="isAe"
         :text="$t('pages.fungible-tokens.buy')"
@@ -69,6 +61,7 @@
         :token-pairs="tokenPairs"
         :token-data="tokenData"
         :tokens="tokens"
+        :is-multisig="isMultisig"
       />
     </transition>
   </div>
@@ -83,27 +76,33 @@ import {
 } from '@vue/composition-api';
 import {
   DEX_URL,
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_TRANSFER_SEND,
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   buildSimplexLink,
   isContract,
 } from '../../utils';
-import { ROUTE_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useBalances, useSdk } from '../../../composables';
+import {
+  ROUTE_COIN,
+  ROUTE_COIN_DETAILS,
+  ROUTE_MULTISIG_COIN,
+  ROUTE_MULTISIG_COIN_DETAILS,
+  ROUTE_TOKEN,
+  ROUTE_TOKEN_DETAILS,
+} from '../../router/routeNames';
+import { useSdk, useTokensList } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
+import OpenTransferReceiveModalButton from '../../components/OpenTransferReceiveModalButton.vue';
+import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
+import OpenTransferProposeModalButton from '../../components/OpenTransferProposeModalButton.vue';
 import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
 import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 import Tab from '../../components/tabs/Tab.vue';
 
-import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
-import ArrowReceiveIcon from '../../../icons/arrow-receive.svg?vue-component';
 import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/credit-card.svg?vue-component';
 
@@ -117,29 +116,40 @@ export default defineComponent({
     Loader,
     Tabs,
     Tab,
+    OpenTransferReceiveModalButton,
+    OpenTransferSendModalButton,
+    OpenTransferProposeModalButton,
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate);
+    const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+    const { aeTokenBalance } = useTokensList({
+      store: root.$store,
+      isMultisig: isMultisig.value,
+    });
 
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
+
+    const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
+    const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
     const tabs = [
       {
         text: root.$t('pages.transactionDetails.transactions'),
-        routeName: isCoin
-          ? ROUTE_COIN
-          : ROUTE_TOKEN,
+        routeName: isMultisig.value
+          ? ROUTE_MULTISIG_COIN
+          : transactionRouteName,
         exact: true,
       },
       {
         text: isCoin
           ? root.$t('pages.token-details.coin-details')
           : root.$t('pages.token-details.token-details'),
-        routeName: isCoin
-          ? 'coin-details'
-          : 'token-details',
+        routeName: isMultisig.value
+          ? ROUTE_MULTISIG_COIN_DETAILS
+          : detailsRouteName,
         exact: true,
       },
     ];
@@ -159,8 +169,8 @@ export default defineComponent({
       const defaultData = {
         decimals: 18,
         symbol: AETERNITY_SYMBOL,
-        convertedBalance: balance.value,
-        balanceCurrency: balanceCurrency.value,
+        convertedBalance: aeTokenBalance.value,
+        balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
         contractId: '',
         description: '',
         isAe: true,
@@ -178,15 +188,6 @@ export default defineComponent({
     });
     const convertedBalance = computed(() => +tokenData.value.convertedBalance || 0);
 
-    const openTransferReceiveModal = () => root.$store.dispatch('modals/open', {
-      name: MODAL_TRANSFER_RECEIVE,
-      tokenContractId: fungibleToken.value?.contractId,
-    });
-    const openTransferSendModal = () => root.$store.dispatch('modals/open', {
-      name: MODAL_TRANSFER_SEND,
-      tokenContractId: fungibleToken.value?.contractId,
-    });
-
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
         await getSdk();
@@ -196,8 +197,6 @@ export default defineComponent({
     });
 
     return {
-      ArrowReceiveIcon,
-      ArrowSendIcon,
       BuyIcon,
       SwapIcon,
       DEX_URL,
@@ -214,8 +213,7 @@ export default defineComponent({
       showFilterBar,
       convertedBalance,
       routeName,
-      openTransferReceiveModal,
-      openTransferSendModal,
+      isMultisig,
     };
   },
 });
