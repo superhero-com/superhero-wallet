@@ -535,6 +535,7 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
 
 export const MULTISIG_CREATION_PHASES = {
   prepared: 'prepared',
+  signed: 'signed',
   deployed: 'deployed',
   created: 'created',
   accessible: 'accessible',

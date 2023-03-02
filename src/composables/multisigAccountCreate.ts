@@ -16,13 +16,13 @@ let rawTx: string;
 let signedAttachTx: string;
 let accountId: string;
 let multisigAccountCreationEncodedCallData: string;
+const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
   const { getMultisigAccountByContractId } = useMultisigAccounts({ store });
 
   const multisigAccount = ref<IMultisigAccountBase | null>(null);
-  const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
   const multisigAccountCreationFee = ref<number>(0);
 
   const isMultisigAccountAccessible = computed(() => (
@@ -67,7 +67,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const gaAccount: IKeyPair = Crypto.generateKeyPair();
 
     const multisigContractInstance = await createMultisigContractInstance();
-    multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
     multisigAccountCreationEncodedCallData = multisigContractInstance.calldata.encode(
       multisigContractInstance._name,
       'init',
@@ -95,6 +94,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       innerTx: true,
       onAccount: gaAccount,
     });
+    multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
   }
 
   /**
@@ -130,6 +130,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const innerFee = tx.encodedTx.tx.tx.tx.encodedTx.tx.fee;
     const creationFeeUnformatted = new BigNumber(outerFee).plus(innerFee).toFixed();
     multisigAccountCreationFee.value = Number(AmountFormatter.toAe(creationFeeUnformatted));
+    multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.signed;
   }
 
   /**

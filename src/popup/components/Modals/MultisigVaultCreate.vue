@@ -156,6 +156,7 @@
         <BtnMain
           :text="$t('modals.createMultisigAccount.btnText')"
           wide
+          :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed"
           @click="createMultisigAccount"
         />
       </template>
