@@ -105,7 +105,6 @@ import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import RevertedIcon from '../../icons/refresh.svg?vue-component';
 import WarningIcon from '../../icons/warning.svg?vue-component';
-import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
@@ -138,19 +137,19 @@ export default defineComponent({
 
     const transactionLabelRef = ref();
     const labelRef = ref();
-    const truncateWidth = ref<string | number>('auto');
+    const truncateWidth = ref<string | number>('100%');
     const addComma = (text: TranslateResult) => text ? `${text},` : '';
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const externalLabel = computed(() => {
       if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
-        return i18n.t('transaction.type.gaMetaTx');
+        return root.$t('transaction.type.gaMetaTx');
       }
       if (
         outerTxType.value === TX_TYPE_MDW.PayingForTx
         && txType.value !== TX_TYPE_MDW.GAAttachTx
       ) {
-        return i18n.t('transaction.type.payingForTx');
+        return root.$t('transaction.type.payingForTx');
       }
       return '';
     });
@@ -231,7 +230,7 @@ export default defineComponent({
 
       const translation = transactionListTypes[txType.value!] || transactionTypes[txType.value!];
 
-      if (txType.value?.includes('name')) {
+      if (txType.value && txType?.value?.includes('name')) {
         return labelWrapper(translation);
       }
 
@@ -247,7 +246,9 @@ export default defineComponent({
     ));
 
     onMounted(() => {
-      truncateWidth.value = `${transactionLabelRef.value.clientWidth - labelRef.value.clientWidth - 25}px`;
+      truncateWidth.value = (
+        `${transactionLabelRef.value?.clientWidth - (labelRef.value?.clientWidth || 0) - 25}px`
+      );
     });
 
     return {
@@ -272,6 +273,7 @@ export default defineComponent({
 .transaction-label {
   @include mixins.flex(flex-start, center, row);
 
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
