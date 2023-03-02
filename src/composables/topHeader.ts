@@ -17,12 +17,22 @@ export function useTopHeaderData({ store }: IDefaultComposableOptions) {
 
   const topBlockHeight = computed(() => topHeaderData.value?.height || 0);
 
-  initPollingWatcher(async () => {
+  async function updateTopHeaderData() {
     const sdk = await getSdk();
     topHeaderData.value = await sdk.api.getTopHeader();
-  }, POLLING_INTERVAL);
+  }
+
+  async function fetchCurrentTopBlockHeight() {
+    await updateTopHeaderData();
+    return topBlockHeight.value;
+  }
+
+  initPollingWatcher(updateTopHeaderData, POLLING_INTERVAL);
 
   return {
+    topHeaderData,
     topBlockHeight,
+    updateTopHeaderData,
+    fetchCurrentTopBlockHeight,
   };
 }

@@ -12,6 +12,7 @@ import {
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { useMultisigAccounts } from './multisigAccounts';
+import { useTopHeaderData } from './topHeader';
 import type {
   IActiveMultisigTx,
   IDefaultComposableOptions,
@@ -25,6 +26,7 @@ const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
+  const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -83,10 +85,8 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   }
 
   async function proposeTx(spendTx: string, contractId: string) {
-    const sdk = await getSdk();
-    const expirationHeight = (
-    (await sdk.api.getTopHeader())?.height + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT
-    );
+    const [sdk, topBlockHeight] = await Promise.all([getSdk(), fetchCurrentTopBlockHeight()]);
+    const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
     const spendTxHash = new Uint8Array(Crypto.hash(
       Buffer.concat([Buffer.from(sdk.getNetworkId()), decode(spendTx)]),
     ));
@@ -116,10 +116,8 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     contractId: string,
     spendTxHash: string,
   ) {
-    const sdk = await getSdk();
-    const expirationHeight = (
-    (await sdk.api.getTopHeader())?.height + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT
-    );
+    const [sdk, topBlockHeight] = await Promise.all([getSdk(), fetchCurrentTopBlockHeight()]);
+    const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
     const gaContractRpc = await sdk.getContractInstance({
       aci: SimpleGAMultiSigAci,
       contractAddress: contractId,
