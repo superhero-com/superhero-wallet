@@ -128,6 +128,7 @@
       :signers="signers"
       :phase="multisigAccountCreationPhase"
       :confirmations-required="confirmationsRequired"
+      :account-id="currentMultisigAccountId"
     />
 
     <!--
@@ -145,7 +146,7 @@
         v-if="currentStep === STEPS.form"
         :text="$t('modals.createMultisigAccount.btnText')"
         :disabled="!canCreateMultisig"
-        @click="openReviewStep"
+        @click.once="openReviewStep"
       />
       <template v-else-if="currentStep === STEPS.review">
         <BtnMain
@@ -241,7 +242,7 @@ export default defineComponent({
     const {
       multisigAccount,
       multisigAccountCreationPhase,
-      multisigAccountCreationEncodedCallData,
+      pendingMultisigCreationTxs,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
       prepareVaultCreationAttachTx,
@@ -252,6 +253,7 @@ export default defineComponent({
 
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
+    const currentMultisigAccountId = ref<string>('');
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       if (!validateHash(signer.address).valid) return false;
@@ -330,7 +332,7 @@ export default defineComponent({
     }
 
     async function openReviewStep() {
-      await prepareVaultCreationAttachTx(
+      currentMultisigAccountId.value = await prepareVaultCreationAttachTx(
         confirmationsRequired.value,
         signers.value.map(({ address }) => address),
       );
@@ -340,7 +342,7 @@ export default defineComponent({
     async function createMultisigAccount() {
       currentStep.value = STEPS.processing;
       try {
-        await deployMultisigAccount();
+        await deployMultisigAccount(currentMultisigAccountId.value);
       } catch (error) {
         handleUnknownError(error);
         await root.$store.dispatch('modals/open', {
@@ -383,10 +385,11 @@ export default defineComponent({
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
       STEPS,
+      currentMultisigAccountId,
       accountsSelectOptions,
       multisigAccount,
       multisigAccountCreationPhase,
-      multisigAccountCreationEncodedCallData,
+      pendingMultisigCreationTxs,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
       currentStep,

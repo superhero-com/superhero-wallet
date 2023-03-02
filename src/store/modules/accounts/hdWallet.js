@@ -96,7 +96,9 @@ export default {
     }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) {
+        await dispatch('confirmTxSigning', { encodedTx, host });
+      }
       const signature = await dispatch(
         'signWithoutConfirmation',
         { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
@@ -109,7 +111,9 @@ export default {
     }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) {
+        await dispatch('confirmTxSigning', { encodedTx, host });
+      }
       const signature = await dispatch(
         'signWithoutConfirmation',
         {

@@ -142,13 +142,14 @@ export default defineComponent({
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     signers: { type: Array as PropType<ICreateMultisigAccount[]>, required: true },
     confirmationsRequired: { type: Number, required: true },
+    accountId: { type: String, required: true },
   },
   setup(props, { root }) {
     const { accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
-      multisigAccountCreationEncodedCallData,
+      pendingMultisigCreationTxs,
     } = useMultisigAccountCreate({ store: root.$store });
     const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
@@ -160,14 +161,17 @@ export default defineComponent({
       () => accounts.value.find(({ address }) => address === creatorAddress.value),
     );
     const fee = computed(() => multisigAccountCreationFee.value);
-    const callData = computed(() => multisigAccountCreationEncodedCallData);
+    const callData = computed(
+      () => pendingMultisigCreationTxs.value[props.accountId]
+        .multisigAccountCreationEncodedCallData,
+    );
 
     watch(creatorAddress, async (val, oldVal) => {
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
         const sdk = await getSdk();
         creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
-        await prepareVaultCreationRawTx(val);
+        await prepareVaultCreationRawTx(val, props.accountId);
       }
     }, { immediate: true });
 

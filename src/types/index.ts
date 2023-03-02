@@ -157,7 +157,7 @@ export interface IMultisigConsensus {
   txHash?: string;
 }
 
-export interface IMultisigAccountRaw {
+export interface IMultisigAccountResponse {
   contractId: string;
   createdAt: string; // Date
   gaAccountId: string; // Generalized Account used as the Multisig Account
@@ -171,13 +171,19 @@ export interface IMultisigAccountRaw {
 /**
  * Our internal account data composed out of data collected from external sources.
  */
-export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountRaw {
+export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountResponse {
   balance: Balance;
   refusedBy?: string[];
   nonce: number;
   signers: string[];
   consensusLabel?: string;
   hasPendingTransaction: boolean;
+}
+
+export interface IRawMultisigAccount {
+  multisigAccountCreationEncodedCallData?: string;
+  signedAttachTx?: string;
+  rawTx?: string;
 }
 
 export interface INetwork {

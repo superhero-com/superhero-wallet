@@ -6,16 +6,14 @@ import type {
   IKeyPair,
   IMultisigAccountBase,
   IMultisigCreationPhase,
+  IRawMultisigAccount,
 } from '../types';
 import { useSdk } from './sdk';
 import { DEFAULT_WAITING_HEIGHT, MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
 
-let rawTx: string;
-let signedAttachTx: string;
-let accountId: string;
-let multisigAccountCreationEncodedCallData: string;
+const pendingMultisigCreationTxs = ref<Record<string, IRawMultisigAccount>>({});
 const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
@@ -65,19 +63,21 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
 
     // Create a temporary account
     const gaAccount: IKeyPair = Crypto.generateKeyPair();
-
+    pendingMultisigCreationTxs.value[gaAccount.publicKey] = {};
     const multisigContractInstance = await createMultisigContractInstance();
-    multisigAccountCreationEncodedCallData = multisigContractInstance.calldata.encode(
-      multisigContractInstance._name,
-      'init',
-      contractArgs,
-    );
+    pendingMultisigCreationTxs.value[gaAccount.publicKey]
+      .multisigAccountCreationEncodedCallData = multisigContractInstance.calldata.encode(
+        multisigContractInstance._name,
+        'init',
+        contractArgs,
+      );
 
     // Build Attach transaction
     const attachTX = await drySdk.gaAttachTx({
       ownerId: gaAccount.publicKey,
       code: multisigContractInstance.bytecode,
-      callData: multisigAccountCreationEncodedCallData,
+      callData: pendingMultisigCreationTxs.value[gaAccount.publicKey]
+        .multisigAccountCreationEncodedCallData,
       authFun: Crypto.hash('authorize'),
       gas: await estimateMultisigAccountDeployGasFee(
         multisigContractInstance,
@@ -88,20 +88,24 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         innerTx: true,
       },
     });
-    accountId = gaAccount.publicKey;
-
-    signedAttachTx = await drySdk.signTransaction(attachTX.tx, {
-      innerTx: true,
-      onAccount: gaAccount,
-    });
+    pendingMultisigCreationTxs.value[gaAccount.publicKey]
+      .signedAttachTx = await drySdk.signTransaction(attachTX.tx, {
+        innerTx: true,
+        onAccount: gaAccount,
+      });
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
+    return gaAccount.publicKey;
   }
 
   /**
    * First step of creating the multisig account
    * Prepare multisig account creation transaction
    */
-  async function prepareVaultCreationRawTx(payerId: string) {
+  async function prepareVaultCreationRawTx(payerId: string, accountId: string) {
+    if (!pendingMultisigCreationTxs.value[accountId]?.signedAttachTx) {
+      throw Error(`GA Attach Tx not found for account ${accountId}, Prepare attach transaction first`);
+    }
+
     const sdk = await getSdk();
 
     // Wrap signed GA attach transaction
@@ -118,14 +122,14 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       await sdk.payingForTx({
         ...opt,
         payerId,
-        tx: signedAttachTx,
+        tx: pendingMultisigCreationTxs.value[accountId].signedAttachTx,
       }),
       opt,
     );
-    rawTx = payedTx.rawTx;
+    pendingMultisigCreationTxs.value[accountId].rawTx = payedTx.rawTx;
 
     // Calculate fee
-    const { tx } = TxBuilder.unpackTx(rawTx);
+    const { tx } = TxBuilder.unpackTx(payedTx.rawTx);
     const outerFee = tx.encodedTx.tx.fee;
     const innerFee = tx.encodedTx.tx.tx.tx.encodedTx.tx.fee;
     const creationFeeUnformatted = new BigNumber(outerFee).plus(innerFee).toFixed();
@@ -137,16 +141,16 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * Second step of account creation.
    * @throws Error
    */
-  async function deployMultisigAccount() {
-    if (!rawTx || !accountId) {
-      throw new Error('To create new multisig vault the account should be prepared first.');
+  async function deployMultisigAccount(accountId: string) {
+    if (!pendingMultisigCreationTxs.value[accountId]?.signedAttachTx) {
+      throw Error(`Raw PayForTransaction not found for account ${accountId}, Prepare PayForTransaction first`);
     }
 
     const sdk = await getSdk();
 
     // Send transaction to the chain
     const { txHash } = await sdk.api.postTransaction(
-      { tx: rawTx },
+      { tx: pendingMultisigCreationTxs.value[accountId].rawTx },
     );
     const pollingResponse = await sdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
     if (pollingResponse && pollingResponse.blockHeight !== -1) {
@@ -157,8 +161,9 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         contractId: gaContract.contractId,
         multisigAccountId: accountId,
       };
+      delete pendingMultisigCreationTxs.value[accountId];
     } else {
-      throw Error('vault creation transaction is not mined within the expected time');
+      throw Error('Vault creation transaction is not mined within the expected time');
     }
 
     // Wait for the account to be discovered by the wallet to allow to open it's details.
@@ -180,7 +185,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   return {
     multisigAccount,
     multisigAccountCreationPhase,
-    multisigAccountCreationEncodedCallData,
+    pendingMultisigCreationTxs,
     multisigAccountCreationFee,
     isMultisigAccountAccessible,
     prepareVaultCreationAttachTx,

@@ -19,7 +19,7 @@ import type {
   INetwork,
   IMultisigAccount,
   IMultisigConsensus,
-  IMultisigAccountRaw,
+  IMultisigAccountResponse,
 } from '../types';
 import { useSdk } from './sdk';
 import { i18n } from '../store/plugins/languages';
@@ -74,7 +74,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     /**
      * Establish the list of multisig accounts used by the regular accounts
      */
-    let rawMultisigData: IMultisigAccountRaw[] = [];
+    let rawMultisigData: IMultisigAccountResponse[] = [];
     try {
       await Promise.all(accounts.value.map(async ({ address }) => rawMultisigData.push(
         ...(await fetchJson(`${activeNetwork.value.multisigBackendUrl}/${address}`)),
