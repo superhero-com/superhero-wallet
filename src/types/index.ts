@@ -441,7 +441,7 @@ export interface ISdk {
       innerTx?: boolean
     }
   ) => Promise<{ hash: string, rawTx: string }>
-  poll: (txHash: string) => any
+  poll: (txHash: string, options: any) => any
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (

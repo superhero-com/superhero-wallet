@@ -8,7 +8,7 @@ import type {
   IMultisigCreationPhase,
 } from '../types';
 import { useSdk } from './sdk';
-import { MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
+import { DEFAULT_WAITING_HEIGHT, MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
 
@@ -147,15 +147,18 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const { txHash } = await sdk.api.postTransaction(
       { tx: rawTx },
     );
-    await sdk.poll(txHash);
-    multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.deployed;
-
-    const gaContract = await sdk.getAccount(accountId);
-    multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.created;
-    multisigAccount.value = {
-      contractId: gaContract.contractId,
-      multisigAccountId: accountId,
-    };
+    const pollingResponse = await sdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
+    if (pollingResponse && pollingResponse.blockHeight !== -1) {
+      multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.deployed;
+      const gaContract = await sdk.getAccount(accountId);
+      multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.created;
+      multisigAccount.value = {
+        contractId: gaContract.contractId,
+        multisigAccountId: accountId,
+      };
+    } else {
+      throw Error('vault creation transaction is not mined within the expected time');
+    }
 
     // Wait for the account to be discovered by the wallet to allow to open it's details.
     // TODO in the future we could try to add the new account to the list of the accounts.
