@@ -35,6 +35,14 @@
             />
           </div>
         </div>
+        <i18n
+          v-if="notEnoughBalanceToCreateMultisig"
+          path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
+          tag="div"
+          class="creator-error-message"
+        >
+          <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
+        </i18n>
       </template>
     </DetailsItem>
 
@@ -110,7 +118,7 @@ import {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '../../types';
-import { AETERNITY_SYMBOL } from '../utils';
+import { AETERNITY_SYMBOL, handleUnknownError } from '../utils';
 import { useAccounts, useMultisigAccountCreate, useSdk } from '../../composables';
 
 import Avatar from './Avatar.vue';
@@ -150,6 +158,7 @@ export default defineComponent({
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
+      notEnoughBalanceToCreateMultisig,
     } = useMultisigAccountCreate({ store: root.$store });
     const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
@@ -170,7 +179,18 @@ export default defineComponent({
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
         const sdk = await getSdk();
-        creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+        try {
+          creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+        } catch (error) {
+          handleUnknownError(error);
+          creatorAccountFetched.value = {
+            balance: '0',
+            id: val,
+            kind: 'basic',
+            nonce: 0,
+            payable: false,
+          };
+        }
         await prepareVaultCreationRawTx(val, props.accountId);
       }
     }, { immediate: true });
@@ -184,6 +204,7 @@ export default defineComponent({
       isLocalAccountAddress,
       fee,
       callData,
+      notEnoughBalanceToCreateMultisig,
     };
   },
 });
@@ -191,6 +212,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/variables' as *;
+@use '../../styles/typography';
 
 .multisig-vault-create-review {
   display: flex;
@@ -202,6 +224,17 @@ export default defineComponent({
     align-items: center;
     gap: 8px;
     padding-block: 4px;
+  }
+
+  .creator-error-message {
+    @extend %face-sans-14-regular;
+
+    color: $color-danger;
+    line-height: 22px;
+
+    span {
+      @extend %face-sans-14-medium;
+    }
   }
 
   .account-select {

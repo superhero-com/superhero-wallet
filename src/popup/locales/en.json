@@ -127,12 +127,13 @@
       "consensusRequiredHelpTitle": "Consensus required",
       "consensusRequiredHelpMsg": "As the creator of this multisig vault you can determine the authorized signers and set the consensus needed for a transaction confirmation (how many signatures are required to confirm each transaction).",
       "createMultisigVault": "Create Vault",
-      "errorDuplicatingSigner": "Cannot add the same address as a signer twice"
+      "errorDuplicatingSigner": "Cannot add the same address as a signer twice",
+      "errorNotEnoughBalanceToCreateVault": "Not enough balance in this account. Creating multisig vault requires at least {0}."
     },
     "creatingMultisigAccount": {
       "title": "Creating vault progress",
       "btnText": "Go to multisig vault",
-      "vaultCreatedMessage": "It’s ready! Your new multisig vault is added to Superhero wallet.",
+      "vaultCreatedMessage": "It's ready! Your new multisig vault is added to Superhero wallet.",
       "preparingMultisigVault": "Preparing multisig vault",
       "deployingSmartContract": "Deploying smart contract",
       "creatingMultisigVault": "Creating multisig vault account",

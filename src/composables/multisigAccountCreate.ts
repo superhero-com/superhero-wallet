@@ -12,13 +12,16 @@ import { useSdk } from './sdk';
 import { DEFAULT_WAITING_HEIGHT, MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
+import { useBalances } from './balances';
 
 const pendingMultisigCreationTxs = ref<Record<string, IRawMultisigAccount>>({});
 const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
+const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
   const { getMultisigAccountByContractId } = useMultisigAccounts({ store });
+  const { balances } = useBalances({ store });
 
   const multisigAccount = ref<IMultisigAccountBase | null>(null);
   const multisigAccountCreationFee = ref<number>(0);
@@ -135,6 +138,9 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     const creationFeeUnformatted = new BigNumber(outerFee).plus(innerFee).toFixed();
     multisigAccountCreationFee.value = Number(AmountFormatter.toAe(creationFeeUnformatted));
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.signed;
+    notEnoughBalanceToCreateMultisig.value = (
+      balances.value[payerId]?.isLessThan(multisigAccountCreationFee.value)
+    );
   }
 
   /**
@@ -191,5 +197,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     prepareVaultCreationAttachTx,
     prepareVaultCreationRawTx,
     deployMultisigAccount,
+    notEnoughBalanceToCreateMultisig,
   };
 }

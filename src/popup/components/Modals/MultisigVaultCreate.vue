@@ -157,7 +157,8 @@
         <BtnMain
           :text="$t('modals.createMultisigAccount.btnText')"
           wide
-          :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed"
+          :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed
+            || notEnoughBalanceToCreateMultisig"
           @click="createMultisigAccount"
         />
       </template>
@@ -193,7 +194,11 @@ import {
   ObjectValues,
 } from '../../../types';
 import { ROUTE_MULTISIG_DETAILS_INFO } from '../../router/routeNames';
-import { useAccounts, useMultisigAccountCreate, useMultisigAccounts } from '../../../composables';
+import {
+  useAccounts,
+  useMultisigAccountCreate,
+  useMultisigAccounts,
+} from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -247,6 +252,7 @@ export default defineComponent({
       isMultisigAccountAccessible,
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
+      notEnoughBalanceToCreateMultisig,
     } = useMultisigAccountCreate({ store: root.$store });
 
     const currentStep = ref<Step>(STEPS.form);
@@ -406,6 +412,7 @@ export default defineComponent({
       getSignerLabel,
       navigateToMultisigVault,
       checkIfSignerAddressDuplicated,
+      notEnoughBalanceToCreateMultisig,
     };
   },
 });
