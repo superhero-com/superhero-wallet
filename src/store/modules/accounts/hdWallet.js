@@ -43,8 +43,11 @@ export default {
       );
       state.nextAccountIdx += 1;
     },
-    signWithoutConfirmation({ rootGetters: { account } }, data) {
-      return Crypto.sign(data, account.secretKey);
+    signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, opt }) {
+      const { secretKey } = opt && opt.fromAccount
+        ? accounts.find(({ address }) => address === opt.fromAccount)
+        : account;
+      return Crypto.sign(data, secretKey);
     },
     async confirmRawDataSigning({ dispatch }, data) {
       await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data }, { root: true });
@@ -85,7 +88,7 @@ export default {
       }
     },
     sign({ dispatch }, data) {
-      return dispatch('signWithoutConfirmation', data);
+      return dispatch('signWithoutConfirmation', { data });
     },
     async signTransaction({ dispatch, rootGetters }, {
       txBase64,
@@ -93,10 +96,30 @@ export default {
     }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
-      if (modal) await dispatch('confirmTxSigning', { encodedTx, host });
+      if (modal) {
+        await dispatch('confirmTxSigning', { encodedTx, host });
+      }
       const signature = await dispatch(
         'signWithoutConfirmation',
-        Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
+      );
+      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+    },
+    async signTransactionFromAccount({ dispatch, rootGetters }, {
+      txBase64,
+      opt: { modal = true, host = null, fromAccount },
+    }) {
+      const sdk = rootGetters['sdkPlugin/sdk'];
+      const encodedTx = decode(txBase64, 'tx');
+      if (modal) {
+        await dispatch('confirmTxSigning', { encodedTx, host });
+      }
+      const signature = await dispatch(
+        'signWithoutConfirmation',
+        {
+          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+          opt: { fromAccount },
+        },
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },

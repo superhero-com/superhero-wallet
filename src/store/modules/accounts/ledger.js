@@ -89,5 +89,9 @@ export default {
       return TxBuilder
         .buildTx({ encodedTx: binaryTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
+
+    async signTransactionFromAccount({ dispatch }, { txBase64 }) {
+      return dispatch('signTransaction', { txBase64 });
+    },
   },
 };

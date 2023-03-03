@@ -146,6 +146,8 @@ export const NETWORK_TESTNET: INetwork = {
 
 export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
+export const DEFAULT_WAITING_HEIGHT = 15;
+
 export const NODE_STATUS_INIT_SERVICES = 'initServices';
 export const NODE_STATUS_CONNECTING = 'connecting';
 export const NODE_STATUS_CONNECTION_DONE = 'connectionDone';
@@ -533,6 +535,7 @@ export const TRANSACTION_OWNERSHIP_STATUS = {
 
 export const MULTISIG_CREATION_PHASES = {
   prepared: 'prepared',
+  signed: 'signed',
   deployed: 'deployed',
   created: 'created',
   accessible: 'accessible',
