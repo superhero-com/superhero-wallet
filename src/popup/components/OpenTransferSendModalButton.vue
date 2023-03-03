@@ -1,7 +1,7 @@
 <template>
   <BtnBox
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('dashboard.sendCard.title')"
-    :subtitle="isBig ? $t('dashboard.sendCard.description') : ''"
+    :subtitle="subtitle"
     :icon="ArrowSendIcon"
     :disabled="!isConnected || (!!pendingMultisigTransaction && isMultisig)"
     data-cy="send"
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, computed } from '@vue/composition-api';
 import { usePendingMultisigTransaction } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { MODAL_TRANSFER_SEND } from '../utils';
@@ -39,9 +39,19 @@ export default defineComponent({
       });
     }
 
+    const subtitle = computed(() => {
+      if (!props.isBig) {
+        return '';
+      }
+      return props.isMultisig
+        ? root.$t('dashboard.proposeCard.description')
+        : root.$t('dashboard.sendCard.description');
+    });
+
     return {
       isConnected,
       pendingMultisigTransaction,
+      subtitle,
       ArrowSendIcon,
       openTransferSendModal,
     };

@@ -1,7 +1,7 @@
 <template>
   <BtnBox
     :text="$t('dashboard.receiveCard.title')"
-    :subtitle="isBig ? $t('dashboard.receiveCard.description') : ''"
+    :subtitle="subtitle"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
     @click="openTransferReceiveModal()"
@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent, computed } from '@vue/composition-api';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
@@ -30,7 +30,17 @@ export default defineComponent({
       });
     }
 
+    const subtitle = computed(() => {
+      if (!props.isBig) {
+        return '';
+      }
+      return props.isMultisig
+        ? root.$t('dashboard.receiveCard.descriptionMultisig')
+        : root.$t('dashboard.receiveCard.description');
+    });
+
     return {
+      subtitle,
       ArrowReceiveIcon,
       openTransferReceiveModal,
     };
