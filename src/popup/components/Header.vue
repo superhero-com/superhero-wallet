@@ -114,7 +114,7 @@ export default defineComponent({
       let { fullPath } = root.$route;
       fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
       return root.$router.push(
-        fullPath.substr(0, fullPath.lastIndexOf('/')) || currentHomeRouteName.value,
+        fullPath.substr(0, fullPath.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
 
