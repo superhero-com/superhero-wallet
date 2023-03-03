@@ -20,9 +20,14 @@
     </div>
 
     <div class="token-actions">
-      <OpenTransferReceiveModalButton :is-multisig="isMultisig" />
-      <OpenTransferProposeModalButton v-if="isMultisig" />
-      <OpenTransferSendModalButton v-else />
+      <OpenTransferReceiveModalButton
+        :is-multisig="isMultisig"
+        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+      />
+      <OpenTransferSendModalButton
+        :is-multisig="isMultisig"
+        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+      />
       <BtnBox
         v-if="isAe"
         :text="$t('pages.fungible-tokens.buy')"
@@ -97,7 +102,6 @@ import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
 import OpenTransferReceiveModalButton from '../../components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
-import OpenTransferProposeModalButton from '../../components/OpenTransferProposeModalButton.vue';
 import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
 import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
@@ -118,7 +122,6 @@ export default defineComponent({
     Tab,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
-    OpenTransferProposeModalButton,
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
@@ -201,6 +204,7 @@ export default defineComponent({
       SwapIcon,
       DEX_URL,
       AETERNITY_CONTRACT_ID,
+      fungibleToken,
       contractId,
       isAe,
       loading,

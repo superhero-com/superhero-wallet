@@ -17,14 +17,16 @@ import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 export default defineComponent({
   components: { BtnBox },
   props: {
-    isMultisig: Boolean,
     isBig: Boolean,
+    isMultisig: Boolean,
+    tokenContractId: { type: String, default: '' },
   },
   setup(props, { root }) {
     function openTransferReceiveModal() {
       root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
         isMultisig: props.isMultisig,
+        tokenContractId: props.tokenContractId,
       });
     }
 

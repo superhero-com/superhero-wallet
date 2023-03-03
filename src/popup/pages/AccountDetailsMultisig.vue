@@ -14,7 +14,7 @@
 
     <template #buttons>
       <OpenTransferReceiveModalButton is-multisig />
-      <OpenTransferProposeModalButton />
+      <OpenTransferSendModalButton is-multisig />
       <BtnBox
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
@@ -39,13 +39,13 @@ import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
 import AccountDetailsNavigation from '../components/AccountDetailsNavigation.vue';
 import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferProposeModalButton from '../components/OpenTransferProposeModalButton.vue';
+import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
 
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 
 export default defineComponent({
   components: {
-    OpenTransferProposeModalButton,
+    OpenTransferSendModalButton,
     BtnBox,
     OpenTransferReceiveModalButton,
     AccountDetailsNavigation,

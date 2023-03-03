@@ -9,7 +9,10 @@
         is-multisig
         is-big
       />
-      <OpenTransferProposeModalButton is-big />
+      <OpenTransferSendModalButton
+        is-multisig
+        is-big
+      />
     </template>
 
     <template #widgets>
@@ -28,14 +31,14 @@ import PendingMultisigTransactionCard from '../components/PendingMultisigTransac
 import DashboardWrapper from '../components/DashboardWrapper.vue';
 import DashboardHeaderMultisig from '../components/DashboardHeaderMultisig.vue';
 import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferProposeModalButton from '../components/OpenTransferProposeModalButton.vue';
+import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
 
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardMultisig',
   components: {
-    OpenTransferProposeModalButton,
+    OpenTransferSendModalButton,
     OpenTransferReceiveModalButton,
     DashboardHeaderMultisig,
     DashboardWrapper,
