@@ -38,13 +38,13 @@ export default defineComponent({
     InfiniteScroll,
     NotificationItem,
   },
-  setup() {
+  setup(props, { root }) {
     const {
       notificationsToShow,
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
-    } = useNotifications({ requirePolling: true });
+    } = useNotifications({ store: root.$store, requirePolling: true });
 
     onMounted(async () => {
       loadMoreNotifications();

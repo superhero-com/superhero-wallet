@@ -1,31 +1,32 @@
 <template>
-  <AnimatedSpinner
-    v-if="isLoading"
-    class="spinner"
-  />
-  <Transition
-    v-else
-    name="page-transition"
+  <div
+    v-if="showWidget"
+    class="latest-transaction-card"
   >
-    <div
-      v-if="showWidget"
-      class="latest-transaction-card"
-    >
-      <div class="title">
-        {{ $t('dashboard.latestTransactionCard.title') }}
-      </div>
-      <TransactionItem
-        v-for="transaction in latestTransactions"
-        :key="`${transaction.transactionOwner}-${transaction.hash}`"
-        :transaction="transaction"
-        show-transaction-owner
-      />
+    <div class="title">
+      {{ $t('dashboard.latestTransactionCard.title') }}
     </div>
-  </Transition>
+
+    <Transition name="page-transition">
+      <AnimatedSpinner
+        v-if="isLoading"
+        class="spinner"
+      />
+      <div v-else>
+        <TransactionItem
+          v-for="transaction in latestTransactions"
+          :key="`${transaction.transactionOwner}-${transaction.hash}`"
+          :transaction="transaction"
+          show-transaction-owner
+        />
+      </div>
+    </Transition>
+  </div>
 </template>
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   onMounted,
   ref,
@@ -37,7 +38,7 @@ import type {
   ITransaction,
 } from '../../types';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
-import { useBalances } from '../../composables';
+import { useBalances, useConnection } from '../../composables';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   handleUnknownError,
@@ -58,12 +59,15 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup(props, { root }) {
-    const latestTransactions = ref<ITransaction[]>([]);
-    const showWidget = ref<boolean>(false);
-    const isLoading = ref<boolean>(true);
-
+    const { isOnline } = useConnection();
     const { balances } = useBalances({ store: root.$store });
 
+    const latestTransactions = ref<ITransaction[]>([]);
+    const isLoading = ref<boolean>(true);
+
+    const showWidget = computed(
+      () => isOnline.value && (isLoading.value || latestTransactions.value.length),
+    );
     const accounts = useGetter<IAccount[]>('accounts');
     const activeIdx = useState('accounts', 'activeIdx');
     const fetchPendingTransactions = useDispatch('fetchPendingTransactions');
@@ -109,10 +113,6 @@ export default defineComponent({
       ))
         .sort(defaultTransactionSortingCallback)
         .slice(0, DASHBOARD_TRANSACTION_LIMIT);
-
-      if (latestTransactions.value.length) {
-        showWidget.value = true;
-      }
     }
 
     // This replaces it poling
@@ -151,11 +151,15 @@ export default defineComponent({
 
     margin-bottom: 4px;
   }
-}
 
-.spinner {
-  align-self: center;
-  height: 60px;
-}
+  .offline-message {
+    margin: auto;
+    padding-block: 10px;
+  }
 
+  .spinner {
+    align-self: center;
+    height: 60px;
+  }
+}
 </style>

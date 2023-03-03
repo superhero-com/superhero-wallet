@@ -24,7 +24,7 @@
     />
 
     <span
-      v-if="subtitle"
+      v-if="isBig && subtitle"
       class="subtitle"
       v-text="subtitle"
     />

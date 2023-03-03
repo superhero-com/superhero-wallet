@@ -5,6 +5,7 @@ import {
   getCurrentInstance,
 } from '@vue/composition-api';
 import { executeAndSetInterval } from '../popup/utils';
+import { useConnection } from './connection';
 
 /**
  * Creates a function, that will monitor how many components is actually using the composable
@@ -12,6 +13,7 @@ import { executeAndSetInterval } from '../popup/utils';
  * This function should be called before actual composable.
  */
 export function createPollingBasedOnMountedComponents() {
+  const { isOnline } = useConnection();
   let pollingIntervalId: NodeJS.Timer | null = null;
   const mountedComponents = ref(0);
 
@@ -24,7 +26,10 @@ export function createPollingBasedOnMountedComponents() {
         mountedComponents.value += 1;
 
         if (mountedComponents.value > 0 && !pollingIntervalId) {
-          pollingIntervalId = executeAndSetInterval(() => callback(), interval);
+          pollingIntervalId = executeAndSetInterval(
+            () => isOnline.value && callback(),
+            interval,
+          );
         }
       });
 

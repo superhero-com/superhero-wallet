@@ -160,7 +160,6 @@ export default defineComponent({
     const loading = ref<boolean>(true);
     const tokenPairs = ref({ token0: null, token1: null });
     const account = useGetter('account');
-    const isConnected = useGetter('isConnected');
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
@@ -208,7 +207,6 @@ export default defineComponent({
       contractId,
       isAe,
       loading,
-      isConnected,
       simplexLink,
       tabs,
       tokenData,

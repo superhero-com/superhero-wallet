@@ -19,7 +19,7 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
+import { defaultNetwork, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
@@ -41,7 +41,7 @@ export default new Vuex.Store({
     middleware: null,
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: NODE_STATUS_OFFLINE,
+    nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
     tip: null,

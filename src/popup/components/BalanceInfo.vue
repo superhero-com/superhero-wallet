@@ -3,31 +3,44 @@
     class="balance-info"
     data-cy="balance-info"
   >
-    <AeBalance :balance="balance" />
-    <div class="display-value">
-      {{ currencyFormatted }}
-    </div>
+    <template v-if="isOnline">
+      <AeBalance :balance="balance" />
+      <div class="display-value">
+        {{ currencyFormatted }}
+      </div>
+    </template>
+    <MessageOffline
+      v-else
+      :text="$t('common.balanceUnavailable')"
+      :horizontal="horizontalOfflineMessage"
+      :disable-colors="!horizontalOfflineMessage"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useCurrencies } from '../../composables';
+import { useConnection, useCurrencies } from '../../composables';
 import AeBalance from './AeBalance.vue';
+import MessageOffline from './MessageOffline.vue';
 
 export default defineComponent({
   components: {
     AeBalance,
+    MessageOffline,
   },
   props: {
     balance: { type: Number, required: true },
+    horizontalOfflineMessage: Boolean,
   },
   setup(props) {
     const { getFormattedFiat } = useCurrencies();
+    const { isOnline } = useConnection();
 
     const currencyFormatted = computed(() => getFormattedFiat(props.balance));
 
     return {
+      isOnline,
       currencyFormatted,
     };
   },

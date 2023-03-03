@@ -2,6 +2,13 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Cuenta principal",
+  "connectionStatus": {
+    "node": {
+      "error": "No puede conectarse al nodo elegido",
+      "connecting": "Conectando al nodo...",
+      "connected": "Conectado"
+    }
+  },
   "badges": {
     "verified": "Verificada",
     "notVerified": "No verificada"
@@ -797,12 +804,6 @@
     "welcome": {
       "send": "Enviar",
       "across": "por todo el Planeta"
-    },
-    "nodeConnectionStatus": {
-      "error": "No puede conectarse al nodo elegido",
-      "connecting": "Conectando al nodo...",
-      "connected": "Conectado",
-      "initServices": "Iniciando servicios..."
     },
     "popupMessageSign": {
       "heading": "gustaría firmar mensaje ",

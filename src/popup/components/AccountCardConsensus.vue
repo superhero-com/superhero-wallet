@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="multisigAccount.hasPendingTransaction"
+    v-if="isOnline && multisigAccount.hasPendingTransaction"
     class="account-card-consensus"
   >
     <div
@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { useAccounts } from '../../composables';
+import { useAccounts, useConnection } from '../../composables';
 import type { IMultisigAccount } from '../../types';
 
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -44,6 +44,7 @@ export default defineComponent({
     },
   },
   setup(props, { root }) {
+    const { isOnline } = useConnection();
     const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
     const isSigned = computed(
@@ -73,6 +74,7 @@ export default defineComponent({
     });
 
     return {
+      isOnline,
       transactionMessage,
     };
   },

@@ -27,12 +27,14 @@
       :header="$t('modals.createAccount.btnText')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
       :icon="PlusCircleIcon"
+      :disabled="!isOnline"
       @click="createPlainAccount()"
     />
     <BtnSubheader
       :header="$t('modals.createMultisigAccount.btnText')"
       :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
       :icon="PlusCircleIcon"
+      :disabled="!isOnline"
       @click="createMultisigAccount()"
     />
 
@@ -43,10 +45,11 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from '@vue/composition-api';
 import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
+import { useConnection } from '../../../composables';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
-import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 import Loader from '../Loader.vue';
+import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -59,6 +62,7 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { root }) {
+    const { isOnline } = useConnection();
     const loading = ref(false);
 
     async function createPlainAccount() {
@@ -77,6 +81,7 @@ export default defineComponent({
 
     return {
       PlusCircleIcon,
+      isOnline,
       loading,
       createPlainAccount,
       createMultisigAccount,

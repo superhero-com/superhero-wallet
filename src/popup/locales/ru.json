@@ -713,12 +713,6 @@
       "send": "Send",
       "across": "across the Globe"
     },
-    "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node",
-      "connecting": "Connecting to node...",
-      "connected": "Connected",
-      "initServices": "Initializing services..."
-    },
     "popupMessageSign": {
       "heading": "would like to sign message ",
       "message": "Message"

@@ -5,6 +5,13 @@
   "common": {
     "callData": "呼叫数据"
   },
+  "connectionStatus": {
+    "node": {
+      "error": "无法连接到所选节点",
+      "connecting": "连接节点中...",
+      "connected": "已连接"
+    }
+  },
   "badges": {
     "verified": "已验证",
     "notVerified": "未验证"
@@ -800,12 +807,6 @@
     "welcome": {
       "send": "发送",
       "across": "在全球范围内"
-    },
-    "nodeConnectionStatus": {
-      "error": "无法连接到所选节点",
-      "connecting": "连接节点中...",
-      "connected": "已连接",
-      "initServices": "初始化服务..."
     },
     "popupMessageSign": {
       "heading": "想要签名消息",

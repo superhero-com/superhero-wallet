@@ -1,5 +1,5 @@
 <template>
-  <AccountDetailsBase>
+  <AccountDetailsBase class="account-details">
     <template #account-info>
       <AccountInfo
         :address="account.address"
@@ -10,7 +10,10 @@
     </template>
 
     <template #balance>
-      <BalanceInfo :balance="balanceNumeric" />
+      <BalanceInfo
+        :balance="balanceNumeric"
+        horizontal-offline-message
+      />
     </template>
 
     <template #buttons>
@@ -20,11 +23,13 @@
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
         :href="simplexLink"
+        :disabled="!isOnline"
       />
       <BtnBox
         :icon="SwapIcon"
         :text="$t('pages.token-details.swap')"
         :href="DEX_URL"
+        :disabled="!isOnline"
       />
     </template>
 
@@ -37,7 +42,7 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
-import { useBalances } from '../../composables';
+import { useBalances, useConnection } from '../../composables';
 import { buildSimplexLink, DEX_URL } from '../utils';
 import type { IAccount } from '../../types';
 
@@ -63,6 +68,7 @@ export default defineComponent({
     AccountDetailsBase,
   },
   setup(props, { root }) {
+    const { isOnline } = useConnection();
     const { balance } = useBalances({ store: root.$store });
 
     const account = useGetter<IAccount>('account');
@@ -73,6 +79,7 @@ export default defineComponent({
 
     return {
       DEX_URL,
+      isOnline,
       balanceNumeric,
       account,
       CreditCardIcon,
@@ -81,4 +88,4 @@ export default defineComponent({
     };
   },
 });
-</script>>
+</script>

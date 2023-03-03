@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="isOnline"
     class="account-card-total-tokens"
     :class="{ selected }"
   >
@@ -16,6 +17,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { useConnection } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { IAccount } from '../../types';
 
@@ -28,11 +30,13 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { isOnline } = useConnection();
     const getTokenBalance = useGetter('fungibleTokens/getTokenBalance');
 
     const totalTokens = computed(() => getTokenBalance.value(props.currentAccount.address).length);
 
     return {
+      isOnline,
       totalTokens,
     };
   },
