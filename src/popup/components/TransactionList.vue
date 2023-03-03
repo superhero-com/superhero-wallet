@@ -157,7 +157,7 @@ export default defineComponent({
               case FILTER_MODE.dex:
                 return isDex.value;
               case FILTER_MODE.out:
-                return direction.value === TX_FUNCTIONS.sent;
+                return direction.value === TX_FUNCTIONS.sent && !isDex.value;
               case FILTER_MODE.in:
                 return direction.value === TX_FUNCTIONS.received;
               default:
