@@ -1,6 +1,11 @@
 import { computed } from '@vue/composition-api';
 import { Universal, Node } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../popup/utils';
+import {
+  NODE_STATUS_CONNECTED,
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_ERROR,
+  watchUntilTruthy,
+} from '../popup/utils';
 import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
 
 let drySdk: ISdk;
@@ -13,9 +18,10 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);
   const isSdkReady = computed(() => !!sdk.value);
 
-  const isNodeConnecting = computed<boolean>(() => store.state.sdkPlugin.isNodeConnecting);
-  const isNodeReady = computed<boolean>(() => store.state.sdkPlugin.isNodeReady);
-  const isNodeError = computed<boolean>(() => store.state.sdkPlugin.isNodeError);
+  const nodeStatus = computed((): string => store.state.nodeStatus);
+  const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
+  const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
+  const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   /**

@@ -1,7 +1,7 @@
 <template>
   <transition name="fade-transition">
     <div
-      v-if="isVisible"
+      v-if="statusText"
       data-cy="connect-node"
       class="node-connection-status"
       :class="{
@@ -13,50 +13,63 @@
   </transition>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
 import {
-  NODE_STATUS_INIT_SERVICES,
-  NODE_STATUS_CONNECTING,
-  NODE_STATUS_CONNECTION_DONE,
-  NODE_STATUS_CONNECTED,
-  NODE_STATUS_ERROR,
-  NODE_STATUS_OFFLINE,
-} from '../utils';
+  computed,
+  defineComponent,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
+import { useConnection, useSdk } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 
-export default {
-  data() {
+const CONNECTED_DISPLAY_TIME = 2000;
+
+export default defineComponent({
+  setup(props, { root }) {
+    const { isOnline } = useConnection();
+    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store: root.$store });
+
+    const justBeenConnected = ref(false);
+
+    const isLoggedIn = useGetter<boolean>('isLoggedIn');
+
+    const isError = computed(() => !isOnline.value || isNodeError.value);
+
+    // Display "Connected" message for a while after connecting to node.
+    watch(isNodeReady, (val) => {
+      justBeenConnected.value = val;
+      if (val) {
+        setTimeout(() => {
+          justBeenConnected.value = false;
+        }, CONNECTED_DISPLAY_TIME);
+      }
+    });
+
+    const statusText = computed((): TranslateResult | null => {
+      switch (true) {
+        case !isOnline.value:
+          return root.$t('connectionStatus.offline');
+        case !isLoggedIn.value:
+          return null;
+        case isNodeConnecting.value:
+          return root.$t('connectionStatus.node.connecting');
+        case justBeenConnected.value:
+          return root.$t('connectionStatus.node.connected');
+        case isNodeError.value:
+          return root.$t('connectionStatus.node.error');
+        default:
+          return null;
+      }
+    });
+
     return {
-      statuses: {
-        [NODE_STATUS_INIT_SERVICES]: this.$t('pages.nodeConnectionStatus.initServices'),
-        [NODE_STATUS_CONNECTING]: this.$t('pages.nodeConnectionStatus.connecting'),
-        [NODE_STATUS_CONNECTION_DONE]: this.$t('pages.nodeConnectionStatus.connected'),
-        [NODE_STATUS_ERROR]: this.$t('pages.nodeConnectionStatus.error'),
-        [NODE_STATUS_OFFLINE]: this.$t('pages.nodeConnectionStatus.offline'),
-      },
+      isError,
+      statusText,
     };
   },
-  computed: {
-    ...mapState(['nodeStatus']),
-    ...mapGetters(['account', 'isConnected', 'isLoggedIn']),
-    isVisible() {
-      return (
-        this.nodeStatus !== NODE_STATUS_CONNECTED
-        && this.account.address
-        && this.isLoggedIn
-      );
-    },
-    isError() {
-      return [
-        NODE_STATUS_ERROR,
-        NODE_STATUS_OFFLINE,
-      ].includes(this.nodeStatus);
-    },
-    statusText() {
-      return this.statuses[this.nodeStatus];
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

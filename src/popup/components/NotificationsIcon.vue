@@ -20,8 +20,8 @@ export default defineComponent({
   components: {
     BtnIcon,
   },
-  setup() {
-    const { notificationsAll } = useNotifications({ requirePolling: true });
+  setup(props, { root }) {
+    const { notificationsAll } = useNotifications({ store: root.$store, requirePolling: true });
 
     const notificationsCount = computed<string | number | null>(() => {
       const count = notificationsAll.value

@@ -11,7 +11,7 @@
       />
     </Tabs>
     <div
-      v-if="currentSubTabs.length"
+      v-if="isOnline && currentSubTabs.length"
       class="sub-tabs"
     >
       <BtnPill
@@ -27,9 +27,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import BtnPill from './buttons/BtnPill.vue';
-import Tab from './tabs/Tab.vue';
-import Tabs from './tabs/Tabs.vue';
 import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
@@ -40,6 +37,11 @@ import {
   ROUTE_MULTISIG_DETAILS_INFO,
   ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
 } from '../router/routeNames';
+import { useConnection } from '../../composables';
+
+import BtnPill from './buttons/BtnPill.vue';
+import Tab from './tabs/Tab.vue';
+import Tabs from './tabs/Tabs.vue';
 
 interface NavigationElement {
   text: string,
@@ -106,6 +108,7 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { root }) {
+    const { isOnline } = useConnection();
     const currentTabs = computed(() => (
       props.isMultisig ? navigationConfigMultisig : navigationConfigRegular
     ));
@@ -119,6 +122,7 @@ export default defineComponent({
     );
 
     return {
+      isOnline,
       currentTabs,
       currentSubTabs,
     };

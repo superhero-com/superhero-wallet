@@ -1,23 +1,40 @@
 <template>
   <div class="transaction-list-wrapper">
     <TransactionList
+      v-if="isOnline"
       :show-filters="showFilters"
       show-search
+    />
+    <MessageOffline
+      v-else
+      class="offline-message"
+      :text="$t('modals.accountDetails.transactionsNotAvailable')"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useConnection } from '../../composables';
+import MessageOffline from '../components/MessageOffline.vue';
 import TransactionList from '../components/TransactionList.vue';
 
-export default {
+export default defineComponent({
   components: {
     TransactionList,
+    MessageOffline,
   },
   props: {
     showFilters: Boolean,
   },
-};
+  setup() {
+    const { isOnline } = useConnection();
+
+    return {
+      isOnline,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -27,6 +44,10 @@ export default {
   ::v-deep .filters {
     position: sticky;
     top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+
+  .offline-message {
+    margin-top: 40px;
   }
 }
 </style>

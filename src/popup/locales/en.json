@@ -10,7 +10,20 @@
     "edit": "Edit",
     "nonce": "Nonce",
     "callData": "Call data",
-    "contractId": "Contract ID"
+    "contractId": "Contract ID",
+    "balanceUnavailable": "Unable to load balance.",
+    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet."
+  },
+  "connectionStatus": {
+    "offline": "You are offline. Go online to get real time data.",
+    "node": {
+      "error": "Unable to connect to the chosen node.",
+      "connecting": "Connecting to the node...",
+      "connected": "Connected"
+    },
+    "middleware": {
+      "unavailable": "Middleware is offline."
+    }
   },
   "badges": {
     "verified": "Verified",
@@ -335,8 +348,11 @@
     },
     "accountDetails": {
       "assets": "Assets",
+      "assetsNotAvailable": "Assets list is not available offline.",
       "transactions": "Transactions",
+      "transactionsNotAvailable": "Transactions history is not available offline.",
       "names": "Names",
+      "namesNotAvailable": "Names list is not available offline.",
       "details": "Details"
     }
   },
@@ -1307,13 +1323,6 @@
     "welcome": {
       "send": "Send",
       "across": "across the Globe"
-    },
-    "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node.",
-      "connecting": "Connecting to node...",
-      "connected": "Connected",
-      "initServices": "Initializing services...",
-      "offline": "You are offline. Go online to get real time data."
     },
     "popupMessageSign": {
       "title": "Sign message",

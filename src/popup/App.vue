@@ -54,8 +54,6 @@ import {
 import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
-  NODE_STATUS_OFFLINE,
-  NODE_STATUS_CONNECTION_DONE,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
   watchUntilTruthy,
@@ -70,12 +68,16 @@ import {
   IS_FIREFOX,
   RUNNING_IN_POPUP,
 } from '../lib/environment';
+import {
+  useConnection,
+  useCurrencies,
+  useNotifications,
+  useViewport,
+} from '../composables';
+
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
-import { useNotifications } from '../composables/notifications';
-import { useCurrencies } from '../composables';
-import { useViewport } from '../composables/viewport';
 
 export default defineComponent({
   name: 'App',
@@ -85,7 +87,13 @@ export default defineComponent({
     Close,
   },
   setup(props, { root }) {
+    const { watchConnectionStatus } = useConnection();
+    const { addWalletNotification } = useNotifications({ store: root.$store });
+    const { loadAeternityData } = useCurrencies(true);
+    const { initViewport } = useViewport();
+
     const innerElement = ref<HTMLDivElement>();
+
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
@@ -93,11 +101,6 @@ export default defineComponent({
     const modals = computed(() => root.$store.getters['modals/opened']);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
-
-    const { addWalletNotification } = useNotifications();
-    const { loadAeternityData } = useCurrencies(true);
-
-    const { initViewport } = useViewport();
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
@@ -139,11 +142,6 @@ export default defineComponent({
       }
     }
 
-    function watchAppNetworkAccess() {
-      window.addEventListener('online', () => root.$store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE));
-      window.addEventListener('offline', () => root.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
-    }
-
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         addWalletNotification({
@@ -161,7 +159,7 @@ export default defineComponent({
       checkExtensionUpdates();
       initViewport(innerElement.value);
 
-      watchAppNetworkAccess();
+      watchConnectionStatus();
 
       await watchUntilTruthy(() => isRestored.value);
       setNotificationSettings();

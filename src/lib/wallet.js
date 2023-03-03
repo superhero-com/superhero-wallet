@@ -5,11 +5,11 @@ import { camelCase, isEqual, times } from 'lodash-es';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
   NODE_STATUS_CONNECTING,
-  NODE_STATUS_CONNECTION_DONE,
   NODE_STATUS_ERROR,
   fetchJson,
   executeAndSetInterval,
   watchUntilTruthy,
+  NODE_STATUS_CONNECTED,
 } from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';
@@ -132,7 +132,7 @@ export default async function initSdk() {
       store.dispatch('initTippingContractInstances'),
       initMiddleware(),
     ]);
-    store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
+    store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
 
     store.watch(
       (state, getters) => getters.activeNetwork,
@@ -141,7 +141,7 @@ export default async function initSdk() {
         try {
           store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
           await initMiddleware();
-          store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
         } catch (error) {
           store.commit('setNodeStatus', NODE_STATUS_ERROR);
           Logger.write(error);

@@ -8,7 +8,10 @@
   >
     <div
       class="circle"
-      :class="[nodeStatus]"
+      :class="{
+        connected: isOnline && isNodeReady,
+        error: !isOnline || isNodeError,
+      }"
     />
     {{ activeNetwork.name }}
   </BtnPill>
@@ -16,9 +19,10 @@
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import { useGetter, useState } from '../../composables/vuex';
-import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import type { INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { useConnection, useSdk } from '../../composables';
+import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 
 import BtnPill from './buttons/BtnPill.vue';
 
@@ -26,13 +30,16 @@ export default defineComponent({
   components: {
     BtnPill,
   },
-  setup() {
-    const nodeStatus = useState('nodeStatus');
+  setup(props, { root }) {
+    const { isOnline } = useConnection();
+    const { isNodeReady, isNodeError } = useSdk({ store: root.$store });
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     return {
+      isOnline,
+      isNodeReady,
+      isNodeError,
       activeNetwork,
-      nodeStatus,
       ROUTE_NETWORK_SETTINGS,
     };
   },

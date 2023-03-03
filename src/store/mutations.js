@@ -2,8 +2,6 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  NODE_STATUS_CONNECTION_DONE,
-  NODE_STATUS_CONNECTED,
   TX_FUNCTIONS,
   defaultNetwork,
 } from '../popup/utils';
@@ -59,13 +57,6 @@ export default {
   },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
-
-    // Hide "connected" message after some delay.
-    if (payload === NODE_STATUS_CONNECTION_DONE) {
-      setTimeout(() => {
-        state.nodeStatus = NODE_STATUS_CONNECTED;
-      }, 1000);
-    }
   },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;

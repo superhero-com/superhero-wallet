@@ -25,7 +25,6 @@
 import { defineComponent } from '@vue/composition-api';
 
 import { MODAL_TRANSFER_SEND } from '../utils';
-import { useGetter } from '../../composables/vuex';
 
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -45,8 +44,6 @@ export default defineComponent({
     PendingMultisigTransactionCard,
   },
   setup(props, { root }) {
-    const isConnected = useGetter('isConnected');
-
     function openTransferSendModal() {
       root.$store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
@@ -56,7 +53,6 @@ export default defineComponent({
 
     return {
       ArrowSendIcon,
-      isConnected,
       openTransferSendModal,
     };
   },

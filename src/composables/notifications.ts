@@ -1,13 +1,11 @@
 import { computed, ref, watch } from '@vue/composition-api';
-import store from '../store';
-import {
-  IAccount,
+import type {
+  IDefaultComposableOptions,
   INetwork,
   INotification,
   INotificationSetting,
   NotificationStatus,
 } from '../types';
-import { useGetter, useState } from './vuex';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_READ,
@@ -19,9 +17,10 @@ import {
   fetchRespondChallenge,
 } from '../popup/utils';
 import { useSdk } from './sdk';
+import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
-export interface UseNotificationsOptions {
+export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean
 }
 
@@ -35,16 +34,19 @@ const notificationsWallet = ref<INotification[]>([]);
 
 export function useNotifications({
   requirePolling = false,
-}: UseNotificationsOptions = {}) {
+  store,
+}: UseNotificationsOptions) {
   const { getSdk } = useSdk({ store });
-
-  const activeNetwork = useGetter<INetwork>('activeNetwork');
-  const account = useGetter<IAccount>('account');
-  const notificationSettings = useState<INotificationSetting[]>('notificationSettings');
-  const chainNames = useState('chainNames');
+  const { account } = useAccounts({ store });
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
+
+  const activeNetwork = computed((): INetwork => store.getters.activeNetwork);
+  const notificationSettings = computed(
+    (): INotificationSetting[] => store.state.notificationSettings,
+  );
+  const chainNames = computed(() => store.state.chainNames);
 
   const notificationSettingsCheckedTypes = computed<string[]>(
     () => notificationSettings.value

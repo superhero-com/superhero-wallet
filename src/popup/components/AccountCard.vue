@@ -1,5 +1,8 @@
 <template>
-  <AccountCardBase :selected="selected">
+  <AccountCardBase
+    class="account-card"
+    :selected="selected"
+  >
     <template #top>
       <AccountInfo
         :address="account.address"
@@ -27,15 +30,14 @@ import {
   defineComponent,
   PropType,
 } from '@vue/composition-api';
+import type { IAccount } from '../../types';
+import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
+import { useBalances } from '../../composables';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import AccountCardTotalTokens from './AccountCardTotalTokens.vue';
 import AccountCardBase from './AccountCardBase.vue';
-
-import type { IAccount } from '../../types';
-import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
-import { useBalances } from '../../composables';
 
 export default defineComponent({
   components: {

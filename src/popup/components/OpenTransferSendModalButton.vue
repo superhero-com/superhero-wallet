@@ -3,7 +3,7 @@
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('dashboard.sendCard.title')"
     :subtitle="subtitle"
     :icon="ArrowSendIcon"
-    :disabled="!isConnected || (!!pendingMultisigTransaction && isMultisig)"
+    :disabled="!isOnline || !isConnected || (!!pendingMultisigTransaction && isMultisig)"
     data-cy="send"
     :is-big="isBig"
     @click="openTransferSendModal()"
@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from '@vue/composition-api';
-import { usePendingMultisigTransaction } from '../../composables';
+import { useConnection, usePendingMultisigTransaction } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { MODAL_TRANSFER_SEND } from '../utils';
 
@@ -27,6 +27,7 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup(props, { root }) {
+    const { isOnline } = useConnection();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
     const isConnected = useGetter('isConnected');
@@ -39,16 +40,12 @@ export default defineComponent({
       });
     }
 
-    const subtitle = computed(() => {
-      if (!props.isBig) {
-        return '';
-      }
-      return props.isMultisig
-        ? root.$t('dashboard.proposeCard.description')
-        : root.$t('dashboard.sendCard.description');
-    });
+    const subtitle = computed(() => (props.isMultisig)
+      ? root.$t('dashboard.proposeCard.description')
+      : root.$t('dashboard.sendCard.description'));
 
     return {
+      isOnline,
       isConnected,
       pendingMultisigTransaction,
       subtitle,

@@ -148,12 +148,9 @@ export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNE
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 
-export const NODE_STATUS_INIT_SERVICES = 'initServices';
 export const NODE_STATUS_CONNECTING = 'connecting';
-export const NODE_STATUS_CONNECTION_DONE = 'connectionDone';
 export const NODE_STATUS_CONNECTED = 'connected';
 export const NODE_STATUS_ERROR = 'error';
-export const NODE_STATUS_OFFLINE = 'offline';
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
 
