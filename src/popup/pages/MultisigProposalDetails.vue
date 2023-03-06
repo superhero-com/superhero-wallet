@@ -52,7 +52,7 @@
                 <CopyText
                   hide-icon
                   :value="multisigTx.recipientId"
-                  :copied-text="$t('hashCopied')"
+                  :copied-text="$t('addressCopied')"
                 >
                   <span class="text-address">{{ splitAddress(multisigTx.recipientId) }}</span>
                 </CopyText>
