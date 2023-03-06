@@ -41,6 +41,7 @@ function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
 const activeMultisigAccountId = ref('');
+const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents();
@@ -53,13 +54,17 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   const activeMultisigAccount = computed<IMultisigAccount | undefined>(() => multisigAccounts.value
     .find((account) => account.gaAccountId === activeMultisigAccountId.value));
 
-  if (!multisigAccounts.value.length) {
+  if (
+    !multisigAccounts.value.length
+    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
+  ) {
     multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
   }
 
   function setActiveMultisigAccountId(gaAccountId: string) {
     if (gaAccountId && multisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
+      activeMultisigNetworkId.value = activeNetwork.value.networkId;
       window.localStorage
         .setItem(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`, JSON.stringify(gaAccountId));
     }
@@ -196,7 +201,10 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
 
-    if (!activeMultisigAccountId.value) {
+    if (
+      !activeMultisigAccountId.value
+      || activeMultisigNetworkId.value !== activeNetwork.value.networkId
+    ) {
       const storedMultisigAccountId = getFromLocalStorage(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`);
       setActiveMultisigAccountId(storedMultisigAccountId || result[0]?.gaAccountId);
     }
