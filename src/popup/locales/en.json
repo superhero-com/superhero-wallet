@@ -19,7 +19,8 @@
   "dashboard": {
     "receiveCard": {
       "title": "Receive",
-      "description": "from existing wallet"
+      "description": "from existing wallet",
+      "descriptionMultisig": "to multisig vault"
     },
     "sendCard": {
       "title": "Send",
