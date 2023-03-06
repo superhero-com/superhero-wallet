@@ -588,6 +588,7 @@ export default defineComponent({
 
   .reason::v-deep {
     .value {
+      word-break: break-all;
       color: variables.$color-warning;
     }
   }
