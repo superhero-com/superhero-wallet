@@ -164,7 +164,7 @@
           </DetailsItem>
           <DetailsItem
             v-if="transaction"
-            :label="$t('pages.transactionDetails.fee')"
+            :label="$t('transaction.fee')"
             data-cy="fee"
           >
             <template #value>
