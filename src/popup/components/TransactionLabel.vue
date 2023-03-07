@@ -31,12 +31,6 @@
         class="type"
         :class="{ secondary: showTransactionOwner }"
       >
-        <span
-          v-if="externalLabel.length"
-        >
-          {{ externalLabel }}
-          &nbsp;
-        </span>
         {{ label.text }}
         <span
           v-if="label.hasComma && !showTransactionOwner"
@@ -146,19 +140,6 @@ export default defineComponent({
     const truncateWidth = ref<string | number>('100%');
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
-    const externalLabel = computed(() => {
-      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
-        return root.$t('transaction.type.gaMetaTx');
-      }
-      if (
-        outerTxType.value === TX_TYPE_MDW.PayingForTx
-        && txType.value !== TX_TYPE_MDW.GAAttachTx
-      ) {
-        return root.$t('transaction.type.payingForTx');
-      }
-      return '';
-    });
-
     const label = computed((): ILabel => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
       const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
@@ -260,7 +241,6 @@ export default defineComponent({
       isErrorTransaction,
       ownerName,
       label,
-      externalLabel,
       transactionLabelRef,
       labelRef,
       truncateWidth,
@@ -323,7 +303,7 @@ export default defineComponent({
   .label,
   .owner {
     display: flex;
-    gap: 5px;
+    gap: 4px;
   }
 
   .account-name-truncated {
