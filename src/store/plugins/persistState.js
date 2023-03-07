@@ -7,14 +7,26 @@ import {
   IS_EXTENSION_BACKGROUND,
   IS_FIREFOX,
 } from '../../lib/environment';
+import { walletStorage } from '../../popup/utils';
 
 const KEY = 'state';
 
-const setState = (state) => browser.storage.local.set({
-  [KEY]: IS_FIREFOX ? cloneDeep(state) : state,
-});
-
-const getStateRaw = async () => (await browser.storage.local.get(KEY))[KEY];
+/**
+ * With the introduction of common storage solution: `walletStorage`
+ * we need to rename the storage state key as we are now prefixing all storage keys.
+ */
+const moveOldStateToNewScope = async () => {
+  const oldState = (await browser.storage.local.get(KEY))[KEY];
+  if (oldState) {
+    await walletStorage.set(KEY, oldState);
+    browser.storage.local.remove(KEY);
+  }
+};
+const setState = (state) => walletStorage.set(KEY, IS_FIREFOX ? cloneDeep(state) : state);
+const getStateRaw = async () => {
+  await moveOldStateToNewScope();
+  return walletStorage.get(KEY);
+};
 
 // TODO: Avoid direct localStorage access outside of this module
 export const getState = async () => (await getStateRaw()) || {};

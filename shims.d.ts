@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 /**
  * Global object available when running as the extension.
  */

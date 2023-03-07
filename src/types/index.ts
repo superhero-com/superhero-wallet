@@ -613,3 +613,8 @@ export interface IDefaultComposableOptions {
    */
   store: Store<any>
 }
+
+export interface IInternalPostMessageOptions {
+  type: 'resolve' | 'reject' | 'getProps';
+  payload?: any;
+}

@@ -18,6 +18,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   MODAL_DEFAULT,
   watchUntilTruthy,
+  walletStorage,
 } from '../utils';
 import {
   RUNNING_IN_POPUP,
@@ -34,12 +35,12 @@ const router = new VueRouter({
   scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
 });
 
-const lastRouteKey = 'last-path';
+const LAST_ROUTE_KEY = 'last-path';
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
-    (to.name === ROUTE_INDEX && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
+    (to.name === ROUTE_INDEX && (await walletStorage.get(LAST_ROUTE_KEY)))
     || undefined,
   );
   unbind();
@@ -82,9 +83,9 @@ router.beforeEach(async (to, from, next) => {
 
 router.afterEach(async (to) => {
   if (to.meta?.notPersist) {
-    await browser?.storage.local.remove(lastRouteKey);
+    await walletStorage.remove(LAST_ROUTE_KEY);
   } else {
-    await browser?.storage.local.set({ [lastRouteKey]: to.path });
+    await walletStorage.set(LAST_ROUTE_KEY, to.path);
   }
 });
 

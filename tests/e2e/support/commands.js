@@ -8,6 +8,7 @@ import {
   getLoginState,
   CURRENCY_URL,
   CURRENCIES_URL,
+  walletStorage,
 } from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
@@ -17,7 +18,10 @@ Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
   const id = uuid();
   const params = `?id=${id}&type=${type}`;
-  const onBeforeLoad = () => (txType ? browser.storage.local.set({ txType }) : browser.storage.local.remove('txType'));
+  const onBeforeLoad = () => (txType
+    ? walletStorage.set('txType', txType)
+    : walletStorage.remove('txType')
+  );
   cy.visit(`${params}`, { onBeforeLoad })
     .get('[data-cy=popup-aex2]')
     .should('exist')
@@ -166,7 +170,7 @@ Cypress.Commands.add('enterAddress', (address) => {
 Cypress.Commands.add(
   'storageSet',
   (key, value) => new Cypress.Promise(async (resolve) => {
-    await browser.storage.local.set({ [key]: value });
+    await walletStorage.set(key, value);
     resolve();
   }),
 );

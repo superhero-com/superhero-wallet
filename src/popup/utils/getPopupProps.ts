@@ -1,13 +1,14 @@
+import type { IInternalPostMessageOptions } from '../../types';
 import { postMessage } from './connection';
 import { popupProps } from './testsConfig';
-import { buildTx } from './index';
+import { buildTx, walletStorage } from './index';
 import { POPUP_TYPE } from '../../lib/environment';
 
 const internalPostMessage = process.env.RUNNING_IN_TESTS
-  ? async ({ type }) => {
+  ? async ({ type }: IInternalPostMessageOptions) => {
     switch (type) {
       case 'getProps': {
-        const { txType } = await browser.storage.local.get('txType');
+        const { txType } = await walletStorage.get('txType') as any;
         if (txType) {
           const props = popupProps.base;
           props.transaction = buildTx(txType).txObject;
@@ -17,7 +18,7 @@ const internalPostMessage = process.env.RUNNING_IN_TESTS
       }
       case 'resolve':
       case 'reject':
-        window[type] = 'send';
+        (window as any)[type] = 'send';
         break;
       default:
         throw new Error(`Unknown type: ${type}`);
@@ -38,7 +39,7 @@ export default async () => {
   };
   window.addEventListener('beforeunload', unloadHandler, true);
 
-  const closingWrapper = (f) => async (...args) => {
+  const closingWrapper = (f: any) => async (...args: any[]) => {
     resolved = true;
     window.removeEventListener('beforeunload', unloadHandler, true);
     f(...args);

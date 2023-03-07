@@ -5,11 +5,9 @@ import {
   CURRENCY_URL,
   CURRENCIES_URL,
   fetchJson,
-  getLocalStorageItem,
   handleUnknownError,
-  setLocalStorageItem,
 } from '../popup/utils';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import { createPollingBasedOnMountedComponents, createStorageRef } from './composablesHelpers';
 
 export interface UseCurrenciesOptions {
   withoutPolling?: boolean;
@@ -20,17 +18,21 @@ const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
 const APP_CURRENCY_CODES = CURRENCIES.map(({ code }) => code).join(',');
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 
+const { useStorageRef } = createStorageRef<CurrencyCode>(
+  DEFAULT_CURRENCY_CODE,
+  LOCAL_STORAGE_CURRENCY_KEY,
+);
+
 const aeternityData = ref<IAsset>();
 const currencyRates = ref<Record<string, number>>({});
-const currentCurrencyCode = ref<CurrencyCode>(
-  getLocalStorageItem<CurrencyCode>([LOCAL_STORAGE_CURRENCY_KEY]) || DEFAULT_CURRENCY_CODE,
-);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useCurrencies({
   withoutPolling = false,
 }: UseCurrenciesOptions = {}) {
+  const currentCurrencyCode = useStorageRef();
+
   const minTipAmount = computed(() => 0.01 / (currencyRates.value.usd || 1));
   const currentCurrencyRate = computed(
     (): number => currencyRates.value[currentCurrencyCode.value] || 0,
@@ -51,7 +53,6 @@ export function useCurrencies({
   function setCurrentCurrency(currency: CurrencyCode) {
     currentCurrencyCode.value = currency;
     loadAeternityData();
-    setLocalStorageItem([LOCAL_STORAGE_CURRENCY_KEY], currency);
   }
 
   async function loadCurrencyRates() {

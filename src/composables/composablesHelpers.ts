@@ -7,7 +7,7 @@ import {
   ref,
 } from '@vue/composition-api';
 import { Store } from 'vuex';
-import { excludeFalsy, getLocalStorageItem, setLocalStorageItem } from '../popup/utils';
+import { excludeFalsy, walletStorage } from '../popup/utils';
 import { INetwork } from '../types';
 import { useConnection } from './connection';
 
@@ -33,6 +33,7 @@ export function createNetworkWatcher() {
 }
 
 interface ICreateStorageRefOptions<T> {
+  disableNetworkScope?: boolean;
   /**
    * When set to true the state will be synced for each network separately
    * by using networkId as a postfix for the storage key.
@@ -81,9 +82,9 @@ export function createStorageRef<T = string | object | any[]>(
         activeNetworkId,
       ].filter(excludeFalsy);
 
-      function restoreStateFromStorage() {
+      async function restoreStateFromStorage() {
         currentNetworkId = activeNetworkId;
-        const restoredValue = getLocalStorageItem<T | null>(storageKeys);
+        const restoredValue = await walletStorage.get<T | null>(storageKeys);
         state.value = (restoredValue)
           ? serializer?.read(restoredValue) || restoredValue
           : initialState;
@@ -103,7 +104,7 @@ export function createStorageRef<T = string | object | any[]>(
         },
         set: (val) => {
           state.value = val;
-          setLocalStorageItem(storageKeys, serializer?.write(val) || val);
+          walletStorage.set(storageKeys, serializer?.write(val) || val);
         },
       });
     },

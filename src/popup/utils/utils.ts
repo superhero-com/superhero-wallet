@@ -20,7 +20,6 @@ import {
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
-  LOCAL_STORAGE_PREFIX,
   MAGNITUDE,
   MAX_UINT256,
   SIMPLEX_URL,
@@ -67,18 +66,6 @@ export function excludeFalsy<T>(value: T): value is Truthy<T> {
 
 export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
-}
-
-export function getLocalStorageItem<T = object>(keys: string[]): T | null {
-  const result = window.localStorage.getItem([LOCAL_STORAGE_PREFIX, ...keys].join('_'));
-  return result ? JSON.parse(result) : null;
-}
-
-export function setLocalStorageItem(keys: string[], value: any): void {
-  return window.localStorage.setItem(
-    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
-    JSON.stringify(value),
-  );
 }
 
 export function convertToken(balance: number | string, precision: number): BigNumberPublic {

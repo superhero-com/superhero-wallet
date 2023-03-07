@@ -9,10 +9,10 @@ import type {
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
-  LOCAL_STORAGE_PREFIX,
   aettosToAe,
   isNotFoundError,
   handleUnknownError,
+  walletStorage,
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -23,29 +23,32 @@ type Balances = Record<string, Balance>;
 type BalancesRaw = Record<string, BalanceRaw>;
 
 const POLLING_INTERVAL = 3000;
-const LOCAL_STORAGE_BALANCES_KEY = `${LOCAL_STORAGE_PREFIX}_balances`;
+const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
 function storeBalances(balances: Balances) {
-  window.localStorage.setItem(
+  walletStorage.set(
     LOCAL_STORAGE_BALANCES_KEY,
-    JSON.stringify(Object.keys(balances).reduce(
+    Object.keys(balances).reduce(
       (acc, address) => ({ ...acc, [address]: balances[address].toFixed() }),
       {},
-    )),
+    ),
   );
 }
 
-function getStoredBalances(): Balances {
-  const storedBalances = window.localStorage.getItem(LOCAL_STORAGE_BALANCES_KEY);
-  const balances: BalancesRaw = storedBalances ? JSON.parse(storedBalances) : {};
+async function getStoredBalances(): Promise<Balances> {
+  const balances = await walletStorage.get<BalancesRaw>(LOCAL_STORAGE_BALANCES_KEY) || {};
   return Object.keys(balances).reduce(
     (acc, address) => ({ ...acc, [address]: new BigNumber(balances[address]) }),
     {},
   );
 }
 
-const balances = ref<Balances>(getStoredBalances());
+const balances = ref<Balances>({});
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+
+getStoredBalances().then((val) => {
+  balances.value = val;
+});
 
 /**
  * This composable detects if any app components requires balances data and polls the API

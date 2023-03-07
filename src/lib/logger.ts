@@ -4,18 +4,44 @@ import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
 import { openErrorModal } from '../store/plugins/openErrorModal';
+import { IS_PRODUCTION } from './environment';
+import { walletStorage } from '../popup/utils';
+
+interface ILoggerOptions {
+  background?: boolean;
+}
+
+interface ILogEntryError {
+  message?: any;
+  modal?: boolean;
+  stack?: string;
+  type?: string;
+  info?: any;
+}
+interface ILogEntry {
+  appVersion?: string;
+  browser: any;
+  error: ILogEntryError;
+  platform?: string;
+  time: number;
+}
 
 export default class Logger {
-  static background;
+  static background: boolean;
 
-  static init(options = {}) {
-    const { background } = options;
+  static init({ background = false }: ILoggerOptions = {}) {
     Logger.background = background;
     if (!background) {
       Vue.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
-        if (error && error.message !== 'Rejected by user') Logger.write({ message: error.toString(), info, type: 'vue-error' });
+        if (error && error.message !== 'Rejected by user') {
+          Logger.write({
+            message: error.toString(),
+            info,
+            type: 'vue-error',
+          });
+        }
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
@@ -58,26 +84,25 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = process.env.NODE_ENV !== 'production', ...error }) {
+  static async write({ modal = !IS_PRODUCTION, ...error }: ILogEntryError) {
     const { saveErrorLog } = await getState();
     if (!saveErrorLog) return;
     const errorLog = await Logger.get();
-    const logEntry = {
+    const logEntry: ILogEntry = {
       error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
       browser: detect(),
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
-    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
+    walletStorage.set('errorLog', [...errorLog, logEntry]);
     if (!Logger.background && modal && error.message) {
       openErrorModal(logEntry);
     }
   }
 
-  static async get() {
-    const { errorLog = [] } = await browser.storage.local.get('errorLog');
-    return errorLog;
+  static async get(): Promise<ILogEntry[]> {
+    return await walletStorage.get('errorLog') || [];
   }
 
   static async sendLog() {
