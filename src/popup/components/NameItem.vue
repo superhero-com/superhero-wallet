@@ -51,7 +51,7 @@
           </button>
         </div>
       </div>
-      <BtnPlain @click="expand = !expand">
+      <BtnPlain @click="onExpandCollapse">
         <ChevronDownIcon :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
       </BtnPlain>
     </div>
@@ -203,6 +203,11 @@ export default defineComponent({
       showInput.value = !showInput.value;
     }
 
+    function onExpandCollapse() {
+      expand.value = !expand.value;
+      showInput.value = false;
+    }
+
     async function setDefault() {
       await root.$store.dispatch('names/setDefault', {
         address: account.value.address,
@@ -256,6 +261,7 @@ export default defineComponent({
       checkAddressOrChannel,
       insertValueFromClipboard,
       expandAndShowInput,
+      onExpandCollapse,
       setDefault,
       setAutoExtend,
       setPointer,
