@@ -16,7 +16,7 @@
       </div>
       <TransactionItem
         v-for="transaction in latestTransactions"
-        :key="`${transaction.transactionOwner}-${transaction.hash}-${activeIdx}`"
+        :key="`${transaction.transactionOwner}-${transaction.hash}`"
         :transaction="transaction"
         show-transaction-owner
       />
