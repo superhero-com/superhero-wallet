@@ -64,6 +64,7 @@
     >
       <InputField
         v-show="showInput"
+        ref="pointerInput"
         v-model="newPointer"
         class="input-address"
         :placeholder="$t('pages.names.details.address-placeholder')"
@@ -181,6 +182,7 @@ export default defineComponent({
     const newPointer = ref<string>('');
     const showInput = ref(false);
     const error = ref(false);
+    const pointerInput = ref();
 
     const account = useGetter<IAccount>('account');
 
@@ -201,6 +203,9 @@ export default defineComponent({
     function expandAndShowInput() {
       expand.value = true;
       showInput.value = !showInput.value;
+      if (showInput.value) {
+        root.$nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
+      }
     }
 
     function onExpandCollapse() {
@@ -251,6 +256,7 @@ export default defineComponent({
       newPointer,
       showInput,
       error,
+      pointerInput,
       account,
       nameEntry,
       hasPointer,
