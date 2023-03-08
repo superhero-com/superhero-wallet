@@ -31,7 +31,7 @@
           >
             {{
               account.name === name
-                ? $t('pages.names.list.default-name')
+                ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
             }}
           </button>
