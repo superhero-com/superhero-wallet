@@ -49,6 +49,12 @@
           >
             {{ $t('pages.names.details.set-pointer') }}
           </button>
+          <BtnHelp
+            v-if="expand && !hasPointer"
+            :title="$t('modals.name-pointers-help.title')"
+            :msg="$t('modals.name-pointers-help.msg')"
+            small
+          />
         </div>
       </div>
       <BtnPlain @click="onExpandCollapse">
@@ -319,9 +325,10 @@ export default defineComponent({
       }
 
       .buttons {
+        display: flex;
         margin-top: 2px;
 
-        button {
+        button:not(.btn-help) {
           padding: 2px 8px;
           cursor: pointer;
           background: variables.$color-border-hover;

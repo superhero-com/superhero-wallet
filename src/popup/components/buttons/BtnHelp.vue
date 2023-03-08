@@ -1,6 +1,7 @@
 <template>
   <BtnPlain
     class="btn-help"
+    :class="{ small }"
     @click="showHelpModal"
   >
     <QuestionCircle class="icon" />
@@ -18,6 +19,7 @@ export default {
     msg: { type: String, default: '' },
     icon: { type: String, default: '' },
     option: { type: Object, default: null },
+    small: Boolean,
   },
   methods: {
     async showHelpModal() {
@@ -45,6 +47,11 @@ export default {
     height: 24px;
     opacity: 0.5;
     color: variables.$color-white;
+  }
+
+  &.small svg {
+    width: 20px;
+    height: 20px;
   }
 
   &:hover svg {
