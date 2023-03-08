@@ -24,7 +24,7 @@
           class="buttons"
         >
           <button
-            v-show="hasPointer"
+            v-show="canBeDefault"
             :class="{ set: account.name === name }"
             :disabled="account.name === name"
             @click="setDefault"
@@ -43,7 +43,7 @@
             {{ $t('pages.names.auto-extend') }}
           </button>
           <button
-            v-show="expand || !hasPointer"
+            v-show="expand || !canBeDefault"
             :class="{ edit: showInput }"
             @click="expandAndShowInput"
           >
@@ -185,7 +185,10 @@ export default defineComponent({
     const account = useGetter<IAccount>('account');
 
     const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
-    const hasPointer = computed(() => nameEntry.value?.pointers?.accountPubkey);
+    const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
+    const canBeDefault = computed(
+      (): boolean => nameEntry.value?.pointers?.accountPubkey === account.value.address,
+    );
     const addressOrFirstPointer = computed((): string | null => (
       nameEntry.value?.pointers?.accountPubkey
       || Object.values(nameEntry.value?.pointers || {})[0]
@@ -248,6 +251,7 @@ export default defineComponent({
       hasPointer,
       addressOrFirstPointer,
       topBlockHeight,
+      canBeDefault,
       blocksToRelativeTime,
       checkAddressOrChannel,
       insertValueFromClipboard,
