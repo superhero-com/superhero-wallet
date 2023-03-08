@@ -10,7 +10,10 @@
         fixed,
         scrollable: shouldScroll,
       }"
-      :style="cssVars"
+      :style="{
+        '--animationTranslate': animationTranslate,
+        '--animationDuration': animationDuration,
+      }"
     >
       <span
         ref="scroll"
@@ -49,9 +52,8 @@ export default defineComponent({
     const shouldScroll = ref(false);
     const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN) ? props.str.replace(AENS_DOMAIN, '') : '');
 
-    const cssVars = computed(() => ({
-      '--beforeWidth': (props.fixed) ? 0 : '4px',
-    }));
+    const animationTranslate = ref<string>();
+    const animationDuration = ref<string>();
 
     onMounted(() => {
       watch(
@@ -62,17 +64,12 @@ export default defineComponent({
           if (!props.fixed && scroll.value && container.value) {
             const { scrollWidth, offsetWidth } = container.value;
 
+            const animationWidth = scrollWidth - offsetWidth;
+
             if (scrollWidth > offsetWidth) {
+              animationTranslate.value = `-${(animationWidth - (props.fixed ? 0 : 4))}px`;
+              animationDuration.value = `${animationWidth * 100}ms`;
               shouldScroll.value = true;
-              scroll.value.animate(
-                [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
-                {
-                  delay: 2000,
-                  duration: 6000,
-                  direction: 'alternate',
-                  iterations: Infinity,
-                },
-              );
             }
           }
         },
@@ -86,7 +83,8 @@ export default defineComponent({
       scroll,
       shouldScroll,
       nameComponent,
-      cssVars,
+      animationTranslate,
+      animationDuration,
     };
   },
 });
@@ -122,14 +120,33 @@ export default defineComponent({
         );
 
       .inner {
+        position: relative;
         display: inline-block;
-        transition: all 0.3s ease-out;
+        animation-name: animationTruncate;
+        animation-duration: var(--animationDuration);
+        animation-delay: 1s;
+        animation-iteration-count: infinite;
+        animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
       }
     }
   }
 
   .domain {
     word-break: keep-all;
+  }
+
+  @keyframes animationTruncate {
+    0% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(var(--animationTranslate));
+    }
+
+    100% {
+      transform: translateX(0);
+    }
   }
 }
 </style>
