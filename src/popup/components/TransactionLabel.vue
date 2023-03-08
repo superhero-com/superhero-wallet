@@ -31,13 +31,13 @@
         class="type"
         :class="{ secondary: showTransactionOwner }"
       >
-        <span
-          v-if="externalLabel.length"
-        >
-          {{ externalLabel }}
-          &nbsp;
-        </span>
         {{ label.text }}
+        <span
+          v-if="label.hasComma && !showTransactionOwner"
+          class="secondary"
+        >
+          ,
+        </span>
       </span>
       <span
         v-if="isErrorTransaction"
@@ -138,21 +138,7 @@ export default defineComponent({
     const transactionLabelRef = ref();
     const labelRef = ref();
     const truncateWidth = ref<string | number>('100%');
-    const addComma = (text: TranslateResult) => text ? `${text},` : '';
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
-
-    const externalLabel = computed(() => {
-      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
-        return root.$t('transaction.type.gaMetaTx');
-      }
-      if (
-        outerTxType.value === TX_TYPE_MDW.PayingForTx
-        && txType.value !== TX_TYPE_MDW.GAAttachTx
-      ) {
-        return root.$t('transaction.type.payingForTx');
-      }
-      return '';
-    });
 
     const label = computed((): ILabel => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
@@ -190,7 +176,7 @@ export default defineComponent({
         )) {
           return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
         }
-        return labelWrapper(addComma(root.$t('transaction.dexType.swap')));
+        return { text: root.$t('transaction.dexType.swap'), hasComma: true };
       }
       if (
         (
@@ -234,9 +220,9 @@ export default defineComponent({
         return labelWrapper(translation);
       }
 
-      return labelWrapper(
-        props.transaction.transactionOwner ? translation : addComma(translation),
-      );
+      return props.transaction.transactionOwner
+        ? labelWrapper(translation)
+        : { text: translation, hasComma: true };
     });
 
     const ownerName = computed(() => getAccountNameToDisplay(
@@ -255,7 +241,6 @@ export default defineComponent({
       isErrorTransaction,
       ownerName,
       label,
-      externalLabel,
       transactionLabelRef,
       labelRef,
       truncateWidth,
@@ -282,6 +267,10 @@ export default defineComponent({
     @extend %face-sans-12-medium;
 
     color: variables.$color-white;
+
+    .type {
+      display: flex;
+    }
 
     .error-type {
       text-transform: lowercase;
@@ -314,7 +303,7 @@ export default defineComponent({
   .label,
   .owner {
     display: flex;
-    gap: 5px;
+    gap: 4px;
   }
 
   .account-name-truncated {

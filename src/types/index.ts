@@ -581,6 +581,7 @@ export interface IKeyPair {
 export interface ILabel {
   text: string | LocaleMessages | TranslateResult,
   customPending?: string | LocaleMessages | TranslateResult
+  hasComma?: boolean;
 }
 
 export interface IDefaultComposableOptions {
