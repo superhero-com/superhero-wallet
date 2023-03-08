@@ -108,7 +108,7 @@ export default {
       return getPayload(this.transaction);
     },
     hasPayload() {
-      return this.payload && this.payload.length;
+      return !!this.payload?.length;
     },
   },
   async mounted() {
