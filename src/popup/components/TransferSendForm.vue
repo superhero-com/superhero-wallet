@@ -292,10 +292,10 @@ export default defineComponent({
     const addressMessage = computed((): IInputMessage => {
       if (isTipUrl.value) {
         switch (urlStatus.value) {
-          case 'verified': return { status: 'success', text: ' ', hideMessage: true };
-          case 'not-secure': return { status: 'warning', text: ' ', hideMessage: true };
-          case 'not-verified': return { status: 'warning', text: ' ', hideMessage: true };
-          case 'blacklisted': return { status: 'error', text: ' ', hideMessage: true };
+          case 'verified': return { status: 'success', text: '', hideMessage: true };
+          case 'not-secure': return { status: 'warning', text: '', hideMessage: true };
+          case 'not-verified': return { status: 'warning', text: '', hideMessage: true };
+          case 'blacklisted': return { status: 'error', text: '', hideMessage: true };
           default:
             throw new Error(`Unknown url status: ${urlStatus.value}`);
         }
