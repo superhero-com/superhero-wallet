@@ -222,10 +222,5 @@ export default defineComponent({
     padding: var(--gap) var(--screen-padding-x);
     background-color: var(--screen-bg-color);
   }
-
-  .tabs-content {
-    position: relative;
-    padding: 0 var(--screen-padding-x);
-  }
 }
 </style>

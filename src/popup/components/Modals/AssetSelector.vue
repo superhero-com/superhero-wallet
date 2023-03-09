@@ -3,7 +3,7 @@
     full-screen
     from-bottom
     has-close-button
-    dense
+    no-padding
     class="asset-selector"
     @close="reject()"
     @opened="onModalOpen"
@@ -128,7 +128,6 @@ export default defineComponent({
   }
 
   .appearing-element {
-    position: fixed;
     width: 100%;
     opacity: 0;
     z-index: -1;
