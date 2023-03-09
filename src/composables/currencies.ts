@@ -83,7 +83,7 @@ export function useCurrencies() {
       return formatCurrency(0);
     }
     const converted = getFiat(value);
-    return (converted < 0.01) ? `<${formatCurrency(0.01)}` : `≈${formatCurrency(converted)}`;
+    return (converted < 0.01) ? `<${formatCurrency(0.01)}` : formatCurrency(converted);
   }
 
   initPollingWatcher(() => loadCurrencyRates(), POLLING_INTERVAL);
