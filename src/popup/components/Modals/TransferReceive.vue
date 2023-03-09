@@ -46,7 +46,7 @@
 
       <div class="request-specific-amount">
         <InputAmount
-          v-model.number="amount"
+          v-model="amount"
           v-validate="{
             min_value_exclusive: 0,
           }"
