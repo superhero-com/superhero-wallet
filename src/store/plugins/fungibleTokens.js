@@ -8,11 +8,10 @@ import {
   fetchJson,
   handleUnknownError,
   calculateSupplyAmount,
-  AETERNITY_SYMBOL,
   getAllPages,
   watchUntilTruthy,
 } from '../../popup/utils';
-import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
+import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 
 export default (store) => {
   store.registerModule('fungibleTokens', {
@@ -20,7 +19,6 @@ export default (store) => {
     state: {
       availableTokens: {},
       tokens: {},
-      aePublicData: {},
       transactions: {},
     },
     getters: {
@@ -28,16 +26,6 @@ export default (store) => {
       tokenBalances: (
         state, { getTokenBalance }, rootState, { account: { address } },
       ) => getTokenBalance(address),
-      getAeternityToken: ({ aePublicData }) => ({ balanceCurrency, tokenBalance }) => {
-        const aePublicDataExists = aePublicData && Object.keys(aePublicData).length > 0;
-        return {
-          ...(aePublicDataExists ? aePublicData : {}),
-          convertedBalance: tokenBalance,
-          symbol: AETERNITY_SYMBOL,
-          balanceCurrency,
-          contractId: AETERNITY_CONTRACT_ID,
-        };
-      },
     },
     mutations: {
       setTransactions(state, { address, transactions }) {
@@ -55,9 +43,6 @@ export default (store) => {
           Vue.set(state.tokens, address, { tokenBalances: [] });
         }
         Vue.set(state.tokens[address], 'tokenBalances', balances);
-      },
-      setAePublicData(state, payload) {
-        state.aePublicData = payload;
       },
     },
     actions: {
@@ -113,15 +98,6 @@ export default (store) => {
             handleUnknownError(e);
           }
         });
-      },
-      async getAeternityData({ rootState: { current }, commit }) {
-        const [aeternityData] = await fetchJson(
-          `${CURRENCY_URL}${current.currency}`,
-        ).catch((e) => {
-          handleUnknownError(e);
-          return [];
-        });
-        return commit('setAePublicData', aeternityData);
       },
       async createOrChangeAllowance(
         { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },

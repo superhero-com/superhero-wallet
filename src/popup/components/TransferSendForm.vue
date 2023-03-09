@@ -257,7 +257,7 @@ export default defineComponent({
     const error = ref<boolean>(false);
 
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const account = useGetter<IAccount>('account');
@@ -265,7 +265,6 @@ export default defineComponent({
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
-    const getAeternityToken = computed(() => root.$store.getters['fungibleTokens/getAeternityToken']);
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
       const warning = (root as any).errors.items
@@ -357,10 +356,7 @@ export default defineComponent({
 
     async function queryHandler(query: any) {
       formModel.value.selectedAsset = availableTokens.value[query.token]
-        || getAeternityToken.value({
-          tokenBalance: balance.value,
-          balanceCurrency: balanceCurrency.value,
-        });
+        || aeternityToken.value;
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
     }

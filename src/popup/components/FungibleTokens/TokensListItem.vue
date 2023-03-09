@@ -43,11 +43,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type { IAsset, IToken } from '../../../types';
+import type { IToken } from '../../../types';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useCurrencies } from '../../../composables';
-import { useState } from '../../../composables/vuex';
 
 import TokenAmount from '../TokenAmount.vue';
 import Tokens from '../Tokens.vue';
@@ -67,11 +66,9 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { getFormattedFiat, formatCurrency } = useCurrencies();
+    const { getFormattedFiat, formatCurrency, aeternityData } = useCurrencies();
 
-    const aePublicData = useState<IAsset>('fungibleTokens', 'aePublicData');
-
-    const price = computed(() => formatCurrency(aePublicData.value?.current_price || 0));
+    const price = computed(() => formatCurrency(aeternityData.value?.current_price || 0));
 
     const balanceFormatted = computed(
       () => getFormattedFiat(props.tokenData.convertedBalance || 0),

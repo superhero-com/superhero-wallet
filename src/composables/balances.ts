@@ -4,9 +4,12 @@ import type {
   Balance,
   BalanceRaw,
   IAccount,
+  IAsset,
   IDefaultComposableOptions,
 } from '../types';
 import {
+  AETERNITY_SYMBOL,
+  AETERNITY_CONTRACT_ID,
   LOCAL_STORAGE_PREFIX,
   aettosToAe,
   isNotFoundError,
@@ -50,13 +53,21 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
-  const { currentCurrencyRate } = useCurrencies();
+  const { currentCurrencyRate, aeternityData } = useCurrencies();
 
   const account = computed<IAccount>(() => store.getters.account);
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
 
   const balance = computed(() => balances.value[account.value.address] || new BigNumber(0));
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
+
+  const aeternityToken = computed((): IAsset => ({
+    ...aeternityData.value,
+    convertedBalance: balance.value,
+    symbol: AETERNITY_SYMBOL,
+    balanceCurrency: balanceCurrency.value,
+    contractId: AETERNITY_CONTRACT_ID,
+  }) as IAsset);
 
   async function updateBalances() {
     const sdk = await getSdk();
@@ -84,6 +95,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   initPollingWatcher(() => updateBalances(), POLLING_INTERVAL);
 
   return {
+    aeternityToken,
     balances,
     balance,
     balanceCurrency,
