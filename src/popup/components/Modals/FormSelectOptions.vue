@@ -3,7 +3,7 @@
     class="form-select-options"
     from-bottom
     has-close-button
-    semi-dense
+    no-padding
     @close="reject()"
   >
     <template #header>
@@ -96,7 +96,7 @@ export default defineComponent({
   }
 
   .title {
-    padding-left: 4px;
+    padding-left: 12px;
     line-height: 48px;
   }
 

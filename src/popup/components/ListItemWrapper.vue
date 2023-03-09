@@ -28,9 +28,7 @@ export default defineComponent({
 
 .list-item-wrapper {
   display: block;
-  padding: 8px var(--screen-padding-x);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
+  padding: 8px 12px;
   color: unset;
   text-decoration: unset;
   text-align: left;
