@@ -128,7 +128,8 @@
       "consensusRequiredHelpTitle": "Consensus required",
       "consensusRequiredHelpMsg": "As the creator of this multisig vault you can determine the authorized signers and set the consensus needed for a transaction confirmation (how many signatures are required to confirm each transaction).",
       "createMultisigVault": "Create Vault",
-      "errorDuplicatingSigner": "Cannot add the same address as a signer twice",
+      "errorDuplicatingSigner": "You can not add the same account address as a signer more than once.",
+      "errorDuplicatingInputMessage": "Duplicated account address",
       "errorNotEnoughBalanceToCreateVault": "Not enough balance in this account. Creating multisig vault requires at least {0}."
     },
     "creatingMultisigAccount": {

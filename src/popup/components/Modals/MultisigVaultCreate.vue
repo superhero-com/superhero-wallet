@@ -38,7 +38,7 @@
           :label="getSignerLabel(index)"
           :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :name="`signer-address-${index}`"
-          :message="errors.first(`signer-address-${index}`)"
+          :message="errors.first(`signer-address-${index}`) || getErrorMessage(signer)"
           :class="{
             error: checkIfSignerAddressDuplicated(signer)
           }"
@@ -290,6 +290,11 @@ export default defineComponent({
       signers.value.splice(index, 1);
     }
 
+    function getErrorMessage(signer: ICreateMultisigAccount) {
+      return checkIfSignerAddressDuplicated(signer)
+        ? root.$t('modals.createMultisigAccount.errorDuplicatingInputMessage')
+        : null;
+    }
     /**
      * Scans a QR code and add a signer address
      * @param {number} signerIndex - The index of the signer to update the address of
@@ -404,6 +409,7 @@ export default defineComponent({
       isValidSigners,
       canCreateMultisig,
       openFormStep,
+      getErrorMessage,
       openReviewStep,
       createMultisigAccount,
       openScanQrModal,
