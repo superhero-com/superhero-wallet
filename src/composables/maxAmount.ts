@@ -135,7 +135,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (!tokenInstance.value) return;
       await getSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.value.methods.balance(account.value.address)).decodedResult,
+        (await tokenInstance.value.methods.balance(account.value.address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
