@@ -285,7 +285,7 @@
     },
     "name-pointers-help": {
       "title": "Name pointers",
-      "msg": "Name pointers associate your .chain name with one of:<br /><br />• Account address;<br />• Oracle ID;<br />• Channel ID;<br />• Contract ID.<br /><br />Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
+      "msg": "Name pointer associates a .chain name with an account address so that the name becomes human-readable alias of the address."
     },
     "auctions-help": {
       "title": "Auctions and bidding",
@@ -756,7 +756,7 @@
         "register": "Register name"
       },
       "list": {
-        "default-name": "Default name",
+        "default": "Default",
         "default-make": "Make default",
         "valid-identifier-error": "Enter valid ae blockchain identifier",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",

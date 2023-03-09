@@ -24,14 +24,14 @@
           class="buttons"
         >
           <button
-            v-show="hasPointer"
+            v-show="canBeDefault"
             :class="{ set: account.name === name }"
             :disabled="account.name === name"
             @click="setDefault"
           >
             {{
               account.name === name
-                ? $t('pages.names.list.default-name')
+                ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
             }}
           </button>
@@ -43,15 +43,21 @@
             {{ $t('pages.names.auto-extend') }}
           </button>
           <button
-            v-show="expand || !hasPointer"
+            v-show="expand || !canBeDefault"
             :class="{ edit: showInput }"
             @click="expandAndShowInput"
           >
             {{ $t('pages.names.details.set-pointer') }}
           </button>
+          <BtnHelp
+            v-if="expand && !hasPointer"
+            :title="$t('modals.name-pointers-help.title')"
+            :msg="$t('modals.name-pointers-help.msg')"
+            small
+          />
         </div>
       </div>
-      <BtnPlain @click="expand = !expand">
+      <BtnPlain @click="onExpandCollapse">
         <ChevronDownIcon :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
       </BtnPlain>
     </div>
@@ -64,6 +70,7 @@
     >
       <InputField
         v-show="showInput"
+        ref="pointerInput"
         v-model="newPointer"
         class="input-address"
         :placeholder="$t('pages.names.details.address-placeholder')"
@@ -181,11 +188,15 @@ export default defineComponent({
     const newPointer = ref<string>('');
     const showInput = ref(false);
     const error = ref(false);
+    const pointerInput = ref();
 
     const account = useGetter<IAccount>('account');
 
     const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
-    const hasPointer = computed(() => nameEntry.value?.pointers?.accountPubkey);
+    const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
+    const canBeDefault = computed(
+      (): boolean => nameEntry.value?.pointers?.accountPubkey === account.value.address,
+    );
     const addressOrFirstPointer = computed((): string | null => (
       nameEntry.value?.pointers?.accountPubkey
       || Object.values(nameEntry.value?.pointers || {})[0]
@@ -198,6 +209,14 @@ export default defineComponent({
     function expandAndShowInput() {
       expand.value = true;
       showInput.value = !showInput.value;
+      if (showInput.value) {
+        root.$nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
+      }
+    }
+
+    function onExpandCollapse() {
+      expand.value = !expand.value;
+      showInput.value = false;
     }
 
     async function setDefault() {
@@ -243,15 +262,18 @@ export default defineComponent({
       newPointer,
       showInput,
       error,
+      pointerInput,
       account,
       nameEntry,
       hasPointer,
       addressOrFirstPointer,
       topBlockHeight,
+      canBeDefault,
       blocksToRelativeTime,
       checkAddressOrChannel,
       insertValueFromClipboard,
       expandAndShowInput,
+      onExpandCollapse,
       setDefault,
       setAutoExtend,
       setPointer,
@@ -303,9 +325,10 @@ export default defineComponent({
       }
 
       .buttons {
+        display: flex;
         margin-top: 2px;
 
-        button {
+        button:not(.btn-help) {
           padding: 2px 8px;
           cursor: pointer;
           background: variables.$color-border-hover;
