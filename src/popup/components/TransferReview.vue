@@ -89,7 +89,6 @@
         <TokenAmount
           :amount="+transferData.fee.toFixed()"
           :symbol="AETERNITY_SYMBOL"
-          hide-fiat
           high-precision
           data-cy="review-fee"
         />
@@ -105,7 +104,6 @@
         <TokenAmount
           :amount="+transferData.total"
           :symbol="AETERNITY_SYMBOL"
-          hide-fiat
           high-precision
           data-cy="review-total"
         />
