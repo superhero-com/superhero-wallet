@@ -6,16 +6,23 @@
         {{ $t('pages.invite.generate-link') }}
       </p>
       <InputAmount
-        v-model="amount"
+        v-model="formModel.amount"
+        v-validate="{
+          min_value_exclusive: 0,
+          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+          enough_ae: fee.toString(),
+        }"
         class="amount"
+        name="amount"
         :label="$t('pages.invite.tip-attached')"
-        no-token
+        :message="errors.first('amount')"
         ae-only
-        @error="(val) => error = val"
+        :selected-asset="formModel.selectedAsset"
+        @asset-selected="(val) => formModel.selectedAsset = val"
       />
       <BtnMain
         extend
-        :disabled="error"
+        :disabled="!formModel.amount || !!errors.first('amount')"
         @click="generate"
       >
         {{ $t('pages.invite.generate') }}
@@ -40,17 +47,20 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { defineComponent, ref } from '@vue/composition-api';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
-import { watchUntilTruthy } from '../utils';
+
+import { useState } from '../../composables/vuex';
+import { useBalances, useSdk, useMaxAmount } from '../../composables';
+import { TransferFormModel } from '../components/Modals/TransferSend.vue';
 import InputAmount from '../components/InputAmountV2.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../icons/new-invite-link.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     InputAmount,
     BtnMain,
@@ -58,40 +68,50 @@ export default {
     Invite,
     NewInviteLink,
   },
-  data: () => ({
-    amount: '',
-    loading: false,
-    error: false,
-  }),
-  computed: {
-    ...mapState('invites', ['invites']),
-    ...mapGetters('sdkPlugin', ['sdk']),
-  },
-  methods: {
-    async generate() {
-      this.loading = true;
+  setup(props, { root }) {
+    const loading = ref(false);
+    const formModel = ref<TransferFormModel>({
+      address: '', amount: '', selectedAsset: undefined, payload: '',
+    });
+
+    const { getSdk } = useSdk({ store: root.$store });
+    const { balance } = useBalances({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+
+    const invites = useState('invites', 'invites');
+
+    async function generate() {
+      loading.value = true;
       const { publicKey, secretKey } = Crypto.generateKeyPair();
 
       try {
-        if (this.amount > 0) {
-          await watchUntilTruthy(() => this.sdk);
-          await this.sdk.spend(this.amount, publicKey, {
-            payload: 'referral',
-            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-          });
-        }
+        const sdk = await getSdk();
+        await sdk.spend(formModel.value.amount, publicKey, {
+          payload: 'referral',
+          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+        });
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
+        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
 
-      this.$store.commit('invites/add', secretKey);
-      this.amount = 0;
-    },
+      root.$store.commit('invites/add', secretKey);
+      formModel.value.amount = '';
+    }
+
+    return {
+      balance,
+      fee,
+      invites,
+      loading,
+      max,
+      formModel,
+      generate,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
