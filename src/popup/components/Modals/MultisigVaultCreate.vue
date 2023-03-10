@@ -81,7 +81,6 @@
 
         <div class="signers-count">
           <select
-            v-if="signers.length > MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
             v-model="confirmationsRequired"
             class="num-of-signers-selector"
           >
@@ -89,7 +88,6 @@
               v-for="signerIdx of signers.length"
             >
               <option
-                v-if="signerIdx !== 1"
                 :key="`option-item-${signerIdx}`"
                 :value="signerIdx"
               >
@@ -97,12 +95,6 @@
               </option>
             </template>
           </select>
-          <span
-            v-else
-            class="text-emphasis"
-          >
-            {{ MULTISIG_VAULT_MIN_NUM_OF_SIGNERS }}
-          </span>
 
           <i18n
             path="modals.createMultisigAccount.consensusRequiredContent"
