@@ -100,7 +100,7 @@ export default defineComponent({
     });
 
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, balanceCurrency } = useBalances({ store: root.$store });
+    const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
 
     const tipId = root.$route.query.id;
@@ -110,7 +110,6 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-    const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
@@ -210,10 +209,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = getAeternityToken.value({
-        tokenBalance: balance.value,
-        balanceCurrency: balanceCurrency.value,
-      });
+      formModel.value.selectedAsset = aeternityToken.value;
 
       if (!tipId) throw new Error('"id" param is missing');
 

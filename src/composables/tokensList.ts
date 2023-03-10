@@ -32,7 +32,7 @@ export function useTokensList({
   searchTerm = ref(''),
   isMultisig,
 }: UseTokensListOptions) {
-  const { balance } = useBalances({ store });
+  const { balance, aeternityToken } = useBalances({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate);
 
@@ -42,7 +42,6 @@ export function useTokensList({
       : (store.state as any).fungibleTokens.availableTokens
   ));
   const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
-  const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
 
   const aeTokenBalance = computed(() => (
     isMultisig
@@ -52,8 +51,9 @@ export function useTokensList({
   /**
    * Returns the default aeternity meta information
    */
-  const aeternityToken = computed<IToken | null>(() => getAeternityToken.value({
-    tokenBalance: aeTokenBalance.value,
+  const aeToken = computed((): any => ({
+    ...aeternityToken.value,
+    convertedBalance: aeTokenBalance.value,
     balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
   }));
 
@@ -72,7 +72,7 @@ export function useTokensList({
     });
 
     return [
-      ...(aeternityToken.value ? [aeternityToken.value] : []),
+      ...(aeToken.value ? [aeToken.value] : []),
       ...tokens,
     ];
   });
@@ -105,7 +105,7 @@ export function useTokensList({
   });
 
   return {
-    aeternityToken,
+    aeToken,
     allTokens,
     filteredTokens,
     aeTokenBalance,

@@ -94,7 +94,7 @@ import {
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
 } from '../../router/routeNames';
-import { useSdk, useTokensList } from '../../../composables';
+import { useSdk, useTokensList, useCurrencies } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -127,6 +127,7 @@ export default defineComponent({
     const { getSdk } = useSdk({ store: root.$store });
     const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+    const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
       store: root.$store,
       isMultisig: isMultisig.value,
@@ -162,7 +163,6 @@ export default defineComponent({
     const isConnected = useGetter('isConnected');
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
-    const aePublicData = computed(() => root.$store.state.fungibleTokens.aePublicData);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
@@ -180,7 +180,7 @@ export default defineComponent({
       };
 
       return contractId === AETERNITY_CONTRACT_ID
-        ? { ...defaultData, ...aePublicData.value }
+        ? { ...defaultData, ...aeternityData.value }
         : tokenBalances.value.find(
           (token) => token.contractId === contractId,
         ) || { ...fungibleToken.value, contractId };

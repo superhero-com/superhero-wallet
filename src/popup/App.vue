@@ -74,6 +74,7 @@ import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
 import { useNotifications } from '../composables/notifications';
+import { useCurrencies } from '../composables';
 import { useViewport } from '../composables/viewport';
 
 export default defineComponent({
@@ -94,6 +95,7 @@ export default defineComponent({
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const { addWalletNotification } = useNotifications();
+    const { loadAeternityData } = useCurrencies(true);
 
     const { initViewport } = useViewport();
 
@@ -164,7 +166,7 @@ export default defineComponent({
       await watchUntilTruthy(() => isRestored.value);
       setNotificationSettings();
 
-      root.$store.dispatch('fungibleTokens/getAeternityData');
+      loadAeternityData();
       root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     });
 

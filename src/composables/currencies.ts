@@ -1,7 +1,8 @@
 import { computed, ref } from '@vue/composition-api';
-import type { CurrencyCode, ICurrency } from '../types';
+import type { CurrencyCode, IAsset, ICurrency } from '../types';
 import {
   CURRENCIES,
+  CURRENCY_URL,
   CURRENCIES_URL,
   fetchJson,
   getLocalStorageItem,
@@ -15,6 +16,7 @@ const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
 const APP_CURRENCY_CODES = CURRENCIES.map(({ code }) => code).join(',');
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 
+const aeternityData = ref<IAsset>();
 const currencyRates = ref<Record<string, number>>({});
 const currentCurrencyCode = ref<CurrencyCode>(
   getLocalStorageItem<CurrencyCode>([LOCAL_STORAGE_CURRENCY_KEY]) || DEFAULT_CURRENCY_CODE,
@@ -22,7 +24,7 @@ const currentCurrencyCode = ref<CurrencyCode>(
 
 const initPollingWatcher = createPollingBasedOnMountedComponents();
 
-export function useCurrencies() {
+export function useCurrencies(withoutPolling: boolean = false) {
   const minTipAmount = computed(() => 0.01 / (currencyRates.value.usd || 1));
   const currentCurrencyRate = computed(
     (): number => currencyRates.value[currentCurrencyCode.value] || 0,
@@ -31,8 +33,18 @@ export function useCurrencies() {
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );
 
+  async function loadAeternityData() {
+    try {
+      [aeternityData.value] = await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`);
+    } catch (e) {
+      handleUnknownError(e);
+      aeternityData.value = undefined;
+    }
+  }
+
   function setCurrentCurrency(currency: CurrencyCode) {
     currentCurrencyCode.value = currency;
+    loadAeternityData();
     setLocalStorageItem([LOCAL_STORAGE_CURRENCY_KEY], currency);
   }
 
@@ -86,15 +98,19 @@ export function useCurrencies() {
     return (converted < 0.01) ? `<${formatCurrency(0.01)}` : formatCurrency(converted);
   }
 
-  initPollingWatcher(() => loadCurrencyRates(), POLLING_INTERVAL);
+  if (!withoutPolling) {
+    initPollingWatcher(() => loadCurrencyRates(), POLLING_INTERVAL);
+  }
 
   return {
+    aeternityData,
     CURRENCIES,
     minTipAmount,
     currencyRates,
     currentCurrencyCode,
     currentCurrencyRate,
     currentCurrencyInfo,
+    loadAeternityData,
     loadCurrencyRates,
     setCurrentCurrency,
     formatCurrency,
