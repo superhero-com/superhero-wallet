@@ -131,6 +131,7 @@
       :phase="multisigAccountCreationPhase"
       :multisig-account="multisigAccount"
       :is-accessible="isMultisigAccountAccessible"
+      :is-created="isMultisigAccountCreated"
     />
 
     <template #footer>
@@ -157,7 +158,7 @@
       <BtnMain
         v-else-if="currentStep === STEPS.processing"
         :text="$t('modals.creatingMultisigAccount.btnText')"
-        :disabled="!isMultisigAccountAccessible"
+        :disabled="!(isMultisigAccountCreated || isMultisigAccountAccessible)"
         @click="navigateToMultisigVault"
       />
     </template>
@@ -242,6 +243,7 @@ export default defineComponent({
       pendingMultisigCreationTxs,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
+      isMultisigAccountCreated,
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
@@ -254,9 +256,12 @@ export default defineComponent({
     const currentMultisigAccountId = ref<string>('');
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
-      if (!validateHash(signer.address).valid) return false;
-      return signers.value.filter(({ address }) => signer.address === address).length >= 2;
+      return (
+        validateHash(signer.address).valid
+        && signers.value.filter(({ address }) => signer.address === address).length >= 2
+      );
     }
+
     const isValidSigners = computed(
       () => !signers.value.filter(
         (signer) => (
@@ -265,6 +270,7 @@ export default defineComponent({
         ),
       ).length,
     );
+
     const canCreateMultisig = computed(
       () => (
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
@@ -340,7 +346,11 @@ export default defineComponent({
     async function createMultisigAccount() {
       currentStep.value = STEPS.processing;
       try {
-        await deployMultisigAccount(currentMultisigAccountId.value);
+        await deployMultisigAccount(
+          currentMultisigAccountId.value,
+          confirmationsRequired.value,
+          signers.value.map(({ address }) => address),
+        );
       } catch (error) {
         handleUnknownError(error);
         await root.$store.dispatch('modals/open', {
@@ -355,7 +365,7 @@ export default defineComponent({
     async function navigateToMultisigVault() {
       if (multisigAccount.value) {
         await props.resolve();
-        setActiveMultisigAccountId(multisigAccount.value.multisigAccountId);
+        setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
         root.$router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
       }
     }
@@ -390,6 +400,7 @@ export default defineComponent({
       pendingMultisigCreationTxs,
       multisigAccountCreationFee,
       isMultisigAccountAccessible,
+      isMultisigAccountCreated,
       currentStep,
       confirmationsRequired,
       signers,

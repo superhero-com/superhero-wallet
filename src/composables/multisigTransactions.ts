@@ -87,6 +87,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   async function proposeTx(spendTx: string, contractId: string) {
     const [sdk, topBlockHeight] = await Promise.all([getSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
+
     const spendTxHash = new Uint8Array(Crypto.hash(
       Buffer.concat([Buffer.from(sdk.getNetworkId()), decode(spendTx)]),
     ));
@@ -99,6 +100,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     await gaContractRpc.methods.propose.send(spendTxHash, {
       FixedTTL: [expirationHeight],
     });
+
     return Buffer.from(spendTxHash).toString('hex');
   }
 

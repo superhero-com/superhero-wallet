@@ -12,7 +12,10 @@
     </template>
 
     <template #bottom>
+      <AccountCardSyncing v-if="isPendingAccount" />
+
       <AccountCardConsensus
+        v-else
         :multisig-account="account"
       />
     </template>
@@ -21,6 +24,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   PropType,
 } from '@vue/composition-api';
@@ -30,11 +34,14 @@ import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import AccountCardConsensus from './AccountCardConsensus.vue';
 import AccountCardBase from './AccountCardBase.vue';
+import AccountCardSyncing from './AccountCardSyncing.vue';
 
 import type { IMultisigAccount } from '../../types';
+import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   components: {
+    AccountCardSyncing,
     AccountCardBase,
     AccountCardConsensus,
     AccountInfo,
@@ -44,8 +51,17 @@ export default defineComponent({
     account: { type: Object as PropType<IMultisigAccount>, required: true },
     selected: Boolean,
   },
-  setup() {
+  setup(props, { root }) {
+    const { pendingMultisigAccounts } = useMultisigAccounts({ store: root.$store });
+
+    const isPendingAccount = computed(
+      () => !!pendingMultisigAccounts.value.find(
+        ({ gaAccountId }) => gaAccountId === props.account.gaAccountId,
+      ),
+    );
+
     return {
+      isPendingAccount,
       ROUTE_MULTISIG_DETAILS,
     };
   },

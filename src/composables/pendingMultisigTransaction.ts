@@ -1,11 +1,10 @@
 import {
-  onMounted,
   ref,
   watch,
   computed,
 } from '@vue/composition-api';
+import { isEqual } from 'lodash-es';
 import {
-  watchUntilTruthy,
   FUNCTION_TYPE_MULTISIG,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   handleUnknownError,
@@ -186,21 +185,17 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
 
   watch(
     () => activeMultisigAccount.value,
-    () => {
-      assignPendingMultisigTx();
+    (newValue, oldValue) => {
+      if (!isEqual(newValue, oldValue)) {
+        assignPendingMultisigTx();
 
-      if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
-        fetchLatestMultisigAccountTransaction();
+        if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
+          fetchLatestMultisigAccountTransaction();
+        }
       }
     },
+    { immediate: true },
   );
-
-  onMounted(async () => {
-    if (!pendingMultisigTransaction.value) {
-      await watchUntilTruthy(() => activeMultisigAccount.value);
-      assignPendingMultisigTx();
-    }
-  });
 
   return {
     pendingMultisigTransaction,

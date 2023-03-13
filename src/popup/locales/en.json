@@ -147,12 +147,16 @@
     "creatingMultisigAccount": {
       "title": "Creating vault progress",
       "btnText": "Go to multisig vault",
-      "vaultCreatedMessage": "It's ready! Your new multisig vault is added to Superhero wallet.",
+      "vaultAccessibleMessage": "It's ready! Your new multisig vault is added to Superhero wallet.",
+      "vaultCreatedMessage": "You may proceed and explore your newly created vault.",
+      "vaultCreatedMessageSub": "However it will become visible to the other authorized signers in a short period of time (usually it takes between 30 seconds and 1 minute).",
       "preparingMultisigVault": "Preparing multisig vault",
       "deployingSmartContract": "Deploying smart contract",
       "creatingMultisigVault": "Creating multisig vault account",
       "addingToWallet": "Adding multisig vault to the wallet",
-      "takingLong": "This step may take a few moments."
+      "syncingVault": "Syncing multisig vault",
+      "takingLong": "This step may take a few moments.",
+      "syncing": "Syncing..."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",

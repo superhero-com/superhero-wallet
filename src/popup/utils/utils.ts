@@ -460,7 +460,7 @@ export function aettosToAe(value: number | string) {
 }
 
 /**
- * Converts long raw values like '3280000000000000000' to human readable 3.28
+ * Converts long raw values like '3280000000000000000' to human-readable 3.28
  */
 export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
@@ -468,4 +468,12 @@ export function getAeFee(value: number | string) {
 
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
+}
+
+export function prepareConsensusLabel(
+  confirmedBy: number,
+  confirmationsRequired: number,
+  totalConfirmations: number,
+) {
+  return `${confirmedBy}/${confirmationsRequired} ${i18n.t('common.of')} ${totalConfirmations}`;
 }

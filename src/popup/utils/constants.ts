@@ -550,3 +550,5 @@ export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
 } as const;
+
+export const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
