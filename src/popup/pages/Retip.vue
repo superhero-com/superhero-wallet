@@ -18,6 +18,7 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
+        min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_ae: fee.toString(),
       }"
@@ -111,7 +112,6 @@ export default defineComponent({
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
-    const minTipAmount = useGetter('minTipAmount');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
     const tippingContract = computed(
       () => tipId.includes('_v2') || tipId.includes('_v3')
@@ -126,10 +126,6 @@ export default defineComponent({
     }>(() => {
       if (!sdk.value || !tippingContract.value) {
         return { error: true };
-      }
-      if (formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
-        && +(formModel.value.amount || 0) < minTipAmount.value) {
-        return { error: true, msg: root.$t('pages.tipPage.minAmountError') };
       }
       return { error: false };
     });
