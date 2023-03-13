@@ -23,10 +23,8 @@
       }"
       name="amount"
       class="amount-input"
-      show-tokens-with-balance
+      ae-only
       :message="validationStatus.msg || errors.first('amount')"
-      :selected-asset="formModel.selectedAsset"
-      @asset-selected="handleAssetChange"
     />
     <div
       v-if="tip.title"
@@ -34,8 +32,6 @@
     >
       {{ tip.title }}
     </div>
-
-    <pre>{{ validationStatus }}</pre>
 
     <BtnMain
       class="bottom-btn"
@@ -131,10 +127,6 @@ export default defineComponent({
       if (!sdk.value || !tippingContract.value) {
         return { error: true };
       }
-      if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
-        && tipId.includes('_v1')) {
-        return { error: true, msg: root.$t('pages.tipPage.v1FungibleTokenTipError') };
-      }
       if (formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
         && +(formModel.value.amount || 0) < minTipAmount.value) {
         return { error: true, msg: root.$t('pages.tipPage.minAmountError') };
@@ -203,10 +195,6 @@ export default defineComponent({
       }
     }
 
-    function handleAssetChange(selectedAsset: any) {
-      formModel.value.selectedAsset = selectedAsset;
-    }
-
     onMounted(async () => {
       loading.value = true;
       formModel.value.selectedAsset = aeternityToken.value;
@@ -223,7 +211,6 @@ export default defineComponent({
     });
 
     return {
-      handleAssetChange,
       tip,
       formModel,
       loading,
