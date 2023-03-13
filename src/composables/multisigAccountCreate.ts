@@ -1,15 +1,22 @@
 import { computed, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { AmountFormatter, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
+import dayjs from 'dayjs';
 import type {
   IDefaultComposableOptions,
   IKeyPair,
-  IMultisigAccountBase,
+  IMultisigAccount,
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '../types';
 import { useSdk } from './sdk';
-import { DEFAULT_WAITING_HEIGHT, MULTISIG_CREATION_PHASES, MULTISIG_SIMPLE_GA_BYTECODE } from '../popup/utils';
+import {
+  DEFAULT_WAITING_HEIGHT,
+  MULTISIG_CREATION_PHASES,
+  MULTISIG_SIMPLE_GA_BYTECODE,
+  SUPPORTED_MULTISIG_CONTRACT_VERSION,
+  prepareConsensusLabel,
+} from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
@@ -20,15 +27,23 @@ const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   const { getDrySdk, getSdk } = useSdk({ store });
-  const { getMultisigAccountByContractId } = useMultisigAccounts({ store });
+  const {
+    getMultisigAccountByContractId,
+    addPendingMultisigAccount,
+  } = useMultisigAccounts({ store });
   const { balances } = useBalances({ store });
 
-  const multisigAccount = ref<IMultisigAccountBase | null>(null);
+  const multisigAccount = ref<IMultisigAccount | null>(null);
   const multisigAccountCreationFee = ref<number>(0);
 
   const isMultisigAccountAccessible = computed(() => (
     multisigAccount.value
     && multisigAccountCreationPhase.value === MULTISIG_CREATION_PHASES.accessible
+  ));
+
+  const isMultisigAccountCreated = computed(() => (
+    multisigAccount.value
+    && multisigAccountCreationPhase.value === MULTISIG_CREATION_PHASES.created
   ));
 
   async function createMultisigContractInstance() {
@@ -40,7 +55,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   }
 
   /**
-   * Estimate the amount of AE tokens to be payed for the multisig account creation.
+   * Estimate the amount of AE tokens to be paid for the multisig account creation.
    */
   async function estimateMultisigAccountDeployGasFee(
     multisigContractInstance: any,
@@ -147,7 +162,11 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * Second step of account creation.
    * @throws Error
    */
-  async function deployMultisigAccount(accountId: string) {
+  async function deployMultisigAccount(
+    accountId: string,
+    confirmationsRequired: number,
+    signers: string[],
+  ) {
     if (!pendingMultisigCreationTxs.value[accountId]?.signedAttachTx) {
       throw Error(`Raw PayForTransaction not found for account ${accountId}, Prepare PayForTransaction first`);
     }
@@ -163,17 +182,40 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.deployed;
       const gaContract = await sdk.getAccount(accountId);
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.created;
+
+      const currentDate = dayjs().toISOString();
+
       multisigAccount.value = {
         contractId: gaContract.contractId,
-        multisigAccountId: accountId,
+        balance: new BigNumber(gaContract.balance),
+        gaAccountId: accountId,
+        signers,
+        confirmationsRequired,
+        consensusLabel: prepareConsensusLabel(0, confirmationsRequired, signers.length),
+        nonce: 1, // Default value for freshly created account
+        createdAt: currentDate,
+        updatedAt: currentDate,
+        hasPendingTransaction: false,
+        confirmedBy: [],
+        expired: false,
+        id: 0,
+        proposedBy: '',
+        refusedBy: [],
+        txHash: undefined, // set from propose
+        version: SUPPORTED_MULTISIG_CONTRACT_VERSION,
+        expirationHeight: 0,
+        signerId: signers[0],
+        height: -1,
+        pending: true,
       };
+
       delete pendingMultisigCreationTxs.value[accountId];
     } else {
       throw Error('Vault creation transaction is not mined within the expected time');
     }
 
-    // Wait for the account to be discovered by the wallet to allow to open it's details.
-    // TODO in the future we could try to add the new account to the list of the accounts.
+    addPendingMultisigAccount(multisigAccount.value);
+
     await new Promise((resolve) => {
       const interval = setInterval(() => {
         if (
@@ -194,6 +236,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     pendingMultisigCreationTxs,
     multisigAccountCreationFee,
     isMultisigAccountAccessible,
+    isMultisigAccountCreated,
     prepareVaultCreationAttachTx,
     prepareVaultCreationRawTx,
     deployMultisigAccount,

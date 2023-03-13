@@ -6,9 +6,11 @@ import { DryRunError } from '@aeternity/aepp-sdk';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import {
   MAGNITUDE,
+  SUPPORTED_MULTISIG_CONTRACT_VERSION,
   fetchJson,
   handleUnknownError,
   convertToken,
+  prepareConsensusLabel,
   getLocalStorageItem,
   setLocalStorageItem,
 } from '../popup/utils';
@@ -22,12 +24,10 @@ import type {
   IMultisigAccountResponse,
 } from '../types';
 import { useSdk } from './sdk';
-import { i18n } from '../store/plugins/languages';
 
 const POLLING_INTERVAL = 7000;
 
 const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
-const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
 
 function storeMultisigAccounts(multisigAccounts: IMultisigAccount[], networkId: string) {
   return setLocalStorageItem([LOCAL_STORAGE_MULTISIG_KEY, networkId], multisigAccounts);
@@ -38,6 +38,7 @@ function getStoredMultisigAccounts(networkId: string): IMultisigAccount[] {
 }
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
+const pendingMultisigAccounts = ref<IMultisigAccount[]>([]);
 const activeMultisigAccountId = ref('');
 const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
@@ -49,8 +50,14 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-  const activeMultisigAccount = computed<IMultisigAccount | undefined>(() => multisigAccounts.value
-    .find((account) => account.gaAccountId === activeMultisigAccountId.value));
+  const allMultisigAccounts = computed<IMultisigAccount[]>(
+    () => [...multisigAccounts.value, ...pendingMultisigAccounts.value],
+  );
+
+  const activeMultisigAccount = computed<IMultisigAccount | undefined>(
+    () => allMultisigAccounts.value
+      .find((account) => account.gaAccountId === activeMultisigAccountId.value),
+  );
 
   if (
     !multisigAccounts.value.length
@@ -60,11 +67,37 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   }
 
   function setActiveMultisigAccountId(gaAccountId: string) {
-    if (gaAccountId && multisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
+    if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
       activeMultisigNetworkId.value = activeNetwork.value.networkId;
       window.localStorage
         .setItem(`${LOCAL_STORAGE_MULTISIG_KEY}_active_${activeNetwork.value.networkId}`, JSON.stringify(gaAccountId));
+    }
+  }
+
+  function addPendingMultisigAccount(multisigAccount: IMultisigAccount) {
+    pendingMultisigAccounts.value.push(multisigAccount);
+  }
+
+  function addTransactionToPendingMultisigAccount(txHash: string, gaAccountId: string) {
+    pendingMultisigAccounts.value = pendingMultisigAccounts.value.map(
+      (account) => account.gaAccountId === gaAccountId
+        ? {
+          ...account,
+          txHash,
+          hasPendingTransaction: true,
+        }
+        : account,
+    );
+  }
+
+  function removeDuplicatesFromPendingAccounts() {
+    if (pendingMultisigAccounts.value?.length) {
+      pendingMultisigAccounts.value = pendingMultisigAccounts.value.filter(
+        (pendingAccount) => !multisigAccounts.value.find(
+          (account) => account.gaAccountId === pendingAccount.gaAccountId,
+        ),
+      );
     }
   }
 
@@ -148,10 +181,10 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
             const hasPendingTransaction = !!txHash && !consensus.expired;
 
-            const consensusLabel = (
-              `${hasPendingTransaction ? consensus?.confirmedBy?.length : 0}`
-              + `/${consensus.confirmationsRequired} ${i18n.t('common.of')} `
-              + `${signers.decodedResult?.length}`
+            const consensusLabel = prepareConsensusLabel(
+              hasPendingTransaction ? consensus?.confirmedBy?.length : 0,
+              consensus.confirmationsRequired,
+                signers.decodedResult?.length,
             );
 
             return {
@@ -213,6 +246,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
     multisigAccounts.value = result;
     storeMultisigAccounts(result, activeNetwork.value.networkId);
+    removeDuplicatesFromPendingAccounts();
   }
 
   function fetchAdditionalInfo() {
@@ -225,20 +259,23 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   }
 
   function getMultisigAccountByContractId(contractId: string) {
-    return multisigAccounts.value.find((acc) => acc.contractId === contractId);
+    return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
 
   initPollingWatcher(() => updateMultisigAccounts(), POLLING_INTERVAL);
 
   return {
-    multisigAccounts,
+    multisigAccounts: allMultisigAccounts,
+    pendingMultisigAccounts,
     isAdditionalInfoNeeded,
     activeMultisigAccountId,
     activeMultisigAccount,
+    addTransactionToPendingMultisigAccount,
     fetchAdditionalInfo,
     setActiveMultisigAccountId,
     stopFetchingAdditionalInfo,
     updateMultisigAccounts,
     getMultisigAccountByContractId,
+    addPendingMultisigAccount,
   };
 }

@@ -175,6 +175,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const {
       activeMultisigAccount,
+      addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
     } = useMultisigAccounts({ store: root.$store });
     const loading = ref<boolean>(false);
@@ -342,7 +343,12 @@ export default defineComponent({
             aeToAettos(props.transferData.amount!),
             props.transferData.payload || '',
           );
+
           const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
+
+          if (activeMultisigAccount.value.pending) {
+            addTransactionToPendingMultisigAccount(txHash, activeMultisigAccount.value.gaAccountId);
+          }
 
           await postSpendTx(txToPropose, txHash);
           await updateMultisigAccounts();

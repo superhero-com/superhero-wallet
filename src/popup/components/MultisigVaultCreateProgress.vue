@@ -31,8 +31,11 @@
         </div>
 
         <div class="phase-item-name">
-          <div>
-            {{ localPhase.text }}<span v-if="isPhaseCurrent(index)">&hellip;</span>
+          <div v-if="isPhaseCurrent(index)">
+            {{ localPhase.pendingText || localPhase.text }}&hellip;
+          </div>
+          <div v-else>
+            {{ localPhase.text }}
           </div>
           <div
             v-if="localPhase.caption && !isAccessible && isPhaseCurrent(index)"
@@ -50,14 +53,25 @@
         class="multisig-account-created"
       >
         <div class="message">
-          {{ $t('modals.creatingMultisigAccount.vaultCreatedMessage') }}
+          {{ $t('modals.creatingMultisigAccount.vaultAccessibleMessage') }}
         </div>
         <AvatarWithChainName
-          :address="multisigAccount.multisigAccountId"
+          :address="multisigAccount.gaAccountId"
           class="ae-address"
           show-address
           :column-count="9"
         />
+      </div>
+      <div
+        v-else-if="isCreated"
+        class="multisig-account-created left"
+      >
+        <div class="message">
+          {{ $t('modals.creatingMultisigAccount.vaultCreatedMessage') }}
+        </div>
+        <div class="sub-message">
+          {{ $t('modals.creatingMultisigAccount.vaultCreatedMessageSub') }}
+        </div>
       </div>
     </Transition>
   </div>
@@ -70,10 +84,8 @@ import {
   PropType,
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
-import {
-  MULTISIG_CREATION_PHASES,
-} from '../utils';
-import { IMultisigAccountBase, IMultisigCreationPhase } from '../../types';
+import { MULTISIG_CREATION_PHASES } from '../utils';
+import type { IMultisigAccount, IMultisigCreationPhase } from '../../types';
 
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -84,6 +96,7 @@ import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 interface PhaseLabel {
   key: IMultisigCreationPhase;
   text: TranslateResult;
+  pendingText?: TranslateResult;
   caption?: TranslateResult;
 }
 
@@ -96,9 +109,10 @@ export default defineComponent({
     PendingIcon,
   },
   props: {
-    multisigAccount: { type: Object as PropType<IMultisigAccountBase>, default: null },
+    multisigAccount: { type: Object as PropType<IMultisigAccount>, default: null },
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     isAccessible: Boolean,
+    isCreated: Boolean,
   },
   setup(props, { root }) {
     const localPhases: PhaseLabel[] = [
@@ -113,10 +127,12 @@ export default defineComponent({
       {
         key: MULTISIG_CREATION_PHASES.created,
         text: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
+        caption: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
       },
       {
         key: MULTISIG_CREATION_PHASES.accessible,
         text: root.$t('modals.creatingMultisigAccount.addingToWallet'),
+        pendingText: root.$t('modals.creatingMultisigAccount.syncingVault'),
         caption: root.$t('modals.creatingMultisigAccount.takingLong'),
       },
     ];
@@ -207,14 +223,30 @@ export default defineComponent({
     padding-top: 30px;
     text-align: center;
 
+    &.left {
+      text-align: left;
+
+      .message,
+      .sub-message {
+        margin-inline: 8px;
+      }
+    }
+
     .message {
-      @extend %face-sans-16-regular;
+      @extend %face-sans-15-medium;
 
       max-width: 250px;
       margin-inline: auto;
       padding-bottom: 16px;
       color: variables.$color-white;
       line-height: 22px;
+    }
+
+    .sub-message {
+      @extend %face-sans-15-regular;
+
+      color: rgba(variables.$color-white, 0.85);
+      line-height: 20px;
     }
 
     .ae-address {

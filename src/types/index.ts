@@ -150,11 +150,6 @@ export interface IAccountLabeled extends Partial<IAccount> {
   label?: TranslateResult
 }
 
-export interface IMultisigAccountBase {
-  contractId: string
-  multisigAccountId: string
-}
-
 export interface IMultisigConsensus {
   confirmationsRequired: number;
   confirmedBy: string[];
@@ -185,6 +180,7 @@ export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountRe
   signers: string[];
   consensusLabel?: string;
   hasPendingTransaction: boolean;
+  pending?: boolean;
 }
 
 export interface IRawMultisigAccount {
