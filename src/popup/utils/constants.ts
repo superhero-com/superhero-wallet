@@ -101,6 +101,7 @@ export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMM
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
 export const ACCOUNT_LEDGER_WALLET = 'ledger';
+export const ACCOUNT_AIR_GAP_WALLET = 'airgap';
 
 /**
  * Default `networkId` values returned by the Node after establishing the connection.
@@ -407,6 +408,7 @@ export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
+export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const MODAL_CONFIRM = 'confirm';
