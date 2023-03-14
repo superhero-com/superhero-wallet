@@ -59,7 +59,6 @@
             autocomplete="off"
             step="any"
             data-cy="input"
-            :type="type"
             :value="value"
             :disabled="readonly"
             :maxlength="textLimit"
