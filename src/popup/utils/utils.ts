@@ -262,7 +262,7 @@ export async function fetchAllPages<T = any>(
   getNextPage: (url: string) => Promise<IPageableResponse<T>>,
 ) {
   const result = [];
-  let nextPageUrl: string | null = null;
+  let nextPageUrl: string | null = '';
 
   while (nextPageUrl !== null) {
     // eslint-disable-next-line no-await-in-loop
