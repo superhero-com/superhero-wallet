@@ -35,12 +35,6 @@ export default defineComponent({
 .multisig-token-list-wrapper {
   position: relative;
   padding-top: 4px;
-}
-
-.search-bar-wrapper {
-  background: var(--screen-bg-color);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  padding-inline: var(--screen-padding-x);
+  margin-inline: calc(-1 * var(--screen-padding-x));
 }
 </style>
