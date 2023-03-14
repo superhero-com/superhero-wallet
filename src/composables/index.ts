@@ -19,3 +19,4 @@ export * from './transactionTokens';
 export * from './transactionAndTokenFilter';
 export * from './ui';
 export * from './viewport';
+export * from './airGap';

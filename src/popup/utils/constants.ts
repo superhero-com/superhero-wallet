@@ -85,6 +85,7 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
+export const ACCOUNT_AIR_GAP_WALLET = 'airgap';
 export const ACCOUNT_LEDEGR_WALLET = 'ledger';
 
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
@@ -428,6 +429,7 @@ export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
+export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const MODAL_CONFIRM = 'confirm';

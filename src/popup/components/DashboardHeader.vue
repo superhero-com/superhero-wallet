@@ -50,7 +50,7 @@ export default defineComponent({
     const addressList = computed(() => accounts.value.map((acc) => acc.address));
 
     function selectAccount(index: number) {
-      root.$store.commit('accounts/setActiveIdx', +(accounts.value[index].idx || 0));
+      root.$store.commit('accounts/setActiveIdx', index);
     }
 
     return {

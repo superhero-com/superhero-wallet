@@ -3,6 +3,7 @@
   "ae": "AE",
   "mainAccount": "Main account",
   "fellowSuperhero": "Fellow Superhero",
+  "airGap": "AirGap",
   "common": {
     "you": "You",
     "of": "of",
@@ -158,6 +159,20 @@
       "syncingVault": "Syncing multisig vault",
       "takingLong": "This step may take a few moments.",
       "syncing": "Syncing..."
+    },
+    "importAirGapAccount": {
+      "btnText": "Pair QR Wallet",
+      "btnSubtitle": "Connect QR-based Hardware Wallet",
+      "scanTitle": "Scan QR code",
+      "scanDescription": "from your AirGap vault",
+
+      "importConfirmDialog": {
+        "title": "Select accounts to import from AirGap",
+        "selectAll": "Select all",
+        "search": "Search for account",
+        "importAccounts": "Import Accounts",
+        "noAccountsFound": "There are no accounts found."
+      }
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
