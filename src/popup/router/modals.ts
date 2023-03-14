@@ -24,12 +24,14 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_ACCOUNT_SELECT_OPTIONS,
+  MODAL_AIR_GAP_CONFIRM_IMPORT,
 } from '../utils/constants';
 import { useModals } from '../../composables';
 
 import Default from '../components/Modals/Default.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
+import AirGapConfirmImport from '../components/Modals/AirGapConfirmImport.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import SpendSuccess from '../components/Modals/SpendSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
@@ -63,6 +65,9 @@ export default () => {
   });
   registerModal(MODAL_ACCOUNT_IMPORT, {
     component: AccountImport,
+  });
+  registerModal(MODAL_AIR_GAP_CONFIRM_IMPORT, {
+    component: AirGapConfirmImport,
   });
   registerModal(MODAL_CLAIM_SUCCESS, {
     component: ClaimSuccess,

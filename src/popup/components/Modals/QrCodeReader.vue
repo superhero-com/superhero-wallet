@@ -10,7 +10,6 @@
     <div class="top-icon-wrapper">
       <IconBoxed :icon="QrScanIcon" />
     </div>
-
     <span v-if="cameraAllowed">{{ title }}</span>
     <span v-else>
       {{ $t('modals.qrCodeReader.grantPermission') }}
@@ -68,6 +67,7 @@ export default {
   },
   props: {
     title: { type: String, required: true },
+    heading: { type: String, required: false, default: null },
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
   },
@@ -234,6 +234,12 @@ export default {
     .second-text {
       margin-top: 20px;
     }
+  }
+
+  .heading {
+    @extend %face-sans-19-medium;
+
+    color: variables.$color-white;
   }
 
   .subtitle {

@@ -31,7 +31,7 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ idx + 1 }}
+        {{ isAirGap ? $t('common.airGap') : $t('pages.account.heading') }} {{ idx + 1 }}
       </div>
       <div
         v-if="address && address.length"
@@ -74,6 +74,7 @@ export default defineComponent({
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
+    isAirGap: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
   },
