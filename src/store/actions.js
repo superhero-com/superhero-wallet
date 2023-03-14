@@ -95,7 +95,7 @@ export default {
     const {
       state, getters, dispatch, commit,
     } = context;
-    if (!!state.transactions.nextPageUrl && !recent) {
+    if (state.transactions.nextPageUrl === null && !recent) {
       return;
     }
 
