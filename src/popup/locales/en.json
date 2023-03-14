@@ -67,7 +67,8 @@
       "slow": "Slow"
     },
     "actionMayTakeFewMoments": "This may take a few moments.",
-    "backToHome": "Proceed to dashboard"
+    "backToHome": "Proceed to dashboard",
+    "airGap": "AirGap"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -241,6 +242,20 @@
       "secondPoint": "{'<'}strong{'>'}Y ={'<'}/strong{'>'} number of signatures required to approve the transaction;",
       "thirdPoint": "{'<'}strong{'>'}Z ={'<'}/strong{'>'} number of authorized signers.",
       "description": "If {'<'}strong{'>'}X=Y{'<'}/strong{'>'} the multisig consensus has been reached. The transaction proposal has been approved and the transaction can be sent by any of the authorized signers."
+    },
+    "importAirGapAccount": {
+      "btnText": "Pair QR Wallet",
+      "btnSubtitle": "Connect QR-based Hardware Wallet",
+      "scanTitle": "Scan QR code",
+      "scanDescription": "from your AirGap vault",
+
+      "importConfirmDialog": {
+        "title": "Select accounts to import from AirGap",
+        "selectAll": "Select all",
+        "search": "Search for account",
+        "importAccounts": "Import Accounts",
+        "noAccountsFound": "There are no accounts found."
+      }
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",

@@ -33,7 +33,7 @@
         v-else
         data-cy="account-name-number"
         class="account-name"
-        v-text="getDefaultAccountLabel(account)"
+        v-text="getDefaultAccountLabel(account, { isAirGap })"
       />
 
       <slot name="address">
@@ -88,6 +88,7 @@ export default defineComponent({
     customName: { type: String, default: null },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
+    isAirGap: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
     isPlaceholder: Boolean,

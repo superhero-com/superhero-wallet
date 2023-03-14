@@ -39,6 +39,13 @@
         :disabled="!isOnline"
         @click="createMultisigAccount()"
       />
+      <BtnSubheader
+        v-if="!isMultisig"
+        :header="$t('modals.importAirGapAccount.btnText')"
+        :subheader="$t('modals.importAirGapAccount.btnSubtitle')"
+        :icon="QrScanIcon"
+        @click="connectHardwareWallet()"
+      />
     </div>
   </Modal>
 </template>
@@ -46,12 +53,19 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOLS } from '@/constants';
-import { useAccounts, useConnection, useModals } from '@/composables';
+import {
+  useAccounts,
+  useAirGap,
+  useConnection,
+  useModals,
+} from '@/composables';
 
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
 
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import { IAccount } from '@/types';
+import { handleUnknownError } from '@/utils';
 
 export default defineComponent({
   components: {
@@ -66,6 +80,7 @@ export default defineComponent({
     const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
+    const { extractAccountShareResponseData } = useAirGap();
 
     async function createPlainAccount() {
       const idx = addRawAccount({
@@ -78,6 +93,36 @@ export default defineComponent({
 
     async function createMultisigAccount() {
       await openModal(MODAL_MULTISIG_VAULT_CREATE);
+      props.resolve();
+    }
+
+    async function connectHardwareWallet() {
+      const scanResult = await root.$store.dispatch('modals/open', {
+        name: MODAL_READ_QR_CODE,
+        heading: root.$t('modals.importAirGapAccount.scanTitle'),
+        title: root.$t('modals.importAirGapAccount.scanDescription'),
+        icon: 'critical',
+      });
+
+      if (!scanResult) return;
+
+      const accounts = await extractAccountShareResponseData(scanResult);
+
+      // Show Account import.
+      if (accounts?.length) {
+        try {
+          const selectedAccounts = await root.$store.dispatch('modals/open', {
+            name: MODAL_AIR_GAP_CONFIRM_IMPORT,
+            accounts,
+          });
+          selectedAccounts.forEach((account: IAccount) => {
+            root.$store.dispatch('accounts/airgap/import', account);
+          });
+        } catch (error) {
+          handleUnknownError(error);
+        }
+      }
+
       props.resolve();
     }
 

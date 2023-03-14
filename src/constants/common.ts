@@ -61,6 +61,7 @@ export const CONNECTION_TYPES = {
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
+export const ACCOUNT_AIR_GAP_WALLET = 'airgap';
 
 export const NETWORK_TYPE_MAINNET = 'mainnet';
 export const NETWORK_TYPE_TESTNET = 'testnet';
@@ -327,6 +328,7 @@ export const MODAL_WALLET_CONNECT = 'wallet-connect';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
+export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

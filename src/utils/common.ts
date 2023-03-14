@@ -195,7 +195,14 @@ export async function fetchJson<T = any>(
  * Prepare human-readable name with protocol for an account.
  * E.g.: `Æternity account 1`, `Bitcoin account 2`
  */
-export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}): string {
+
+export function getDefaultAccountLabel(
+  { protocol, idx }: Partial<IAccount> = {},
+  { isAirGap }: {isAirGap:Boolean} = { isAirGap: false },
+): string {
+  if (isAirGap) {
+    return tg('common.airGap');
+  }
   return [
     (protocol) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
     tg('pages.account.heading'),

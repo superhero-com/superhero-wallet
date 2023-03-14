@@ -253,7 +253,7 @@ export type IAccountAsset = Partial<ITokenBalance> & IToken;
 
 export type AssetList = Record<AssetContractId, IToken>;
 
-export type AccountType = 'hd-wallet';
+export type AccountType = 'hd-wallet' | 'airgap';
 
 /**
  * Simplified account structure stored it in the local storage
