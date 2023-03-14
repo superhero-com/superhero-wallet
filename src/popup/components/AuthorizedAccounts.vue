@@ -12,7 +12,7 @@
         >
           <AccountItem :address="address" />
           <DialogBox
-            v-if="address === activeMultisigAccount.signerId"
+            v-if="isLocalAccountAddress(address)"
             class="dialog"
             dense
           >
@@ -26,10 +26,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from '@vue/composition-api';
+import { useAccounts } from '../../composables';
+
 import DetailsItem from './DetailsItem.vue';
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
-import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   name: 'AuthorizedAccounts',
@@ -45,12 +46,10 @@ export default defineComponent({
     },
   },
   setup(props, { root }) {
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
     return {
-      activeMultisigAccount,
+      isLocalAccountAddress,
     };
   },
 });
