@@ -13,7 +13,7 @@ import {
   isValidURL,
 } from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances } from '../../composables';
+import { useBalances, useCurrencies } from '../../composables';
 
 Vue.use(VeeValidate);
 
@@ -74,6 +74,7 @@ Validator.localize('en', {
 
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
+  const { minTipAmount } = useCurrencies({ store });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
@@ -126,7 +127,7 @@ export default (store) => {
     }
   };
 
-  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(store.getters.minTipAmount));
+  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   Validator.extend('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
   Validator.extend('token_to_an_address', {
