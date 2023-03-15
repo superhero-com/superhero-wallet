@@ -127,7 +127,10 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       })).shiftedBy(-MAGNITUDE);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
-    { deep: true },
+    {
+      deep: true,
+      immediate: true,
+    },
   );
 
   onMounted(() => {
