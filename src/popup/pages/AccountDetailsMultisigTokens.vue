@@ -35,6 +35,5 @@ export default defineComponent({
 .multisig-token-list-wrapper {
   position: relative;
   padding-top: 4px;
-  margin-inline: calc(-1 * var(--screen-padding-x));
 }
 </style>
