@@ -63,6 +63,7 @@ Validator.localize('en', {
     max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
     max_value_vault: (field, [arg]) => i18n.t('validation.maxValueVault', [arg]),
     enough_ae: () => i18n.t('validation.enoughAe'),
+    enough_ae_signer: () => i18n.t('validation.enoughAeSigner'),
     not_token: () => i18n.t('validation.notToken'),
     name_registered_address_or_url: () => i18n.t('validation.invalidAddressChainUrl'),
     min_tip_amount: () => i18n.t('pages.tipPage.minAmountError'),
@@ -141,6 +142,10 @@ export default (store) => {
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
   Validator.extend('enough_ae', async (_, [arg]) => {
+    await updateBalances();
+    return balance.value.isGreaterThanOrEqualTo(arg);
+  });
+  Validator.extend('enough_ae_signer', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });

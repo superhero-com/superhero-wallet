@@ -90,8 +90,10 @@
         required: true,
         min_value_exclusive: 0,
         ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
-        ...isMultisig ? {} : { enough_ae: fee.toString() },
-        ...isMultisig ? { max_value_vault: activeMultisigAccount.balance.toString() } : {},
+        ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
+        ...+balance.minus(fee) > 0 && isMultisig
+          ? { max_value_vault: activeMultisigAccount.balance.toString() }
+          : {},
         min_tip_amount: isTipUrl,
       }"
       name="amount"
@@ -339,6 +341,9 @@ export default defineComponent({
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
+        if (formModel.value.amount) {
+          (root as any).$validator.validate('amount');
+        }
       }
     }
 
