@@ -1428,6 +1428,7 @@
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
+    "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxValue": "This field must be {0} or less",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
