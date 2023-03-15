@@ -2,7 +2,7 @@
   <div class="dashboard-header-multisig">
     <TotalWalletAmount
       v-if="addressList.length > 1"
-      :total-balance="multisigBalances"
+      :total-balance="multisigBalancesTotal"
       is-multisig
     />
 
@@ -28,6 +28,7 @@ import {
   computed,
   defineComponent,
 } from '@vue/composition-api';
+import BigNumber from 'bignumber.js';
 import { useMultisigAccounts } from '../../composables';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
@@ -56,7 +57,12 @@ export default defineComponent({
       ),
     );
 
-    const multisigBalances = computed(() => multisigAccounts.value.map((acc) => acc.balance));
+    const multisigBalancesTotal = computed(
+      () => multisigAccounts.value
+        .map((acc) => acc.balance)
+        .reduce((total, balance) => total.plus(balance), new BigNumber(0))
+        .toFixed(),
+    );
 
     function selectAccount(index: number) {
       const selectedAccount = multisigAccounts.value[index];
@@ -68,7 +74,7 @@ export default defineComponent({
     return {
       multisigAccounts,
       multisigAccountIdx,
-      multisigBalances,
+      multisigBalancesTotal,
       addressList,
       ROUTE_MULTISIG_DETAILS,
       selectAccount,

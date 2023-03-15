@@ -28,7 +28,6 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   ref,
   watch,
 } from '@vue/composition-api';
@@ -43,6 +42,7 @@ import {
   DASHBOARD_TRANSACTION_LIMIT,
   handleUnknownError,
   defaultTransactionSortingCallback,
+  MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '../utils';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
@@ -59,7 +59,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();
-    const { balances } = useBalances({ store: root.$store });
+    const { balancesTotal } = useBalances({ store: root.$store });
     const { getMiddleware } = useMiddleware({ store: root.$store });
 
     const latestTransactions = ref<ITransaction[]>([]);
@@ -113,21 +113,28 @@ export default defineComponent({
       ))
         .sort(defaultTransactionSortingCallback)
         .slice(0, DASHBOARD_TRANSACTION_LIMIT);
+
+      isLoading.value = false;
     }
 
-    // This replaces it poling
-    watch(balances, updateData);
-
-    onMounted(async () => {
-      await updateData();
-      isLoading.value = false;
-    });
+    // To avoid unnecessary data transfers instead of constant polling
+    // we are fetching the transactions only if the total balance of the accounts changes.
+    watch(
+      balancesTotal,
+      (val, oldVal) => {
+        if (!latestTransactions.value.length || val !== oldVal) {
+          setTimeout(() => updateData(), MDW_TO_NODE_APPROX_DELAY_TIME);
+        }
+      },
+      { immediate: true },
+    );
 
     return {
       latestTransactions,
       showWidget,
       activeIdx,
       isLoading,
+      balancesTotal,
     };
   },
 });

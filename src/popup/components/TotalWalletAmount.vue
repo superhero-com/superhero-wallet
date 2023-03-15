@@ -10,25 +10,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
+import { computed, defineComponent } from '@vue/composition-api';
 import { useCurrencies } from '../../composables';
 
 export default defineComponent({
   props: {
-    totalBalance: { type: Array as PropType<BigNumber[]>, required: true },
+    totalBalance: { type: String, required: true },
     isMultisig: Boolean,
   },
   setup(props) {
     const { getFormattedFiat } = useCurrencies();
 
-    const totalAmount = computed(() => {
-      const total = props.totalBalance.reduce(
-        (previousValue, currentValue) => previousValue.plus(currentValue),
-        new BigNumber(0),
-      );
-      return getFormattedFiat(total.toNumber());
-    });
+    const totalAmount = computed(() => getFormattedFiat(+props.totalBalance));
 
     return {
       totalAmount,

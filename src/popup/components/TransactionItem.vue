@@ -44,7 +44,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  ref,
+} from '@vue/composition-api';
 import dayjs from 'dayjs';
 import {
   FUNCTION_TYPE_DEX,
@@ -53,6 +60,7 @@ import {
   formatDate,
   formatTime,
   relativeTimeTo,
+  executeAndSetInterval,
 } from '../utils';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
@@ -92,6 +100,9 @@ export default defineComponent({
   setup(props, { root }) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
+    let timerInterval: NodeJS.Timer;
+    const transactionDate = ref();
+
     const currentTransaction = computed(
       () => (props.multisigTransaction || props.transaction),
     );
@@ -118,12 +129,6 @@ export default defineComponent({
       // TODO - refactor useTransactionTokens to use only tx
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
-
-    const transactionDate = computed(
-      () => props.transaction
-        ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
-        : undefined,
-    );
 
     const redirectRoute = computed<any>(() => {
       if (props.multisigTransaction) {
@@ -167,6 +172,18 @@ export default defineComponent({
     const consensus = computed(() => `${root.$t('multisig.consensusPending')}
        ${getConsensusInfo.value.confirmedBy}/${getConsensusInfo.value.confirmationsRequired}
        ${root.$t('common.of')} ${getConsensusInfo.value.totalSigners}`);
+
+    onMounted(() => {
+      timerInterval = executeAndSetInterval(() => {
+        transactionDate.value = (props.transaction)
+          ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
+          : undefined;
+      }, 5000);
+    });
+
+    onBeforeUnmount(() => {
+      clearInterval(timerInterval);
+    });
 
     return {
       redirectRoute,
