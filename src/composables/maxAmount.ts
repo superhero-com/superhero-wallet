@@ -7,7 +7,9 @@ import {
   Ref,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import { Tag, unpackTx, Contract } from '@aeternity/aepp-sdk';
+import {
+  Tag, unpackTx, Contract, Encoding, encode,
+} from '@aeternity/aepp-sdk';
 import type { Store } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk/es/utils/encoder';
 import type { IAccount, IAsset, IToken } from '../types';
@@ -75,7 +77,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         if (!tokenInstance
           || tokenInstance.$options.address !== val.selectedAsset.contractId) {
           tokenInstance = await sdk.value.initializeContract({
-            aci: FUNGIBLE_TOKEN_CONTRACT_ACI,
+            aci: FUNGIBLE_TOKEN_CONTRACT_ACI as any, // Todo: remove typecasting once https://github.com/aeternity/aepp-sdk-js/issues/1741 fixed
             address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });
         }
@@ -88,7 +90,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           val.address && !checkAensName(val.address) && validateTipUrl(val.address)
         )
       ) {
-        txfee.value = await calculateFee(
+        txfee.value = calculateFee(
           Tag.ContractCallTx, {
             ttl: 0,
             nonce: nonce.value + 1,
@@ -107,9 +109,9 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         amount: BigNumber(val.amount > 0 ? val.amount : 0).shiftedBy(MAGNITUDE),
         ttl: 0,
         nonce: nonce.value + 1,
-        payload: '',
+        payload: encode(Buffer.from(''), Encoding.Bytearray),
       } as any); // TODO: Remove typecasting to any once https://github.com/aeternity/aepp-sdk-js/issues/1727 closed.
-      const { fee } = (unpackTx(spendTx, Tag.SpendTx) as any).tx; // TODO: Remove typecasting to any once https://github.com/aeternity/aepp-sdk-js/issues/1727 closed.
+      const { fee } = (unpackTx(spendTx, Tag.SpendTx) as any); // TODO: Remove typecasting to any once https://github.com/aeternity/aepp-sdk-js/issues/1727 closed.
       const minFee: BigNumber = BigNumber(fee).shiftedBy(-MAGNITUDE);
       if (!minFee.isEqualTo(txfee.value)) txfee.value = minFee;
     },

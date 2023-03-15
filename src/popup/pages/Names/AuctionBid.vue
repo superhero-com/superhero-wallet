@@ -21,7 +21,7 @@
         <DetailsItem :label="$t('total')">
           <template #value>
             <TokenAmount
-              :amount="+totalsAmount"
+              :amount="+amountTotal"
             />
           </template>
         </DetailsItem>

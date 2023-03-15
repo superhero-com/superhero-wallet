@@ -1,4 +1,4 @@
-import { ABI_VERSIONS, VM_VERSIONS, Tag } from '@aeternity/aepp-sdk';
+import { AbiVersion, VmVersion, Tag } from '@aeternity/aepp-sdk';
 import { MAX_UINT256 } from './constants';
 
 export const testAccount = {
@@ -45,7 +45,7 @@ export const popupProps = {
       host: 'localhost',
     },
     transaction: {
-      tag: '12',
+      tag: Tag.SpendTx,
       VSN: '1',
       senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
       recipientId: 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q',
@@ -100,8 +100,8 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: ABI_VERSIONS.SOPHIA, vmVersion: VM_VERSIONS.SOPHIA },
-  abiVersion: ABI_VERSIONS.SOPHIA,
+  ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
+  abiVersion: AbiVersion.Sophia,
   callData:
     'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF',
 };
