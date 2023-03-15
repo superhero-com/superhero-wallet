@@ -1,5 +1,5 @@
 <template>
-  <RouterLink
+  <ListItemWrapper
     class="transaction-item"
     :to="redirectRoute"
   >
@@ -40,7 +40,7 @@
         </template>
       </div>
     </div>
-  </RouterLink>
+  </ListItemWrapper>
 </template>
 
 <script lang="ts">
@@ -73,12 +73,14 @@ import {
 import TransactionTokens from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
+import ListItemWrapper from './ListItemWrapper.vue';
 
 export default defineComponent({
   components: {
     PendingIcon,
     TransactionLabel,
     TransactionTokens,
+    ListItemWrapper,
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, default: null },
@@ -194,11 +196,6 @@ export default defineComponent({
 
   padding: 10px var(--screen-padding-x);
   margin: 0 calc(-1 * var(--screen-padding-x));
-  transition: all 0.25s ease-out;
-
-  &:hover {
-    background-color: variables.$color-bg-4-hover;
-  }
 
   .body {
     width: 100%;
