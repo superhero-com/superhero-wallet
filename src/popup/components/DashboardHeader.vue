@@ -2,7 +2,7 @@
   <div class="dashboard-header">
     <TotalWalletAmount
       v-if="accounts.length > 1"
-      :total-balance="totalBalance"
+      :total-balance="balancesTotal"
     />
 
     <AccountSwiper
@@ -42,13 +42,12 @@ export default defineComponent({
     AccountCard,
   },
   setup(props, { root }) {
-    const { balances } = useBalances({ store: root.$store });
+    const { balancesTotal } = useBalances({ store: root.$store });
 
     const activeIdx = useState<number>('accounts', 'activeIdx');
     const accounts = useGetter<IAccount[]>('accounts');
 
     const addressList = computed(() => accounts.value.map((acc) => acc.address));
-    const totalBalance = computed(() => Object.values(balances.value));
 
     function selectAccount(index: number) {
       root.$store.commit('accounts/setActiveIdx', +(accounts.value[index].idx || 0));
@@ -58,7 +57,7 @@ export default defineComponent({
       accounts,
       activeIdx,
       addressList,
-      totalBalance,
+      balancesTotal,
       ROUTE_ACCOUNT_DETAILS,
       selectAccount,
     };

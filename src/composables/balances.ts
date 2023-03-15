@@ -3,7 +3,6 @@ import BigNumber from 'bignumber.js';
 import type {
   Balance,
   BalanceRaw,
-  IAccount,
   IAsset,
   IDefaultComposableOptions,
 } from '../types';
@@ -18,6 +17,7 @@ import {
 import { useSdk } from './sdk';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useCurrencies } from './currencies';
+import { useAccounts } from './accounts';
 
 type Balances = Record<string, Balance>;
 type BalancesRaw = Record<string, BalanceRaw>;
@@ -29,7 +29,7 @@ function storeBalances(balances: Balances) {
   window.localStorage.setItem(
     LOCAL_STORAGE_BALANCES_KEY,
     JSON.stringify(Object.keys(balances).reduce(
-      (acc, address) => ({ ...acc, [address]: balances[address].toNumber() }),
+      (acc, address) => ({ ...acc, [address]: balances[address].toFixed() }),
       {},
     )),
   );
@@ -54,12 +54,15 @@ const initPollingWatcher = createPollingBasedOnMountedComponents();
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
   const { currentCurrencyRate, aeternityData } = useCurrencies();
-
-  const account = computed<IAccount>(() => store.getters.account);
-  const accounts = computed<IAccount[]>(() => store.getters.accounts);
+  const { account, accounts } = useAccounts({ store });
 
   const balance = computed(() => balances.value[account.value.address] || new BigNumber(0));
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
+  const balancesTotal = computed(
+    () => Object.keys(balances.value)
+      .reduce((total, key) => total.plus(balances.value[key]), new BigNumber(0))
+      .toFixed(),
+  );
 
   const aeternityToken = computed((): IAsset => ({
     ...aeternityData.value,
@@ -97,6 +100,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   return {
     aeternityToken,
     balances,
+    balancesTotal,
     balance,
     balanceCurrency,
     updateBalances,

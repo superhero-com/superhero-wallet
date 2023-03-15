@@ -177,6 +177,13 @@ export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
+/**
+ * Estimated time we need to wait for the middleware to sync it's state
+ * with the node. There is a high risk that in some cases this won't be enough
+ * so consider using this constant as a workaround.
+ */
+export const MDW_TO_NODE_APPROX_DELAY_TIME = 5000;
+
 export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
