@@ -45,7 +45,7 @@ function getStoredBalances(): Balances {
 }
 
 const balances = ref<Balances>(getStoredBalances());
-const initPollingWatcher = createPollingBasedOnMountedComponents();
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 /**
  * This composable detects if any app components requires balances data and polls the API
@@ -92,7 +92,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
     storeBalances(balances.value as Balances);
   }
 
-  initPollingWatcher(() => updateBalances(), POLLING_INTERVAL);
+  initPollingWatcher(() => updateBalances());
 
   return {
     aeternityToken,

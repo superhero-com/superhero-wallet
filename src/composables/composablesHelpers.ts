@@ -1,10 +1,8 @@
 import {
   onBeforeUnmount,
   onMounted,
-  ref,
   getCurrentInstance,
 } from '@vue/composition-api';
-import { executeAndSetInterval } from '../popup/utils';
 import { useConnection } from './connection';
 
 /**
@@ -12,31 +10,44 @@ import { useConnection } from './connection';
  * and if the value is greater than 0 it will perform a polling based on the setInterval function.
  * This function should be called before actual composable.
  */
-export function createPollingBasedOnMountedComponents() {
+export function createPollingBasedOnMountedComponents(interval: number) {
   const { isOnline } = useConnection();
+
+  let initialCallDone = false;
   let pollingIntervalId: NodeJS.Timer | null = null;
-  const mountedComponents = ref(0);
+  let mountedComponents = 0;
 
   /**
    * Polling watcher - function that should be called inside of an composable.
    */
-  return (callback: () => void, interval: number) => {
+  return (callback: () => void) => {
+    function callbackWrapper() {
+      if (isOnline.value) {
+        initialCallDone = true;
+        callback();
+      }
+    }
+
     if (getCurrentInstance()) {
       onMounted(() => {
-        mountedComponents.value += 1;
+        mountedComponents += 1;
 
-        if (mountedComponents.value > 0 && !pollingIntervalId) {
-          pollingIntervalId = executeAndSetInterval(
-            () => isOnline.value && callback(),
+        if (mountedComponents > 0 && !pollingIntervalId) {
+          if (!initialCallDone) {
+            callbackWrapper();
+          }
+
+          pollingIntervalId = setInterval(
+            () => callbackWrapper(),
             interval,
           );
         }
       });
 
       onBeforeUnmount(() => {
-        mountedComponents.value -= 1;
+        mountedComponents -= 1;
 
-        if (mountedComponents.value === 0 && pollingIntervalId) {
+        if (mountedComponents === 0 && pollingIntervalId) {
           clearInterval(pollingIntervalId);
           pollingIntervalId = null;
         }

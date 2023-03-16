@@ -75,7 +75,7 @@ Validator.localize('en', {
 
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
-  const { minTipAmount } = useCurrencies({ store });
+  const { minTipAmount } = useCurrencies({ withoutPolling: true });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),

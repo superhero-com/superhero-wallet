@@ -6,7 +6,7 @@ import type { ITopHeader, IDefaultComposableOptions } from '../types';
 
 const POLLING_INTERVAL = 30000;
 
-const initPollingWatcher = createPollingBasedOnMountedComponents();
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 const topHeaderData = ref<ITopHeader>();
 
 /**
@@ -27,7 +27,7 @@ export function useTopHeaderData({ store }: IDefaultComposableOptions) {
     return topBlockHeight.value;
   }
 
-  initPollingWatcher(updateTopHeaderData, POLLING_INTERVAL);
+  initPollingWatcher(() => updateTopHeaderData());
 
   return {
     topHeaderData,
