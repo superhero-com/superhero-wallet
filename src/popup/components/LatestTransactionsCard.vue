@@ -31,7 +31,7 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import { uniqWith } from 'lodash-es';
+import { uniqWith, isEqual } from 'lodash-es';
 import type {
   IAccount,
   ITransaction,
@@ -73,6 +73,7 @@ export default defineComponent({
     const fetchPendingTransactions = useDispatch('fetchPendingTransactions');
     const getTokensHistory = useDispatch('fungibleTokens/getTokensHistory');
     const fetchTipWithdrawnTransactions = useDispatch('fetchTipWithdrawnTransactions');
+    const tokens = useState('fungibleTokens', 'tokens');
 
     function fetchForAllAccount(func: CallbackFunction, isMultiple?: boolean) {
       const fetchForAccount = async (address: string) => {
@@ -127,6 +128,16 @@ export default defineComponent({
         }
       },
       { immediate: true },
+    );
+
+    watch(
+      tokens,
+      (oldTokens, newTokens) => {
+        if (!isEqual(oldTokens, newTokens)) {
+          updateData();
+        }
+      },
+      { deep: true },
     );
 
     return {

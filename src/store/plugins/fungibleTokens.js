@@ -39,11 +39,8 @@ export default (store) => {
         state.tokens = {};
         state.transactions = {};
       },
-      addTokenBalance(state, { address, balances }) {
-        if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { tokenBalances: [] });
-        }
-        Vue.set(state.tokens[address], 'tokenBalances', balances);
+      addTokenBalance(state, tokens) {
+        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
       },
     },
     actions: {
@@ -63,7 +60,8 @@ export default (store) => {
         state: { availableTokens },
         commit,
       }) {
-        accounts.map(async ({ address }) => {
+        const newBalances = {};
+        await Promise.all(accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
@@ -89,11 +87,12 @@ export default (store) => {
 
               return objectStructure;
             });
-            commit('addTokenBalance', { address, balances });
+            newBalances[address] = { tokenBalances: balances };
           } catch (e) {
             handleUnknownError(e);
           }
-        });
+        }));
+        commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
         { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
