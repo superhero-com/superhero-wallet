@@ -89,7 +89,7 @@ export default defineComponent({
   setup(props, { root }) {
     const { watchConnectionStatus } = useConnection();
     const { addWalletNotification } = useNotifications({ store: root.$store });
-    const { loadAeternityData } = useCurrencies(true);
+    const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();

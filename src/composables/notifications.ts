@@ -27,7 +27,7 @@ export interface UseNotificationsOptions extends IDefaultComposableOptions {
 const POLLING_INTERVAL = 30000;
 const FETCHED_NOTIFICATIONS_LIMIT = 20;
 
-const initPollingWatcher = createPollingBasedOnMountedComponents();
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 const notificationsSuperhero = ref<INotification[]>([]);
 const notificationsWallet = ref<INotification[]>([]);
@@ -184,7 +184,7 @@ export function useNotifications({
             ? `${AGGREGATOR_URL}tip/${entityId}`
             : `${AGGREGATOR_URL}tip/${sourceId}/comment/${entityId}`,
         }));
-    }, POLLING_INTERVAL);
+    });
   }
 
   return {

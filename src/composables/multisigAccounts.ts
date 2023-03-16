@@ -43,7 +43,7 @@ const activeMultisigAccountId = ref('');
 const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
-const initPollingWatcher = createPollingBasedOnMountedComponents();
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
@@ -262,7 +262,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
 
-  initPollingWatcher(() => updateMultisigAccounts(), POLLING_INTERVAL);
+  initPollingWatcher(() => updateMultisigAccounts());
 
   return {
     multisigAccounts: allMultisigAccounts,

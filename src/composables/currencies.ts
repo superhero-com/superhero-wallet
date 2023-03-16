@@ -11,6 +11,10 @@ import {
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
+export interface UseCurrenciesOptions {
+  withoutPolling?: boolean;
+}
+
 const POLLING_INTERVAL = 3600000;
 const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
 const APP_CURRENCY_CODES = CURRENCIES.map(({ code }) => code).join(',');
@@ -22,9 +26,11 @@ const currentCurrencyCode = ref<CurrencyCode>(
   getLocalStorageItem<CurrencyCode>([LOCAL_STORAGE_CURRENCY_KEY]) || DEFAULT_CURRENCY_CODE,
 );
 
-const initPollingWatcher = createPollingBasedOnMountedComponents();
+const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
-export function useCurrencies(withoutPolling: boolean = false) {
+export function useCurrencies({
+  withoutPolling = false,
+}: UseCurrenciesOptions = {}) {
   const minTipAmount = computed(() => 0.01 / (currencyRates.value.usd || 1));
   const currentCurrencyRate = computed(
     (): number => currencyRates.value[currentCurrencyCode.value] || 0,
@@ -99,7 +105,7 @@ export function useCurrencies(withoutPolling: boolean = false) {
   }
 
   if (!withoutPolling) {
-    initPollingWatcher(() => loadCurrencyRates(), POLLING_INTERVAL);
+    initPollingWatcher(() => loadCurrencyRates());
   }
 
   return {
