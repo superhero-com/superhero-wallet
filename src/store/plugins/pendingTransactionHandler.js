@@ -2,7 +2,7 @@ import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const waitTransactionMined = async ({
-    hash, type, tipUrl, recipient: recipientId, tx,
+    hash, type, tipUrl, recipient: recipientId, tx, ...otherTx
   }) => {
     const network = store.getters.activeNetwork?.networkId;
     try {
@@ -11,6 +11,7 @@ export default async (store) => {
         name: MODAL_SPEND_SUCCESS,
         transaction: {
           tipUrl,
+          ...otherTx,
           ...transaction,
           ...(type === 'spendToken')
             ? { tx: { ...transaction.tx, recipientId, amount: tx.amount } }
