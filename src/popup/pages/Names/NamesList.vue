@@ -1,5 +1,5 @@
 <template>
-  <div class="list">
+  <div class="names-list">
     <template v-if="namesForAccount.length">
       <NameItem
         v-for="({ name, owner, autoExtend }, index) in namesForAccount"
@@ -23,6 +23,7 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount } from '@vue/composition-api';
 import type { IName } from '../../../types';
+import { executeAndSetInterval } from '../../utils';
 import { useState } from '../../../composables/vuex';
 import { useAccounts } from '../../../composables';
 import NameItem from '../../components/NameItem.vue';
@@ -44,14 +45,13 @@ export default defineComponent({
       () => namesOwned.value.filter(({ owner }) => owner === activeAccount.value.address),
     );
 
-    const id = setInterval(() => root.$store.dispatch('names/fetchOwned'), 10000);
+    const id = executeAndSetInterval(() => root.$store.dispatch('names/fetchOwned'), 10000);
 
     onBeforeUnmount(() => {
       clearInterval(id);
     });
 
     return {
-      activeAccount,
       areNamesFetching,
       namesForAccount,
     };
@@ -63,7 +63,7 @@ export default defineComponent({
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 
-.list {
+.names-list {
   padding-top: 4px;
 
   .name-item {
