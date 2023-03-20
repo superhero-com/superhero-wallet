@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import { watch } from '@vue/composition-api';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   MODAL_DEFAULT,
@@ -7,16 +8,20 @@ import {
   checkAddress,
   checkAensName,
   fetchAllPages,
-  watchUntilTruthy,
   fetchRespondChallenge,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware } from '../../composables';
+import { useMiddleware, useSdk } from '../../composables';
 
 export default (store) => {
   const {
+    getSdk,
+  } = useSdk({ store });
+
+  const {
     isMiddlewareReady,
     getMiddleware,
+    getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
   } = useMiddleware({ store });
 
@@ -33,10 +38,8 @@ export default (store) => {
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getDefault: ({ defaults }, getters, _, { activeNetwork }) => (address) => {
-        const sdk = store.getters['sdkPlugin/sdk'];
         if (!defaults) return '';
-        let { networkId } = activeNetwork;
-        if (sdk) networkId = sdk.getNetworkId();
+        const { networkId } = activeNetwork;
         return defaults[`${address}-${networkId}`];
       },
       getPreferred: (
@@ -58,9 +61,8 @@ export default (store) => {
       set(state, names) {
         state.owned = names;
       },
-      async setDefault({ defaults }, { address, name }) {
-        const sdk = await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-        const networkId = sdk.getNetworkId();
+      setDefault({ defaults }, { address, name }) {
+        const { networkId } = store.getters.activeNetwork;
         if (name) Vue.set(defaults, `${address}-${networkId}`, name);
         else Vue.delete(defaults, `${address}-${networkId}`);
       },
@@ -69,7 +71,7 @@ export default (store) => {
         Vue.set(state.owned[index], 'autoExtend', value);
       },
       setPreferred({ preferred }, { address, name }) {
-        const networkId = store.getters['sdkPlugin/sdk'].getNetworkId();
+        const { networkId } = store.getters.activeNetwork;
         if (name) Vue.set(preferred, `${address}-${networkId}`, name);
         else Vue.delete(preferred, `${address}-${networkId}`);
       },
@@ -136,9 +138,10 @@ export default (store) => {
         }));
       },
       async updatePointer(
-        { dispatch, rootGetters: { 'sdkPlugin/sdk': sdk } },
+        { dispatch },
         { name, address, type = 'update' },
       ) {
+        const sdk = await getSdk();
         const nameEntry = await sdk.aensQuery(name);
         try {
           if (type === 'extend') {
@@ -166,14 +169,17 @@ export default (store) => {
         }));
       },
       async setDefault(
-        { commit, rootGetters: { 'sdkPlugin/sdk': sdk, activeNetwork } },
+        { commit, rootGetters: { activeNetwork } },
         { name, address },
       ) {
-        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
-          body: {
-            preferredChainName: name,
-          },
-        });
+        const [sdk, response] = await Promise.all([
+          getSdk(),
+          postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+            body: {
+              preferredChainName: name,
+            },
+          }),
+        ]);
 
         const respondChallenge = await fetchRespondChallenge(sdk, response);
 
@@ -192,11 +198,9 @@ export default (store) => {
         return '';
       },
       async setPreferred({
-        rootState: { middleware },
         rootGetters: { activeNetwork },
         commit,
       }, address) {
-        if (!middleware) return;
         const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
         if (response?.preferredChainName) {
           commit('setPreferred', { address, name: response?.preferredChainName });
@@ -207,37 +211,33 @@ export default (store) => {
     },
   });
 
-  store.watch(
-    ({ middleware }) => middleware,
-    async (middleware) => {
-      if (!middleware) return;
-
-      await Promise.all([
+  watch(getMiddlewareRef(), async () => {
+    if (isMiddlewareReady.value) {
+      const [sdk] = await Promise.all([
+        getSdk(),
         store.dispatch('names/fetchOwned').catch(() => {}),
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await (await watchUntilTruthy(() => store.getters['sdkPlugin/sdk'])).height();
+      const height = await sdk.height();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)
           .filter(({ expiresAt }) => expiresAt - height < AUTO_EXTEND_NAME_BLOCKS_INTERVAL)
           .map(({ name }) => store.dispatch('names/updatePointer', { name, type: 'extend' })),
       );
-    },
-    { immediate: true },
-  );
+    }
+  }, { immediate: true, deep: true });
 
   store.watch(
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
-      if (!isMiddlewareReady.value) {
-        return;
+      if (isMiddlewareReady.value) {
+        await Promise.all([
+          store.dispatch('names/fetchOwned').catch(() => {}),
+          store.dispatch('names/setDefaults'),
+        ]);
       }
-      await Promise.all([
-        store.dispatch('names/fetchOwned').catch(() => {}),
-        store.dispatch('names/setDefaults'),
-      ]);
     },
   );
 };

@@ -100,9 +100,14 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
     return middleware.value!;
   }
 
+  function getMiddlewareRef() {
+    return middleware;
+  }
+
   return {
     initMiddleware,
     getMiddleware,
+    getMiddlewareRef,
     fetchFromMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchMiddlewareStatus,

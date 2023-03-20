@@ -38,7 +38,6 @@ export default new Vuex.Store({
       pending: {},
       tipWithdrawnTransactions: [],
     },
-    middleware: null,
     tippingV1: null,
     tippingV2: null,
     nodeStatus: NODE_STATUS_CONNECTING,
