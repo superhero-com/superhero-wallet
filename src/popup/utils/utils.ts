@@ -469,11 +469,3 @@ export function getAeFee(value: number | string) {
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
 }
-
-export function prepareConsensusLabel(
-  confirmedBy: number,
-  confirmationsRequired: number,
-  totalConfirmations: number,
-) {
-  return `${confirmedBy}/${confirmationsRequired} ${i18n.t('common.of')} ${totalConfirmations}`;
-}
