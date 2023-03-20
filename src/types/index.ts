@@ -418,19 +418,19 @@ export interface ITopHeader {
   version: number
 }
 
+export type ISignMessage = (m: any) => Promise<any>
+
 /**
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
  */
-export type ISignMessage = (m: any) => Promise<any>
-
 export interface ISdk {
-  payingForTx(arg0: any): any;
-  addNode: (name: string, node: any, select: boolean) => void
-  api: Record<string, GenericApiMethod>
-  compilerApi: Record<string, (...args: any[]) => Promise<any>>
-  Ae: Record<string, any>
-  pool: Map<string, any>
+  addNode: (name: string, node: any, select: boolean) => void;
+  Ae: Record<string, any>;
+  aensQuery: (name: string) => Promise<any>;
+  api: Record<string, GenericApiMethod>;
+  balance: (address: string) => Promise<number>;
+  compilerApi: Record<string, (...args: any[]) => Promise<any>>;
   getAccount: (publicKey: any) => Promise<any>
   gaAttachTx: (options: {
     ownerId: any
@@ -450,8 +450,10 @@ export interface ISdk {
       modal: boolean;
       innerTx?: boolean
     }
-  ) => Promise<{ hash: string, rawTx: string }>
-  poll: (txHash: string, options: any) => any
+  ) => Promise<{ hash: string, rawTx: string }>;
+  payingForTx(arg0: any): any;
+  poll: (txHash: string, options: any) => any;
+  pool: Map<string, any>;
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
@@ -468,7 +470,6 @@ export interface ISdk {
   spendTx: (a: any) => Promise<any>
   address: () => Promise<string>
   aensBid: (name: string, aettos: any) => Promise<any>
-  balance: (address: string) => Promise<number>,
 }
 
 /**
