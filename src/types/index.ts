@@ -178,7 +178,6 @@ export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountRe
   refusedBy?: string[];
   nonce: number;
   signers: string[];
-  consensusLabel?: string;
   hasPendingTransaction: boolean;
   pending?: boolean;
 }

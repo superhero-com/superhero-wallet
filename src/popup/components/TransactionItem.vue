@@ -10,14 +10,19 @@
         icon-size="md"
       />
       <div class="footer">
-        <!-- TODO consensus and other multisig stuff, is todo in my another task SW-622       -->
         <div
           v-if="!!multisigTransaction && !hasConsensus"
           class="consensus"
         >
           <PendingIcon class="icon" />
           <span class="pending">
-            {{ consensus }}
+            {{ $t('multisig.consensusPending') }}
+            <ConsensusLabel
+              :confirmations-required="multisigTransaction.confirmationsRequired"
+              :has-pending-transaction="multisigTransaction.hasPendingTransaction"
+              :confirmed-by="multisigTransaction.confirmedBy"
+              :signers="multisigTransaction.signers"
+            />
           </span>
         </div>
 
@@ -82,9 +87,11 @@ import TransactionTokens from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import ListItemWrapper from './ListItemWrapper.vue';
+import ConsensusLabel from './ConsensusLabel.vue';
 
 export default defineComponent({
   components: {
+    ConsensusLabel,
     PendingIcon,
     TransactionLabel,
     TransactionTokens,
@@ -146,12 +153,6 @@ export default defineComponent({
       };
     });
 
-    const getConsensusInfo = computed(() => ({
-      confirmedBy: props.multisigTransaction?.totalConfirmations,
-      totalSigners: props.multisigTransaction?.signers?.length,
-      confirmationsRequired: props.multisigTransaction?.confirmationsRequired?.toString(),
-    }));
-
     const fiatAmount = computed(() => {
       const aeToken = tokens.value?.find((t) => t?.isAe);
       if (
@@ -168,10 +169,6 @@ export default defineComponent({
           : aeToken.amount)!),
       );
     });
-
-    const consensus = computed(() => `${root.$t('multisig.consensusPending')}
-       ${getConsensusInfo.value.confirmedBy}/${getConsensusInfo.value.confirmationsRequired}
-       ${root.$t('common.of')} ${getConsensusInfo.value.totalSigners}`);
 
     onMounted(() => {
       timerInterval = executeAndSetInterval(() => {
@@ -193,8 +190,6 @@ export default defineComponent({
       tokens,
       currentTransaction,
       transactionOwner,
-      consensus,
-      getConsensusInfo,
       direction,
       formatDate,
       formatTime,

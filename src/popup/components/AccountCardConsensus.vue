@@ -8,11 +8,13 @@
     >
       <PendingIcon class="icon pending" />
       {{ $t('multisig.consensus') }}
-      <span class="highlighted">
-        {{ multisigAccount.confirmedBy.length }}/{{ multisigAccount.confirmationsRequired }}
-        {{ $t('common.of') }}
-        {{ multisigAccount.signers.length }}
-      </span>
+      <ConsensusLabel
+        :confirmations-required="multisigAccount.confirmationsRequired"
+        :has-pending-transaction="multisigAccount.hasPendingTransaction"
+        :confirmed-by="multisigAccount.confirmedBy"
+        :signers="multisigAccount.signers"
+        class="highlighted"
+      />
     </div>
     <div
       v-if="transactionMessage"
@@ -29,11 +31,14 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { useAccounts, useConnection } from '../../composables';
 import type { IMultisigAccount } from '../../types';
 
+import ConsensusLabel from './ConsensusLabel.vue';
+
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import CheckCircleFillIcon from '../../icons/check-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
+    ConsensusLabel,
     PendingIcon,
     CheckCircleFillIcon,
   },

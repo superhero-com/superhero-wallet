@@ -15,7 +15,6 @@ import {
   MULTISIG_CREATION_PHASES,
   MULTISIG_SIMPLE_GA_BYTECODE,
   SUPPORTED_MULTISIG_CONTRACT_VERSION,
-  prepareConsensusLabel,
 } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
@@ -191,7 +190,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         gaAccountId: accountId,
         signers,
         confirmationsRequired,
-        consensusLabel: prepareConsensusLabel(0, confirmationsRequired, signers.length),
         nonce: 1, // Default value for freshly created account
         createdAt: currentDate,
         updatedAt: currentDate,

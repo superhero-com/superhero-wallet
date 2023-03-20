@@ -67,9 +67,11 @@
       </DetailsItem>
 
       <DetailsItem :label="$t('multisig.consensus')">
-        {{ confirmationsRequired }}/{{ confirmationsRequired }}
-        {{ $t('common.of') }}
-        {{ signers.length }}
+        <ConsensusLabel
+          :confirmations-required="confirmationsRequired"
+          :signers="signers"
+          :default-confirmed-by="confirmationsRequired"
+        />
       </DetailsItem>
     </div>
 
@@ -130,11 +132,13 @@ import DialogBox from './DialogBox.vue';
 import FormSelect from './form/FormSelect.vue';
 import TokenAmount from './TokenAmount.vue';
 import Truncate from './Truncate.vue';
+import ConsensusLabel from './ConsensusLabel.vue';
 
 import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
 
 export default defineComponent({
   components: {
+    ConsensusLabel,
     DetailsItem,
     AccountItem,
     DialogBox,

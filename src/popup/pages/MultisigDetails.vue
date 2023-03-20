@@ -67,8 +67,16 @@
       <DetailsItem
         class="details-item"
         :label="$t('multisig.consensus')"
-        :value="activeMultisigAccount.consensusLabel"
-      />
+      >
+        <template #value>
+          <ConsensusLabel
+            :confirmations-required="activeMultisigAccount.confirmationsRequired"
+            :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+            :confirmed-by="activeMultisigAccount.confirmedBy"
+            :signers="activeMultisigAccount.signers"
+          />
+        </template>
+      </DetailsItem>
     </div>
   </div>
 </template>
@@ -83,11 +91,14 @@ import AddressFormatted from '../components/AddressFormatted.vue';
 import Avatar from '../components/Avatar.vue';
 import AuthorizedAccounts from '../components/AuthorizedAccounts.vue';
 import LinkButton from '../components/LinkButton.vue';
+import ConsensusLabel from '../components/ConsensusLabel.vue';
+
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
   name: 'MultisigDetails',
   components: {
+    ConsensusLabel,
     LinkButton,
     AuthorizedAccounts,
     Avatar,

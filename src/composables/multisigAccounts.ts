@@ -10,7 +10,6 @@ import {
   fetchJson,
   handleUnknownError,
   convertToken,
-  prepareConsensusLabel,
   getLocalStorageItem,
   setLocalStorageItem,
 } from '../popup/utils';
@@ -181,16 +180,9 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
 
             const hasPendingTransaction = !!txHash && !consensus.expired;
 
-            const consensusLabel = prepareConsensusLabel(
-              hasPendingTransaction ? consensus?.confirmedBy?.length : 0,
-              consensus.confirmationsRequired,
-                signers.decodedResult?.length,
-            );
-
             return {
               ...consensus,
               ...otherMultisigData,
-              consensusLabel,
               contractId,
               gaAccountId,
               nonce: Number(nonce.decodedResult),

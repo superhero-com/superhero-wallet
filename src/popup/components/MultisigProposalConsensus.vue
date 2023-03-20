@@ -6,7 +6,12 @@
     >
       <span> {{ $t('multisig.consensus') }} </span>
       <span class="confirmations-count">
-        {{ activeMultisigAccount.consensusLabel }}
+        <ConsensusLabel
+          :confirmations-required="activeMultisigAccount.confirmationsRequired"
+          :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+          :confirmed-by="activeMultisigAccount.confirmedBy"
+          :signers="activeMultisigAccount.signers"
+        />
       </span>
     </div>
     <div class="consensus">
@@ -59,10 +64,12 @@ import InfoBox, { InfoBoxType, INFO_BOX_TYPES } from './InfoBox.vue';
 
 import CheckCircle from '../../icons/circle-check-outlined.svg?vue-component';
 import CloseCircle from '../../icons/circle-close.svg?vue-component';
+import ConsensusLabel from './ConsensusLabel.vue';
 
 export default defineComponent({
   name: 'TransactionMultisigConsensus',
   components: {
+    ConsensusLabel,
     AccountItem,
     CheckCircle,
     CloseCircle,
