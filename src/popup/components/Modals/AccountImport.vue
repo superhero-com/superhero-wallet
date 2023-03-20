@@ -38,58 +38,75 @@
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  defineComponent,
+  PropType,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
-import { validateSeedLength, watchUntilTruthy } from '../../utils';
+import type { ResolveRejectCallback } from '../../../types';
+import { validateSeedLength } from '../../utils';
+import { useSdk } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../form/FormTextarea.vue';
 
-export default {
+export default defineComponent({
   components: {
     BtnMain,
     Modal,
     FormTextarea,
   },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
-  data: () => ({
-    mnemonic: '',
-    error: '',
-  }),
-  watch: {
-    mnemonic() {
-      this.error = '';
-    },
-  },
-  methods: {
-    async importAccount() {
-      const mnemonic = this.mnemonic
+  setup(props, { root }) {
+    const { getSdk } = useSdk({ store: root.$store });
+
+    const mnemonic = ref('');
+    const error = ref<string | TranslateResult>('');
+
+    watch(mnemonic, () => {
+      error.value = '';
+    });
+
+    async function importAccount() {
+      const mnemonicParsed = mnemonic.value
         .toLowerCase()
         .replace(/\s+/g, ' ')
         .replace(/[^a-z ]/g, '')
         .trim();
-      if (!validateSeedLength(mnemonic)) {
-        this.error = this.$t('pages.index.invalidSeed');
+
+      if (!validateSeedLength(mnemonicParsed)) {
+        error.value = root.$t('pages.index.invalidSeed');
         return;
       }
-      if (!mnemonic || !validateMnemonic(mnemonic)) {
-        this.error = this.$t('pages.index.accountNotFound');
+      if (!mnemonicParsed || !validateMnemonic(mnemonicParsed)) {
+        error.value = root.$t('pages.index.accountNotFound');
         return;
       }
-      this.$store.commit('setMnemonic', mnemonic);
-      this.$store.commit('setBackedUpSeed');
-      this.resolve();
+      root.$store.commit('setMnemonic', mnemonicParsed);
+      root.$store.commit('setBackedUpSeed');
+      props.resolve();
       setTimeout(async () => {
-        await watchUntilTruthy(() => this.$store.getters['sdkPlugin/sdk']);
-        this.$store.dispatch('accounts/hdWallet/discover');
+        await getSdk();
+        root.$store.dispatch('accounts/hdWallet/discover');
       }, 100);
-      this.$router.push(this.$store.state.loginTargetLocation);
-    },
+      root.$router.push(root.$store.state.loginTargetLocation);
+    }
+
+    return {
+      mnemonic,
+      error,
+      importAccount,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
