@@ -2,19 +2,22 @@
   <InputField
     v-bind="$attrs"
     class="textarea"
-    :class="[ size ]"
-    @input="$emit('input', $event)"
+    :class="[ size, { 'auto-height' : autoHeight } ]"
+    @input="handleInput"
   >
     <template #default="{ inputId }">
       <textarea
         :id="inputId"
+        ref="textarea"
         data-cy="textarea"
         class="textarea-input styled-scrollbar"
-        :class="{ resizable }"
+        :class="{ resizable: resizable && !autoHeight }"
+        :style="{ height }"
         :placeholder="placeholder"
         :value="value"
-        @keydown.enter="handleEnterClick"
-        @input="$emit('input', $event.target.value)"
+        :rows="1"
+        @keydown.enter.prevent="handleEnterClick"
+        @input="handleInput"
       />
     </template>
 
@@ -27,12 +30,13 @@
   </InputField>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, nextTick } from '@vue/composition-api';
 import InputField from '../InputField.vue';
 
 const SIZES = ['xs', 'sm', 'rg', 'md'];
 
-export default {
+export default defineComponent({
   components: {
     InputField,
   },
@@ -45,17 +49,41 @@ export default {
     size: {
       type: String,
       default: null,
-      validator: (val) => SIZES.includes(val),
+      validator: (val: string) => SIZES.includes(val),
     },
+    autoHeight: Boolean,
   },
-  methods: {
-    handleEnterClick(event) {
-      if (!this.enterSubmit) return;
-      this.$emit('submit');
-      event.preventDefault();
-    },
+  setup(props, { emit }) {
+    const textarea = ref<HTMLTextAreaElement>();
+    const height = ref<string | undefined>();
+    function handleInput(event: InputEvent) {
+      const { value } = event.target as HTMLInputElement;
+      if (props.autoHeight && textarea.value) {
+        height.value = 'auto';
+        nextTick(() => {
+          const { scrollHeight, clientHeight } = textarea.value!;
+          const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
+          height.value = `${newHeight}px`;
+        });
+      }
+
+      emit('input', value);
+    }
+
+    function handleEnterClick() {
+      if (props.enterSubmit) {
+        emit('submit');
+      }
+    }
+
+    return {
+      textarea,
+      height,
+      handleInput,
+      handleEnterClick,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -95,6 +123,10 @@ export default {
 
   &.md {
     --size: 8;
+  }
+
+  &.auto-height {
+    --size: 1;
   }
 }
 </style>

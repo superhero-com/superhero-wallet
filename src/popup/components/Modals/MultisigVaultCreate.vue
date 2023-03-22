@@ -28,13 +28,14 @@
           :label="getSignerLabel(index)"
           :options="accountsSelectOptions"
         />
-        <InputField
+        <FormTextarea
           v-else
           v-model.trim="signer.address"
           v-validate="{
             required: true,
             name_registered_address_or_url: true,
           }"
+          auto-height
           :label="getSignerLabel(index)"
           :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :name="`signer-address-${index}`"
@@ -58,7 +59,7 @@
               @click="removeSigner(index)"
             />
           </template>
-        </InputField>
+        </FormTextarea>
       </div>
 
       <div class="signers-add-wrapper">
@@ -198,8 +199,8 @@ import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import FormSelect from '../form/FormSelect.vue';
-import InputField from '../InputField.vue';
 import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
+import FormTextarea from '../form/FormTextarea.vue';
 import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
 
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
@@ -215,11 +216,11 @@ type Step = ObjectValues<typeof STEPS>;
 export default defineComponent({
   name: 'MultisigVaultCreate',
   components: {
+    FormTextarea,
     Modal,
     BtnMain,
     BtnText,
     BtnHelp,
-    InputField,
     MultisigVaultCreateProgress,
     QrScanIcon,
     PlusCircleIcon,
