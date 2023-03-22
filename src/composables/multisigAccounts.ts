@@ -76,6 +76,18 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     pendingMultisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId, true);
   }
 
+  if (
+    !activeMultisigAccountId.value
+    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
+  ) {
+    activeMultisigAccountId.value = getLocalStorageItem<string>([
+      LOCAL_STORAGE_MULTISIG_KEY,
+      'active',
+      activeNetwork.value.networkId,
+    ]) || '';
+    activeMultisigNetworkId.value = activeNetwork.value.networkId;
+  }
+
   function setActiveMultisigAccountId(gaAccountId: string) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
@@ -242,19 +254,15 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       });
 
+    multisigAccounts.value = result;
+
     if (
       !activeMultisigAccountId.value
       || activeMultisigNetworkId.value !== activeNetwork.value.networkId
     ) {
-      const storedMultisigAccountId = getLocalStorageItem<string>([
-        LOCAL_STORAGE_MULTISIG_KEY,
-        'active',
-        activeNetwork.value.networkId,
-      ]);
-      setActiveMultisigAccountId(storedMultisigAccountId || result[0]?.gaAccountId);
+      setActiveMultisigAccountId(result[0]?.gaAccountId);
     }
 
-    multisigAccounts.value = result;
     storeMultisigAccounts(result, activeNetwork.value.networkId);
     removeDuplicatesFromPendingAccounts();
   }
