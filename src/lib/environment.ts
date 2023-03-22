@@ -5,9 +5,11 @@ const url = new URL(window.location.href);
 
 export const PLATFORM = process.env.PLATFORM as 'web' | 'cordova' | 'extension';
 
+export const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
+
 export const RUNNING_IN_POPUP = !!(
   url.searchParams.get('id')
-  && (window.location.pathname.includes('index.html') || process.env.RUNNING_IN_TESTS)
+  && (window.location.pathname.includes('index.html') || RUNNING_IN_TESTS)
 );
 
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
@@ -33,7 +35,7 @@ export const IS_CORDOVA = PLATFORM === 'cordova';
 /**
  * Running as a browser extension
  */
-export const IS_EXTENSION = PLATFORM === 'extension' && !process.env.RUNNING_IN_TESTS;
+export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 

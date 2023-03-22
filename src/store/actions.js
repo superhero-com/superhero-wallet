@@ -1,14 +1,10 @@
-import {
-  flatten, orderBy, uniq,
-} from 'lodash-es';
+import { flatten, orderBy } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { postMessageToContent } from '../popup/utils/connection';
 import {
   fetchJson,
-  getAddressByNameEntry,
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
@@ -137,27 +133,6 @@ export default {
     }
 
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-  },
-  async getWebPageAddresses({ state: { sdk } }) {
-    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    const { address, chainName } = await postMessageToContent(
-      { method: 'getAddresses' },
-      tab.id,
-    ).catch(() => ({ address: [], chainName: [] }));
-    let addresses = Array.isArray(address) ? address : [address];
-    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
-    const chainNamesAddresses = await Promise.all(
-      chainNames.map(async (n) => {
-        try {
-          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
-        } catch (e) {
-          return null;
-        }
-      }),
-    );
-    addresses = [...addresses, ...chainNamesAddresses];
-
-    return { addresses: uniq(addresses).filter((a) => a), tab };
   },
   async claimTips({ getters: { activeNetwork } }, { url, address }) {
     return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });

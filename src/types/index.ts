@@ -21,6 +21,8 @@ export * from './router';
 export * from './filter';
 export * from './forms';
 
+export type Dictionary<T = any> = Record<string, T>;
+
 /**
  * Convert `key: val` objects into union of values.
  */
@@ -526,6 +528,17 @@ export interface IMiddlewareStatus {
   nodeRevision: string
   nodeSyncing: boolean
   nodeVersion: string
+}
+
+export interface IPopupConfig {
+  type: string;
+  app: IAppData;
+  action?: any;
+  data?: string;
+  message?: string;
+  transaction?: Partial<ITx>;
+  resolve?: any;
+  reject?: any;
 }
 
 export interface IName {
