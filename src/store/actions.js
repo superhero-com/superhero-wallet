@@ -1,5 +1,5 @@
 import {
-  flatten, orderBy, uniq, uniqBy,
+  flatten, orderBy, uniq,
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
@@ -59,19 +59,20 @@ export default {
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
-  // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
   async fetchTipWithdrawnTransactions(
     { state, getters, commit },
-    { recent, address, multipleAccounts },
+    {
+      recent, limit = 5, address, multipleAccounts,
+    },
   ) {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
     const response = await fetchJson(
-      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn`,
+      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ''}`,
     );
     if (response.message) return [];
-    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({
+    const tipWithdrawnTransactions = response.map(({
       amount, contract, height, data: { tx }, ...t
     }) => ({
       tx: {
@@ -85,7 +86,7 @@ export default {
       microTime: new Date(t.createdAt).getTime(),
       blockHeight: height,
       claim: true,
-    })));
+    }));
     if (!multipleAccounts) {
       commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
     }
