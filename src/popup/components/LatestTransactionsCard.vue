@@ -100,11 +100,17 @@ export default defineComponent({
         middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1)
       );
 
+      const fetchTipWithdrawnTransactionsByAddress = (address: string) => (
+        fetchTipWithdrawnTransactions({
+          address, recent: true, limit: DASHBOARD_TRANSACTION_LIMIT, multipleAccounts: true,
+        })
+      );
+
       const allTransactionsPromises = [
         ...fetchForAllAccount(getTxByAccountAddress as CallbackFunction),
         ...fetchForAllAccount(fetchPendingTransactions),
         ...fetchForAllAccount(getTokensHistory, true),
-        ...fetchForAllAccount(fetchTipWithdrawnTransactions, true),
+        ...fetchForAllAccount(fetchTipWithdrawnTransactionsByAddress as CallbackFunction),
       ];
 
       const allTransactions = await Promise.all(allTransactionsPromises);
