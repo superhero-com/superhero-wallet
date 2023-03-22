@@ -15,11 +15,12 @@
       >
         {{ $t('multisig.multisigVault') }}
       </div>
-      <Truncate
+      <div
         v-else-if="name"
         class="account-name-truncated"
-        :str="name"
-      />
+      >
+        <Truncate :str="name" />
+      </div>
       <div
         v-else
         data-cy="account-name-number"
@@ -99,7 +100,7 @@ export default defineComponent({
   }
 
   .account-details {
-    max-width: 230px;
+    max-width: 250px;
     font-weight: 500;
 
     .account-name-truncated,

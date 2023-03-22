@@ -18,12 +18,13 @@
       <span
         ref="scroll"
         class="inner"
-        v-text="nameComponent || str"
-      />
+        :class="{ ready: isLoaded }"
+      >
+        {{ nameComponent }}
+      </span>
     </span>
-
     <span
-      v-if="nameComponent"
+      v-if="nameComponent !== str"
       class="domain"
       v-text="AENS_DOMAIN"
     />
@@ -34,9 +35,10 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   ref,
   watch,
+  nextTick,
+  onMounted,
 } from '@vue/composition-api';
 import { AENS_DOMAIN } from '../utils';
 
@@ -50,36 +52,45 @@ export default defineComponent({
     const container = ref<HTMLDivElement>();
     const scroll = ref<HTMLDivElement>();
     const shouldScroll = ref(false);
-    const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN) ? props.str.replace(AENS_DOMAIN, '') : '');
+    const isLoaded = ref(false);
+    const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN)
+      ? props.str.replace(AENS_DOMAIN, '')
+      : props.str);
 
     const animationTranslate = ref<string>();
     const animationDuration = ref<string>();
 
+    const calculateTruncate = async () => {
+      shouldScroll.value = false;
+      await nextTick();
+      if (!props.fixed && scroll.value && container.value?.clientWidth) {
+        const { clientWidth } = container.value;
+        const { clientWidth: scrollWidth } = scroll.value;
+        const animationWidth = scrollWidth - clientWidth;
+        const PADDING_WIDTH = 20;
+
+        if (scrollWidth > clientWidth) {
+          animationTranslate.value = `-${animationWidth + PADDING_WIDTH}px`;
+          animationDuration.value = `${(animationWidth + PADDING_WIDTH) * 100}ms`;
+          shouldScroll.value = true;
+        }
+      }
+    };
+
+    watch(nameComponent, calculateTruncate);
+
     onMounted(() => {
-      watch(
-        () => props.str,
-        () => {
-          shouldScroll.value = false;
-
-          if (!props.fixed && scroll.value && container.value) {
-            const { scrollWidth, offsetWidth } = container.value;
-
-            const animationWidth = scrollWidth - offsetWidth;
-
-            if (scrollWidth > offsetWidth) {
-              animationTranslate.value = `-${(animationWidth - (props.fixed ? 0 : 4))}px`;
-              animationDuration.value = `${animationWidth * 100}ms`;
-              shouldScroll.value = true;
-            }
-          }
-        },
-        { immediate: true },
-      );
+      // sometimes setTimeout is needed for scroll to calculate proper width
+      setTimeout(() => {
+        calculateTruncate();
+        isLoaded.value = true;
+      }, 500);
     });
 
     return {
       AENS_DOMAIN,
       container,
+      isLoaded,
       scroll,
       shouldScroll,
       nameComponent,
@@ -93,7 +104,9 @@ export default defineComponent({
 <style lang="scss" scoped>
 .truncate {
   display: flex;
-  max-width: 100%;
+  width: 100%;
+  min-width: 0;
+  padding-right: 5px;
 
   &.right {
     justify-content: flex-end;
@@ -108,7 +121,20 @@ export default defineComponent({
       text-overflow: ellipsis;
     }
 
+    .inner {
+      position: relative;
+      display: inline-block;
+      min-width: fit-content;
+      transition: opacity 0.5s;
+      opacity: 0;
+
+      &.ready {
+        opacity: 1;
+      }
+    }
+
     &.scrollable {
+      padding-right: 5px;
       border-radius: 2px;
       mask-image:
         linear-gradient(
@@ -124,9 +150,9 @@ export default defineComponent({
         display: inline-block;
         animation-name: animationTruncate;
         animation-duration: var(--animationDuration);
-        animation-delay: 1s;
+        animation-delay: 1.5s;
         animation-iteration-count: infinite;
-        animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+        padding: 0 10px;
       }
     }
   }
@@ -141,7 +167,7 @@ export default defineComponent({
     }
 
     50% {
-      transform: translateX(var(--animationTranslate));
+      transform: translateX(calc(var(--animationTranslate) - 0px));
     }
 
     100% {
