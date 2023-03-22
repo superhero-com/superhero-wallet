@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { ICordova } from '../../types';
+import { Dictionary, ICordova } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
@@ -69,7 +69,7 @@ router.beforeEach(async (to, from, next) => {
     }[POPUP_TYPE];
 
     if (name !== to.name) {
-      next({ name, params: await getPopupProps() });
+      next({ name, params: await getPopupProps() as Dictionary });
       return;
     }
   }
