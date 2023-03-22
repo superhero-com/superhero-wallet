@@ -35,7 +35,9 @@
         />
 
         <template v-if="!multisigTransaction">
-          <span v-if="fiatAmount && !showTransactionOwner">{{ fiatAmount }}</span>
+          <span v-if="fiatAmount && !showTransactionOwner">
+            {{ fiatAmount }}
+          </span>
           <span
             v-else-if="showTransactionOwner"
             class="date"
@@ -219,6 +221,7 @@ export default defineComponent({
 
       width: 100%;
       color: rgba(variables.$color-white, 0.75);
+      gap: 3px;
 
       .date {
         white-space: nowrap;

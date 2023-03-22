@@ -63,12 +63,7 @@
         class="owner"
       >
         <span class="secondary">{{ $t('common.by') }}</span>
-        <Truncate
-          :key="truncateWidth"
-          class="account-name-truncated"
-          :str="ownerName"
-          :style="{ width: truncateWidth }"
-        />
+        <Truncate :str="ownerName" />
       </div>
     </div>
   </div>
@@ -77,8 +72,8 @@
 <script lang="ts">
 import {
   computed,
-  defineComponent, onMounted,
-  PropType, ref,
+  defineComponent,
+  PropType,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
@@ -134,10 +129,6 @@ export default defineComponent({
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
     const accounts = useGetter('accounts');
-
-    const transactionLabelRef = ref();
-    const labelRef = ref();
-    const truncateWidth = ref<string | number>('100%');
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
@@ -231,19 +222,10 @@ export default defineComponent({
       )),
     ));
 
-    onMounted(() => {
-      truncateWidth.value = (
-        `${transactionLabelRef.value?.clientWidth - (labelRef.value?.clientWidth || 0) - 25}px`
-      );
-    });
-
     return {
       isErrorTransaction,
       ownerName,
       label,
-      transactionLabelRef,
-      labelRef,
-      truncateWidth,
       ABORT_TX_TYPE,
     };
   },
@@ -260,6 +242,7 @@ export default defineComponent({
 
   width: 100%;
   overflow: hidden;
+  flex: 1 1 50%;
   white-space: nowrap;
   text-overflow: ellipsis;
 
@@ -302,12 +285,13 @@ export default defineComponent({
 
   .label,
   .owner {
+    width: 100%;
     display: flex;
     gap: 4px;
   }
 
-  .account-name-truncated {
-    width: calc(100%);
+  .owner {
+    min-width: 0;
   }
 }
 </style>
