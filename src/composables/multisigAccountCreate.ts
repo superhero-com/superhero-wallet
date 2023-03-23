@@ -145,7 +145,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       }),
       {
         modal: false,
-        fromAccount: payerId,
+        onAccount: payerId,
       } as any,
     );
 
