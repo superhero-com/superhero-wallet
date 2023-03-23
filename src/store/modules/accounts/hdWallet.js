@@ -46,8 +46,8 @@ export default {
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, opt }) {
-      const { secretKey } = opt && opt.fromAccount
-        ? accounts.find(({ address }) => address === opt.fromAccount)
+      const { secretKey } = opt && opt.onAccount
+        ? accounts.find(({ address }) => address === opt.onAccount)
         : account;
       return Crypto.sign(data, secretKey);
     },
@@ -90,11 +90,10 @@ export default {
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
+    async signTransactionFromAccount({ dispatch }, {
       txBase64,
-      opt: { modal = true, app = null, fromAccount },
+      opt: { modal = true, app = null, onAccount },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
         await dispatch('confirmTxSigning', { encodedTx, app });
@@ -102,8 +101,7 @@ export default {
       const signature = await dispatch(
         'signWithoutConfirmation',
         {
-          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
-          opt: { fromAccount },
+          opt: { onAccount },
         },
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;

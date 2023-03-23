@@ -132,7 +132,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         waitMined: true,
         modal: false,
         innerTx: true,
-        fromAccount: payerId,
+        onAccount: payerId,
       },
     };
     const payedTx = await sdk.send(
