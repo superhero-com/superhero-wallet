@@ -38,8 +38,15 @@ export default async function initSdk() {
 
   store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
   try {
-    await store.dispatch('sdkPlugin/initialize');
-    await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+    await Promise.all([
+      store.dispatch('sdkPlugin/initialize'),
+      store.dispatch('sdk13Plugin/initialize'),
+    ]);
+    await Promise.all([
+      watchUntilTruthy(() => store.getters['sdkPlugin/sdk']),
+      watchUntilTruthy(() => store.getters['sdk13Plugin/sdk']),
+    ]);
+
     const { getMiddleware, initMiddleware } = useMiddleware({ store });
 
     if (IN_FRAME) {
