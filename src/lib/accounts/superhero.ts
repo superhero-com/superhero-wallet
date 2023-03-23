@@ -18,8 +18,6 @@ export class AccountSuperhero extends AccountBase {
 
   store: Store<any>;
 
-  aeppInfo: Record<string, any> = {};
-
   constructor(store: Store<any>) {
     super();
     this.store = store;
@@ -85,16 +83,15 @@ export class AccountSuperhero extends AccountBase {
   }
 
   async bgPermissionCheckAndSign(method: IPopupType, payload: any, opt: Record<string, any>) {
-    const aepp = this.aeppInfo[opt.aeppRpcClientId];
     const isTxSigning = method === POPUP_TYPE_TX_SIGN;
     if (
       (await this.store.dispatch('permissions/checkPermissions', {
-        host: new URL(aepp.origin).host,
+        host: new URL(opt.origin).host,
         method,
         params: opt,
       }))
       || (await showPopup(
-        aepp.origin,
+        opt.origin,
         isTxSigning ? POPUP_TYPE_SIGN : POPUP_TYPE_MESSAGE_SIGN,
         {
           ...opt,
@@ -120,7 +117,7 @@ export class AccountSuperhero extends AccountBase {
         opt: {
           ...opt,
           modal: false,
-          host: aepp.origin,
+          host: opt.origin,
         },
       });
     }
