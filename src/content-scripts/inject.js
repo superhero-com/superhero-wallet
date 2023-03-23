@@ -1,8 +1,9 @@
-import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
-import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { getBrowserAPI } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/helpers';
-import { MESSAGE_DIRECTION } from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/schema';
-import ContentScriptBridge from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/content-script-bridge';
+import {
+  BrowserRuntimeConnection,
+  BrowserWindowMessageConnection,
+  MESSAGE_DIRECTION,
+  connectionProxy,
+} from '@aeternity/aepp-sdk-13';
 
 window.browser = require('webextension-polyfill');
 
@@ -39,25 +40,15 @@ const runContentScript = () => {
   const readyStateCheckInterval = setInterval(() => {
     if (document.readyState === 'complete') {
       clearInterval(readyStateCheckInterval);
-      const port = getBrowserAPI().runtime.connect();
-      const extConnection = BrowserRuntimeConnection({
-        connectionInfo: {
-          description: 'Content Script to Extension connection',
-          origin: window.origin,
-        },
-        port,
-      });
-      const pageConnection = BrowserWindowMessageConnection({
-        connectionInfo: {
-          description: 'Content Script to Page  connection',
-          origin: window.origin,
-        },
+      const port = browser.runtime.connect();
+      const extConnection = new BrowserRuntimeConnection({ port });
+      const pageConnection = new BrowserWindowMessageConnection({
+        target: window,
         origin: window.origin,
         sendDirection: MESSAGE_DIRECTION.to_aepp,
         receiveDirection: MESSAGE_DIRECTION.to_waellet,
       });
-      const bridge = ContentScriptBridge({ pageConnection, extConnection });
-      bridge.run();
+      connectionProxy(pageConnection, extConnection);
     }
   }, 10);
 };

@@ -79,18 +79,22 @@ export default {
       txBase64,
       opt: { modal = true, app = null },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
         await dispatch('confirmTxSigning', { encodedTx, app });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
-        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
+        {
+          data: Buffer.concat([
+            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(encodedTx),
+          ]),
+        },
       );
       return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
     },
-    async signTransactionFromAccount({ dispatch }, {
+    async signTransactionFromAccount({ dispatch, rootGetters }, {
       txBase64,
       opt: { modal = true, app = null, onAccount },
     }) {
@@ -101,6 +105,10 @@ export default {
       const signature = await dispatch(
         'signWithoutConfirmation',
         {
+          data: Buffer.concat([
+            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(encodedTx),
+          ]),
           opt: { onAccount },
         },
       );

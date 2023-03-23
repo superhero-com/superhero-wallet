@@ -59,7 +59,8 @@ export default async function initSdk() {
             store.dispatch('sdkPlugin/initialize'),
             getMiddleware(),
           ]);
-          sdk = await getSdk();
+          const { getSdk: getSdk13 } = useSdk13({ store });
+          sdk = await getSdk13();
 
           if (IN_FRAME && !FramesConnection.initialized) {
             FramesConnection.init(sdk);

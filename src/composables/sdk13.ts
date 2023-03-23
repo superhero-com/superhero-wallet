@@ -1,10 +1,11 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref, watch } from '@vue/composition-api';
 import {
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
   CompilerHttp,
 } from '@aeternity/aepp-sdk-13';
+import { isEqual } from 'lodash-es';
 import { ShSdkWallet } from '../lib/shSdkWallet';
 import type {
   IDefaultComposableOptions,
@@ -36,7 +37,7 @@ const aeppInfo: Record<string, any> = {};
  * For now, it works as an abstraction layer.
  */
 export function useSdk13({ store }: IDefaultComposableOptions) {
-  const { isLoggedIn } = useAccounts({ store });
+  const { isLoggedIn, activeAccount } = useAccounts({ store });
   const isSdkReady = computed(() => !!sdk);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -91,7 +92,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
         const aepp = aeppInfo[aeppId];
         const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
         const app = new App(url);
-        const { activeAccount } = useAccounts({ store });
         if (!(await store.dispatch('permissions/requestAddressForHost', {
           host: app.host.host,
           name: app.host.hostname,
@@ -126,15 +126,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     sdkBlocked = false;
   }
 
-  async function resetSdkNode() {
-    sdkBlocked = true;
-    sdk.pool.delete(sdkCurrentNetwork.name);
-    const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-    sdk.addNode(activeNetwork.value.name, nodeInstance!, true);
-    sdkCurrentNetwork = activeNetwork.value;
-    sdkBlocked = false;
-  }
-
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.
    * TODO: this probably could be replaced with a computed prop.
@@ -144,8 +135,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
       await watchUntilTruthy(isSdkReady);
     } else if (!sdk) {
       await initSdk();
-    } else if (sdkCurrentNetwork.url !== activeNetwork.value.url) {
-      await resetSdkNode();
     }
     return sdk;
   }
@@ -163,6 +152,31 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
       signature: signedChallenge,
     };
   }
+
+  watch(
+    activeAccount,
+    (oldVal, newVal) => {
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdk._pushAccountsToApps();
+      }
+    },
+    { deep: true },
+  );
+
+  watch(
+    activeNetwork,
+    async (oldVal, newVal) => {
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdkBlocked = true;
+        sdk.pool.delete(sdkCurrentNetwork.name);
+        const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+        sdk.addNode(activeNetwork.value.name, nodeInstance!, true);
+        sdkCurrentNetwork = activeNetwork.value;
+        sdkBlocked = false;
+      }
+    },
+    { deep: true },
+  );
 
   return {
     isNodeReady,
