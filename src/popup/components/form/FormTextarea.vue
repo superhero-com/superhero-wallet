@@ -31,7 +31,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, nextTick } from '@vue/composition-api';
+import {
+  defineComponent, ref, nextTick, watch,
+} from '@vue/composition-api';
 import InputField from '../InputField.vue';
 
 const SIZES = ['xs', 'sm', 'rg', 'md'];
@@ -58,15 +60,6 @@ export default defineComponent({
     const height = ref<string | undefined>();
     function handleInput(event: InputEvent) {
       const { value } = event.target as HTMLInputElement;
-      if (props.autoHeight && textarea.value) {
-        height.value = 'auto';
-        nextTick(() => {
-          const { scrollHeight, clientHeight } = textarea.value!;
-          const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
-          height.value = `${newHeight}px`;
-        });
-      }
-
       emit('input', value);
     }
 
@@ -75,6 +68,17 @@ export default defineComponent({
         emit('submit');
       }
     }
+
+    watch(() => props.value, () => {
+      if (props.autoHeight && textarea.value) {
+        height.value = 'auto';
+        nextTick(() => {
+          const { scrollHeight, clientHeight } = textarea.value!;
+          const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
+          height.value = `${newHeight}px`;
+        });
+      }
+    });
 
     return {
       textarea,
