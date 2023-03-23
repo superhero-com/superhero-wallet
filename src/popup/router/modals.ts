@@ -1,5 +1,3 @@
-import { registerModal } from '../../store/plugins/modals';
-
 import {
   MODAL_DEFAULT,
   MODAL_ACCOUNT_CREATE,
@@ -25,6 +23,7 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
 } from '../utils/constants';
+import { useModals } from '../../composables';
 
 import Default from '../components/Modals/Default.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
@@ -50,42 +49,78 @@ import MultisigProposalConfirmActions from '../components/Modals/MultisigProposa
 import MessageSign from '../pages/Popups/MessageSign.vue';
 
 export default () => {
-  registerModal({ name: MODAL_DEFAULT, component: Default });
-  registerModal({ name: MODAL_ACCOUNT_CREATE, component: AccountCreate });
-  registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
-  registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
-  registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
-  registerModal({ name: MODAL_CONFIRM, component: Confirm });
-  registerModal({ name: MODAL_ERROR_LOG, component: ErrorLog });
-  registerModal({ name: MODAL_FORM_SELECT_OPTIONS, component: FormSelectOptions });
-  registerModal({ name: MODAL_HELP, component: Help });
-  registerModal({
-    name: MODAL_CONFIRM_TRANSACTION_SIGN,
+  const { registerModal } = useModals();
+
+  registerModal(MODAL_DEFAULT, {
+    component: Default,
+  });
+  registerModal(MODAL_ACCOUNT_CREATE, {
+    component: AccountCreate,
+  });
+  registerModal(MODAL_ACCOUNT_IMPORT, {
+    component: AccountImport,
+  });
+  registerModal(MODAL_CLAIM_SUCCESS, {
+    component: ClaimSuccess,
+  });
+  registerModal(MODAL_SPEND_SUCCESS, {
+    component: SpendSuccess,
+  });
+  registerModal(MODAL_CONFIRM, {
+    component: Confirm,
+  });
+  registerModal(MODAL_ERROR_LOG, {
+    component: ErrorLog,
+  });
+  registerModal(MODAL_FORM_SELECT_OPTIONS, {
+    component: FormSelectOptions,
+  });
+  registerModal(MODAL_HELP, {
+    component: Help,
+  });
+  registerModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
     component: ConfirmTransactionSign,
     showInPopupIfWebFrame: true,
   });
-  registerModal({
-    name: MODAL_CONFIRM_RAW_SIGN,
+  registerModal(MODAL_CONFIRM_RAW_SIGN, {
     component: ConfirmRawSign,
     showInPopupIfWebFrame: true,
   });
-  registerModal({ name: MODAL_CONFIRM_CONNECT, showInPopupIfWebFrame: true });
-  registerModal({ name: MODAL_READ_QR_CODE, component: QrCodeReader });
-  registerModal({
-    name: MODAL_MESSAGE_SIGN,
+  registerModal(MODAL_CONFIRM_CONNECT, {
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_MESSAGE_SIGN, {
     component: MessageSign,
     showInPopupIfWebFrame: true,
   });
-  registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
-  registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
-  registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
-  registerModal({ name: MODAL_RESET_WALLET, component: ResetWallet });
-  registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
-  registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
-  registerModal({ name: MODAL_PAYLOAD_FORM, component: PayloadForm });
-  registerModal({ name: MODAL_MULTISIG_VAULT_CREATE, component: MultisigVaultCreate });
-  registerModal({
-    name: MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+  registerModal(MODAL_READ_QR_CODE, {
+    component: QrCodeReader,
+  });
+  registerModal(MODAL_TRANSFER_RECEIVE, {
+    component: TransferReceive,
+  });
+  registerModal(MODAL_TRANSFER_SEND, {
+    component: TransferSend,
+  });
+  registerModal(MODAL_ASSET_SELECTOR, {
+    component: AssetSelector,
+  });
+  registerModal(MODAL_RESET_WALLET, {
+    component: ResetWallet,
+  });
+  registerModal(MODAL_RECIPIENT_HELPER, {
+    component: RecipientHelper,
+  });
+  registerModal(MODAL_RECIPIENT_INFO, {
+    component: RecipientInfo,
+  });
+  registerModal(MODAL_PAYLOAD_FORM, {
+    component: PayloadForm,
+  });
+  registerModal(MODAL_MULTISIG_VAULT_CREATE, {
+    component: MultisigVaultCreate,
+  });
+  registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
   });
 };

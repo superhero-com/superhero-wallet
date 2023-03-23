@@ -14,10 +14,9 @@ import {
   isAccountNotFoundError,
   watchUntilTruthy,
   fetchRespondChallenge,
-  MODAL_DEFAULT,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
-import { useMiddleware } from '../composables';
+import { useMiddleware, useModals } from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
@@ -27,12 +26,13 @@ export default {
 
   async selectNetwork({ dispatch, getters }, network) {
     await dispatch('switchNetwork', network);
-    if (getters.tippingSupported) return;
-    await dispatch('modals/open', {
-      name: MODAL_DEFAULT,
-      title: i18n.t('modals.tip-mainnet-warning.title'),
-      msg: i18n.t('modals.tip-mainnet-warning.msg'),
-    });
+    if (!getters.tippingSupported) {
+      const { openDefaultModal } = useModals();
+      await openDefaultModal({
+        title: i18n.t('modals.tip-mainnet-warning.title'),
+        msg: i18n.t('modals.tip-mainnet-warning.msg'),
+      });
+    }
   },
   addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
     commit('addPendingTransaction', {

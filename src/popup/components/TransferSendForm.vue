@@ -188,7 +188,6 @@ import type {
   ITokenList,
 } from '../../types';
 import {
-  MODAL_DEFAULT,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
@@ -201,6 +200,7 @@ import {
 import {
   useBalances,
   useMaxAmount,
+  useModals,
   useMultisigAccounts,
 } from '../../composables';
 import { useState, useGetter } from '../../composables/vuex';
@@ -258,6 +258,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
+    const { openModal, openDefaultModal } = useModals();
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
@@ -387,9 +388,7 @@ export default defineComponent({
     }
 
     function showRecipientHelp() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_RECIPIENT_INFO,
-      });
+      openModal(MODAL_RECIPIENT_INFO);
     }
 
     function handleAssetChange(selectedAsset: IToken) {
@@ -397,11 +396,11 @@ export default defineComponent({
     }
 
     async function openScanQrModal() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
         title: root.$t('pages.send.scanAddress'),
         icon: 'critical',
       });
+
       if (scanResult?.trim().charAt(0) === '{') {
         let parsedScanResult: any = null;
         try {
@@ -410,8 +409,7 @@ export default defineComponent({
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
+          openDefaultModal({
             title: root.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -422,8 +420,7 @@ export default defineComponent({
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
-          formModel.value.address = '';
+          openDefaultModal({ msg: root.$t('modals.insufficient-balance.msg') });
           return;
         }
 
@@ -454,12 +451,13 @@ export default defineComponent({
     }
 
     function editPayload() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_PAYLOAD_FORM,
+      openModal(MODAL_PAYLOAD_FORM, {
         payload: formModel.value.payload,
-      }).then((text) => {
-        formModel.value.payload = text;
-      }).catch(() => null);
+      })
+        .then((text) => {
+          formModel.value.payload = text;
+        })
+        .catch(() => null);
     }
 
     function clearPayload() {

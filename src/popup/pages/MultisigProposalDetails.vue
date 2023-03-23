@@ -263,7 +263,6 @@ import {
   aettosToAe,
   splitAddress,
   AETERNITY_SYMBOL,
-  MODAL_DEFAULT,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   FUNCTION_TYPE_MULTISIG,
   getPayload,
@@ -282,8 +281,9 @@ import {
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
+  useModals,
 } from '../../composables';
-import { useGetter, useDispatch } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -321,6 +321,8 @@ export default defineComponent({
     ExternalLink,
   },
   setup(props, { root }) {
+    const { openDefaultModal, openModal } = useModals();
+
     const {
       activeMultisigAccount,
       updateMultisigAccounts,
@@ -353,8 +355,6 @@ export default defineComponent({
 
     const getExplorerPath = useGetter('getExplorerPath');
     const getTxSymbol = useGetter('getTxSymbol');
-
-    const openModal = useDispatch('modals/open');
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
@@ -405,8 +405,7 @@ export default defineComponent({
 
       processingAction.value = true;
       try {
-        await root.$store.dispatch('modals/open', {
-          name: MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+        await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
           action,
           signers: pendingMultisigTxLocalSigners.value,
         });
@@ -442,14 +441,13 @@ export default defineComponent({
         await updateMultisigAccounts();
 
         proposalCompleted.value = true;
-      } catch (error) {
+      } catch (error: any) {
         let title;
         if (isInsufficientBalanceError(error)) {
           error.message = root.$t('modals.vaultLowBalance.msg');
           title = root.$t('modals.vaultLowBalance.title');
         }
-        openModal({
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           icon: 'warning',
           title,
           msg: error.message,

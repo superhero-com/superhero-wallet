@@ -69,13 +69,14 @@ import {
   IPendingTransaction,
   ISdk,
 } from '../../types';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
+import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
   IFormModel,
   useBalances,
+  useModals,
 } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -96,6 +97,7 @@ export default defineComponent({
       amount: '',
     });
 
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
@@ -179,8 +181,7 @@ export default defineComponent({
         root.$store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });

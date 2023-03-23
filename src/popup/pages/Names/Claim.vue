@@ -56,17 +56,17 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   MAGNITUDE,
-  MODAL_DEFAULT,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
   checkAensName,
   convertToken,
 } from '../../utils';
+import { useModals } from '../../../composables';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -102,16 +102,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions('modals', {
-      openModal: 'open',
-    }),
     async claim() {
       if (!await this.$validator.validateAll()) return;
+
+      const { openDefaultModal } = useModals();
       const name = `${this.name}${AENS_DOMAIN}`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
       if (nameEntry) {
-        this.openModal({
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: this.$t('modals.name-exist.msg'),
         });
       } else {
@@ -129,10 +127,9 @@ export default {
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
             msg = this.$t('pages.names.balance-error');
           }
-          this.openModal({
-            name: MODAL_DEFAULT,
+          openDefaultModal({
             icon: 'critical',
-            title: msg,
+            msg,
           });
           return;
         } finally {
@@ -150,8 +147,7 @@ export default {
             });
           }
         } catch (e) {
-          this.openModal({
-            name: MODAL_DEFAULT,
+          openDefaultModal({
             msg: e.message,
           });
         } finally {

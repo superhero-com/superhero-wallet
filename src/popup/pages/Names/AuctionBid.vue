@@ -44,11 +44,10 @@
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { IAuctionBid } from '../../../types';
-import { useSdk } from '../../../composables';
+import { useModals, useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 import {
   AENS_BID_MIN_RATIO,
-  MODAL_DEFAULT,
   aeToAettos,
   calculateNameClaimFee,
 } from '../../utils';
@@ -73,6 +72,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const { openDefaultModal } = useModals();
 
     const loading = ref(false);
     const amount = ref('');
@@ -97,8 +97,7 @@ export default defineComponent({
       try {
         loading.value = true;
         await sdk.aensBid(props.name, aeToAettos(amount.value));
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
         root.$router.push({ name: 'auction-history', params: { name: props.name } });
@@ -107,7 +106,7 @@ export default defineComponent({
         if (msg.includes('is not enough to execute')) {
           msg = root.$t('pages.names.balance-error');
         }
-        root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, msg });
+        openDefaultModal({ msg });
       } finally {
         loading.value = false;
       }

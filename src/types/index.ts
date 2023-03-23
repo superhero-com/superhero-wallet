@@ -33,6 +33,8 @@ type PublicPart<T> = {[K in keyof T]: T[K]};
 
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
+export type ResolveRejectCallback = (...args: any) => void;
+
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
  * because of the private properties of the class.
@@ -615,3 +617,12 @@ export interface IDefaultComposableOptions {
    */
   store: Store<any>
 }
+
+export type StatusIconType =
+  | 'critical'
+  | 'alert'
+  | 'warning'
+  | 'info'
+  | 'success'
+  | 'not-secure'
+  | 'help';

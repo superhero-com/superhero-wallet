@@ -40,13 +40,15 @@
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from '@vue/composition-api';
+import type { StatusIconType } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
@@ -58,13 +60,12 @@ export default {
     close: { type: Function, default: null },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
-    type: { type: String, default: '' },
-    icon: { type: String, default: '' },
+    icon: { type: String as PropType<StatusIconType>, default: '' },
     buttonMessage: { type: String, default: '' },
     textCenter: Boolean,
     fullScreen: Boolean,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

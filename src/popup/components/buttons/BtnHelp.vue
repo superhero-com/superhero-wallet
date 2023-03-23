@@ -8,11 +8,14 @@
   </BtnPlain>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useModals } from '../../../composables';
+import { MODAL_HELP } from '../../utils';
 import BtnPlain from './BtnPlain.vue';
 import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: { BtnPlain, QuestionCircle },
   props: {
     title: { type: String, default: '' },
@@ -21,19 +24,24 @@ export default {
     option: { type: Object, default: null },
     small: Boolean,
   },
-  methods: {
-    async showHelpModal() {
-      await this.$store.dispatch('modals/open', {
-        name: 'help',
-        icon: this.icon || 'info',
-        title: this.title,
-        msg: this.msg,
-        option: this.option,
+  setup(props) {
+    const { openModal } = useModals();
+
+    async function showHelpModal() {
+      return openModal(MODAL_HELP, {
+        icon: props.icon || 'info',
+        title: props.title,
+        msg: props.msg,
+        option: props.option,
         textCenter: true,
       });
-    },
+    }
+
+    return {
+      showHelpModal,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
