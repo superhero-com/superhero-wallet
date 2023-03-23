@@ -127,12 +127,16 @@ import {
   ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi, useMultisigAccounts, useMultisigTransactions } from '../../composables';
+import {
+  useDeepLinkApi,
+  useModals,
+  useMultisigAccounts,
+  useMultisigTransactions,
+} from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
-  MODAL_DEFAULT,
   TX_FUNCTIONS,
   aeToAettos,
   checkAensName,
@@ -172,6 +176,7 @@ export default defineComponent({
     amount: { type: Number, default: null },
   },
   setup(props, { root, emit }) {
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const {
       activeMultisigAccount,
@@ -197,8 +202,7 @@ export default defineComponent({
     const PROPOSE_TRANSACTION_FEE = 0.000182940;
 
     function openTransactionFailedModal() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_DEFAULT,
+      openDefaultModal({
         title: root.$t('modals.transaction-failed.msg'),
         icon: 'critical',
       });

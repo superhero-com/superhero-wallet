@@ -4,8 +4,10 @@ import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
 import { MODAL_CONFIRM_CONNECT, watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
+import { useModals } from '../../composables';
 
 export default (store) => {
+  const { openModal } = useModals();
   let sdk;
 
   store.registerModule('sdkPlugin', {
@@ -48,8 +50,7 @@ export default (store) => {
             };
             if (method === 'message.sign') {
               if (!permission) {
-                await store.dispatch('modals/open', {
-                  name: 'confirm-message-sign',
+                await openModal(MODAL_MESSAGE_SIGN, {
                   message: params.message,
                   app: aeppUrl,
                 });
@@ -114,8 +115,7 @@ export default (store) => {
                   address,
                   connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
                     ? showPopup(app.host.href, 'connectConfirm')
-                    : store.dispatch('modals/open', {
-                      name: MODAL_CONFIRM_CONNECT,
+                    : openModal(MODAL_CONFIRM_CONNECT, {
                       app: {
                         name: app.host.hostname,
                         icons: [],

@@ -45,7 +45,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from '@vue/composition-api';
 import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
-import { useConnection } from '../../../composables';
+import { useConnection, useModals } from '../../../composables';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 import Loader from '../Loader.vue';
@@ -63,6 +63,8 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();
+    const { openModal } = useModals();
+
     const loading = ref(false);
 
     async function createPlainAccount() {
@@ -73,9 +75,7 @@ export default defineComponent({
     }
 
     async function createMultisigAccount() {
-      await root.$store.dispatch('modals/open', {
-        name: MODAL_MULTISIG_VAULT_CREATE,
-      });
+      await openModal(MODAL_MULTISIG_VAULT_CREATE);
       props.resolve();
     }
 

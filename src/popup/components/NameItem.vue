@@ -148,7 +148,7 @@ import {
   checkAddressOrChannel,
   readValueFromClipboard,
 } from '../utils';
-import { useTopHeaderData } from '../../composables';
+import { useModals, useTopHeaderData } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { IAccount, IName } from '../../types';
 
@@ -183,6 +183,7 @@ export default defineComponent({
     autoExtend: { type: Boolean },
   },
   setup(props, { root }) {
+    const { openModal } = useModals();
     const { topBlockHeight } = useTopHeaderData({ store: root.$store });
 
     const expand = ref(false);
@@ -229,8 +230,7 @@ export default defineComponent({
 
     async function setAutoExtend() {
       if (!props.autoExtend) {
-        await root.$store.dispatch('modals/open', {
-          name: MODAL_CONFIRM,
+        await openModal(MODAL_CONFIRM, {
           icon: 'info',
           title: root.$t('modals.autoextend-help.title'),
           msg: root.$t('modals.autoextend-help.msg'),

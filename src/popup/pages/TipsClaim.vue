@@ -47,12 +47,14 @@
 import { mapGetters, mapState } from 'vuex';
 import {
   BLOG_CLAIM_TIP_URL,
+  MODAL_CLAIM_SUCCESS,
   aettosToAe,
   toURL,
   validateTipUrl,
   watchUntilTruthy,
 } from '../utils';
 import { IS_EXTENSION } from '../../lib/environment';
+import { useModals } from '../../composables';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -89,6 +91,8 @@ export default {
   },
   methods: {
     async claimTips() {
+      const { openModal, openDefaultModal } = useModals();
+
       const url = this.normalizedUrl;
       this.loading = true;
       await watchUntilTruthy(() => this.sdk && this.tippingV1);
@@ -105,7 +109,7 @@ export default {
         await this.$store.dispatch('claimTips', { url, address: this.account.address });
         await this.$store.dispatch('cacheInvalidateOracle');
         await this.$store.dispatch('cacheInvalidateTips');
-        this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
+        openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
         this.$router.push({ name: 'account' });
       } catch (e) {
         const { error = '' } = e.response ? e.response.data : {};
@@ -118,8 +122,9 @@ export default {
         ) msg = this.$t('pages.claim.noZeroClaim');
         else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) msg = this.$t('pages.claim.oracleFailed');
         else if (error) msg = error;
-        if (msg) this.$store.dispatch('modals/open', { name: 'default', msg });
-        else {
+        if (msg) {
+          openDefaultModal({ msg });
+        } else {
           e.payload = { url };
           throw e;
         }

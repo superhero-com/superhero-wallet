@@ -3,7 +3,7 @@
     class="transfer-receive-modal"
     has-close-button
     from-bottom
-    @close="closeModal"
+    @close="resolve()"
   >
     <div
       class="transfer-receive"
@@ -81,12 +81,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  ref,
+} from '@vue/composition-api';
 import type {
   IAccount,
   IAsset,
   IToken,
   ITokenList,
+  ResolveRejectCallback,
 } from '../../../types';
 import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
@@ -95,7 +101,6 @@ import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
   APP_LINK_WEB,
-  MODAL_TRANSFER_RECEIVE,
 } from '../../utils';
 
 import InputAmount from '../InputAmountV2.vue';
@@ -121,6 +126,7 @@ export default defineComponent({
     AccountItem,
   },
   props: {
+    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
     isMultisig: Boolean,
@@ -180,10 +186,6 @@ export default defineComponent({
       selectedAsset.value = asset;
     }
 
-    function closeModal() {
-      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
-    }
-
     function copyAddress() {
       copy(accountAddressToCopy.value);
     }
@@ -200,7 +202,6 @@ export default defineComponent({
       amount,
       selectedAsset,
       share,
-      closeModal,
       handleAssetChange,
       copyAddress,
       copied,

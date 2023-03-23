@@ -16,7 +16,6 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  MODAL_DEFAULT,
   watchUntilTruthy,
 } from '../utils';
 import {
@@ -25,6 +24,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
+import { useModals } from '../../composables';
 
 Vue.use(VueRouter);
 
@@ -99,6 +99,7 @@ const routerReadyPromise = new Promise((resolve) => {
 
 if (IS_CORDOVA) {
   (async () => {
+    const { openDefaultModal } = useModals();
     const cordova = window.cordova as ICordova;
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
@@ -117,7 +118,10 @@ if (IS_CORDOVA) {
       if (url) {
         router.push({ name: ROUTE_ACCOUNT, query: { url } });
       } else {
-        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') as any });
+        openDefaultModal({
+          title: i18n.t('modals.mobile-share-error.title'),
+          msg: i18n.t('modals.mobile-share-error.msg'),
+        });
       }
     });
 

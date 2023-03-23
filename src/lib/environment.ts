@@ -15,7 +15,8 @@ export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 export const POPUP_TYPE = url.searchParams.get('type') as IPopupType || null;
 
 /**
- * Running in a web frame opened by an external application
+ * Running in a web frame, eg.: as a widget on the Superhero.com or in the Dex.
+ * In this case we need to handle some UI actions differently.
  */
 export const IN_FRAME = window.parent !== window;
 

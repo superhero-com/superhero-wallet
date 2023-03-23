@@ -3,8 +3,8 @@ import {
   defineComponent,
   onMounted,
 } from '@vue/composition-api';
-import { useDeepLinkApi, useSdk } from '../../composables';
-import { MODAL_DEFAULT, handleUnknownError } from '../utils';
+import { useDeepLinkApi, useModals, useSdk } from '../../composables';
+import { handleUnknownError } from '../utils';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -12,6 +12,7 @@ export default defineComponent({
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
       const { getSdk } = useSdk({ store: root.$store });
+      const { openDefaultModal } = useModals();
 
       try {
         const sdk = await getSdk();
@@ -19,8 +20,7 @@ export default defineComponent({
         const currentNetworkId = root.$store.getters.activeNetwork.networkId;
 
         if (networkId !== currentNetworkId) {
-          await root.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
+          await openDefaultModal({
             icon: 'warning',
             title: root.$t('modals.wrongNetwork.title'),
             msg: root.$t('modals.wrongNetwork.msg', [networkId]),

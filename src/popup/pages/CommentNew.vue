@@ -36,8 +36,12 @@ import {
   watch,
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
-import { MODAL_DEFAULT } from '../utils';
-import { useDeepLinkApi, useSdk, useAccounts } from '../../composables';
+import {
+  useAccounts,
+  useDeepLinkApi,
+  useModals,
+  useSdk,
+} from '../../composables';
 import { useGetter } from '../../composables/vuex';
 
 import AccountSelector from '../components/AccountSelector.vue';
@@ -53,6 +57,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
 
@@ -90,8 +95,7 @@ export default defineComponent({
         ]);
         openCallbackOrGoHome(true);
       } catch (e: any) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
