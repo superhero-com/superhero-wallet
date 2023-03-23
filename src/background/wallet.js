@@ -21,7 +21,6 @@ const addAeppConnection = async (port) => {
 
 export async function init() {
   const { isSdkReady, getSdk } = useSdk13({ store });
-
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
 
