@@ -361,6 +361,11 @@
       "fee": "Proposal transaction fee",
       "proposeAndApprove": "Propose and approve"
     },
+    "airGapSend": {
+      "sendTitle": "Send funds with AirGap",
+      "reviewTitle": "Review and sign transaction",
+      "reviewSubTitle": "Scan QR-code with your AirGap vault in order to sign the transaction"
+    },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",

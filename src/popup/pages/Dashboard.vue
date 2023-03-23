@@ -6,7 +6,10 @@
 
     <template #buttons>
       <OpenTransferReceiveModalButton is-big />
-      <OpenTransferSendModalButton is-big />
+      <OpenTransferSendModalButton
+        is-big
+        :is-air-gap="isAirGap"
+      />
     </template>
 
     <template #cards>
@@ -43,7 +46,7 @@ import {
 } from '@vue/composition-api';
 
 import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
-import { useGetter } from '../../composables/vuex';
+import { useAccounts } from '../../composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -70,8 +73,8 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup() {
-    const account = useGetter('account');
+  setup(props, { root }) {
+    const { account, isAirGap } = useAccounts({ store: root.$store });
 
     const simplexLink = computed(() => buildSimplexLink(account.value.address));
 
@@ -84,6 +87,7 @@ export default defineComponent({
       simplexLink,
       buyBackground,
       chainNameBackground,
+      isAirGap,
     };
   },
 });

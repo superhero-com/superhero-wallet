@@ -130,9 +130,9 @@ export interface IAccount {
   name: string // .chain
   publicKey: Uint8Array
   secretKey?: Uint8Array
+  airGapPublicKey?: string
   showed: boolean
   type: string
-  isOffline?: boolean;
 }
 
 /**

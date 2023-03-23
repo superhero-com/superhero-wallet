@@ -1,12 +1,14 @@
 import { computed } from '@vue/composition-api';
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
-import { getAccountNameToDisplay } from '../popup/utils';
+import { ACCOUNT_AIR_GAP_WALLET, getAccountNameToDisplay } from '../popup/utils';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in th future the state of the accounts should be stored in this composable
   const accounts = computed((): IAccount[] => store.getters.accounts);
   const account = computed((): IAccount => store.getters.account);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
+
+  const isAirGap = computed((): boolean => account.value.type === ACCOUNT_AIR_GAP_WALLET);
 
   /**
    * Accounts data formatted as the form select options
@@ -32,5 +34,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accountsAddressList,
     accountsSelectOptions,
     isLocalAccountAddress,
+    isAirGap,
   };
 }

@@ -12,7 +12,9 @@
           :is="currentStepConfig.component"
           ref="currentRenderedComponent"
           v-model="transferData"
+          :tx-raw="txRaw"
           :is-multisig="isMultisig"
+          :is-air-gap="isAirGap"
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"
           @success="currentStepConfig.onSuccess"
@@ -22,6 +24,15 @@
     </div>
 
     <template #footer>
+      <BtnMain
+        v-if="showCancelButton"
+        variant="muted"
+        text="Cancel"
+        class="button-action-secondary"
+        data-cy="cancel"
+        extra-padded
+        @click="cancelTransfer"
+      />
       <BtnMain
         v-if="showEditButton"
         variant="muted"
@@ -33,8 +44,8 @@
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="error || !isConnected || !transferData.address || !transferData.amount"
-        :icon="(showSendButton && !isMultisig) ? ArrowSendIcon : null"
+        :disabled="primaryButtonDisable"
+        :icon="primaryButtonIcon"
         :text="primaryButtonText"
         data-cy="next-step-button"
         @click="proceedToNextStep"
@@ -48,7 +59,11 @@ import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type { ITokenList, ObjectValues } from '../../../types';
 import { IFormModel } from '../../../composables';
-import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
+import {
+  AENS_DOMAIN,
+  MODAL_TRANSFER_SEND,
+  validateTipUrl,
+} from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -56,7 +71,9 @@ import BtnMain from '../buttons/BtnMain.vue';
 import TransferSendForm from '../TransferSendForm.vue';
 import TransferReview from '../TransferReview.vue';
 import TransferReviewTip from '../TransferReviewTip.vue';
+import TransferRawTxReview from '../TransferRawTxReview.vue';
 import ArrowSendIcon from '../../../icons/arrow-send.svg?vue-component';
+import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 
 export interface TransferFormModel extends IFormModel {
   fee?: BigNumber
@@ -71,6 +88,7 @@ const STEPS = {
   form: 'form',
   review: 'review',
   reviewTip: 'tip',
+  reviewRawTx: 'rawTx',
 } as const;
 type Step = ObjectValues<typeof STEPS>;
 
@@ -84,11 +102,13 @@ export default defineComponent({
     tokenContractId: { type: String, default: null },
     address: { type: String, default: null },
     isMultisig: Boolean,
+    isAirGap: Boolean,
   },
   setup(props, { root }) {
     const currentRenderedComponent = ref<Vue.Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
+    const txRaw = ref();
     const transferData = ref<TransferFormModel>({
       address: '', amount: '', selectedAsset: undefined, payload: '',
     });
@@ -100,7 +120,17 @@ export default defineComponent({
       STEPS.review,
       STEPS.reviewTip,
     ].includes(currentStep.value as any));
-    const showSendButton = computed(() => currentStep.value === STEPS.review);
+    const showCancelButton = computed(() => [
+      STEPS.reviewRawTx,
+    ].includes(currentStep.value as any));
+    const showSendButton = computed(() => (
+      currentStep.value === STEPS.review
+      || currentStep.value === STEPS.reviewRawTx
+    ));
+    const showScanButton = computed(() => (
+      currentStep.value === STEPS.review
+      && props.isAirGap
+    ));
     const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AENS_DOMAIN));
     const isAddressUrl = computed(() => (
       !isAddressChain.value
@@ -114,7 +144,33 @@ export default defineComponent({
       if (props.isMultisig) {
         return root.$t('modals.multisigTxProposal.proposeAndApprove');
       }
+      if (props.isAirGap && showScanButton.value) {
+        return 'Scan';
+      }
       return root.$t('pages.send.send');
+    });
+    const primaryButtonIcon = computed(() => {
+      if (showScanButton.value) {
+        return QrScanIcon;
+      }
+      if (showSendButton.value && !props.isMultisig) {
+        return ArrowSendIcon;
+      }
+      return null;
+    });
+    const primaryButtonDisable = computed(() => {
+      if (showScanButton.value) {
+        return (
+          error.value
+          || !isConnected.value
+        );
+      }
+      return (
+        error.value
+        || !isConnected.value
+        || !transferData.value.address
+        || !transferData.value.amount
+      );
     });
 
     function closeModal() {
@@ -140,8 +196,13 @@ export default defineComponent({
      * and the summary modal will be displayed by the `pendingTransactionHandler`
      * after the transfer is finished.
      */
-    function handleReviewSuccess() {
-      closeModal();
+    function handleReviewSuccess(rawTx: string = '') {
+      if (props.isAirGap && rawTx) {
+        txRaw.value = rawTx;
+        currentStep.value = STEPS.reviewRawTx;
+      } else {
+        closeModal();
+      }
     }
 
     function editTransfer() {
@@ -149,6 +210,12 @@ export default defineComponent({
       currentStep.value = STEPS.form;
     }
 
+    function cancelTransfer() {
+      error.value = false;
+      closeModal();
+    }
+
+    // add new steps: (signAirGapTransaction, reviewRawTx)
     const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
       [STEPS.form]: {
         component: TransferSendForm,
@@ -160,6 +227,10 @@ export default defineComponent({
       },
       [STEPS.review]: {
         component: TransferReview,
+        onSuccess: handleReviewSuccess,
+      },
+      [STEPS.reviewRawTx]: {
+        component: TransferRawTxReview,
         onSuccess: handleReviewSuccess,
       },
     };
@@ -176,6 +247,7 @@ export default defineComponent({
     return {
       STEPS,
       ArrowSendIcon,
+      QrScanIcon,
       isConnected,
       currentRenderedComponent,
       steps,
@@ -187,10 +259,16 @@ export default defineComponent({
       isAddressUrl,
       showEditButton,
       showSendButton,
+      showCancelButton,
+      showScanButton,
       primaryButtonText,
+      primaryButtonIcon,
+      primaryButtonDisable,
       closeModal,
       proceedToNextStep,
       editTransfer,
+      cancelTransfer,
+      txRaw,
     };
   },
 });

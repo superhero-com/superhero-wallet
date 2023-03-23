@@ -26,6 +26,7 @@
       />
       <OpenTransferSendModalButton
         :is-multisig="isMultisig"
+        :is-air-gap="isAirGap"
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
@@ -94,7 +95,12 @@ import {
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
 } from '../../router/routeNames';
-import { useSdk, useTokensList, useCurrencies } from '../../../composables';
+import {
+  useSdk,
+  useTokensList,
+  useCurrencies,
+  useAccounts,
+} from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -132,6 +138,7 @@ export default defineComponent({
       store: root.$store,
       isMultisig: isMultisig.value,
     });
+    const { account, isAirGap } = useAccounts({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
     const contractId = root.$route.params.id;
@@ -159,7 +166,6 @@ export default defineComponent({
     ];
     const loading = ref<boolean>(true);
     const tokenPairs = ref({ token0: null, token1: null });
-    const account = useGetter('account');
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
@@ -216,6 +222,7 @@ export default defineComponent({
       convertedBalance,
       routeName,
       isMultisig,
+      isAirGap,
     };
   },
 });

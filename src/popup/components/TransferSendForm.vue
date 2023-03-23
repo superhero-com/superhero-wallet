@@ -38,7 +38,9 @@
       </div>
     </template>
     <template v-else>
-      <ModalHeader :title="$t('modals.send.sendTitle')" />
+      <ModalHeader
+        :title="isAirGap ? $t('modals.airGapSend.sendTitle') : $t('modals.send.sendTitle')"
+      />
       <div class="account-row">
         <AccountItem
           :address="account.address"
@@ -250,6 +252,7 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
+    isAirGap: Boolean,
   },
   setup(props, { root, emit }) {
     const invoiceId = ref(null);

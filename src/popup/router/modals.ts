@@ -25,12 +25,14 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_AIR_GAP_TRANSACTION_QR,
 } from '../utils/constants';
 
 import Default from '../components/Modals/Default.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import AirGapConfirmImport from '../components/Modals/AirGapConfirmImport.vue';
+import TransactionQR from '../components/Modals/AirGap/TransactionQR.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import SpendSuccess from '../components/Modals/SpendSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
@@ -55,6 +57,7 @@ export default () => {
   registerModal({ name: MODAL_ACCOUNT_CREATE, component: AccountCreate });
   registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
   registerModal({ name: MODAL_AIR_GAP_CONFIRM_IMPORT, component: AirGapConfirmImport });
+  registerModal({ name: MODAL_AIR_GAP_TRANSACTION_QR, component: TransactionQR });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
   registerModal({ name: MODAL_CONFIRM, component: Confirm });

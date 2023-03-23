@@ -18,7 +18,7 @@
 
     <template #buttons>
       <OpenTransferReceiveModalButton />
-      <OpenTransferSendModalButton />
+      <OpenTransferSendModalButton :is-air-gap="isAirGap" />
       <BtnBox
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
@@ -41,10 +41,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
-import { useBalances, useConnection } from '../../composables';
+import { useAccounts, useBalances, useConnection } from '../../composables';
 import { buildSimplexLink, DEX_URL } from '../utils';
-import type { IAccount } from '../../types';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -70,8 +68,7 @@ export default defineComponent({
   setup(props, { root }) {
     const { isOnline } = useConnection();
     const { balance } = useBalances({ store: root.$store });
-
-    const account = useGetter<IAccount>('account');
+    const { account, isAirGap } = useAccounts({ store: root.$store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 
@@ -85,6 +82,7 @@ export default defineComponent({
       CreditCardIcon,
       SwapIcon,
       simplexLink,
+      isAirGap,
     };
   },
 });
