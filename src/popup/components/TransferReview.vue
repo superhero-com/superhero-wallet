@@ -127,14 +127,15 @@ import {
   ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { encode, Encoding } from '@aeternity/aepp-sdk-13';
 import {
   useAccounts,
   useDeepLinkApi,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
+  useSdk,
 } from '../../composables';
-import { useGetter } from '../../composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
@@ -146,7 +147,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IPendingTransaction, ISdk } from '../../types';
+import { IPendingTransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -189,7 +190,8 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const { getSdk13 } = useSdk({ store: root.$store });
+
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -211,6 +213,8 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
+      const sdk13 = await getSdk13();
+
       loading.value = true;
       try {
         let actionResult;
@@ -231,10 +235,9 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk.value.spend(amount, recipient, {
-            waitMined: false,
+          actionResult = await sdk13.spend(amount, recipient, {
+            payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
-            payload: props.transferData.payload,
           });
         }
 
