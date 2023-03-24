@@ -34,7 +34,7 @@ export function useTokensList({
 }: UseTokensListOptions) {
   const { balance, aeternityToken } = useBalances({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
-  const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate);
+  const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate || 0);
 
   const availableTokens = computed<ITokenList>(() => (
     isMultisig
@@ -45,7 +45,7 @@ export function useTokensList({
 
   const aeTokenBalance = computed(() => (
     isMultisig
-      ? activeMultisigAccount.value?.balance || new BigNumber(0)
+      ? new BigNumber(activeMultisigAccount.value?.balance || 0)
       : balance.value || new BigNumber(0)
   ));
   /**

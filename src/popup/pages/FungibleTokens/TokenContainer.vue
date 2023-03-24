@@ -125,7 +125,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
-    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate);
+    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
