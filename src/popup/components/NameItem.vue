@@ -286,6 +286,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .name-item {
   display: flex;
@@ -334,6 +335,10 @@ export default defineComponent({
           cursor: pointer;
           background: variables.$color-border-hover;
           border-radius: 6px;
+
+          @include mixins.mobile {
+            padding: 2px 6px;
+          }
 
           @extend %face-sans-12-medium;
 
