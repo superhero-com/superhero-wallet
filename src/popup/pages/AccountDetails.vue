@@ -18,7 +18,7 @@
 
     <template #buttons>
       <OpenTransferReceiveModalButton />
-      <OpenTransferSendModalButton />
+      <OpenTransferSendModalButton :is-air-gap="isAirGap" />
       <BtnBox
         v-if="isNodeMainnet && !IS_IOS"
         :icon="CreditCardIcon"
@@ -94,6 +94,7 @@ export default defineComponent({
     } = useAccounts({ store: root.$store });
 
     const { balance } = useBalances({ store: root.$store });
+    const { isAirGap } = useAccounts({ store: root.$store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 
@@ -110,6 +111,7 @@ export default defineComponent({
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      isAirGap,
     };
   },
 });

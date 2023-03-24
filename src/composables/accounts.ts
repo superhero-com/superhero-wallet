@@ -1,6 +1,11 @@
 import { computed } from '@vue/composition-api';
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
-import { FAUCET_URL, buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
+import {
+  FAUCET_URL,
+  ACCOUNT_AIR_GAP_WALLET,
+  buildSimplexLink,
+  getAccountNameToDisplay,
+} from '../popup/utils';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -11,6 +16,8 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const isLoggedIn = computed(
     () => activeAccount.value && Object.keys(activeAccount.value).length > 0,
   );
+
+  const isAirGap = computed((): boolean => activeAccount.value.type === ACCOUNT_AIR_GAP_WALLET);
 
   /**
    * Accounts data formatted as the form select options
@@ -67,5 +74,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     getAccountByAddress,
     setActiveAccountByAddress,
     setActiveAccountByIdx,
+    isAirGap,
   };
 }

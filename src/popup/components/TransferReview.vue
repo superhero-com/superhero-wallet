@@ -1,9 +1,21 @@
 <template>
   <div class="transfer-review">
     <ModalHeader
-      :title="isMultisig ? $t('modals.multisigTxProposal.title') : $t('pages.send.reviewtx')"
-      :subtitle="isMultisig ? null : $t('pages.send.checkalert')"
-    />
+      :title="headerTitle"
+      :subtitle="headerSubTitle"
+    >
+      <template #title>
+        <div class="custom-header-title">
+          {{ headerTitle }}
+          <BtnHelp
+            v-if="isAirGap"
+            :title="$t('modals.scanAirGapTx.help.title')"
+            :msg="$t('modals.scanAirGapTx.help.msg')"
+            icon="qr-scan"
+          />
+        </div>
+      </template>
+    </ModalHeader>
 
     <div
       v-if="isMultisig"
@@ -11,6 +23,11 @@
     >
       <AccountItem :address="activeMultisigAccount.gaAccountId" />
     </div>
+
+    <TransferQRCodeGenerator
+      v-if="isAirGap"
+      :transfer-data="transferData"
+    />
 
     <DetailsItem
       :label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : $t('pages.send.sender')"
@@ -135,6 +152,7 @@ import {
   useMultisigAccounts,
   useMultisigTransactions,
   useSdk13,
+  useAirGap,
 } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
@@ -145,6 +163,7 @@ import {
   convertToken,
   escapeSpecialChars,
   handleUnknownError,
+  MODAL_READ_QR_CODE,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
 import { IPendingTransaction } from '../../types';
@@ -155,6 +174,8 @@ import AvatarWithChainName from './AvatarWithChainName.vue';
 import ModalHeader from './ModalHeader.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import AccountItem from './AccountItem.vue';
+import TransferQRCodeGenerator from './TransferQRCodeGenerator.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 
 export default defineComponent({
   name: 'TransferReview',
@@ -165,6 +186,8 @@ export default defineComponent({
     AvatarWithChainName,
     DetailsItem,
     TokenAmount,
+    TransferQRCodeGenerator,
+    BtnHelp,
   },
   model: {
     prop: 'transferData',
@@ -174,6 +197,7 @@ export default defineComponent({
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
     isMultisig: Boolean,
+    isAirGap: Boolean,
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
   },
@@ -181,6 +205,8 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
+    const { extractSignedTransactionResponseData } = useAirGap({ store: root.$store });
+
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
@@ -200,6 +226,22 @@ export default defineComponent({
       !!props.transferData.selectedAsset
       && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
     ));
+
+    const headerTitle = computed(() => {
+      if (props.isMultisig) {
+        return root.$t('modals.multisigTxProposal.title');
+      }
+      if (props.isAirGap) {
+        return root.$t('modals.airGapSend.reviewTitle');
+      }
+      return root.$t('pages.send.reviewtx');
+    });
+    const headerSubTitle = computed(() => {
+      if (props.isAirGap) {
+        return root.$t('modals.airGapSend.reviewSubTitle');
+      }
+      return root.$t('pages.send.checkalert');
+    });
 
     // TODO provide correct fee for the multisig
     const PROPOSE_TRANSACTION_FEE = 0.000182940;
@@ -374,7 +416,28 @@ export default defineComponent({
       }
     }
 
+    async function scanSignedTransaction() {
+      const scanResult = await root.$store.dispatch('modals/open', {
+        name: MODAL_READ_QR_CODE,
+        heading: root.$t('modals.scanAirGapTx.heading'),
+        title: root.$t('modals.scanAirGapTx.title'),
+        icon: 'critical',
+      });
+
+      if (!scanResult) return;
+
+      const txRaw = await extractSignedTransactionResponseData(scanResult);
+
+      if (!txRaw) {
+        return;
+      }
+      emit('success', txRaw);
+    }
+
     function submit(): any {
+      if (props.isAirGap) {
+        return scanSignedTransaction();
+      }
       const {
         amount: amountRaw,
         address: recipient,
@@ -419,6 +482,8 @@ export default defineComponent({
       tokenSymbol,
       activeAccount,
       activeMultisigAccount,
+      headerTitle,
+      headerSubTitle,
     };
   },
 });
@@ -428,6 +493,13 @@ export default defineComponent({
 .transfer-review {
   .details-item {
     margin-top: 16px;
+  }
+
+  .custom-header-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 
   .multisig-account {
