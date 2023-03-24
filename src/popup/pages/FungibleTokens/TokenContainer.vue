@@ -26,6 +26,7 @@
       />
       <OpenTransferSendModalButton
         :is-multisig="isMultisig"
+        :is-air-gap="isAirGap"
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
@@ -148,6 +149,7 @@ export default defineComponent({
       store: root.$store,
       isMultisig: isMultisig.value,
     });
+    const { account, isAirGap } = useAccounts({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),
@@ -233,6 +235,7 @@ export default defineComponent({
       routeName,
       isMultisig,
       IS_IOS,
+      isAirGap,
     };
   },
 });

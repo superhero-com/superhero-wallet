@@ -6,7 +6,10 @@
 
     <template #buttons>
       <OpenTransferReceiveModalButton is-big />
-      <OpenTransferSendModalButton is-big />
+      <OpenTransferSendModalButton
+        is-big
+        :is-air-gap="isAirGap"
+      />
     </template>
 
     <template #cards>
@@ -75,6 +78,7 @@ export default defineComponent({
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      isAirGap,
     } = useAccounts({ store: root.$store });
 
     const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
@@ -93,6 +97,7 @@ export default defineComponent({
       chainNameBackground,
       isNodeMainnet,
       isNodeTestnet,
+      isAirGap,
     };
   },
 });
