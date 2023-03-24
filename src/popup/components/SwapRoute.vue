@@ -129,6 +129,7 @@ export default {
 
     flex: 0;
     position: relative;
+    height: 24px;
 
     .divider,
     .tokens::v-deep {
