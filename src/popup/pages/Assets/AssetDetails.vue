@@ -31,6 +31,7 @@
             <OpenTransferSendModalButton
               :is-multisig="isMultisig"
               :disabled="isMultisig && !!pendingMultisigTransaction"
+              :is-air-gap="isAirGap"
               :token-contract-id="fungibleToken?.contractId"
             />
             <BtnBox
@@ -185,7 +186,7 @@ export default defineComponent({
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
     const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
-    const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
+    const { activeAccount, getLastActiveProtocolAccount, isAirGap } = useAccounts();
     const { protocolCoinBalance } = useAccountAssetsList({
       isMultisig: isMultisig.value,
     });
@@ -403,6 +404,7 @@ export default defineComponent({
       stickyTabsWrapperEl,
       fungibleToken,
       isAeCoin,
+      isAirGap,
       isCoin,
       isNodeMainnet,
       isNodeTestnet,

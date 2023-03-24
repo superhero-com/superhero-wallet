@@ -35,7 +35,7 @@
       <div class="buttons">
         <template v-if="!withoutDefaultButtons">
           <OpenTransferReceiveModalButton />
-          <OpenTransferSendModalButton />
+          <OpenTransferSendModalButton :is-air-gap="isAirGap" />
         </template>
         <slot
           v-if="$slots.buttons"
@@ -119,7 +119,7 @@ export default defineComponent({
     const route = useRoute();
     const ionRouter = useIonRouter();
 
-    const { activeAccount } = useAccounts();
+    const { activeAccount, isAirGap } = useAccounts();
     const { isScrollEnabled } = useScrollConfig();
     const { homeRouteName } = useUi();
     const { balance } = useBalances();
@@ -181,6 +181,7 @@ export default defineComponent({
       routeName,
       balanceNumeric,
       activeAccount,
+      isAirGap,
       routerHeight,
       isScrollEnabled,
       fadeAnimation,

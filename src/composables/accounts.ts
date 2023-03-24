@@ -16,6 +16,7 @@ import {
   STORAGE_KEYS,
   IS_IOS,
   IS_MOBILE_APP,
+  ACCOUNT_AIR_GAP_WALLET,
 } from '@/constants';
 import {
   createCallbackRegistry,
@@ -109,6 +110,8 @@ const accounts = computed((): IAccount[] => {
 });
 
 const activeAccount = computed((): IAccount => accounts.value[activeAccountGlobalIdx.value] || {});
+
+const isAirGap = computed((): boolean => activeAccount.value.type === ACCOUNT_AIR_GAP_WALLET);
 
 const accountsGroupedByProtocol = computed(
   () => accounts.value.reduce(
@@ -285,6 +288,7 @@ export function useAccounts() {
     activeAccountGlobalIdx,
     areAccountsRestored,
     isLoggedIn,
+    isAirGap,
     mnemonic,
     mnemonicSeed,
     protocolsInUse,

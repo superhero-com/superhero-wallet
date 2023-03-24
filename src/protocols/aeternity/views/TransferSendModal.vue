@@ -14,7 +14,9 @@
         :is="currentStepConfig.component"
         ref="currentRenderedComponent"
         v-model:transferData="transferData"
+        :tx-raw="txRaw"
         :is-multisig="isMultisig"
+        :is-air-gap="isAirGap"
         :is-address-chain="isAddressChain"
         :is-address-url="isAddressUrl"
         @success="currentStepConfig.onSuccess"
@@ -53,6 +55,7 @@ import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/compon
 import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
+import TransferRawTxReview from '../components/TransferRawTxReview.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_SEND,
@@ -63,6 +66,7 @@ export default defineComponent({
     ...transferSendModalRequiredProps,
     tokenContractId: { type: String as PropType<AssetContractId>, default: null },
     isMultisig: Boolean,
+    isAirGap: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
@@ -72,6 +76,7 @@ export default defineComponent({
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
+    const txRaw = ref();
     const transferData = ref<TransferFormModel>({
       address: props.address as any, // TODO change to string globally
       amount: props.amount,
@@ -96,9 +101,24 @@ export default defineComponent({
       || !transferData.value.amount
     ));
 
-    const customPrimaryButtonText = computed(() => (props.isMultisig)
-      ? t('modals.multisigTxProposal.proposeAndApprove')
-      : '');
+    const showScanButton = computed(() => (
+      currentStep.value === TRANSFER_SEND_STEPS.review
+      && props.isAirGap
+    ));
+
+    // const customPrimaryButtonText = computed(() => (props.isMultisig)
+    //   ? t('modals.multisigTxProposal.proposeAndApprove')
+    //   : '');
+
+    const customPrimaryButtonText = computed(() => {
+      if (props.isMultisig) {
+        return t('modals.multisigTxProposal.proposeAndApprove');
+      }
+      if (props.isAirGap && showScanButton.value) {
+        return t('common.scan');
+      }
+      return '';
+    });
 
     function proceedToNextStep() {
       (currentRenderedComponent.value as any).submit();
@@ -114,9 +134,23 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.review;
     }
 
+    function handleReviewSuccess(rawTx: string = '') {
+      if (props.isAirGap && rawTx) {
+        txRaw.value = rawTx;
+        currentStep.value = STEPS.reviewRawTx;
+      } else {
+        props.resolve();
+      }
+    }
+
     function editTransfer() {
       error.value = false;
       currentStep.value = TRANSFER_SEND_STEPS.form;
+    }
+
+    function cancelTransfer() {
+      error.value = false;
+      props.resolve();
     }
 
     const steps: TransferSendStepConfigRegistry = {
@@ -130,7 +164,11 @@ export default defineComponent({
       },
       [TRANSFER_SEND_STEPS.review]: {
         component: TransferReview,
-        onSuccess: props.resolve,
+        onSuccess: handleReviewSuccess,
+      },
+      [TRANSFER_SEND_STEPS.reviewRawTx]: {
+        component: TransferRawTxReview,
+        onSuccess: handleReviewSuccess,
       },
     };
 
@@ -143,6 +181,7 @@ export default defineComponent({
       steps,
       currentStep,
       error,
+      txRaw,
       transferData,
       currentStepConfig,
       isAddressChain,

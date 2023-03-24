@@ -1,6 +1,7 @@
 <template>
   <TransferReviewBase
-    :title="isMultisig ? $t('modals.multisigTxProposal.title') : undefined"
+    :title="headerTitle"
+    :subtitle="headerSubtitle"
     :without-subtitle="isMultisig"
     :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : undefined"
     :base-token-symbol="AE_SYMBOL"
@@ -11,6 +12,17 @@
     :protocol="PROTOCOLS.aeternity"
     class="transfer-review"
   >
+    <template #title>
+      <div class="custom-header-title">
+        {{ headerTitle }}
+        <BtnHelp
+          v-if="isAirGap"
+          :title="$t('modals.scanAirGapTx.help.title')"
+          :msg="$t('modals.scanAirGapTx.help.msg')"
+          icon="qr-scan"
+        />
+      </div>
+    </template>
     <template #subheader>
       <div
         v-if="isMultisig"
@@ -92,9 +104,11 @@ import {
   handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
+import { tg } from '@/popup/plugins/i18n';
 import {
   useAccounts,
   useAeSdk,
+  useAirGap,
   useDeepLinkApi,
   useFungibleTokens,
   useLatestTransactionList,
@@ -133,6 +147,7 @@ export default defineComponent({
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
     isMultisig: Boolean,
+    isAirGap: Boolean,
     isAddressChain: Boolean,
     isAddressUrl: Boolean,
   },
@@ -145,6 +160,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
+    const { extractSignedTransactionResponseData } = useAirGap();
     const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
@@ -164,6 +180,22 @@ export default defineComponent({
     const isSelectedAssetAex9 = computed(
       () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
     );
+
+    const headerTitle = computed(() => {
+      if (props.isMultisig) {
+        return tg('modals.multisigTxProposal.title');
+      }
+      if (props.isAirGap) {
+        return tg('modals.airGapSend.reviewTitle');
+      }
+      return tg('pages.send.reviewtx');
+    });
+    const headerSubtitle = computed(() => {
+      if (props.isAirGap) {
+        return tg('modals.airGapSend.reviewSubTitle');
+      }
+      return tg('pages.send.checkalert');
+    });
 
     function openTransactionFailedModal() {
       openDefaultModal({
@@ -352,7 +384,29 @@ export default defineComponent({
       }
     }
 
+    async function scanSignedTransaction() {
+      const scanResult = await root.$store.dispatch('modals/open', {
+        name: MODAL_READ_QR_CODE,
+        heading: root.$t('modals.scanAirGapTx.heading'),
+        title: root.$t('modals.scanAirGapTx.title'),
+        icon: 'critical',
+      });
+
+      if (!scanResult) return;
+
+      const txRaw = await extractSignedTransactionResponseData(scanResult);
+
+      if (!txRaw) {
+        return;
+      }
+      emit('success', txRaw);
+    }
+
     async function submit(): Promise<void> {
+      if (props.isAirGap) {
+        return scanSignedTransaction();
+      }
+
       const {
         amount: amountRaw,
         address: recipient,
@@ -361,7 +415,7 @@ export default defineComponent({
       } = props.transferData;
 
       if (!amountRaw || !recipient || !selectedAsset) {
-        return;
+        return undefined;
       }
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
@@ -385,6 +439,7 @@ export default defineComponent({
         });
         router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
       }
+      return undefined;
     }
 
     return {
@@ -395,6 +450,8 @@ export default defineComponent({
       AE_CONTRACT_ID,
       PROPOSE_TRANSACTION_FEE,
       loading,
+      headerTitle,
+      headerSubtitle,
       submit,
     };
   },
@@ -405,6 +462,13 @@ export default defineComponent({
 .transfer-review {
   .details-item {
     margin-top: 16px;
+  }
+
+  .custom-header-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 
   .multisig-account {

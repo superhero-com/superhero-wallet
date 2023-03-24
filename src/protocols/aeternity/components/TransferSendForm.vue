@@ -5,6 +5,7 @@
     :fee="+fee.toFixed()"
     :fee-symbol="AE_SYMBOL"
     :protocol="PROTOCOLS.aeternity"
+    :custom-title="isAirGap ? $t('modals.airGapSend.sendTitle') : undefined"
     class="transfer-send-form"
   >
     <template
@@ -237,6 +238,7 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
+    isAirGap: Boolean,
   },
   emits: [
     'update:transferData',

@@ -2,7 +2,7 @@
   <div class="transfer-review-base">
     <ModalHeader
       :title="title"
-      :subtitle="withoutSubtitle ? null : $t('pages.send.checkalert')"
+      :subtitle="withoutSubtitle ? null : subtitle"
     />
 
     <slot name="subheader" />
@@ -114,6 +114,7 @@ export default defineComponent({
   },
   props: {
     title: { type: String, default: tg('pages.send.reviewtx') },
+    subtitle: { type: String, default: tg('pages.send.checkalert') },
     senderLabel: { type: String, default: tg('pages.send.sender') },
     amountLabel: { type: String, default: tg('common.amount') },
     baseTokenSymbol: { type: String, required: true },

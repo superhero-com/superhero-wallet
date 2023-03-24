@@ -272,6 +272,8 @@ export interface IAccount extends IHdWalletAccount, IAccountRaw {
   address: AccountAddress;
   globalIdx: number;
   idx: number;
+  airGapPublicKey?: string;
+  showed: boolean;
 }
 
 /**

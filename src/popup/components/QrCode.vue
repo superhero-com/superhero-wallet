@@ -6,10 +6,11 @@
 import {
   defineComponent,
   onMounted,
+  PropType,
   ref,
   watch,
 } from 'vue';
-import QRCodeStyling from 'qr-code-styling';
+import QRCodeStyling, { TypeNumber } from 'qr-code-styling';
 import SHLogo from '../../icons/logo-small-blue.webp';
 
 export default defineComponent({
@@ -17,6 +18,7 @@ export default defineComponent({
   props: {
     value: { type: String, required: true },
     size: { type: Number, required: true },
+    typeNumber: { type: Number as PropType<TypeNumber>, default: 10 },
   },
   setup(props) {
     const canvas = ref<HTMLElement>();
@@ -28,7 +30,7 @@ export default defineComponent({
       height: props.size,
       margin: 0,
       qrOptions: {
-        typeNumber: 10,
+        typeNumber: props.typeNumber,
         mode: 'Byte',
         errorCorrectionLevel: 'M',
       },

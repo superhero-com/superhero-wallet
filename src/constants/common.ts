@@ -329,6 +329,7 @@ export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
 export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
+export const MODAL_AIR_GAP_TRANSACTION_QR = 'air-gap-transaction-qr';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -390,6 +391,7 @@ export const ALLOWED_ICON_STATUSES = [
   'not-secure',
   'success',
   'warning',
+  'qr-scan',
 ] as const;
 
 /**
@@ -409,6 +411,7 @@ export const TRANSFER_SEND_STEPS = {
   form: 'form',
   review: 'review',
   reviewTip: 'tip',
+  reviewRawTx: 'rawTx',
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';

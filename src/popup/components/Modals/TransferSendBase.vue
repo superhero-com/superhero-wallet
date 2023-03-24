@@ -13,6 +13,15 @@
     </div>
     <template #footer>
       <BtnMain
+        v-if="showCancelButton"
+        variant="muted"
+        text="Cancel"
+        class="button-action-secondary"
+        data-cy="cancel"
+        extra-padded
+        @click="cancelTransfer"
+      />
+      <BtnMain
         v-if="showEditButton"
         variant="muted"
         :text="$t('common.edit')"
@@ -70,6 +79,7 @@ export default defineComponent({
     currentStep: { type: String as PropType<TransferSendStep>, required: true },
     sendingDisabled: Boolean,
     hideArrowSendIcon: Boolean,
+    isAirGap: Boolean,
   },
   emits: [
     'close',
@@ -85,7 +95,13 @@ export default defineComponent({
       TRANSFER_SEND_STEPS.reviewTip,
     ].includes(props.currentStep as any));
 
-    const showSendButton = computed(() => props.currentStep === TRANSFER_SEND_STEPS.review);
+    const showCancelButton = computed(() => [
+      TRANSFER_SEND_STEPS.reviewRawTx,
+    ].includes(props.currentStep as any));
+    const showSendButton = computed(() => (
+      props.currentStep === TRANSFER_SEND_STEPS.review
+      || props.currentStep === TRANSFER_SEND_STEPS.reviewRawTx
+    ));
 
     const primaryButtonText = computed(() => {
       if (props.customPrimaryButtonText) {
@@ -101,6 +117,7 @@ export default defineComponent({
       isOnline,
       primaryButtonText,
       showEditButton,
+      showCancelButton,
       showSendButton,
       ArrowSendIcon,
       TRANSFER_SEND_STEPS,
