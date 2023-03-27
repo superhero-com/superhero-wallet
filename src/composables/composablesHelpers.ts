@@ -3,7 +3,30 @@ import {
   onMounted,
   getCurrentInstance,
 } from '@vue/composition-api';
+import { Store } from 'vuex';
+import { INetwork } from '../types';
 import { useConnection } from './connection';
+
+/**
+ * Monitor the network state and compare it with stored custom state to know when
+ * user changes the network.
+ */
+export function createNetworkWatcher() {
+  let currentNetworkId: string;
+
+  return {
+    onNetworkChange: (store: Store<any>, callback: () => void) => {
+      const activeNetwork = store.getters.activeNetwork as INetwork;
+
+      if (!currentNetworkId) {
+        currentNetworkId = activeNetwork.networkId;
+      } else if (currentNetworkId !== activeNetwork.networkId) {
+        currentNetworkId = activeNetwork.networkId;
+        callback();
+      }
+    },
+  };
+}
 
 /**
  * Creates a function, that will monitor how many components is actually using the composable
