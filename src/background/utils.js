@@ -1,13 +1,34 @@
 import { useAccounts } from '../composables';
+import { IS_FIREFOX } from '../lib/environment';
 import {
-  setContractInstance,
-  contractCall,
+  CONNECTION_TYPES,
   getAddressByNameEntry,
   watchUntilTruthy,
 } from '../popup/utils';
 import store from './store';
 
+const BACKEND_AE_VM = 'aevm';
+const BACKEND_FATE = 'fate';
+
 let tippingContract;
+
+export const setContractInstance = async (tx, sdk, contractAddress = null) => {
+  let contractInstance = false;
+  try {
+    let backend = BACKEND_FATE;
+    if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
+      backend = BACKEND_AE_VM;
+    }
+    contractInstance = await sdk.getContractInstance({
+      source: tx.source,
+      contractAddress,
+    });
+    contractInstance.setOptions({ backend });
+  } catch (e) {
+    handleUnknownError(e);
+  }
+  return Promise.resolve(contractInstance);
+};
 
 const getAddress = async (name) => {
   await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
@@ -26,6 +47,32 @@ export const getTippingContractInstance = async (tx) => {
   await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
   tippingContract = await setContractInstance(tx, store.getters['sdkPlugin/sdk'], tx.address);
   return tippingContract;
+};
+
+export const contractCall = async ({
+  instance,
+  method,
+  params = [],
+  decode = false,
+  async = true,
+}) => {
+  let call;
+  try {
+    call = await instance.methods[method](...params);
+  } catch (e) {
+    if (e.message.indexOf('wrong_abi_version') > -1) {
+      instance.setOptions({ backend: BACKEND_AE_VM });
+      return contractCall({
+        instance, method, params, decode, async,
+      });
+    }
+    throw e.message;
+  }
+
+  if (async) {
+    return decode ? call.decodedResult : call;
+  }
+  return instance.methods[method](...params);
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {
@@ -49,4 +96,15 @@ export const contractCallStatic = async ({ tx, callType }) => {
     }
   }
   throw new Error('No data to return');
+};
+
+export const detectConnectionType = (port) => {
+  const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
+  const [senderUrl] = port.sender.url.split('?');
+  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
+    || IS_FIREFOX;
+  if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
+    return port.name;
+  }
+  return CONNECTION_TYPES.OTHER;
 };
