@@ -18,7 +18,7 @@ const isMiddlewareReady = computed(() => !!middleware.value);
 export function useMiddleware({ store }: IDefaultComposableOptions) {
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
-  async function fetchFromMiddleware<T = any>(path: string): Promise<T> {
+  async function fetchFromMiddleware<T = any>(path: string): Promise<T | null> {
     const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
     return fetchJson(`${middlewareUrl}${path}`);
   }

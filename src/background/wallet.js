@@ -1,7 +1,8 @@
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
-import { detectConnectionType, watchUntilTruthy } from '../popup/utils';
+import { watchUntilTruthy } from '../popup/utils';
 import { removePopup, getPopup } from './popupHandler';
+import { detectConnectionType } from './utils';
 import store from './store';
 
 window.browser = require('webextension-polyfill');

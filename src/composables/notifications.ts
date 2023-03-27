@@ -83,7 +83,7 @@ export function useNotifications({
     const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
     const url = new URL(fetchUrl);
     Object.entries(respondChallenge).forEach(([key, value]) => url.searchParams.append(key, value));
-    return fetchJson(url.toString());
+    return await fetchJson(url.toString()) || [];
   }
 
   async function modifyNotifications(

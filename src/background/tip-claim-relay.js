@@ -1,6 +1,6 @@
 import { uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import { postJson } from '../popup/utils/helper';
+import { postJson } from '../popup/utils';
 import { defaultNetwork } from '../popup/utils/constants';
 import { contractCallStatic, getAddressFromChainName } from './utils';
 import Logger from '../lib/logger';
