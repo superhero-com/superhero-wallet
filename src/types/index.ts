@@ -27,6 +27,8 @@ export * from './coinGecko';
 
 export type Dictionary<T = any> = Record<string, T>;
 
+export type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T;
+
 /**
  * Convert `key: val` objects into union of values.
  */

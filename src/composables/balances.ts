@@ -1,4 +1,5 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed } from '@vue/composition-api';
+import { mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
   Balance,
@@ -9,43 +10,33 @@ import type {
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
-  LOCAL_STORAGE_PREFIX,
   aettosToAe,
   isNotFoundError,
   handleUnknownError,
 } from '../popup/utils';
+import {
+  createNetworkWatcher,
+  createPollingBasedOnMountedComponents,
+  createStorageRef,
+} from './composablesHelpers';
 import { useSdk } from './sdk';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
 
 type Balances = Record<string, Balance>;
-type BalancesRaw = Record<string, BalanceRaw>;
 
 const POLLING_INTERVAL = 3000;
-const LOCAL_STORAGE_BALANCES_KEY = `${LOCAL_STORAGE_PREFIX}_balances`;
+const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
-function storeBalances(balances: Balances) {
-  window.localStorage.setItem(
-    LOCAL_STORAGE_BALANCES_KEY,
-    JSON.stringify(Object.keys(balances).reduce(
-      (acc, address) => ({ ...acc, [address]: balances[address].toFixed() }),
-      {},
-    )),
-  );
-}
-
-function getStoredBalances(): Balances {
-  const storedBalances = window.localStorage.getItem(LOCAL_STORAGE_BALANCES_KEY);
-  const balances: BalancesRaw = storedBalances ? JSON.parse(storedBalances) : {};
-  return Object.keys(balances).reduce(
-    (acc, address) => ({ ...acc, [address]: new BigNumber(balances[address]) }),
-    {},
-  );
-}
-
-const balances = ref<Balances>(getStoredBalances());
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+const { onNetworkChange } = createNetworkWatcher();
+const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
+  scopedToNetwork: true,
+  serializer: {
+    read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
+    write: (val) => mapValues(val, (balance) => balance.toFixed()),
+  },
+});
 
 /**
  * This composable detects if any app components requires balances data and polls the API
@@ -55,6 +46,8 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
   const { currentCurrencyRate, aeternityData } = useCurrencies();
   const { activeAccount, accounts } = useAccounts({ store });
+
+  const balances = useStorageRef(store);
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
@@ -95,9 +88,9 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       }),
       {},
     );
-
-    storeBalances(balances.value as Balances);
   }
+
+  onNetworkChange(store, () => updateBalances());
 
   initPollingWatcher(() => updateBalances());
 

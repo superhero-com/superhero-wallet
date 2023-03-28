@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { mount } from '@vue/test-utils';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
-import { AETERNITY_SYMBOL } from '../../src/popup/utils';
+import { AETERNITY_SYMBOL, NETWORK_TESTNET } from '../../src/popup/utils';
 import { testAccount } from '../../src/popup/utils/testsConfig';
 
 Object.assign(Vue.prototype, {
@@ -21,6 +21,7 @@ const store = new Vuex.Store({
     account: () => testAccount,
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
+    activeNetwork: () => (NETWORK_TESTNET),
   },
 });
 

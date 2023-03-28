@@ -63,6 +63,7 @@ import type {
   IDexContracts,
   TxFunctionRaw,
   ICommonTransaction,
+  Truthy,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
@@ -79,6 +80,14 @@ export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U 
 
 export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
   return (data: T) => fns.reduce((currData, func) => func(currData), data);
+}
+
+/**
+ * Following function exists mostly to satisfy TypeScript engine and is a replacement for:
+ * `.filter(Boolean)` => `.filter(excludeFalsy)`
+ */
+export function excludeFalsy<T>(value: T): value is Truthy<T> {
+  return !!value;
 }
 
 export function isNumbersEqual(a: number, b: number) {
