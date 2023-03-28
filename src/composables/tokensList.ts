@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { computed, ref, Ref } from '@vue/composition-api';
+import { computed, Ref } from '@vue/composition-api';
 import type { IToken, ITokenList, IDefaultComposableOptions } from '../types';
 import { AETERNITY_CONTRACT_ID } from '../popup/utils';
 import { useBalances } from './balances';
@@ -29,7 +29,7 @@ export function useTokensList({
   store,
   ownedOnly = false,
   withBalanceOnly = false,
-  searchTerm = ref(''),
+  searchTerm,
   isMultisig,
 }: UseTokensListOptions) {
   const { balance, aeternityToken } = useBalances({ store });
@@ -81,7 +81,7 @@ export function useTokensList({
    * Filter the available tokens with options provided for the composable and the search text
    */
   const filteredTokens = computed<IToken[]>(() => {
-    const searchTermParsed = searchTerm.value.trim().toLowerCase();
+    const searchTermParsed = (searchTerm?.value || '').trim().toLowerCase();
     return allTokens.value
       .filter((token) => (
         !ownedOnly
@@ -95,11 +95,11 @@ export function useTokensList({
       ))
       .filter(({ symbol, name, contractId }) => (
         !searchTermParsed
-        || symbol.toLowerCase().includes(searchTermParsed)
-        || name.toLowerCase().includes(searchTermParsed)
+        || symbol?.toLowerCase().includes(searchTermParsed)
+        || name?.toLowerCase().includes(searchTermParsed)
         || (
           searchTermParsed.startsWith('ct_')
-          && contractId.toLowerCase().includes(searchTermParsed)
+          && contractId?.toLowerCase().includes(searchTermParsed)
         )
       ));
   });
