@@ -5,7 +5,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, onUpdated } from '@vue/composition-api';
 import { useUi } from '../../composables';
-import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT, ROUTE_MULTISIG_DEFAULT_PAGES } from '../router/routeNames';
+import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   setup(props, { root }) {
@@ -15,7 +15,7 @@ export default defineComponent({
       const [rootRoute] = root.$route.matched;
 
       setHomeRouteName(
-        rootRoute.name === ROUTE_MULTISIG_DEFAULT_PAGES
+        rootRoute.meta.isMultisig
           ? ROUTE_MULTISIG_ACCOUNT
           : ROUTE_ACCOUNT,
       );

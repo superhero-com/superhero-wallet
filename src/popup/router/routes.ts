@@ -20,8 +20,6 @@ import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
-  ROUTE_DEFAULT_PAGES,
-  ROUTE_MULTISIG_DEFAULT_PAGES,
   ROUTE_MULTISIG_COIN,
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
@@ -100,7 +98,6 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/',
-    name: ROUTE_DEFAULT_PAGES,
     component: DefaultPagesRouter,
     redirect: '/account',
     children: [
@@ -171,8 +168,10 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/multisig',
-    name: ROUTE_MULTISIG_DEFAULT_PAGES,
     component: DefaultPagesRouter,
+    meta: {
+      isMultisig: true,
+    },
     children: [
       {
         path: '',
