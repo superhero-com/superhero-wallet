@@ -57,6 +57,7 @@ export default defineComponent({
           throw new Error('CommentNew: Invalid arguments');
         }
       },
+      { immediate: true },
     );
 
     async function sendComment() {
@@ -64,10 +65,10 @@ export default defineComponent({
       const sdk = await getSdk();
       try {
         await root.$store.dispatch('sendTipComment', [
-          id,
-          text,
+          id.value,
+          text.value,
           await sdk.address(),
-          parentId,
+          parentId.value,
         ]);
         openCallbackOrGoHome(true);
       } catch (e: any) {
