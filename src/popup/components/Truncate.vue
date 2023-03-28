@@ -18,7 +18,6 @@
       <span
         ref="scroll"
         class="inner"
-        :class="{ ready: isLoaded }"
       >
         {{ nameComponent }}
       </span>
@@ -52,7 +51,7 @@ export default defineComponent({
     const container = ref<HTMLDivElement>();
     const scroll = ref<HTMLDivElement>();
     const shouldScroll = ref(false);
-    const isLoaded = ref(false);
+
     const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN)
       ? props.str.replace(AENS_DOMAIN, '')
       : props.str);
@@ -67,11 +66,11 @@ export default defineComponent({
         const { clientWidth } = container.value;
         const { clientWidth: scrollWidth } = scroll.value;
         const animationWidth = scrollWidth - clientWidth;
-        const PADDING_WIDTH = 20;
+        const PADDING_WIDTH = 2;
 
         if (scrollWidth > clientWidth) {
           animationTranslate.value = `-${animationWidth + PADDING_WIDTH}px`;
-          animationDuration.value = `${(animationWidth + PADDING_WIDTH) * 100}ms`;
+          animationDuration.value = `${(animationWidth + PADDING_WIDTH) * 200}ms`;
           shouldScroll.value = true;
         }
       }
@@ -83,14 +82,12 @@ export default defineComponent({
       // sometimes setTimeout is needed for scroll to calculate proper width
       setTimeout(() => {
         calculateTruncate();
-        isLoaded.value = true;
       }, 500);
     });
 
     return {
       AENS_DOMAIN,
       container,
-      isLoaded,
       scroll,
       shouldScroll,
       nameComponent,
@@ -125,23 +122,18 @@ export default defineComponent({
       position: relative;
       display: inline-block;
       min-width: fit-content;
-      transition: opacity 0.5s;
-      opacity: 0;
-
-      &.ready {
-        opacity: 1;
-      }
     }
 
     &.scrollable {
       padding-right: 5px;
       border-radius: 2px;
+      margin-left: -2px;
       mask-image:
         linear-gradient(
           90deg,
           rgba(black, 0) 0%,
-          rgba(black, 1) 5%,
-          rgba(black, 1) 95%,
+          rgba(black, 1) 2px,
+          rgba(black, 1) calc(100% - 2px),
           rgba(black, 0) 100%
         );
 
@@ -152,7 +144,8 @@ export default defineComponent({
         animation-duration: var(--animationDuration);
         animation-delay: 1.5s;
         animation-iteration-count: infinite;
-        padding: 0 10px;
+        animation-timing-function: linear;
+        padding: 0 2px;
       }
     }
   }
@@ -167,7 +160,7 @@ export default defineComponent({
     }
 
     50% {
-      transform: translateX(calc(var(--animationTranslate) - 0px));
+      transform: translateX(var(--animationTranslate));
     }
 
     100% {
