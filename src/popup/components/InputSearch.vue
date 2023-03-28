@@ -2,6 +2,7 @@
   <InputField
     class="input-search"
     v-bind="$attrs"
+    thin
     v-on="$listeners"
     @input="$emit('input', $event)"
   >

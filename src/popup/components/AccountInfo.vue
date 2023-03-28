@@ -107,13 +107,10 @@ export default defineComponent({
     .account-name {
       @extend %face-sans-16-medium;
 
-      margin-top: 4px;
-      margin-bottom: 2px;
-      line-height: 20px;
+      margin: 4px 0;
     }
 
     .ae-address {
-      padding: 4px 0;
       color: rgba(variables.$color-white, 0.85);
       opacity: 0.85;
 

@@ -6,6 +6,7 @@
       'warning': hasWarning,
       readonly,
       code,
+      thin,
     }"
   >
     <div
@@ -144,6 +145,7 @@ export default defineComponent({
     showHelp: Boolean,
     showMessageHelp: Boolean,
     code: Boolean,
+    thin: Boolean,
     textLimit: {
       type: Number,
       default: null,
@@ -379,6 +381,12 @@ export default defineComponent({
   &.code {
     .input {
       @extend %face-mono-10-medium;
+    }
+  }
+
+  &.thin {
+    .input {
+      @extend %face-sans-14-regular;
     }
   }
 }
