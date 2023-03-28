@@ -21,6 +21,7 @@ export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
+export const AETERNITY_COIN_NAME = 'Aeternity';
 
 export const TX_FUNCTIONS = {
   tip: 'tip',

@@ -33,16 +33,16 @@
 import {
   computed, defineComponent, PropType, ref,
 } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
 import {
   amountRounded,
   convertToken,
   shrinkString,
+  calculateFontSize,
   AETERNITY_SYMBOL,
   TX_FUNCTIONS,
 } from '../utils';
 import { useTransactionTokens } from '../../composables';
-import { ITokenResolved, ITransaction } from '../../types';
+import type { ITokenResolved, ITransaction } from '../../types';
 
 import Tokens from './Tokens.vue';
 
@@ -85,31 +85,14 @@ export default defineComponent({
 
     const getTokenName = (token: ITokenResolved) => token?.isAe ? AETERNITY_SYMBOL : token.symbol;
 
-    function calculateFontSize(amountValue: BigNumber | number) {
-      const amount = BigNumber.isBigNumber(amountValue)
-        ? amountValue
-        : new BigNumber(amountValue);
-
-      if (amount.isLessThanOrEqualTo(new BigNumber(999999))) {
-        return '18px';
-      }
-      if (amount.isLessThanOrEqualTo(new BigNumber(999999999))) {
-        return '16px';
-      }
-      if (amount.isLessThanOrEqualTo(new BigNumber(999999999999))) {
-        return '14px';
-      }
-      return '12px';
-    }
-
     return {
       filteredTokens,
       tokenAmount,
       shrinkString,
       getTokenName,
       amountRounded,
-      TX_FUNCTIONS,
       calculateFontSize,
+      TX_FUNCTIONS,
     };
   },
 });

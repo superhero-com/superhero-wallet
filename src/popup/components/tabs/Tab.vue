@@ -47,6 +47,7 @@ export default defineComponent({
   &.active {
     background-color: rgba(variables.$color-white, 0.15);
     color: variables.$color-white;
+    font-weight: 600;
   }
 }
 </style>

@@ -11,7 +11,12 @@
         {{ label }}
       </span>
 
-      <span class="amount">
+      <span
+        class="amount"
+        :style="dynamicSizing
+          ? { '--font-size': calculateFontSize(amountRounded) }
+          : {}"
+      >
         {{ amountRounded }}
         <span
           v-if="!noSymbol"
@@ -37,6 +42,7 @@ import { useCurrencies } from '../../composables';
 import {
   AETERNITY_SYMBOL,
   TX_FUNCTIONS,
+  calculateFontSize,
 } from '../utils';
 
 export default defineComponent({
@@ -59,6 +65,7 @@ export default defineComponent({
     row: Boolean,
     noSymbol: Boolean,
     highPrecision: Boolean,
+    dynamicSizing: Boolean,
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -77,6 +84,7 @@ export default defineComponent({
     return {
       amountRounded,
       amountFiat,
+      calculateFontSize,
     };
   },
 });
@@ -96,6 +104,11 @@ export default defineComponent({
 
     color: rgba(variables.$color-white, 0.5);
     display: block;
+  }
+
+  .amount {
+    font-size: var(--font-size);
+    line-height: 20px;
   }
 
   .symbol {

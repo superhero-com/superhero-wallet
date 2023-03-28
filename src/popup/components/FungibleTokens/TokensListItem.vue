@@ -13,23 +13,24 @@
     v-on="$listeners"
   >
     <div class="row">
-      <div class="left">
-        <Tokens
-          :tokens="[tokenData]"
-          icon-size="xl"
-        />
-      </div>
+      <Tokens
+        :tokens="[tokenData]"
+        icon-size="lg"
+        full-ae-symbol
+        bright
+      />
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
         :symbol="tokenData.symbol"
         :aex9="tokenData.contractId !== AETERNITY_CONTRACT_ID"
+        dynamic-sizing
         no-symbol
         hide-fiat
       />
     </div>
     <div
       v-if="tokenData.contractId === AETERNITY_CONTRACT_ID"
-      class="row"
+      class="row bottom"
     >
       <div class="price">
         @ {{ price }}
@@ -44,7 +45,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type { IToken } from '../../../types';
-import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
+import { AETERNITY_CONTRACT_ID } from '../../utils';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useCurrencies } from '../../../composables';
 
@@ -103,41 +104,17 @@ export default defineComponent({
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
 
-  ::v-deep .tokens {
-    padding-bottom: 4px;
-
-    img {
-      border-radius: 15px;
-      margin-right: 0;
+    &.bottom {
+      margin-top: 4px;
     }
-
-    .symbols {
-      @extend %face-sans-15-regular;
-
-      color: variables.$color-white;
-      line-height: 28px;
-      padding-left: 4px;
-    }
-  }
-
-  ::v-deep .token-amount {
-    @extend %face-sans-15-regular;
-
-    margin-top: -5px;
   }
 
   .price {
-    @extend %face-sans-14-regular;
-
-    &:last-child {
-      color: variables.$color-grey-light;
-    }
+    @extend %face-sans-12-regular;
 
     color: rgba(variables.$color-white, 0.75);
-    font-weight: 100;
-    margin-top: -5px;
+    letter-spacing: -0.02em;
   }
 }
 </style>
