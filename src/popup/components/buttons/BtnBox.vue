@@ -56,7 +56,7 @@ export default {
 @use '../../../styles/mixins';
 
 .btn-box {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-14-medium;
 
   display: flex;
   flex-direction: column;

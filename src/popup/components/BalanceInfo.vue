@@ -58,11 +58,11 @@ export default defineComponent({
   padding-top: 8px;
 
   .display-value {
-    @extend %face-sans-16-regular;
+    @extend %face-sans-16-medium;
 
     color: rgba(variables.$color-white, 1);
     line-height: 18px;
-    margin-top: 2px;
+    margin-top: 4px;
     opacity: 0.75;
   }
 }

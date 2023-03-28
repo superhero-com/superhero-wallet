@@ -11,9 +11,11 @@
       {{ $t('multisig.backToMainAccounts') }}
     </span>
     <template v-else>
-      <div class="icon-wrapper">
+      <div
+        v-if="hasPendingMultisigTransaction"
+        class="icon-wrapper"
+      >
         <PendingIcon
-          v-if="hasPendingMultisigTransaction"
           class="animated-pending-icon"
         />
         <span class="tx-text">{{ $t('tx') }}</span>
