@@ -469,3 +469,17 @@ export function getAeFee(value: number | string) {
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
 }
+
+export function calculateFontSize(amountValue: BigNumber | number) {
+  const amount = new BigNumber(amountValue);
+  if (amount.isLessThanOrEqualTo(999999)) {
+    return '18px';
+  }
+  if (amount.isLessThanOrEqualTo(999999999)) {
+    return '16px';
+  }
+  if (amount.isLessThanOrEqualTo(999999999999)) {
+    return '14px';
+  }
+  return '12px';
+}

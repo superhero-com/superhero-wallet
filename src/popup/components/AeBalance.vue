@@ -1,6 +1,6 @@
 <template>
   <div class="ae-balance">
-    <span class="token-symbol">Æ </span>
+    <span class="token-symbol">Æ</span>
     <span class="token-integer">{{ balanceParts.integer }}.</span>
     <span class="token-fractional">{{ balanceParts.fraction }}</span>
   </div>
@@ -32,24 +32,29 @@ export default {
   align-items: baseline;
 
   .token-symbol {
-    @extend %face-sans-24-medium;
+    @extend %face-sans-24-semi-bold;
 
     color: variables.$color-white;
     margin-right: 4px;
   }
 
   .token-integer {
-    @extend %face-sans-30-medium;
+    @extend %face-sans-30-semi-bold;
 
     color: variables.$color-white;
   }
 
   .token-fractional {
-    @extend %face-sans-24-medium;
+    @extend %face-sans-24-semi-bold;
 
     color: rgba(variables.$color-white, 0.75);
-    line-height: 32px;
     opacity: 0.75;
+  }
+
+  .token-symbol,
+  .token-integer,
+  .token-fractional {
+    line-height: 32px;
   }
 }
 </style>

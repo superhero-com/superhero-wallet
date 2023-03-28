@@ -1,7 +1,7 @@
 <template>
   <span
     class="tokens"
-    :class="[iconSize, { vertical }]"
+    :class="[iconSize, { vertical, bright }]"
   >
     <span class="icons">
       <img
@@ -47,13 +47,14 @@
 import { computed, defineComponent } from '@vue/composition-api';
 import AeIcon from '../../icons/tokens/ae.svg';
 import {
+  AETERNITY_COIN_NAME,
   AETERNITY_COIN_SYMBOL,
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
   shrinkString as shrinkStringFactory,
 } from '../utils';
 
-const SIZES = ['rg', 'md', 'xl']; // TODO - add more sizes to icons
+const SIZES = ['rg', 'md', 'lg', 'xl'];
 
 export default defineComponent({
   props: {
@@ -71,6 +72,7 @@ export default defineComponent({
     vertical: Boolean,
     noIcons: Boolean,
     fullAeSymbol: Boolean,
+    bright: Boolean,
   },
   setup(props) {
     function getAvailableCharLength() {
@@ -89,17 +91,20 @@ export default defineComponent({
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
 
+      let { symbol } = token;
+      let name = token.symbol;
+
       if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
         img = AeIcon;
         imgBorder = false;
+        symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
+        name = AETERNITY_COIN_NAME;
       }
-
-      const aeSymbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
 
       return {
         ...token,
-        symbol: token.isAe ? aeSymbol : token.symbol,
-        name: token.isAe ? 'Aeternity' : token.symbol,
+        symbol,
+        name,
         img,
         imgBorder,
       };
@@ -128,6 +133,10 @@ export default defineComponent({
 
   color: rgba(variables.$color-white, 0.75);
 
+  &.bright {
+    color: variables.$color-white;
+  }
+
   &,
   .symbols,
   .icons {
@@ -142,6 +151,7 @@ export default defineComponent({
     vertical-align: middle;
     white-space: nowrap;
     line-height: 20px;
+    letter-spacing: -0.02em;
   }
 
   .separator {
@@ -153,6 +163,10 @@ export default defineComponent({
     --icon-size: 18px;
   }
 
+  &.lg {
+    --icon-size: 24px;
+  }
+
   &.xl {
     --icon-size: 30px;
   }
@@ -160,7 +174,7 @@ export default defineComponent({
   img {
     width: var(--icon-size);
     height: var(--icon-size);
-    border-radius: 8px;
+    border-radius: calc(var(--icon-size) / 2);
     vertical-align: middle;
     margin-right: 4px;
 
