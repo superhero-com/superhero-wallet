@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
 
 import type {
   IAccountOverview,
@@ -50,9 +50,8 @@ export function useTransactionTx({
   const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
-
-  const txType = computed(() => innerTx.value ? getTxType(innerTx.value) : null);
-  const outerTxType = computed(() => outerTx.value ? getTxType(outerTx.value) : null);
+  const innerTxType = computed<Tag | null>(() => innerTx.value ? getTxType(innerTx.value) : null);
+  const outerTxType = computed<Tag | null>(() => tx ? getTxType(tx) : null);
 
   const isAllowance = computed((): boolean => (
     !!innerTx.value?.function
@@ -131,7 +130,7 @@ export function useTransactionTx({
   return {
     outerTxType,
     hasNestedTx,
-    txType,
+    innerTxType,
     innerTx: innerTx as any,
     isAllowance,
     isErrorTransaction,

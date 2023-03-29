@@ -1,5 +1,5 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Encoded, METHODS } from '@aeternity/aepp-sdk-13';
+import { Encoded, METHODS, Tag } from '@aeternity/aepp-sdk-13';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,
@@ -8,7 +8,6 @@ import type {
   INetwork,
   INotificationSetting,
   IPermission,
-  TxType,
   IToken,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
@@ -64,19 +63,6 @@ export const TX_FUNCTIONS = {
   withdraw: 'withdraw',
   claim: 'claim',
 } as const;
-
-export const TX_TYPE_MDW: Partial<Record<TxType, string>> = {
-  SpendTx: SCHEMA.TX_TYPE.spend,
-  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
-  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
-  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
-  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
-  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
-  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
-  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
-  GAMetaTx: 'gaMetaTx',
-  GAAttachTx: 'gaAttachTx',
-};
 
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
@@ -595,3 +581,10 @@ export const ALLOWED_ICON_STATUSES = [
   'success',
   'warning',
 ] as const;
+
+export const NAME_TAGS = new Set([
+  Tag.NameClaimTx,
+  Tag.NamePreclaimTx,
+  Tag.NameRevokeTx,
+  Tag.NameUpdateTx,
+]);

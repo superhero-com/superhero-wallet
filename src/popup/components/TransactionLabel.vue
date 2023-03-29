@@ -75,9 +75,11 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import { camelCase } from 'lodash-es';
+
 import { useAccounts, useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -92,8 +94,8 @@ import {
   ABORT_TX_TYPE,
   FUNCTION_TYPE_DEX,
   getAccountNameToDisplay,
+  NAME_TAGS,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
 } from '../utils';
 import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -120,7 +122,7 @@ export default defineComponent({
 
     const {
       outerTxType,
-      txType,
+      innerTxType,
       isAllowance,
       isDex,
       innerTx,
@@ -133,7 +135,10 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
+      if (
+        outerTxType.value === Tag.SpendTx
+        || (outerTxType.value === Tag.GaMetaTx && innerTxType.value === Tag.SpendTx)
+      ) {
         const isSent = getTxDirection.value(
           innerTx.value,
           props.transaction.transactionOwner,
@@ -147,10 +152,7 @@ export default defineComponent({
             : t('transaction.type.receivedTx'),
         };
       }
-      if (
-        txType.value === TX_TYPE_MDW.GAAttachTx
-        && outerTxType.value === TX_TYPE_MDW.PayingForTx
-      ) {
+      if (outerTxType.value === Tag.PayingForTx && innerTxType.value === Tag.GaAttachTx) {
         return labelWrapper(t('transaction.type.multisigVaultCreated'));
       }
       if (isAllowance.value) {
@@ -184,7 +186,7 @@ export default defineComponent({
           : t('transaction.listType.tipSent'));
       }
       if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
+        outerTxType.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
         && (innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete)
@@ -202,13 +204,12 @@ export default defineComponent({
             : t('transaction.type.receivedTx'),
         };
       }
-
       // TODO refactor from dynamic translation keys to map of translations
-      const translation = !t(`transaction.listType.${txType.value!}`).includes('listType')
-        ? t(`transaction.listType.${txType.value!}`)
-        : t(`transaction.type.${txType.value!}`);
+      const translation = !t(`transaction.listType.${camelCase(Tag[outerTxType.value!])}`).includes('listType')
+        ? t(`transaction.listType.${camelCase(Tag[outerTxType.value!])}`)
+        : t(`transaction.type.${camelCase(Tag[outerTxType.value!])}`);
 
-      if (txType.value && txType.value?.includes('name')) {
+      if (outerTxType.value && NAME_TAGS.has(outerTxType?.value)) {
         return labelWrapper(translation);
       }
 

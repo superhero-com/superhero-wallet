@@ -250,12 +250,11 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
 
 import {
   AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
-  TX_TYPE_MDW,
   formatDate,
   formatTime,
   aettosToAe,
@@ -391,7 +390,7 @@ export default defineComponent({
     });
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
-      if (outerTxType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      if (outerTxType.value !== Tag.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
     });
 
@@ -437,7 +436,7 @@ export default defineComponent({
         setTransactionTx(transaction.value.tx);
       }
 
-      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === Tag.GaMetaTx) {
         try {
           const { contract_id: contractIdForMultisig = null } = await fetchJson(
             `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
