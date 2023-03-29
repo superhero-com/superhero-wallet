@@ -6,35 +6,7 @@
 
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
-        <div class="creator">
-          <Avatar :address="creatorAccount.address" />
-          <div class="creator-data">
-            <BtnPill
-              class="account-select"
-              dense
-            >
-              <FormSelect
-                v-model="creatorAddress"
-                unstyled
-                :default-text="$t('modals.createMultisigAccount.selectAccount')"
-                :options="accountsSelectOptions"
-              >
-                <template #current-text="{ text }">
-                  <div>
-                    <Truncate
-                      class="account-select-text"
-                      :str="text"
-                    />
-                  </div>
-                </template>
-              </FormSelect>
-            </BtnPill>
-            <AddressTruncated
-              show-explorer-link
-              :address="creatorAccount.address"
-            />
-          </div>
-        </div>
+        <AccountSelector v-model="creatorAddress" />
         <i18n
           v-if="notEnoughBalanceToCreateMultisig"
           path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
@@ -123,32 +95,24 @@ import {
 import { AETERNITY_SYMBOL, handleUnknownError } from '../utils';
 import { useAccounts, useMultisigAccountCreate, useSdk } from '../../composables';
 
-import Avatar from './Avatar.vue';
-import AddressTruncated from './AddressTruncated.vue';
+import AccountSelector from './AccountSelector.vue';
 import AccountItem from './AccountItem.vue';
-import BtnPill from './buttons/BtnPill.vue';
 import DetailsItem from './DetailsItem.vue';
 import DialogBox from './DialogBox.vue';
-import FormSelect from './form/FormSelect.vue';
 import TokenAmount from './TokenAmount.vue';
-import Truncate from './Truncate.vue';
 import ConsensusLabel from './ConsensusLabel.vue';
 
 import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
 
 export default defineComponent({
   components: {
+    AccountSelector,
     ConsensusLabel,
     DetailsItem,
     AccountItem,
     DialogBox,
     TokenAmount,
-    BtnPill,
-    Avatar,
-    AddressTruncated,
-    FormSelect,
     LoadingIcon,
-    Truncate,
   },
   props: {
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
@@ -157,7 +121,7 @@ export default defineComponent({
     accountId: { type: String, required: true },
   },
   setup(props, { root }) {
-    const { accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+    const { accounts } = useAccounts({ store: root.$store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
@@ -201,7 +165,6 @@ export default defineComponent({
 
     return {
       AETERNITY_SYMBOL,
-      accountsSelectOptions,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,
@@ -223,13 +186,6 @@ export default defineComponent({
   flex-direction: column;
   gap: var(--gap);
 
-  .creator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-block: 4px;
-  }
-
   .creator-error-message {
     @extend %face-sans-14-regular;
 
@@ -239,16 +195,6 @@ export default defineComponent({
     span {
       @extend %face-sans-14-medium;
     }
-  }
-
-  .account-select {
-    margin-bottom: 4px;
-    margin-left: -3px; // Compensate roundness
-    color: $color-white;
-  }
-
-  .account-select-text {
-    max-width: 220px;
   }
 
   .review-details-row {
