@@ -207,7 +207,7 @@ export default defineComponent({
 
       const translation = transactionListTypes[txType.value!] || transactionTypes[txType.value!];
 
-      if (txType.value && txType?.value?.includes('name')) {
+      if (txType.value && txType.value?.includes('name')) {
         return labelWrapper(translation);
       }
 

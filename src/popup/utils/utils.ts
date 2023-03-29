@@ -43,6 +43,7 @@ import type {
   BigNumberPublic,
   IPendingTransaction,
   IPageableResponse,
+  IDashboardTransaction,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -378,7 +379,14 @@ export function defaultTransactionSortingCallback(
     if (withoutTimeIndex === 1) {
       return 1;
     }
-    return bMicroTime - aMicroTime;
+    const sortDirection = bMicroTime - aMicroTime;
+    // Workaround to display received transaction after send (they have the same time)
+    if (sortDirection === 0) {
+      const { direction = 'received' } = a as IDashboardTransaction;
+      return direction === 'received' ? -1 : 1;
+    }
+
+    return sortDirection;
   };
   return pending || compareMicroTime();
 }
