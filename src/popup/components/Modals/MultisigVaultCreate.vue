@@ -81,21 +81,10 @@
         </div>
 
         <div class="signers-count">
-          <select
+          <FormNumberSelect
             v-model="confirmationsRequired"
-            class="num-of-signers-selector"
-          >
-            <template
-              v-for="signerIdx of signers.length"
-            >
-              <option
-                :key="`option-item-${signerIdx}`"
-                :value="signerIdx"
-              >
-                {{ signerIdx }}
-              </option>
-            </template>
-          </select>
+            :size="signers.length"
+          />
 
           <i18n
             path="modals.createMultisigAccount.consensusRequiredContent"
@@ -199,8 +188,9 @@ import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import FormSelect from '../form/FormSelect.vue';
-import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
 import FormTextarea from '../form/FormTextarea.vue';
+import FormNumberSelect from '../form/FormNumberSelect.vue';
+import MultisigVaultCreateReview from '../MultisigVaultCreateReview.vue';
 import MultisigVaultCreateProgress from '../MultisigVaultCreateProgress.vue';
 
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
@@ -216,6 +206,7 @@ type Step = ObjectValues<typeof STEPS>;
 export default defineComponent({
   name: 'MultisigVaultCreate',
   components: {
+    FormNumberSelect,
     FormTextarea,
     Modal,
     BtnMain,
@@ -479,7 +470,7 @@ export default defineComponent({
       padding: 6px 0;
 
       .text-emphasis {
-        color: variables.$color-white;
+        color: rgba(variables.$color-white, 0.75);
       }
 
       .num-of-signers-selector {
