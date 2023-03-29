@@ -11,6 +11,7 @@ import { useMiddleware } from './middleware';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
+import { useTransactionTx } from './transactionTx';
 
 // eslint-disable-next-line no-unused-vars
 type TransactionFetchCallbackFunction = (address: string)
@@ -61,10 +62,20 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
       try {
         const res = await func(address);
         return (Array.isArray(res) ? res : res?.data).map(
-          (transaction: ITransaction) => ({
-            ...transaction,
-            transactionOwner: address,
-          }),
+          (transaction: ITransaction) => {
+            const {
+              direction,
+            } = useTransactionTx({
+              store,
+              tx: transaction.tx,
+              externalAddress: address,
+            });
+            return {
+              ...transaction,
+              transactionOwner: address,
+              direction: direction.value,
+            };
+          },
         );
       } catch (e) {
         handleUnknownError(e);

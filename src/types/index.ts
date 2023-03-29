@@ -368,6 +368,10 @@ export interface ITransaction {
   url?: string;
 }
 
+export interface IDashboardTransaction extends ITransaction {
+  direction?: 'received' | 'send'
+}
+
 export type PendingTransactionType = 'spend' | 'spendToken';
 
 export interface IPendingTransaction {
