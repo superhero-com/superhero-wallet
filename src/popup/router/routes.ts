@@ -565,6 +565,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'comment-new',
       notPersist: true,
+      showHeaderNavigation: true,
     },
   },
   {
