@@ -8,6 +8,7 @@
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
+        avatar-borderless
       />
     </template>
 

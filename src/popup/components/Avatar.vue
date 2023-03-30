@@ -2,7 +2,7 @@
   <img
     class="avatar"
     :src="error ? avatar : profileImage"
-    :class="[size, { 'with-border': withBorder }]"
+    :class="[size, { borderless }]"
     :style="avatarStyle"
     @error="error = true"
   >
@@ -26,8 +26,7 @@ export default defineComponent({
       default: 'rg',
       validator: (val: string) => SIZES.includes(val),
     },
-    withBorder: Boolean,
-    colorfulBorder: Boolean,
+    borderless: Boolean,
   },
   setup(props) {
     const error = ref(false);
@@ -37,7 +36,7 @@ export default defineComponent({
     const profileImage = computed(() => (isContract(props.address) || props.address === '')
       ? ''
       : `${activeNetwork.value.backendUrl}/profile/image/${props.address}`);
-    const avatarStyle = computed(() => (props.colorfulBorder) ? { 'border-color': color.value } : null);
+    const avatarStyle = computed(() => !props.borderless ? { 'border-color': color.value } : null);
 
     return {
       error,
@@ -52,6 +51,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
+@use '../../styles/mixins';
 
 $size-xs: 18px;
 $size-sm: 24px;
@@ -69,6 +69,7 @@ $size-xl: 56px;
   object-fit: cover;
   user-select: none;
   flex-shrink: 0;
+  border: 1px solid transparent;
 
   &.sm {
     height: $size-sm;
@@ -85,18 +86,26 @@ $size-xl: 56px;
     width: $size-md;
   }
 
+  &.rg {
+    height: $size-rg;
+    width: $size-rg;
+    border-width: 2px;
+  }
+
   &.lg {
     height: $size-lg;
     width: $size-lg;
+    border-width: 2px;
   }
 
   &.xl {
     height: $size-xl;
     width: $size-xl;
+    border-width: 2px;
   }
 
-  &.with-border {
-    border: 1px solid variables.$color-grey-border-avatar;
+  &.borderless {
+    border: none;
   }
 }
 </style>
