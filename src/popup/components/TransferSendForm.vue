@@ -495,7 +495,7 @@ export default defineComponent({
 
       queryHandler({
         ...query,
-        token: formModel.value?.selectedAsset?.contractId || query.token,
+        token: query.token || formModel.value?.selectedAsset?.contractId,
       });
     });
 
