@@ -154,7 +154,7 @@ export default defineComponent({
       .name {
         display: flex;
         flex-direction: column;
-        font-weight: bold;
+        font-weight: 600;
       }
 
       .expiration {

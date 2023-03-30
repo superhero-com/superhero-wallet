@@ -68,6 +68,6 @@ export default {
 
 span {
   display: block;
-  font-weight: bold;
+  font-weight: 600;
 }
 </style>

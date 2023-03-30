@@ -2,15 +2,15 @@
 @import '~@fontsource/ibm-plex-sans/400.css';
 @import '~@fontsource/ibm-plex-sans/400-italic.css';
 @import '~@fontsource/ibm-plex-sans/500.css';
-@import '~@fontsource/ibm-plex-sans/700.css';
-@import '~@fontsource/ibm-plex-sans/700-italic.css';
+@import '~@fontsource/ibm-plex-sans/600.css';
+@import '~@fontsource/ibm-plex-sans/600-italic.css';
 @import '~@fontsource/ibm-plex-mono/400.css';
 @import '~@fontsource/ibm-plex-mono/500.css';
 @import 'variables';
 
 %face-sans-30-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 30px;
   line-height: 32px;
 }
@@ -24,7 +24,7 @@
 
 %face-sans-24-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 24px;
   line-height: 24px;
 }
@@ -52,7 +52,7 @@
 
 %face-sans-20-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 20px;
   line-height: 24px;
 }
@@ -80,7 +80,7 @@
 
 %face-sans-18-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 18px;
   line-height: 24px;
 }
@@ -115,7 +115,7 @@
 
 %face-sans-16-bold {
   font-family: $font-sans;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 16px;
   line-height: 24px;
 }
@@ -143,7 +143,7 @@
 
 %face-sans-15-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 15px;
   line-height: 24px;
 }
@@ -164,7 +164,7 @@
 
 %face-sans-14-bold {
   font-family: $font-sans;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 14px;
   line-height: 24px;
 }
