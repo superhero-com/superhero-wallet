@@ -6,6 +6,7 @@
         v-if="sender.address"
         :name="sender.name"
         :address="sender.address"
+        borderless
       />
       <div class="mid">
         <TriangleRight class="triangle" />
@@ -16,6 +17,7 @@
         v-if="recipient.address"
         :address="recipient.address"
         :name="recipient.name"
+        borderless
       />
       <div
         v-else

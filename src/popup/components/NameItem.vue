@@ -9,6 +9,7 @@
         v-else
         :name="name"
         :address="address"
+        borderless
       />
 
       <div class="header">

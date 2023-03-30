@@ -4,6 +4,7 @@
       <AccountInfo
         :address="account.gaAccountId"
         is-multisig
+        avatar-borderless
       />
     </template>
 

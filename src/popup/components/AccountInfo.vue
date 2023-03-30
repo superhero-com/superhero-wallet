@@ -7,6 +7,7 @@
       class="avatar"
       :address="address"
       :name="name"
+      :borderless="avatarBorderless"
     />
     <div class="account-details">
       <div
@@ -68,6 +69,7 @@ export default defineComponent({
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
+    avatarBorderless: Boolean,
   },
   setup(props) {
     const activeNetwork = useGetter('activeNetwork');
