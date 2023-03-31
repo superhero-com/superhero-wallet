@@ -119,6 +119,7 @@ export default defineComponent({
       margin-left: 0;
       padding-top: 4px;
       white-space: nowrap;
+      text-align: right;
     }
   }
 

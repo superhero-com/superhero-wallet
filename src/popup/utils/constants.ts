@@ -412,6 +412,7 @@ export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
 export const MODAL_AIR_GAP_TRANSACTION_QR = 'air-gap-transaction-qr';
+export const MODAL_AIR_GAP_SIGN_TRANSACTION = 'air-gap-sign-transaction';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
 export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const MODAL_CONFIRM = 'confirm';
