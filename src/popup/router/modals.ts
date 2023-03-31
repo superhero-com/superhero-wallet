@@ -25,6 +25,7 @@ import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_AIR_GAP_SIGN_TRANSACTION,
 } from '../utils/constants';
 import { useModals } from '../../composables';
 
@@ -53,6 +54,7 @@ import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
+import AirGapSignTransaction from '../components/Modals/AirGapSignTransaction.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -137,5 +139,8 @@ export default () => {
   });
   registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
+  });
+  registerModal(MODAL_AIR_GAP_SIGN_TRANSACTION, {
+    component: AirGapSignTransaction,
   });
 };

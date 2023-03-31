@@ -206,7 +206,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
-    const { extractSignedTransactionResponseData } = useAirGap({ store: root.$store });
+    const { extractSignedTransactionResponseData } = useAirGap();
 
     const {
       activeMultisigAccount,

@@ -124,10 +124,10 @@ export default defineComponent({
     const showCancelButton = computed(() => [
       STEPS.reviewRawTx,
     ].includes(currentStep.value as any));
-    const showSendButton = computed(() => (
-      currentStep.value === STEPS.review
-      || currentStep.value === STEPS.reviewRawTx
-    ));
+    const showSendButton = computed(() => [
+      STEPS.review,
+      STEPS.reviewRawTx,
+    ].includes(currentStep.value as any));
     const showScanButton = computed(() => (
       currentStep.value === STEPS.review
       && props.isAirGap
@@ -147,7 +147,7 @@ export default defineComponent({
       }
 
       if (props.isAirGap && showScanButton.value) {
-        return 'Scan';
+        return root.$t('modals.scan');
       }
 
       return root.$t('common.send');
@@ -214,7 +214,6 @@ export default defineComponent({
       props.resolve();
     }
 
-    // add new steps: (signAirGapTransaction, reviewRawTx)
     const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
       [STEPS.form]: {
         component: TransferSendForm,

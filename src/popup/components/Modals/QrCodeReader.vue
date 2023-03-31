@@ -15,6 +15,10 @@
       {{ $t('modals.qrCodeReader.grantPermission') }}
       <div class="subtitle">{{ $t('modals.qrCodeReader.subtitle') }}</div>
     </span>
+    <InfoBox v-if="isMultiFragmentQr">
+      {{ $t('modals.qrCodeReader.qrCodeHasMultipleFragments') }}
+      <b>{{ scanProgress }}%</b>
+    </InfoBox>
 
     <div class="camera">
       <span
@@ -51,10 +55,14 @@
 
 <script>
 import { mapMutations } from 'vuex';
-import { RejectedByUserError } from '../../../lib/errors';
+import { URDecoder } from '@ngraveio/bc-ur';
+import { SerializerV3 } from '@airgap/serializer';
+import bs58check from 'bs58check';
 import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
+import { RejectedByUserError } from '../../../lib/errors';
 import Modal from '../Modal.vue';
+import InfoBox from '../InfoBox.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 import IconBoxed from '../IconBoxed.vue';
@@ -62,6 +70,7 @@ import IconBoxed from '../IconBoxed.vue';
 export default {
   components: {
     Modal,
+    InfoBox,
     BtnMain,
     IconBoxed,
   },
@@ -83,6 +92,8 @@ export default {
     browserReader: null,
     videoInputDevices: [],
     headerText: '',
+    isMultiFragmentQr: false,
+    scanProgress: 0,
   }),
   watch: {
     async cameraAllowed(value) {
@@ -158,6 +169,7 @@ export default {
       const { BrowserQRCodeReader } = await import('@zxing/library');
 
       this.browserReader = new BrowserQRCodeReader();
+      this.decoder = new URDecoder();
     },
     async scan() {
       return this.mobile
@@ -165,7 +177,23 @@ export default {
           this.setQrScanner(true);
           window.plugins.webviewcolor.change('#00FFFFFF');
 
-          window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
+          window.QRScanner.scan(async (error, text) => {
+            if (!error && text) {
+              if (String(text).includes('BYTES/')) {
+                this.decoder.receivePart(text);
+                if (this.decoder.isComplete()) {
+                  resolve(await this.getEncoderData());
+                } else {
+                  this.isMultiFragmentQr = true;
+                  this.scanProgress = Math.floor(this.decoder.getProgress() * 100);
+                }
+              } else {
+                resolve(text);
+              }
+            } else {
+              reject(error);
+            }
+          });
           window.QRScanner.show();
           ['body', '#app'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
@@ -175,9 +203,31 @@ export default {
             document.querySelector('.camera-close-button').addEventListener('click', this.stopReading);
           }, 500);
         })
-        : (
-          await this.browserReader.decodeFromInputVideoDevice(undefined, this.$refs.qrCodeVideo)
-        ).getText();
+        : new Promise((resolve) => {
+          this.browserReader.decodeFromVideoDevice(
+            undefined,
+            this.$refs.qrCodeVideo,
+            async (result) => {
+              if (result) {
+                const text = result.getText();
+                if (String(text).includes('BYTES/')) {
+                  this.decoder.receivePart(text);
+                  if (this.decoder.isComplete()) {
+                    resolve(await this.getEncoderData());
+                  } else {
+                    this.isMultiFragmentQr = true;
+                    this.scanProgress = Math.floor(this.decoder.getProgress() * 100);
+                  }
+                } else {
+                  resolve(text);
+                }
+              }
+            },
+            (error) => {
+              reject(error);
+            },
+          );
+        });
     },
     async stopReading() {
       if (this.mobile) {
@@ -197,6 +247,14 @@ export default {
     openSettings() {
       window.QRScanner.openSettings();
     },
+    async getEncoderData() {
+      const combinedData = this.decoder.resultUR().decodeCBOR();
+      const resultUr = bs58check.encode(combinedData);
+
+      const serializer = SerializerV3.getInstance();
+      return serializer.deserialize(resultUr);
+    },
+
   },
 };
 </script>
@@ -249,6 +307,10 @@ export default {
     margin-bottom: 20px;
     line-height: 24px;
     color: rgba(variables.$color-white, 0.75);
+  }
+
+  .info-box {
+    text-align: left;
   }
 }
 </style>

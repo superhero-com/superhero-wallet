@@ -81,7 +81,7 @@ export default defineComponent({
     const { openModal } = useModals();
 
     const loading = ref(false);
-    const { extractAccountShareResponseData } = useAirGap({ store: root.$store });
+    const { extractAccountShareResponseData } = useAirGap();
 
     async function createPlainAccount() {
       loading.value = true;
@@ -105,21 +105,19 @@ export default defineComponent({
 
       if (!scanResult) return;
 
-      const accounts = await extractAccountShareResponseData(scanResult);
+      const accounts = await extractAccountShareResponseData(scanResult) || [];
 
       // Show Account import.
-      if (accounts?.length) {
-        try {
-          const selectedAccounts = await root.$store.dispatch('modals/open', {
-            name: MODAL_AIR_GAP_CONFIRM_IMPORT,
-            accounts,
-          });
-          selectedAccounts.forEach((account: IAccount) => {
-            root.$store.dispatch('accounts/airgap/import', account);
-          });
-        } catch (error) {
-          handleUnknownError(error);
-        }
+      try {
+        const selectedAccounts = await root.$store.dispatch('modals/open', {
+          name: MODAL_AIR_GAP_CONFIRM_IMPORT,
+          accounts,
+        });
+        selectedAccounts.forEach((account: IAccount) => {
+          root.$store.dispatch('accounts/airgap/import', account);
+        });
+      } catch (error) {
+        handleUnknownError(error);
       }
 
       props.resolve();

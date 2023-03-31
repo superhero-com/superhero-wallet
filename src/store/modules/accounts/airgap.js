@@ -1,4 +1,4 @@
-import { MODAL_DEFAULT, ACCOUNT_AIR_GAP_WALLET } from '../../../popup/utils';
+import { MODAL_DEFAULT, ACCOUNT_AIR_GAP_WALLET, MODAL_AIR_GAP_SIGN_TRANSACTION } from '../../../popup/utils';
 
 export default {
   namespaced: true,
@@ -35,7 +35,10 @@ export default {
     },
 
     sign: () => Promise.reject(new Error('AirGap Sign Not implemented yet')),
-    signTransaction: () => Promise.reject(new Error('AirGap signTransaction Not implemented yet')),
+    signTransaction: async ({ dispatch }, { txBase64 }) => dispatch('modals/open', {
+      name: MODAL_AIR_GAP_SIGN_TRANSACTION,
+      txRaw: txBase64,
+    }, { root: true }),
 
     async signTransactionFromAccount({ dispatch }, { txBase64 }) {
       return dispatch('signTransaction', { txBase64 });
