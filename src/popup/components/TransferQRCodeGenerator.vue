@@ -1,8 +1,8 @@
 <template>
-  <div class="qrcode-wrapper">
-    <QrCode
-      v-if="transactionUR"
-      :value="transactionUR"
+  <div class="transfer-qr-code-generator">
+    <MultiFragmentsQrCode
+      v-if="fragments"
+      :value="fragments"
       :size="280"
       :type-number="0"
       class="qrcode"
@@ -22,13 +22,13 @@ import { useAccounts, useAirGap, useSdk } from '../../composables';
 
 import type { INetwork } from '../../types';
 
-import QrCode from './QrCode.vue';
+import MultiFragmentsQrCode from './MultiFragmentsQrCode.vue';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import { AETERNITY_CONTRACT_ID, aeToAettos, convertToken } from '../utils';
 
 export default defineComponent({
   components: {
-    QrCode,
+    MultiFragmentsQrCode,
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
@@ -37,8 +37,8 @@ export default defineComponent({
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const { getSdk } = useSdk({ store: root.$store });
     const { account } = useAccounts({ store: root.$store });
-    const { generateEncodedTransactionSignRequestUR } = useAirGap({ store: root.$store });
-    const transactionUR = ref();
+    const { generateTransactionURDataFragments } = useAirGap();
+    const fragments = ref();
 
     onMounted(async () => {
       const sdk = await getSdk();
@@ -62,7 +62,7 @@ export default defineComponent({
         amount,
         payload: props.transferData.payload,
       });
-      transactionUR.value = await generateEncodedTransactionSignRequestUR(
+      fragments.value = await generateTransactionURDataFragments(
         account.value.airGapPublicKey,
         txRaw,
         activeNetwork.value.networkId,
@@ -71,7 +71,7 @@ export default defineComponent({
     });
 
     return {
-      transactionUR,
+      fragments,
     };
   },
 });
@@ -80,7 +80,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 
-.qrcode-wrapper {
+.transfer-qr-code-generator {
   margin-top: 10px;
   text-align: center;
 

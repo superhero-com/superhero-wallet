@@ -330,6 +330,7 @@ export const MODAL_SECURE_LOGIN = 'secure-login';
 export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
 export const MODAL_AIR_GAP_CONFIRM_IMPORT = 'air-gap-confirm-import';
 export const MODAL_AIR_GAP_TRANSACTION_QR = 'air-gap-transaction-qr';
+export const MODAL_AIR_GAP_SIGN_TRANSACTION = 'air-gap-sign-transaction';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

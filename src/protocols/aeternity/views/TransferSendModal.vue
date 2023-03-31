@@ -8,6 +8,7 @@
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
+    @cancel-transfer="cancelTransfer"
   >
     <template #content>
       <component
@@ -115,7 +116,7 @@ export default defineComponent({
         return t('modals.multisigTxProposal.proposeAndApprove');
       }
       if (props.isAirGap && showScanButton.value) {
-        return t('common.scan');
+        return t('modals.scan');
       }
       return '';
     });
@@ -137,7 +138,7 @@ export default defineComponent({
     function handleReviewSuccess(rawTx: string = '') {
       if (props.isAirGap && rawTx) {
         txRaw.value = rawTx;
-        currentStep.value = STEPS.reviewRawTx;
+        currentStep.value = TRANSFER_SEND_STEPS.reviewRawTx;
       } else {
         props.resolve();
       }
@@ -190,6 +191,7 @@ export default defineComponent({
       customPrimaryButtonText,
       proceedToNextStep,
       editTransfer,
+      cancelTransfer,
     };
   },
 });

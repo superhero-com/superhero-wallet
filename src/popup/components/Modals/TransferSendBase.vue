@@ -19,7 +19,7 @@
         class="button-action-secondary"
         data-cy="cancel"
         extra-padded
-        @click="cancelTransfer"
+        @click="$emit('cancel-transfer')"
       />
       <BtnMain
         v-if="showEditButton"
@@ -85,6 +85,7 @@ export default defineComponent({
     'close',
     'step-prev',
     'step-next',
+    'cancel-transfer',
   ],
   setup(props) {
     const { t } = useI18n();
@@ -98,10 +99,11 @@ export default defineComponent({
     const showCancelButton = computed(() => [
       TRANSFER_SEND_STEPS.reviewRawTx,
     ].includes(props.currentStep as any));
-    const showSendButton = computed(() => (
-      props.currentStep === TRANSFER_SEND_STEPS.review
-      || props.currentStep === TRANSFER_SEND_STEPS.reviewRawTx
-    ));
+
+    const showSendButton = computed(() => [
+      TRANSFER_SEND_STEPS.review,
+      TRANSFER_SEND_STEPS.reviewRawTx,
+    ].includes(props.currentStep as any));
 
     const primaryButtonText = computed(() => {
       if (props.customPrimaryButtonText) {

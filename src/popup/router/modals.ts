@@ -36,6 +36,7 @@ import {
   MODAL_SECURE_LOGIN,
   MODAL_ENABLE_SECURE_LOGIN,
   MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_AIR_GAP_SIGN_TRANSACTION,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -74,6 +75,7 @@ import SecureLogin from '../components/Modals/SecureLogin.vue';
 import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
 import WalletConnect from '../components/Modals/WalletConnectModal.vue';
 import AirGapConfirmImport from '../components/Modals/AirGapConfirmImport.vue';
+import AirGapSignTransaction from '../components/Modals/AirGapSignTransaction.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -190,5 +192,8 @@ export default () => {
   });
   registerModal(MODAL_ENABLE_SECURE_LOGIN, {
     component: EnableSecureLogin,
+  });
+  registerModal(MODAL_AIR_GAP_SIGN_TRANSACTION, {
+    component: AirGapSignTransaction,
   });
 };

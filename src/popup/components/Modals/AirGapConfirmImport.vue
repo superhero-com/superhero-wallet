@@ -3,7 +3,7 @@
     full-screen
     has-close-button
     dense
-    class="ari-gap-confirm-import"
+    class="air-gap-confirm-import"
     @close="cancel()"
   >
     <template #header>
@@ -12,12 +12,6 @@
       </div>
     </template>
     <div>
-      <InputSearch
-        v-if="filteredAccounts.length > 5"
-        v-model="searchPhrase"
-        class="input-search"
-        :placeholder="$t('modals.importAirGapAccount.importConfirmDialog.search')"
-      />
       <div
         v-if="filteredAccounts.length"
         class="select-all"
@@ -71,7 +65,6 @@ import {
 import type { IAccount } from '../../../types';
 import { useState } from '../../../composables/vuex';
 
-import InputSearch from '../InputSearch.vue';
 import Modal from '../Modal.vue';
 import CheckBox from '../CheckBox.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -79,7 +72,6 @@ import AccountImportRow from '../AccountImportRow.vue';
 
 export default defineComponent({
   components: {
-    InputSearch,
     Modal,
     BtnMain,
     AccountImportRow,
@@ -99,15 +91,15 @@ export default defineComponent({
     const searchPhrase = ref<string>('');
     const selectAll = ref<boolean>(false);
     const selectedAccounts = ref<Record<string, boolean>>({});
-    const hasSelectedAccounts = computed((): boolean => !!props.accounts.filter(
+    const hasSelectedAccounts = computed((): boolean => props.accounts.some(
       (account) => selectedAccounts.value[account.address],
-    ).length);
+    ));
     const filteredAccounts = computed((): IAccount[] => (
       props.accounts.filter((account) => account.address.includes(searchPhrase.value))
     ));
 
     function isAccountAlreadyImported(account: IAccount) {
-      return !!importedAccounts.value.filter((acc) => acc.address === account.address).length;
+      return importedAccounts.value.some((acc) => acc.address === account.address);
     }
 
     function confirm() {
@@ -152,17 +144,13 @@ export default defineComponent({
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-.ari-gap-confirm-import {
+.air-gap-confirm-import {
   .title {
     @extend %face-sans-15-medium;
 
     color: rgba(variables.$color-white, 0.75);
     text-align: left;
     padding: 12px;
-  }
-
-  .input-search {
-    margin-bottom: 20px;
   }
 
   .select-all,

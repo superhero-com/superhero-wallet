@@ -30,6 +30,11 @@
       v-text="title"
     />
 
+    <InfoBox v-if="isMultiFragmentQr">
+      {{ $t('modals.qrCodeReader.qrCodeHasMultipleFragments') }}
+      <b>{{ scanProgress }}%</b>
+    </InfoBox>
+
     <div class="camera">
       <div class="camera-inner">
         <div
@@ -89,6 +94,9 @@ import {
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import type QrScannerType from 'qr-scanner';
+import { URDecoder } from '@ngraveio/bc-ur';
+import { SerializerV3 } from '@airgap/serializer';
+import bs58check from 'bs58check';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
@@ -99,6 +107,7 @@ import { useUi } from '@/composables';
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
+import InfoBox from '@/popup/components/InfoBox.vue';
 
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?vue-component';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -107,6 +116,7 @@ import AlertIcon from '@/icons/alert.svg?vue-component';
 export default defineComponent({
   components: {
     Modal,
+    InfoBox,
     BtnMain,
     IconBoxed,
     AnimatedSpinnerIcon,
@@ -125,6 +135,9 @@ export default defineComponent({
     const hasDeviceCamera = ref(false);
     const isCameraReady = ref(false);
     const cameraPermissionGranted = ref(true);
+    const isMultiFragmentQr = ref(false);
+    const scanProgress = ref(0);
+    const decoder = ref(new URDecoder());
 
     let browserReader: QrScannerType | null = null;
 
@@ -140,6 +153,14 @@ export default defineComponent({
       }
     }
 
+    async function getEncoderData() {
+      const combinedData = decoder.value.resultUR().decodeCBOR();
+      const resultUr = bs58check.encode(combinedData);
+
+      const serializer = SerializerV3.getInstance();
+      return serializer.deserialize(resultUr);
+    }
+
     async function scanMobile(): Promise<string | Error> {
       setMobileQrScannerVisible(true);
       setTimeout(() => {
@@ -152,9 +173,21 @@ export default defineComponent({
           'barcodeScanned',
           async ({ barcode }) => {
             if (barcode.displayValue) {
-              await listener.remove();
-              stopReading();
-              resolve(barcode.displayValue);
+              if (barcode.displayValue.includes('BYTES/')) {
+                decoder.value.receivePart(barcode.displayValue);
+                if (decoder.value.isComplete()) {
+                  await listener.remove();
+                  stopReading();
+                  resolve(await getEncoderData());
+                } else {
+                  isMultiFragmentQr.value = true;
+                  scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
+                }
+              } else {
+                await listener.remove();
+                stopReading();
+                resolve(barcode.displayValue);
+              }
             }
           },
         );
@@ -167,10 +200,21 @@ export default defineComponent({
       return new Promise<string>((resolve) => {
         browserReader = new QrScanner(
           qrCodeVideoEl.value!,
-          (result) => {
-            if (result.data) {
+          async (result) => {
+            const text = result.data;
+            if (text) {
               stopReading();
-              resolve(result.data);
+              if (String(text).includes('BYTES/')) {
+                decoder.value.receivePart(text);
+                if (decoder.value.isComplete()) {
+                  resolve(await getEncoderData());
+                } else {
+                  isMultiFragmentQr.value = true;
+                  scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
+                }
+              } else {
+                resolve(text);
+              }
             }
           },
           {},
@@ -209,6 +253,7 @@ export default defineComponent({
       }
 
       isCameraReady.value = true;
+      decoder.value = new URDecoder();
       props.resolve((IS_MOBILE_APP) ? await scanMobile() : await scanWeb());
     });
 
@@ -221,6 +266,8 @@ export default defineComponent({
       isCameraReady,
       hasDeviceCamera,
       cameraPermissionGranted,
+      isMultiFragmentQr,
+      scanProgress,
       QrScanIcon,
       qrCodeVideoEl,
       closeQrCodeReaderModal,
@@ -296,6 +343,10 @@ export default defineComponent({
     margin-bottom: 20px;
     line-height: 24px;
     color: rgba($color-white, 0.75);
+  }
+
+  .info-box {
+    text-align: left;
   }
 }
 </style>

@@ -7,7 +7,10 @@
       :is-air-gap="isAirGapAccount"
     />
 
-    <TokenAmount :amount="+numericBalance" />
+    <TokenAmount
+      :amount="+numericBalance"
+      fiat-below
+    />
   </div>
 </template>
 
@@ -63,13 +66,5 @@ export default defineComponent({
 
 .account-import-row {
   @include mixins.flex(space-between, center, row);
-
-  ::v-deep .token-amount {
-    .amount,
-    .fiat {
-      display: block;
-      text-align: right;
-    }
-  }
 }
 </style>

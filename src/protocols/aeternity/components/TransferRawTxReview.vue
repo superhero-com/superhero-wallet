@@ -141,8 +141,8 @@ export default defineComponent({
       recipientId.value = tx.recipientId;
       senderId.value = tx.senderId;
       transferData.value = {
-        amount: new BigNumber(aettosToAe(tx?.amount || 0)).toString(),
-        fee: new BigNumber(aettosToAe(tx?.fee || 0)),
+        amount: aettosToAe(tx?.amount || 0).toString(),
+        fee: aettosToAe(tx?.fee || 0),
         total: new BigNumber(aettosToAe(tx?.fee || 0)).plus(
           new BigNumber(aettosToAe(tx?.amount || 0)),
         ).toNumber(),
