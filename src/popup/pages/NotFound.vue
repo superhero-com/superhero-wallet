@@ -20,7 +20,7 @@
       <BtnMain
         class="button"
         :href="BUG_REPORT_URL"
-        variant="secondary"
+        variant="muted"
       >
         <BugIcon class="icon" />
         {{ $t('pages.notFound.reportBug') }}
@@ -77,6 +77,7 @@ export default defineComponent({
 
     margin-top: 8px;
     margin-bottom: 32px;
+    opacity: 85%;
   }
 
   .button-wrapper {
