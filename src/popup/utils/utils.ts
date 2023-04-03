@@ -24,6 +24,7 @@ import {
   MAGNITUDE,
   MAX_UINT256,
   SIMPLEX_URL,
+  SUPPORTED_TX_TYPES,
   STUB_ADDRESS,
   STUB_CALLDATA,
   STUB_NONCE,
@@ -490,4 +491,18 @@ export function calculateFontSize(amountValue: BigNumber | number) {
     return '14px';
   }
   return '12px';
+}
+
+export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
+  let txObject;
+  try {
+    if (isTxBase64) {
+      txObject = TxBuilder.unpackTx(TxBuilderHelper.decode(encodedTx, 'tx'), true).tx;
+    } else {
+      txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+    }
+  } catch (e) {
+    return false;
+  }
+  return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
