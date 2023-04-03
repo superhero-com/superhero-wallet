@@ -693,6 +693,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       ifNotAuth: true,
       showHeaderNavigation: true,
+      title: 'not-found',
     },
   },
 ];
