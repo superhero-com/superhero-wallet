@@ -58,7 +58,7 @@ export default defineComponent({
       if (!multisigAccounts.value?.length && props.isMultisig) {
         toggleMultisigDashboard(false);
       }
-    });
+    }, { immediate: true });
 
     return {
       multisigAccounts,

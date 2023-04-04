@@ -44,6 +44,7 @@ import type {
   IPendingTransaction,
   IPageableResponse,
   IDashboardTransaction,
+  Truthy,
 } from '../../types';
 
 Vue.use(VueCompositionApi);
@@ -54,6 +55,14 @@ Vue.use(VueCompositionApi);
  */
 export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
   return arr.includes(elem as any);
+}
+
+/**
+ * Following function exists mostly to satisfy TypeScript engine and is a replacement for:
+ * `.filter(Boolean)` => `.filter(excludeFalsy)`
+ */
+export function excludeFalsy<T>(value: T): value is Truthy<T> {
+  return !!value;
 }
 
 export function isNumbersEqual(a: number, b: number) {
