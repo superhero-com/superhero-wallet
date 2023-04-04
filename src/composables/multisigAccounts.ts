@@ -10,10 +10,8 @@ import {
   fetchJson,
   handleUnknownError,
   convertToken,
-  getLocalStorageItem,
-  setLocalStorageItem,
 } from '../popup/utils';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import { createNetworkWatcher, createPollingBasedOnMountedComponents, createStorageRef } from './composablesHelpers';
 import type {
   IDefaultComposableOptions,
   INetwork,
@@ -33,34 +31,34 @@ export interface MultisigAccountsOptions extends IDefaultComposableOptions {
   pollOnce?: boolean;
 }
 
-function storeMultisigAccounts(
-  multisigAccounts: IMultisigAccount[],
-  networkId: string,
-  isPending = false,
-) {
-  return setLocalStorageItem(
-    [isPending ? LOCAL_STORAGE_MULTISIG_PENDING_KEY : LOCAL_STORAGE_MULTISIG_KEY, networkId],
-    multisigAccounts,
-  );
-}
+const { useStorageRef: useMultisigAccountsRef } = createStorageRef<IMultisigAccount[]>(
+  [],
+  LOCAL_STORAGE_MULTISIG_KEY,
+  { scopedToNetwork: true },
+);
+const { useStorageRef: useMultisigPendingAccountsRef } = createStorageRef<IMultisigAccount[]>(
+  [],
+  LOCAL_STORAGE_MULTISIG_PENDING_KEY,
+  { scopedToNetwork: true },
+);
+const { useStorageRef: useMultisigAccountIdRef } = createStorageRef<string>(
+  '',
+  [LOCAL_STORAGE_MULTISIG_KEY, 'active'],
+  { scopedToNetwork: true },
+);
 
-function getStoredMultisigAccounts(networkId: string, isPending = false): IMultisigAccount[] {
-  return getLocalStorageItem(
-    [isPending ? LOCAL_STORAGE_MULTISIG_PENDING_KEY : LOCAL_STORAGE_MULTISIG_KEY, networkId],
-  ) || [];
-}
-
-const multisigAccounts = ref<IMultisigAccount[]>([]);
-const pendingMultisigAccounts = ref<IMultisigAccount[]>([]);
-const activeMultisigAccountId = ref('');
-const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+const { onNetworkChange } = createNetworkWatcher();
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { getSdk } = useSdk({ store });
   const { accounts } = useAccounts({ store });
+
+  const multisigAccounts = useMultisigAccountsRef(store);
+  const pendingMultisigAccounts = useMultisigPendingAccountsRef(store);
+  const activeMultisigAccountId = useMultisigAccountIdRef(store);
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const allMultisigAccounts = computed<IMultisigAccount[]>(
@@ -72,42 +70,14 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
       .find((account) => account.gaAccountId === activeMultisigAccountId.value),
   );
 
-  if (
-    !multisigAccounts.value.length
-    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
-  ) {
-    multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
-    pendingMultisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId, true);
-  }
-
-  if (
-    !activeMultisigAccountId.value
-    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
-  ) {
-    activeMultisigAccountId.value = getLocalStorageItem<string>([
-      LOCAL_STORAGE_MULTISIG_KEY,
-      'active',
-      activeNetwork.value.networkId,
-    ]) || '';
-    activeMultisigNetworkId.value = activeNetwork.value.networkId;
-  }
-
   function setActiveMultisigAccountId(gaAccountId: string) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
-      activeMultisigNetworkId.value = activeNetwork.value.networkId;
-
-      setLocalStorageItem([
-        LOCAL_STORAGE_MULTISIG_KEY,
-        'active',
-        activeNetwork.value.networkId,
-      ], gaAccountId);
     }
   }
 
   function addPendingMultisigAccount(multisigAccount: IMultisigAccount) {
     pendingMultisigAccounts.value.push(multisigAccount);
-    storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
   }
 
   function addTransactionToPendingMultisigAccount(
@@ -125,7 +95,6 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         }
         : account,
     );
-    storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
   }
 
   function removeDuplicatesFromPendingAccounts() {
@@ -136,7 +105,6 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         ),
       );
       pendingMultisigAccounts.value = newPendingMultisigAccounts;
-      storeMultisigAccounts(newPendingMultisigAccounts, activeNetwork.value.networkId, true);
     }
   }
 
@@ -266,14 +234,10 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
 
     multisigAccounts.value = result;
 
-    if (
-      !activeMultisigAccountId.value
-      || activeMultisigNetworkId.value !== activeNetwork.value.networkId
-    ) {
+    if (!activeMultisigAccountId.value) {
       setActiveMultisigAccountId(result[0]?.gaAccountId);
     }
 
-    storeMultisigAccounts(result, activeNetwork.value.networkId);
     removeDuplicatesFromPendingAccounts();
   }
 
@@ -289,11 +253,15 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
   function getMultisigAccountByContractId(contractId: string) {
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
-  if (pollOnce && !getStoredMultisigAccounts(activeNetwork.value.networkId).length) {
+  if (pollOnce && !multisigAccounts.value.length) {
     updateMultisigAccounts();
-  } else if (!pollOnce) {
+  } else {
     initPollingWatcher(() => updateMultisigAccounts());
   }
+
+  onNetworkChange(store, () => {
+    updateMultisigAccounts();
+  });
 
   return {
     multisigAccounts: allMultisigAccounts,
