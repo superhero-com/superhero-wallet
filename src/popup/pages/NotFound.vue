@@ -77,7 +77,7 @@ export default defineComponent({
 
     margin-top: 8px;
     margin-bottom: 32px;
-    opacity: 85%;
+    opacity: 0.85;
   }
 
   .button-wrapper {
