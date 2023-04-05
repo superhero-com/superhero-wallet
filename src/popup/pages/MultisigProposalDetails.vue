@@ -252,10 +252,11 @@ import {
   computed,
   defineComponent,
   ref,
-  onMounted,
   onBeforeUnmount,
+  watch,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { isEqual } from 'lodash-es';
 import {
   formatDate,
   formatTime,
@@ -443,11 +444,18 @@ export default defineComponent({
       processingAction.value = false;
     }
 
-    onMounted(async () => {
-      if (activeMultisigAccount.value) {
-        getTransactionDetails();
-        fetchAdditionalInfo();
-      }
+    watch(
+      () => activeMultisigAccount.value,
+      (value, oldValue) => {
+        if (value && !isEqual(value, oldValue)) {
+          getTransactionDetails();
+        }
+      },
+      { immediate: true },
+    );
+
+    watch(() => multisigTx.value, () => {
+      fetchAdditionalInfo();
     });
 
     onBeforeUnmount(stopFetchingAdditionalInfo);

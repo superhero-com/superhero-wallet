@@ -66,7 +66,13 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     const { activeMultisigAccount } = useMultisigAccounts({ store });
     const txHash = activeMultisigAccount.value?.txHash;
 
-    if (txHash && activeMultisigAccount.value?.hasPendingTransaction) {
+    if (
+      txHash
+      && (
+        activeMultisigAccount.value?.hasPendingTransaction
+        || activeMultisigAccount.value?.pending
+      )
+    ) {
       const rawTx = await fetchTransactionByHash(txHash);
 
       return {

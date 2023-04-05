@@ -116,6 +116,7 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
         }
         : account,
     );
+    storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
   }
 
   function removeDuplicatesFromPendingAccounts() {
