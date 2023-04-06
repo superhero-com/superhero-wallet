@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import type { INetwork } from '../../types';
 import { useGetter, useState } from '../../composables/vuex';
 import { useCurrencies } from '../../composables';

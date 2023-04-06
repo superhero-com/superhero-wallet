@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { useConnection } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { IAccount } from '../../types';

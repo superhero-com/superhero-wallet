@@ -60,7 +60,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, getCurrentInstance } from 'vue';
+import { useStore } from 'vuex';
+import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
 import { useGetter } from '../../composables/vuex';
 import { WalletRouteMeta } from '../../types';
 import {
@@ -89,8 +91,14 @@ export default defineComponent({
     Truncate,
     BtnIcon,
   },
-  setup(props, { root }) {
-    const { homeRouteName } = useUi({ store: root.$store });
+  setup() {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+    const router = useRouter();
+
+    const { homeRouteName } = useUi({ store });
 
     const isLoggedIn = useGetter('isLoggedIn');
 
@@ -99,27 +107,27 @@ export default defineComponent({
         ? homeRouteName.value
         : ROUTE_INDEX,
     );
-    const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
+    const routeMeta = computed(() => route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
-    const isLogoDisabled = computed(() => root.$route.name === ROUTE_ACCOUNT);
+    const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
       () => routeMeta.value?.title ? root.$t(`pages.titles.${routeMeta.value.title}`) : '',
     );
 
     function back() {
-      if (root.$route.meta?.backRoute) {
+      if (route.meta?.backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return root.$router.push(root.$route.meta?.backRoute);
+        return router.push(route.meta?.backRoute as RouteLocationRaw);
       }
-      let { fullPath } = root.$route;
+      let { fullPath } = route;
       fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
-      return root.$router.push(
+      return router.push(
         fullPath.substr(0, fullPath.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
 
     function close() {
-      root.$router.replace({ name: currentHomeRouteName.value });
+      router.replace({ name: currentHomeRouteName.value });
     }
 
     return {

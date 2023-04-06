@@ -69,9 +69,11 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import type { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import type { IAccount, IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
 import { FUNCTION_TYPE_MULTISIG } from '../../utils';
@@ -96,20 +98,24 @@ export default defineComponent({
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function as PropType<() => void>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
     const {
       account,
       accounts,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
     const {
       pendingMultisigTxSigners,
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
-    } = usePendingMultisigTransaction({ store: root.$store });
+    } = usePendingMultisigTransaction({ store });
 
     function getAccountNameToDisplay(acc: IAccount) {
       return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
@@ -141,7 +147,8 @@ export default defineComponent({
     });
 
     const actionHasError = computed(() => {
-      const confirmActionText = confirmActionContent.value as Record<string, TranslateResult>;
+      const confirmActionText = confirmActionContent.value as
+        unknown as Record<string, TranslateResult>;
       if (!pendingMultisigTxSigners.value.includes(account.value.address)) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
@@ -172,7 +179,7 @@ export default defineComponent({
 
     function selectAccount(accountAddress: string) {
       if (accountAddress) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === accountAddress)?.idx,
         );

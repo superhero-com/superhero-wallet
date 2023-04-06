@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
 import { getAccountNameToDisplay } from '../popup/utils';
 

@@ -47,8 +47,10 @@ import {
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { debounce } from 'lodash-es';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import {
   EXTENSION_HEIGHT,
 } from '../utils';
@@ -67,7 +69,11 @@ export default defineComponent({
     TransactionAndTokenFilter,
     BtnClose,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const route = useRoute();
+
     const ACCOUNT_INFO_HEIGHT = 120;
     const BALANCE_AND_ACTIONS_HEIGHT = 280;
     const accountDetailsElem = ref<HTMLElement>();
@@ -77,13 +83,13 @@ export default defineComponent({
 
     const { resetFilter } = useTransactionAndTokenFilter();
 
-    const { homeRouteName } = useUi({ store: root.$store });
+    const { homeRouteName } = useUi({ store });
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
     );
 
-    const routeName = computed(() => root.$route.name);
+    const routeName = computed(() => route.name);
 
     const showFilters = computed<boolean>(() => (
       clientHeight.value > initialClientHeight.value
@@ -111,7 +117,7 @@ export default defineComponent({
     }, 100));
 
     watch(
-      () => root.$route,
+      () => route,
       () => {
         clientHeight.value = 0;
         resetFilter();

@@ -44,7 +44,7 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import type { IFormSelectOption } from '../../../types';
 
 import InputSearch from '../InputSearch.vue';

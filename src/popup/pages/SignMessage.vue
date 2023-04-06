@@ -26,7 +26,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import { useDeepLinkApi, useSdk } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
@@ -35,13 +37,18 @@ export default defineComponent({
   components: {
     BtnMain,
   },
-  setup(props, { root }) {
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { getSdk } = useSdk({ store });
 
     const sendAddress = async () => {
       const sdk = await getSdk();
-      const signature = await sdk.signMessage(root.$route.query.message);
+      const signature = await sdk.signMessage(route.query.message);
       const signatureHex = Buffer.from(signature).toString('hex');
       openCallbackOrGoHome(true, { signature: signatureHex });
     };

@@ -9,7 +9,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed, getCurrentInstance } from 'vue';
+import { useStore } from 'vuex';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
@@ -21,9 +22,13 @@ export default defineComponent({
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     function openTransferReceiveModal() {
-      root.$store.dispatch('modals/open', {
+      store.dispatch('modals/open', {
         name: MODAL_TRANSFER_RECEIVE,
         isMultisig: props.isMultisig,
         tokenContractId: props.tokenContractId,

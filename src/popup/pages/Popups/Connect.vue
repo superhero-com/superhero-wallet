@@ -56,7 +56,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, getCurrentInstance, PropType,
+} from 'vue';
+import { useStore } from 'vuex';
 import type {
   IAccount,
   IAccountLabeled,
@@ -95,7 +98,11 @@ export default defineComponent({
     // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
     const account = useGetter<IAccount>('account');
@@ -109,7 +116,7 @@ export default defineComponent({
     }));
 
     function confirm() {
-      root.$store.commit('permissions/addPermission', {
+      store.commit('permissions/addPermission', {
         ...PERMISSION_DEFAULTS,
         ...props.app,
         ...permission.value,

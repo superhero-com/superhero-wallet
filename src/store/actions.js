@@ -30,8 +30,8 @@ export default {
     if (getters.tippingSupported) return;
     await dispatch('modals/open', {
       name: MODAL_DEFAULT,
-      title: i18n.t('modals.tip-mainnet-warning.title'),
-      msg: i18n.t('modals.tip-mainnet-warning.msg'),
+      title: i18n.global.t('modals.tip-mainnet-warning.title'),
+      msg: i18n.global.t('modals.tip-mainnet-warning.msg'),
     });
   },
   addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {

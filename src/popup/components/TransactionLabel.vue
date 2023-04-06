@@ -73,10 +73,12 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -114,7 +116,11 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     dense: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const {
       outerTxType,
       txType,
@@ -122,7 +128,7 @@ export default defineComponent({
       isDex,
       innerTx,
       isErrorTransaction,
-    } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
+    } = useTransactionTx({ store, tx: props.transaction.tx });
 
     const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');

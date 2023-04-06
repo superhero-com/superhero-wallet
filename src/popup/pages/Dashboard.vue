@@ -40,7 +40,7 @@
 import {
   computed,
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
 
 import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
 import { useGetter } from '../../composables/vuex';

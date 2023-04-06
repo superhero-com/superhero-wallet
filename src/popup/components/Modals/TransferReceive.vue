@@ -81,7 +81,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed, defineComponent, ref,
+} from 'vue';
+import { useStore } from 'vuex';
 import type {
   IAccount,
   IAsset,
@@ -125,16 +128,18 @@ export default defineComponent({
     tokenContractId: { type: [String, Number], default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
-    const account = computed<IAccount>(() => root.$store.getters.account);
+    const account = computed<IAccount>(() => store.getters.account);
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
       : account.value.address);
     const availableTokens = computed<ITokenList>(
-      () => root.$store.state.fungibleTokens.availableTokens,
+      () => store.state.fungibleTokens.availableTokens,
     );
 
     const selectedAsset = ref<IAsset | IToken | null>(null);
@@ -171,9 +176,9 @@ export default defineComponent({
       const { address } = account.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
-        ? i18n.t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : i18n.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
-      await root.$store.dispatch('share', { text });
+        ? i18n.global.t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : i18n.global.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+      await store.dispatch('share', { text });
     }
 
     function handleAssetChange(asset: IAsset | IToken) {
@@ -181,7 +186,7 @@ export default defineComponent({
     }
 
     function closeModal() {
-      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
+      store.commit('modals/closeByKey', MODAL_TRANSFER_RECEIVE);
     }
 
     function copyAddress() {

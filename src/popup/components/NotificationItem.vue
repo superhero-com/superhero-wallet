@@ -60,7 +60,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import {
+  PropType, computed, defineComponent, getCurrentInstance,
+} from 'vue';
+import { useRouter } from 'vue-router';
 import {
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
@@ -97,9 +100,13 @@ export default defineComponent({
     BackupSeedNotificationIcon,
   },
   props: {
-    notification: { type: Object, required: true },
+    notification: { type: Object as PropType<IProps['notification']>, required: true },
   },
-  setup(props: IProps, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const router = useRouter();
+
     function getNotificationText(notification: INotification) {
       switch (notification.type) {
         case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
@@ -143,7 +150,7 @@ export default defineComponent({
         if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
           window.open(props.notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
         } else {
-          root.$router.push(props.notification.path);
+          router.push(props.notification.path);
         }
       }
     }

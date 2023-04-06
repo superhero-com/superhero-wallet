@@ -55,8 +55,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent, getCurrentInstance } from 'vue';
 import { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
@@ -79,15 +80,19 @@ export default defineComponent({
   props: {
     proposalCompleted: Boolean,
   },
-  setup(props, { root }) {
+  setup(props: any) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
     const {
       accounts,
       isLocalAccountAddress,
     } = useAccounts({
-      store: root.$store,
+      store,
     });
     const {
       pendingMultisigTxConfirmedBy,
@@ -103,9 +108,9 @@ export default defineComponent({
       isPendingMultisigTxCompletedAndRevoked,
       isPendingMultisigTxCompletedAndConfirmed,
     } = usePendingMultisigTransaction({
-      store: root.$store,
+      store,
     });
-    const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
+    const getExplorerPath = computed(() => store.getters.getExplorerPath);
 
     const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
       if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {

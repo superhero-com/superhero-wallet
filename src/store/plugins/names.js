@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import { watch } from '@vue/composition-api';
+import Vue, { watch } from 'vue';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   MODAL_DEFAULT,
@@ -151,7 +150,7 @@ export default (store) => {
           }
           dispatch(
             'modals/open',
-            { name: MODAL_DEFAULT, msg: i18n.t('pages.names.pointer-added', { type }) },
+            { name: MODAL_DEFAULT, msg: i18n.global.t('pages.names.pointer-added', { type }) },
             { root: true },
           );
         } catch (e) {
@@ -164,7 +163,7 @@ export default (store) => {
         await Promise.all(accounts.map(async ({ address }) => {
           const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
-          ).catch(() => {});
+          ).catch(() => { });
           commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
@@ -201,7 +200,7 @@ export default (store) => {
         rootGetters: { activeNetwork },
         commit,
       }, address) {
-        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
+        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => { });
         if (response?.preferredChainName) {
           commit('setPreferred', { address, name: response?.preferredChainName });
         } else {
@@ -215,7 +214,7 @@ export default (store) => {
     if (isMiddlewareReady.value) {
       const [sdk] = await Promise.all([
         getSdk(),
-        store.dispatch('names/fetchOwned').catch(() => {}),
+        store.dispatch('names/fetchOwned').catch(() => { }),
         store.dispatch('names/setDefaults'),
       ]);
 
@@ -234,7 +233,7 @@ export default (store) => {
     async () => {
       if (isMiddlewareReady.value) {
         await Promise.all([
-          store.dispatch('names/fetchOwned').catch(() => {}),
+          store.dispatch('names/fetchOwned').catch(() => { }),
           store.dispatch('names/setDefaults'),
         ]);
       }

@@ -1,4 +1,4 @@
-import { computed, ref, watch } from '@vue/composition-api';
+import { computed, ref, watch } from 'vue';
 import type {
   IDefaultComposableOptions,
   INetwork,

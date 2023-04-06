@@ -33,7 +33,8 @@ import { isEmpty } from 'lodash-es';
 import {
   defineComponent,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useRoute } from 'vue-router';
 import { MODAL_TRANSFER_SEND } from '../utils';
 import { useDispatch, useState } from '../../composables/vuex';
 
@@ -46,12 +47,15 @@ export default defineComponent({
   components: {
     DashboardCard,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const route = useRoute();
+
     const backedUpSeed = useState('backedUpSeed');
     const openModal = useDispatch('modals/open');
 
-    watch(() => root.$route.query, () => {
-      if (!isEmpty(root.$route.query)) {
+    watch(() => route.query, () => {
+      if (!isEmpty(route.query)) {
         openModal({ name: MODAL_TRANSFER_SEND });
       }
     }, { immediate: true });

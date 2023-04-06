@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
 

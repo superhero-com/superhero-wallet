@@ -49,9 +49,10 @@ import {
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
-import { Swiper } from 'vue-awesome-swiper';
-import { Location } from 'vue-router';
+} from 'vue';
+// import { Swiper } from 'vue-awesome-swiper';
+import { RouteLocation } from 'vue-router';
+import { useStore } from 'vuex';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -65,16 +66,18 @@ export default defineComponent({
     ToggleMultisigButton,
     BulletSwitcher,
     AccountSwiperSlide,
-    Swiper,
+    // Swiper,
     AccountCardAdd,
   },
   props: {
     activeIdx: { type: Number, required: true },
-    to: { type: Object as PropType<Location>, required: true },
+    to: { type: Object as PropType<RouteLocation>, required: true },
     addressList: { type: Array as PropType<string[]>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const store = useStore();
+
     const swiperOptions = {
       slidesPerView: 1.1,
       centeredSlides: true,
@@ -93,7 +96,7 @@ export default defineComponent({
     }
 
     function onSlideChange() {
-      root.$store.commit('initTransactions');
+      store.commit('initTransactions');
       const { realIndex } = swiper.value;
       if (realIndex < props.addressList.length && realIndex >= 0) {
         emit('selectAccount', realIndex);

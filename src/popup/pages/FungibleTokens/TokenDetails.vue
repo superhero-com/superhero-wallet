@@ -160,7 +160,7 @@
 import {
   computed,
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import {
   DEX_URL,

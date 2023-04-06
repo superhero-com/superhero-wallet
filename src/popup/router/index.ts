@@ -1,5 +1,7 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import {
+  createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw,
+} from 'vue-router';
+// import { getCurrentInstance } from 'vue';
 import { ICordova } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -26,12 +28,13 @@ import {
   IS_WEB,
 } from '../../lib/environment';
 
-Vue.use(VueRouter);
+// const app = getCurrentInstance();
+// if (app) app.appContext.app.use(VueRouter);
 
-const router = new VueRouter({
-  routes,
-  mode: IS_WEB ? 'history' : 'hash',
-  scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
+const router = createRouter({
+  routes: routes as RouteRecordRaw[],
+  history: IS_WEB ? createWebHistory() : createWebHashHistory(),
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
 const lastRouteKey = 'last-path';
@@ -77,6 +80,7 @@ router.beforeEach(async (to, from, next) => {
   // @ts-ignore
   document.querySelector('.app-inner').scroll(0, 0);
 
+  // @ts-ignore
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 
@@ -117,7 +121,7 @@ if (IS_CORDOVA) {
       if (url) {
         router.push({ name: ROUTE_ACCOUNT, query: { url } });
       } else {
-        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') as any });
+        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.global.t('modals.mobile-share-error') as any });
       }
     });
 

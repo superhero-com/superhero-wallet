@@ -29,7 +29,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, PropType,
+} from 'vue';
+import { useStore } from 'vuex';
 import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
 import type { IFormSelectOption } from '../../../types';
 
@@ -61,7 +64,9 @@ export default defineComponent({
      */
     unstyled: Boolean,
   },
-  setup(props, { emit, root }) {
+  setup(props, { emit }) {
+    const store = useStore();
+
     const currentText = computed(() => {
       if (props.persistentDefaultText) {
         return props.defaultText;
@@ -72,7 +77,7 @@ export default defineComponent({
     });
 
     function openOptionsModal() {
-      root.$store.dispatch(
+      store.dispatch(
         'modals/open',
         {
           name: MODAL_FORM_SELECT_OPTIONS,
@@ -81,7 +86,7 @@ export default defineComponent({
           title: props.defaultText,
         },
       )
-        .then((val) => emit('select', val))
+        .then((val: any) => emit('select', val))
         .catch(() => null); // Closing the modal does nothing
     }
 

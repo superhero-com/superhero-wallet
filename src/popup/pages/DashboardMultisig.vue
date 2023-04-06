@@ -22,8 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
+import { useStore } from 'vuex';
 import { MODAL_TRANSFER_SEND } from '../utils';
 
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
@@ -43,9 +44,11 @@ export default defineComponent({
     DashboardWrapper,
     PendingMultisigTransactionCard,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
     function openTransferSendModal() {
-      root.$store.dispatch('modals/open', {
+      store.dispatch('modals/open', {
         name: MODAL_TRANSFER_SEND,
         isMultisig: true,
       });

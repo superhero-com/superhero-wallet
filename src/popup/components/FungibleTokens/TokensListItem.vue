@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '../../../types';
 import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';

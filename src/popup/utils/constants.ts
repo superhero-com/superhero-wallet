@@ -188,37 +188,38 @@ export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
-    text: i18n.t('pages.notification-settings.wallet'),
+    // @ts-ignore
+    text: i18n.global.t('pages.notification-settings.wallet'),
     checked: true,
     type: NOTIFICATION_TYPE_WALLET,
   },
   {
-    text: i18n.t('pages.notification-settings.commentOnTip'),
+    text: i18n.global.t('pages.notification-settings.commentOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.commentOnComment'),
+    text: i18n.global.t('pages.notification-settings.commentOnComment'),
     checked: false,
     type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
   },
   {
-    text: i18n.t('pages.notification-settings.retipOnTip'),
+    text: i18n.global.t('pages.notification-settings.retipOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_RETIP_ON_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.tipOnComment'),
+    text: i18n.global.t('pages.notification-settings.tipOnComment'),
     checked: true,
     type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
   },
   {
-    text: i18n.t('pages.notification-settings.claimOfTip'),
+    text: i18n.global.t('pages.notification-settings.claimOfTip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.claimOfRetip'),
+    text: i18n.global.t('pages.notification-settings.claimOfRetip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   },

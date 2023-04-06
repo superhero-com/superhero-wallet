@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { camelCase } from 'lodash-es';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';

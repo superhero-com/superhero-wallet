@@ -60,7 +60,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useCopy } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
@@ -71,13 +73,17 @@ export default defineComponent({
   components: {
     BtnMain,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const router = useRouter();
+
     const { copy, copied } = useCopy();
-    const mnemonic = computed(() => root.$store.state.mnemonic);
+    const mnemonic = computed(() => store.state.mnemonic);
 
     function setBackedUpSeed() {
-      root.$store.commit('setBackedUpSeed');
-      root.$router.push({ name: 'account' });
+      store.commit('setBackedUpSeed');
+      router.push({ name: 'account' });
     }
 
     return {

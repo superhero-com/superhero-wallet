@@ -18,7 +18,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import type { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
 import { useConnection, useSdk } from '../../composables';
@@ -30,9 +31,11 @@ export default defineComponent({
   components: {
     BtnPill,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
     const { isOnline } = useConnection();
-    const { isNodeReady, isNodeError } = useSdk({ store: root.$store });
+    const { isNodeReady, isNodeError } = useSdk({ store });
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     return {

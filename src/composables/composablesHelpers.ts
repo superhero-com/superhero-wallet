@@ -2,7 +2,7 @@ import {
   onBeforeUnmount,
   onMounted,
   getCurrentInstance,
-} from '@vue/composition-api';
+} from 'vue';
 import { Store } from 'vuex';
 import { INetwork } from '../types';
 import { useConnection } from './connection';

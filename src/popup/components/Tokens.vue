@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import AeIcon from '../../icons/tokens/ae.svg';
 import {
   AETERNITY_COIN_SYMBOL,

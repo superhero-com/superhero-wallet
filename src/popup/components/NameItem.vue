@@ -139,9 +139,11 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import {
   MODAL_CONFIRM,
   blocksToRelativeTime,
@@ -182,8 +184,11 @@ export default defineComponent({
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
-  setup(props, { root }) {
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -193,7 +198,7 @@ export default defineComponent({
 
     const account = useGetter<IAccount>('account');
 
-    const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
+    const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
       (): boolean => nameEntry.value?.pointers?.accountPubkey === account.value.address,
@@ -221,7 +226,7 @@ export default defineComponent({
     }
 
     async function setDefault() {
-      await root.$store.dispatch('names/setDefault', {
+      await store.dispatch('names/setDefault', {
         address: account.value.address,
         name: props.name,
       });
@@ -229,14 +234,14 @@ export default defineComponent({
 
     async function setAutoExtend() {
       if (!props.autoExtend) {
-        await root.$store.dispatch('modals/open', {
+        await store.dispatch('modals/open', {
           name: MODAL_CONFIRM,
           icon: 'info',
           title: root.$t('modals.autoextend-help.title'),
           msg: root.$t('modals.autoextend-help.msg'),
         });
       }
-      root.$store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+      store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
     }
 
     async function setPointer() {
@@ -244,7 +249,7 @@ export default defineComponent({
         error.value = true;
         return;
       }
-      root.$store.dispatch('names/updatePointer', {
+      store.dispatch('names/updatePointer', {
         name: props.name,
         address: newPointer.value,
         type: 'update',

@@ -82,7 +82,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeUnmount } from '@vue/composition-api';
+import {
+  defineComponent, onMounted, onBeforeUnmount,
+} from 'vue';
+import { useStore } from 'vuex';
 import { useGetter } from '../../composables/vuex';
 import { useMultisigAccounts } from '../../composables';
 
@@ -106,14 +109,17 @@ export default defineComponent({
     DetailsItem,
     ExternalLinkIcon,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+
     const getExplorerPath = useGetter('getExplorerPath');
 
     const {
       activeMultisigAccount,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     onMounted(fetchAdditionalInfo);
 

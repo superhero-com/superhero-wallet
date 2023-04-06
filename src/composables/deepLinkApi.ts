@@ -1,15 +1,15 @@
-import { ref } from '@vue/composition-api';
-import VueRouter, { Route } from 'vue-router';
+import { ref } from 'vue';
+import { Router, RouteLocationNormalized as Route } from 'vue-router';
 
 export interface UseDeepLinkApiOptions {
-  router: VueRouter
+  router: Router
 }
 /**
  * TODO: refactor once upgrade to vue-router: 4.x.x
- * @param { router: VueRouter }
+ * @param { router: Router }
  */
 export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
-  const route: Route = router.currentRoute;
+  const route: Route = router.currentRoute.value;
   const callbackOrigin = ref<URL | null>(
     route.query['x-success']
       ? (new URL(route.query['x-success'] as string))

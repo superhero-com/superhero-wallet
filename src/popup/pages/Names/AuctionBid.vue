@@ -41,8 +41,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed, defineComponent, getCurrentInstance, ref,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { IAuctionBid } from '../../../types';
 import { useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
@@ -71,8 +75,13 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
+    const { getSdk } = useSdk({ store });
 
     const loading = ref(false);
     const amount = ref('');
@@ -97,17 +106,17 @@ export default defineComponent({
       try {
         loading.value = true;
         await sdk.aensBid(props.name, aeToAettos(amount.value));
-        root.$store.dispatch('modals/open', {
+        store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        root.$router.push({ name: 'auction-history', params: { name: props.name } });
+        router.push({ name: 'auction-history', params: { name: props.name } });
       } catch (e: any) {
         let msg = e.message;
         if (msg.includes('is not enough to execute')) {
           msg = root.$t('pages.names.balance-error');
         }
-        root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, msg });
+        store.dispatch('modals/open', { name: MODAL_DEFAULT, msg });
       } finally {
         loading.value = false;
       }

@@ -44,8 +44,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import Vue, {
+  computed, defineComponent, getCurrentInstance, ref,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
 import type { ITokenList, ObjectValues } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
@@ -85,7 +88,11 @@ export default defineComponent({
     address: { type: String, default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const currentRenderedComponent = ref<Vue.Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
@@ -118,7 +125,7 @@ export default defineComponent({
     });
 
     function closeModal() {
-      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
+      store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
     }
 
     function proceedToNextStep() {

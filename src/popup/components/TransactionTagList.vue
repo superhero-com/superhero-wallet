@@ -14,9 +14,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, PropType,
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -48,7 +51,8 @@ export default defineComponent({
     isClaim: Boolean,
     dense: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const {
       direction,
       txType,
@@ -57,7 +61,7 @@ export default defineComponent({
       isDex,
       outerTxType,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction?.tx,
       externalAddress: props.transaction?.transactionOwner,
     });
@@ -71,13 +75,14 @@ export default defineComponent({
       let innerLabels = [];
 
       if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
-        externalLabels.push(i18n.t('transaction.type.gaMetaTx'));
+        // @ts-ignore
+        externalLabels.push(i18n.global.t('transaction.type.gaMetaTx'));
       }
       if (outerTxType.value === TX_TYPE_MDW.PayingForTx) {
-        externalLabels.push(i18n.t('transaction.type.payingForTx'));
+        externalLabels.push(i18n.global.t('transaction.type.payingForTx'));
       }
 
-      const transactionTypes = i18n.t('transaction.type') as Record<string, TranslateResult>;
+      const transactionTypes = i18n.global.t('transaction.type') as any;
       const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
@@ -88,24 +93,24 @@ export default defineComponent({
         innerLabels = [AENS, txTransactionType];
       } else if (txType.value === SCHEMA.TX_TYPE.gaMeta) {
         innerLabels = [
-          i18n.t('transaction.type.contractCallTx'),
-          i18n.t('transaction.type.multisigProposal'),
+          i18n.global.t('transaction.type.contractCallTx'),
+          i18n.global.t('transaction.type.multisigProposal'),
         ];
       } else if (txType.value === SCHEMA.TX_TYPE.spend) {
         innerLabels = [
-          i18n.t('transaction.type.spendTx'),
+          i18n.global.t('transaction.type.spendTx'),
           direction.value === TX_FUNCTIONS.received
-            ? i18n.t('transaction.spendType.in')
-            : i18n.t('transaction.spendType.out'),
+            ? i18n.global.t('transaction.spendType.in')
+            : i18n.global.t('transaction.spendType.out'),
         ];
       } else if (isAllowance.value) {
-        innerLabels = [i18n.t('transaction.dexType.allowToken')];
+        innerLabels = [i18n.global.t('transaction.dexType.allowToken')];
       } else if (isDex.value) {
         innerLabels = [
           DEX,
           FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
-            ? i18n.t('transaction.dexType.pool')
-            : i18n.t('transaction.dexType.swap'),
+            ? i18n.global.t('transaction.dexType.pool')
+            : i18n.global.t('transaction.dexType.swap'),
         ];
       } else if (
         (
@@ -115,17 +120,17 @@ export default defineComponent({
         ) || props.isClaim
       ) {
         innerLabels = [
-          i18n.t('pages.token-details.tip'),
+          i18n.global.t('pages.token-details.tip'),
           props.isClaim
-            ? i18n.t('transaction.spendType.in')
-            : i18n.t('transaction.spendType.out'),
+            ? i18n.global.t('transaction.spendType.in')
+            : i18n.global.t('transaction.spendType.out'),
         ];
       } else if (
         txType.value === TX_TYPE_MDW.GAAttachTx
         && outerTxType.value === TX_TYPE_MDW.PayingForTx
       ) {
         innerLabels = [
-          i18n.t('transaction.type.createMultisigVault'),
+          i18n.global.t('transaction.type.createMultisigVault'),
         ];
       } else if (
         txType.value === SCHEMA.TX_TYPE.contractCall
@@ -136,13 +141,13 @@ export default defineComponent({
         )
       ) {
         innerLabels = [
-          i18n.t('transaction.type.spendTx'),
+          i18n.global.t('transaction.type.spendTx'),
           (
             innerTx.value.callerId === props.transaction.transactionOwner
             || !props.transaction.transactionOwner
           )
-            ? i18n.t('transaction.spendType.out')
-            : i18n.t('transaction.spendType.in'),
+            ? i18n.global.t('transaction.spendType.out')
+            : i18n.global.t('transaction.spendType.in'),
         ];
       } else if (props.isPending) {
         return [];

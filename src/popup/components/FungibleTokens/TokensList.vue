@@ -10,7 +10,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { useTokensList } from '../../../composables';
 import TokensListItem from './TokensListItem.vue';
 
@@ -22,9 +23,10 @@ export default defineComponent({
     searchTerm: { type: String, default: '' },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { filteredTokens } = useTokensList({
-      store: root.$store,
+      store,
       ownedOnly: true,
       searchTerm: computed(() => props.searchTerm),
       isMultisig: props.isMultisig,

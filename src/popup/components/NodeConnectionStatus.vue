@@ -17,19 +17,25 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useConnection, useSdk } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 
 const CONNECTED_DISPLAY_TIME = 2000;
 
 export default defineComponent({
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
     const { isOnline } = useConnection();
-    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store: root.$store });
+    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store });
 
     const justBeenConnected = ref(false);
 

@@ -46,7 +46,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, getCurrentInstance, PropType,
+} from 'vue';
 import type { IAccount, IAccountLabeled, IAppData } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
 import Modal from '../../components/Modal.vue';
@@ -70,7 +72,10 @@ export default defineComponent({
     // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
     const account = useGetter<IAccount>('account');

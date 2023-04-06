@@ -28,7 +28,8 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
 import AccountInfo from './AccountInfo.vue';
@@ -52,8 +53,10 @@ export default defineComponent({
     account: { type: Object as PropType<IMultisigAccount>, required: true },
     selected: Boolean,
   },
-  setup(props, { root }) {
-    const { pendingMultisigAccounts } = useMultisigAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+
+    const { pendingMultisigAccounts } = useMultisigAccounts({ store });
 
     const isPendingAccount = computed(
       () => !!pendingMultisigAccounts.value.find(

@@ -32,10 +32,12 @@
 <script lang="ts">
 import {
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
-import { Route } from 'vue-router';
+} from 'vue';
+import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { MODAL_DEFAULT } from '../utils';
 import { useDeepLinkApi, useSdk, useAccounts } from '../../composables';
 import { useGetter } from '../../composables/vuex';
@@ -51,10 +53,17 @@ export default defineComponent({
     BtnMain,
     FixedScreenFooter,
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
+    const { getSdk } = useSdk({ store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { account, accounts, accountsSelectOptions } = useAccounts({ store });
 
     const creatorAddress = ref<string>(account.value.address);
     const id = ref<string>('');
@@ -64,14 +73,14 @@ export default defineComponent({
     const tippingSupported = useGetter('tippingSupported');
 
     watch(
-      () => root.$route,
-      ({ query }: Route) => {
+      () => route,
+      ({ query }: RouteLocationNormalized) => {
         id.value = query.id as string ?? '';
         parentId.value = query.parentId ? +query.parentId : undefined;
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: 'account' });
+          router.push({ name: 'account' });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -82,7 +91,7 @@ export default defineComponent({
       loading.value = true;
       const sdk = await getSdk();
       try {
-        await root.$store.dispatch('sendTipComment', [
+        await store.dispatch('sendTipComment', [
           id.value,
           text.value,
           await sdk.address(),
@@ -90,7 +99,7 @@ export default defineComponent({
         ]);
         openCallbackOrGoHome(true);
       } catch (e: any) {
-        root.$store.dispatch('modals/open', {
+        store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
@@ -104,7 +113,7 @@ export default defineComponent({
 
     function selectAccount(val: string) {
       if (val) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );

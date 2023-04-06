@@ -128,9 +128,12 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
 import { useBalances, useCurrencies } from '../../composables';
@@ -152,12 +155,19 @@ export default defineComponent({
     TokenAmount,
     BtnMain,
   },
-  setup(props, { root }) {
-    const { balance } = useBalances({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
+    const { balance } = useBalances({ store });
     const { currentCurrencyRate } = useCurrencies();
 
-    const routeHost = root.$route.params.host as string;
-    const editView = !!root.$route.meta?.isEdit;
+    const routeHost = route.params.host as string;
+    const editView = !!route.meta?.isEdit;
 
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
@@ -174,8 +184,8 @@ export default defineComponent({
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
 
     function removePermission() {
-      root.$store.commit('permissions/removePermission', routeHost);
-      root.$router.push({ name: 'permissions-settings' });
+      store.commit('permissions/removePermission', routeHost);
+      router.push({ name: 'permissions-settings' });
     }
 
     async function savePermission() {
@@ -186,7 +196,7 @@ export default defineComponent({
       ));
 
       if (host !== routeHost) {
-        root.$store.commit('permissions/removePermission', routeHost);
+        store.commit('permissions/removePermission', routeHost);
       }
 
       if (!permission.value.dailySpendLimit) {
@@ -197,17 +207,17 @@ export default defineComponent({
         );
       }
 
-      root.$store.commit('permissions/addPermission', {
+      store.commit('permissions/addPermission', {
         ...permission.value,
         host,
       });
-      root.$router.push({ name: 'permissions-settings' });
+      router.push({ name: 'permissions-settings' });
     }
 
     if (editView) {
       const savedPermission = permissions.value[routeHost];
       if (!savedPermission) {
-        root.$router.replace({ name: ROUTE_NOT_FOUND });
+        router.replace({ name: ROUTE_NOT_FOUND });
       } else {
         if (typeof savedPermission.transactionSignLimit === 'string') {
           savedPermission.transactionSignLimit = parseInt(

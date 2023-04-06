@@ -34,10 +34,10 @@
       />
 
       <Component
+        v-bind="props"
         :is="component"
         v-for="{ component, key, props } in modals"
         :key="key"
-        v-bind="props"
       />
     </div>
   </div>
@@ -47,10 +47,13 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
@@ -86,25 +89,31 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+
     const { watchConnectionStatus } = useConnection();
-    const { addWalletNotification } = useNotifications({ store: root.$store });
+    const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
 
-    const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
-    const isRestored = computed(() => root.$store.state.isRestored);
-    const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
-    const modals = computed(() => root.$store.getters['modals/opened']);
-    const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
+    const isLoggedIn = computed(() => store.getters.isLoggedIn);
+    const isRestored = computed(() => store.state.isRestored);
+    const backedUpSeed = computed(() => store.state.backedUpSeed);
+    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
+    const modals = computed(() => store.getters['modals/opened']);
+    const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
-      || root.$route.params.app // TODO determine if still used
+      || route.params.app // TODO determine if still used
       || routeMeta.value?.hideHeader
     ));
 
@@ -137,8 +146,8 @@ export default defineComponent({
     }
 
     function setNotificationSettings() {
-      if (root.$store.state.notificationSettings.length === 0) {
-        root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      if (store.state.notificationSettings.length === 0) {
+        store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
       }
     }
 
@@ -165,7 +174,7 @@ export default defineComponent({
       setNotificationSettings();
 
       loadAeternityData();
-      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+      store.commit('setChainNames', await store.dispatch('getCacheChainNames'));
     });
 
     return {

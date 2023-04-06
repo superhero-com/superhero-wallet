@@ -43,7 +43,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '@vue/composition-api';
+import {
+  defineComponent, PropType, ref,
+} from 'vue';
+import { useStore } from 'vuex';
 import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
 import { useConnection } from '../../../composables';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
@@ -61,19 +64,20 @@ export default defineComponent({
     resolve: { type: Function as PropType<() => void>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { isOnline } = useConnection();
     const loading = ref(false);
 
     async function createPlainAccount() {
       loading.value = true;
-      await root.$store.dispatch('accounts/hdWallet/create');
+      await store.dispatch('accounts/hdWallet/create');
       loading.value = false;
       props.resolve();
     }
 
     async function createMultisigAccount() {
-      await root.$store.dispatch('modals/open', {
+      await store.dispatch('modals/open', {
         name: MODAL_MULTISIG_VAULT_CREATE,
       });
       props.resolve();

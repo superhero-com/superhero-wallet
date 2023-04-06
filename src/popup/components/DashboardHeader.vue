@@ -25,7 +25,8 @@
 import {
   computed,
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { useGetter, useState } from '../../composables/vuex';
 import type { IAccount } from '../../types';
 
@@ -41,8 +42,11 @@ export default defineComponent({
     TotalWalletAmount,
     AccountCard,
   },
-  setup(props, { root }) {
-    const { balancesTotal } = useBalances({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+
+    const { balancesTotal } = useBalances({ store });
 
     const activeIdx = useState<number>('accounts', 'activeIdx');
     const accounts = useGetter<IAccount[]>('accounts');
@@ -50,7 +54,7 @@ export default defineComponent({
     const addressList = computed(() => accounts.value.map((acc) => acc.address));
 
     function selectAccount(index: number) {
-      root.$store.commit('accounts/setActiveIdx', +(accounts.value[index].idx || 0));
+      store.commit('accounts/setActiveIdx', +(accounts.value[index].idx || 0));
     }
 
     return {

@@ -64,10 +64,12 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_SYMBOL } from '../utils';
@@ -86,8 +88,12 @@ export default defineComponent({
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
-  setup(props, { root, emit }) {
-    const { aeternityToken } = useBalances({ store: root.$store });
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
+    const { aeternityToken } = useBalances({ store });
     const { formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityToken.value);

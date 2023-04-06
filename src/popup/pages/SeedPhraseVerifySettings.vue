@@ -71,8 +71,11 @@ import {
   ref,
   computed,
   watch,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import { shuffle } from 'lodash-es';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
 import SeedPhraseNotification from '../components/SeedPhraseNotification.vue';
@@ -85,13 +88,19 @@ export default defineComponent({
     FixedScreenFooter,
     BtnMain,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
     const selectedWordIds = ref<number[]>([]);
     const showNotification = ref<boolean>(false);
     const hasError = ref<boolean>(false);
     const examplePhrase = ref([root.$t('pages.seedPhrase.first'), root.$t('pages.seedPhrase.second'), '...']);
 
-    const mnemonic = computed((): string => root.$store.state.mnemonic);
+    const mnemonic = computed((): string => store.state.mnemonic);
     const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
 
     function verifyLastStep() {
@@ -101,12 +110,12 @@ export default defineComponent({
       showNotification.value = true;
       hasError.value = mnemonic.value !== mnemonicSelected;
       if (mnemonic.value === mnemonicSelected) {
-        root.$store.commit('setBackedUpSeed');
+        store.commit('setBackedUpSeed');
       }
 
       setTimeout(() => {
         showNotification.value = false;
-        root.$router.push({ name: 'account' });
+        router.push({ name: 'account' });
       }, 3000);
     }
 

@@ -230,7 +230,9 @@ import {
   defineComponent,
   ref,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
@@ -271,7 +273,7 @@ import Avatar from '../components/Avatar.vue';
 import DialogBox from '../components/DialogBox.vue';
 
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
@@ -299,9 +301,12 @@ export default defineComponent({
     multisigDashboard: { type: Boolean },
     transactionOwner: { type: String, default: '' },
   },
-  setup(props, { root }) {
-    const { getMiddleware } = useMiddleware({ store: root.$store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+
+    const { getMiddleware } = useMiddleware({ store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store });
     const {
       setExternalAddress,
       setTransactionTx,
@@ -312,22 +317,22 @@ export default defineComponent({
       isMultisig,
       outerTxType,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       externalAddress: props.transactionOwner,
     });
 
     const { isLocalAccountAddress } = useAccounts({
-      store: root.$store,
+      store,
     });
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
-    const getTx = computed(() => root.$store.getters.getTx);
-    const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
-    const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
-    const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
-    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+    const getTx = computed(() => store.getters.getTx);
+    const getExplorerPath = computed(() => store.getters.getExplorerPath);
+    const getTxSymbol = computed(() => store.getters.getTxSymbol);
+    const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
+    const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
@@ -378,7 +383,7 @@ export default defineComponent({
         try {
           rawTransaction = await middleware.getTxByHash(props.hash);
         } catch (e) {
-          root.$router.push({ name: ROUTE_NOT_FOUND });
+          router.push({ name: ROUTE_NOT_FOUND });
         }
 
         if (rawTransaction?.tx) {
@@ -392,7 +397,7 @@ export default defineComponent({
           } else {
             transaction.value = { ...rawTransaction, transactionOwner: props.transactionOwner };
           }
-          root.$store.commit('setTransactionByHash', transaction.value);
+          store.commit('setTransactionByHash', transaction.value);
         }
       } else {
         transaction.value = rawTransaction;

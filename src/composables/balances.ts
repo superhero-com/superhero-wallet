@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import BigNumber from 'bignumber.js';
 import type {
   Balance,

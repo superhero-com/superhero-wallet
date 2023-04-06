@@ -159,11 +159,14 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   MODAL_READ_QR_CODE,
   MODAL_DEFAULT,
@@ -222,12 +225,17 @@ export default defineComponent({
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function, required: true },
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
+    const { accountsSelectOptions } = useAccounts({ store });
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const {
       multisigAccount,
@@ -239,7 +247,7 @@ export default defineComponent({
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
 
     const currentStep = ref<Step>(STEPS.form);
 
@@ -290,7 +298,7 @@ export default defineComponent({
      * @param {number} signerIndex - The index of the signer to update the address of
      */
     async function openScanQrModal(signerIndex: number) {
-      const scanResult = await root.$store.dispatch('modals/open', {
+      const scanResult = await store.dispatch('modals/open', {
         name: MODAL_READ_QR_CODE,
         title: root.$t('pages.send.scanAddress'),
         icon: 'critical',
@@ -302,7 +310,7 @@ export default defineComponent({
 
       // Check if the address is valid and it's not a name
       if (!(valid && !isName)) {
-        root.$store.dispatch('modals/open', {
+        store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           title: root.$t('modals.invalid-qr-code.msg'),
           icon: 'critical',
@@ -312,7 +320,7 @@ export default defineComponent({
 
       // Check if signer address already added
       if (signers.value.find((signer) => signer.address === scanResult)) {
-        root.$store.dispatch('modals/open', {
+        store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           title: root.$t('modals.createMultisigAccount.errorDuplicatingSigner'),
           icon: 'critical',
@@ -350,7 +358,7 @@ export default defineComponent({
         );
       } catch (error) {
         handleUnknownError(error);
-        await root.$store.dispatch('modals/open', {
+        await store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
           title: root.$t('multisig.multisigVaultCreationFailed'),
           icon: 'critical',
@@ -363,7 +371,7 @@ export default defineComponent({
       if (multisigAccount.value) {
         await props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
-        root.$router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
+        router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
       }
     }
 

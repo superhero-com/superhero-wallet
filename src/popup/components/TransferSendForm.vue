@@ -178,8 +178,11 @@ import {
   onMounted,
   PropType,
   nextTick,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import type {
   IAccount,
   IFormSelectOption,
@@ -251,16 +254,21 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, aeternityToken } = useBalances({ store: root.$store });
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { balance, aeternityToken } = useBalances({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const account = useGetter<IAccount>('account');
     const accounts = useGetter<IAccount[]>('accounts');
@@ -282,7 +290,7 @@ export default defineComponent({
     const amountMessage = computed(() => getMessageByFieldName('amount'));
 
     const urlStatus = computed(
-      () => root.$store.getters['tipUrl/status'](formModel.value.address),
+      () => store.getters['tipUrl/status'](formModel.value.address),
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -337,7 +345,7 @@ export default defineComponent({
 
     function selectAccount(val: string) {
       if (val) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
@@ -387,7 +395,7 @@ export default defineComponent({
     }
 
     function showRecipientHelp() {
-      root.$store.dispatch('modals/open', {
+      store.dispatch('modals/open', {
         name: MODAL_RECIPIENT_INFO,
       });
     }
@@ -397,7 +405,7 @@ export default defineComponent({
     }
 
     async function openScanQrModal() {
-      const scanResult = await root.$store.dispatch('modals/open', {
+      const scanResult = await store.dispatch('modals/open', {
         name: MODAL_READ_QR_CODE,
         title: root.$t('pages.send.scanAddress'),
         icon: 'critical',
@@ -410,7 +418,7 @@ export default defineComponent({
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', {
+          store.dispatch('modals/open', {
             name: MODAL_DEFAULT,
             title: root.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
@@ -422,7 +430,7 @@ export default defineComponent({
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
+          store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
           formModel.value.address = '';
           return;
         }
@@ -454,10 +462,10 @@ export default defineComponent({
     }
 
     function editPayload() {
-      root.$store.dispatch('modals/open', {
+      store.dispatch('modals/open', {
         name: MODAL_PAYLOAD_FORM,
         payload: formModel.value.payload,
-      }).then((text) => {
+      }).then((text: string) => {
         formModel.value.payload = text;
       }).catch(() => null);
     }
@@ -482,16 +490,16 @@ export default defineComponent({
         props.isMultisig
         && !activeMultisigAccount.value?.signers.includes(account.value.address)
       ) {
-        root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+        store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
-      const tipUrlEncoded: any = root.$route.query.url;
+      const tipUrlEncoded: any = route.query.url;
       if (tipUrlEncoded) {
         const tipUrl = decodeURIComponent(tipUrlEncoded);
         const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
         formModel.value.address = tipUrlNormalised.toString();
       }
 
-      const { query } = root.$route;
+      const { query } = route;
 
       queryHandler({
         ...query,

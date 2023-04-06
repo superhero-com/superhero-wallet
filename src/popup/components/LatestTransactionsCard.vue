@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { useConnection, useLatestTransactionList } from '../../composables';
 import TransactionItem from './TransactionItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
@@ -36,12 +37,15 @@ export default defineComponent({
     TransactionItem,
     AnimatedSpinner,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+
     const { isOnline } = useConnection();
     const {
       isTransactionListLoading,
       transactionList,
-    } = useLatestTransactionList({ store: root.$store });
+    } = useLatestTransactionList({ store });
 
     const isLoading = computed(
       () => isTransactionListLoading.value && !transactionList.value.length,

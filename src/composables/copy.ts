@@ -1,4 +1,4 @@
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 import { handleUnknownError } from '../popup/utils/helper';
 
 function fallbackCopyTextToClipboard(text: string) {

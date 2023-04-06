@@ -31,9 +31,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { Location } from 'vue-router';
-import { SwiperSlide } from 'vue-awesome-swiper';
+import { computed, defineComponent, PropType } from 'vue';
+import { RouteLocation } from 'vue-router';
+// import { SwiperSlide } from 'vue-awesome-swiper';
 import { getAddressColor } from '../utils/avatar';
 
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -43,14 +43,14 @@ import ChevronIcon from '../../icons/chevron.svg?vue-component';
 export default defineComponent({
   components: {
     BtnBase,
-    SwiperSlide,
+    // SwiperSlide,
     BtnPlain,
     ChevronIcon,
   },
   props: {
     idx: { type: Number, default: -1 },
     address: { type: String, default: '' },
-    to: { type: Object as PropType<Location>, default: null },
+    to: { type: Object as PropType<RouteLocation>, default: null },
     selected: Boolean,
     hideNext: Boolean,
   },

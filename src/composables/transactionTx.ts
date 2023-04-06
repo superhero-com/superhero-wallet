@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import type {
   IAccount,
   IAccountLabeled,
@@ -130,7 +130,7 @@ export function useTransactionTx({
       case TRANSACTION_OWNERSHIP_STATUS.current:
         return {
           ...account.value,
-          label: i18n.t('transaction.overview.accountAddress'),
+          label: i18n.global.t('transaction.overview.accountAddress'),
           url: getExplorerPath.value(account.value.address),
         };
       case TRANSACTION_OWNERSHIP_STATUS.subAccount: {

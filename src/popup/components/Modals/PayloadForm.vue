@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from '@vue/composition-api';
+import { ref, defineComponent } from 'vue';
 import Modal from '../Modal.vue';
 import FormTextarea from '../form/FormTextarea.vue';
 import BtnMain from '../buttons/BtnMain.vue';
