@@ -107,14 +107,20 @@ export default defineComponent({
     );
 
     function back() {
-      if (root.$route.meta?.backRoute) {
-        // TODO: rewrite back button logic in more unified way
-        return root.$router.push(root.$route.meta?.backRoute);
+      const { fullPath, meta } = root.$route;
+      const { directBackRoute, backRoute } = meta || {};
+
+      if (directBackRoute) {
+        return root.$router.go(-1);
       }
-      let { fullPath } = root.$route;
-      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+      if (backRoute) {
+        // TODO: rewrite back button logic in more unified way
+        return root.$router.push(backRoute);
+      }
+      const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+
       return root.$router.push(
-        fullPath.substr(0, fullPath.lastIndexOf('/')) || { name: currentHomeRouteName.value },
+        path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
 
