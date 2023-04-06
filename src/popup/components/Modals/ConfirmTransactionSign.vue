@@ -105,11 +105,13 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { camelCase } from 'lodash-es';
+import { useStore } from 'vuex';
 import {
   FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
@@ -173,8 +175,12 @@ export default defineComponent({
     // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
+    const { getSdk } = useSdk({ store });
 
     const {
       direction,
@@ -182,7 +188,7 @@ export default defineComponent({
       isDex,
       setTransactionTx,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction,
     });
 

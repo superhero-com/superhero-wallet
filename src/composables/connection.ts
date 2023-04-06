@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 
 let isConnectionStatusWatched = false;
 const isOnline = ref(window.navigator.onLine);

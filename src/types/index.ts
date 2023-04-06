@@ -4,7 +4,7 @@
     no-unused-vars,
 */
 
-import { RawLocation } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
@@ -242,7 +242,7 @@ export interface INotification {
   entityId?: string
   entityType?: string
   id?: number
-  path?: RawLocation
+  path?: RouteLocationRaw
   receiver?: string
   sender?: string
   sourceId?: string

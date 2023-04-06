@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
 import getters from './getters';
 import mutations from './mutations';
@@ -18,8 +17,6 @@ import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
 import { defaultNetwork, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
-
-Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {

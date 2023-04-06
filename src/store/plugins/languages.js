@@ -1,16 +1,16 @@
-import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import { createI18n } from 'vue-i18n';
 import en from '../../popup/locales/en.json';
-
-Vue.use(VueI18n);
 
 const fallbackLocale = 'en';
 
-export const i18n = new VueI18n({
+export const i18n = createI18n({
+  allowComposition: true,
   fallbackLocale,
   locale: fallbackLocale,
   messages: { en },
 });
+
+i18n.install();
 
 const languages = {
   en: {

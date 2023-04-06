@@ -45,11 +45,13 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   onUnmounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import type {
   INetwork,
   ITokenList,
@@ -92,14 +94,17 @@ export default defineComponent({
     showSearch: Boolean,
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const loading = ref(false);
     const isDestroyed = ref(false);
 
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
-
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { activeAccount } = useAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const {
       searchPhrase,
@@ -144,7 +149,7 @@ export default defineComponent({
           })
           .filter((tr) => {
             const { direction, isDex } = useTransactionTx({
-              store: root.$store,
+              store,
               tx: tr.tx,
               externalAddress: tr.transactionOwner,
             });
@@ -195,7 +200,7 @@ export default defineComponent({
       if (loading.value) return;
       loading.value = true;
       try {
-        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
+        await store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
       } finally {
         loading.value = false;
       }
@@ -204,7 +209,7 @@ export default defineComponent({
 
     async function getLatest() {
       try {
-        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
+        await store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
       } finally {
         loading.value = false;
       }

@@ -86,7 +86,8 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import type {
   IAsset,
   IToken,
@@ -130,9 +131,11 @@ export default defineComponent({
     tokenContractId: { type: [String, Number], default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+  setup(props) {
+    const store = useStore();
+
+    const { activeAccount } = useAccounts({ store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { copied, copy } = useCopy();
 
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
@@ -143,7 +146,7 @@ export default defineComponent({
       : activeAccount.value.address);
 
     const availableTokens = computed<ITokenList>(
-      () => root.$store.state.fungibleTokens.availableTokens,
+      () => store.state.fungibleTokens.availableTokens,
     );
 
     function getTokenInfoQuery() {
@@ -176,9 +179,10 @@ export default defineComponent({
       const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
-        ? i18n.t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : i18n.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
-      await root.$store.dispatch('share', { text });
+        // @ts-ignore
+        ? i18n.global.t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : i18n.global.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+      await store.dispatch('share', { text });
     }
 
     function handleAssetChange(asset: IAsset | IToken) {

@@ -29,7 +29,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, PropType,
+} from 'vue';
 import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
 import type { IFormSelectOption } from '../../../types';
 import { useModals } from '../../../composables';

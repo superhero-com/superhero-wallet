@@ -81,8 +81,9 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { MULTISIG_CREATION_PHASES } from '../utils';
 import type { IMultisigAccount, IMultisigCreationPhase } from '../../types';
@@ -114,7 +115,9 @@ export default defineComponent({
     isAccessible: Boolean,
     isCreated: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
     const localPhases: PhaseLabel[] = [
       {
         key: MULTISIG_CREATION_PHASES.prepared,

@@ -21,7 +21,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount } from '@vue/composition-api';
+import { computed, defineComponent, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 import type { IName } from '../../../types';
 import { useState } from '../../../composables/vuex';
 import { useAccounts } from '../../../composables';
@@ -35,8 +36,9 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { activeAccount } = useAccounts({ store });
     const areNamesFetching = useState('names', 'areNamesFetching');
     const namesOwned = useState<IName[]>('names', 'owned');
 
@@ -44,7 +46,7 @@ export default defineComponent({
       () => namesOwned.value.filter(({ owner }) => owner === activeAccount.value.address),
     );
 
-    const id = setInterval(() => root.$store.dispatch('names/fetchOwned'), 10000);
+    const id = setInterval(() => store.dispatch('names/fetchOwned'), 10000);
 
     onBeforeUnmount(() => {
       clearInterval(id);

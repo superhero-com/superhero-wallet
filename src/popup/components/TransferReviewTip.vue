@@ -73,6 +73,8 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
+
 import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { useAccounts } from '../../composables';
 import ModalHeader from './ModalHeader.vue';
@@ -98,8 +100,9 @@ export default {
   props: {
     transferData: { type: Object, required: true },
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { activeAccount } = useAccounts({ store });
 
     return {
       activeAccount,

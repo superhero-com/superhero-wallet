@@ -176,8 +176,11 @@ import {
   onMounted,
   PropType,
   nextTick,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import type {
   IFormSelectOption,
   IInputMessage,
@@ -249,7 +252,12 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
@@ -257,10 +265,10 @@ export default defineComponent({
     const error = ref<boolean>(false);
 
     const { openModal, openDefaultModal } = useModals();
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, aeternityToken } = useBalances({ store: root.$store });
-    const { accounts, activeAccount } = useAccounts({ store: root.$store });
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { balance, aeternityToken } = useBalances({ store });
+    const { accounts, activeAccount } = useAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
@@ -280,7 +288,7 @@ export default defineComponent({
     const amountMessage = computed(() => getMessageByFieldName('amount'));
 
     const urlStatus = computed(
-      () => root.$store.getters['tipUrl/status'](formModel.value.address),
+      () => store.getters['tipUrl/status'](formModel.value.address),
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -335,7 +343,7 @@ export default defineComponent({
 
     function selectAccount(val: string) {
       if (val) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
@@ -362,7 +370,6 @@ export default defineComponent({
         || aeternityToken.value;
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
-      if (query.payload) formModel.value.payload = query.payload;
     }
 
     function setMaxValue() {
@@ -478,10 +485,10 @@ export default defineComponent({
         props.isMultisig
         && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
       ) {
-        root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+        store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
 
-      const { query } = root.$route;
+      const { query } = route;
 
       queryHandler({
         ...query,

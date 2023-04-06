@@ -1,4 +1,4 @@
-import icon from '../icons/twitter-icon-tip.svg';
+import icon from '../icons/twitter-icon-tip.svg?vue-component';
 
 window.browser = require('webextension-polyfill');
 

@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import type { CurrencyCode, IAsset, ICurrency } from '../types';
 import {
   CURRENCIES,

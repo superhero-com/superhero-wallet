@@ -1,4 +1,5 @@
 import { merge } from 'lodash-es';
+import { h } from 'vue';
 import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
@@ -218,7 +219,7 @@ export const routes: WalletAppRouteConfig[] = [
         name: ROUTE_MULTISIG_TX_DETAILS,
         component: {
           functional: true,
-          render: (h, context) => h(
+          render: (context: any) => h(
             TransactionDetails,
             merge({}, context, { props: { multisigDashboard: true } }),
           ),
@@ -275,8 +276,8 @@ export const routes: WalletAppRouteConfig[] = [
     ],
   },
   {
-    path: '/transfer*',
-    redirect: '/account*',
+    path: '/transfer/:t(.*)',
+    redirect: '/account/:a(.*)',
   },
   {
     name: 'popup-sign-tx',
@@ -486,8 +487,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/tips*',
-    redirect: '/account*',
+    path: '/tips/:tip(.*)',
+    redirect: '/account/:account(.*)',
   },
   {
     path: '/retip',
@@ -691,7 +692,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '*',
+    path: '/:pathMatch(.*)',
     component: NotFound,
     meta: {
       ifNotAuth: true,

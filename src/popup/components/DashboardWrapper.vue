@@ -34,7 +34,8 @@ import {
   computed,
   defineComponent,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useRoute } from 'vue-router';
 import { MODAL_TRANSFER_SEND } from '../utils';
 import { useState } from '../../composables/vuex';
 import { useModals } from '../../composables';
@@ -48,10 +49,13 @@ export default defineComponent({
   components: {
     DashboardCard,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
     const { openModal } = useModals();
+    const route = useRoute();
+
     const backedUpSeed = useState('backedUpSeed');
-    const query = computed(() => root.$route.query);
+    const query = computed(() => route.query);
 
     watch(query, (value) => {
       if (!isEmpty(value)) {

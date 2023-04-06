@@ -37,8 +37,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
+import { useStore } from 'vuex';
 import { DASHBOARD_CARD_ID } from '../utils';
 import { useAccounts } from '../../composables';
 
@@ -67,8 +68,9 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup(props, { root }) {
-    const { activeAccountSimplexLink } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const { activeAccountSimplexLink } = useAccounts({ store });
 
     return {
       DASHBOARD_CARD_ID,

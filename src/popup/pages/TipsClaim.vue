@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters, mapState, useStore } from 'vuex';
 import {
   BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
@@ -68,8 +68,9 @@ export default {
     BtnHelp,
     AccountInfo,
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { activeAccount } = useAccounts({ store });
 
     return {
       activeAccount,
@@ -100,7 +101,7 @@ export default {
   methods: {
     async claimTips() {
       const { openModal, openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store: this.$store });
+      const { activeAccount } = useAccounts({ store });
 
       const url = this.normalizedUrl;
       this.loading = true;
@@ -117,9 +118,9 @@ export default {
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await this.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
-        await this.$store.dispatch('cacheInvalidateOracle');
-        await this.$store.dispatch('cacheInvalidateTips');
+        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await store.dispatch('cacheInvalidateOracle');
+        await store.dispatch('cacheInvalidateTips');
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
 

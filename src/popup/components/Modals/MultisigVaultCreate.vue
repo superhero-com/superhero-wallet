@@ -160,11 +160,14 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -223,13 +226,18 @@ export default defineComponent({
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function, required: true },
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
+    const { accountsSelectOptions } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+    } = useMultisigAccounts({ store, pollOnce: true });
 
     const {
       multisigAccount,
@@ -241,7 +249,7 @@ export default defineComponent({
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
 
     const currentStep = ref<Step>(STEPS.form);
 
@@ -363,7 +371,7 @@ export default defineComponent({
       if (multisigAccount.value) {
         await props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
-        root.$router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
+        router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
       }
     }
 

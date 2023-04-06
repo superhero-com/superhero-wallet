@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { StatusIconType } from '../../types';
 import TimesCircle from '../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../icons/question-circle.svg?vue-component';

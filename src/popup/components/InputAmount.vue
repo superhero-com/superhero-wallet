@@ -32,12 +32,14 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
 import { AETERNITY_SYMBOL, calculateFee } from '../utils';
 import { useBalances, useCurrencies, useSdk } from '../../composables';
 import InputField from './InputField.vue';
@@ -50,9 +52,13 @@ export default defineComponent({
     value: { type: [String, Number], default: '' },
     noToken: Boolean,
   },
-  setup(props, { emit, root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
+    const { getSdk } = useSdk({ store });
+    const { balance } = useBalances({ store });
     const { getFormattedFiat } = useCurrencies();
 
     const fee = ref(new BigNumber(0));

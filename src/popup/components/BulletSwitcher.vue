@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 // Physical size of the bullet area in pixels

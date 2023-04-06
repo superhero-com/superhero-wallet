@@ -1,4 +1,4 @@
-import { ref } from '@vue/composition-api';
+import { ref } from 'vue';
 import { ROUTE_ACCOUNT } from '../popup/router/routeNames';
 import type { IDefaultComposableOptions } from '../types';
 

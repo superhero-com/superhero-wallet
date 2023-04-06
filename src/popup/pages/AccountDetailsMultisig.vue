@@ -29,7 +29,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { useMultisigAccounts } from '../../composables';
 import { buildSimplexLink } from '../utils';
 
@@ -53,8 +54,10 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props, { root }) {
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const simplexLink = computed(
       () => (activeMultisigAccount.value)

@@ -52,7 +52,7 @@
 import {
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import type {
   IAccountOverView,
 } from '../../types';

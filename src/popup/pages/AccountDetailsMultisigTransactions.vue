@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
 import TransactionList from '../components/TransactionList.vue';

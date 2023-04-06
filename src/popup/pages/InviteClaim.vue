@@ -3,8 +3,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from '@vue/composition-api';
+import { defineComponent, getCurrentInstance, onMounted } from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
 import { useModals, useSdk } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
@@ -12,8 +13,11 @@ export default defineComponent({
   props: {
     secretKey: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
 
     onMounted(async () => {

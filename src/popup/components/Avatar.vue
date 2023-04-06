@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import { computed, defineComponent, ref } from 'vue';
 import type { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
 import { AVATAR_URL, isContract } from '../utils';

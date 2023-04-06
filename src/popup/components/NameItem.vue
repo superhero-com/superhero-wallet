@@ -139,9 +139,11 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import {
   MODAL_CONFIRM,
   blocksToRelativeTime,
@@ -181,10 +183,13 @@ export default defineComponent({
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+    const { activeAccount } = useAccounts({ store });
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -192,7 +197,7 @@ export default defineComponent({
     const error = ref(false);
     const pointerInput = ref();
 
-    const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
+    const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
     const isDefault = computed(() => activeAccount.value.name === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
@@ -221,7 +226,7 @@ export default defineComponent({
     }
 
     async function setDefault() {
-      await root.$store.dispatch('names/setDefault', {
+      await store.dispatch('names/setDefault', {
         address: activeAccount.value.address,
         name: props.name,
       });
@@ -235,7 +240,7 @@ export default defineComponent({
           msg: root.$t('modals.autoextend-help.msg'),
         });
       }
-      root.$store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+      store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
     }
 
     async function setPointer() {
@@ -243,7 +248,7 @@ export default defineComponent({
         error.value = true;
         return;
       }
-      root.$store.dispatch('names/updatePointer', {
+      store.dispatch('names/updatePointer', {
         name: props.name,
         address: newPointer.value,
         type: 'update',

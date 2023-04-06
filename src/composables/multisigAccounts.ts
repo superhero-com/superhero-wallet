@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import { uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError } from '@aeternity/aepp-sdk';

@@ -40,7 +40,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts, useBalances, useConnection } from '../../composables';
 import { DEX_URL } from '../utils';
 
@@ -65,10 +66,12 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
     const { isOnline } = useConnection();
-    const { activeAccount, activeAccountSimplexLink } = useAccounts({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
+    const { activeAccount, activeAccountSimplexLink } = useAccounts({ store });
+    const { balance } = useBalances({ store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 

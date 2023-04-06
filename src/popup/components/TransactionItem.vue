@@ -54,8 +54,9 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import dayjs from 'dayjs';
+import { useStore } from 'vuex';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -100,7 +101,8 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
@@ -120,13 +122,13 @@ export default defineComponent({
       isAllowance,
       isErrorTransaction,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
-      store: root.$store,
+      store,
       direction: direction.value,
       isAllowance: isAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx

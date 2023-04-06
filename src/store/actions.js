@@ -25,8 +25,8 @@ export default {
     if (!getters.tippingSupported) {
       const { openDefaultModal } = useModals();
       await openDefaultModal({
-        title: i18n.t('modals.tip-mainnet-warning.title'),
-        msg: i18n.t('modals.tip-mainnet-warning.msg'),
+        title: i18n.global.t('modals.tip-mainnet-warning.title'),
+        msg: i18n.global.t('modals.tip-mainnet-warning.msg'),
       });
     }
   },

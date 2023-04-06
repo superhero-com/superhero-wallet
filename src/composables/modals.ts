@@ -1,5 +1,4 @@
-import Vue, { ComponentOptions } from 'vue';
-import { computed, ref } from '@vue/composition-api';
+import Vue, { ComponentOptions, computed, ref } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { ResolveRejectCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';

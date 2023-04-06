@@ -44,11 +44,13 @@
 
 <script lang="ts">
 import {
+  Component,
   computed,
   defineComponent,
+  getCurrentInstance,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
 import { IFormModel } from '../../../composables';
@@ -90,8 +92,11 @@ export default defineComponent({
     address: { type: String, default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const currentRenderedComponent = ref<Vue.Component>();
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+
+    const currentRenderedComponent = ref<Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({

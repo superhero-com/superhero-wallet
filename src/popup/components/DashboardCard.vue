@@ -19,8 +19,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
-import type { LocaleMessage } from 'vue-i18n';
+import { defineComponent, PropType } from 'vue';
+import type { VueI18nTranslation } from 'vue-i18n';
 
 import Card from './Card.vue';
 import BtnMain from './buttons/BtnMain.vue';
@@ -28,9 +28,9 @@ import BtnMain from './buttons/BtnMain.vue';
 export default defineComponent({
   components: { BtnMain, Card },
   props: {
-    title: { type: String as PropType<string | LocaleMessage>, required: true },
-    description: { type: String as PropType<string | LocaleMessage>, required: true },
-    btnText: { type: String as PropType<string | LocaleMessage>, required: true },
+    title: { type: String as PropType<string | VueI18nTranslation>, required: true },
+    description: { type: String as PropType<string | VueI18nTranslation>, required: true },
+    btnText: { type: String as PropType<string | VueI18nTranslation>, required: true },
     background: { type: String, default: null },
     variant: { type: String, default: 'secondary' },
     href: { type: String, default: null },

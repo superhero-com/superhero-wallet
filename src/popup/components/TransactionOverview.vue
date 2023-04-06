@@ -14,11 +14,13 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
+import { useStore } from 'vuex';
 import {
   TX_DIRECTION,
   TX_FUNCTIONS,
@@ -48,15 +50,19 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const name = ref('');
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
 
     const getExplorerPath = useGetter('getExplorerPath');
     const getPreferred = useGetter('names/getPreferred');
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { getMiddleware } = useMiddleware({ store: root.$store });
+    const { getSdk } = useSdk({ store });
+    const { getMiddleware } = useMiddleware({ store });
 
     const {
       isDex,
@@ -65,7 +71,7 @@ export default defineComponent({
       getOwnershipAccount,
       innerTx,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction.tx,
       externalAddress: props.transaction?.transactionOwner,
     });

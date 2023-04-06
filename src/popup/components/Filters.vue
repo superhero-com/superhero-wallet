@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { defineComponent, PropType, ref } from 'vue';
 import { useViewport } from '../../composables/viewport';
 import FilterArrowIcon from '../../icons/filter-arrow.svg?vue-component';
 import SortIcon from '../../icons/sort.svg?vue-component';

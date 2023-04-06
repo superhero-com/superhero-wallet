@@ -1,5 +1,6 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import {
+  createRouter, RouteRecordRaw, createWebHashHistory, createWebHistory,
+} from 'vue-router';
 import { Dictionary } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -26,12 +27,13 @@ import {
 } from '../../lib/environment';
 import { useAccounts } from '../../composables';
 
-Vue.use(VueRouter);
+// const app = getCurrentInstance();
+// if (app) app.appContext.app.use(VueRouter);
 
-const router = new VueRouter({
-  routes,
-  mode: IS_WEB ? 'history' : 'hash',
-  scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
+const router = createRouter({
+  routes: routes as RouteRecordRaw[],
+  history: IS_WEB ? createWebHistory() : createWebHashHistory(),
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
 const lastRouteKey = 'last-path';
@@ -75,6 +77,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // @ts-ignore
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 

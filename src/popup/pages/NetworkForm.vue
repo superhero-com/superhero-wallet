@@ -49,8 +49,11 @@
 <script lang="ts">
 import {
   computed, defineComponent, onMounted, ref,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import type { TranslateResult } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { defaultNetwork } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
@@ -81,7 +84,12 @@ export default defineComponent({
     BtnMain,
     InputField,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
     const networks = useGetter('networks');
     const selectNetwork = useDispatch('selectNetwork');
 
@@ -133,10 +141,10 @@ export default defineComponent({
       || !!hasErrors.value,
     );
 
-    const isEdit = computed(() => root.$route.name === ROUTE_NETWORK_EDIT);
+    const isEdit = computed(() => route.name === ROUTE_NETWORK_EDIT);
 
     function goBack() {
-      root.$router.push({ name: ROUTE_NETWORK_SETTINGS });
+      router.push({ name: ROUTE_NETWORK_SETTINGS });
     }
 
     function validatorRules(key: keyof INetworkBase) {
@@ -154,7 +162,7 @@ export default defineComponent({
         return;
       }
 
-      root.$store.commit('setUserNetwork', {
+      store.commit('setUserNetwork', {
         ...newNetwork.value,
         index: newNetwork.value.index,
       });
@@ -163,7 +171,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      const { name } = root.$route.params;
+      const { name } = route.params;
       if (name) {
         newNetwork.value = { ...networks.value[name] };
       }

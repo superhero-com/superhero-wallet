@@ -1,8 +1,7 @@
-import Vue from 'vue';
-import VueCompositionApi, {
+import Vue, {
   watch,
   WatchSource,
-} from '@vue/composition-api';
+} from 'vue';
 import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer, times } from 'lodash-es';
@@ -61,13 +60,14 @@ import type {
 import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
 
-Vue.use(VueCompositionApi);
-
 /**
  * Replacement for `Array.includes` which has some TypeScript issues.
  * @link https://github.com/microsoft/TypeScript/issues/26255
  */
-export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
+export function includes<T, U extends T>(
+  arr: readonly U[],
+  elem: T,
+): elem is U {
   return arr.includes(elem as any);
 }
 
@@ -76,7 +76,9 @@ export function isNumbersEqual(a: number, b: number) {
 }
 
 export function getLocalStorageItem<T = object>(keys: string[]): T | null {
-  const result = window.localStorage.getItem([LOCAL_STORAGE_PREFIX, ...keys].join('_'));
+  const result = window.localStorage.getItem(
+    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+  );
   return result ? JSON.parse(result) : null;
 }
 
@@ -87,7 +89,10 @@ export function setLocalStorageItem(keys: string[], value: any): void {
   );
 }
 
-export function convertToken(balance: number | string, precision: number): BigNumberPublic {
+export function convertToken(
+  balance: number | string,
+  precision: number,
+): BigNumberPublic {
   return new BigNumber(balance).shiftedBy(precision);
 }
 
@@ -111,12 +116,11 @@ export function isAccountNotFoundError(error: any) {
 
 // TODO: Use the current language from i18n module
 export function formatDate(time: number) {
-  return new Date(+time)
-    .toLocaleDateString(navigator.language, {
-      year: '2-digit',
-      month: '2-digit',
-      day: '2-digit',
-    });
+  return new Date(+time).toLocaleDateString(navigator.language, {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+  });
 }
 
 export function formatTime(time: number) {
@@ -141,7 +145,9 @@ export function toURL(url: string): URL {
 export function truncateAddress(address: string): [string, string] {
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
-  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g) as string[];
+  const secondPart = address
+    .slice(addressLength - 3, addressLength)
+    .match(/.{3}/g) as string[];
   return [
     firstPart?.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
     secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
@@ -182,7 +188,10 @@ export function validateHash(fullHash?: string) {
   }
 
   return {
-    valid, isName, prefix, hash,
+    valid,
+    isName,
+    prefix,
+    hash,
   };
 }
 
@@ -201,12 +210,12 @@ export function getMdwEndpointPrefixForHash(fullHash: string) {
 
 export function isContract(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return (valid && prefix === HASH_PREFIX_CONTRACT);
+  return valid && prefix === HASH_PREFIX_CONTRACT;
 }
 
 export function isAensName(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return (valid && prefix === HASH_PREFIX_NAME);
+  return valid && prefix === HASH_PREFIX_NAME;
 }
 
 export function checkAddress(value: string) {
@@ -238,15 +247,15 @@ export function secondsToRelativeTime(seconds: number) {
   const secondsPerDay = secondsPerHour * 24;
 
   if (seconds < secondsPerMinute) {
-    return i18n.tc('common.seconds', Math.round(seconds));
+    return i18n.global.tc('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.tc('common.minutes', Math.round(seconds / secondsPerMinute));
+    return i18n.global.tc('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.tc('common.hours', Math.round(seconds / secondsPerHour));
+    return i18n.global.tc('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.tc('common.days', Math.round(seconds / secondsPerDay));
+  return i18n.global.tc('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {
@@ -262,7 +271,9 @@ export function buildSimplexLink(address: string) {
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
  */
-export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>> {
+export function watchUntilTruthy<T>(
+  getter: WatchSource<T>,
+): Promise<NonNullable<T>> {
   return new Promise((resolve) => {
     const unwatch = watch(
       getter,
@@ -278,44 +289,54 @@ export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable
 }
 
 export function splitAddress(address: string | null): string {
-  return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+  return address
+    ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`)
+    : '';
 }
 
 export function relativeTimeTo(date: string): string {
   return dayjs().to(dayjs(date));
 }
 
-export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): BigNumber {
+export function calculateFee(
+  type: typeof SCHEMA.TX_TYPE,
+  params: object = {},
+): BigNumber {
   const minFee = TxBuilder.calculateMinFee(type, {
     params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
+      ...(type === 'spendTx'
+        ? {
+          senderId: STUB_ADDRESS,
+          recipientId: STUB_ADDRESS,
+        }
+        : {}),
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
+      ctVersion: {
+        abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+        vmVersion: SCHEMA.VM_VERSIONS.SOPHIA,
+      },
       abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
       callData: STUB_CALLDATA,
       gas: 0,
       ...params,
     },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
+    ...(type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {}),
   });
   return new BigNumber(minFee).shiftedBy(-MAGNITUDE);
 }
 
-export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
-  SCHEMA.TX_TYPE.nameClaim, {
-    accountId: STUB_ADDRESS,
-    name,
-    nameSalt: Crypto.salt(),
-    nameFee: TxBuilderHelper.getMinimumNameFee(name),
-    nonce: STUB_NONCE,
-    ttl: SCHEMA.NAME_TTL,
-  },
-);
+export const calculateNameClaimFee = (
+  name: string,
+): BigNumber => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+  accountId: STUB_ADDRESS,
+  name,
+  nameSalt: Crypto.salt(),
+  nameFee: TxBuilderHelper.getMinimumNameFee(name),
+  nonce: STUB_NONCE,
+  ttl: SCHEMA.NAME_TTL,
+});
 
 export async function fetchJson<T = any>(
   url: string,
@@ -347,9 +368,9 @@ export async function fetchAllPages<T = any>(
 
   while (nextPageUrl !== null) {
     // eslint-disable-next-line no-await-in-loop
-    const { data, next } = await (nextPageUrl
+    const { data, next } = (await (nextPageUrl
       ? getNextPage(nextPageUrl)
-      : getFunction()) as IPageableResponse<T>;
+      : getFunction())) as IPageableResponse<T>;
 
     if (data?.length) {
       result.push(...data);
@@ -376,26 +397,27 @@ export async function fetchRespondChallenge(
 }
 
 export function getPayload(transaction: ITransaction) {
-  return (transaction.tx?.payload)
+  return transaction.tx?.payload
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;
 }
 
-export function compareCaseInsensitive(
-  str1?: string,
-  str2?: string,
-) {
+export function compareCaseInsensitive(str1?: string, str2?: string) {
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
 }
 
-export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
-  amount?: string | number
-  to?: string
-  token?: string
-  url?: string
-  note?: string
+export function categorizeContractCallTxObject(
+  transaction: ITransaction | IPendingTransaction,
+): {
+  amount?: string | number;
+  to?: string;
+  token?: string;
+  url?: string;
+  note?: string;
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
+  if (
+    !compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)
+  ) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
@@ -440,19 +462,19 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  * Eg.: `somehuman.chain`, `Account 2`
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return acc?.name || `${i18n.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
+  return (
+    acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
+  );
 }
 
 export function defaultTransactionSortingCallback(
   a: ITransaction,
   b: ITransaction,
 ) {
-  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  const [aMicroTime, bMicroTime] = [a, b].map((tr) => new Date(tr.microTime).getTime());
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
   const compareMicroTime = () => {
-    const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
-      (time) => Number.isNaN(time),
-    );
+    const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex((time) => Number.isNaN(time));
     if (withoutTimeIndex === 0) {
       return -1;
     }
@@ -472,8 +494,10 @@ export function defaultTransactionSortingCallback(
 }
 
 export function shrinkString(text: string, maxLength: number) {
-  return (text?.length)
-    ? `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`
+  return text?.length
+    ? `${String(text).substring(0, maxLength)}${
+      text.length > maxLength ? '...' : ''
+    }`
     : '';
 }
 
@@ -483,10 +507,10 @@ export function amountRounded(rawAmount: number | BigNumberPublic): string {
     amount = new BigNumber(rawAmount);
   }
 
-  if (amount < 0.01 && amount.toString().length < 9 + 2) {
+  if (new BigNumber(amount).lt(0.01) && amount.toString().length < 9 + 2) {
     return amount.toFixed();
   }
-  return amount.toFixed((amount < 0.01) ? 9 : 2);
+  return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
 }
 
 export function getTxType(tx: ITx): TxType {
@@ -503,10 +527,9 @@ export function isTransactionAex9(transaction: ITransaction): boolean {
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {
-  return [
-    TX_TYPE_MDW.GAMetaTx,
-    TX_TYPE_MDW.PayingForTx,
-  ].includes(getTxType(tx));
+  return [TX_TYPE_MDW.GAMetaTx, TX_TYPE_MDW.PayingForTx].includes(
+    getTxType(tx),
+  );
 }
 
 export function getInnerTransaction(tx: ITx): any {
@@ -517,17 +540,15 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
   return (
     transaction.tipUrl
     || transaction.url
-    || (
-      !transaction.pending
+    || (!transaction.pending
       && !transaction.claim
       && transaction.tx.log?.[0]
       && transaction.tx?.function
-      && includes([
-        TX_FUNCTIONS.tip,
-        TX_FUNCTIONS.claim,
-      ], transaction.tx.function)
-      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString()
-    )
+      && includes(
+        [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
+        transaction.tx.function,
+      )
+      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );

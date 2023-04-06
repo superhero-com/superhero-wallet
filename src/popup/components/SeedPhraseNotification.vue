@@ -13,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api/dist/vue-composition-api';
+import { defineComponent, computed, getCurrentInstance } from 'vue';
 import CheckCircleIcon from '../../icons/check-circle.svg?vue-component';
 import AlertIcon from '../../icons/alert.svg?vue-component';
 
@@ -25,7 +25,9 @@ export default defineComponent({
   props: {
     hasError: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
     const notificationMessage = computed(() => props.hasError
       ? root.$t('pages.seed-phrase-settings.seed-phrase-incorrect')
       : root.$t('pages.seed-phrase-settings.seed-phrase-correct'));

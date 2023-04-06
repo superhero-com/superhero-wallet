@@ -76,9 +76,12 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import {
   DEX_URL,
   AETERNITY_CONTRACT_ID,
@@ -127,20 +130,26 @@ export default defineComponent({
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
   },
-  setup(props, { root }) {
-    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
-    const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+    const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate || 0);
+    const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { activeAccountSimplexLink } = useAccounts({ store: root.$store });
+    const { getSdk } = useSdk({ store });
+    const { activeAccountSimplexLink } = useAccounts({ store });
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
-      store: root.$store,
+      store,
       isMultisig: isMultisig.value,
     });
 
-    const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
-    const contractId = root.$route.params.id;
+    const isCoin: boolean = !!route.matched.find(
+      ({ name }: { name: any }) => name === ROUTE_COIN,
+    );
+    const contractId = route.params.id as string;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
@@ -166,10 +175,10 @@ export default defineComponent({
     const loading = ref<boolean>(true);
     const tokenPairs = ref({ token0: null, token1: null });
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
-    const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
+    const availableTokens = computed(() => store.state.fungibleTokens.availableTokens);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
-    const routeName = computed(() => root.$route.name);
-    const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
+    const routeName = computed(() => route.name);
+    const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
 
     const tokenData = computed(() => {
       const defaultData = {
@@ -197,7 +206,7 @@ export default defineComponent({
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
         await getSdk();
-        tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
     });
