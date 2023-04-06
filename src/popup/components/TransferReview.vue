@@ -347,7 +347,11 @@ export default defineComponent({
           const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
 
           if (activeMultisigAccount.value.pending) {
-            addTransactionToPendingMultisigAccount(txHash, activeMultisigAccount.value.gaAccountId);
+            addTransactionToPendingMultisigAccount(
+              txHash,
+              activeMultisigAccount.value.gaAccountId,
+              account.value.address,
+            );
           }
 
           await postSpendTx(txToPropose, txHash);
