@@ -65,11 +65,11 @@ export default defineComponent({
   justify-content: space-between;
 
   .details-item {
-    ::v-deep .label {
+    :deep(.label) {
       margin-bottom: 4px;
     }
 
-    ::v-deep .value {
+    :deep(.value) {
       text-align: left;
     }
 
@@ -78,11 +78,11 @@ export default defineComponent({
     }
 
     &.end-height {
-      ::v-deep .value {
+      :deep(.value) {
         color: variables.$color-grey-light;
       }
 
-      ::v-deep .secondary {
+      :deep(.secondary) {
         color: variables.$color-grey-dark;
       }
     }

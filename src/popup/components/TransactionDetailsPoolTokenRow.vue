@@ -84,7 +84,7 @@ export default {
     }
   }
 
-  .details-item.label::v-deep {
+  .details-item.label:deep() {
     margin-bottom: 4px;
   }
 
@@ -94,13 +94,13 @@ export default {
     gap: 8px;
     padding-top: 4px;
 
-    .symbol::v-deep,
-    .address-shortening::v-deep {
+    .symbol:deep(),
+    .address-shortening:deep() {
       font-weight: 500;
     }
   }
 
-  .tokens::v-deep {
+  .tokens:deep() {
     .symbol {
       @extend %face-sans-15-medium;
 

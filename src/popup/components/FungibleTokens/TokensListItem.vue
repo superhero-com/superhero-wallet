@@ -105,7 +105,7 @@ export default defineComponent({
     justify-content: space-between;
   }
 
-  ::v-deep .tokens {
+  :deep(.tokens) {
     padding-bottom: 4px;
 
     img {
@@ -122,7 +122,7 @@ export default defineComponent({
     }
   }
 
-  ::v-deep .token-amount {
+  :deep(.token-amount) {
     @extend %face-sans-15-regular;
 
     margin-top: -5px;

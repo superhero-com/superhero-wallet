@@ -145,7 +145,7 @@ export default {
     .help-button {
       margin-left: 8px;
 
-      ::v-deep .icon {
+      :deep(.icon) {
         width: 32px;
         height: 32px;
       }
