@@ -139,11 +139,11 @@ export default {
 @use '../../../styles/mixins';
 
 .spend-success {
-  ::v-deep .container .body {
+  :deep(.container .body) {
     @include mixins.flex(flex-start, center, column);
   }
 
-  ::v-deep .token-amount {
+  :deep(.token-amount) {
     @extend %face-sans-15-medium;
 
     .symbol {

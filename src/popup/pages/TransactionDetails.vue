@@ -505,7 +505,7 @@ export default defineComponent({
         flex-direction: column-reverse;
       }
 
-      ::v-deep .token-row {
+      :deep(.token-row) {
         margin-bottom: 12px;
         padding-inline: 16px;
 
@@ -600,13 +600,13 @@ export default defineComponent({
     }
   }
 
-  .details-item::v-deep {
+  .details-item:deep() {
     .label {
       white-space: nowrap;
     }
   }
 
-  .reason::v-deep {
+  .reason:deep() {
     .value {
       word-break: break-all;
       color: variables.$color-warning;
