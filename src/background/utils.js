@@ -1,3 +1,4 @@
+import { useAccounts } from '../composables';
 import {
   setContractInstance,
   contractCall,
@@ -28,21 +29,24 @@ export const getTippingContractInstance = async (tx) => {
 };
 
 export const contractCallStatic = async ({ tx, callType }) => {
-  const { account } = store.getters;
-  if (typeof callType !== 'undefined' && callType === 'static' && account) {
-    const contractInstance = await getTippingContractInstance(tx);
-    const call = await contractCall({
-      instance: contractInstance,
-      method: tx.method,
-      params: [...tx.params, tx.options],
-    });
-    if (call) return call;
-    const error = new Error('Contract call failed');
-    error.payload = { tx };
-    throw error;
-  }
-  if (!store.getters.isLoggedIn && typeof callType !== 'undefined' && callType === 'static') {
-    throw new Error('You need to unlock the wallet first');
+  const { isLoggedIn } = useAccounts({ store });
+  if (typeof callType !== 'undefined' && callType === 'static') {
+    if (isLoggedIn.value) {
+      const contractInstance = await getTippingContractInstance(tx);
+      const call = await contractCall({
+        instance: contractInstance,
+        method: tx.method,
+        params: [...tx.params, tx.options],
+      });
+      if (call) {
+        return call;
+      }
+      const error = new Error('Contract call failed');
+      error.payload = { tx };
+      throw error;
+    } else {
+      throw new Error('You need to unlock the wallet first');
+    }
   }
   throw new Error('No data to return');
 };

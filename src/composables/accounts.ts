@@ -7,6 +7,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const accounts = computed((): IAccount[] => store.getters.accounts);
   const account = computed((): IAccount => store.getters.account);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
+  const isLoggedIn = computed(() => Object.keys(account.value).length > 0);
 
   /**
    * Accounts data formatted as the form select options
@@ -31,6 +32,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     account,
     accountsAddressList,
     accountsSelectOptions,
+    isLoggedIn,
     isLocalAccountAddress,
   };
 }

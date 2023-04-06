@@ -24,7 +24,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useModals } from '../../composables';
+import { useAccounts, useModals } from '../../composables';
 
 Vue.use(VueRouter);
 
@@ -36,6 +36,8 @@ const router = new VueRouter({
 
 const lastRouteKey = 'last-path';
 
+const { isLoggedIn } = useAccounts({ store });
+
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
@@ -46,9 +48,7 @@ const unbind = router.beforeEach(async (to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-  const { isLoggedIn } = store.getters;
-
-  if (!isLoggedIn) {
+  if (!isLoggedIn.value) {
     if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
       next();
     } else {

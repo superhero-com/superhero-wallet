@@ -7,6 +7,7 @@ import TipClaimRelay from './tip-claim-relay';
 import Logger from '../lib/logger';
 import { getState } from '../store/plugins/persistState';
 import store from './store';
+import { useAccounts } from '../composables';
 
 Logger.init({ background: true });
 RedirectChainNames.init();
@@ -31,7 +32,8 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
   }
 
   if (method === 'checkHasAccount') {
-    return store.getters.isLoggedIn;
+    const { isLoggedIn } = useAccounts({ store });
+    return isLoggedIn.value;
   }
 
   if (process.env.UNFINISHED_FEATURES && method === 'paste') {

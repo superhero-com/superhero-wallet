@@ -43,7 +43,6 @@ export default {
   account({ accounts: { activeIdx } }, { accounts }) {
     return accounts[activeIdx] || {}; // TODO: Return null
   },
-  isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   networks({ userNetworks }) {
     return [
       NETWORK_MAINNET,

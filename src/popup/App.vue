@@ -69,6 +69,7 @@ import {
   RUNNING_IN_POPUP,
 } from '../lib/environment';
 import {
+  useAccounts,
   useConnection,
   useCurrencies,
   useModals,
@@ -90,13 +91,13 @@ export default defineComponent({
   setup(props, { root }) {
     const { watchConnectionStatus } = useConnection();
     const { modalsOpen } = useModals();
+    const { isLoggedIn } = useAccounts({ store: root.$store });
     const { addWalletNotification } = useNotifications({ store: root.$store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
 
-    const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
