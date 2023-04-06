@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import { Universal, Node } from '@aeternity/aepp-sdk';
 import {
   NETWORK_ID_MAINNET,

@@ -1,4 +1,4 @@
-const path = require('path');
+// const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
@@ -73,6 +73,20 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
+    // configure vue to use the migration build
+    config.resolve.alias.set('vue', '@vue/compat');
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap((options) => ({
+        ...options,
+        compilerOptions: {
+          compatConfig: {
+            MODE: 2,
+          },
+        },
+      }));
+
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
@@ -136,52 +150,52 @@ module.exports = {
       .loader('raw-loader')
       .end();
 
-    config.module.rule('svg')
-      .uses.clear().end()
-      .oneOf('vue-component')
-      .resourceQuery(/vue-component/)
-      .use('babel-loader')
-      .loader('babel-loader')
-      .options({ configFile: false, presets: ['@babel/preset-env'] })
-      .end()
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
-      .options({
-        svgo: {
-          plugins: [{
-            addClassesToSVGElement: {
-              type: 'full',
-              fn(data, options, extra) {
-                const svg = data.content[0];
-                svg.class.add('icon', path.basename(extra.path, '.svg'));
-                return data;
-              },
-            },
-          }],
-        },
-      })
-      .end()
-      .end()
-      .oneOf('skip-optimize')
-      .resourceQuery(/skip-optimize/)
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
-      .options({ svgo: false })
-      .end()
-      .end()
-      .oneOf('default')
-      .use('svg-url-loader')
-      .loader('svg-url-loader')
-      .options({
-        noquotes: true,
-        limit: 4096,
-        name: 'img/[name].[hash:8].[ext]',
-        esModule: false,
-      })
-      .end()
-      .use('svgo-loader')
-      .loader('svgo-loader')
-      .end();
+    // config.module.rule('svg')
+    //   .uses.clear().end()
+    //   .oneOf('vue-component')
+    //   .resourceQuery(/vue-component/)
+    //   .use('babel-loader')
+    //   .loader('babel-loader')
+    //   .options({ configFile: false, presets: ['@babel/preset-env'] })
+    //   .end()
+    //   .use('vue-svg-loader')
+    //   .loader('vue-svg-loader')
+    //   .options({
+    //     svgo: {
+    //       plugins: [{
+    //         addClassesToSVGElement: {
+    //           type: 'full',
+    //           fn(data, options, extra) {
+    //             const svg = data.content[0];
+    //             svg.class.add('icon', path.basename(extra.path, '.svg'));
+    //             return data;
+    //           },
+    //         },
+    //       }],
+    //     },
+    //   })
+    //   .end()
+    //   .end()
+    //   .oneOf('skip-optimize')
+    //   .resourceQuery(/skip-optimize/)
+    //   .use('vue-svg-loader')
+    //   .loader('vue-svg-loader')
+    //   .options({ svgo: false })
+    //   .end()
+    //   .end()
+    //   .oneOf('default')
+    //   .use('svg-url-loader')
+    //   .loader('svg-url-loader')
+    //   .options({
+    //     noquotes: true,
+    //     limit: 4096,
+    //     name: 'img/[name].[hash:8].[ext]',
+    //     esModule: false,
+    //   })
+    //   .end()
+    //   .use('svgo-loader')
+    //   .loader('svgo-loader')
+    //   .end();
     return config;
   },
 

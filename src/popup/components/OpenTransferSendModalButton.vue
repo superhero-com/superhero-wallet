@@ -11,7 +11,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed, getCurrentInstance } from 'vue';
+import { useStore } from 'vuex';
 import { useConnection, useModals, usePendingMultisigTransaction } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { MODAL_TRANSFER_SEND } from '../utils';
@@ -26,10 +27,14 @@ export default defineComponent({
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const isConnected = useGetter('isConnected');
 

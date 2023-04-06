@@ -60,9 +60,12 @@ import {
   onMounted,
   ref,
   computed,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import {
   IToken,
   IPendingTransaction,
@@ -92,18 +95,25 @@ export default defineComponent({
     BtnMain,
     BalanceInfo,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
     const formModel = ref<IFormModel>({
       amount: '',
     });
 
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { activeAccount } = useAccounts({ store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { balance, aeternityCoin } = useBalances({ store });
+    const { max, fee } = useMaxAmount({ formModel, store });
 
-    const tipId = root.$route.query.id;
+    const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
@@ -116,7 +126,7 @@ export default defineComponent({
     const tippingSupported = useGetter('tippingSupported');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
     const tippingContract = computed(
-      () => tipId.includes('_v2') || tipId.includes('_v3')
+      () => tipId && (tipId.includes('_v2') || tipId.includes('_v3'))
         ? tippingV2.value
         : tippingV1.value,
     );
@@ -144,7 +154,7 @@ export default defineComponent({
       try {
         let retipResponse = null;
         if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
-          await root.$store.dispatch(
+          await store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
             [
               formModel.value.selectedAsset?.contractId,
@@ -178,7 +188,7 @@ export default defineComponent({
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
           },
         };
-        root.$store.dispatch('addPendingTransaction', transaction);
+        store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
@@ -199,7 +209,7 @@ export default defineComponent({
       if (!tipId) throw new Error('"id" param is missing');
 
       try {
-        tip.value = await root.$store.dispatch('getCacheTip', tipId);
+        tip.value = await store.dispatch('getCacheTip', tipId);
       } catch (error: any) {
         error.payload = tipId;
         throw error;

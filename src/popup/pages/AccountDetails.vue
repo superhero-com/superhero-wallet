@@ -49,7 +49,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { IS_IOS } from '../../lib/environment';
 import { DEX_URL } from '../utils';
 import {
@@ -82,18 +83,20 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
     const { isOnline } = useConnection();
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
 
     const {
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
-    const { balance } = useBalances({ store: root.$store });
+    const { balance } = useBalances({ store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 

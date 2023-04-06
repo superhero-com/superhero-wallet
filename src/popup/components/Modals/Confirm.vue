@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 import type { ResolveRejectCallback } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
 import Default from './Default.vue';

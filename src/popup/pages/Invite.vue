@@ -48,9 +48,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent, ref } from 'vue';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 
+import { useStore } from 'vuex';
 import { useState } from '../../composables/vuex';
 import { useBalances, useSdk, useMaxAmount } from '../../composables';
 import { TransferFormModel } from '../components/Modals/TransferSend.vue';
@@ -68,15 +69,17 @@ export default defineComponent({
     Invite,
     NewInviteLink,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const store = useStore();
     const loading = ref(false);
     const formModel = ref<TransferFormModel>({
       address: '', amount: '', selectedAsset: undefined, payload: '',
     });
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { getSdk } = useSdk({ store });
+    const { balance } = useBalances({ store });
+    const { max, fee } = useMaxAmount({ formModel, store });
 
     const invites = useState('invites', 'invites');
 
@@ -91,13 +94,13 @@ export default defineComponent({
           denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
         });
       } catch (error) {
-        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
+        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
         loading.value = false;
       }
 
-      root.$store.commit('invites/add', secretKey);
+      store.commit('invites/add', secretKey);
       formModel.value.amount = '';
     }
 

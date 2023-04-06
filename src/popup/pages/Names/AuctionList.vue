@@ -44,9 +44,11 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
@@ -60,7 +62,7 @@ import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 import RegisterName from '../../components/RegisterName.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg';
 
 const SORT_MODE = {
   soonest: 'soonest',
@@ -83,8 +85,13 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props, { root }) {
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const loading = ref(false);
     const activeAuctions = ref<IActiveAuction[]>([]);
@@ -112,7 +119,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      activeAuctions.value = await root.$store.dispatch('names/fetchAuctions');
+      activeAuctions.value = await store.dispatch('names/fetchAuctions');
       loading.value = false;
     });
 

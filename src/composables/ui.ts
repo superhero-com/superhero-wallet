@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, ref } from '@vue/composition-api';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { ROUTE_ACCOUNT } from '../popup/router/routeNames';
 
 const homeRouteName = ref(ROUTE_ACCOUNT);

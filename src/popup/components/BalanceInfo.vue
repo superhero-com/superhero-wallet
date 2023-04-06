@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import { useConnection, useCurrencies } from '../../composables';
 import AeBalance from './AeBalance.vue';
 import MessageOffline from './MessageOffline.vue';

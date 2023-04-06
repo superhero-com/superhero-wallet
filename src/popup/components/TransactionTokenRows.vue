@@ -32,7 +32,8 @@
 <script lang="ts">
 import {
   computed, defineComponent, PropType, ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import {
   amountRounded,
   convertToken,
@@ -57,12 +58,13 @@ export default defineComponent({
     error: Boolean,
     isAllowance: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const localTokens = ref();
 
     if (!props.extTokens && !!props.transaction) {
       const { tokens } = useTransactionTokens({
-        store: root.$store,
+        store,
         transaction: props.transaction,
         direction: props.direction,
         isAllowance: props.isAllowance,

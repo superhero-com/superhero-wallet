@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';

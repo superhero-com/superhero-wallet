@@ -1,4 +1,6 @@
-import Vue from 'vue';
-import VueCompositionApi from '@vue/composition-api';
+// * this file can be deleted
 
-Vue.use(VueCompositionApi);
+// import Vue from 'vue';
+// import VueCompositionApi from '@vue/composition-api';
+
+// Vue.use(VueCompositionApi);

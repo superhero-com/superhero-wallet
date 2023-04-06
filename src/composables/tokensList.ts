@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { computed, Ref } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
 import type {
   IToken,
   ITokenList,

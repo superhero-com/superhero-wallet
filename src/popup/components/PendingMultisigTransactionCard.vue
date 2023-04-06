@@ -13,17 +13,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { usePendingMultisigTransaction } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
 
 export default defineComponent({
-  components: {
-    TransactionListItem,
+  components: { 
+    TransactionListItem
   },
-  setup(props, { root }) {
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     return {
       pendingMultisigTransaction,

@@ -90,7 +90,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import {
+  defineComponent, onMounted, ref,
+} from 'vue';
+import { useStore } from 'vuex';
 import type { IMiddlewareStatus, INetwork } from '../../types';
 import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
 import { useMiddleware } from '../../composables';
@@ -110,8 +113,10 @@ export default defineComponent({
     Github,
     ExternalLink,
   },
-  setup(props, { root }) {
-    const { fetchMiddlewareStatus } = useMiddleware({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+    const { fetchMiddlewareStatus } = useMiddleware({ store });
     const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
     const mdwStatus = ref<IMiddlewareStatus>();
     const activeNetwork = useGetter<INetwork>('activeNetwork');

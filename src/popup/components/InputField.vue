@@ -105,7 +105,7 @@ import {
   getCurrentInstance,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import type { IInputMessage, IInputMessageRaw } from '../../types';
 import { INPUT_MESSAGE_STATUSES } from '../utils';
 import BtnHelp from './buttons/BtnHelp.vue';

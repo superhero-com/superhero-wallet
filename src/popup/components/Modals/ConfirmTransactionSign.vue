@@ -105,11 +105,13 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { camelCase } from 'lodash-es';
+import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
   FUNCTION_TYPE_DEX,
@@ -175,14 +177,18 @@ export default defineComponent({
     resolve: { type: Function, required: true },
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const {
       direction,
       isAllowance,
       isDex,
       setTransactionTx,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction,
     });
 

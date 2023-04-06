@@ -1,43 +1,22 @@
 <template>
-  <ListItemWrapper
-    class="transaction-item"
-    :to="redirectRoute"
-  >
+  <ListItemWrapper class="transaction-item" :to="redirectRoute">
     <div class="body">
-      <TransactionTokenRows
-        :ext-tokens="tokens"
-        :error="isErrorTransaction"
-        icon-size="md"
-      />
+      <TransactionTokenRows :ext-tokens="tokens" :error="isErrorTransaction" icon-size="md" />
       <div class="footer">
-        <div
-          v-if="!!multisigTransaction && !hasConsensus"
-          class="consensus"
-        >
-          <ConsensusApprovedLabel
-            :confirmations-required="multisigTransaction.confirmationsRequired"
+        <div v-if="!!multisigTransaction && !hasConsensus" class="consensus">
+          <ConsensusApprovedLabel :confirmations-required="multisigTransaction.confirmationsRequired"
             :has-pending-transaction="multisigTransaction.hasPendingTransaction"
-            :confirmed-by="multisigTransaction.confirmedBy"
-            :signers="multisigTransaction.signers"
-          />
+            :confirmed-by="multisigTransaction.confirmedBy" :signers="multisigTransaction.signers" />
         </div>
 
-        <TransactionLabel
-          v-else
-          :transaction="currentTransaction"
-          :transaction-date="transactionDate"
-          :show-transaction-owner="showTransactionOwner"
-          dense
-        />
+        <TransactionLabel v-else :transaction="currentTransaction" :transaction-date="transactionDate"
+          :show-transaction-owner="showTransactionOwner" dense />
 
         <template v-if="!multisigTransaction">
           <span v-if="fiatAmount && !showTransactionOwner">
             {{ fiatAmount }}
           </span>
-          <span
-            v-else-if="showTransactionOwner"
-            class="date"
-          >
+          <span v-else-if="showTransactionOwner" class="date">
             {{ transactionDate }}
           </span>
         </template>
@@ -54,9 +33,10 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { Location } from 'vue-router';
 import dayjs from 'dayjs';
+import { useStore } from 'vuex';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -101,7 +81,8 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
@@ -119,13 +100,13 @@ export default defineComponent({
       isAllowance,
       isErrorTransaction,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
-      store: root.$store,
+      store,
       direction: direction.value,
       isAllowance: isAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx

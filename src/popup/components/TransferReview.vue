@@ -123,11 +123,14 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { encode, Encoding } from '@aeternity/aepp-sdk-13';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -177,20 +180,26 @@ export default defineComponent({
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { activeAccount } = useAccounts({ store: root.$store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { activeAccount } = useAccounts({ store });
+
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const loading = ref<boolean>(false);
-    const tippingV1 = computed(() => root.$store.state.tippingV1);
-    const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const { getSdk } = useSdk13({ store: root.$store });
+    const tippingV1 = computed(() => store.state.tippingV1);
+    const tippingV2 = computed(() => store.state.tippingV2);
+    const { getSdk } = useSdk13({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -218,7 +227,7 @@ export default defineComponent({
         let actionResult;
 
         if (props.transferData.invoiceId !== null) {
-          actionResult = await root.$store.dispatch('fungibleTokens/burnTriggerPoS', [
+          actionResult = await store.dispatch('fungibleTokens/burnTriggerPoS', [
             selectedAsset.contractId,
             amount,
             props.transferData.invoiceContract,
@@ -226,7 +235,7 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          actionResult = await root.$store.dispatch('fungibleTokens/transfer', [
+          actionResult = await store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
             recipient,
             amount,
@@ -256,7 +265,7 @@ export default defineComponent({
             },
           };
 
-          root.$store.dispatch('addPendingTransaction', transaction);
+          store.dispatch('addPendingTransaction', transaction);
         } else if (actionResult) {
           const transaction: IPendingTransaction = {
             hash: actionResult.hash,
@@ -270,7 +279,7 @@ export default defineComponent({
             },
           };
 
-          root.$store.dispatch('addPendingTransaction', transaction);
+          store.dispatch('addPendingTransaction', transaction);
         }
         emit('success');
       } catch (error) {
@@ -291,7 +300,7 @@ export default defineComponent({
       try {
         let txResult = null;
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
+          await store.dispatch('fungibleTokens/createOrChangeAllowance', [
             selectedAsset.contractId,
             props.amount,
           ]);
@@ -325,7 +334,7 @@ export default defineComponent({
             selectedTokenContractId: selectedAsset.contractId,
           },
         };
-        root.$store.dispatch('addPendingTransaction', transaction);
+        store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {
@@ -343,7 +352,7 @@ export default defineComponent({
       try {
         const {
           buildSpendTx, proposeTx, postSpendTx,
-        } = useMultisigTransactions({ store: root.$store });
+        } = useMultisigTransactions({ store });
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId,
@@ -364,7 +373,7 @@ export default defineComponent({
 
           await postSpendTx(txToPropose, txHash);
           await updateMultisigAccounts();
-          root.$router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
+          router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
         }
       } catch (error) {
         handleUnknownError(error);

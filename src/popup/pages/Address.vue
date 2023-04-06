@@ -8,7 +8,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { IAppData } from '../../types';
 import { useAccounts, useDeepLinkApi } from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
@@ -17,9 +19,12 @@ import Connect from './Popups/Connect.vue';
 export default defineComponent({
   name: 'Address',
   components: { Connect },
-  setup(props, { root }) {
-    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
+    const { activeAccount } = useAccounts({ store });
 
     const app = computed((): Partial<IAppData> => callbackOrigin.value ? ({
       name: callbackOrigin.value.hostname,
@@ -29,7 +34,7 @@ export default defineComponent({
 
     const onResolve = () => openCallbackOrGoHome(true, {
       address: activeAccount.value.address,
-      networkId: root.$store.getters.activeNetwork.networkId,
+      networkId: store.getters.activeNetwork.networkId,
     });
 
     const onReject = () => openCallbackOrGoHome(false);

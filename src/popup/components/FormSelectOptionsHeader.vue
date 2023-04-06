@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 import type { TranslateResult } from 'vue-i18n';
 import InputSearch from './InputSearch.vue';
 

@@ -37,7 +37,7 @@ import {
   nextTick,
   watch,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
 import InputField from '../InputField.vue';
 
 const SIZES = ['xs', 'sm', 'rg', 'md'];

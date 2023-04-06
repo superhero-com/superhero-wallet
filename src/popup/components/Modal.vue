@@ -78,7 +78,7 @@ import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
 import { IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';

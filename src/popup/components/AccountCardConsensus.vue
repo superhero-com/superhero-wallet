@@ -27,7 +27,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed, defineComponent, getCurrentInstance, PropType,
+} from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts, useConnection } from '../../composables';
 import type { IMultisigAccount } from '../../types';
 
@@ -48,9 +51,13 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+
     const { isOnline } = useConnection();
-    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+    const { isLocalAccountAddress } = useAccounts({ store });
 
     const isSigned = computed(
       () => {

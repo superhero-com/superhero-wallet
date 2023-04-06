@@ -5,7 +5,7 @@ import {
   onMounted,
   Ref,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { Store } from 'vuex';
 import {
   excludeFalsy,

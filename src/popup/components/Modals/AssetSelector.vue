@@ -44,7 +44,8 @@ import {
   nextTick,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import type { IToken } from '../../../types';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
@@ -66,13 +67,14 @@ export default defineComponent({
     selectedToken: { type: Object as PropType<IToken | null>, default: null },
     showTokensWithBalance: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
     const { filteredTokens } = useTokensList({
-      store: root.$store,
+      store,
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });

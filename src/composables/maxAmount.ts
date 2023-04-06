@@ -5,7 +5,7 @@ import {
   onBeforeUnmount,
   watch,
   Ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';

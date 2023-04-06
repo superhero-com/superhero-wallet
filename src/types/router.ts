@@ -1,4 +1,4 @@
-import { RawLocation, RouteConfig } from 'vue-router';
+import { RouteLocationRaw, RouteRecordRaw } from 'vue-router';
 import type { VueAnyComponent } from '.';
 
 export interface WalletRouteMeta {
@@ -7,7 +7,7 @@ export interface WalletRouteMeta {
    * the app header back arrow.
    * TODO: Temporary solution.
    */
-  backRoute?: RawLocation
+  backRoute?: RouteLocationRaw
   /**
    * Decide if the app header should be hidden
    */
@@ -51,7 +51,7 @@ export interface WalletRouteMeta {
   directBackRoute?: boolean
 }
 
-export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {
+export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {
   meta?: WalletRouteMeta
   component?: VueAnyComponent,
   children?: WalletAppRouteConfig[],

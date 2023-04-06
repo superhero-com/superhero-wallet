@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
