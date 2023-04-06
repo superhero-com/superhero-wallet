@@ -197,7 +197,7 @@ export default {
     gap: 4px;
     color: rgba(variables.$color-white, 0.75);
 
-    ::v-deep .token-amount {
+    :deep(.token-amount) {
       .symbol {
         font-weight: 500;
       }

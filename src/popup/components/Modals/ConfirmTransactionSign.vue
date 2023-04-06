@@ -410,7 +410,7 @@ export default defineComponent({
     }
   }
 
-  .pool-token-row::v-deep {
+  .pool-token-row:deep() {
     padding-bottom: 8px;
   }
 }
