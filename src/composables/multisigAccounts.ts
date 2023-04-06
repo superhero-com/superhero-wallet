@@ -15,7 +15,6 @@ import {
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import type {
-  IAccount,
   IDefaultComposableOptions,
   INetwork,
   IMultisigAccount,
@@ -23,6 +22,7 @@ import type {
   IMultisigAccountResponse,
 } from '../types';
 import { useSdk } from './sdk';
+import { useAccounts } from './accounts';
 
 const POLLING_INTERVAL = 7000;
 
@@ -60,8 +60,8 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { getSdk } = useSdk({ store });
+  const { accounts } = useAccounts({ store });
 
-  const accounts = computed<IAccount[]>(() => store.getters.accounts);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const allMultisigAccounts = computed<IMultisigAccount[]>(
     () => [...multisigAccounts.value, ...pendingMultisigAccounts.value],

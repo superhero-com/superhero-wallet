@@ -64,7 +64,6 @@ import {
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
 import {
-  IAccount,
   IToken,
   IPendingTransaction,
   ISdk,
@@ -77,6 +76,7 @@ import {
   IFormModel,
   useBalances,
   useModals,
+  useAccounts,
 } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -98,6 +98,7 @@ export default defineComponent({
     });
 
     const { openDefaultModal } = useModals();
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
@@ -110,7 +111,6 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
@@ -171,7 +171,7 @@ export default defineComponent({
           pending: true,
           tx: {
             amount,
-            callerId: account.value.address,
+            callerId: activeAccount.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',

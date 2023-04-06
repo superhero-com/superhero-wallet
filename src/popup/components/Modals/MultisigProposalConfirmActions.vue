@@ -25,12 +25,12 @@
         class="account-selector"
         persistent-default-text
         unstyled
-        @select="selectAccount($event)"
+        @select="setActiveAccountByAddress($event)"
       />
 
       <div>
         <div class="active-account">
-          <AccountItem :address="account.address" />
+          <AccountItem :address="activeAccount.address" />
         </div>
 
         <div
@@ -72,9 +72,9 @@ import {
   PropType,
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
-import type { IAccount, IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
+import type { IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
-import { FUNCTION_TYPE_MULTISIG } from '../../utils';
+import { FUNCTION_TYPE_MULTISIG, getAccountNameToDisplay } from '../../utils';
 
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -101,8 +101,8 @@ export default defineComponent({
       activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
     const {
-      account,
-      accounts,
+      activeAccount,
+      setActiveAccountByAddress,
     } = useAccounts({ store: root.$store });
     const {
       pendingMultisigTxSigners,
@@ -110,10 +110,6 @@ export default defineComponent({
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction({ store: root.$store });
-
-    function getAccountNameToDisplay(acc: IAccount) {
-      return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
-    }
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => pendingMultisigTxLocalSigners.value
@@ -142,24 +138,24 @@ export default defineComponent({
 
     const actionHasError = computed(() => {
       const confirmActionText = confirmActionContent.value as Record<string, TranslateResult>;
-      if (!pendingMultisigTxSigners.value.includes(account.value.address)) {
+      if (!pendingMultisigTxSigners.value.includes(activeAccount.value.address)) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.revoke
-        && activeMultisigAccount.value?.proposedBy !== account.value.address
+        && activeMultisigAccount.value?.proposedBy !== activeAccount.value.address
       ) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.confirm
-        && pendingMultisigTxConfirmedBy.value.includes(account.value.address)
+        && pendingMultisigTxConfirmedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.refuse
-        && pendingMultisigTxRefusedBy.value.includes(account.value.address)
+        && pendingMultisigTxRefusedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
@@ -170,21 +166,12 @@ export default defineComponent({
       props.reject();
     }
 
-    function selectAccount(accountAddress: string) {
-      if (accountAddress) {
-        root.$store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === accountAddress)?.idx,
-        );
-      }
-    }
-
     return {
       icon,
       closeModal,
       eligibleAccounts,
-      account,
-      selectAccount,
+      activeAccount,
+      setActiveAccountByAddress,
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,

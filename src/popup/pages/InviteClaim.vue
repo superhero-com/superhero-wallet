@@ -6,6 +6,7 @@
 import { defineComponent, onMounted } from '@vue/composition-api';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { useModals, useSdk } from '../../composables';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   props: {
@@ -36,7 +37,7 @@ export default defineComponent({
         }
         throw error;
       } finally {
-        await root.$router.push({ name: 'account' });
+        await root.$router.push({ name: ROUTE_ACCOUNT });
       }
     });
   },
