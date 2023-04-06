@@ -226,6 +226,7 @@ export default defineComponent({
   .main {
     padding-bottom: 0;
     padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
     background-color: var(--screen-bg-color);
 
     @include mixins.desktop {
@@ -237,7 +238,7 @@ export default defineComponent({
     position: fixed;
     z-index: variables.$z-index-header;
     bottom: 0;
-    bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
     left: 0;
     width: 100%;
   }
