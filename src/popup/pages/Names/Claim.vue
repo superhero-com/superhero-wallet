@@ -56,7 +56,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   MAGNITUDE,
@@ -66,7 +65,8 @@ import {
   checkAensName,
   convertToken,
 } from '../../utils';
-import { useModals } from '../../../composables';
+import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
+import { useAccounts, useModals, useSdk } from '../../../composables';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -88,9 +88,6 @@ export default {
     maxNameLength: AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length,
   }),
   computed: {
-    ...mapGetters('sdkPlugin', [
-      'sdk',
-    ]),
     isNameValid() {
       return this.name && checkAensName(`${this.name}${AENS_DOMAIN}`);
     },
@@ -105,9 +102,13 @@ export default {
     async claim() {
       if (!await this.$validator.validateAll()) return;
 
+      const { getSdk } = useSdk({ store: this.$store });
       const { openDefaultModal } = useModals();
+      const { activeAccount } = useAccounts({ store: this.$store });
+
       const name = `${this.name}${AENS_DOMAIN}`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
+
       if (nameEntry) {
         openDefaultModal({
           title: this.$t('modals.name-exist.msg'),
@@ -115,13 +116,15 @@ export default {
       } else {
         this.loading = true;
         let claimTxHash;
+        const sdk = await getSdk();
+
         try {
-          const { salt } = await this.sdk.aensPreclaim(name);
-          claimTxHash = (await this.sdk.aensClaim(name, salt, { waitMined: false })).hash;
+          const { salt } = await sdk.aensPreclaim(name);
+          claimTxHash = (await sdk.aensClaim(name, salt, { waitMined: false })).hash;
           if (this.autoExtend) {
             this.$store.commit('names/setPendingAutoExtendName', name);
           }
-          this.$router.push({ name: 'account-details-names' });
+          this.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
@@ -138,12 +141,12 @@ export default {
 
         try {
           this.$store.dispatch('names/fetchOwned');
-          await this.sdk.poll(claimTxHash);
+          await sdk.poll(claimTxHash);
           const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= name.length;
           if (!isAuction) {
             this.$store.dispatch('names/updatePointer', {
               name,
-              address: this.$store.getters.account.address,
+              address: activeAccount.value.address,
             });
           }
         } catch (e) {

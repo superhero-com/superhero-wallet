@@ -73,6 +73,7 @@ import {
   watch,
 } from '@vue/composition-api';
 import { shuffle } from 'lodash-es';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
 import SeedPhraseNotification from '../components/SeedPhraseNotification.vue';
@@ -106,7 +107,7 @@ export default defineComponent({
 
       setTimeout(() => {
         showNotification.value = false;
-        root.$router.push({ name: 'account' });
+        root.$router.push({ name: ROUTE_ACCOUNT });
       }, 3000);
     }
 

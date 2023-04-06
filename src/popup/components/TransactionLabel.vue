@@ -77,10 +77,9 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
-import { useTransactionTx } from '../../composables';
+import { useAccounts, useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
-  IAccount,
   INetwork,
   ITokenList,
   ITransaction,
@@ -115,6 +114,7 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props, { root }) {
+    const { accounts, activeAccount } = useAccounts({ store: root.$store });
     const {
       outerTxType,
       txType,
@@ -124,11 +124,9 @@ export default defineComponent({
       isErrorTransaction,
     } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
 
-    const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const getTxDirection = useGetter('getTxDirection');
-    const accounts = useGetter('accounts');
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
@@ -192,7 +190,7 @@ export default defineComponent({
           || props.transaction.incomplete)
       ) {
         const isSent = !props.transaction.transactionOwner
-          ? innerTx.value.callerId === account.value.address
+          ? innerTx.value.callerId === activeAccount.value.address
           : props.transaction.transactionOwner === innerTx.value.callerId;
 
         return {
@@ -217,9 +215,7 @@ export default defineComponent({
     });
 
     const ownerName = computed(() => getAccountNameToDisplay(
-      accounts.value.find((acc: IAccount) => (
-        acc.address === props.transaction.transactionOwner
-      )),
+      accounts.value.find((acc) => acc.address === props.transaction.transactionOwner),
     ));
 
     return {

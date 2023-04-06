@@ -2,7 +2,7 @@
   <div class="comment-new">
     <AccountSelector
       v-model="creatorAddress"
-      @select="selectAccount"
+      @select="setActiveAccountByAddress"
     />
     <div class="comment-text">
       {{ text }}
@@ -43,6 +43,7 @@ import {
   useSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -59,9 +60,13 @@ export default defineComponent({
     const { getSdk } = useSdk({ store: root.$store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+    const {
+      activeAccount,
+      accountsSelectOptions,
+      setActiveAccountByAddress,
+    } = useAccounts({ store: root.$store });
 
-    const creatorAddress = ref<string>(account.value.address);
+    const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
@@ -76,7 +81,7 @@ export default defineComponent({
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: 'account' });
+          root.$router.push({ name: ROUTE_ACCOUNT });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -106,15 +111,6 @@ export default defineComponent({
       }
     }
 
-    function selectAccount(val: string) {
-      if (val) {
-        root.$store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === val)?.idx,
-        );
-      }
-    }
-
     // Wait until the `tippingSupported` is established by the SDK
     (async () => {
       loading.value = true;
@@ -132,7 +128,7 @@ export default defineComponent({
       tippingSupported,
       sendComment,
       openCallbackOrGoHome,
-      selectAccount,
+      setActiveAccountByAddress,
     };
   },
 });

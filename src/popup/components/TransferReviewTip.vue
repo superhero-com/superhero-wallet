@@ -20,20 +20,20 @@
 
     <div class="account-info">
       <Avatar
-        :address="account.address"
+        :address="activeAccount.address"
         size="lg"
       />
       <div class="name-address-wrapper">
         <Truncate
-          v-if="account.name"
-          :str="account.name"
+          v-if="activeAccount.name"
+          :str="activeAccount.name"
         />
         <div v-else>
-          {{ $t('pages.account.heading') }} {{ account.idx + 1 }}
+          {{ $t('pages.account.heading') }} {{ activeAccount.idx + 1 }}
         </div>
         <AddressTruncated
           show-explorer-link
-          :address="account.address"
+          :address="activeAccount.address"
         />
       </div>
     </div>
@@ -73,8 +73,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { useAccounts } from '../../composables';
 import ModalHeader from './ModalHeader.vue';
 import TokenAmount from './TokenAmount.vue';
 import FormTextarea from './form/FormTextarea.vue';
@@ -98,6 +98,13 @@ export default {
   props: {
     transferData: { type: Object, required: true },
   },
+  setup(props, { root }) {
+    const { activeAccount } = useAccounts({ store: root.$store });
+
+    return {
+      activeAccount,
+    };
+  },
   data() {
     return {
       AGGREGATOR_URL,
@@ -111,7 +118,6 @@ export default {
       return !!this.transferData.selectedAsset
         && this.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
     },
-    ...mapGetters(['account']),
     noteError() {
       return (this.note.length > this.noteMaxLength)
         ? this.$t('pages.tipPage.maxNoteLengthError')

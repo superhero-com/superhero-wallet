@@ -51,7 +51,6 @@ import {
   watch,
 } from '@vue/composition-api';
 import type {
-  IAccount,
   INetwork,
   ITokenList,
   ITx,
@@ -66,6 +65,7 @@ import {
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
+  useAccounts,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
@@ -96,9 +96,8 @@ export default defineComponent({
     const loading = ref(false);
     const isDestroyed = ref(false);
 
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    const { activeAccount } = useAccounts({ store: root.$store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
@@ -110,7 +109,6 @@ export default defineComponent({
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const transactions = useState('transactions');
-    const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
     const getTxSymbol = useGetter('getTxSymbol');
@@ -121,7 +119,7 @@ export default defineComponent({
 
     const currentAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
-      : account.value.address);
+      : activeAccount.value.address);
 
     const filteredTransactions = computed(
       () => {
@@ -236,7 +234,6 @@ export default defineComponent({
       displayMode,
       availableTokens,
       transactions,
-      account,
       activeNetwork,
       getAccountPendingTransactions,
       getTxSymbol,

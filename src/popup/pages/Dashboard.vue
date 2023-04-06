@@ -18,7 +18,7 @@
         :btn-text="$t('dashboard.buyCard.button')"
         :background="buyBackground"
         :icon="CardIcon"
-        :href="simplexLink"
+        :href="activeAccountSimplexLink"
         :card-id="DASHBOARD_CARD_ID.buyAe"
       />
 
@@ -37,13 +37,10 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-} from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 
-import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
-import { useGetter } from '../../composables/vuex';
+import { DASHBOARD_CARD_ID } from '../utils';
+import { useAccounts } from '../../composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -70,10 +67,8 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup() {
-    const account = useGetter('account');
-
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
+  setup(props, { root }) {
+    const { activeAccountSimplexLink } = useAccounts({ store: root.$store });
 
     return {
       DASHBOARD_CARD_ID,
@@ -81,7 +76,7 @@ export default defineComponent({
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
-      simplexLink,
+      activeAccountSimplexLink,
       buyBackground,
       chainNameBackground,
     };

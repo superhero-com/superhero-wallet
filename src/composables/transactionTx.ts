@@ -1,6 +1,5 @@
 import { computed, ref } from '@vue/composition-api';
 import type {
-  IAccount,
   IAccountLabeled,
   IDexContracts,
   ITokenList,
@@ -19,6 +18,7 @@ import {
   isContainingNestedTx,
   getInnerTransaction,
 } from '../popup/utils';
+import { useAccounts } from './accounts';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
@@ -30,6 +30,8 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
+  const { accounts, activeAccount } = useAccounts({ store });
+
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<string | undefined>(externalAddress);
@@ -46,9 +48,6 @@ export function useTransactionTx({
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
-
-  const account = computed<IAccount>(() => store.getters.account);
-  const accounts = computed<IAccount[]>(() => store.getters.accounts);
 
   const getTxDirection = computed(() => store.getters.getTxDirection);
   const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
@@ -102,7 +101,7 @@ export function useTransactionTx({
 
   const ownershipStatus = computed(
     () => {
-      if (account.value?.address === txOwnerAddress.value) {
+      if (activeAccount.value?.address === txOwnerAddress.value) {
         return TRANSACTION_OWNERSHIP_STATUS.current;
       }
       if (accounts.value?.find(({ address }) => address === txOwnerAddress.value)) {
@@ -129,9 +128,9 @@ export function useTransactionTx({
     switch (ownershipStatus.value) {
       case TRANSACTION_OWNERSHIP_STATUS.current:
         return {
-          ...account.value,
+          ...activeAccount.value,
           label: i18n.t('transaction.overview.accountAddress'),
-          url: getExplorerPath.value(account.value.address),
+          url: getExplorerPath.value(activeAccount.value.address),
         };
       case TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};

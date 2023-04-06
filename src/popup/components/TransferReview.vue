@@ -18,8 +18,8 @@
     >
       <template #value>
         <AvatarWithChainName
-          :address="account.address"
-          :name="account.name"
+          :address="activeAccount.address"
+          :name="activeAccount.name"
           :show-address="!isRecipientName"
         />
       </template>
@@ -128,6 +128,7 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
+  useAccounts,
   useDeepLinkApi,
   useModals,
   useMultisigAccounts,
@@ -145,7 +146,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IAccount, IPendingTransaction, ISdk } from '../../types';
+import { IPendingTransaction, ISdk } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -178,13 +179,14 @@ export default defineComponent({
   setup(props, { root, emit }) {
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { activeAccount } = useAccounts({ store: root.$store });
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
     } = useMultisigAccounts({ store: root.$store });
+
     const loading = ref<boolean>(false);
-    const account = computed<IAccount>(() => root.$store.getters.account);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
@@ -245,7 +247,7 @@ export default defineComponent({
             type: 'spendToken',
             tx: {
               amount,
-              callerId: account.value.address,
+              callerId: activeAccount.value.address,
               contractId: selectedAsset.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
               function: TX_FUNCTIONS.transfer,
@@ -260,7 +262,7 @@ export default defineComponent({
             type: 'spend',
             tx: {
               amount,
-              senderId: account.value.address,
+              senderId: activeAccount.value.address,
               recipientId: recipient,
               type: SCHEMA.TX_TYPE.spend,
             },
@@ -314,7 +316,7 @@ export default defineComponent({
           tipUrl: recipient,
           tx: {
             amount,
-            callerId: account.value.address,
+            callerId: activeAccount.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
@@ -354,7 +356,7 @@ export default defineComponent({
             addTransactionToPendingMultisigAccount(
               txHash,
               activeMultisigAccount.value.gaAccountId,
-              account.value.address,
+              activeAccount.value.address,
             );
           }
 
@@ -413,7 +415,7 @@ export default defineComponent({
       isRecipientName,
       isSelectedAssetAex9,
       tokenSymbol,
-      account,
+      activeAccount,
       activeMultisigAccount,
     };
   },

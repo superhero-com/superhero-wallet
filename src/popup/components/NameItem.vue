@@ -26,12 +26,12 @@
         >
           <button
             v-show="canBeDefault"
-            :class="{ set: account.name === name }"
-            :disabled="account.name === name"
+            :class="{ set: isDefault }"
+            :disabled="isDefault"
             @click="setDefault"
           >
             {{
-              account.name === name
+              (isDefault)
                 ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
             }}
@@ -148,9 +148,8 @@ import {
   checkAddressOrChannel,
   readValueFromClipboard,
 } from '../utils';
-import { useModals, useTopHeaderData } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { IAccount, IName } from '../../types';
+import { useAccounts, useModals, useTopHeaderData } from '../../composables';
+import { IName } from '../../types';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -184,6 +183,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { openModal } = useModals();
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { topBlockHeight } = useTopHeaderData({ store: root.$store });
 
     const expand = ref(false);
@@ -192,12 +192,11 @@ export default defineComponent({
     const error = ref(false);
     const pointerInput = ref();
 
-    const account = useGetter<IAccount>('account');
-
     const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
+    const isDefault = computed(() => activeAccount.value.name === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
-      (): boolean => nameEntry.value?.pointers?.accountPubkey === account.value.address,
+      (): boolean => nameEntry.value?.pointers?.accountPubkey === activeAccount.value.address,
     );
     const addressOrFirstPointer = computed((): string | null => (
       nameEntry.value?.pointers?.accountPubkey
@@ -223,7 +222,7 @@ export default defineComponent({
 
     async function setDefault() {
       await root.$store.dispatch('names/setDefault', {
-        address: account.value.address,
+        address: activeAccount.value.address,
         name: props.name,
       });
     }
@@ -264,8 +263,9 @@ export default defineComponent({
       showInput,
       error,
       pointerInput,
-      account,
+      activeAccount,
       nameEntry,
+      isDefault,
       hasPointer,
       addressOrFirstPointer,
       topBlockHeight,
@@ -331,6 +331,8 @@ export default defineComponent({
         margin-top: 2px;
 
         button:not(.btn-help) {
+          @extend %face-sans-12-medium;
+
           padding: 2px 8px;
           cursor: pointer;
           background: variables.$color-border-hover;
@@ -339,8 +341,6 @@ export default defineComponent({
           @include mixins.mobile {
             padding: 2px 6px;
           }
-
-          @extend %face-sans-12-medium;
 
           &.set {
             background: rgba(variables.$color-warning, 0.1);

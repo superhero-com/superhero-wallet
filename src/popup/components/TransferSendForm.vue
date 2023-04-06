@@ -21,9 +21,7 @@
             </template>
           </template>
           <template #value>
-            <AccountItem
-              :address="account.address"
-            />
+            <AccountItem :address="activeAccount.address" />
           </template>
         </DetailsItem>
 
@@ -41,8 +39,8 @@
       <ModalHeader :title="$t('modals.send.sendTitle')" />
       <div class="account-row">
         <AccountItem
-          :address="account.address"
-          :name="account.name"
+          :address="activeAccount.address"
+          :name="activeAccount.name"
           size="md"
         />
       </div>
@@ -52,7 +50,7 @@
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
-        not_same_as: isMultisig? multisigVaultAddress : account.address,
+        not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
         name_registered_address_or_url: true,
         token_to_an_address: { isToken: !isAe },
       }"
@@ -181,7 +179,6 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type {
-  IAccount,
   IFormSelectOption,
   IInputMessage,
   IToken,
@@ -198,12 +195,13 @@ import {
   getAccountNameToDisplay,
 } from '../utils';
 import {
+  useAccounts,
   useBalances,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
 } from '../../composables';
-import { useState, useGetter } from '../../composables/vuex';
+import { useState } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -261,10 +259,9 @@ export default defineComponent({
     const { openModal, openDefaultModal } = useModals();
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { accounts, activeAccount } = useAccounts({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
-    const account = useGetter<IAccount>('account');
-    const accounts = useGetter<IAccount[]>('accounts');
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -478,7 +475,7 @@ export default defineComponent({
     onMounted(async () => {
       if (
         props.isMultisig
-        && !activeMultisigAccount.value?.signers.includes(account.value.address)
+        && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
       ) {
         root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
@@ -510,7 +507,7 @@ export default defineComponent({
       error,
       amountMessage,
       availableTokens,
-      account,
+      activeAccount,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
       urlStatus,

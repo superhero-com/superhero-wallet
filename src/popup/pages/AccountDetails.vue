@@ -2,9 +2,9 @@
   <AccountDetailsBase class="account-details">
     <template #account-info>
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
+        :address="activeAccount.address"
+        :name="activeAccount.name"
+        :idx="activeAccount.idx"
         can-copy-address
       />
     </template>
@@ -22,7 +22,7 @@
       <BtnBox
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
-        :href="simplexLink"
+        :href="activeAccountSimplexLink"
         :disabled="!isOnline"
       />
       <BtnBox
@@ -41,10 +41,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
-import { useBalances, useConnection } from '../../composables';
-import { buildSimplexLink, DEX_URL } from '../utils';
-import type { IAccount } from '../../types';
+import { useAccounts, useBalances, useConnection } from '../../composables';
+import { DEX_URL } from '../utils';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -69,22 +67,19 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();
+    const { activeAccount, activeAccountSimplexLink } = useAccounts({ store: root.$store });
     const { balance } = useBalances({ store: root.$store });
 
-    const account = useGetter<IAccount>('account');
-
     const balanceNumeric = computed(() => balance.value.toNumber());
-
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
 
     return {
       DEX_URL,
       isOnline,
       balanceNumeric,
-      account,
+      activeAccount,
+      activeAccountSimplexLink,
       CreditCardIcon,
       SwapIcon,
-      simplexLink,
     };
   },
 });

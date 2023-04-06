@@ -16,7 +16,7 @@
       <div class="account-row">
         <AccountItem
           :address="activeAccountAddress"
-          :name="isMultisig ? null : account.name"
+          :name="isMultisig ? null : activeAccount.name"
         />
       </div>
 
@@ -88,7 +88,6 @@ import {
   ref,
 } from '@vue/composition-api';
 import type {
-  IAccount,
   IAsset,
   IToken,
   ITokenList,
@@ -96,7 +95,7 @@ import type {
 } from '../../../types';
 import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
-import { useCopy, useMultisigAccounts } from '../../../composables';
+import { useAccounts, useCopy, useMultisigAccounts } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
@@ -132,20 +131,20 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { root }) {
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+    const { copied, copy } = useCopy();
 
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
-    const account = computed<IAccount>(() => root.$store.getters.account);
+    const selectedAsset = ref<IAsset | IToken | null>(null);
+
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccountId.value
-      : account.value.address);
+      : activeAccount.value.address);
+
     const availableTokens = computed<ITokenList>(
       () => root.$store.state.fungibleTokens.availableTokens,
     );
-
-    const selectedAsset = ref<IAsset | IToken | null>(null);
-
-    const { copied, copy } = useCopy();
 
     function getTokenInfoQuery() {
       if (!amount.value || amount.value <= 0) return '';
@@ -174,7 +173,7 @@ export default defineComponent({
     );
 
     async function share() {
-      const { address } = account.value;
+      const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
         ? i18n.t('modals.receive.shareTextNoAmount', { address, walletLink })
@@ -205,8 +204,8 @@ export default defineComponent({
       handleAssetChange,
       copyAddress,
       copied,
+      activeAccount,
       activeAccountAddress,
-      account,
       accountAddressToDisplay,
       accountAddressToCopy,
     };

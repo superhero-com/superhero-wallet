@@ -58,7 +58,6 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type {
-  IAccount,
   IAccountLabeled,
   IAppData,
   IPermission,
@@ -69,6 +68,7 @@ import {
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
+import { useAccounts } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -96,16 +96,17 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
+    const { activeAccount } = useAccounts({ store: root.$store });
+
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
-    const account = useGetter<IAccount>('account');
 
     const permission = useState<IPermission>('permissions', props.app.host);
     const appName = computed(() => permission.value?.name || props.app.name);
     const accountExtended = computed((): IAccountLabeled => ({
-      ...account.value,
+      ...activeAccount.value,
       label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(account.value.address),
+      url: getExplorerPath.value(activeAccount.value.address),
     }));
 
     function confirm() {
