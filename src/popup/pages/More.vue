@@ -81,7 +81,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { IS_IOS } from '../../lib/environment';
 import {
   BUG_REPORT_URL,
@@ -113,9 +114,11 @@ export default defineComponent({
     ClaimTips,
     FaucetIcon,
   },
-  setup(props, { root }) {
-    const { activeAccountFaucetUrl } = useAccounts({ store: root.$store });
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+
+    const { activeAccountFaucetUrl } = useAccounts({ store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
 
     return {
       BUG_REPORT_URL,

@@ -49,7 +49,10 @@ import {
   computed,
   ref,
   onMounted,
-} from '@vue/composition-api';
+  getCurrentInstance
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
@@ -78,11 +81,16 @@ export default defineComponent({
     BtnHelp,
     AccountInfo,
   },
-  setup(props, { root }) {
-    const { isTippingSupported } = useSdk({ store: root.$store });
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
+    const { isTippingSupported } = useSdk({ store });
+    const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store });
 
     const tipUrl = ref('');
     const loading = ref(false);
@@ -106,15 +114,15 @@ export default defineComponent({
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await root.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
         await Promise.all([
-          root.$store.dispatch('cacheInvalidateOracle'),
-          root.$store.dispatch('cacheInvalidateTips'),
+          store.dispatch('cacheInvalidateOracle'),
+          store.dispatch('cacheInvalidateTips'),
         ]);
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
 
-        root.$router.push({ name: ROUTE_ACCOUNT });
+        router.push({ name: ROUTE_ACCOUNT });
       } catch (error: any) {
         const { error: errorMessage = '' } = error.response ? error.response.data : {};
         let msg;

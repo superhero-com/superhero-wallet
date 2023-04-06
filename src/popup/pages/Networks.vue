@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useDispatch, useGetter } from '../../composables/vuex';
 
 import NetworkRow from '../components/NetworkRow.vue';

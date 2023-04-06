@@ -33,7 +33,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts } from '../../composables';
 import type { IFormSelectOption } from '../../types';
 
@@ -58,8 +59,11 @@ export default defineComponent({
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  setup(props) {
+    console.log(props);
+    const store = useStore();
+
+    const { accountsSelectOptions } = useAccounts({ store });
 
     return { accountsSelectOptions };
   },

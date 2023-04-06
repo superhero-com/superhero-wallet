@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 export const LINK_BUTTON_VARIANT = [
   'default',

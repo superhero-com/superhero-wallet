@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed, getCurrentInstance } from 'vue';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
 import { useModals } from '../../composables';
 import BtnBox from './buttons/BtnBox.vue';
@@ -22,7 +22,9 @@ export default defineComponent({
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
     const { openModal } = useModals();
 
     function openTransferReceiveModal() {

@@ -5,7 +5,7 @@
 */
 
 import Vue, { ComponentOptions } from 'vue';
-import { RawLocation } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
@@ -37,7 +37,7 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = {[K in keyof T]: T[K]};
+type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
  * Allowed options that can be passed to our fetch utility functions
@@ -254,7 +254,7 @@ export interface INotification {
   entityId?: string
   entityType?: string
   id?: number
-  path?: RawLocation
+  path?: RouteLocationRaw
   receiver?: string
   sender?: string
   sourceId?: string

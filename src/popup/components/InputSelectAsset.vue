@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import { useModals } from '../../composables';
 import { MODAL_ASSET_SELECTOR } from '../utils/constants';
 import type { IToken } from '../../types';

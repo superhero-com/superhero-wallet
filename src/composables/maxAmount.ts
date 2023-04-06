@@ -5,7 +5,7 @@ import {
   onBeforeUnmount,
   watch,
   Ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 

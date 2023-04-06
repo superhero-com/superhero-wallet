@@ -1,7 +1,7 @@
 import '../lib/environment';
 import '../lib/initPolyfills';
-import Vue from 'vue';
-import './plugins/compositionApi';
+import { createApp } from 'vue';
+import './plugins/compositionApi'; // * this is no longer needed as of Vue3
 import store from '../store';
 import router from './router';
 import { i18n } from '../store/plugins/languages';
@@ -12,15 +12,12 @@ import LoaderComponent from './components/Loader.vue';
 
 import '../styles/fullscreen-message.scss';
 
-Vue.component('Loader', LoaderComponent);
-
 registerModals();
-
-new Vue({
-  store,
-  router,
-  i18n,
-  render: (h) => h(App),
-}).$mount('#app');
+const app = createApp(App);
+app.use(store);
+app.use(router as any);
+app.use(i18n as any);
+app.component('Loader', LoaderComponent);
+app.mount('#app');
 
 Logger.init();

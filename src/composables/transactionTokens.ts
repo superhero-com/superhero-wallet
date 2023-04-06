@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import { camelCase } from 'lodash-es';
 import type {
   IDefaultComposableOptions,

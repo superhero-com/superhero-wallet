@@ -39,8 +39,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
+import { useStore } from 'vuex';
 import { IS_IOS } from '../../lib/environment';
 import { DASHBOARD_CARD_ID } from '../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
@@ -71,13 +72,15 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
 
     return {
       DASHBOARD_CARD_ID,

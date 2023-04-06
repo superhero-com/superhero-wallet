@@ -13,7 +13,7 @@ import {
   defineComponent,
   onMounted,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import type { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
 import { AVATAR_URL, checkImageAvailability, isContract } from '../utils';

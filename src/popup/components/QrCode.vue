@@ -8,7 +8,7 @@ import {
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import QRCodeStyling from 'qr-code-styling';
 import SHLogo from '../../icons/logo-small-blue.png';
 

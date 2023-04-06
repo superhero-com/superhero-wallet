@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 import type { StatusIconType } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';

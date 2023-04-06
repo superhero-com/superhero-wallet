@@ -1,23 +1,33 @@
 <script lang="ts">
 import {
   defineComponent,
+  getCurrentInstance,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../lib/errors';
 import { handleUnknownError } from '../utils';
 import { useDeepLinkApi, useModals, useSdk } from '../../composables';
 
 export default defineComponent({
   name: 'SignTransaction',
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { nodeNetworkId, getSdk } = useSdk({ store: root.$store });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
+      const { nodeNetworkId, getSdk } = useSdk({ store });
       const { openDefaultModal } = useModals();
 
       try {
         const sdk = await getSdk();
-        const { transaction, networkId, broadcast } = root.$route.query;
+        const { transaction, networkId, broadcast } = route.query;
 
         if (networkId !== nodeNetworkId.value) {
           await openDefaultModal({

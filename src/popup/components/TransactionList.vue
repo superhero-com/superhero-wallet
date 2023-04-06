@@ -1,29 +1,12 @@
 <template>
   <div class="transaction-list">
-    <InfiniteScroll
-      class="list"
-      data-cy="list"
-      is-more-data
-      @loadMore="loadMore"
-    >
-      <TransactionListItem
-        v-for="transaction in filteredTransactions"
-        :key="transaction.hash"
-        :transaction="getTransaction(transaction)"
-        :multisig-transaction="getMultisigTransaction(transaction)"
-        :is-multisig="isMultisig"
-        :data-cy="transaction.pending && 'pending-txs'"
-      />
+    <InfiniteScroll class="list" data-cy="list" is-more-data @loadMore="loadMore">
+      <TransactionListItem v-for="transaction in filteredTransactions" :key="transaction.hash"
+        :transaction="getTransaction(transaction)" :multisig-transaction="getMultisigTransaction(transaction)"
+        :is-multisig="isMultisig" :data-cy="transaction.pending && 'pending-txs'" />
     </InfiniteScroll>
-    <AnimatedSpinner
-      v-if="loading"
-      class="spinner"
-      data-cy="loader"
-    />
-    <div
-      v-else-if="!filteredTransactions.length"
-      class="message"
-    >
+    <AnimatedSpinner v-if="loading" class="spinner" data-cy="loader" />
+    <div v-else-if="!filteredTransactions.length" class="message">
       <p>
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
@@ -39,7 +22,8 @@ import {
   onUnmounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import {
   getTransaction,
   getMultisigTransaction,
@@ -87,15 +71,17 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+
     const {
       activeAccount,
       accounts,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const { isAppActive } = useUi();
 
@@ -109,9 +95,9 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { dexContracts } = useSdk({ store: root.$store });
+    const { dexContracts } = useSdk({ store });
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const loading = ref(false);
     const isDestroyed = ref(false);
@@ -187,7 +173,8 @@ export default defineComponent({
           case FILTER_MODE.in:
             return direction === TX_DIRECTION.received;
           default:
-            throw new Error(`${i18n.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            // @ts-ignore
+            throw new Error(`${i18n.global.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });
     }

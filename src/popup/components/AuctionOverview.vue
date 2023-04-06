@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { IAuction, IAuctionBid } from '../../types';
 import { useTopHeaderData } from '../../composables';
 import { useGetter } from '../../composables/vuex';
@@ -32,8 +33,10 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
     const getAuction = useGetter('names/getAuction');

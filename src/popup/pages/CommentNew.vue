@@ -32,10 +32,12 @@
 <script lang="ts">
 import {
   defineComponent,
+  getCurrentInstance,
   ref,
   watch,
-} from '@vue/composition-api';
-import { Route } from 'vue-router';
+} from 'vue';
+import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -55,15 +57,21 @@ export default defineComponent({
     BtnMain,
     FixedScreenFooter,
   },
-  setup(props, { root }) {
-    const { isTippingSupported, getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
+    const { isTippingSupported, getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
       activeAccount,
       accountsSelectOptions,
       setActiveAccountByAddress,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
@@ -72,14 +80,14 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     watch(
-      () => root.$route,
-      ({ query }: Route) => {
+      () => route,
+      ({ query }: RouteLocationNormalized) => {
         id.value = query.id as string ?? '';
         parentId.value = query.parentId ? +query.parentId : undefined;
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_ACCOUNT });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -90,7 +98,7 @@ export default defineComponent({
       loading.value = true;
       const sdk = await getSdk();
       try {
-        await root.$store.dispatch('sendTipComment', [
+        await store.dispatch('sendTipComment', [
           id.value,
           text.value,
           await sdk.address(),

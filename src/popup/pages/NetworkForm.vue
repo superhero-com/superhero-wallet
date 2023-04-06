@@ -60,12 +60,15 @@ import {
   computed,
   defineComponent,
   getCurrentScope,
+  getCurrentInstance,
   nextTick,
   onMounted,
   ref,
   set,
-} from '@vue/composition-api';
+} from 'vue';
 import type { TranslateResult } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { NETWORK_DEFAULT } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
@@ -98,8 +101,14 @@ export default defineComponent({
     BtnMain,
     InputField,
   },
-  setup(props, { root }) {
-    const isEdit = root.$route.name === ROUTE_NETWORK_EDIT;
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
+    const isEdit = route.name === ROUTE_NETWORK_EDIT;
 
     const { $validator } = (getCurrentScope() as any).vm;
     const networks = useGetter('networks');
@@ -155,7 +164,7 @@ export default defineComponent({
     );
 
     function goBack() {
-      root.$router.push({ name: ROUTE_NETWORK_SETTINGS });
+      router.push({ name: ROUTE_NETWORK_SETTINGS });
     }
 
     function validatorRules(key: keyof INetworkBase) {
@@ -171,7 +180,7 @@ export default defineComponent({
 
     async function addOrUpdateNetwork() {
       if (await $validator.validateAll()) {
-        root.$store.commit('setUserNetwork', {
+        store.commit('setUserNetwork', {
           ...newNetwork.value,
           index: newNetwork.value.index,
         });
@@ -181,7 +190,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      const { params, query } = root.$route;
+      const { params, query } = route;
 
       if (isEdit) {
         newNetwork.value = { ...networks.value[params.name] };

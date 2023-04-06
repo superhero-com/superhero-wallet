@@ -34,10 +34,10 @@
       />
 
       <Component
+        v-bind="props"
         :is="component"
         v-for="({ component, key, props }) in modalsOpen"
         :key="key"
-        v-bind="props"
       />
     </div>
   </div>
@@ -47,10 +47,13 @@
 import {
   computed,
   defineComponent,
+  getCurrentInstance,
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
@@ -89,26 +92,32 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store: root.$store });
-    const { addWalletNotification } = useNotifications({ store: root.$store });
+    const { isLoggedIn } = useAccounts({ store });
+    const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
 
-    const isRestored = computed(() => root.$store.state.isRestored);
-    const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
-    const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
+    const isRestored = computed(() => store.state.isRestored);
+    const backedUpSeed = computed(() => store.state.backedUpSeed);
+    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
+    const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
-      || root.$route.params.app // TODO determine if still used
+      || route.params.app // TODO determine if still used
       || routeMeta.value?.hideHeader
     ));
 
@@ -142,8 +151,8 @@ export default defineComponent({
 
     async function setNotificationSettings() {
       await watchUntilTruthy(isRestored);
-      if (root.$store.state.notificationSettings.length === 0) {
-        root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      if (store.state.notificationSettings.length === 0) {
+        store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
       }
     }
 
@@ -163,7 +172,7 @@ export default defineComponent({
       }
     });
 
-    watch(() => root.$route.fullPath, () => {
+    watch(() => route.fullPath, () => {
       if (innerElement.value) {
         innerElement.value.scrollTop = 0;
       }

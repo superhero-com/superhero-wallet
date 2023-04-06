@@ -41,8 +41,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed, defineComponent, getCurrentInstance, ref,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { IAuctionBid } from '../../../types';
 import { useModals, useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
@@ -70,8 +74,13 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+
+    const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
 
     const loading = ref(false);
@@ -98,7 +107,7 @@ export default defineComponent({
         openDefaultModal({
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        root.$router.push({ name: 'auction-history', params: { name: props.name } });
+        router.push({ name: 'auction-history', params: { name: props.name } });
       } catch (error: any) {
         let msg = error.message;
         if (msg.includes('is not enough to execute')) {

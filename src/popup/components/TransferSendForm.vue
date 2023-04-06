@@ -3,9 +3,7 @@
     <template v-if="isMultisig">
       <ModalHeader :title="$t('modals.multisigTxProposal.title')" />
       <div class="multisig-addresses-row">
-        <DetailsItem
-          class="multisig-address-item"
-        >
+        <DetailsItem class="multisig-address-item">
           <template #label>
             <FormSelect
               v-if="multisigVaultOwnedByManyAccounts"
@@ -23,16 +21,11 @@
             </template>
           </template>
           <template #value>
-            <AccountItem
-              :address="activeAccount.address"
-            />
+            <AccountItem :address="activeAccount.address" />
           </template>
         </DetailsItem>
 
-        <DetailsItem
-          class="multisig-address-item"
-          :label="$t('modals.multisigTxProposal.multisigVault')"
-        >
+        <DetailsItem class="multisig-address-item" :label="$t('modals.multisigTxProposal.multisigVault')">
           <template #value>
             <AccountItem :address="multisigVaultAddress" />
           </template>
@@ -42,131 +35,66 @@
     <template v-else>
       <ModalHeader :title="$t('modals.send.sendTitle')" />
       <div class="account-row">
-        <AccountItem
-          :address="activeAccount.address"
-          :name="activeAccount.name"
-          size="md"
-        />
+        <AccountItem :address="activeAccount.address" :name="activeAccount.name" size="md" />
       </div>
     </template>
 
-    <InputField
-      v-model.trim="formModel.address"
-      v-validate="{
-        required: true,
-        not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
-        name_registered_address_or_url: isUrlTippingEnabled,
-        name_registered_address: !isUrlTippingEnabled,
-        token_to_an_address: { isToken: !isAe },
-      }"
-      name="address"
-      data-cy="address"
-      show-help
-      show-message-help
-      :label="$t('modals.send.recipientLabel')"
+    <InputField v-model.trim="formModel.address" v-validate="{
+      required: true,
+      not_same_as: isMultisig ? multisigVaultAddress : activeAccount.address,
+      name_registered_address_or_url: isUrlTippingEnabled,
+      name_registered_address: !isUrlTippingEnabled,
+      token_to_an_address: { isToken: !isAe },
+    }" name="address" data-cy="address" show-help show-message-help :label="$t('modals.send.recipientLabel')"
       :placeholder="isMultisig || !isUrlTippingEnabled
         ? $t('modals.send.recipientPlaceholder')
-        : $t('modals.send.recipientPlaceholderUrl')"
-      :message="addressMessage"
-      @help="showRecipientHelp()"
-    >
+        : $t('modals.send.recipientPlaceholderUrl')" :message="addressMessage" @help="showRecipientHelp()">
       <template #label-after>
-        <a
-          class="scan-button"
-          data-cy="scan-button"
-          @click="openScanQrModal"
-        >
+        <a class="scan-button" data-cy="scan-button" @click="openScanQrModal">
           <QrScanIcon />
         </a>
       </template>
     </InputField>
     <div class="status">
-      <UrlStatus
-        v-show="isTipUrl"
-        :status="urlStatus"
-      />
+      <UrlStatus v-show="isTipUrl" :status="urlStatus" />
     </div>
 
-    <InputAmount
-      v-model="formModel.amount"
-      v-validate="{
-        required: true,
-        min_value_exclusive: 0,
-        ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
-        ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
-        ...+balance.minus(fee) > 0 && isMultisig
-          ? { max_value_vault: activeMultisigAccount.balance.toString() }
-          : {},
-        min_tip_amount: isTipUrl,
-      }"
-      name="amount"
-      data-cy="amount"
-      class="amount-input"
-      show-tokens-with-balance
-      :ae-only="isMultisig"
-      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
-      :message="amountMessage"
-      :selected-asset="formModel.selectedAsset"
-      @asset-selected="handleAssetChange"
-    >
+    <InputAmount v-model="formModel.amount" v-validate="{
+      required: true,
+      min_value_exclusive: 0,
+      ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
+      ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
+      ...+balance.minus(fee) > 0 && isMultisig
+        ? { max_value_vault: activeMultisigAccount.balance.toString() }
+        : {},
+      min_tip_amount: isTipUrl,
+    }" name="amount" data-cy="amount" class="amount-input" show-tokens-with-balance :ae-only="isMultisig"
+      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')" :message="amountMessage"
+      :selected-asset="formModel.selectedAsset" @asset-selected="handleAssetChange">
       <template #label-after>
-        <BtnPlain
-          v-if="!isMultisig"
-          class="max-button"
-          :class="{ chosen: isMaxValue }"
-          @click="setMaxValue"
-        >
+        <BtnPlain v-if="!isMultisig" class="max-button" :class="{ chosen: isMaxValue }" @click="setMaxValue">
           {{ $t('common.max') }}
         </BtnPlain>
       </template>
     </InputAmount>
 
     <template v-if="isAe">
-      <div
-        v-if="!(formModel.payload && formModel.payload.length)"
-        class="payload-add-wrapper"
-      >
-        <BtnText
-          :icon="PlusCircleIcon"
-          :text="$t('modals.send.payload')"
-          @click="editPayload"
-        />
-        <BtnHelp
-          :title="$t('modals.payloadInfo.title')"
-          :msg="$t('modals.payloadInfo.msg')"
-        />
+      <div v-if="!(formModel.payload && formModel.payload.length)" class="payload-add-wrapper">
+        <BtnText :icon="PlusCircleIcon" :text="$t('modals.send.payload')" @click="editPayload" />
+        <BtnHelp :title="$t('modals.payloadInfo.title')" :msg="$t('modals.payloadInfo.msg')" />
       </div>
 
-      <PayloadDetails
-        v-else
-        :payload="formModel.payload"
-        class="payload-details"
-      >
+      <PayloadDetails v-else :payload="formModel.payload" class="payload-details">
         <div class="payload-options">
-          <BtnIcon
-            size="sm"
-            dimmed
-            :icon="EditIcon"
-            @click="editPayload"
-          />
-          <BtnIcon
-            size="sm"
-            icon-variant="danger"
-            dimmed
-            :icon="DeleteIcon"
-            @click="clearPayload"
-          />
+          <BtnIcon size="sm" dimmed :icon="EditIcon" @click="editPayload" />
+          <BtnIcon size="sm" icon-variant="danger" dimmed :icon="DeleteIcon" @click="clearPayload" />
         </div>
       </PayloadDetails>
     </template>
 
     <DetailsItem :label="$t('transaction.fee')">
       <template #value>
-        <TokenAmount
-          :amount="+fee.toFixed()"
-          symbol="AE"
-          data-cy="review-fee"
-        />
+        <TokenAmount :amount="+fee.toFixed()" symbol="AE" data-cy="review-fee" />
       </template>
     </DetailsItem>
   </div>
@@ -181,8 +109,11 @@ import {
   onMounted,
   PropType,
   nextTick,
-} from '@vue/composition-api';
+  getCurrentInstance,
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
 import type {
   Dictionary,
   IFormSelectOption,
@@ -256,7 +187,12 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const route = useRoute();
+
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
@@ -264,15 +200,15 @@ export default defineComponent({
     const error = ref<boolean>(false);
     const isUrlTippingEnabled = ref<boolean>(false);
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { balance, aeternityCoin } = useBalances({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const {
       accounts,
       activeAccount,
       prepareAccountSelectOptions,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
@@ -292,7 +228,7 @@ export default defineComponent({
     const amountMessage = computed(() => getMessageByFieldName('amount'));
 
     const urlStatus = computed(
-      () => root.$store.getters['tipUrl/status'](formModel.value.address),
+      () => store.getters['tipUrl/status'](formModel.value.address),
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -343,7 +279,7 @@ export default defineComponent({
 
     function selectAccount(val: string) {
       if (val) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
@@ -396,7 +332,7 @@ export default defineComponent({
           formModel.value.amount = max.value;
         }
       },
-      100);
+        100);
     }
 
     // Method called from a parent scope - avoid changing its name.
@@ -500,10 +436,10 @@ export default defineComponent({
         props.isMultisig
         && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
       ) {
-        root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+        store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
 
-      const { query } = root.$route;
+      const { query } = route;
       if ([query['x-success'], query['x-cancel']].every((value) => value === AGGREGATOR_URL)) {
         isUrlTippingEnabled.value = true;
       }

@@ -264,7 +264,7 @@ import {
   ref,
   onBeforeUnmount,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
@@ -309,7 +309,7 @@ import MultisigProposalConsensus from '../components/MultisigProposalConsensus.v
 import Avatar from '../components/Avatar.vue';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
@@ -330,7 +330,9 @@ export default defineComponent({
     AnimatedSpinner,
     ExternalLink,
   },
-  setup(props, { root }) {
+  setup(props) {
+    console.log(props);
+
     const { openDefaultModal, openModal } = useModals();
 
     const {
@@ -338,7 +340,7 @@ export default defineComponent({
       updateMultisigAccounts,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const {
       pendingMultisigTxExpired,
@@ -346,7 +348,7 @@ export default defineComponent({
       pendingMultisigTxCanBeSent,
       pendingMultisigTxLocalSigners,
       pendingMultisigTxConfirmedByLocalSigners,
-    } = usePendingMultisigTransaction({ store: root.$store });
+    } = usePendingMultisigTransaction({ store });
 
     const {
       fetchActiveMultisigTx,
@@ -354,13 +356,13 @@ export default defineComponent({
       sendTx,
       callContractMethod,
     } = useMultisigTransactions({
-      store: root.$store,
+      store,
     });
 
     const {
       isLocalAccountAddress,
     } = useAccounts({
-      store: root.$store,
+      store,
     });
 
     const getExplorerPath = useGetter('getExplorerPath');
@@ -453,7 +455,7 @@ export default defineComponent({
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
-          root.$router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_ACCOUNT });
         }
       } catch (error: any) {
         handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());

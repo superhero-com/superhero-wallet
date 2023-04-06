@@ -9,10 +9,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { StatusIconType, VueAnyComponent } from '../../types';
 import { ALLOWED_ICON_STATUSES } from '../utils';
-
 import TimesCircle from '../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../icons/question-circle.svg?vue-component';
 import Alert from '../../icons/alert.svg?vue-component';

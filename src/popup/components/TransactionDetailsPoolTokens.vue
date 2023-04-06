@@ -12,7 +12,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
@@ -45,9 +46,11 @@ export default defineComponent({
     hideAmount: Boolean,
     isAllowance: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+
     const { tokens } = useTransactionTokens({
-      store: root.$store,
+      store,
       transaction: props.transaction,
       direction: props.direction,
       isAllowance: props.isAllowance,

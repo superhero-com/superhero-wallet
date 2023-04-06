@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import { IFilterInputPayload, IFilters, ObjectValues } from '../types';
 import { i18n } from '../store/plugins/languages';
 
@@ -26,10 +26,11 @@ export const useTransactionAndTokenFilter = () => {
   );
 
   const filtersConfig = ref<IFilters<ObjectValues<typeof FILTER_MODE>>>({
-    all: { name: i18n.t('common.all') },
-    in: { name: i18n.t('filters.in') },
-    out: { name: i18n.t('filters.out') },
-    dex: { name: i18n.t('filters.dex') },
+    // @ts-ignore
+    all: { name: i18n.global.t('filters.all') },
+    in: { name: i18n.global.t('filters.in') },
+    out: { name: i18n.global.t('filters.out') },
+    dex: { name: i18n.global.t('filters.dex') },
   });
 
   function resetFilter() {

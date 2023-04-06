@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent, ref } from 'vue';
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
 

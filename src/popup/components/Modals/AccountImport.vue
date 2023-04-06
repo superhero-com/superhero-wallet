@@ -40,13 +40,16 @@
 
 <script lang="ts">
 import {
+  getCurrentInstance,
   defineComponent,
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import type { ResolveRejectCallback } from '../../../types';
 import { validateSeedLength } from '../../utils';
 import { useSdk } from '../../../composables';
@@ -65,8 +68,12 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
     reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const store = useStore();
+    const router = useRouter();
+    const { getSdk } = useSdk({ store });
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -90,14 +97,14 @@ export default defineComponent({
         error.value = root.$t('pages.index.accountNotFound');
         return;
       }
-      root.$store.commit('setMnemonic', mnemonicParsed);
-      root.$store.commit('setBackedUpSeed');
+      store.commit('setMnemonic', mnemonicParsed);
+      store.commit('setBackedUpSeed');
       props.resolve();
       setTimeout(async () => {
         await getSdk();
-        root.$store.dispatch('accounts/hdWallet/discover');
+        store.dispatch('accounts/hdWallet/discover');
       }, 100);
-      root.$router.push(root.$store.state.loginTargetLocation);
+      router.push(store.state.loginTargetLocation);
     }
 
     return {

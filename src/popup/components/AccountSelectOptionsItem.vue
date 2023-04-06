@@ -33,7 +33,8 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { useBalances } from '../../composables';
 import { getAddressColor } from '../utils/avatar';
 import { AETERNITY_SYMBOL } from '../utils';
@@ -56,8 +57,9 @@ export default defineComponent({
     },
     value: { type: [String, Number], default: null },
   },
-  setup(props, { root }) {
-    const { getAccountBalance } = useBalances({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { getAccountBalance } = useBalances({ store });
 
     const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.account.address) }));
 

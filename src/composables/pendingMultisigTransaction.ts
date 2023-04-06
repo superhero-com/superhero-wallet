@@ -2,7 +2,7 @@ import {
   ref,
   watch,
   computed,
-} from '@vue/composition-api';
+} from 'vue';
 import { isEqual } from 'lodash-es';
 import {
   FUNCTION_TYPE_MULTISIG,

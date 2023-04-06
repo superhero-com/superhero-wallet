@@ -56,8 +56,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from '@vue/composition-api';
+import {
+  defineComponent, ref, computed, getCurrentInstance,
+} from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   AETERNITY_COIN_PRECISION,
   AENS_DOMAIN,
@@ -81,7 +85,12 @@ export default defineComponent({
     BtnMain,
     BtnHelp,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const instance = getCurrentInstance();
+    const root = instance?.root as any;
+    const router = useRouter();
+    const store = useStore();
+
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
@@ -94,13 +103,13 @@ export default defineComponent({
       -AETERNITY_COIN_PRECISION,
     ).toFixed(4));
 
-    const { getSdk, isSdkReady } = useSdk({ store: root.$store });
+    const { getSdk, isSdkReady } = useSdk({ store });
 
     async function claim() {
       if (!await (root as any).$validator.validateAll()) return;
 
       const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store: root.$store });
+      const { activeAccount } = useAccounts({ store });
 
       const sdk = await getSdk();
 
@@ -119,9 +128,9 @@ export default defineComponent({
           const { salt } = await sdk.aensPreclaim(fullName);
           claimTxHash = (await sdk.aensClaim(fullName, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            root.$store.commit('names/setPendingAutoExtendName', fullName);
+            store.commit('names/setPendingAutoExtendName', fullName);
           }
-          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+          router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e: any) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
@@ -137,10 +146,10 @@ export default defineComponent({
         }
 
         try {
-          root.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
           await sdk.poll(claimTxHash);
           if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
-            root.$store.dispatch('names/updatePointer', {
+            store.dispatch('names/updatePointer', {
               name: fullName,
               address: activeAccount.value.address,
             });
@@ -148,7 +157,7 @@ export default defineComponent({
         } catch (e: any) {
           openDefaultModal({ msg: e.message });
         } finally {
-          root.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
         }
       }
     }
