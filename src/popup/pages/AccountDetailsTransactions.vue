@@ -36,7 +36,7 @@ export default defineComponent({
 .transaction-list-wrapper {
   --filter-top-offset: 175px;
 
-  ::v-deep .filters {
+  :deep(.filters) {
     position: sticky;
     top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }

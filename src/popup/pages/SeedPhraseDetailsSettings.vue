@@ -116,7 +116,7 @@ export default defineComponent({
     box-shadow: 0 4px 8px 2px rgb(60 60 60 / 10%);
     box-sizing: border-box;
 
-    ::v-deep .content {
+    :deep(.content) {
       padding: 12px;
     }
 

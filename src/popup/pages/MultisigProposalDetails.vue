@@ -619,13 +619,13 @@ export default defineComponent({
     }
   }
 
-  .details-item::v-deep {
+  .details-item:deep() {
     .label {
       white-space: nowrap;
     }
   }
 
-  .reason::v-deep {
+  .reason:deep() {
     .value {
       color: variables.$color-warning;
     }

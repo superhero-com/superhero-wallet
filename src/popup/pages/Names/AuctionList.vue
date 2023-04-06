@@ -179,7 +179,7 @@ export default defineComponent({
     margin: 72px auto 0 auto;
   }
 
-  ::v-deep .filters {
+  :deep(.filters) {
     position: sticky;
     top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }

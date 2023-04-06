@@ -200,7 +200,7 @@ export default defineComponent({
       }
     }
 
-    ::v-deep .account-info .title {
+    :deep(.account-info .title) {
       justify-content: flex-start;
       word-break: normal;
 

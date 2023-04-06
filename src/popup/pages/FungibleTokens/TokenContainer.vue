@@ -284,7 +284,7 @@ export default defineComponent({
     padding-bottom: 4px;
   }
 
-  ::v-deep .filters {
+  :deep(.filters) {
     --buttons-height: 40px;
 
     padding-top: 12px;

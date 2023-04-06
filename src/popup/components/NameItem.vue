@@ -398,14 +398,14 @@ export default defineComponent({
       }
     }
 
-    .details-item ::v-deep .value {
+    .details-item :deep(.value) {
       color: variables.$color-grey-light;
     }
 
     > .details-item {
       margin: 8px 0;
 
-      ::v-deep .value {
+      :deep(.value){
         @extend %face-mono-10-medium;
 
         letter-spacing: 0;
@@ -430,7 +430,7 @@ export default defineComponent({
       .details-item {
         flex: 1;
 
-        ::v-deep .value .secondary {
+        :deep(.value .secondary) {
           color: variables.$color-grey-dark;
           margin-left: -2px;
         }
