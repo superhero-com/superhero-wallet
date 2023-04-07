@@ -188,17 +188,21 @@ export interface IRawMultisigAccount {
   rawTx?: string;
 }
 
-export interface INetwork {
-  backendUrl: string
-  compilerUrl: string
-  explorerUrl: string
-  middlewareUrl: string
+export interface INetworkBase {
+  url: string
   name: string
+  middlewareUrl: string
+  compilerUrl: string
+  backendUrl: string
+  index?: number
+}
+
+export interface INetwork extends INetworkBase {
+  explorerUrl: string
   networkId: string
   tipContractV1: string
   tipContractV2?: string
   multisigBackendUrl: string
-  url: string
 }
 
 export interface IPermission {
