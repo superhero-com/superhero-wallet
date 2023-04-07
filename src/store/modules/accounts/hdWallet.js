@@ -5,6 +5,7 @@ import {
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   getHdWalletAccount,
+  isTxOfASupportedType,
 } from '../../../popup/utils';
 
 export default {
@@ -53,26 +54,11 @@ export default {
       await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data }, { root: true });
     },
     async confirmTxSigning({ dispatch }, { encodedTx, host }) {
-      let txObject;
-      try {
-        txObject = TxBuilder.unpackTx(encodedTx, true).tx;
-      } catch (e) {
+      if (!isTxOfASupportedType(encodedTx)) {
         await dispatch('confirmRawDataSigning', encodedTx);
         return;
       }
-      const SUPPORTED_TX_TYPES = [
-        SCHEMA.TX_TYPE.spend,
-        SCHEMA.TX_TYPE.contractCreate,
-        SCHEMA.TX_TYPE.contractCall,
-        SCHEMA.TX_TYPE.namePreClaim,
-        SCHEMA.TX_TYPE.nameClaim,
-        SCHEMA.TX_TYPE.nameUpdate,
-        SCHEMA.TX_TYPE.nameTransfer,
-      ];
-      if (!SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag])) {
-        await dispatch('confirmRawDataSigning', encodedTx);
-        return;
-      }
+      const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,

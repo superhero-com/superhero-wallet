@@ -498,6 +498,16 @@ export const ADDRESS_TYPES: Record<string, string> = {
   [HASH_PREFIX_TRANSACTION]: 'transactions',
 };
 
+export const SUPPORTED_TX_TYPES = [
+  SCHEMA.TX_TYPE.spend,
+  SCHEMA.TX_TYPE.contractCreate,
+  SCHEMA.TX_TYPE.contractCall,
+  SCHEMA.TX_TYPE.namePreClaim,
+  SCHEMA.TX_TYPE.nameClaim,
+  SCHEMA.TX_TYPE.nameUpdate,
+  SCHEMA.TX_TYPE.nameTransfer,
+];
+
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';

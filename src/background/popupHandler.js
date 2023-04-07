@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import { isTxOfASupportedType, POPUP_TYPE_SIGN, POPUP_TYPE_RAW_SIGN } from '../popup/utils';
 
 const popups = {};
 
@@ -19,7 +20,10 @@ export const showPopup = async (aepp, type, params) => {
   });
 
   const extUrl = browser.runtime.getURL('./index.html');
-  const popupUrl = `${extUrl}?id=${id}&type=${type}&url=${encodeURIComponent(href)}`;
+  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params?.tx, true);
+  const popupType = isRawSign ? POPUP_TYPE_RAW_SIGN : type;
+  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
+
   const popupWindow = await browser.windows.create({
     url: popupUrl,
     type: 'popup',
@@ -40,7 +44,8 @@ export const showPopup = async (aepp, type, params) => {
           host,
         },
         ...(params?.message && { message: params.message }),
-        ...(params?.txObject && { transaction: params.txObject.params }),
+        ...(params?.txObject && !isRawSign && { transaction: params.txObject.params }),
+        ...(isRawSign && { data: params.tx }),
       },
     };
   });
