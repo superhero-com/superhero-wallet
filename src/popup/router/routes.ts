@@ -24,6 +24,7 @@ import {
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_NETWORK_EDIT,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -407,7 +408,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks/:name',
-    name: 'network-edit',
+    name: ROUTE_NETWORK_EDIT,
     component: NetworkForm,
     props: true,
     meta: {

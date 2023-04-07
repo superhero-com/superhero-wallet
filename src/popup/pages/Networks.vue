@@ -28,23 +28,30 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
-import NetworkRow from '../components/NetworkRow.vue';
-import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
-import BtnMain from '../components/buttons/BtnMain.vue';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useDispatch, useGetter } from '../../composables/vuex';
 
-export default {
+import NetworkRow from '../components/NetworkRow.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
+import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
+
+export default defineComponent({
   components: {
     BtnMain,
     NetworkRow,
   },
-  data: () => ({
-    PlusCircleIcon,
-  }),
-  computed: mapGetters(['networks']),
-  methods: mapActions(['selectNetwork']),
-};
+  setup() {
+    const networks = useGetter('networks');
+    const selectNetwork = useDispatch('selectNetwork');
+
+    return {
+      networks,
+      selectNetwork,
+      PlusCircleIcon,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

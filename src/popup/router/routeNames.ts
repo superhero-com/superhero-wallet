@@ -22,3 +22,4 @@ export const ROUTE_TOKEN = 'token';
 export const ROUTE_TOKEN_DETAILS = 'token-details';
 export const ROUTE_NOT_FOUND = 'not-found';
 export const ROUTE_NETWORK_SETTINGS = 'network-settings';
+export const ROUTE_NETWORK_EDIT = 'network-edit';
