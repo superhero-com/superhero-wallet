@@ -1,6 +1,5 @@
 import { computed } from '@vue/composition-api';
 import { Universal, Node } from '@aeternity/aepp-sdk';
-import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
 import {
   NODE_STATUS_CONNECTED,
   NODE_STATUS_CONNECTING,
@@ -17,7 +16,6 @@ let drySdk: ISdk;
  */
 export function useSdk({ store }: IDefaultComposableOptions) {
   const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);
-  const sdk13 = computed<AeSdkWallet | undefined>(() => store.getters['sdk13Plugin/sdk']);
   const isSdkReady = computed(() => !!sdk.value);
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
@@ -32,14 +30,6 @@ export function useSdk({ store }: IDefaultComposableOptions) {
    */
   async function getSdk(): Promise<ISdk> {
     return watchUntilTruthy(() => sdk.value);
-  }
-
-  /**
-   * Get the SDK instance. For now the SDK state is asynchronous.
-   * TODO: With the new SDK version this probably could be replaced with a computed prop.
-   */
-  async function getSdk13(): Promise<AeSdkWallet> {
-    return watchUntilTruthy(() => sdk13.value);
   }
 
   /**
@@ -69,7 +59,6 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     isNodeError,
     isSdkReady,
     getSdk,
-    getSdk13,
     getDrySdk,
   };
 }

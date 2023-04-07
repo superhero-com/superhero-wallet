@@ -470,6 +470,7 @@ export interface INameEntryFetched {
  */
 export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
+  addRpcClient: (connection: any) => any;
   Ae: Dictionary;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
@@ -498,6 +499,7 @@ export interface ISdk {
   payingForTx(arg0: any): any;
   poll: (txHash: string, options: any) => any;
   pool: Map<string, any>;
+  shareWalletInfo: (c: any) => any;
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (

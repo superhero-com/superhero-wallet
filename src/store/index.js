@@ -4,7 +4,6 @@ import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
-import sdk13Plugin from './plugins/sdk13';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
@@ -60,8 +59,6 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
-    sdk13Plugin,
-    modals,
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,

@@ -134,7 +134,7 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useSdk,
+  useSdk13,
 } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
@@ -190,8 +190,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const { getSdk13 } = useSdk({ store: root.$store });
-
+    const { getSdk } = useSdk13({ store: root.$store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -213,8 +212,7 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const sdk13 = await getSdk13();
-
+      const sdk = await getSdk();
       loading.value = true;
       try {
         let actionResult;
@@ -235,7 +233,7 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk13.spend(amount, recipient, {
+          actionResult = await sdk.spendWithCustomOptions(amount, recipient, {
             payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
           });
