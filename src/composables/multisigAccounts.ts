@@ -106,13 +106,18 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
     storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
   }
 
-  function addTransactionToPendingMultisigAccount(txHash: string, gaAccountId: string) {
+  function addTransactionToPendingMultisigAccount(
+    txHash: string,
+    gaAccountId: string,
+    proposedBy: string,
+  ) {
     pendingMultisigAccounts.value = pendingMultisigAccounts.value.map(
       (account) => account.gaAccountId === gaAccountId
         ? {
           ...account,
           txHash,
           hasPendingTransaction: true,
+          proposedBy,
         }
         : account,
     );
