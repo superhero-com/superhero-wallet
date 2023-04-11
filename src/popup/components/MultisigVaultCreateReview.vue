@@ -7,14 +7,15 @@
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
         <AccountSelector v-model="creatorAddress" />
-        <i18n
+        <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
-          path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
+          keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
           tag="div"
           class="creator-error-message"
+          scope="global"
         >
           <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
-        </i18n>
+        </i18n-t>
       </template>
     </DetailsItem>
 

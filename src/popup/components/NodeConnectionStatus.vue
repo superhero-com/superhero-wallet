@@ -17,11 +17,10 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   ref,
   watch,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useAccounts, useConnection, useSdk } from '../../composables';
 
@@ -29,10 +28,9 @@ const CONNECTED_DISPLAY_TIME = 2000;
 
 export default defineComponent({
   setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
+
     const { isOnline } = useConnection();
     const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store });
     const { isLoggedIn } = useAccounts({ store });
@@ -54,15 +52,15 @@ export default defineComponent({
     const statusText = computed((): TranslateResult | null => {
       switch (true) {
         case !isOnline.value:
-          return root.$t('connectionStatus.offline');
+          return t('connectionStatus.offline');
         case !isLoggedIn.value:
           return null;
         case isNodeConnecting.value:
-          return root.$t('connectionStatus.node.connecting');
+          return t('connectionStatus.node.connecting');
         case justBeenConnected.value:
-          return root.$t('connectionStatus.node.connected');
+          return t('connectionStatus.node.connected');
         case isNodeError.value:
-          return root.$t('connectionStatus.node.error');
+          return t('connectionStatus.node.error');
         default:
           return null;
       }

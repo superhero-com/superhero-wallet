@@ -47,12 +47,13 @@ import {
   Component,
   computed,
   defineComponent,
-  getCurrentInstance,
   PropType,
   ref,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
+import { useI18n } from 'vue-i18n';
+
+import { ObjectValues, ResolveRejectCallback, ITokenList } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, validateTipUrl } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
@@ -93,8 +94,7 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+    const { t } = useI18n();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<Step>(STEPS.form);
@@ -119,12 +119,12 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('common.next');
+        return t('common.next');
       }
       if (props.isMultisig) {
-        return root.$t('modals.multisigTxProposal.proposeAndApprove');
+        return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('common.send');
+      return t('common.send');
     });
 
     function proceedToNextStep() {
@@ -155,7 +155,7 @@ export default defineComponent({
       currentStep.value = STEPS.form;
     }
 
-    const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
+    const steps: Record<Step, { component: Component, onSuccess: () => void }> = {
       [STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,

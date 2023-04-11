@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
 
@@ -37,7 +36,7 @@ export default (store) => {
         state.transactions = {};
       },
       addTokenBalance(state, tokens) {
-        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
+        state.tokens = { ...state.tokens, ...tokens };
       },
     },
     actions: {

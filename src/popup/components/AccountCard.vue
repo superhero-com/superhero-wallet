@@ -53,7 +53,6 @@ export default defineComponent({
     selected: Boolean,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const { balance } = useBalances({ store });

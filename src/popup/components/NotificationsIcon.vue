@@ -22,7 +22,6 @@ export default defineComponent({
     BtnIcon,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const { notificationsAll } = useNotifications({ store, requirePolling: true });
 

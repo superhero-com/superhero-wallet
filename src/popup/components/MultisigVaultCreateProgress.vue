@@ -81,10 +81,9 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   PropType,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { MULTISIG_CREATION_PHASES } from '../utils';
 import type { IMultisigAccount, IMultisigCreationPhase } from '../../types';
 
@@ -116,27 +115,27 @@ export default defineComponent({
     isCreated: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+    const { t } = useI18n();
+
     const localPhases: PhaseLabel[] = [
       {
         key: MULTISIG_CREATION_PHASES.prepared,
-        text: root.$t('modals.creatingMultisigAccount.preparingMultisigVault'),
+        text: t('modals.creatingMultisigAccount.preparingMultisigVault'),
       },
       {
         key: MULTISIG_CREATION_PHASES.deployed,
-        text: root.$t('modals.creatingMultisigAccount.deployingSmartContract'),
+        text: t('modals.creatingMultisigAccount.deployingSmartContract'),
       },
       {
         key: MULTISIG_CREATION_PHASES.created,
-        text: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
-        caption: root.$t('modals.creatingMultisigAccount.creatingMultisigVault'),
+        text: t('modals.creatingMultisigAccount.creatingMultisigVault'),
+        caption: t('modals.creatingMultisigAccount.creatingMultisigVault'),
       },
       {
         key: MULTISIG_CREATION_PHASES.accessible,
-        text: root.$t('modals.creatingMultisigAccount.addingToWallet'),
-        pendingText: root.$t('modals.creatingMultisigAccount.syncingVault'),
-        caption: root.$t('modals.creatingMultisigAccount.takingLong'),
+        text: t('modals.creatingMultisigAccount.addingToWallet'),
+        pendingText: t('modals.creatingMultisigAccount.syncingVault'),
+        caption: t('modals.creatingMultisigAccount.takingLong'),
       },
     ];
 

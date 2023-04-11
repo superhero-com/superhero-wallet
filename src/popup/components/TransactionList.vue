@@ -1,12 +1,29 @@
 <template>
   <div class="transaction-list">
-    <InfiniteScroll class="list" data-cy="list" is-more-data @loadMore="loadMore">
-      <TransactionListItem v-for="transaction in filteredTransactions" :key="transaction.hash"
-        :transaction="getTransaction(transaction)" :multisig-transaction="getMultisigTransaction(transaction)"
-        :is-multisig="isMultisig" :data-cy="transaction.pending && 'pending-txs'" />
+    <InfiniteScroll
+      class="list"
+      data-cy="list"
+      is-more-data
+      @loadMore="loadMore"
+    >
+      <TransactionListItem
+        v-for="transaction in filteredTransactions"
+        :key="transaction.hash"
+        :transaction="getTransaction(transaction)"
+        :multisig-transaction="getMultisigTransaction(transaction)"
+        :is-multisig="isMultisig"
+        :data-cy="transaction.pending && 'pending-txs'"
+      />
     </InfiniteScroll>
-    <AnimatedSpinner v-if="loading" class="spinner" data-cy="loader" />
-    <div v-else-if="!filteredTransactions.length" class="message">
+    <AnimatedSpinner
+      v-if="loading"
+      class="spinner"
+      data-cy="loader"
+    />
+    <div
+      v-else-if="!filteredTransactions.length"
+      class="message"
+    >
       <p>
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
@@ -24,6 +41,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   getTransaction,
   getMultisigTransaction,
@@ -59,7 +77,6 @@ import {
   ITransactionsState,
   ITx,
 } from '../../types';
-import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
@@ -73,6 +90,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { t } = useI18n();
 
     const {
       activeAccount,
@@ -174,7 +192,7 @@ export default defineComponent({
             return direction === TX_DIRECTION.received;
           default:
             // @ts-ignore
-            throw new Error(`${i18n.global.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });
     }

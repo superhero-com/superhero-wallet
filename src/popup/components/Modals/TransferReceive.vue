@@ -88,13 +88,13 @@ import {
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import type {
   IAsset,
   IToken,
   ITokenList,
   ResolveRejectCallback,
 } from '../../../types';
-import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
 import { useAccounts, useCopy, useMultisigAccounts } from '../../../composables';
@@ -133,6 +133,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { t } = useI18n();
 
     const { activeAccount } = useAccounts({ store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
@@ -180,9 +181,8 @@ export default defineComponent({
       const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
-        // @ts-ignore
-        ? i18n.global.t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : i18n.global.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+        ? t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
       await store.dispatch('share', { text });
     }
 

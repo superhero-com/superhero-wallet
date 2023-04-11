@@ -1,8 +1,8 @@
 import { useModals, useSdk } from '../../composables';
-import { MODAL_SPEND_SUCCESS } from '../../popup/utils';
+import { watchUntilTruthy, MODAL_SPEND_SUCCESS } from '../../popup/utils';
 
 export default async (store) => {
-  const { nodeNetworkId, getSdk } = useSdk({ store });
+  const { nodeNetworkId } = useSdk({ store });
   const { openModal } = useModals();
 
   const waitTransactionMined = async ({
@@ -38,7 +38,7 @@ export default async (store) => {
     }
   };
 
-  await getSdk();
+  await watchUntilTruthy(() => store.state.sdkPlugin.ready);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[nodeNetworkId.value]

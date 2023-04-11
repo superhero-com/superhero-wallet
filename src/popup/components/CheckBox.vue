@@ -2,21 +2,22 @@
   <label class="checkbox-container">
     <input
       :disabled="disabled"
-      :value="value"
+      :value="modelValue"
       :type="type"
       :name="name"
-      @change="$emit('input', $event.target.checked)"
+      @change="$emit('update:modelValue', $event.target.checked)"
+      @input="$emit('update:modelValue', $event.target.checked)"
     >
 
     <span
       class="checkmark"
-      :class="{ checked: value, disabled }"
+      :class="{ checked: modelValue, disabled }"
     />
 
     <div
       v-if="$slots.default"
       class="label-text"
-      :class="{ checked: value }"
+      :class="{ checked: modelValue }"
     >
       <slot />
     </div>
@@ -24,14 +25,18 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  name: 'CheckBox',
   props: {
-    value: { type: [String, Number, Boolean], default: '' },
+    modelValue: { type: [String, Number, Boolean], default: '' },
     type: { type: String, default: 'checkbox' },
     name: { type: String, default: '' },
     disabled: Boolean,
   },
-};
+  emits: ['update:modelValue'],
+});
 </script>
 
 <style lang="scss" scoped>

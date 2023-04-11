@@ -19,7 +19,7 @@ import Connect from './Popups/Connect.vue';
 export default defineComponent({
   name: 'Address',
   components: { Connect },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
 

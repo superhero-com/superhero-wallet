@@ -1,6 +1,5 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
-import Vue from 'vue';
 import hdWallet from './hdWallet';
 import ledger from './ledger';
 import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
@@ -44,11 +43,11 @@ export default {
     },
     remove(state, idx) {
       if (state.activeIdx === state.list.length) state.activeIdx = 0;
-      Vue.delete(state.list, idx);
+      delete state.list[idx];
     },
     toggleShowed(state, idx) {
       if (state.activeIdx === idx) state.activeIdx = 0;
-      Vue.set(state.list[idx], 'showed', !state.list[idx].showed);
+      state.list[idx].showed = !state.list[idx].showed;
     },
   },
 

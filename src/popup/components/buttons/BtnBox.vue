@@ -8,7 +8,6 @@
       disabled,
       'is-big': isBig,
     }"
-    v-on="$listeners"
   >
     <IconWrapper
       v-if="icon"

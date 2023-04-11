@@ -44,7 +44,6 @@ export default defineComponent({
     TotalWalletAmount,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const {

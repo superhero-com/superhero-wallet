@@ -10,8 +10,6 @@ export const i18n = createI18n({
   messages: { en },
 });
 
-i18n.install();
-
 const languages = {
   en: {
     name: 'English',
@@ -24,11 +22,11 @@ const languages = {
 };
 
 const fetchAndSetLocale = async (languageCode) => {
-  if (!i18n.availableLocales.includes(languageCode)) {
+  if (!i18n.global.availableLocales.includes(languageCode)) {
     const messages = (await languages[languageCode].getMessages()).default;
-    i18n.setLocaleMessage(languageCode, messages);
+    i18n.global.setLocaleMessage(languageCode, messages);
   }
-  i18n.locale = languageCode;
+  i18n.global.locale = languageCode;
 };
 
 const preferredLocale = (() => {

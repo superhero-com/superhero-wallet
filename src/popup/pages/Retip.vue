@@ -60,9 +60,9 @@ import {
   onMounted,
   ref,
   computed,
-  getCurrentInstance,
 } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -96,18 +96,16 @@ export default defineComponent({
     BalanceInfo,
   },
   setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { t } = useI18n();
 
     const formModel = ref<IFormModel>({
       amount: '',
     });
 
-    const { isTippingSupported } = useSdk({ store: root.$store });
+    const { isTippingSupported } = useSdk({ store });
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
@@ -189,7 +187,7 @@ export default defineComponent({
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         error.payload = tip.value;

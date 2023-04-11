@@ -51,13 +51,13 @@
           :input-id="inputId"
         >
           <input
-            :id="inputId"
             v-bind="$attrs"
+            :id="inputId"
             class="input"
             autocomplete="off"
             step="any"
             data-cy="input"
-            :value="value"
+            :value="modelValue"
             :disabled="readonly"
             :maxlength="textLimit"
             :inputmode="inputMode"
@@ -118,7 +118,7 @@ export default defineComponent({
     BtnHelp,
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     label: { type: String, default: '' },
     type: {
       type: String as PropType<InputFieldType>,
@@ -148,6 +148,7 @@ export default defineComponent({
       default: null,
     },
   },
+  emits: ['update:modelValue', 'input', 'focus-change', 'click', 'help'],
   setup(props, { emit }) {
     const inputId = `input-${getCurrentInstance()?.uid}`;
 
@@ -170,14 +171,14 @@ export default defineComponent({
       () => !messageAsObject.value?.hideMessage && !!messageAsObject.value?.text,
     );
     const availableTextLimit = computed(
-      () => (props.textLimit && props.value)
-        ? props.textLimit - String(props.value).length
+      () => (props.textLimit && props.modelValue)
+        ? props.textLimit - String(props.modelValue).length
         : props.textLimit,
     );
 
     function checkIfNumber(event: KeyboardEvent) {
       const isSingleChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey;
-      const alreadyHasDot = (typeof props.value === 'string' && props.value?.includes('.')) && [',', '.'].includes(event.key);
+      const alreadyHasDot = (typeof props.modelValue === 'string' && props.modelValue?.includes('.')) && [',', '.'].includes(event.key);
       if (
         props.type === 'number'
         && isSingleChar
@@ -189,7 +190,7 @@ export default defineComponent({
 
     function handleInput(event: InputEvent) {
       const { value } = event.target as HTMLInputElement;
-      emit('input', props.type === 'number' ? value?.replace(',', '.') : value);
+      emit('update:modelValue', props.type === 'number' ? value?.replace(',', '.') : value);
     }
 
     watch(

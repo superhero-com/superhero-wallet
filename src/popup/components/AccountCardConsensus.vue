@@ -28,9 +28,10 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, getCurrentInstance, PropType,
+  computed, defineComponent, PropType,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { useAccounts, useConnection } from '../../composables';
 import type { IMultisigAccount } from '../../types';
 
@@ -52,9 +53,8 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const { isOnline } = useConnection();
     const { isLocalAccountAddress } = useAccounts({ store });
@@ -74,13 +74,13 @@ export default defineComponent({
       const { confirmedBy, confirmationsRequired, signers } = props.multisigAccount;
 
       if (confirmedBy.length === confirmationsRequired) {
-        return root.$t('multisig.transactionReady');
+        return t('multisig.transactionReady');
       }
       if (isSigned.value) {
-        return root.$t('multisig.transactionSigned');
+        return t('multisig.transactionSigned');
       }
       if (signers.some((signer) => isLocalAccountAddress(signer))) {
-        return root.$t('multisig.signatureRequested');
+        return t('multisig.signatureRequested');
       }
       return null;
     });

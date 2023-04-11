@@ -1,4 +1,4 @@
-import Vue, { watch } from 'vue';
+import { watch } from 'vue';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   fetchJson,
@@ -64,19 +64,26 @@ export default (store) => {
         state.owned = names;
       },
       setDefault({ defaults }, { address, name }) {
-        if (name) Vue.set(defaults, `${address}-${nodeNetworkId.value}`, name);
-        else Vue.delete(defaults, `${address}-${nodeNetworkId.value}`);
+        if (name) {
+          // eslint-disable-next-line no-param-reassign
+          defaults[`${address}-${nodeNetworkId.value}`] = name;
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          delete defaults[`${address}-${nodeNetworkId.value}`];
+        }
       },
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
-        Vue.set(state.owned[index], 'autoExtend', value);
+        state.owned[index].autoExtend = value;
       },
       setPreferred({ preferred }, { address, name }) {
         const key = `${address}-${nodeNetworkId.value}`;
         if (name) {
-          Vue.set(preferred, key, name);
+          // eslint-disable-next-line no-param-reassign
+          preferred[key] = name;
         } else {
-          Vue.delete(preferred, key);
+          // eslint-disable-next-line no-param-reassign
+          delete preferred[key];
         }
       },
       setAuctionEntry(state, { name, expiration, bids }) {
