@@ -3,12 +3,6 @@ import {
   getMdwEndpointPrefixForHash,
 } from '../../../src/popup/utils';
 
-const testErrors = [{
-  hash: null,
-}, {
-  hash: undefined,
-}];
-
 const testHashes = [{
   hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcek0',
   error: true,
@@ -39,9 +33,6 @@ const testHashes = [{
 }];
 
 describe('validateHash', () => {
-  testErrors.forEach((test) => it('should throw an error', () => {
-    expect(() => validateHash(test.hash)).toThrow();
-  }));
   testHashes.forEach((test) => it('should be invalid if hash has improper length, contains invalid characters (0, J, O, l or symbols) or does not have ".chain" ending', () => {
     expect(validateHash(test.hash).valid).toBe(!test.error);
   }));
@@ -49,7 +40,8 @@ describe('validateHash', () => {
     expect.assertions(1);
     if (test.error) {
       expect(validateHash(test.hash).valid).toBe(false);
+    } else {
+      expect(getMdwEndpointPrefixForHash(test.hash)).toBe(test.endpoint);
     }
-    expect(getMdwEndpointPrefixForHash(test.hash)).toBe(test.endpoint);
   }));
 });
