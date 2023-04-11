@@ -60,10 +60,9 @@ import {
   onMounted,
   ref,
   computed,
-  getCurrentInstance,
 } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import VueI18n from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import {
@@ -96,12 +95,10 @@ export default defineComponent({
     BalanceInfo,
   },
   setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { t } = useI18n();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -134,7 +131,7 @@ export default defineComponent({
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     const validationStatus = computed<{
-      error: boolean, msg?: string | VueI18n.TranslateResult
+      error: boolean, msg?: string | TranslateResult
     }>(() => {
       if (!sdk.value || !tippingContract.value) {
         return { error: true };
@@ -192,7 +189,7 @@ export default defineComponent({
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         error.payload = tip.value;

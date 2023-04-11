@@ -52,7 +52,7 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
     defaultText: { type: String, required: true },
     itemTitle: { type: String as PropType<keyof IFormSelectOption>, default: 'text' },
@@ -65,6 +65,7 @@ export default defineComponent({
      */
     unstyled: Boolean,
   },
+  emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
     const { openModal } = useModals();
 
@@ -72,14 +73,14 @@ export default defineComponent({
       if (props.persistentDefaultText) {
         return props.defaultText;
       }
-      return (props.value)
-        ? props.options.find(({ value }) => value === props.value)?.[props.itemTitle]
+      return (props.modelValue)
+        ? props.options.find(({ value }) => value === props.modelValue)?.[props.itemTitle]
         : props.defaultText;
     });
 
     function openOptionsModal() {
       openModal(MODAL_FORM_SELECT_OPTIONS, {
-        value: props.value,
+        value: props.modelValue,
         options: props.options,
         title: props.defaultText,
       })

@@ -42,11 +42,12 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, getCurrentInstance, ref,
+  computed, defineComponent, ref,
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { IAuctionBid } from '../../../types';
 import { useModals, useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
@@ -75,10 +76,9 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
+    const { t } = useI18n();
 
     const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
@@ -96,7 +96,7 @@ export default defineComponent({
     const amountError = computed(() => {
       const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
       return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
-        ? root.$t('pages.names.auctions.min-bid', { minBid })
+        ? t('pages.names.auctions.min-bid', { minBid })
         : null;
     });
 
@@ -107,13 +107,13 @@ export default defineComponent({
         loading.value = true;
         await sdk.aensBid(props.name, aeToAettos(amount.value));
         openDefaultModal({
-          msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
+          msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });
         router.push({ name: 'auction-history', params: { name: props.name } });
       } catch (e: any) {
         let msg = e.message;
         if (msg.includes('is not enough to execute')) {
-          msg = root.$t('pages.names.balance-error');
+          msg = t('pages.names.balance-error');
         }
         openDefaultModal({ msg });
       } finally {

@@ -18,13 +18,14 @@
         <Warning class="icon" />
         {{ $t('modals.confirm-raw-sign.warning.title') }}
       </span>
-      <i18n
-        path="modals.confirm-raw-sign.warning.content"
+      <i18n-t
+        keypath="modals.confirm-raw-sign.warning.content"
         tag="span"
         class="content"
+        scope="global"
       >
         <br>
-      </i18n>
+      </i18n-t>
     </div>
 
     <DetailsItem

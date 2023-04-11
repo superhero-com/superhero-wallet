@@ -99,9 +99,7 @@ export default defineComponent({
     bodyWithoutPaddingBottom: Boolean,
     header: { type: String, default: null },
   },
-  emits: [
-    'close',
-  ],
+  emits: ['close', 'opened'],
   setup(props, { slots }) {
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 

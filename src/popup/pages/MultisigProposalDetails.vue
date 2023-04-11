@@ -264,9 +264,11 @@ import {
   onBeforeUnmount,
   watch,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   formatDate,
   formatTime,
@@ -329,10 +331,11 @@ export default defineComponent({
     AnimatedSpinner,
     ExternalLink,
   },
-  setup(props) {
-    console.log(props);
-
+  setup() {
     const { openDefaultModal, openModal } = useModals();
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
 
     const {
       activeMultisigAccount,
@@ -416,11 +419,11 @@ export default defineComponent({
         let { message } = error;
         if (isInsufficientBalanceError(error)) {
           message = isVault
-            ? root.$t('modals.vaultLowBalance.msg')
-            : root.$t('modals.accountLowBalance.msg', { action });
+            ? t('modals.vaultLowBalance.msg')
+            : t('modals.accountLowBalance.msg', { action });
           title = isVault
-            ? root.$t('modals.vaultLowBalance.title')
-            : root.$t('modals.accountLowBalance.title');
+            ? t('modals.vaultLowBalance.title')
+            : t('modals.accountLowBalance.title');
         }
         openDefaultModal({
           icon: 'warning',

@@ -38,8 +38,8 @@
       </p>
       <InviteItem
         v-for="link in invites"
+        v-bind="link ?? null"
         :key="link.secretKey"
-        v-bind="link"
         @loading="(val) => (loading = val)"
       />
     </div>
@@ -70,7 +70,6 @@ export default defineComponent({
     NewInviteLink,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const loading = ref(false);
     const formModel = ref<TransferFormModel>({

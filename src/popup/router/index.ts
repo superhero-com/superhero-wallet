@@ -27,9 +27,6 @@ import {
 } from '../../lib/environment';
 import { useAccounts } from '../../composables';
 
-// const app = getCurrentInstance();
-// if (app) app.appContext.app.use(VueRouter);
-
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
   history: IS_WEB ? createWebHistory() : createWebHashHistory(),

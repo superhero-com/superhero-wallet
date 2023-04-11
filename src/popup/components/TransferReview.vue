@@ -123,7 +123,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   PropType,
   ref,
 } from 'vue';
@@ -131,6 +130,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { encode, Encoding } from '@aeternity/aepp-sdk-13';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -181,10 +181,9 @@ export default defineComponent({
     amount: { type: Number, default: null },
   },
   setup(props, { emit }) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
+    const { t } = useI18n();
 
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
@@ -215,7 +214,7 @@ export default defineComponent({
 
     function openTransactionFailedModal() {
       openDefaultModal({
-        title: root.$t('modals.transaction-failed.msg'),
+        title: t('modals.transaction-failed.msg'),
         icon: 'critical',
       });
     }

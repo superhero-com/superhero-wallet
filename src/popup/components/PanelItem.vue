@@ -4,7 +4,6 @@
     class="panel-item"
     variant="dark"
     :to="to"
-    v-on="$listeners"
   >
     <div class="panel-item-left">
       <slot name="icon" />

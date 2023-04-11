@@ -12,45 +12,49 @@
           {{ $t('modals.recipient.sub-header') }}
         </span>
         <p>
-          <i18n
-            path="modals.recipient.msg.publicAddress.msg"
+          <i18n-t
+            keypath="modals.recipient.msg.publicAddress.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.publicAddress.title') }}:
             </strong>
-          </i18n>
+          </i18n-t>
         </p>
         <p>
-          <i18n
-            path="modals.recipient.msg.chain.msg"
+          <i18n-t
+            keypath="modals.recipient.msg.chain.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
-          </i18n>
+          </i18n-t>
         </p>
         <p>
-          <i18n
-            path="modals.recipient.msg.url.msg"
+          <i18n-t
+            keypath="modals.recipient.msg.url.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.url.title') }}:
             </strong>
-          </i18n>
+          </i18n-t>
         </p>
         <p v-if="UNFINISHED_FEATURES">
-          <i18n
-            path="modals.readMore.msg"
+          <i18n-t
+            keypath="modals.readMore.msg"
             class="help"
+            scope="global"
           >
             <a :href="BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
-          </i18n>
+          </i18n-t>
         </p>
       </div>
     </template>

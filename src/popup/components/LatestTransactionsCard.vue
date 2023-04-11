@@ -38,7 +38,6 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const { isOnline } = useConnection();

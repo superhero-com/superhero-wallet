@@ -49,8 +49,7 @@ export default defineComponent({
   components: {
     DashboardCard,
   },
-  setup(props) {
-    console.log(props);
+  setup() {
     const { openModal } = useModals();
     const route = useRoute();
 

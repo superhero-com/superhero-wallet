@@ -4,6 +4,7 @@ const commitHash = require('child_process').execSync('git rev-parse HEAD || echo
 const sass = require('sass');
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
+const path = require('path');
 
 // eslint-disable-next-line camelcase
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;
@@ -102,6 +103,12 @@ module.exports = {
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
+      Object.assign(definitions, {
+        __VUE_I18N_FULL_INSTALL__: JSON.stringify(true),
+        __INTLIFY_PROD_DEVTOOLS__: JSON.stringify(false),
+        __VUE_I18N_LEGACY_API__: JSON.stringify(false),
+      });
+
       Object.entries(definitions['process.env']).forEach(([k, v]) => {
         definitions[`process.env.${k}`] = v;
       });
@@ -167,52 +174,59 @@ module.exports = {
       .loader('raw-loader')
       .end();
 
-    // config.module.rule('svg')
-    //   .uses.clear().end()
-    //   .oneOf('vue-component')
-    //   .resourceQuery(/vue-component/)
-    //   .use('babel-loader')
-    //   .loader('babel-loader')
-    //   .options({ configFile: false, presets: ['@babel/preset-env'] })
-    //   .end()
-    //   .use('vue-svg-loader')
-    //   .loader('vue-svg-loader')
-    //   .options({
-    //     svgo: {
-    //       plugins: [{
-    //         addClassesToSVGElement: {
-    //           type: 'full',
-    //           fn(data, options, extra) {
-    //             const svg = data.content[0];
-    //             svg.class.add('icon', path.basename(extra.path, '.svg'));
-    //             return data;
-    //           },
-    //         },
-    //       }],
-    //     },
-    //   })
-    //   .end()
-    //   .end()
-    //   .oneOf('skip-optimize')
-    //   .resourceQuery(/skip-optimize/)
-    //   .use('vue-svg-loader')
-    //   .loader('vue-svg-loader')
-    //   .options({ svgo: false })
-    //   .end()
-    //   .end()
-    //   .oneOf('default')
-    //   .use('svg-url-loader')
-    //   .loader('svg-url-loader')
-    //   .options({
-    //     noquotes: true,
-    //     limit: 4096,
-    //     name: 'img/[name].[hash:8].[ext]',
-    //     esModule: false,
-    //   })
-    //   .end()
-    //   .use('svgo-loader')
-    //   .loader('svgo-loader')
-    //   .end();
+    config.module.rule('svg')
+      .uses.clear().end()
+      .oneOf('vue-component')
+      .resourceQuery(/vue-component/)
+      .use('vue-loader-v16')
+      .loader('vue-loader-v16')
+      .end()
+      .use('custom-svg-loader')
+      .loader(path.resolve(__dirname, './custom-svg-loader.js'))
+      .options({
+        svgo: {
+          plugins: [{
+            name: 'preset-default',
+            params: {
+              overrides: {
+                addClassesToSVGElement: {
+                  type: 'full',
+                  fn(data, options, extra) {
+                    const svg = data.content[0];
+                    svg.class.add('icon', path.basename(extra.path, '.svg'));
+                    return data;
+                  },
+                },
+              },
+            },
+          }],
+        },
+      })
+      .end()
+      .end()
+      .oneOf('skip-optimize')
+      .resourceQuery(/skip-optimize/)
+      .use('vue-loader-v16')
+      .loader('vue-loader-v16')
+      .end()
+      .use('custom-svg-loader')
+      .loader(path.resolve(__dirname, './custom-svg-loader.js'))
+      .options({ svgo: false })
+      .end()
+      .end()
+      .oneOf('default')
+      .use('svg-url-loader')
+      .loader('svg-url-loader')
+      .options({
+        noquotes: true,
+        limit: 4096,
+        name: 'img/[name].[hash:8].[ext]',
+        esModule: false,
+      })
+      .end()
+      .use('svgo-loader')
+      .loader('svgo-loader')
+      .end();
     return config;
   },
 

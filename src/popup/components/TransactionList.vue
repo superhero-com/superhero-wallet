@@ -45,13 +45,13 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import type {
   INetwork,
   ITokenList,
@@ -95,9 +95,8 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const loading = ref(false);
     const isDestroyed = ref(false);
@@ -163,7 +162,7 @@ export default defineComponent({
               case FILTER_MODE.in:
                 return direction.value === TX_DIRECTION.received;
               default:
-                throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+                throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
             }
           })
           .filter(
