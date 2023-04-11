@@ -32,7 +32,6 @@ export default defineComponent({
     BtnPill,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const { isOnline } = useConnection();
     const { isNodeReady, isNodeError } = useSdk({ store });

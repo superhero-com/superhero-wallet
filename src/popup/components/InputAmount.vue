@@ -11,7 +11,7 @@
     class="input-amount"
     type="number"
     placeholder="0.00"
-    :value="value"
+    :model-value="modelValue"
     :message="$attrs['message'] || errors.first('amount')"
     :label="$attrs.label || $t('pages.tipPage.amountLabel')"
     @input="$emit('input', $event)"
@@ -49,9 +49,10 @@ export default defineComponent({
     InputField,
   },
   props: {
-    value: { type: [String, Number], default: '' },
+    modelValue: { type: [String, Number], default: '' },
     noToken: Boolean,
   },
+  emits: ['update:modelValue', 'error'],
   setup(props, { emit }) {
     const instance = getCurrentInstance();
     const root = instance?.root as any;
@@ -65,7 +66,7 @@ export default defineComponent({
 
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const max = computed(() => balance.value.minus(fee.value).toNumber());
-    const currencyAmount = computed(() => getFormattedFiat(+props.value || 0));
+    const currencyAmount = computed(() => getFormattedFiat(+props.modelValue || 0));
 
     onMounted(async () => {
       const sdk = await getSdk();

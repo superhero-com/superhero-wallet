@@ -14,9 +14,9 @@ import '../styles/fullscreen-message.scss';
 
 registerModals();
 const app = createApp(App);
+app.use(i18n);
 app.use(store);
-app.use(router as any);
-app.use(i18n as any);
+app.use(router);
 app.component('Loader', LoaderComponent);
 app.mount('#app');
 

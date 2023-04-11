@@ -2,10 +2,11 @@
   <div class="review-tip-wrapper">
     <ModalHeader :title="$t('pages.send.sendingCryptoToUrl')">
       <template #subtitle>
-        <i18n
-          path="pages.send.tipInfo"
+        <i18n-t
+          keypath="pages.send.tipInfo"
           tag="span"
           class="subtitle"
+          scope="global"
         >
           <a
             :href="AGGREGATOR_URL"
@@ -14,7 +15,7 @@
           >
             {{ $t('pages.notifications.superhero') }}
           </a>
-        </i18n>
+        </i18n-t>
       </template>
     </ModalHeader>
 

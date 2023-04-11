@@ -139,11 +139,12 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
+  nextTick,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   MODAL_CONFIRM,
   blocksToRelativeTime,
@@ -185,9 +186,8 @@ export default defineComponent({
     autoExtend: { type: Boolean },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData({ store });
 
     const expand = ref(false);
@@ -216,7 +216,7 @@ export default defineComponent({
       expand.value = true;
       showInput.value = !showInput.value;
       if (showInput.value) {
-        root.$nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
+        nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
       }
     }
 
@@ -237,8 +237,8 @@ export default defineComponent({
         await store.dispatch('modals/open', {
           name: MODAL_CONFIRM,
           icon: 'info',
-          title: root.$t('modals.autoextend-help.title'),
-          msg: root.$t('modals.autoextend-help.msg'),
+          title: t('modals.autoextend-help.title'),
+          msg: t('modals.autoextend-help.msg'),
         });
       }
       store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });

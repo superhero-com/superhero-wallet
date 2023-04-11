@@ -20,7 +20,6 @@ export default defineComponent({
   name: 'Address',
   components: { Connect },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const router = useRouter();
 

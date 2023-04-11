@@ -32,12 +32,12 @@
 <script lang="ts">
 import {
   defineComponent,
-  getCurrentInstance,
   ref,
   watch,
 } from 'vue';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { MODAL_DEFAULT } from '../utils';
 import { useDeepLinkApi, useSdk, useAccounts } from '../../composables';
 import { useGetter } from '../../composables/vuex';
@@ -54,12 +54,10 @@ export default defineComponent({
     FixedScreenFooter,
   },
   setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { t } = useI18n();
 
     const { getSdk } = useSdk({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
@@ -101,7 +99,7 @@ export default defineComponent({
       } catch (e: any) {
         store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         e.payload = { id, parentId, text };

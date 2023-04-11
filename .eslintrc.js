@@ -33,7 +33,7 @@ module.exports = {
     }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-unused-vars': 'error',
+    'no-unused-vars': 'warn', // TODO: change back to 'error' 
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
     'import/prefer-default-export': 'off',

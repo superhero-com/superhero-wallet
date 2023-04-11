@@ -16,7 +16,7 @@
       :label="input.label"
       :data-cy="input.dataCy"
       :message="errors.first(input.key)"
-      :value="newNetwork[input.key]"
+      :model-value="newNetwork[input.key]"
       :text-limit="input.textLimit"
     />
     <div class="button-wrapper">

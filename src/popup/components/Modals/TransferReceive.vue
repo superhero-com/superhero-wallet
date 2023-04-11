@@ -85,13 +85,13 @@ import {
   computed, defineComponent, ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import type {
   IAccount,
   IAsset,
   IToken,
   ITokenList,
 } from '../../../types';
-import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { useCopy, useMultisigAccounts } from '../../../composables';
 import {
@@ -130,6 +130,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { t } = useI18n();
 
     const { activeMultisigAccount } = useMultisigAccounts({ store });
 
@@ -176,8 +177,8 @@ export default defineComponent({
       const { address } = account.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
-        ? i18n.global.t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : i18n.global.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+        ? t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
       await store.dispatch('share', { text });
     }
 

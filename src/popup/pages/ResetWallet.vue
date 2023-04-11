@@ -3,15 +3,16 @@
     <p class="text-description">
       {{ $t('pages.reset-wallet.description') }}
     </p>
-    <i18n
-      path="pages.reset-wallet.description2"
+    <i18n-t
+      keypath="pages.reset-wallet.description2"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <RouterLink :to="{ name: 'settings-seed-phrase' }">
         seed phrase
       </RouterLink>
-    </i18n>
+    </i18n-t>
 
     <BtnMain
       variant="danger"

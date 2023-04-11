@@ -38,7 +38,6 @@ export default defineComponent({
     BtnMain,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const router = useRouter();
     const route = useRoute();

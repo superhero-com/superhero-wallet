@@ -4,7 +4,6 @@
     class="tab"
     :class="{ active }"
     :text="text"
-    v-on="$listeners"
   />
 </template>
 

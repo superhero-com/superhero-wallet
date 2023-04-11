@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, getCurrentInstance } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { useConnection, usePendingMultisigTransaction } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { MODAL_TRANSFER_SEND } from '../utils';
@@ -28,9 +29,8 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const { isOnline } = useConnection();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
@@ -46,8 +46,8 @@ export default defineComponent({
     }
 
     const subtitle = computed(() => (props.isMultisig)
-      ? root.$t('dashboard.proposeCard.description')
-      : root.$t('dashboard.sendCard.description'));
+      ? t('dashboard.proposeCard.description')
+      : t('dashboard.sendCard.description'));
 
     return {
       isOnline,

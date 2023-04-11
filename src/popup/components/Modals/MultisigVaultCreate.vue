@@ -86,13 +86,14 @@
             :size="signers.length"
           />
 
-          <i18n
-            path="modals.createMultisigAccount.consensusRequiredContent"
+          <i18n-t
+            keypath="modals.createMultisigAccount.consensusRequiredContent"
             tag="span"
             class="text"
+            scope="global"
           >
             <span class="text-emphasis">{{ signers.length }} </span>
-          </i18n>
+          </i18n-t>
 
           <BtnHelp
             :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
@@ -159,7 +160,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   PropType,
   ref,
@@ -167,6 +167,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   MODAL_READ_QR_CODE,
   MODAL_DEFAULT,
@@ -226,10 +227,9 @@ export default defineComponent({
     reject: { type: Function, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
+    const { t } = useI18n();
 
     const { accountsSelectOptions } = useAccounts({ store });
 
@@ -290,7 +290,7 @@ export default defineComponent({
 
     function getErrorMessage(signer: ICreateMultisigAccount) {
       return checkIfSignerAddressDuplicated(signer)
-        ? root.$t('modals.createMultisigAccount.errorDuplicatingInputMessage')
+        ? t('modals.createMultisigAccount.errorDuplicatingInputMessage')
         : null;
     }
     /**
@@ -300,7 +300,7 @@ export default defineComponent({
     async function openScanQrModal(signerIndex: number) {
       const scanResult = await store.dispatch('modals/open', {
         name: MODAL_READ_QR_CODE,
-        title: root.$t('pages.send.scanAddress'),
+        title: t('pages.send.scanAddress'),
         icon: 'critical',
       });
 
@@ -312,7 +312,7 @@ export default defineComponent({
       if (!(valid && !isName)) {
         store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
-          title: root.$t('modals.invalid-qr-code.msg'),
+          title: t('modals.invalid-qr-code.msg'),
           icon: 'critical',
         });
         return;
@@ -322,7 +322,7 @@ export default defineComponent({
       if (signers.value.find((signer) => signer.address === scanResult)) {
         store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
-          title: root.$t('modals.createMultisigAccount.errorDuplicatingSigner'),
+          title: t('modals.createMultisigAccount.errorDuplicatingSigner'),
           icon: 'critical',
         });
         return;
@@ -333,7 +333,7 @@ export default defineComponent({
     }
 
     function getSignerLabel(index: number) {
-      return `${root.$t('modals.createMultisigAccount.signer')} ${index + 1}`;
+      return `${t('modals.createMultisigAccount.signer')} ${index + 1}`;
     }
 
     function openFormStep() {
@@ -360,7 +360,7 @@ export default defineComponent({
         handleUnknownError(error);
         await store.dispatch('modals/open', {
           name: MODAL_DEFAULT,
-          title: root.$t('multisig.multisigVaultCreationFailed'),
+          title: t('multisig.multisigVaultCreationFailed'),
           icon: 'critical',
         });
         currentStep.value = STEPS.form;

@@ -13,16 +13,17 @@
     >
       <SuperheroLogoIcon class="superhero-logo" />
       <div class="heading">
-        <i18n
-          path="pages.index.heading.message"
+        <i18n-t
+          keypath="pages.index.heading.message"
           tag="span"
           class="tag"
+          scope="global"
         >
           <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
           <span class="store">{{ $t('pages.index.heading.store') }}</span>
           <span class="send">{{ $t('pages.index.heading.send') }}</span>
           <span class="aeternity-name">{{ $t('pages.index.heading.aeternityBlockchain') }}</span>
-        </i18n>
+        </i18n-t>
       </div>
 
       <Platforms v-if="IS_WEB">

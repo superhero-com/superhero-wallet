@@ -1,6 +1,7 @@
 <template>
   <ListItemWrapper
     v-if="tokenData"
+    v-bind="$attrs"
     class="tokens-list-item"
     :to="preventNavigation ? null : {
       name: targetRouteName,
@@ -10,7 +11,6 @@
     }"
     :extend="preventNavigation"
     :selected="selected"
-    v-on="$listeners"
   >
     <div class="row">
       <div class="left">

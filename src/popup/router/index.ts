@@ -1,7 +1,6 @@
 import {
   createRouter, createWebHashHistory, createWebHistory, RouteRecordRaw,
 } from 'vue-router';
-// import { getCurrentInstance } from 'vue';
 import { ICordova } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -27,9 +26,6 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-
-// const app = getCurrentInstance();
-// if (app) app.appContext.app.use(VueRouter);
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
@@ -121,6 +117,7 @@ if (IS_CORDOVA) {
       if (url) {
         router.push({ name: ROUTE_ACCOUNT, query: { url } });
       } else {
+        // @ts-ignore
         store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.global.t('modals.mobile-share-error') as any });
       }
     });

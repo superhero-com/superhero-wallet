@@ -55,8 +55,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance } from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { computed, defineComponent } from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
 import AccountItem from './AccountItem.vue';
@@ -81,10 +81,9 @@ export default defineComponent({
     proposalCompleted: Boolean,
   },
   setup(props: any) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
+
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store });
@@ -115,42 +114,42 @@ export default defineComponent({
     const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
       if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.completed'),
+          content: t('pages.proposalDetails.infoBox.completed'),
           type: INFO_BOX_TYPES.success,
         };
       }
 
       if (pendingMultisigTxExpired.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.expired'),
+          content: t('pages.proposalDetails.infoBox.expired'),
           type: INFO_BOX_TYPES.warning,
         };
       }
 
       if (pendingMultisigTxConfirmed.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.approved'),
+          content: t('pages.proposalDetails.infoBox.approved'),
           type: INFO_BOX_TYPES.default,
         };
       }
 
       if (isPendingMultisigTxCompletedAndRevoked.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.justRevoked'),
+          content: t('pages.proposalDetails.infoBox.justRevoked'),
           type: INFO_BOX_TYPES.danger,
         };
       }
 
       if (pendingMultisigTxProposingAccountRevoked.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.proposingAccountRevoked'),
+          content: t('pages.proposalDetails.infoBox.proposingAccountRevoked'),
           type: INFO_BOX_TYPES.danger,
         };
       }
 
       if (pendingMultisigTxRevoked.value) {
         return {
-          content: root.$t('pages.proposalDetails.infoBox.revoked', [
+          content: t('pages.proposalDetails.infoBox.revoked', [
             pendingMultisigTxRefusedBy.value.length,
             pendingMultisigTxRequiredConfirmations.value,
           ]),
@@ -159,11 +158,11 @@ export default defineComponent({
       }
 
       return {
-        content: root.$t('pages.proposalDetails.infoBox.pending', [
+        content: t('pages.proposalDetails.infoBox.pending', [
           pendingMultisigTxPendingConfirmationsCount.value,
           pendingMultisigTxPendingConfirmationsCount.value > 1
-            ? root.$t('pages.proposalDetails.infoBox.signatures')
-            : root.$t('pages.proposalDetails.infoBox.signature'),
+            ? t('pages.proposalDetails.infoBox.signatures')
+            : t('pages.proposalDetails.infoBox.signature'),
         ]),
         type: INFO_BOX_TYPES.default,
       };

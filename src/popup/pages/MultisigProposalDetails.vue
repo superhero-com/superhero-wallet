@@ -320,7 +320,6 @@ export default defineComponent({
     ExternalLink,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const router = useRouter();
 

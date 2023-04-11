@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { isEmpty, uniqBy } from 'lodash-es';
@@ -30,7 +29,7 @@ export default (store) => {
     },
     mutations: {
       setTransactions(state, { address, transactions }) {
-        Vue.set(state.transactions, address, transactions);
+        state.transactions[address] = transactions;
       },
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
@@ -40,7 +39,7 @@ export default (store) => {
         state.transactions = {};
       },
       addTokenBalance(state, tokens) {
-        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
+        state.tokens = { ...state.tokens, ...tokens };
       },
     },
     actions: {

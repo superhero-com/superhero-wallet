@@ -48,7 +48,6 @@ export default defineComponent({
     DashboardCard,
   },
   setup(props) {
-    console.log(props);
     const route = useRoute();
 
     const backedUpSeed = useState('backedUpSeed');

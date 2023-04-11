@@ -3,7 +3,6 @@
     v-bind="$attrs"
     class="list-item-wrapper"
     :class="{ selected }"
-    v-on="$listeners"
   >
     <slot />
   </BtnPlain>

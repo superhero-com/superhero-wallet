@@ -1,9 +1,10 @@
 <template>
   <div class="permissions-settings">
-    <i18n
-      path="pages.permissions.description"
+    <i18n-t
+      keypath="pages.permissions.description"
       tag="div"
       class="text-description"
+      scope="global"
     >
       <a
         href="https://superhero.com/"
@@ -11,7 +12,7 @@
       >
         superhero.com
       </a>
-    </i18n>
+    </i18n-t>
 
     <div class="hosts">
       <PanelItem

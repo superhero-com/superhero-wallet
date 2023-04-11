@@ -104,13 +104,13 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   PropType,
   ref,
 } from 'vue';
 import { camelCase } from 'lodash-es';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
@@ -175,9 +175,8 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const { getSdk } = useSdk({ store });
 
@@ -268,7 +267,7 @@ export default defineComponent({
         availableTokens.value,
       )?.tokens;
       if (!isPool.value) return tokens;
-      if (isProvideLiquidity.value) return tokens.filter((t) => !t.isPool);
+      if (isProvideLiquidity.value) return tokens.filter((token) => !token.isPool);
       return tokens.reverse();
     }
 
@@ -279,13 +278,13 @@ export default defineComponent({
 
     function getLabels(token: any, idx: number) {
       if (isAllowance.value) {
-        return root.$t('pages.signTransaction.approveUseOfToken');
+        return t('pages.signTransaction.approveUseOfToken');
       }
       if (isSwap.value) {
-        return !idx ? root.$t('pages.signTransaction.from') : root.$t('pages.signTransaction.to');
+        return !idx ? t('pages.signTransaction.from') : t('pages.signTransaction.to');
       }
       if (isPool.value && isProvideLiquidity.value) {
-        return token.isPool ? '' : root.$t('pages.signTransaction.maximumDeposited');
+        return token.isPool ? '' : t('pages.signTransaction.maximumDeposited');
       }
       if (
         isPool.value
@@ -293,8 +292,8 @@ export default defineComponent({
         && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_REMOVE_LIQUIDITY
       ) {
         return token.isPool
-          ? root.$t('pages.signTransaction.poolTokenSpent')
-          : root.$t('pages.signTransaction.minimumWithdrawn');
+          ? t('pages.signTransaction.poolTokenSpent')
+          : t('pages.signTransaction.minimumWithdrawn');
       }
       return '';
     }
@@ -323,7 +322,7 @@ export default defineComponent({
           tokenList.value = allTokens.map((token) => ({
             ...token,
             tokens: token.isPool && !isProvideLiquidity.value
-              ? allTokens.filter((t) => !t.isPool).reverse()
+              ? allTokens.filter((tkn) => !tkn.isPool).reverse()
               : [token],
           }));
         } catch (e) {

@@ -60,9 +60,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, getCurrentInstance } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { RouteLocationRaw, useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useGetter } from '../../composables/vuex';
 import { WalletRouteMeta } from '../../types';
 import {
@@ -92,11 +93,10 @@ export default defineComponent({
     BtnIcon,
   },
   setup() {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const route = useRoute();
     const router = useRouter();
+    const { t } = useI18n();
 
     const { homeRouteName } = useUi({ store });
 
@@ -111,7 +111,7 @@ export default defineComponent({
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
     const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
-      () => routeMeta.value?.title ? root.$t(`pages.titles.${routeMeta.value.title}`) : '',
+      () => routeMeta.value?.title ? t(`pages.titles.${routeMeta.value.title}`) : '',
     );
 
     function back() {

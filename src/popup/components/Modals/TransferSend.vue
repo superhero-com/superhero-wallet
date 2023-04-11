@@ -45,10 +45,11 @@
 
 <script lang="ts">
 import Vue, {
-  computed, defineComponent, getCurrentInstance, ref,
+  computed, defineComponent, ref,
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import type { ITokenList, ObjectValues } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
@@ -89,9 +90,8 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const currentRenderedComponent = ref<Vue.Component>();
     const currentStep = ref<Step>(STEPS.form);
@@ -116,12 +116,12 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('modals.send.next');
+        return t('modals.send.next');
       }
       if (props.isMultisig) {
-        return root.$t('modals.multisigTxProposal.proposeAndApprove');
+        return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('pages.send.send');
+      return t('pages.send.send');
     });
 
     function closeModal() {

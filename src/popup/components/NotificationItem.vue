@@ -61,9 +61,10 @@
 
 <script lang="ts">
 import {
-  PropType, computed, defineComponent, getCurrentInstance,
+  PropType, computed, defineComponent,
 } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
@@ -103,24 +104,23 @@ export default defineComponent({
     notification: { type: Object as PropType<IProps['notification']>, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const router = useRouter();
+    const { t } = useI18n();
 
     function getNotificationText(notification: INotification) {
       switch (notification.type) {
         case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
-          return root.$t('pages.notifications.commentOnComment');
+          return t('pages.notifications.commentOnComment');
         case NOTIFICATION_TYPE_COMMENT_ON_TIP:
-          return root.$t('pages.notifications.commentOnTip');
+          return t('pages.notifications.commentOnTip');
         case NOTIFICATION_TYPE_TIP_ON_COMMENT:
-          return root.$t('pages.notifications.tipOnComment');
+          return t('pages.notifications.tipOnComment');
         case NOTIFICATION_TYPE_RETIP_ON_TIP:
-          return root.$t('pages.notifications.retipOnTip');
+          return t('pages.notifications.retipOnTip');
         case NOTIFICATION_TYPE_CLAIM_OF_TIP:
-          return root.$t('pages.notifications.claimOfTip');
+          return t('pages.notifications.claimOfTip');
         case NOTIFICATION_TYPE_CLAIM_OF_RETIP:
-          return root.$t('pages.notifications.claimOfRetip');
+          return t('pages.notifications.claimOfRetip');
         case NOTIFICATION_TYPE_WALLET:
           return notification.text;
         default:
@@ -136,10 +136,10 @@ export default defineComponent({
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
     const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
-    const redirectInfo = computed(() => !isWallet.value ? root.$t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
+    const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
       ? props.notification.title || ''
-      : chainName.value || address.value || root.$t('fellowSuperhero'));
+      : chainName.value || address.value || t('fellowSuperhero'));
     const initialStatus = props.notification.status;
     const isUnread = computed(() => (IS_EXTENSION
       ? initialStatus

@@ -45,7 +45,6 @@ export default defineComponent({
     PendingMultisigTransactionCard,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     function openTransferSendModal() {
       store.dispatch('modals/open', {

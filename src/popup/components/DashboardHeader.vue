@@ -43,7 +43,6 @@ export default defineComponent({
     AccountCard,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const { balancesTotal } = useBalances({ store });

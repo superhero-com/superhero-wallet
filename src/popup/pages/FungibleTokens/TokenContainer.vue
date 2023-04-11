@@ -76,12 +76,12 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   DEX_URL,
   AETERNITY_CONTRACT_ID,
@@ -127,10 +127,9 @@ export default defineComponent({
     OpenTransferSendModalButton,
   },
   setup() {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const route = useRoute();
+    const { t } = useI18n();
 
     const { getSdk } = useSdk({ store });
     const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate || 0);
@@ -151,7 +150,7 @@ export default defineComponent({
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
     const tabs = [
       {
-        text: root.$t('pages.transactionDetails.transactions'),
+        text: t('pages.transactionDetails.transactions'),
         routeName: isMultisig.value
           ? ROUTE_MULTISIG_COIN
           : transactionRouteName,
@@ -159,8 +158,8 @@ export default defineComponent({
       },
       {
         text: isCoin
-          ? root.$t('pages.token-details.coin-details')
-          : root.$t('pages.token-details.token-details'),
+          ? t('pages.token-details.coin-details')
+          : t('pages.token-details.token-details'),
         routeName: isMultisig.value
           ? ROUTE_MULTISIG_COIN_DETAILS
           : detailsRouteName,

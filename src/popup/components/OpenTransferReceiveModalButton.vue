@@ -9,8 +9,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, getCurrentInstance } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
@@ -23,9 +24,8 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     function openTransferReceiveModal() {
       store.dispatch('modals/open', {
@@ -40,8 +40,8 @@ export default defineComponent({
         return '';
       }
       return props.isMultisig
-        ? root.$t('dashboard.receiveCard.descriptionMultisig')
-        : root.$t('dashboard.receiveCard.description');
+        ? t('dashboard.receiveCard.descriptionMultisig')
+        : t('dashboard.receiveCard.description');
     });
 
     return {

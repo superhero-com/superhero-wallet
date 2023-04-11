@@ -156,7 +156,6 @@ export default defineComponent({
     BtnMain,
   },
   setup(props) {
-    console.log(props);
     const instance = getCurrentInstance();
     const root = instance?.root as any;
     const store = useStore();

@@ -21,12 +21,15 @@
     >
       <Header v-if="showHeader" />
 
-      <Transition name="page-transition">
-        <RouterView
-          :class="{ 'show-header': showHeader }"
-          class="main"
-        />
-      </Transition>
+      <RouterView
+        v-slot="{ Component }"
+        :class="{ 'show-header': showHeader }"
+        class="main"
+      >
+        <Transition name="page-transition">
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
 
       <NodeConnectionStatus
         v-if="!modals.length"
@@ -47,13 +50,13 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
@@ -89,12 +92,10 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
-  setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+  setup() {
     const store = useStore();
     const route = useRoute();
+    const { t } = useI18n();
 
     const { watchConnectionStatus } = useConnection();
     const { addWalletNotification } = useNotifications({ store });
@@ -136,9 +137,9 @@ export default defineComponent({
         }
         if (update === 'update_available') {
           addWalletNotification({
-            text: root.$t('pages.account.updateAvailableText'),
-            title: root.$t('pages.account.updateAvailable'),
-            buttonLabel: root.$t('pages.notifications.goToStore'),
+            text: t('pages.account.updateAvailableText'),
+            title: t('pages.account.updateAvailable'),
+            buttonLabel: t('pages.notifications.goToStore'),
             path,
           });
         }
@@ -154,9 +155,9 @@ export default defineComponent({
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         addWalletNotification({
-          title: root.$t('pages.account.secureYourAccount'),
-          text: root.$t('pages.account.seedNotification'),
-          buttonLabel: root.$t('pages.account.backupNow'),
+          title: t('pages.account.secureYourAccount'),
+          text: t('pages.account.seedNotification'),
+          buttonLabel: t('pages.account.backupNow'),
           path: '/more/settings/seed-phrase',
           isSeedBackup: true,
         });

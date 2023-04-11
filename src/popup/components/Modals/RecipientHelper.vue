@@ -9,14 +9,12 @@
       <div class="msg">
         {{ msg }}
         <p v-if="UNFINISHED_FEATURES">
-          <i18n
-            path="modals.readMore.msg"
-            class="help"
-          >
+          <section class="help">
+            {{ t('modals.readMore.msg') }}
             <a :href="BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
-          </i18n>
+          </section>
         </p>
       </div>
     </template>

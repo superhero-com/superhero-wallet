@@ -69,10 +69,9 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   PropType,
 } from 'vue';
-import type { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import type { IAccount, IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
@@ -99,9 +98,8 @@ export default defineComponent({
     reject: { type: Function as PropType<() => void>, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const {
       activeMultisigAccount,
@@ -118,7 +116,7 @@ export default defineComponent({
     } = usePendingMultisigTransaction({ store });
 
     function getAccountNameToDisplay(acc: IAccount) {
-      return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
+      return acc.name || `${t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
     }
 
     const eligibleAccounts = computed(
@@ -138,11 +136,11 @@ export default defineComponent({
     const confirmActionContent = computed((): TranslateResult => {
       switch (props.action) {
         case FUNCTION_TYPE_MULTISIG.confirm:
-          return root.$t('pages.proposalDetails.signDialog');
+          return t('pages.proposalDetails.signDialog');
         case FUNCTION_TYPE_MULTISIG.revoke:
-          return root.$t('pages.proposalDetails.revokeDialog');
+          return t('pages.proposalDetails.revokeDialog');
         default:
-          return root.$t('pages.proposalDetails.refuseDialog');
+          return t('pages.proposalDetails.refuseDialog');
       }
     });
 

@@ -13,7 +13,6 @@
         'has-icon': !!icon,
       },
     ]"
-    v-on="$listeners"
   >
     <Component
       :is="icon"

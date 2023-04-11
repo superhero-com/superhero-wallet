@@ -40,7 +40,6 @@ export default defineComponent({
     NotificationItem,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const {

@@ -57,9 +57,10 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, getCurrentInstance, PropType,
+  computed, defineComponent, PropType,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import type {
   IAccount,
   IAccountLabeled,
@@ -99,9 +100,8 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
@@ -111,7 +111,7 @@ export default defineComponent({
     const appName = computed(() => permission.value?.name || props.app.name);
     const accountExtended = computed((): IAccountLabeled => ({
       ...account.value,
-      label: root.$t('transaction.overview.accountAddress'),
+      label: t('transaction.overview.accountAddress'),
       url: getExplorerPath.value(account.value.address),
     }));
 
