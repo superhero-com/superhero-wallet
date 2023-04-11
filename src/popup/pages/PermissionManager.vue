@@ -27,7 +27,6 @@
             required: true,
             url: permissionHostValidation
           }"
-          type="url"
           name="url"
           :label="$t('pages.permissions.permissions-for-url')"
           :placeholder="$t('pages.permissions.enter-url')"
