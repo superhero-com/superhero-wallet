@@ -44,11 +44,11 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
@@ -86,10 +86,8 @@ export default defineComponent({
     RegisterName,
   },
   setup(props) {
-    console.log(props);
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { t } = useI18n();
 
     const { topBlockHeight } = useTopHeaderData({ store });
 
@@ -97,9 +95,9 @@ export default defineComponent({
     const activeAuctions = ref<IActiveAuction[]>([]);
     const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
     const filters = ref<AuctionsFilters>({
-      soonest: { rotated: false, name: root.$t('filters.soonest') },
-      bid: { rotated: false, name: root.$t('filters.bid') },
-      length: { rotated: false, name: root.$t('filters.length') },
+      soonest: { rotated: false, name: t('filters.soonest') },
+      bid: { rotated: false, name: t('filters.bid') },
+      length: { rotated: false, name: t('filters.length') },
     });
 
     const auctions = computed(

@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import { cloneDeep, isEqual } from 'lodash-es';
 import stateReducer from '../utils';
 import {
@@ -45,7 +44,8 @@ export default (
     mutations: {
       syncState(state, newState) {
         Object.entries(newState)
-          .forEach(([name, value]) => Vue.set(store.state, name, value));
+          // eslint-disable-next-line no-param-reassign
+          .forEach(([name, value]) => { store.state[name] = value; });
       },
     },
   });

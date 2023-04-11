@@ -25,20 +25,22 @@
       </BtnMain>
     </div>
 
-    <i18n
-      path="pages.seedPhrase.backUpYourSeedPhrase"
+    <i18n-t
+      keypath="pages.seedPhrase.backUpYourSeedPhrase"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
-    </i18n>
-    <i18n
-      path="pages.seedPhrase.toBeSureYouGotItRight"
+    </i18n-t>
+    <i18n-t
+      keypath="pages.seedPhrase.toBeSureYouGotItRight"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
-    </i18n>
+    </i18n-t>
 
     <div class="buttons">
       <BtnMain
@@ -75,7 +77,6 @@ export default defineComponent({
     BtnMain,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const router = useRouter();
 

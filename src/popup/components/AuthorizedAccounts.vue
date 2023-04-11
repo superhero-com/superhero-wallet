@@ -47,7 +47,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
 
     const { isLocalAccountAddress } = useAccounts({ store });

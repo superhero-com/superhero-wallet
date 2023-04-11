@@ -1,4 +1,4 @@
-import Vue, { watch } from 'vue';
+import { watch } from 'vue';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   fetchJson,
@@ -65,17 +65,21 @@ export default (store) => {
       },
       setDefault({ defaults }, { address, name }) {
         const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
-        else Vue.delete(defaults, `${address}-${networkId}`);
+        // eslint-disable-next-line no-param-reassign
+        if (name) defaults[`${address}-${networkId}`] = name;
+        // eslint-disable-next-line no-param-reassign
+        delete defaults[`${address}-${networkId}`];
       },
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
-        Vue.set(state.owned[index], 'autoExtend', value);
+        state.owned[index].autoExtend = value;
       },
       setPreferred({ preferred }, { address, name }) {
         const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(preferred, `${address}-${networkId}`, name);
-        else Vue.delete(preferred, `${address}-${networkId}`);
+        // eslint-disable-next-line no-param-reassign
+        if (name) preferred[`${address}-${networkId}`] = name;
+        // eslint-disable-next-line no-param-reassign
+        delete preferred[`${address}-${networkId}`];
       },
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };

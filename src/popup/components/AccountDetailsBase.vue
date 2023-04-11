@@ -28,12 +28,14 @@
       </div>
 
       <div class="tabs-content">
-        <transition
-          name="fade-transition"
-          mode="out-in"
-        >
-          <RouterView />
-        </transition>
+        <RouterView v-slot="{ Component }">
+          <transition
+            name="fade-transition"
+            mode="out-in"
+          >
+            <component :is="Component" />
+          </transition>
+        </RouterView>
       </div>
     </div>
   </div>
@@ -70,7 +72,6 @@ export default defineComponent({
     BtnClose,
   },
   setup(props) {
-    console.log(props);
     const store = useStore();
     const route = useRoute();
 

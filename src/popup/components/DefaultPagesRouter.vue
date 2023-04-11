@@ -13,7 +13,6 @@ import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   setup(props) {
-    console.log(props);
     const store = useStore();
     const route = useRoute();
 

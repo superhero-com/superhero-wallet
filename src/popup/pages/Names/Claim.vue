@@ -32,13 +32,14 @@
 
     <Loader v-if="loading" />
 
-    <i18n
-      path="pages.names.claim.short-names.message"
+    <i18n-t
+      keypath="pages.names.claim.short-names.message"
       tag="p"
       class="text-description explanation"
+      scope="global"
     >
       <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
-    </i18n>
+    </i18n-t>
 
     <BtnMain
       class="btn-register"

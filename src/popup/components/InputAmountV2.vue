@@ -4,10 +4,10 @@
     class="input-amount"
     type="number"
     placeholder="0.00"
-    :value="value"
+    :model-value="modelValue"
     :label="label"
     :message="$attrs['message'] || errors.first('amount')"
-    @input="$emit('input', $event)"
+    @input="$emit('update:modelValue', $event)"
   >
     <template
       v-for="(index, name) in $slots"
@@ -41,7 +41,7 @@
           class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
-          <span v-if="value">&thickapprox;</span>
+          <span v-if="modelValue">&thickapprox;</span>
           {{ totalAmountFormatted }}
         </span>
 
@@ -82,12 +82,13 @@ export default defineComponent({
     InputField,
   },
   props: {
-    value: { type: [String, Number], default: '' },
+    modelValue: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
+  emits: ['update:modelValue', 'asset-selected', 'error'],
   setup(props, { emit }) {
     const instance = getCurrentInstance();
     const root = instance?.root as any;
@@ -107,7 +108,7 @@ export default defineComponent({
     );
     const totalAmountFormatted = computed(() => formatCurrency(
       (currentAssetFiatPrice.value)
-        ? (+props.value || 0) * currentAssetFiatPrice.value
+        ? (+props.modelValue || 0) * currentAssetFiatPrice.value
         : 0,
     ));
 

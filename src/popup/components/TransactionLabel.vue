@@ -73,11 +73,10 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   PropType,
 } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useAccounts, useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
@@ -116,10 +115,9 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const { accounts, activeAccount } = useAccounts({ store });
+    const { t } = useI18n();
 
     const {
       outerTxType,
@@ -136,8 +134,8 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
-      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
-      const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
+      const transactionTypes = t('transaction.type') as unknown as Record<TxType, TranslateResult>;
+      const transactionListTypes = t('transaction.listType') as unknown as Record<TxType, TranslateResult>;
 
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         const isSent = getTxDirection.value(
@@ -146,32 +144,32 @@ export default defineComponent({
         ) === 'sent';
         return {
           text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
+            ? t('transaction.listType.sentTx')
+            : t('transaction.listType.receivedTx'),
           customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
+            ? t('transaction.type.sentTx')
+            : t('transaction.type.receivedTx'),
         };
       }
       if (
         txType.value === TX_TYPE_MDW.GAAttachTx
         && outerTxType.value === TX_TYPE_MDW.PayingForTx
       ) {
-        return labelWrapper(root.$t('transaction.type.multisigVaultCreated'));
+        return labelWrapper(t('transaction.type.multisigVaultCreated'));
       }
       if (isAllowance.value) {
-        return labelWrapper(root.$t('transaction.dexType.allowToken'));
+        return labelWrapper(t('transaction.dexType.allowToken'));
       }
       if (isDex.value) {
         if (FUNCTION_TYPE_DEX.addLiquidity.includes(innerTx.value?.function as TxFunctionRaw)) {
-          return labelWrapper(root.$t('transaction.dexType.provideLiquidity'));
+          return labelWrapper(t('transaction.dexType.provideLiquidity'));
         }
         if (FUNCTION_TYPE_DEX.removeLiquidity.includes(
           innerTx.value?.function as TxFunctionRaw,
         )) {
-          return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
+          return labelWrapper(t('transaction.dexType.removeLiquidity'));
         }
-        return { text: root.$t('common.swap'), hasComma: true };
+        return { text: t('common.swap'), hasComma: true };
       }
       if (
         (
@@ -186,8 +184,8 @@ export default defineComponent({
         || props.transaction.claim
       ) {
         return labelWrapper(props.transaction.claim
-          ? root.$t('transaction.listType.tipReceived')
-          : root.$t('transaction.listType.tipSent'));
+          ? t('transaction.listType.tipReceived')
+          : t('transaction.listType.tipSent'));
       }
       if (
         txType.value === SCHEMA.TX_TYPE.contractCall
@@ -201,11 +199,11 @@ export default defineComponent({
 
         return {
           text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
+            ? t('transaction.listType.sentTx')
+            : t('transaction.listType.receivedTx'),
           customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
+            ? t('transaction.type.sentTx')
+            : t('transaction.type.receivedTx'),
         };
       }
 

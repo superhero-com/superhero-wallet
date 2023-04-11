@@ -17,17 +17,18 @@
 <script>
 export default {
   props: {
-    value: { type: Boolean },
+    modelValue: { type: Boolean },
     label: { type: String, default: '' },
     disabled: { type: Boolean, default: false },
   },
+  emits: ['update:modelValue'],
   computed: {
     active: {
       get() {
         return this.value;
       },
       set(value) {
-        this.$emit('input', value);
+        this.$emit('update:modelValue', value);
       },
     },
   },

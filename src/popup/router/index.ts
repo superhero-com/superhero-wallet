@@ -29,9 +29,6 @@ import {
 import { useAccounts } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
-// const app = getCurrentInstance();
-// if (app) app.appContext.app.use(VueRouter);
-
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
   history: IS_WEB ? createWebHistory() : createWebHashHistory(),

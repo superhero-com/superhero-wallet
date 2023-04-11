@@ -106,6 +106,7 @@ import {
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type {
   Dictionary,
   IFormSelectOption,
@@ -184,6 +185,7 @@ export default defineComponent({
     const root = instance?.root as any;
     const store = useStore();
     const route = useRoute();
+    const { t } = useI18n();
 
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
@@ -342,7 +344,7 @@ export default defineComponent({
 
     async function openScanQrModal() {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: root.$t('pages.send.scanAddress'),
+        title: t('pages.send.scanAddress'),
         icon: 'critical',
       });
       if (scanResult?.trim().charAt(0) === '{') {
@@ -354,7 +356,7 @@ export default defineComponent({
           if (process.env.NODE_ENV !== 'production') console.error(e);
           formModel.value.address = '';
           openDefaultModal({
-            title: root.$t('modals.invalid-qr-code.msg'),
+            title: t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
           return;
