@@ -13,6 +13,7 @@
         'has-icon': !!icon,
       },
     ]"
+    @click="$emit('click')"
   >
     <Component
       :is="icon"

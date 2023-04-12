@@ -1,3 +1,4 @@
+import { Component, VNode, h } from 'vue';
 import { WalletAppRouteConfig } from '../../types';
 import { IN_POPUP, IS_WEB } from '../../lib/environment';
 import {
@@ -11,6 +12,22 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 
+const iFrameComponent = (component: Component | VNode) => {
+  const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
+  window.addEventListener('beforeunload', unloadHandler);
+  const closingWrapper = (f: any) => (...args: any) => {
+    f(...args);
+    window.removeEventListener('beforeunload', unloadHandler);
+    window.close();
+  };
+
+  return h(component, {
+    ...window.popupProps,
+    resolve: closingWrapper(window.popupProps.resolve),
+    reject: closingWrapper(window.popupProps.reject),
+  }, {});
+};
+
 const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
   ? [
     { name: 'confirm-connect', component: ConfirmConnect },
@@ -20,26 +37,7 @@ const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
   ].map(({ name, component }) => ({
     name: `web-iframe-popup-${name}`,
     path: `/web-iframe-popup/${name}`,
-    component: {
-      functional: true,
-      render: (createElement: any) => {
-        const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
-        window.addEventListener('beforeunload', unloadHandler);
-        const closingWrapper = (f: any) => (...args: any) => {
-          f(...args);
-          window.removeEventListener('beforeunload', unloadHandler);
-          window.close();
-        };
-
-        return createElement(component, {
-          props: {
-            ...window.popupProps,
-            resolve: closingWrapper(window.popupProps.resolve),
-            reject: closingWrapper(window.popupProps.reject),
-          },
-        });
-      },
-    },
+    component: iFrameComponent(component),
     meta: {
       notPersist: true,
       hideHeader: true,
