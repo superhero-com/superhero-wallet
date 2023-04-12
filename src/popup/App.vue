@@ -228,10 +228,6 @@ export default defineComponent({
     padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);
     background-color: var(--screen-bg-color);
-
-    @include mixins.desktop {
-      min-height: 100%;
-    }
   }
 
   .connection-status {
