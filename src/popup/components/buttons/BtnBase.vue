@@ -15,6 +15,7 @@
       }
     ]"
     class="btn-base"
+    @click="$emit('click')"
   >
     <slot />
   </Component>

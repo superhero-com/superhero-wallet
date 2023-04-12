@@ -53,6 +53,7 @@ export default defineComponent({
     noToken: Boolean,
   },
   emits: ['update:modelValue', 'error'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const instance = getCurrentInstance();
     const root = instance?.root as any;
