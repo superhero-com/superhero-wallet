@@ -149,6 +149,7 @@ export default defineComponent({
     },
   },
   emits: ['update:modelValue', 'input', 'focus-change', 'click', 'help'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const inputId = `input-${getCurrentInstance()?.uid}`;
 

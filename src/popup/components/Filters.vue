@@ -40,6 +40,7 @@ export default defineComponent({
     scrollTopThreshold: { type: Number, default: 140 },
   },
   emits: ['update:modelValue'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const { viewportElement } = useViewport();
 
