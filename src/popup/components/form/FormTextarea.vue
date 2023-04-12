@@ -17,7 +17,7 @@
         :value="modelValue"
         :rows="1"
         @keydown.enter.prevent="handleEnterClick"
-        @input="handleInput"
+        @input="(payload) => handleInput(payload as InputEvent)"
       />
     </template>
 
@@ -56,6 +56,7 @@ export default defineComponent({
     autoHeight: Boolean,
   },
   emits: ['update:modelValue', 'submit'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const textarea = ref<HTMLTextAreaElement>();
     const height = ref<string | undefined>();

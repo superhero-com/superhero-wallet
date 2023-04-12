@@ -1,3 +1,4 @@
+import { Component, VNode, h } from 'vue';
 import { WalletAppRouteConfig } from '../../types';
 import { IN_POPUP, IS_WEB } from '../../lib/environment';
 import {
@@ -12,6 +13,22 @@ import ConfirmConnect from '../pages/Popups/Connect.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
+
+const iFrameComponent = (component: Component | VNode) => {
+  const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
+  window.addEventListener('beforeunload', unloadHandler);
+  const closingWrapper = (f: any) => (...args: any) => {
+    f(...args);
+    window.removeEventListener('beforeunload', unloadHandler);
+    window.close();
+  };
+
+  return h(component, {
+    ...window.popupProps,
+    resolve: closingWrapper(window.popupProps.resolve),
+    reject: closingWrapper(window.popupProps.reject),
+  }, {});
+};
 
 /**
  * This logic handles the situation where the app is open in an iframe
@@ -28,26 +45,7 @@ const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
   ].map(({ name, component }): WalletAppRouteConfig => ({
     name: `${ROUTE_WEB_IFRAME_POPUP}-${name}`,
     path: `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
-    component: {
-      functional: true,
-      render: (createElement: any) => {
-        const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
-        window.addEventListener('beforeunload', unloadHandler);
-        const closingWrapper = (f: any) => (...args: any) => {
-          f(...args);
-          window.removeEventListener('beforeunload', unloadHandler);
-          window.close();
-        };
-
-        return createElement(component, {
-          props: {
-            ...window.popupProps,
-            resolve: closingWrapper(window.popupProps.resolve),
-            reject: closingWrapper(window.popupProps.reject),
-          },
-        });
-      },
-    },
+    component: iFrameComponent(component),
     meta: {
       notPersist: true,
       hideHeader: true,

@@ -2,11 +2,10 @@
   <label class="checkbox-container">
     <input
       :disabled="disabled"
-      :value="modelValue"
+      :checked="!!modelValue"
       :type="type"
       :name="name"
-      @change="$emit('update:modelValue', $event.target.checked)"
-      @input="$emit('update:modelValue', $event.target.checked)"
+      @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
     >
 
     <span
@@ -24,7 +23,7 @@
   </label>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -36,6 +35,7 @@ export default defineComponent({
     disabled: Boolean,
   },
   emits: ['update:modelValue'],
+  compatConfig: { COMPONENT_V_MODEL: false },
 });
 </script>
 

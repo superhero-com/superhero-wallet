@@ -95,7 +95,7 @@ module.exports = {
         ...options,
         compilerOptions: {
           compatConfig: {
-            MODE: 2,
+            MODE: 3,
           },
         },
       }));
@@ -178,26 +178,17 @@ module.exports = {
       .uses.clear().end()
       .oneOf('vue-component')
       .resourceQuery(/vue-component/)
-      .use('vue-loader-v16')
-      .loader('vue-loader-v16')
+      .use('vue-loader')
+      .loader('vue-loader')
       .end()
       .use('custom-svg-loader')
       .loader(path.resolve(__dirname, './custom-svg-loader.js'))
       .options({
         svgo: {
           plugins: [{
-            name: 'preset-default',
+            name: 'addClassesToSVGElement',
             params: {
-              overrides: {
-                addClassesToSVGElement: {
-                  type: 'full',
-                  fn(data, options, extra) {
-                    const svg = data.content[0];
-                    svg.class.add('icon', path.basename(extra.path, '.svg'));
-                    return data;
-                  },
-                },
-              },
+              classNames: ['icon'],
             },
           }],
         },
@@ -206,8 +197,8 @@ module.exports = {
       .end()
       .oneOf('skip-optimize')
       .resourceQuery(/skip-optimize/)
-      .use('vue-loader-v16')
-      .loader('vue-loader-v16')
+      .use('vue-loader')
+      .loader('vue-loader')
       .end()
       .use('custom-svg-loader')
       .loader(path.resolve(__dirname, './custom-svg-loader.js'))

@@ -59,6 +59,7 @@ export default defineComponent({
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
   },
   emits: ['update:modelValue'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props) {
     const store = useStore();
 

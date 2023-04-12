@@ -8,6 +8,7 @@
       disabled,
       'is-big': isBig,
     }"
+    @click="$emit('click')"
   >
     <IconWrapper
       v-if="icon"

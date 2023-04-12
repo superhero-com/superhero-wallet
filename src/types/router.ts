@@ -1,4 +1,4 @@
-import { Component } from 'vue';
+import { Component, VNode } from 'vue';
 import { RouteLocationRaw, RouteRecordRaw } from 'vue-router';
 
 export interface WalletRouteMeta {
@@ -53,7 +53,7 @@ export interface WalletRouteMeta {
 
 export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {
   meta?: WalletRouteMeta
-  component?: Component | {
+  component?: VNode | Component | {
     functional: boolean
     render: any
   },

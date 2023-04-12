@@ -66,6 +66,7 @@ export default defineComponent({
     unstyled: Boolean,
   },
   emits: ['select', 'update:modelValue'],
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const { openModal } = useModals();
 
