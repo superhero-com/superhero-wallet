@@ -302,6 +302,14 @@ export default defineComponent({
   setup(props, { root }) {
     const { getMiddleware } = useMiddleware({ store: root.$store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
+    const { account } = useAccounts({ store: root.$store });
+
+    const externalAddress = computed((): string => (
+      props.transactionOwner || props.multisigDashboard
+        ? activeMultisigAccountId.value
+        : account.value.address
+    ));
+
     const {
       setExternalAddress,
       setTransactionTx,
@@ -313,7 +321,7 @@ export default defineComponent({
       outerTxType,
     } = useTransactionTx({
       store: root.$store,
-      externalAddress: props.transactionOwner,
+      externalAddress: externalAddress.value,
     });
 
     const { isLocalAccountAddress } = useAccounts({
@@ -384,14 +392,14 @@ export default defineComponent({
         if (rawTransaction?.tx) {
           if (props.multisigDashboard) {
             await watchUntilTruthy(() => activeMultisigAccountId.value);
-            setExternalAddress(activeMultisigAccountId.value);
-            transaction.value = {
-              ...rawTransaction,
-              transactionOwner: activeMultisigAccountId.value,
-            };
           } else {
-            transaction.value = { ...rawTransaction, transactionOwner: props.transactionOwner };
+            await watchUntilTruthy(() => account.value);
           }
+          setExternalAddress(externalAddress.value);
+          transaction.value = {
+            ...rawTransaction,
+            transactionOwner: externalAddress.value,
+          };
           root.$store.commit('setTransactionByHash', transaction.value);
         }
       } else {
