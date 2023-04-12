@@ -5,6 +5,7 @@
   >
     <img
       v-if="IN_FRAME"
+      class="iframe-image"
       src="../../icons/iframe/sendAndReceive.svg"
     >
     <div
@@ -128,12 +129,15 @@ export default {
 .index {
   --padding-top: 44px;
 
-  padding-top: var(--padding-top);
-  padding-top: calc(var(--padding-top) + env(safe-area-inset-top));
   text-align: center;
 
   &.extended-top-padding {
     --padding-top: 64px;
+  }
+
+  .iframe-image,
+  .superhero-logo {
+    margin-top: var(--padding-top);
   }
 
   .terms-agreement {
