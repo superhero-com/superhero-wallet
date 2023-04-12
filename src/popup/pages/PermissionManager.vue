@@ -27,7 +27,6 @@
             required: true,
             url: permissionHostValidation
           }"
-          type="url"
           name="url"
           :label="$t('pages.permissions.permissions-for-url')"
           :placeholder="$t('pages.permissions.enter-url')"
@@ -181,8 +180,9 @@ export default defineComponent({
     async function savePermission() {
       if (!(await (root as any).$validator.validateAll())) return;
 
+      const hostValue = permission.value.host.toLowerCase();
       const { host } = (new URL(
-        `${permission.value.host.includes('http') ? '' : 'http://'}${permission.value.host}`,
+        `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,
       ));
 
       if (host !== routeHost) {
