@@ -40,16 +40,17 @@ export default (store) => {
               method,
               params: params?.txObject?.params,
             });
+            const aeppUrl = {
+              name: originUrl.host,
+              host: originUrl.host,
+              protocol: originUrl.protocol,
+            };
             if (method === 'message.sign') {
               if (!permission) {
                 await store.dispatch('modals/open', {
                   name: 'confirm-message-sign',
                   message: params.message,
-                  app: {
-                    name: originUrl.host,
-                    host: originUrl.host,
-                    protocol: originUrl.protocol,
-                  },
+                  app: aeppUrl,
                 });
               }
               action.accept({ onAccount: { sign: () => {}, address: () => {} } });
@@ -61,7 +62,7 @@ export default (store) => {
                   txBase64: params.tx,
                   opt: {
                     modal: !permission,
-                    host: originUrl.host,
+                    app: aeppUrl,
                   },
                 }),
                 address: () => {},
