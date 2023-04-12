@@ -10,7 +10,7 @@ export default defineComponent({
   name: 'SignTransaction',
   setup(props, { root }) {
     onMounted(async () => {
-      const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
       const { getSdk } = useSdk({ store: root.$store });
 
       try {
@@ -30,7 +30,9 @@ export default defineComponent({
           return;
         }
 
-        const signedTransaction = await sdk.signTransaction(transaction, { networkId });
+        const signedTransaction = await sdk.signTransaction(
+          transaction, { networkId, app: callbackOrigin.value },
+        );
 
         if (broadcast) {
           const result = await sdk.sendTransaction(signedTransaction, { waitMined: true });

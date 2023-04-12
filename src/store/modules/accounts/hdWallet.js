@@ -50,19 +50,19 @@ export default {
         : account;
       return Crypto.sign(data, secretKey);
     },
-    async confirmRawDataSigning({ dispatch }, data) {
-      await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data }, { root: true });
+    async confirmRawDataSigning({ dispatch }, { data, app }) {
+      await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data, app }, { root: true });
     },
-    async confirmTxSigning({ dispatch }, { encodedTx, host }) {
+    async confirmTxSigning({ dispatch }, { encodedTx, app }) {
       if (!isTxOfASupportedType(encodedTx)) {
-        await dispatch('confirmRawDataSigning', encodedTx);
+        await dispatch('confirmRawDataSigning', { data: encodedTx, app });
         return;
       }
       const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,
-        host,
+        host: app.host,
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
@@ -78,12 +78,12 @@ export default {
     },
     async signTransaction({ dispatch, rootGetters }, {
       txBase64,
-      opt: { modal = true, host = null },
+      opt: { modal = true, app = null },
     }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, host });
+        await dispatch('confirmTxSigning', { encodedTx, app });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
@@ -93,12 +93,12 @@ export default {
     },
     async signTransactionFromAccount({ dispatch, rootGetters }, {
       txBase64,
-      opt: { modal = true, host = null, fromAccount },
+      opt: { modal = true, app = null, fromAccount },
     }) {
       const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, host });
+        await dispatch('confirmTxSigning', { encodedTx, app });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
