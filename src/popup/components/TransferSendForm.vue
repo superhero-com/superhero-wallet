@@ -255,6 +255,7 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
+  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const instance = getCurrentInstance();
     const root = instance?.root as any;

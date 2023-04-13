@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue';
 import BtnIcon from './BtnIcon.vue';
 import CloseIcon from '../../../icons/close.svg?vue-component';
 
@@ -17,7 +18,7 @@ export default {
     BtnIcon,
   },
   data: () => ({
-    CloseIcon,
+    CloseIcon: markRaw(CloseIcon),
   }),
 };
 </script>

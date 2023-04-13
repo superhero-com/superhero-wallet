@@ -26,6 +26,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
 import { MODAL_RESET_WALLET } from '../utils/constants';
@@ -35,7 +36,7 @@ export default {
     BtnMain,
   },
   data: () => ({
-    ResetWalletIcon,
+    ResetWalletIcon: markRaw(ResetWalletIcon),
   }),
   methods: {
     onResetWallet() {

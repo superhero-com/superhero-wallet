@@ -61,6 +61,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { markRaw } from 'vue';
 import { defaultNetwork } from '../utils/constants';
 import RadioButton from './RadioButton.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -79,8 +80,8 @@ export default {
     },
   },
   data: () => ({
-    PencilIcon,
-    TrashIcon,
+    PencilIcon: markRaw(PencilIcon),
+    TrashIcon: markRaw(TrashIcon),
   }),
   computed: {
     ...mapGetters(['activeNetwork']),

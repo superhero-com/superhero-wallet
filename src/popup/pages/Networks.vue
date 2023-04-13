@@ -30,6 +30,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import { markRaw } from 'vue';
 import NetworkRow from '../components/NetworkRow.vue';
 import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -40,7 +41,7 @@ export default {
     NetworkRow,
   },
   data: () => ({
-    PlusCircleIcon,
+    PlusCircleIcon: markRaw(PlusCircleIcon),
   }),
   computed: mapGetters(['networks']),
   methods: mapActions(['selectNetwork']),
