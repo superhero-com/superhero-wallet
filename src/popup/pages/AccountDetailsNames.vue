@@ -1,18 +1,21 @@
 <template>
   <div class="account-details-names">
-    <transition
-      name="fade-transition"
-      mode="out-in"
+    <RouterView
+      v-if="isOnline"
+      v-slot="{ Component }"
     >
-      <RouterView
-        v-if="isOnline"
-      />
-      <MessageOffline
-        v-else
-        class="offline-message"
-        :text="$t('modals.accountDetails.namesNotAvailable')"
-      />
-    </transition>
+      <transition
+        name="fade-transition"
+        mode="out-in"
+      >
+        <component :is="Component" />
+      </transition>
+    </RouterView>
+    <MessageOffline
+      v-else
+      class="offline-message"
+      :text="$t('modals.accountDetails.namesNotAvailable')"
+    />
   </div>
 </template>
 

@@ -22,7 +22,7 @@
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName"
+          :key="routeName!"
           :show-filters="showFilters"
         />
       </div>
