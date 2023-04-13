@@ -227,7 +227,7 @@ export default defineComponent({
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store: root.$store, pollOnce: true });
 
     const {
       multisigAccount,

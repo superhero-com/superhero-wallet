@@ -29,6 +29,10 @@ const POLLING_INTERVAL = 7000;
 const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
 const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
 
+export interface MultisigAccountsOptions extends IDefaultComposableOptions {
+  pollOnce?: boolean;
+}
+
 function storeMultisigAccounts(
   multisigAccounts: IMultisigAccount[],
   networkId: string,
@@ -54,7 +58,7 @@ const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
-export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
+export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { getSdk } = useSdk({ store });
 
   const accounts = computed<IAccount[]>(() => store.getters.accounts);
@@ -285,8 +289,11 @@ export function useMultisigAccounts({ store }: IDefaultComposableOptions) {
   function getMultisigAccountByContractId(contractId: string) {
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
-
-  initPollingWatcher(() => updateMultisigAccounts());
+  if (pollOnce && !getStoredMultisigAccounts(activeNetwork.value.networkId).length) {
+    updateMultisigAccounts();
+  } else if (!pollOnce) {
+    initPollingWatcher(() => updateMultisigAccounts());
+  }
 
   return {
     multisigAccounts: allMultisigAccounts,
