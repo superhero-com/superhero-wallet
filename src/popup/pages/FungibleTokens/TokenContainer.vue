@@ -59,22 +59,25 @@
         />
       </Tabs>
       <TransactionAndTokenFilter
-        :key="routeName"
+        :key="routeName!"
         :show-filters="showFilterBar"
       />
     </div>
-    <transition
-      name="fade-transition"
-      mode="out-in"
+    <RouterView
+      v-slot="{ Component }"
+      :contract-id="contractId"
+      :token-pairs="tokenPairs"
+      :token-data="tokenData"
+      :tokens="tokens"
+      :is-multisig="isMultisig"
     >
-      <RouterView
-        :contract-id="contractId"
-        :token-pairs="tokenPairs"
-        :token-data="tokenData"
-        :tokens="tokens"
-        :is-multisig="isMultisig"
-      />
-    </transition>
+      <transition
+        name="fade-transition"
+        mode="out-in"
+      >
+        <component :is="Component" />
+      </transition>
+    </RouterView>
   </div>
 </template>
 

@@ -16,7 +16,7 @@
     >
       <BtnPill
         v-for="subTab in currentSubTabs"
-        :key="subTab.name"
+        :key="subTab.routeName"
         :to="{ name: subTab.routeName }"
         :text="$t(subTab.text)"
         :exact="subTab.exact"
