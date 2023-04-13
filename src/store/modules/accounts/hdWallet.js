@@ -62,7 +62,7 @@ export default {
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,
-        host: app.host,
+        host: app?.host || null,
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
