@@ -149,7 +149,7 @@ export default {
     }
     this.cameraAllowed = true;
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stopReading();
   },
   methods: {

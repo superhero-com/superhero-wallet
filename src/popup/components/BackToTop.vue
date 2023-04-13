@@ -25,9 +25,10 @@ export default {
   mounted() {
     if (!this.$el?.parentNode) return;
     this.$el.parentNode.addEventListener('scroll', this.handleVisibility);
-    this.$on('beforeDestroy', () => {
-      this.$el.parentNode.removeEventListener('scroll', this.handleVisibility);
-    });
+  },
+  beforeUnmount() {
+    if (!this.$el?.parentNode) return;
+    this.$el.parentNode.removeEventListener('scroll', this.handleVisibility);
   },
   methods: {
     handleVisibility() {
