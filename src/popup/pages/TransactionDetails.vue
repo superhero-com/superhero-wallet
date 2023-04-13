@@ -574,6 +574,8 @@ export default defineComponent({
         svg {
           opacity: 1;
           color: rgba(variables.$color-white, 0.75);
+          width: 24px;
+          height: 24px;
         }
 
         &:hover {

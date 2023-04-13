@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue';
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
@@ -45,7 +46,7 @@ export default {
     BtnMain,
   },
   data: () => ({
-    PlusIcon,
+    PlusIcon: markRaw(PlusIcon),
   }),
   computed: {
     permissions() {

@@ -42,6 +42,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { markRaw } from 'vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import CloseIcon from '../../icons/times-circle.svg?vue-component';
 import IconWrapper from './IconWrapper.vue';
@@ -71,7 +72,7 @@ export default {
     icon: { type: Object, default: null },
   },
   data: () => ({
-    CloseIcon,
+    CloseIcon: markRaw(CloseIcon),
   }),
   computed: {
     ...mapState(['hiddenCards']),
