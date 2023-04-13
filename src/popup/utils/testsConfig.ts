@@ -1,11 +1,16 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import type { IPopupConfig } from '../../types';
 import {
+  AETERNITY_CONTRACT_ID,
   MAX_UINT256,
+  NETWORK_TESTNET,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  STUB_ADDRESS,
+  STUB_CONTRACT_ADDRESS,
+  STUB_TOKEN_CONTRACT_ADDRESS,
 } from './constants';
 
 export const testAccount = {
@@ -133,5 +138,301 @@ export const txParams = {
     senderId: testAccount.address,
     recipientId,
     ...commonParams,
+  },
+};
+
+export const transactions = {
+  spend: {
+    tx: {
+      amount: 10000000000000,
+      fee: 16780000000000,
+      type: 'SpendTx',
+      senderId: STUB_ADDRESS,
+      recipientId: testAccount.address,
+    },
+  },
+  tip: {
+    tx: {
+      amount: 10000000000000000,
+      arguments: [
+        {
+          type: 'string',
+          value: 'https://example.com',
+        },
+        {
+          type: 'string',
+          value: '',
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV1,
+      fee: 183820000000000,
+      function: 'tip',
+      type: 'ContractCallTx',
+    },
+  },
+  retip: {
+    tx: {
+      amount: 200000000000000000,
+      arguments: [
+        {
+          type: 'int',
+          value: 3,
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV1,
+      fee: 182200000000000,
+      function: 'retip',
+      type: 'ContractCallTx',
+    },
+  },
+  tipToken: {
+    tx: {
+      amount: 0,
+      arguments: [
+        {
+          type: 'string',
+          value: 'https://github.com/thepiwo',
+        },
+        {
+          type: 'string',
+          value: 'great work!',
+        },
+        {
+          type: 'contract',
+          value: STUB_TOKEN_CONTRACT_ADDRESS,
+        },
+        {
+          type: 'int',
+          value: 10000000000000000,
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV2,
+      fee: 183720000000000,
+      function: 'tip_token',
+      type: 'ContractCallTx',
+    },
+  },
+  retipToken: {
+    tx: {
+      amount: 0,
+      arguments: [
+        {
+          type: 'int',
+          value: 3263,
+        },
+        {
+          type: 'contract',
+          value: STUB_TOKEN_CONTRACT_ADDRESS,
+        },
+        {
+          type: 'int',
+          value: 10000000000000000,
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV2,
+      fee: 183000000000000,
+      function: 'retip_token',
+      type: 'ContractCallTx',
+    },
+  },
+  claim: {
+    claim: true,
+    tx: {
+      amount: 0,
+      arguments: [
+        {
+          type: 'string',
+          value: 'https://example.com',
+        },
+        {
+          type: 'address',
+          value: STUB_ADDRESS,
+        },
+        {
+          type: 'bool',
+          value: 'false',
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: STUB_CONTRACT_ADDRESS,
+      fee: 183640000000000,
+      function: 'claim',
+      type: 'ContractCallTx',
+    },
+  },
+  transfer: {
+    tx: {
+      arguments: [
+        {
+          type: 'address',
+          value: testAccount.address,
+        },
+        {
+          type: 'int',
+          value: 1000000000000000000,
+        },
+      ],
+      fee: 16780000000000,
+      callerId: STUB_ADDRESS,
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+      function: 'transfer',
+      type: 'ContractCallTx',
+    },
+  },
+  createAllowance: {
+    tx: {
+      amount: 0,
+      arguments: [
+        {
+          type: 'address',
+          value: STUB_ADDRESS,
+        },
+        {
+          type: 'int',
+          value: 1050000000000000000,
+        },
+      ],
+      callerId: STUB_ADDRESS,
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+      fee: 182920000000000,
+      function: 'create_allowance',
+      type: 'ContractCallTx',
+    },
+  },
+  changeAllowance: {
+    tx: {
+      amount: 0,
+      fee: 16780000000000,
+      arguments: [
+        {
+          type: 'address',
+          value: STUB_ADDRESS,
+        },
+        {
+          type: 'int',
+          value: 99900000000000000,
+        },
+      ],
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+      function: 'change_allowance',
+      type: 'ContractCallTx',
+    },
+  },
+  namePreclaim: {
+    tx: {
+      accountId: STUB_ADDRESS,
+      commitmentId: 'cm_21m1rLtN2fNT3ovBbWBQo88rPUhbmWWv6L96Z8KH2YGiEkabtZ',
+      fee: 16620000000000,
+      type: 'NamePreclaimTx',
+    },
+  },
+  nameClaim: {
+    tx: {
+      accountId: STUB_ADDRESS,
+      fee: 16560000000000,
+      name: 'test.chain',
+      nameFee: 51422900000000000000,
+      nameId: 'nm_cVjoMBVH5UAthDx8hEijr5dF21yex6itrxbZZUMaftL941g9G',
+      type: 'NameClaimTx',
+    },
+  },
+  nameTransfer: {
+    tx: {
+      accountId: STUB_ADDRESS,
+      fee: 17340000000000,
+      name: 'test.chain',
+      nameId: 'nm_cVjoMBVH5UAthDx8hEijr5dF21yex6itrxbZZUMaftL941g9G',
+      recipientId: STUB_ADDRESS,
+      type: 'NameTransferTx',
+    },
+  },
+  incompleteTransfer: {
+    incomplete: true,
+    tx: {
+      amount: 195697771897021980,
+      callerId: STUB_ADDRESS,
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+      recipientId: testAccount.address,
+      senderId: STUB_ADDRESS,
+      function: 'transfer',
+      type: 'ContractCallTx',
+    },
+  },
+  pendingSpend: {
+    pending: true,
+    tx: {
+      amount: 743000000000000000,
+      senderId: STUB_ADDRESS,
+      recipientId: testAccount.address,
+      type: 'SpendTx',
+    },
+  },
+  pendingTransfer: {
+    pending: true,
+    type: 'spendToken',
+    tx: {
+      amount: 195697771897021980,
+      callerId: STUB_ADDRESS,
+      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
+      recipientId: testAccount.address,
+      function: 'transfer',
+      type: 'ContractCallTx',
+    },
+  },
+  pendingTipAe: {
+    pending: true,
+    tx: {
+      amount: 195697771897021980,
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV1,
+      function: 'tip',
+      type: 'ContractCallTx',
+      selectedTokenContractId: AETERNITY_CONTRACT_ID,
+    },
+  },
+  pendingTipToken: {
+    pending: true,
+    tipUrl: 'http://superhero.com',
+    tx: {
+      amount: 195697771897021980,
+      callerId: STUB_ADDRESS,
+      contractId: NETWORK_TESTNET.tipContractV2,
+      function: 'tip',
+      type: 'ContractCallTx',
+      selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,
+    },
+  },
+  payForGaAttach: {
+    tx: {
+      fee: 5560000000000,
+      tx: {
+        tx: {
+          fee: 163660000000000,
+          type: 'GAAttachTx',
+        },
+      },
+      type: 'PayingForTx',
+      version: 1,
+    },
+  },
+  gaMetaSpend: {
+    tx: {
+      fee: 76440000000000,
+      gaiId: STUB_ADDRESS,
+      tx: {
+        tx: {
+          amount: 2341200000000000,
+          fee: 16800000000000,
+          recipientId: STUB_ADDRESS,
+          senderId: STUB_ADDRESS,
+          type: 'SpendTx',
+        },
+      },
+      type: 'GAMetaTx',
+    },
   },
 };

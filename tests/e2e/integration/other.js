@@ -1,49 +1,17 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { STUB_CONTRACT_ADDRESS, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
+import { transactions } from '../../../src/popup/utils/testsConfig';
 
 const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 
 const txs = [
+  transactions.pendingSpend,
+  transactions.pendingTransfer,
   {
-    pending: true,
-    hash: 'th_',
-    amount: 0.1,
-    tipUrl: 'http://test.com',
-    time: Date.now(),
-    tx: {
-      type: SCHEMA.TX_TYPE.contractCall,
-      callerId: ACCOUNT_ADDRESS,
-      contractId: STUB_CONTRACT_ADDRESS,
-      function: 'tip',
-      selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,
-    },
+    ...transactions.pendingTipToken,
+    tx: { ...transactions.pendingTipToken.tx, callerId: ACCOUNT_ADDRESS },
   },
   {
-    pending: true,
-    hash: 'th_',
-    amount: 0.1,
-    type: 'spend',
-    time: Date.now(),
-    tx: {
-      senderId: ACCOUNT_ADDRESS,
-      recipientId: ACCOUNT_ADDRESS,
-      type: SCHEMA.TX_TYPE.spend,
-    },
-  },
-  {
-    pending: true,
-    amount: 100,
-    recipient: ACCOUNT_ADDRESS,
-    hash: 'th_',
-    type: 'spendToken',
-    pendingTokenTx: true,
-    time: Date.now(),
-    tx: {
-      callerId: ACCOUNT_ADDRESS,
-      contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      type: SCHEMA.TX_TYPE.contractCall,
-      function: 'transfer',
-    },
+    ...transactions.pendingTipAe,
+    tx: { ...transactions.pendingTipAe.tx, callerId: ACCOUNT_ADDRESS },
   },
 ];
 
