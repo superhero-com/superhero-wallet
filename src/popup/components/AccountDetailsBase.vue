@@ -227,5 +227,11 @@ export default defineComponent({
     position: relative;
     padding: 0 var(--screen-padding-x);
   }
+
+  .close-button {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+  }
 }
 </style>

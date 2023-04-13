@@ -40,6 +40,7 @@
       <BtnClose
         v-if="showHeaderNavigation"
         data-cy="close"
+        class="btn-close"
         @click="close"
       />
       <template v-else>
@@ -164,7 +165,6 @@ export default defineComponent({
 
   .left {
     display: flex;
-    width: 20%;
 
     .home-button {
       &.disabled {
@@ -198,12 +198,9 @@ export default defineComponent({
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    width: 20%;
   }
 
   .title {
-    width: 60%;
-
     .text {
       @extend %face-sans-16-medium;
 
