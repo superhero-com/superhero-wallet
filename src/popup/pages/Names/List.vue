@@ -32,6 +32,11 @@ export default {
     AnimatedSpinner,
     RegisterName,
   },
+  data() {
+    return {
+      intervalId: null,
+    };
+  },
   computed: {
     ...mapGetters(['account']),
     ...mapState('names', ['areNamesFetching']),
@@ -42,8 +47,12 @@ export default {
     }),
   },
   mounted() {
-    const id = setInterval(() => this.$store.dispatch('names/fetchOwned'), 10000);
-    this.$once('hook:destroyed', () => clearInterval(id));
+    this.intervalId = setInterval(() => {
+      this.$store.dispatch('names/fetchOwned');
+    }, 10000);
+  },
+  unmounted() {
+    clearInterval(this.intervalId);
   },
 };
 </script>
