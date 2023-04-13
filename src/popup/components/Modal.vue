@@ -41,6 +41,7 @@
           <BtnClose
             v-if="hasCloseButton"
             data-cy="btn-close"
+            class="close-button"
             @click="$emit('close')"
           />
         </div>
@@ -196,6 +197,12 @@ export default defineComponent({
       &.without-padding-bottom {
         padding-bottom: 0;
       }
+    }
+
+    .close-button {
+      position: absolute;
+      top: 4px;
+      right: 8px;
     }
   }
 

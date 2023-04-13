@@ -21,13 +21,3 @@ export default {
   }),
 };
 </script>
-
-<style lang="scss" scoped>
-@use '../../../styles/variables';
-
-.btn-close {
-  position: absolute;
-  top: 4px;
-  right: 8px;
-}
-</style>
