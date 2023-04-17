@@ -378,7 +378,7 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' |'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
+export const FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
   pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
   removeLiquidity: ['remove_liquidity', 'remove_liquidity_ae'],
   addLiquidity: ['add_liquidity', 'add_liquidity_ae'],

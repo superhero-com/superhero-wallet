@@ -7,7 +7,7 @@
       <div>
         <TokenAmount
           v-if="!hideAmount"
-          :amount="+convertToken(token.amount, -token.decimals)"
+          :amount="amount"
           hide-fiat
           no-symbol
         />
@@ -57,6 +57,15 @@ export default {
     hideAmount: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    amount() {
+      return +(
+        this.token.decimals
+          ? this.convertToken(this.token.amount, -this.token.decimals)
+          : this.token.amount
+      );
     },
   },
   methods: {

@@ -4,82 +4,83 @@
     class="confirm-transaction-sign"
     data-cy="popup-aex2"
   >
-    <TransactionOverview :transaction="completeTransaction" />
-
     <AnimatedSpinner
       v-if="loading"
       class="loader"
     />
 
-    <template v-if="(isDex || isAllowance) && tokenList.length">
-      <TransactionDetailsPoolTokenRow
-        v-for="(token, idx) in tokenList"
-        :key="token.contractId"
-        :token="token"
-        :tokens="token.tokens"
-        :label="getLabels(token, idx)"
-        :hide-amount="isSwap"
+    <template v-else>
+      <TransactionOverview
+        :transaction="completeTransaction"
       />
-    </template>
 
-    <DetailsItem
-      v-if="nameAeFee"
-      :label="$t('modals.confirmTransactionSign.nameFee')"
-      class="name-fee"
-    >
-      <template #value>
-        <TokenAmount
-          :amount="nameAeFee"
+      <template v-if="(isDex || isAllowance) && tokenList.length">
+        <TransactionDetailsPoolTokenRow
+          v-for="(token, idx) in tokenList"
+          :key="token.contractId"
+          :token="token"
+          :tokens="token.tokens"
+          :label="getLabels(token, idx)"
+          :hide-amount="isSwap"
         />
       </template>
-    </DetailsItem>
-
-    <div class="details">
       <DetailsItem
-        v-if="isSwap"
-        :label="$t(`pages.signTransaction.${swapDirection}`)"
+        v-if="nameAeFee"
+        :label="$t('modals.confirmTransactionSign.nameFee')"
+        class="name-fee"
       >
-        <TokenAmount
-          :amount="tokenAmount"
-          :symbol="tokenSymbol"
-          :aex9="isTransactionAex9(txWrapped)"
-          :hide-fiat="!swapTokenAmountData.isAe"
-          data-cy="total"
-        />
+        <template #value>
+          <TokenAmount :amount="nameAeFee" />
+        </template>
       </DetailsItem>
 
-      <DetailsItem :label="$t('transaction.fee')">
-        <TokenAmount
-          :amount="txAeFee"
-          data-cy="fee"
-        />
-      </DetailsItem>
+      <div class="details">
+        <DetailsItem
+          v-if="isSwap"
+          :label="$t(`pages.signTransaction.${swapDirection}`)"
+        >
+          <TokenAmount
+            :amount="tokenAmount"
+            :symbol="tokenSymbol"
+            :aex9="isTransactionAex9(txWrapped)"
+            :hide-fiat="!swapTokenAmountData.isAe"
+            data-cy="total"
+          />
+        </DetailsItem>
+
+        <DetailsItem :label="$t('transaction.fee')">
+          <TokenAmount
+            :amount="txAeFee"
+            data-cy="fee"
+          />
+        </DetailsItem>
+
+        <DetailsItem
+          v-if="!isDex"
+          :label="$t('pages.signTransaction.total')"
+        >
+          <TokenAmount
+            :amount="totalAmount"
+            :symbol="getTxSymbol(transaction)"
+            :aex9="isTransactionAex9(txWrapped)"
+            data-cy="total"
+          />
+        </DetailsItem>
+      </div>
 
       <DetailsItem
-        v-if="!isDex"
-        :label="$t('pages.signTransaction.total')"
+        expandable
+        :label="$t('transaction.advancedDetails')"
       >
-        <TokenAmount
-          :amount="totalAmount"
-          :symbol="getTxSymbol(transaction)"
-          :aex9="isTransactionAex9(txWrapped)"
-          data-cy="total"
+        <DetailsItem
+          v-for="key in filteredTxFields"
+          :key="key"
+          :label="$t('modals.confirmTransactionSign')[key]"
+          :value="transaction[key]"
+          :class="{ 'hash-field': isHash(key) }"
         />
       </DetailsItem>
-    </div>
-
-    <DetailsItem
-      expandable
-      :label="$t('transaction.advancedDetails')"
-    >
-      <DetailsItem
-        v-for="key in filteredTxFields"
-        :key="key"
-        :label="$t('modals.confirmTransactionSign')[key]"
-        :value="transaction[key]"
-        :class="{ 'hash-field': isHash(key) }"
-      />
-    </DetailsItem>
+    </template>
 
     <template #footer>
       <BtnMain
@@ -253,16 +254,24 @@ export default defineComponent({
     );
 
     function getTokens(txParams: ITx): ITokenResolved[] {
-      if (!isDex.value) return [singleToken.value];
+      if (!isDex.value && !isAllowance.value) {
+        return [singleToken.value];
+      }
       const functionName = camelCase(txParams.function) as TxFunctionParsed;
       const resolver = transactionTokenInfoResolvers[functionName];
-      if (!resolver) return [];
+      if (!resolver) {
+        return [];
+      }
       const tokens = resolver(
         { tx: { ...txParams, ...props.transaction } } as ITransaction,
         availableTokens.value,
       )?.tokens;
-      if (!isPool.value) return tokens;
-      if (isProvideLiquidity.value) return tokens.filter((t) => !t.isPool);
+      if (!isPool.value) {
+        return tokens;
+      }
+      if (isProvideLiquidity.value) {
+        return tokens.filter((token) => !token.isPool);
+      }
       return tokens.reverse();
     }
 

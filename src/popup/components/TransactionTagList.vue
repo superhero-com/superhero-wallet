@@ -66,7 +66,10 @@ export default defineComponent({
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
     const labels = computed<(string | TranslateResult)[]>(() => {
-      if (!props.transaction?.tx) return [];
+      if (!props.transaction?.tx) {
+        return [];
+      }
+
       const externalLabels = [];
       let innerLabels = [];
 
