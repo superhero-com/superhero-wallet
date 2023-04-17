@@ -73,9 +73,6 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
   }
-  // TODO: rethink this approach
-  // @ts-ignore
-  document.querySelector('.app-inner').scroll(0, 0);
 
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
