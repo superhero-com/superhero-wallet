@@ -22,6 +22,7 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AETERNITY_CONTRACT_ID,
+  TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
@@ -459,8 +460,8 @@ export function defaultTransactionSortingCallback(
     const sortDirection = bMicroTime - aMicroTime;
     // Workaround to display received transaction after send (they have the same time)
     if (sortDirection === 0) {
-      const { direction = 'received' } = a as IDashboardTransaction;
-      return direction === 'received' ? -1 : 1;
+      const { direction = TX_DIRECTION.received } = a as IDashboardTransaction;
+      return direction === TX_DIRECTION.received ? -1 : 1;
     }
 
     return sortDirection;

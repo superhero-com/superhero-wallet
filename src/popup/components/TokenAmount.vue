@@ -1,7 +1,7 @@
 <template>
   <span
     class="token-amount"
-    :class="[direction, { large, 'has-label': !!label }]"
+    :class="{ large, 'has-label': !!label }"
   >
     <span>
       <span
@@ -41,7 +41,6 @@ import { computed, defineComponent } from '@vue/composition-api';
 import { useCurrencies } from '../../composables';
 import {
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
   calculateFontSize,
 } from '../utils';
 
@@ -53,14 +52,6 @@ export default defineComponent({
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
     hideFiat: Boolean,
-    direction: {
-      type: String,
-      validator: (value: any) => [
-        TX_FUNCTIONS.sent,
-        TX_FUNCTIONS.received,
-      ].includes(value),
-      default: undefined,
-    },
     large: Boolean,
     row: Boolean,
     noSymbol: Boolean,
@@ -133,23 +124,6 @@ export default defineComponent({
     align-items: flex-start;
     justify-content: space-between;
     width: 100%;
-  }
-
-  &.sent {
-    color: variables.$color-danger;
-
-    &::before {
-      font-weight: 600;
-      content: '−';
-    }
-  }
-
-  &.received {
-    color: variables.$color-success-hover;
-
-    &::before {
-      content: '+';
-    }
   }
 
   &.large {

@@ -23,6 +23,7 @@ import {
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
 import {
+  TX_DIRECTION,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
 } from '../utils';
@@ -112,10 +113,10 @@ export default defineComponent({
           }
 
           return {
-            sender: direction.value === TX_FUNCTIONS.sent
+            sender: direction.value === TX_DIRECTION.sent
               ? ownershipAccount.value
               : contract,
-            recipient: direction.value === TX_FUNCTIONS.received
+            recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? ownershipAccount.value
               : contract,
             title: root.$t('transaction.type.contractCallTx'),

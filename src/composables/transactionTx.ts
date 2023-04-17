@@ -14,6 +14,7 @@ import {
   RETURN_TYPE_OK,
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
+  TX_DIRECTION,
   getTxType,
   isContainingNestedTx,
   getInnerTransaction,
@@ -112,7 +113,7 @@ export function useTransactionTx({
   );
 
   const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
-    ? TX_FUNCTIONS.received
+    ? TX_DIRECTION.received
     : getTxDirection.value(
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress

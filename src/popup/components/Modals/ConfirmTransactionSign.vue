@@ -116,7 +116,7 @@ import {
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
+  TX_DIRECTION,
   convertToken,
   isTransactionAex9,
   getAeFee,
@@ -223,7 +223,7 @@ export default defineComponent({
     const totalAmount = computed(() => getTxAmountTotal.value(txWrapped.value, direction.value));
 
     const singleToken = computed((): ITokenResolved => ({
-      isReceived: direction.value === TX_FUNCTIONS.received,
+      isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
       symbol: getTxSymbol.value(props.transaction),
     }));
