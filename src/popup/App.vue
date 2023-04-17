@@ -156,6 +156,12 @@ export default defineComponent({
       }
     });
 
+    watch(() => root.$route.fullPath, () => {
+      if (innerElement.value) {
+        innerElement.value.scrollTop = 0;
+      }
+    });
+
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
