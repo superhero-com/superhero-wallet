@@ -36,7 +36,7 @@ export default defineComponent({
     BtnMain,
   },
   setup(props, { root }) {
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
     const { getSdk } = useSdk({ store: root.$store });
 
     const sendAddress = async () => {
@@ -47,6 +47,8 @@ export default defineComponent({
     };
 
     return {
+      callbackOrigin,
+      openCallbackOrGoHome,
       sendAddress,
     };
   },
