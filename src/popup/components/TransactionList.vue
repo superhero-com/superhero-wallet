@@ -57,10 +57,10 @@ import type {
   ITx,
 } from '../../types';
 import {
-  TX_FUNCTIONS,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
+  TX_DIRECTION,
   defaultTransactionSortingCallback,
   getInnerTransaction,
 } from '../utils';
@@ -156,9 +156,9 @@ export default defineComponent({
               case FILTER_MODE.dex:
                 return isDex.value;
               case FILTER_MODE.out:
-                return direction.value === TX_FUNCTIONS.sent && !isDex.value;
+                return direction.value === TX_DIRECTION.sent && !isDex.value;
               case FILTER_MODE.in:
-                return direction.value === TX_FUNCTIONS.received;
+                return direction.value === TX_DIRECTION.received;
               default:
                 throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
             }
