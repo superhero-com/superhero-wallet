@@ -119,6 +119,10 @@
     "insufficient-balance": {
       "msg": "You do not have enough balance for this transaction."
     },
+    "vaultLowBalance": {
+      "title": "Insufficient vault balance",
+      "msg": "Multisig vault balance is not enough to pay for the transaction fee.<br /><br />Please top up multisig vault."
+    },
     "createAccount": {
       "title": "Add account",
       "titleMultisig": "Add multisig vault",

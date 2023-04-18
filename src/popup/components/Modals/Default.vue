@@ -20,7 +20,9 @@
     </h2>
 
     <slot name="msg">
-      {{ msg }}
+      <TemplateRenderer
+        :str="msg"
+      />
     </slot>
 
     <slot />
@@ -42,9 +44,15 @@
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
+import TemplateRenderer from '../TemplateRenderer.vue';
 
 export default {
-  components: { Modal, BtnMain, StatusIcon },
+  components: {
+    Modal,
+    BtnMain,
+    TemplateRenderer,
+    StatusIcon,
+  },
   props: {
     resolve: { type: Function, required: true },
     close: { type: Function, default: null },
