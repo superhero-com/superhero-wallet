@@ -305,10 +305,12 @@ export default defineComponent({
     const { account } = useAccounts({ store: root.$store });
 
     const externalAddress = computed((): string => (
-      props.transactionOwner || props.multisigDashboard
-        ? activeMultisigAccountId.value
-        : account.value.address
-    ));
+      props.transactionOwner
+      || (
+        props.multisigDashboard
+          ? activeMultisigAccountId.value
+          : account.value.address
+      )));
 
     const {
       setExternalAddress,
