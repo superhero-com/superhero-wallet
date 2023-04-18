@@ -44,6 +44,7 @@ export default (store) => {
               name: originUrl.host,
               host: originUrl.host,
               protocol: originUrl.protocol,
+              url: originUrl.href,
             };
             if (method === 'message.sign') {
               if (!permission) {
@@ -120,6 +121,7 @@ export default (store) => {
                         icons: [],
                         protocol: app.host.protocol,
                         host: app.host.host,
+                        url: app.host.href,
                       },
                     })),
                 }))

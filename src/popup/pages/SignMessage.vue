@@ -20,7 +20,7 @@ export default defineComponent({
           app: {
             name: callbackOrigin.value?.host,
             host: callbackOrigin.value?.host,
-            url: callbackOrigin.value?.origin,
+            url: callbackOrigin.value?.href,
           },
         });
 
