@@ -1,5 +1,6 @@
 import { WalletAppRouteConfig } from '../../types';
 import { IN_POPUP, IS_WEB } from '../../lib/environment';
+import { RejectedByUserError } from '../../lib/errors';
 import {
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_RAW_SIGN,
@@ -31,7 +32,7 @@ const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
     component: {
       functional: true,
       render: (createElement: any) => {
-        const unloadHandler = () => window.popupProps.reject(new Error('Rejected by user'));
+        const unloadHandler = () => window.popupProps.reject(new RejectedByUserError());
         window.addEventListener('beforeunload', unloadHandler);
         const closingWrapper = (f: any) => (...args: any) => {
           f(...args);

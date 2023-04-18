@@ -24,12 +24,15 @@
   </Default>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from '@vue/composition-api';
+import type { ResolveRejectCallback } from '../../../types';
+import { RejectedByUserError } from '../../../lib/errors';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
 
-export default {
+export default defineComponent({
   components: {
     Default,
     TemplateRenderer,
@@ -37,13 +40,17 @@ export default {
   },
   props: {
     resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
     msg: { type: String, default: '' },
   },
-  methods: {
-    cancel() {
-      this.reject(new Error('Rejected by user'));
-    },
+  setup(props) {
+    function cancel() {
+      props.reject(new RejectedByUserError());
+    }
+
+    return {
+      cancel,
+    };
   },
-};
+});
 </script>

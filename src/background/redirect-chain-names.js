@@ -1,12 +1,12 @@
 import { getAddressFromChainName } from './utils';
-import { AGGREGATOR_URL } from '../popup/utils/constants';
+import { AENS_DOMAIN, AGGREGATOR_URL } from '../popup/utils/constants';
 
 export default {
   init() {
     this.setListener();
   },
   supportedDomain(domain) {
-    return domain.endsWith('.chain');
+    return domain.endsWith(AENS_DOMAIN);
   },
   setListener() {
     browser.webRequest.onBeforeRequest.addListener(

@@ -3,8 +3,9 @@ import {
   defineComponent,
   onMounted,
 } from '@vue/composition-api';
-import { useDeepLinkApi, useModals, useSdk } from '../../composables';
+import { RejectedByUserError } from '../../lib/errors';
 import { handleUnknownError } from '../utils';
+import { useDeepLinkApi, useModals, useSdk } from '../../composables';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -40,10 +41,12 @@ export default defineComponent({
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
-      } catch (e: any) {
+      } catch (error: any) {
         openCallbackOrGoHome(false);
 
-        if (e.message !== 'Rejected by user') handleUnknownError(e);
+        if (error instanceof RejectedByUserError) {
+          handleUnknownError(error);
+        }
       }
     });
   },

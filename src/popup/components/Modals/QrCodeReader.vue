@@ -52,6 +52,7 @@
 
 <script>
 import { mapMutations } from 'vuex';
+import { RejectedByUserError } from '../../../lib/errors';
 import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
@@ -191,7 +192,7 @@ export default {
     },
     cancelReading() {
       this.stopReading();
-      this.reject(new Error('Rejected by user'));
+      this.reject(new RejectedByUserError());
     },
     openSettings() {
       window.QRScanner.openSettings();

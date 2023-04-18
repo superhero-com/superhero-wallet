@@ -48,6 +48,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type { IAccountLabeled, IAppData } from '../../../types';
+import { RejectedByUserError } from '../../../lib/errors';
 import { useGetter } from '../../../composables/vuex';
 import { useAccounts } from '../../../composables';
 
@@ -84,7 +85,7 @@ export default defineComponent({
     }));
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     return {
