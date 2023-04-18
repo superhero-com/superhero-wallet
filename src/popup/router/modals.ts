@@ -47,6 +47,7 @@ import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
+import MessageSign from '../pages/Popups/MessageSign.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -70,7 +71,11 @@ export default () => {
   });
   registerModal({ name: MODAL_CONFIRM_CONNECT, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_READ_QR_CODE, component: QrCodeReader });
-  registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
+  registerModal({
+    name: MODAL_MESSAGE_SIGN,
+    component: MessageSign,
+    showInPopupIfWebFrame: true,
+  });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
