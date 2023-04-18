@@ -18,7 +18,6 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
 import { useTransactionTx } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
 import {
   INetwork,
   ITokenList,
@@ -61,8 +60,10 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+    const availableTokens = computed<ITokenList>(
+      () => root.$store.state.fungibleTokens.availableTokens,
+    );
 
     const labels = computed<(string | TranslateResult)[]>(() => {
       if (props.customTitle) return [props.customTitle];
