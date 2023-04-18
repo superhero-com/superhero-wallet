@@ -126,12 +126,12 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { root }) {
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
 
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
     const account = computed<IAccount>(() => root.$store.getters.account);
     const activeAccountAddress = computed(() => props.isMultisig
-      ? activeMultisigAccount.value?.gaAccountId
+      ? activeMultisigAccountId.value
       : account.value.address);
     const availableTokens = computed<ITokenList>(
       () => root.$store.state.fungibleTokens.availableTokens,

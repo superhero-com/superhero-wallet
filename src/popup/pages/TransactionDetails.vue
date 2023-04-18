@@ -301,7 +301,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getMiddleware } = useMiddleware({ store: root.$store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
     const { account } = useAccounts({ store: root.$store });
 
     const externalAddress = computed((): string => (
