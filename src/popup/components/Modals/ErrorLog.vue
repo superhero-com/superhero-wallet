@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { RejectedByUserError } from '../../../lib/errors';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -48,7 +49,7 @@ export default {
   },
   methods: {
     cancel() {
-      this.reject(new Error('Rejected by user'));
+      this.reject(new RejectedByUserError());
     },
     createReport() {
       this.resolve(true);

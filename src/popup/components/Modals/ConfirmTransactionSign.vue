@@ -110,6 +110,7 @@ import {
   ref,
 } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
+import { RejectedByUserError } from '../../../lib/errors';
 import {
   FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
@@ -303,7 +304,7 @@ export default defineComponent({
     }
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     onMounted(async () => {

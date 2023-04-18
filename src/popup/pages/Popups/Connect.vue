@@ -62,6 +62,7 @@ import type {
   IAppData,
   IPermission,
 } from '../../../types';
+import { RejectedByUserError } from '../../../lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
@@ -119,7 +120,7 @@ export default defineComponent({
     }
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     return {

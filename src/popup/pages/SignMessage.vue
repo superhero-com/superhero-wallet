@@ -1,5 +1,6 @@
 <script lang="ts">
 import { defineComponent, onMounted } from '@vue/composition-api';
+import { RejectedByUserError } from '../../lib/errors';
 import { useDeepLinkApi, useModals, useSdk } from '../../composables';
 import { MODAL_MESSAGE_SIGN, handleUnknownError } from '../utils';
 
@@ -27,10 +28,12 @@ export default defineComponent({
         const signature = await sdk.signMessage(message);
         const signatureHex = Buffer.from(signature).toString('hex');
         openCallbackOrGoHome(true, { signature: signatureHex });
-      } catch (e: any) {
+      } catch (error: any) {
         openCallbackOrGoHome(false);
 
-        if (e.message !== 'Rejected by user') handleUnknownError(e);
+        if (error instanceof RejectedByUserError) {
+          handleUnknownError(error);
+        }
       }
     });
   },
