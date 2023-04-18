@@ -5,7 +5,7 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :title="$t('pages.popupMessageSign.title')"
+      :custom-title="$t('pages.popupMessageSign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="accountExtended"
     />

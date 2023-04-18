@@ -42,7 +42,7 @@ export default defineComponent({
     TransactionTag,
   },
   props: {
-    title: { type: String, default: null },
+    customTitle: { type: String, default: null },
     transaction: { type: Object as PropType<ITransaction>, default: null },
     isIncomplete: Boolean,
     isPending: Boolean,
@@ -67,7 +67,7 @@ export default defineComponent({
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
     const labels = computed<(string | TranslateResult)[]>(() => {
-      if (props.title) return [props.title];
+      if (props.customTitle) return [props.customTitle];
       if (!props.transaction?.tx) {
         return [];
       }
