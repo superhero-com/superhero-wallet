@@ -263,11 +263,13 @@ import {
   aettosToAe,
   splitAddress,
   AETERNITY_SYMBOL,
-  getPayload,
-  handleUnknownError,
+  MODAL_DEFAULT,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   FUNCTION_TYPE_MULTISIG,
+  getPayload,
+  handleUnknownError,
   blocksToRelativeTime,
+  isInsufficientBalanceError,
 } from '../utils';
 import type {
   IGAMetaTx,
@@ -281,7 +283,7 @@ import {
   usePendingMultisigTransaction,
   useMultisigTransactions,
 } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { useGetter, useDispatch } from '../../composables/vuex';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -351,6 +353,8 @@ export default defineComponent({
 
     const getExplorerPath = useGetter('getExplorerPath');
     const getTxSymbol = useGetter('getTxSymbol');
+
+    const openModal = useDispatch('modals/open');
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
@@ -439,7 +443,18 @@ export default defineComponent({
 
         proposalCompleted.value = true;
       } catch (error) {
-        handleUnknownError(error);
+        let title;
+        if (isInsufficientBalanceError(error)) {
+          error.message = root.$t('modals.vaultLowBalance.msg');
+          title = root.$t('modals.vaultLowBalance.title');
+        }
+        openModal({
+          name: MODAL_DEFAULT,
+          icon: 'warning',
+          title,
+          msg: error.message,
+          textCenter: true,
+        });
       }
       processingAction.value = false;
     }
@@ -553,7 +568,7 @@ export default defineComponent({
 
       column-gap: 24px;
       row-gap: 8px;
-      padding: 8px 16px;
+      padding: 8px var(--screen-padding-x);
 
       .tip-url {
         width: 100%;
@@ -595,7 +610,7 @@ export default defineComponent({
   }
 
   .bottom-buttons {
-    padding: 24px;
+    padding: var(--screen-padding-x);
     position: absolute;
     bottom: 0;
     left: 0;

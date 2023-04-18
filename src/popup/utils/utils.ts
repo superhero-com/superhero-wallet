@@ -12,6 +12,7 @@ import {
   Crypto,
   TxBuilder,
   TxBuilderHelper,
+  InvalidTxError,
 } from '@aeternity/aepp-sdk';
 import {
   ADDRESS_TYPES,
@@ -505,4 +506,18 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
     return false;
   }
   return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
+}
+
+export function errorHasValidationKey(error: any, expectedKey: string) {
+  return (
+    error.validation
+    && error.validation.some(({ key }: any) => expectedKey === key)
+  );
+}
+
+export function isInsufficientBalanceError(error: any) {
+  return (
+    error instanceof InvalidTxError
+    && errorHasValidationKey(error, 'InsufficientBalance')
+  );
 }
