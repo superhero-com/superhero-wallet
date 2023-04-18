@@ -5,7 +5,7 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :title="$t('pages.connectConfirm.title')"
+      :custom-title="$t('pages.connectConfirm.title')"
       :sender="{ name: appName, address: app.host, url: app.url }"
       :recipient="accountExtended"
     />
