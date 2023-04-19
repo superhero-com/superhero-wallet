@@ -8,6 +8,7 @@ import {
   checkAensName,
   fetchAllPages,
   fetchRespondChallenge,
+  isInsufficientBalanceError,
 } from '../../popup/utils';
 import { i18n } from './languages';
 import { useMiddleware, useModals, useSdk } from '../../composables';
@@ -144,15 +145,18 @@ export default (store) => {
       ) {
         const sdk = await getSdk();
         const nameEntry = await sdk.aensQuery(name);
+        let msg;
         try {
           if (type === 'extend') {
             await nameEntry.extendTtl();
           } else if (type === 'update') {
             await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
-          openDefaultModal({ msg: i18n.t('pages.names.pointer-added', { type }) });
+          msg = i18n.t('pages.names.pointer-added', { type });
         } catch (e) {
-          openDefaultModal({ msg: e.message });
+          msg = isInsufficientBalanceError(e) ? i18n.t('modals.insufficient-balance.msg') : e.message;
+        } finally {
+          openDefaultModal({ msg });
         }
       },
       async setDefaults(
