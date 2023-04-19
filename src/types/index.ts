@@ -361,7 +361,7 @@ export interface ITx {
   result: string;
   return: ITxArguments
   returnType: string
-  recipientId?: string
+  recipientId: string; // nm_* or ak_*
   senderId?: string
   selectedTokenContractId?: string
   tag?: string; // Allows to establish the transaction type

@@ -375,7 +375,7 @@ export async function fetchRespondChallenge(
   };
 }
 
-export function getPayload(transaction: ITransaction) {
+export function getPayload(transaction: ITransaction): string | null {
   return (transaction.tx?.payload)
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;

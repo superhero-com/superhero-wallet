@@ -19,16 +19,13 @@
     </div>
     <TokenAmount
       :amount="getTxAmountTotal(transaction)"
-      :symbol="getSymbol(transaction)"
+      :symbol="symbol"
       :hide-fiat="!isAe"
     />
-    <span class="sending-to">
+    <p class="sending-to">
       {{ transaction.tipUrl ? $t('pages.send.sentTo') : $t('pages.send.sendingTo') }}
-    </span>
-    <div
-      class="content"
-      :class="{ 'without-margin': hasPayload }"
-    >
+    </p>
+    <div class="content">
       <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
       <AvatarWithChainName
         v-else
@@ -53,7 +50,7 @@
         extra-padded
         :text="$t('pages.send.viewInExplorer')"
         :href="getExplorerPath(transaction.hash)"
-        :icon="ExternalLink"
+        :icon="ExternalLinkIcon"
       />
       <BtnMain
         inline
@@ -65,10 +62,18 @@
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import { getPayload, AETERNITY_SYMBOL } from '../../utils';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  ref,
+  onMounted,
+  PropType,
+} from '@vue/composition-api';
+import { getPayload, AETERNITY_SYMBOL, isAensName } from '../../utils';
 import { useMiddleware } from '../../../composables';
+import { ITokenList, ITransaction } from '../../../types';
+import { useState, useGetter } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
@@ -78,10 +83,10 @@ import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
 
 import PendingIcon from '../../../icons/animated-pending.svg?vue-component';
-import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
+import ExternalLinkIcon from '../../../icons/external-link-big.svg?vue-component';
 import IconBoxed from '../IconBoxed.vue';
 
-export default {
+export default defineComponent({
   components: {
     PayloadDetails,
     ModalHeader,
@@ -93,46 +98,49 @@ export default {
   },
   props: {
     resolve: { type: Function, required: true },
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  data: () => ({
-    PendingIcon,
-    ExternalLink,
-    hideAvatar: false,
-    nameRecipient: null,
-  }),
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
-    ...mapGetters('names', ['getPreferred']),
-    isAe() {
-      return !(this.transaction.tx.contractId
-        && this.availableTokens[this.transaction.tx.contractId]?.symbol);
-    },
-    payload() {
-      return getPayload(this.transaction);
-    },
-    hasPayload() {
-      return !!this.payload?.length;
-    },
+  setup(props, { root }) {
+    const { getMiddleware } = useMiddleware({ store: root.$store });
+
+    const hideAvatar = ref(false);
+    const nameRecipient = ref(null);
+
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const getTxAmountTotal = useGetter('getTxAmountTotal');
+    const getExplorerPath = useGetter('getExplorerPath');
+
+    const payload = computed(() => getPayload(props.transaction));
+    const hasPayload = computed(() => !!payload.value?.length);
+    const symbol = computed(() => {
+      const { contractId } = props.transaction.tx;
+      return contractId ? availableTokens.value[contractId].symbol : AETERNITY_SYMBOL;
+    });
+    const isAe = computed(() => symbol.value === AETERNITY_SYMBOL);
+
+    onMounted(async () => {
+      const { recipientId } = props.transaction.tx;
+      if (isAensName(recipientId)) {
+        const middleware = await getMiddleware();
+        hideAvatar.value = true;
+        nameRecipient.value = (await middleware.getNameById(recipientId)).name;
+      }
+    });
+
+    return {
+      PendingIcon,
+      ExternalLinkIcon,
+      hideAvatar,
+      nameRecipient,
+      symbol,
+      isAe,
+      payload,
+      hasPayload,
+      getExplorerPath,
+      getTxAmountTotal,
+    };
   },
-  async mounted() {
-    const { getMiddleware } = useMiddleware({ store: this.$store });
-    const middleware = await getMiddleware();
-    const { recipientId } = this.transaction.tx;
-    if (recipientId.includes('nm_')) {
-      this.hideAvatar = true;
-      this.nameRecipient = (await middleware.getNameById(recipientId)).name;
-    }
-  },
-  methods: {
-    getSymbol() {
-      return this.transaction.tx.contractId
-        ? this.availableTokens[this.transaction.tx.contractId].symbol
-        : AETERNITY_SYMBOL;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -141,29 +149,8 @@ export default {
 @use '../../../styles/mixins';
 
 .spend-success {
-  ::v-deep .container .body {
-    @include mixins.flex(flex-start, center, column);
-  }
-
-  ::v-deep .token-amount {
-    @extend %face-sans-15-medium;
-
-    .symbol {
-      margin-left: 4px;
-      color: rgba(variables.$color-white, 0.75);
-    }
-
-    .fiat {
-      font-weight: normal;
-    }
-  }
-
   .header {
     padding: 0;
-  }
-
-  .avatar-with-chain-name {
-    padding-inline: 8px;
   }
 
   .pending-wrapper {
@@ -179,16 +166,12 @@ export default {
   }
 
   .content {
-    margin-bottom: 26px;
+    margin-bottom: 20px;
+    padding-inline: 8px;
     width: 100%;
-
-    &.without-margin {
-      margin-bottom: 0;
-    }
   }
 
   .payload-detail {
-    margin-top: 20px;
     margin-bottom: 10px;
   }
 
