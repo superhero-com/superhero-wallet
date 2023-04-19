@@ -8,14 +8,16 @@
     :full-screen="fullScreen"
     v-on="{ close: close || resolve }"
   >
-    <div class="icon-box">
-      <StatusIcon
-        :status="icon"
-        class="icon"
-      />
+    <div class="top-icon-wrapper">
+      <IconBoxed>
+        <StatusIcon
+          :status="icon"
+          class="status-icon"
+        />
+      </IconBoxed>
     </div>
 
-    <h2 class="text-heading-2 text-center">
+    <h2 class="text-heading-2 text-center title">
       {{ title }}
     </h2>
 
@@ -47,6 +49,7 @@ import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
+import IconBoxed from '../IconBoxed.vue';
 
 export default defineComponent({
   components: {
@@ -54,6 +57,7 @@ export default defineComponent({
     BtnMain,
     TemplateRenderer,
     StatusIcon,
+    IconBoxed,
   },
   props: {
     resolve: { type: Function, required: true },
@@ -73,29 +77,18 @@ export default defineComponent({
 @use '../../../styles/mixins';
 
 .default {
-  .text-heading-2 {
+  .title {
     margin-bottom: 16px;
   }
 
-  .icon-box {
-    @include mixins.flex(center, center, column);
+  .top-icon-wrapper {
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-    gap: 20px;
-
-    .icon {
-      padding: 4px;
-      border: 4px solid variables.$color-disabled;
-      border-radius: 200%;
-      height: 64px;
-      width: 64px;
-      margin-bottom: 20px;
-      background-color: variables.$color-bg-1;
-    }
-
-    .center-button {
-      width: auto;
-      padding: 0 24px;
-    }
+  .center-button {
+    width: auto;
+    padding: 0 24px;
   }
 }
 </style>
