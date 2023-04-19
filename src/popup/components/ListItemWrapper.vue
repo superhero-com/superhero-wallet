@@ -25,6 +25,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/variables' as *;
+@use '../../styles/mixins';
 
 .list-item-wrapper {
   display: block;
@@ -36,7 +37,11 @@ export default defineComponent({
   transition: background-color 0.12s ease-in-out;
 
   &:hover {
-    background-color: $color-bg-4-hover;
+    background-color: rgba($color-bg-4-hover, 0.5);
+
+    @include mixins.mobile {
+      background-color: transparent;
+    }
   }
 
   &:active {
