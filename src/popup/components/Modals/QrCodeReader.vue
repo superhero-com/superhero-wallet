@@ -7,9 +7,10 @@
     from-bottom
     @close="resolve"
   >
-    <div class="qr-scan-wrapper">
-      <QrScan />
+    <div class="top-icon-wrapper">
+      <IconBoxed :icon="QrScanIcon" />
     </div>
+
     <span v-if="cameraAllowed">{{ title }}</span>
     <span v-else>
       {{ $t('modals.qrCodeReader.grantPermission') }}
@@ -55,18 +56,24 @@ import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import QrScan from '../../../icons/qr-scan.svg?vue-component';
+import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
+import IconBoxed from '../IconBoxed.vue';
 
 export default {
   components: {
     Modal,
     BtnMain,
-    QrScan,
+    IconBoxed,
   },
   props: {
     title: { type: String, required: true },
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
+  },
+  setup() {
+    return {
+      QrScanIcon,
+    };
   },
   data: () => ({
     mobile: IS_CORDOVA,
@@ -199,23 +206,10 @@ export default {
 @use '../../../styles/typography';
 
 .qr-code-reader {
-  .qr-scan-wrapper {
-    @include mixins.flex(center, center);
-
-    background-color: variables.$color-bg-1;
-    border: 4px solid rgba(variables.$color-white, 0.05);
-    border-radius: 50%;
-    width: 56px;
-    height: 56px;
-    align-self: center;
+  .top-icon-wrapper {
     margin: 0 auto 16px auto;
-
-    .qr-scan {
-      margin-bottom: 0;
-      width: 40px;
-      height: 40px;
-      color: variables.$color-primary;
-    }
+    text-align: center;
+    color: variables.$color-primary;
   }
 
   .camera {
