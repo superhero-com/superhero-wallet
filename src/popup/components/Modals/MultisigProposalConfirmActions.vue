@@ -7,12 +7,14 @@
     @close="closeModal"
   >
     <div class="content">
-      <div class="icon-box">
-        <StatusIcon
-          :status="icon"
-          class="icon"
-          :class="[action]"
-        />
+      <div class="icon-wrapper">
+        <IconBoxed>
+          <StatusIcon
+            class="status-icon"
+            :class="[action]"
+            :status="icon"
+          />
+        </IconBoxed>
       </div>
 
       <h2 class="text-heading-2 text-center">
@@ -81,6 +83,7 @@ import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountItem from '../AccountItem.vue';
 import StatusIcon from '../StatusIcon.vue';
+import IconBoxed from '../IconBoxed.vue';
 
 export default defineComponent({
   components: {
@@ -89,6 +92,7 @@ export default defineComponent({
     BtnMain,
     AccountItem,
     StatusIcon,
+    IconBoxed,
   },
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
@@ -227,19 +231,11 @@ export default defineComponent({
     padding: 0 18px;
   }
 
-  .icon-box {
-    @include mixins.flex(center, center, column);
+  .icon-wrapper {
+    margin-bottom: 20px;
 
-    gap: 20px;
-
-    .icon {
-      padding: 8px;
-      border: 4px solid variables.$color-disabled;
-      border-radius: 200%;
-      height: 56px;
-      width: 56px;
-      margin-bottom: 20px;
-      background-color: variables.$color-bg-1;
+    .status-icon {
+      margin: 8px;
 
       &.refuse {
         color: variables.$color-warning;
