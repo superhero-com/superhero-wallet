@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { aettosToAe } from '../../popup/utils/helper';
+import { aettosToAe } from '../../popup/utils';
 
 const hostConfig = (addresses, isDefault = false) => ({
   addresses,

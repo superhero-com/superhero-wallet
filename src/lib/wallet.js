@@ -1,80 +1,16 @@
-import { genSwaggerClient } from '@aeternity/aepp-sdk';
 import BrowserWindowMessageConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-window-message';
-import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
-import { camelCase, isEqual, times } from 'lodash-es';
-import camelcaseKeysDeep from 'camelcase-keys-deep';
+import { isEqual, times } from 'lodash-es';
 import {
   NODE_STATUS_CONNECTING,
-  NODE_STATUS_CONNECTION_DONE,
   NODE_STATUS_ERROR,
-  fetchJson,
   executeAndSetInterval,
   watchUntilTruthy,
+  NODE_STATUS_CONNECTED,
 } from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
-
-async function initMiddleware() {
-  const { middlewareUrl } = store.getters.activeNetwork;
-
-  const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
-
-  const spec = await fetchJson(swagUrl);
-  spec.paths = {
-    ...spec.paths,
-    '/txs/backward': {
-      get: {
-        operationId: 'getTxByAccount',
-        parameters: [
-          {
-            in: 'query',
-            name: 'account',
-            required: true,
-            type: 'string',
-          },
-          {
-            in: 'query',
-            name: 'limit',
-            required: true,
-            type: 'integer',
-          },
-          {
-            in: 'query',
-            name: 'page',
-            required: true,
-            type: 'integer',
-          },
-        ],
-      },
-    },
-    // TODO: remove after mainnet middleware would be updated to a > 1.7.3 version
-    '/names/owned_by/{id}': {
-      get: {
-        operationId: 'getNamesOwnedBy',
-        parameters: [{
-          in: 'path',
-          name: 'id',
-          required: true,
-          type: 'string',
-        }],
-      },
-    },
-  };
-  spec.basePath = '/mdw/';
-  // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/160
-  delete spec.schemes;
-  // TODO: remove after resolving https://github.com/aeternity/ae_mdw/issues/508
-  spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
-  delete spec.paths['/names/pointees/{id}'];
-  const middleware = mapObject(
-    (await genSwaggerClient(middlewareUrl, { spec })).api,
-    ([k, v]) => [camelCase(k), v],
-  );
-  middleware.fetchByPath = (path) => fetchJson(`${middlewareUrl}${path}`).then(camelcaseKeysDeep);
-
-  store.commit('setMiddleware', middleware);
-}
+import { useMiddleware } from '../composables';
 
 let initSdkRunning = false;
 
@@ -104,6 +40,8 @@ export default async function initSdk() {
   try {
     await store.dispatch('sdkPlugin/initialize');
     await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+    const { getMiddleware, initMiddleware } = useMiddleware({ store });
+
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
         window.parent,
@@ -142,9 +80,9 @@ export default async function initSdk() {
 
     await Promise.all([
       store.dispatch('initTippingContractInstances'),
-      initMiddleware(),
+      getMiddleware(),
     ]);
-    store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
+    store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
 
     store.watch(
       (state, getters) => getters.activeNetwork,
@@ -153,7 +91,7 @@ export default async function initSdk() {
         try {
           store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
           await initMiddleware();
-          store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE);
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
         } catch (error) {
           store.commit('setNodeStatus', NODE_STATUS_ERROR);
           Logger.write(error);

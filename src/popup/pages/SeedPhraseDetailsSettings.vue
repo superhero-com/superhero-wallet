@@ -9,18 +9,17 @@
         {{ mnemonic }}
       </p>
       <BtnMain
-        has-icon
         variant="dark"
         class="copy-btn"
+        big-icon
+        :icon="copied ? CheckSuccessCircle : CopyOutlined"
         @click="copy(mnemonic)"
       >
         <template v-if="!copied">
-          <CopyOutlined class="copy-icon" />
           {{ $t('pages.seed-phrase-settings.copy') }}
         </template>
 
         <template v-else>
-          <CheckSuccessCircle />
           {{ $t('addressCopied') }}
         </template>
       </BtnMain>
@@ -62,17 +61,15 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
+import { useCopy } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
-
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
-import { useCopy } from '../../composables';
 
 export default defineComponent({
+  name: 'SeedPhraseDetailsSettings',
   components: {
     BtnMain,
-    CopyOutlined,
-    CheckSuccessCircle,
   },
   setup(props, { root }) {
     const { copy, copied } = useCopy();
@@ -84,6 +81,8 @@ export default defineComponent({
     }
 
     return {
+      CopyOutlined,
+      CheckSuccessCircle,
       copy,
       copied,
       mnemonic,
@@ -125,20 +124,8 @@ export default defineComponent({
     }
 
     .copy-btn {
-      @extend %face-sans-16-regular;
-
       margin: 0 auto;
       min-width: 210px;
-
-      .check-success-circle {
-        margin-right: 4px;
-        color: variables.$color-success-dark;
-      }
-
-      .copy-icon {
-        width: 24px;
-        height: 24px;
-      }
     }
   }
 

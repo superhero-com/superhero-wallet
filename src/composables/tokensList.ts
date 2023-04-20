@@ -1,9 +1,11 @@
-import { computed, ref, Ref } from '@vue/composition-api';
-import type { IToken, ITokenList } from '../types';
-import { AETERNITY_CONTRACT_ID, rxJsObservableToVueState } from '../popup/utils';
-import store from '../store';
+import BigNumber from 'bignumber.js';
+import { computed, Ref } from '@vue/composition-api';
+import type { IToken, ITokenList, IDefaultComposableOptions } from '../types';
+import { AETERNITY_CONTRACT_ID } from '../popup/utils';
+import { useBalances } from './balances';
+import { useMultisigAccounts } from './multisigAccounts';
 
-export interface UseTokensListOptions {
+export interface UseTokensListOptions extends IDefaultComposableOptions {
   /**
    * Restrict the list to tokens owned by the user
    */
@@ -16,34 +18,43 @@ export interface UseTokensListOptions {
    * Search the list by the symbol, name or contractId
    */
   searchTerm?: Ref<string>
+
+  /**
+   * Restrict the tokens list based on the account type.
+   */
+  isMultisig?: boolean
 }
 
-export function useTokensList(options: UseTokensListOptions = {}) {
-  const {
-    ownedOnly = false,
-    withBalanceOnly = false,
-    searchTerm = ref(''),
-  }: UseTokensListOptions = options;
+export function useTokensList({
+  store,
+  ownedOnly = false,
+  withBalanceOnly = false,
+  searchTerm,
+  isMultisig,
+}: UseTokensListOptions) {
+  const { balance, aeternityToken } = useBalances({ store });
+  const { activeMultisigAccount } = useMultisigAccounts({ store });
+  const currentCurrencyRate = computed(() => store.getters.currentCurrencyRate || 0);
 
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
+  const availableTokens = computed<ITokenList>(() => (
+    isMultisig
+      ? []
+      : (store.state as any).fungibleTokens.availableTokens
+  ));
   const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
-  const getAeternityToken = computed(() => store.getters['fungibleTokens/getAeternityToken']);
 
-  const balance = rxJsObservableToVueState<any>(
-    (store.state as any).observables.balance,
-  );
-  const balanceCurrency = rxJsObservableToVueState<number>(
-    (store.state as any).observables.balanceCurrency,
-  );
-
+  const aeTokenBalance = computed(() => (
+    isMultisig
+      ? new BigNumber(activeMultisigAccount.value?.balance || 0)
+      : balance.value || new BigNumber(0)
+  ));
   /**
    * Returns the default aeternity meta information
    */
-  const aeternityToken = computed<IToken | null>(() => getAeternityToken.value({
-    tokenBalance: balance.value,
-    balanceCurrency: balanceCurrency.value,
+  const aeToken = computed((): any => ({
+    ...aeternityToken.value,
+    convertedBalance: aeTokenBalance.value,
+    balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
   }));
 
   /**
@@ -54,14 +65,14 @@ export function useTokensList(options: UseTokensListOptions = {}) {
       .map(([contractId, tokenData]) => ({ ...tokenData, contractId }));
 
     tokenBalances.value.forEach((singleBalance: IToken) => {
-      const index = tokens.findIndex((token) => token.contractId === singleBalance.contractId);
+      const index = tokens.findIndex((token) => token.contractId === singleBalance?.contractId);
       if (index !== -1) {
         tokens[index] = singleBalance;
       }
     });
 
     return [
-      ...(aeternityToken.value ? [aeternityToken.value] : []),
+      ...(aeToken.value ? [aeToken.value] : []),
       ...tokens,
     ];
   });
@@ -70,7 +81,7 @@ export function useTokensList(options: UseTokensListOptions = {}) {
    * Filter the available tokens with options provided for the composable and the search text
    */
   const filteredTokens = computed<IToken[]>(() => {
-    const searchTermParsed = searchTerm.value.trim().toLowerCase();
+    const searchTermParsed = (searchTerm?.value || '').trim().toLowerCase();
     return allTokens.value
       .filter((token) => (
         !ownedOnly
@@ -84,18 +95,19 @@ export function useTokensList(options: UseTokensListOptions = {}) {
       ))
       .filter(({ symbol, name, contractId }) => (
         !searchTermParsed
-        || symbol.toLowerCase().includes(searchTermParsed)
-        || name.toLowerCase().includes(searchTermParsed)
+        || symbol?.toLowerCase().includes(searchTermParsed)
+        || name?.toLowerCase().includes(searchTermParsed)
         || (
           searchTermParsed.startsWith('ct_')
-          && contractId.toLowerCase().includes(searchTermParsed)
+          && contractId?.toLowerCase().includes(searchTermParsed)
         )
       ));
   });
 
   return {
-    aeternityToken,
+    aeToken,
     allTokens,
     filteredTokens,
+    aeTokenBalance,
   };
 }

@@ -4,7 +4,8 @@
     has-close-button
     from-bottom
     centered
-    :body-without-padding-bottom="!!payload.length"
+    :body-without-padding-bottom="hasPayload"
+    data-cy="spend-success"
     @close="resolve"
   >
     <ModalHeader
@@ -26,7 +27,7 @@
     </span>
     <div
       class="content"
-      :class="{ 'without-margin': payload.length }"
+      :class="{ 'without-margin': hasPayload }"
     >
       <span v-if="transaction.tipUrl">{{ transaction.tipUrl }}</span>
       <AvatarWithChainName
@@ -49,32 +50,33 @@
         variant="muted"
         extend
         nowrap
-        has-icon
+        extra-padded
+        :text="$t('pages.send.viewInExplorer')"
         :href="getExplorerPath(transaction.hash)"
-      >
-        <ExternalLink class="external-link" />
-        {{ $t('pages.send.viewInExplorer') }}
-      </BtnMain>
+        :icon="ExternalLink"
+      />
       <BtnMain
         inline
         nowrap
+        :text="$t('ok')"
         @click="resolve"
-      >
-        {{ $t('ok') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { getPayload, AETERNITY_SYMBOL } from '../../utils';
+import { useMiddleware } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
-import { getPayload, watchUntilTruthy, AETERNITY_SYMBOL } from '../../utils';
+
 import Pending from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
 
@@ -87,19 +89,19 @@ export default {
     Pending,
     TokenAmount,
     BtnMain,
-    ExternalLink,
   },
   props: {
     resolve: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
   data: () => ({
+    ExternalLink,
     hideAvatar: false,
     nameRecipient: null,
   }),
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath', 'isTxAex9']),
+    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
     ...mapGetters('names', ['getPreferred']),
     isAe() {
       return !(this.transaction.tx.contractId
@@ -108,13 +110,17 @@ export default {
     payload() {
       return getPayload(this.transaction);
     },
+    hasPayload() {
+      return !!this.payload?.length;
+    },
   },
   async mounted() {
+    const { getMiddleware } = useMiddleware({ store: this.$store });
+    const middleware = await getMiddleware();
     const { recipientId } = this.transaction.tx;
-    await watchUntilTruthy(() => this.$store.state.middleware);
     if (recipientId.includes('nm_')) {
       this.hideAvatar = true;
-      this.nameRecipient = (await this.$store.state.middleware.getNameById(recipientId)).name;
+      this.nameRecipient = (await middleware.getNameById(recipientId)).name;
     }
   },
   methods: {

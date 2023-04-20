@@ -27,16 +27,15 @@
       <BtnMain
         class="btn-cancel"
         variant="muted"
+        extra-padded
+        :text="$t('modals.payloadForm.cancelBtn')"
         @click="reject()"
-      >
-        {{ $t('modals.payloadForm.cancelBtn') }}
-      </BtnMain>
+      />
       <BtnMain
+        :text="$t('modals.payloadForm.doneBtn')"
         :disabled="!value.length"
         @click="resolve(value)"
-      >
-        {{ $t('modals.payloadForm.doneBtn') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
@@ -44,7 +43,7 @@
 <script lang="ts">
 import { ref, defineComponent } from '@vue/composition-api';
 import Modal from '../Modal.vue';
-import FormTextarea from '../FormTextarea.vue';
+import FormTextarea from '../form/FormTextarea.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
 export default defineComponent({
@@ -57,7 +56,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    payload: { type: String, required: true },
+    payload: { type: String, default: '' },
   },
   setup: (props) => ({ value: ref(props.payload) }),
 });

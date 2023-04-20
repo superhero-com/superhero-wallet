@@ -10,7 +10,7 @@
         </div>
       </div>
       <a
-        class="table-item dark link"
+        class="table-item link"
         :href="`${COMMIT_URL}${commitHash}`"
         target="_blank"
       >
@@ -27,10 +27,10 @@
           {{ $t('pages.about.software-version') }}
         </div>
         <div class="value">
-          {{ extensionVersion }}
+          v.{{ extensionVersion }}
         </div>
       </div>
-      <div class="table-item dark">
+      <div class="table-item">
         <div class="name">
           {{ $t('pages.about.sdk-version') }}
         </div>
@@ -38,99 +38,100 @@
           {{ sdkVersion }}
         </div>
       </div>
-      <a
-        v-if="activeNetwork"
-        class="table-item link"
-        target="_blank"
-        :href="`${activeNetwork.middlewareUrl}/status`"
-      >
-        <div class="name">
-          {{ $t('pages.about.middleware-version') }}
-        </div>
-        <div class="value">
-          {{ mdw.mdw_version }}
-          <ExternalLink />
-        </div>
-      </a>
-      <a
-        v-if="activeNetwork"
-        class="table-item dark link"
-        target="_blank"
-        :href="`${activeNetwork.middlewareUrl}/status`"
-      >
-        <div class="name">
-          {{ $t('pages.about.node-version') }}
-        </div>
-        <div class="value">
-          {{ mdw.node_version }}
-          <ExternalLink />
-        </div>
-      </a>
+      <template v-if="activeNetwork && mdwStatus">
+        <a
+          class="table-item link"
+          target="_blank"
+          :href="`${activeNetwork.middlewareUrl}/status`"
+        >
+          <div class="name">
+            {{ $t('pages.about.middleware-version') }}
+          </div>
+          <div class="value">
+            {{ mdwStatus.mdwVersion }}
+            <ExternalLink class="compensate-icon-margin" />
+          </div>
+        </a>
+        <a
+          class="table-item link"
+          target="_blank"
+          :href="`${activeNetwork.middlewareUrl}/status`"
+        >
+          <div class="name">
+            {{ $t('pages.about.node-version') }}
+          </div>
+          <div class="value">
+            {{ mdwStatus.nodeVersion }}
+            <ExternalLink class="compensate-icon-margin" />
+          </div>
+        </a>
+      </template>
     </div>
 
-    <PanelItem
-      :to="{ name: 'about-terms' }"
-      :title="$t('pages.about.terms')"
-    >
-      <template #icon>
-        <Terms />
-      </template>
-    </PanelItem>
-    <PanelItem
-      :to="{ name: 'about-privacy' }"
-      :title="$t('pages.about.privacyPolicy')"
-    >
-      <template #icon>
-        <Terms />
-      </template>
-    </PanelItem>
+    <div class="additional-links">
+      <PanelItem
+        :to="{ name: 'about-terms' }"
+        :title="$t('pages.about.terms')"
+      >
+        <template #icon>
+          <Terms />
+        </template>
+      </PanelItem>
+      <PanelItem
+        :to="{ name: 'about-privacy' }"
+        :title="$t('pages.about.privacyPolicy')"
+      >
+        <template #icon>
+          <Terms />
+        </template>
+      </PanelItem>
+    </div>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import type { IMiddlewareStatus, INetwork } from '../../types';
+import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
+import { useMiddleware } from '../../composables';
+import { useGetter } from '../../composables/vuex';
+
 import PanelItem from '../components/PanelItem.vue';
 import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
-import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
-import { fetchJson } from '../utils/helper';
 
 const extPackageJson = require('../../../package.json');
 
-export default {
+export default defineComponent({
   components: {
     PanelItem,
     Terms,
     Github,
     ExternalLink,
   },
-  data() {
+  setup(props, { root }) {
+    const { fetchMiddlewareStatus } = useMiddleware({ store: root.$store });
+    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
+    const mdwStatus = ref<IMiddlewareStatus>();
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+
+    onMounted(async () => {
+      mdwStatus.value = await fetchMiddlewareStatus();
+    });
+
     return {
-      extensionVersion: `v.${process.env.npm_package_version}`,
-      commitHash: process.env.COMMIT_HASH,
       BUG_REPORT_URL,
       AGGREGATOR_URL,
       COMMIT_URL,
-      mdw: {},
-      sdkVersion: null,
+      extensionVersion: process.env.npm_package_version,
+      commitHash: process.env.COMMIT_HASH,
+      sdkVersion,
+      mdwStatus,
+      activeNetwork,
     };
   },
-  computed: mapGetters(['activeNetwork']),
-  mounted() {
-    this.fetchMiddlewareVersion();
-    this.sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
-  },
-  methods: {
-    async fetchMiddlewareVersion() {
-      try {
-        this.mdw = await fetchJson(`${this.activeNetwork.middlewareUrl}/status`);
-      } catch (error) {
-        //
-      }
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -138,12 +139,13 @@ export default {
 @use '../../styles/typography';
 
 .about {
-  padding-top: 14px;
+  --screen-padding-x: 8px;
+
+  padding-top: 16px;
+  padding-inline: var(--screen-padding-x);
 
   .table {
-    margin: 0 8px 36px;
-    background: rgba(variables.$color-white, 0.06);
-    border-radius: 10px;
+    border-radius: variables.$border-radius-interactive;
     overflow: hidden;
 
     .table-item {
@@ -153,25 +155,26 @@ export default {
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 14px;
+      padding: 4px 16px;
+      background: rgba(variables.$color-white, 0.08);
 
-      &.dark {
-        background-color: variables.$color-disabled;
+      &:nth-child(even) {
+        background-color: rgba(variables.$color-white, 0.06);
       }
 
       .name {
+        @extend %face-sans-15-regular;
+
         color: rgba(variables.$color-white, 0.75);
         font-weight: 400;
-
-        @extend %face-sans-15-regular;
       }
 
       .value {
+        @extend %face-sans-14-light;
+
         display: inline-flex;
         align-items: center;
         color: rgba(variables.$color-white, 1);
-
-        @extend %face-sans-14-light;
 
         .icon {
           width: 24px;
@@ -185,16 +188,33 @@ export default {
       &.link {
         text-decoration: none;
         cursor: pointer;
+        transition: variables.$transition-interactive;
 
-        .value:hover {
-          text-decoration: underline;
+        &:hover {
+          background: rgba(variables.$color-white, 0.05);
 
-          .icon {
-            opacity: 1;
+          .name {
+            color: variables.$color-white;
           }
+
+          .value {
+            text-decoration: underline;
+
+            .icon {
+              opacity: 1;
+            }
+          }
+        }
+
+        &:active {
+          background: rgba(variables.$color-white, 0.04);
         }
       }
     }
+  }
+
+  .additional-links {
+    margin-top: 24px;
   }
 }
 </style>

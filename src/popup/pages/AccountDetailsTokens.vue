@@ -1,54 +1,54 @@
 <template>
-  <div class="token-list-wrapper">
-    <div
-      v-if="showFilters || searchTerm.length"
-      class="search-bar-wrapper"
-    >
-      <InputSearch
-        v-model="searchTerm"
-        :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
-      />
-    </div>
+  <div class="account-details-tokens">
     <TokensList
-      :search-term="searchTerm"
+      v-if="isOnline"
+      class="tokens-list"
+      :search-term="searchPhrase"
+    />
+    <MessageOffline
+      v-else
+      class="offline-message"
+      :text="$t('modals.accountDetails.assetsNotAvailable')"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useConnection, useTransactionAndTokenFilter } from '../../composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
-import InputSearch from '../components/InputSearch.vue';
+import MessageOffline from '../components/MessageOffline.vue';
 
-export default {
+export default defineComponent({
   components: {
     TokensList,
-    InputSearch,
+    MessageOffline,
   },
   props: {
     showFilters: Boolean,
   },
-  data() {
+  setup() {
+    const { isOnline } = useConnection();
+    const { searchPhrase } = useTransactionAndTokenFilter();
+
     return {
-      searchTerm: '',
+      isOnline,
+      searchPhrase,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/mixins';
-@use '../../styles/typography';
-
-.token-list-wrapper {
+.account-details-tokens {
   position: relative;
-  padding-top: 4px;
-}
 
-.search-bar-wrapper {
-  background: var(--screen-bg-color);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  padding-inline: var(--screen-padding-x);
+  .tokens-list {
+    padding-top: 4px;
+  }
+
+  .offline-message {
+    margin-top: 40px;
+  }
 }
 </style>

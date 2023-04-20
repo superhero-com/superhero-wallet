@@ -1,180 +1,200 @@
 <template>
-  <RouterLink
+  <ListItemWrapper
     class="transaction-item"
-    :to="{ name: 'tx-details', params: { hash: transaction.hash } }"
+    :to="redirectRoute"
   >
-    <div class="header">
-      <span />
-      <div class="status">
-        <template v-if="transaction.pending">
-          <Pending class="icon" />
-          <span class="pending">{{ $t('transaction.type.pending') }}</span>
-        </template>
-        <template v-else>
-          <span data-cy="date">{{ formatDate(transaction.microTime) }}</span>
-          <span data-cy="time">{{ formatTime(transaction.microTime) }}</span>
-          <div
-            v-if="isErrorTransaction"
-            class="error"
-          >
-            <Warning
-              v-if="transaction.tx.returnType === 'abort'"
-              class="icon"
-            />
-            <Reverted
-              v-else
-              class="icon"
-            />
-            <span>{{ $t('transaction.returnType')[transaction.tx.returnType] }}</span>
-          </div>
-        </template>
-      </div>
-      <span />
-    </div>
     <div class="body">
       <TransactionTokens
-        :tokens="tokens"
+        :ext-tokens="tokens"
         :error="isErrorTransaction"
+        icon-size="md"
       />
       <div class="footer">
-        <div class="labels">
-          <label
-            v-for="label in labels"
-            :key="label"
-          >
-            {{ label.toUpperCase() }}
-          </label>
+        <div
+          v-if="!!multisigTransaction && !hasConsensus"
+          class="consensus"
+        >
+          <PendingIcon class="icon" />
+          <span class="pending">
+            {{ $t('multisig.consensusPending') }}
+            <ConsensusLabel
+              :confirmations-required="multisigTransaction.confirmationsRequired"
+              :has-pending-transaction="multisigTransaction.hasPendingTransaction"
+              :confirmed-by="multisigTransaction.confirmedBy"
+              :signers="multisigTransaction.signers"
+            />
+          </span>
         </div>
-        <span v-if="fiatAmount">{{ fiatAmount }}</span>
+
+        <TransactionLabel
+          v-else
+          :transaction="currentTransaction"
+          :transaction-date="transactionDate"
+          :show-transaction-owner="showTransactionOwner"
+          dense
+        />
+
+        <template v-if="!multisigTransaction">
+          <span v-if="fiatAmount && !showTransactionOwner">
+            {{ fiatAmount }}
+          </span>
+          <span
+            v-else-if="showTransactionOwner"
+            class="date"
+          >
+            {{ transactionDate }}
+          </span>
+        </template>
       </div>
     </div>
-  </RouterLink>
+  </ListItemWrapper>
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  ref,
+} from '@vue/composition-api';
+import dayjs from 'dayjs';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
   convertToken,
   formatDate,
   formatTime,
-  AENS,
-  DEX,
+  relativeTimeTo,
+  executeAndSetInterval,
 } from '../utils';
-import Pending from '../../icons/animated-pending.svg?vue-component';
-import Reverted from '../../icons/refresh.svg?vue-component';
-import Warning from '../../icons/warning.svg?vue-component';
+import {
+  ROUTE_MULTISIG_TX_DETAILS,
+  ROUTE_TX_DETAILS,
+  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+} from '../router/routeNames';
+import {
+  IActiveMultisigTx,
+  ITransaction,
+  TxFunctionRaw,
+} from '../../types';
+import {
+  useCurrencies,
+  useTransactionTokens,
+  useTransactionTx,
+} from '../../composables';
+
 import TransactionTokens from './TransactionTokenRows.vue';
-import { useTransactionToken, useGetter } from '../../composables';
-import { ITransaction, TransactionType } from '../../types';
+import TransactionLabel from './TransactionLabel.vue';
+import PendingIcon from '../../icons/animated-pending.svg?vue-component';
+import ListItemWrapper from './ListItemWrapper.vue';
+import ConsensusLabel from './ConsensusLabel.vue';
 
 export default defineComponent({
   components: {
-    Pending,
-    Reverted,
-    Warning,
+    ConsensusLabel,
+    PendingIcon,
+    TransactionLabel,
     TransactionTokens,
+    ListItemWrapper,
   },
   props: {
-    transaction: { type: Object as PropType<ITransaction>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, default: null },
+    multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
+    isMultisig: Boolean,
+    showTransactionOwner: Boolean,
+    hasConsensus: Boolean,
   },
   setup(props, { root }) {
-    const getAmountFiat = useGetter('getAmountFiat');
-    const activeNetwork = useGetter('activeNetwork');
-    const account = useGetter('account');
+    const { getFormattedAndRoundedFiat } = useCurrencies();
+
+    let timerInterval: NodeJS.Timer;
+    const transactionDate = ref();
+
+    const currentTransaction = computed(
+      () => (props.multisigTransaction || props.transaction),
+    );
+
+    const transactionOwner = computed((): string | undefined => (
+      props.transaction?.transactionOwner || undefined
+    ));
 
     const {
-      txType,
-      getTxDirection,
-      isAllowance,
       isDex,
-      availableTokens,
-      tokens,
+      direction,
+      isAllowance,
       isErrorTransaction,
-    } = useTransactionToken(props.transaction);
+    } = useTransactionTx({
+      store: root.$store,
+      tx: currentTransaction.value.tx,
+      externalAddress: transactionOwner.value,
+    });
 
-    const labels = computed(() => {
-      const transactionTypes = root.$t('transaction.type') as Record<TransactionType, any>;
+    const { tokens } = useTransactionTokens({
+      store: root.$store,
+      direction: direction.value,
+      isAllowance: isAllowance.value,
+      // TODO - refactor useTransactionTokens to use only tx
+      transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
+    });
 
-      if (txType.value?.startsWith('name')) {
-        return [AENS, transactionTypes[txType.value]];
-      }
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
-        return [
-          root.$t('transaction.type.spendTx'),
-          getTxDirection.value(props.transaction) === 'sent'
-            ? root.$t('transaction.spendType.out')
-            : root.$t('transaction.spendType.in'),
-        ];
-      }
-      if (isAllowance.value) {
-        return [root.$t('transaction.dexType.allow_token')];
-      }
-      if (isDex.value) {
-        return [
-          DEX, FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function)
-            ? root.$t('transaction.dexType.pool')
-            : root.$t('transaction.dexType.swap'),
-        ];
-      }
-      if (
-        (
-          props.transaction.tx.contractId
-          && (
-            activeNetwork.value.tipContractV1 === props.transaction.tx.contractId
-            || activeNetwork.value.tipContractV2 === props.transaction.tx.contractId
-          )
-          && (props.transaction.tx.function === 'tip' || props.transaction.tx.function === 'retip')
-        )
-        || props.transaction.claim
-      ) {
-        return [
-          root.$t('pages.token-details.tip'),
-          props.transaction.claim
-            ? root.$t('transaction.spendType.in')
-            : root.$t('transaction.spendType.out'),
-        ];
-      }
-      if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
-        && availableTokens.value[props.transaction.tx.contractId]
-        && (props.transaction.tx.function === 'transfer' || props.transaction.incomplete)
-      ) {
-        return [
-          root.$t('transaction.type.spendTx'),
-          props.transaction.tx.callerId === account.value.address
-            ? root.$t('transaction.spendType.out')
-            : root.$t('transaction.spendType.in'),
-        ];
+    const redirectRoute = computed<any>(() => {
+      if (props.multisigTransaction) {
+        return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }
 
-      return props.transaction.pending ? [] : [transactionTypes[txType.value]];
+      return {
+        name: props.isMultisig
+          ? ROUTE_MULTISIG_TX_DETAILS
+          : ROUTE_TX_DETAILS,
+        params: {
+          hash: props.transaction.hash,
+          transactionOwner: props.transaction.transactionOwner,
+        },
+      };
     });
 
     const fiatAmount = computed(() => {
-      // TODO add type to tokens
-      const aeToken = tokens.value?.find((t: any) => t?.isAe);
+      const aeToken = tokens.value?.find((t) => t?.isAe);
       if (
         !aeToken
         || isErrorTransaction.value
-        || (isDex.value && FUNCTION_TYPE_DEX.pool.includes(props.transaction.tx.function))
+        || (
+          isDex.value
+          && FUNCTION_TYPE_DEX.pool.includes(currentTransaction.value.tx?.function as TxFunctionRaw)
+        )
       ) return 0;
-      return getAmountFiat.value(amountRounded(
-        aeToken.decimals
+      return getFormattedAndRoundedFiat(
+        +amountRounded((aeToken.decimals
           ? convertToken(aeToken.amount || 0, -aeToken.decimals)
-          : aeToken.amount,
-      ));
+          : aeToken.amount)!),
+      );
+    });
+
+    onMounted(() => {
+      timerInterval = executeAndSetInterval(() => {
+        transactionDate.value = (props.transaction)
+          ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
+          : undefined;
+      }, 5000);
+    });
+
+    onBeforeUnmount(() => {
+      clearInterval(timerInterval);
     });
 
     return {
-      labels,
+      redirectRoute,
       fiatAmount,
-      formatDate,
-      formatTime,
+      transactionDate,
       isErrorTransaction,
       tokens,
+      currentTransaction,
+      transactionOwner,
+      direction,
+      formatDate,
+      formatTime,
     };
   },
 });
@@ -183,98 +203,42 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .transaction-item {
-  padding: 4px var(--screen-padding-x) 10px;
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
+  @include mixins.flex(center, center, column);
 
-  &:hover {
-    background-color: variables.$color-bg-4-hover;
-  }
-
-  .header {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    color: variables.$color-grey-dark;
-    margin-bottom: 4px;
-
-    .icon {
-      width: 16px;
-      height: 16px;
-      color: variables.$color-white;
-      margin-right: 2px;
-    }
-
-    .status {
-      display: flex;
-      margin-left: 8px;
-      white-space: nowrap;
-      color: variables.$color-grey-dark;
-
-      @extend %face-sans-12-regular;
-
-      span {
-        margin-right: 8px;
-      }
-
-      .error {
-        display: flex;
-        color: variables.$color-warning;
-
-        .icon {
-          color: variables.$color-warning;
-        }
-      }
-
-      .pending {
-        font-weight: 500;
-      }
-    }
-
-    > span {
-      width: 100%;
-      border-bottom: 1px solid rgba(variables.$color-white, 0.15);
-    }
-  }
+  padding: 10px var(--screen-padding-x);
+  margin: 0 calc(-1 * var(--screen-padding-x));
 
   .body {
     width: 100%;
 
     .footer {
-      display: flex;
-      justify-content: space-between;
-      color: variables.$color-white;
-      padding-top: 4px;
+      @include mixins.flex(space-between, center, row);
 
-      span {
-        color: variables.$color-grey-light;
+      @extend %face-sans-12-regular;
 
-        @extend %face-sans-15-medium;
+      width: 100%;
+      color: rgba(variables.$color-white, 0.75);
+      gap: 3px;
+
+      .date {
+        white-space: nowrap;
       }
+    }
+  }
 
-      .labels {
-        display: flex;
-        width: 100%;
+  .consensus {
+    @extend %face-sans-12-medium;
 
-        label {
-          @extend %face-sans-11-regular;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
-          height: 22px;
-          margin-right: 4px;
-          padding: 2px 5px;
-          border: 1px solid variables.$color-grey-dark;
-          border-radius: 4px;
-          color: variables.$color-grey-dark;
-          font-weight: 500;
-        }
-      }
+    .icon {
+      width: 16px;
+      height: 16px;
     }
   }
 }

@@ -2,28 +2,29 @@
   <div class="auction-overview">
     <DetailsItem :label="$t('pages.auctionBid.current-highest-bid')">
       <template #value>
-        <TokenAmount
-          :amount="+getHighestBid(name).nameFee"
-        />
+        <TokenAmount :amount="amount" />
       </template>
     </DetailsItem>
     <DetailsItem
       class="end-height"
       :label="$t('pages.auctionBid.ending-height')"
       :value="auction.expiration"
-      :secondary="`(≈${blocksToRelativeTime(blocksToExpiry)})`"
+      :secondary="`(≈${endHeight})`"
     />
   </div>
 </template>
 
-<script>
-import { pick } from 'lodash-es';
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { IAuction, IAuctionBid } from '../../types';
+import { useTopHeaderData } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import { blocksToRelativeTime } from '../utils';
+
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 
-export default {
+export default defineComponent({
   components: {
     DetailsItem,
     TokenAmount,
@@ -31,22 +32,26 @@ export default {
   props: {
     name: { type: String, required: true },
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['topBlockHeight']);
+  setup(props, { root }) {
+    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+
+    // eslint-disable-next-line no-unused-vars
+    const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
+
+    const getAuction = useGetter('names/getAuction');
+    const auction = computed<IAuction>(() => getAuction.value(props.name));
+    const blocksToExpiry = computed<number>(() => auction.value.expiration - topBlockHeight.value);
+    const amount = computed(() => +getHighestBid.value(props.name).nameFee);
+    const endHeight = computed(() => blocksToRelativeTime(blocksToExpiry.value));
+
+    return {
+      blocksToRelativeTime,
+      auction,
+      amount,
+      endHeight,
+    };
   },
-  computed: {
-    ...mapGetters('names', ['getAuction', 'getHighestBid']),
-    auction() {
-      return this.getAuction(this.name);
-    },
-    blocksToExpiry() {
-      return this.auction.expiration - this.topBlockHeight;
-    },
-  },
-  methods: {
-    blocksToRelativeTime,
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -54,6 +59,7 @@ export default {
 
 .auction-overview {
   display: flex;
+  justify-content: space-between;
 
   .details-item {
     ::v-deep .label {

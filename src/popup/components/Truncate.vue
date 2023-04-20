@@ -6,82 +6,104 @@
     <span
       ref="container"
       class="container"
-      :class="{ fixed }"
-      :style="cssVars"
+      :class="{
+        fixed,
+        scrollable: shouldScroll,
+      }"
+      :style="{
+        '--animationTranslate': animationTranslate,
+        '--animationDuration': animationDuration,
+      }"
     >
-      <span ref="scroll">{{ nameComponent || str }}</span>
+      <span
+        ref="scroll"
+        class="inner"
+      >
+        {{ nameComponent }}
+      </span>
     </span>
     <span
-      v-if="nameComponent"
+      v-if="nameComponent !== str"
       class="domain"
-    >{{ AENS_DOMAIN }}</span>
+      v-text="AENS_DOMAIN"
+    />
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  ref,
+  watch,
+  nextTick,
+  onMounted,
+} from '@vue/composition-api';
 import { AENS_DOMAIN } from '../utils';
 
-export default {
+export default defineComponent({
   props: {
     str: { type: String, required: true },
-    gradientColor: { type: String, default: 'black' },
     fixed: Boolean,
     right: Boolean,
   },
-  data: () => ({
-    AENS_DOMAIN,
-  }),
-  computed: {
-    nameComponent() {
-      return this.str.endsWith(AENS_DOMAIN) ? this.str.replace(AENS_DOMAIN, '') : '';
-    },
-    cssVars() {
-      if (this.fixed) {
-        return {
-          '--gradientColor': this.gradientColor,
-        };
+  setup(props) {
+    const container = ref<HTMLDivElement>();
+    const scroll = ref<HTMLDivElement>();
+    const shouldScroll = ref(false);
+
+    const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN)
+      ? props.str.replace(AENS_DOMAIN, '')
+      : props.str);
+
+    const animationTranslate = ref<string>();
+    const animationDuration = ref<string>();
+
+    const calculateTruncate = async () => {
+      shouldScroll.value = false;
+      await nextTick();
+      if (!props.fixed && scroll.value && container.value?.clientWidth) {
+        const { clientWidth } = container.value;
+        const { clientWidth: scrollWidth } = scroll.value;
+        const animationWidth = scrollWidth - clientWidth;
+        const PADDING_WIDTH = 2;
+
+        if (scrollWidth > clientWidth) {
+          animationTranslate.value = `-${animationWidth + PADDING_WIDTH}px`;
+          animationDuration.value = `${(animationWidth + PADDING_WIDTH) * 200}ms`;
+          shouldScroll.value = true;
+        }
       }
-      return {
-        '--beforeWidth': '4px',
-        '--gradientColor': this.gradientColor,
-      };
-    },
-  },
-  watch: {
-    str: {
-      async handler() {
-        if (this.fixed) return;
-        document.fonts.ready.then(() => {
-          const scrollElem = this.$refs.scroll;
-          const containerElem = this.$refs.container;
+    };
 
-          if (scrollElem && containerElem) {
-            const { scrollWidth, offsetWidth } = containerElem;
+    watch(nameComponent, calculateTruncate);
 
-            if (scrollWidth > offsetWidth) {
-              containerElem.classList.add('scrollable');
-              this.animation = scrollElem.animate(
-                [{ transform: `translateX(calc(-${scrollWidth - offsetWidth}px - var(--beforeWidth)))` }],
-                {
-                  delay: 2000,
-                  duration: 4000,
-                  direction: 'alternate',
-                  iterations: Infinity,
-                },
-              );
-            }
-          }
-        });
-      },
-      immediate: true,
-    },
+    onMounted(() => {
+      // sometimes setTimeout is needed for scroll to calculate proper width
+      setTimeout(() => {
+        calculateTruncate();
+      }, 500);
+    });
+
+    return {
+      AENS_DOMAIN,
+      container,
+      scroll,
+      shouldScroll,
+      nameComponent,
+      animationTranslate,
+      animationDuration,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
 .truncate {
   display: flex;
+  width: 100%;
+  min-width: 0;
+  padding-right: 5px;
 
   &.right {
     justify-content: flex-end;
@@ -96,45 +118,54 @@ export default {
       text-overflow: ellipsis;
     }
 
+    .inner {
+      position: relative;
+      display: inline-block;
+      min-width: fit-content;
+    }
+
     &.scrollable {
+      padding-right: 5px;
       border-radius: 2px;
+      margin-left: -2px;
+      mask-image:
+        linear-gradient(
+          90deg,
+          rgba(black, 0) 0%,
+          rgba(black, 1) 2px,
+          rgba(black, 1) calc(100% - 2px),
+          rgba(black, 0) 100%
+        );
 
-      span {
+      .inner {
+        position: relative;
         display: inline-block;
-        transition: all 0.3s ease-out;
-      }
-
-      &::before,
-      &::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        width: var(--beforeWidth);
-        height: 100%;
-        background: linear-gradient(270deg, var(--gradientColor), transparent);
-      }
-
-      &::before {
-        z-index: 1;
-        left: 0;
-        opacity: 0;
-        background: linear-gradient(90deg, var(--gradientColor), transparent);
-        animation-name: fade;
-        animation-duration: 8s;
-        animation-delay: 2s;
+        animation-name: animationTruncate;
+        animation-duration: var(--animationDuration);
+        animation-delay: 1.5s;
         animation-iteration-count: infinite;
-
-        @keyframes fade {
-          100% {
-            opacity: 1;
-          }
-        }
+        animation-timing-function: linear;
+        padding: 0 2px;
       }
     }
   }
 
   .domain {
     word-break: keep-all;
+  }
+
+  @keyframes animationTruncate {
+    0% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(var(--animationTranslate));
+    }
+
+    100% {
+      transform: translateX(0);
+    }
   }
 }
 </style>

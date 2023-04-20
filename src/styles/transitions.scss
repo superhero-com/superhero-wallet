@@ -37,18 +37,6 @@
   }
 }
 
-.fade {
-  &-enter-active,
-  &-leave-active {
-    transition: opacity 150ms ease-out;
-  }
-
-  &-enter,
-  &-leave-to {
-    opacity: 0;
-  }
-}
-
 .fade-between {
   &-enter-active,
   &-leave-active {

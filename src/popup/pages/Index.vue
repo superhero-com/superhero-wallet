@@ -5,6 +5,7 @@
   >
     <img
       v-if="IN_FRAME"
+      class="iframe-image"
       src="../../icons/iframe/sendAndReceive.svg"
     >
     <div
@@ -53,28 +54,28 @@
         {{ $t('pages.index.termsAndConditions') }}
       </RouterLink>
     </div>
-    <div
-      class="wallet-button-box"
-    >
-      <BtnSubheader
-        v-show="termsAgreed"
-        data-cy="generate-wallet"
-        :subheader="$t('pages.index.getStartedWithWallet')"
-        :header="$t('pages.index.generateWallet')"
-        @click="createWallet"
+
+    <transition name="fade-transition">
+      <div
+        v-if="termsAgreed"
+        class="wallet-button-box"
       >
-        <PlusCircleIcon />
-      </BtnSubheader>
-      <BtnSubheader
-        v-show="termsAgreed"
-        data-cy="import-wallet"
-        :subheader="$t('pages.index.enterSeed')"
-        :header="$t('pages.index.importWallet')"
-        @click="importWallet"
-      >
-        <CheckCircleIcon />
-      </BtnSubheader>
-    </div>
+        <BtnSubheader
+          data-cy="generate-wallet"
+          :subheader="$t('pages.index.getStartedWithWallet')"
+          :header="$t('pages.index.generateWallet')"
+          :icon="PlusCircleIcon"
+          @click="createWallet"
+        />
+        <BtnSubheader
+          data-cy="import-wallet"
+          :subheader="$t('pages.index.enterSeed')"
+          :header="$t('pages.index.importWallet')"
+          :icon="CheckCircleIcon"
+          @click="importWallet"
+        />
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -83,10 +84,10 @@ import { generateMnemonic } from '@aeternity/bip39';
 import {
   IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
 } from '../../lib/environment';
+import { MODAL_ACCOUNT_IMPORT } from '../utils';
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
-import { MODAL_ACCOUNT_IMPORT } from '../utils';
 import SuperheroLogoIcon from '../../icons/logo.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../icons/check-circle-fill.svg?vue-component';
@@ -96,11 +97,11 @@ export default {
     SuperheroLogoIcon,
     CheckBox,
     BtnSubheader,
-    PlusCircleIcon,
-    CheckCircleIcon,
     Platforms,
   },
   data: () => ({
+    PlusCircleIcon,
+    CheckCircleIcon,
     termsAgreed: false,
     IS_WEB,
     IS_MOBILE_DEVICE,
@@ -128,12 +129,15 @@ export default {
 .index {
   --padding-top: 44px;
 
-  padding-top: var(--padding-top);
-  padding-top: calc(var(--padding-top) + env(safe-area-inset-top));
   text-align: center;
 
   &.extended-top-padding {
     --padding-top: 64px;
+  }
+
+  .iframe-image,
+  .superhero-logo {
+    margin-top: var(--padding-top);
   }
 
   .terms-agreement {

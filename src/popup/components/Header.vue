@@ -12,33 +12,22 @@
       <BtnIcon
         v-if="showHeaderNavigation"
         class="icon-btn"
+        data-cy="back-arrow"
+        :icon="BackIcon"
         @click="back"
-      >
-        <BackIcon data-cy="back-arrow" />
-      </BtnIcon>
+      />
       <Component
         :is="isLogoDisabled ? 'div' : 'RouterLink'"
         v-else-if="isLoggedIn"
-        :to="isLogoDisabled ? null : { name: ROUTE_ACCOUNT }"
+        :to="isLogoDisabled ? null : { name: homeRouteName }"
         :class="['home-button', { 'disabled': isLogoDisabled }]"
       >
         <Logo class="home-icon" />
       </Component>
     </div>
 
-    <BtnPlain
-      v-if="!showHeaderNavigation"
-      :to="{ name: 'network-settings' }"
-      class="network-btn"
-    >
-      <div
-        class="circle"
-        :class="[ nodeStatus ]"
-      />
-      {{ activeNetwork.name }}
-    </BtnPlain>
     <div
-      v-else
+      v-if="showHeaderNavigation"
       class="title"
     >
       <Truncate
@@ -47,24 +36,25 @@
       />
     </div>
 
-    <div
-      v-if="isLoggedIn"
-      class="right"
-    >
+    <div class="right">
       <BtnClose
         v-if="showHeaderNavigation"
         data-cy="close"
+        class="btn-close"
         @click="close"
       />
       <template v-else>
-        <NotifyBell />
+        <NetworkButton />
 
-        <BtnIcon
-          :to="{ name: ROUTE_MORE }"
-          data-cy="page-more"
-        >
-          <ThreeDots />
-        </BtnIcon>
+        <template v-if="isLoggedIn">
+          <NotificationsIcon />
+
+          <BtnIcon
+            :to="{ name: ROUTE_MORE }"
+            :icon="ThreeDotsIcon"
+            data-cy="page-more"
+          />
+        </template>
       </template>
     </div>
   </div>
@@ -72,38 +62,44 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter, useState } from '../../composables';
-import { WalletRouteMeta, INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { WalletRouteMeta } from '../../types';
 import {
-  ROUTE_INDEX,
   ROUTE_ACCOUNT,
+  ROUTE_INDEX,
   ROUTE_MORE,
 } from '../router/routeNames';
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
-import ThreeDots from '../../icons/three-dots.svg?vue-component';
+import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
 import Truncate from './Truncate.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
-import NotifyBell from './NotifyBell.vue';
+import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
+import NetworkButton from './NetworkButton.vue';
+import { useUi } from '../../composables';
 
 export default defineComponent({
   components: {
-    NotifyBell,
+    NetworkButton,
+    NotificationsIcon,
     BtnClose,
     BtnPlain,
     Logo,
-    BackIcon,
-    ThreeDots,
     Truncate,
     BtnIcon,
   },
   setup(props, { root }) {
+    const { homeRouteName } = useUi({ store: root.$store });
+
     const isLoggedIn = useGetter('isLoggedIn');
-    const nodeStatus = useState('nodeStatus');
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const currentHomeRouteName = computed(() => (isLoggedIn.value) ? ROUTE_ACCOUNT : ROUTE_INDEX);
+
+    const currentHomeRouteName = computed(
+      () => isLoggedIn.value
+        ? homeRouteName.value
+        : ROUTE_INDEX,
+    );
     const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
     const isLogoDisabled = computed(() => root.$route.name === ROUTE_ACCOUNT);
@@ -112,14 +108,20 @@ export default defineComponent({
     );
 
     function back() {
-      if (root.$route.meta?.backRoute) {
-        // TODO: rewrite back button logic in more unified way
-        return root.$router.push(root.$route.meta?.backRoute);
+      const { fullPath, meta } = root.$route;
+      const { directBackRoute, backRoute } = meta || {};
+
+      if (directBackRoute) {
+        return root.$router.go(-1);
       }
-      let { fullPath } = root.$route;
-      fullPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+      if (backRoute) {
+        // TODO: rewrite back button logic in more unified way
+        return root.$router.push(backRoute);
+      }
+      const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+
       return root.$router.push(
-        fullPath.substr(0, fullPath.lastIndexOf('/')) || currentHomeRouteName.value,
+        path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
 
@@ -128,6 +130,9 @@ export default defineComponent({
     }
 
     return {
+      homeRouteName,
+      BackIcon,
+      ThreeDotsIcon,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
       isLoggedIn,
@@ -136,8 +141,6 @@ export default defineComponent({
       titleTruncated,
       back,
       close,
-      nodeStatus,
-      activeNetwork,
     };
   },
 });
@@ -168,18 +171,42 @@ export default defineComponent({
 
   .left {
     display: flex;
-    width: 20%;
+
+    .home-button {
+      &.disabled {
+        cursor: default;
+      }
+
+      &:not(.disabled) {
+        .home-icon {
+          cursor: pointer;
+        }
+
+        &:hover svg {
+          color: variables.$color-primary-hover;
+        }
+
+        &:active svg {
+          color: variables.$color-primary-hover;
+          opacity: 0.9;
+        }
+      }
+
+      .home-icon {
+        width: 32px;
+        height: 32px;
+        color: variables.$color-primary;
+      }
+    }
   }
 
   .right {
     display: flex;
     justify-content: flex-end;
-    width: 20%;
+    gap: 8px;
   }
 
   .title {
-    width: 60%;
-
     .text {
       @extend %face-sans-16-medium;
 
@@ -190,36 +217,10 @@ export default defineComponent({
       line-height: 24px;
       color: variables.$color-white;
     }
-  }
 
-  .network-btn {
-    @extend %face-sans-14-medium;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 16px;
-    margin-left: auto;
-    color: rgba(variables.$color-white, 0.75);
-
-    .circle {
-      width: 6px;
-      height: 6px;
-      border-radius: 100%;
-      margin-right: 4px;
-      background-color: variables.$color-warning;
-
-      &.connected {
-        background-color: variables.$color-success-dark;
-      }
-
-      &.error {
-        background-color: variables.$color-danger;
-      }
-    }
-
-    &:hover {
-      color: rgba(variables.$color-white, 1);
+    &:only-child {
+      flex-grow: 2;
+      margin-left: 8px;
     }
   }
 
@@ -234,45 +235,8 @@ export default defineComponent({
     }
   }
 
-  .left .home-button {
-    &.disabled {
-      cursor: default;
-    }
-
-    &:not(.disabled) {
-      .home-icon {
-        cursor: pointer;
-      }
-
-      &:hover svg {
-        color: variables.$color-primary-hover;
-      }
-
-      &:active svg {
-        color: variables.$color-primary-hover;
-        opacity: 0.9;
-      }
-    }
-
-    .home-icon {
-      width: 32px;
-      height: 32px;
-      color: variables.$color-primary;
-    }
-  }
-
   .home-button + .back {
     margin-left: 22px;
-  }
-
-  .title:only-child {
-    flex-grow: 2;
-    margin-left: 8px;
-  }
-
-  .settings,
-  .notifications {
-    margin-right: 8px;
   }
 }
 </style>

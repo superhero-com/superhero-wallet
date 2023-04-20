@@ -2,35 +2,86 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Main account",
-  "subaccountName": "Sub-account #{idx}",
+  "fellowSuperhero": "Fellow Superhero",
+  "common": {
+    "you": "You",
+    "of": "of",
+    "by": "by",
+    "edit": "Edit",
+    "nonce": "Nonce",
+    "callData": "Call data",
+    "contractId": "Contract ID",
+    "balanceUnavailable": "Unable to load balance.",
+    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet."
+  },
+  "connectionStatus": {
+    "offline": "You are offline. Go online to get real time data.",
+    "node": {
+      "error": "Unable to connect to the chosen node.",
+      "connecting": "Connecting to the node...",
+      "connected": "Connected"
+    },
+    "middleware": {
+      "unavailable": "Middleware is offline."
+    }
+  },
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
   },
   "dashboard": {
-    "receive-card": {
+    "receiveCard": {
       "title": "Receive",
-      "description": "from existing wallet"
+      "description": "from existing wallet",
+      "descriptionMultisig": "to multisig vault"
     },
-    "send-card": {
+    "sendCard": {
       "title": "Send",
       "description": "assets to others"
     },
-    "back-up-card": {
+    "proposeCard": {
+      "title": "Propose Tx",
+      "description": "to other signers"
+    },
+    "backUpCard": {
       "title": "Back up your seed phrase",
       "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
       "button": "Back up now"
     },
-    "buy-card": {
+    "buyCard": {
       "title": "Buy AE coin",
       "description": "Use Simplex to buy AE coins with your credit card or bank account.",
       "button": "Buy AE"
     },
-    "name-card": {
+    "nameCard": {
       "title": "Claim your own .chain name",
       "description": "Get a human-readable name for your account and receive funds with it.",
       "button": "Claim a name"
+    },
+    "latestTransactionCard": {
+      "title": "Latest transactions"
+    },
+    "pendingMultisigCard": {
+      "title": "Pending multisig transaction"
     }
+  },
+  "multisig": {
+    "backToMainAccounts": "Back to main accounts",
+    "showMultisigVaults": "Show multisig vaults",
+    "consensus": "Consensus",
+    "signatureRequested": "Your signature is requested.",
+    "transactionSigned": "You have signed the transaction.",
+    "transactionReady": "Transaction is ready to be sent",
+    "multisigVault": "Multisig vault",
+    "address": "Multisig vault address",
+    "version": "Contract version",
+    "currentNonce": "Current nonce",
+    "authorizedSigners": "Authorized signers",
+    "explorerLink": "View smart contract in blockchain explorer",
+    "consensusPending": "Consensus pending",
+    "multisigVaultCreationFailed": "Multisig creation failed",
+    "needForApproval": "Needed for approval",
+    "creatingAccount": "Creating account (pays for the transaction)"
   },
   "modals": {
     "transaction-failed": {
@@ -41,7 +92,7 @@
     },
     "payloadInfo": {
       "title": "Payload message",
-      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /> <br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /><br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
     },
     "payloadForm": {
       "title": "Add payload (optional)",
@@ -68,19 +119,53 @@
     "insufficient-balance": {
       "msg": "You do not have enough balance for this transaction."
     },
+    "vaultLowBalance": {
+      "title": "Insufficient vault balance",
+      "msg": "Multisig vault balance is not enough to pay for the transaction fee.<br /><br />Please top up multisig vault."
+    },
     "createAccount": {
       "title": "Add account",
+      "titleMultisig": "Add multisig vault",
       "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
-      "btnText": "Create account",
-      "btnSubtitle": "and add it to your wallet"
+      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
+      "btnText": "Add account",
+      "btnSubtitle": "Derive another account from your seed"
+    },
+    "createMultisigAccount": {
+      "title": "Create new multisig vault",
+      "btnText": "Create multisig vault",
+      "btnSubtitle": "Manage funds with multiple accounts",
+      "signer": "Signer",
+      "signerInputPlaceholder": "Signer's account address",
+      "addSigner": "Add Signer",
+      "selectAccount": "Select an account",
+      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br /><br />As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
+      "consensusRequiredDesc": "Consensus required for tx confirmation:",
+      "consensusRequiredContent": "of {0} signatures",
+      "consensusRequiredHelpTitle": "Consensus required",
+      "consensusRequiredHelpMsg": "As the creator of this multisig vault you can determine the authorized signers and set the consensus needed for a transaction confirmation (how many signatures are required to confirm each transaction).",
+      "createMultisigVault": "Create Vault",
+      "errorDuplicatingSigner": "You can not add the same account address as a signer more than once.",
+      "errorDuplicatingInputMessage": "Duplicated account address",
+      "errorNotEnoughBalanceToCreateVault": "Not enough balance in this account. Creating multisig vault requires at least {0}."
+    },
+    "creatingMultisigAccount": {
+      "title": "Creating vault progress",
+      "btnText": "Go to multisig vault",
+      "vaultAccessibleMessage": "It's ready! Your new multisig vault is added to Superhero wallet.",
+      "vaultCreatedMessage": "You may proceed and explore your newly created vault.",
+      "vaultCreatedMessageSub": "However it will become visible to the other authorized signers in a short period of time (usually it takes between 30 seconds and 1 minute).",
+      "preparingMultisigVault": "Preparing multisig vault",
+      "deployingSmartContract": "Deploying smart contract",
+      "creatingMultisigVault": "Creating multisig vault account",
+      "addingToWallet": "Adding multisig vault to the wallet",
+      "syncingVault": "Syncing multisig vault",
+      "takingLong": "This step may take a few moments.",
+      "syncing": "Syncing..."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"
-    },
-    "removeSubaccount": {
-      "title": "Remove sub-account?",
-      "msg": "This sub-account will be removed from your wallet and deleted from storage. It will still remain stored on the blockchain and you will be able to restore it with your seed phrase. Make sure you have backed up your seed phrase before you proceed. This action cannot be undone!"
     },
     "verify": {
       "title": "Verify your URL",
@@ -150,7 +235,7 @@
       "title": "Warning",
       "msg": "Tip/Claim functionality works on the predefined networks."
     },
-    "confirm-transaction-sign": {
+    "confirmTransactionSign": {
       "unknown": "Unknown",
       "contract-create": "Contract create",
       "aens": "AENS",
@@ -222,7 +307,7 @@
     },
     "name-pointers-help": {
       "title": "Name pointers",
-      "msg": "Name pointers associate your .chain name with one of:<br /><br />• Account address;<br />• Oracle ID;<br />• Channel ID;<br />• Contract ID.<br /><br />Your .chain name may have more than one pointer. However it can be associated with only one of each type of pointers listed above."
+      "msg": "Name pointer associates a .chain name with an account address so that the name becomes human-readable alias of the address."
     },
     "auctions-help": {
       "title": "Auctions and bidding",
@@ -241,24 +326,43 @@
       "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
       "shareTextWithAmount": "{amount} AE has been requested. Send to æternity address: {address} Or send with Superhero Wallet: {walletLink}"
     },
+    "receiveMultisig": {
+      "title": "Receive funds to multisig vault"
+    },
     "send": {
       "sendTitle": "Send funds",
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
-      "recipientPlaceholder": "Enter address, .chain name or URL",
+      "recipientPlaceholder": "Enter public address or .chain name",
+      "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
+      "edit": "Edit",
       "next": "Next",
       "payload": "Payload"
+    },
+    "multisigTxProposal": {
+      "title": "Multisig transaction proposal",
+      "multisigVault": "Multisig vault",
+      "amount": "Propose amount",
+      "amountProposed": "Proposed amount",
+      "signingAddress": "Signing address",
+      "signingAccount": "Signing account",
+      "fee": "Proposal transaction fee",
+      "proposeAndApprove": "Propose and approve"
     },
     "wrongNetwork": {
       "title": "Network discrepancy",
       "msg": "This action was initiated on a different network. Please switch to {0} in your wallet settings to proceed.",
       "button": "Dismiss"
     },
-    "account-details": {
+    "accountDetails": {
       "assets": "Assets",
+      "assetsNotAvailable": "Assets list is not available offline.",
       "transactions": "Transactions",
-      "names": "Names"
+      "transactionsNotAvailable": "Transactions history is not available offline.",
+      "names": "Names",
+      "namesNotAvailable": "Names list is not available offline.",
+      "details": "Details"
     }
   },
   "filters": {
@@ -273,6 +377,8 @@
     "length": "Name length"
   },
   "transaction": {
+    "fee": "Transaction fee",
+    "advancedDetails": "Advanced transaction details",
     "type": {
       "spendTx": "Spend",
       "contractCreateTx": "Contract create",
@@ -290,19 +396,48 @@
       "channelSlashTx": "Slash channel",
       "channelSettleTx": "Settle channel",
       "channelSnapshotSoloTx": "Solo snapshot channel",
-      "payingForTx": "Paying For Transaction",
-      "pending": "Pending..."
+      "payingForTx": "Pay For Tx",
+      "gaMetaTx": "GA Meta Tx",
+      "gaAttachTx": "GA Attach Tx",
+      "pending": "Pending",
+      "multisigProposal": "Multisig Proposal",
+      "sentTx": "Sending",
+      "receivedTx": "Receiving",
+      "multisigVaultCreated": "Multisig vault created",
+      "createMultisigVault": "Create Multisig Vault",
+      "propose": "Propose Tx",
+      "revoke": "Revoke Tx",
+      "refuse": "Disapprove Tx",
+      "confirm": "Approve Tx"
+    },
+    "listType": {
+      "sentTx": "Sent",
+      "receivedTx": "Received",
+      "namePreClaimTx": "Name preclaimed",
+      "nameClaimTx": "Name claimed",
+      "nameUpdateTx": "Name updated",
+      "nameTransferTx": "Name transferred",
+      "nameRevokeTx": "Revoke name",
+      "provide_liquidity": "Liquidity provided",
+      "remove_liquidity": "Liquidity removed",
+      "tipSent": "Tip sent",
+      "tipReceived": "Tip received"
     },
     "dexType": {
-      "provide_liquidity": "provide liquidity",
-      "remove_liquidity":"remove liquidity",
-      "swap": "swap",
-      "allow_token":"allow token" ,
-      "change_allowance": "allow token",
-      "transfer_allowance": "allow token",
-      "deposit": "deposit",
-      "withdraw": "withdraw",
-      "pool": "pool"
+      "provideLiquidity": "Liquidity provided",
+      "removeLiquidity": "Liquidity removed",
+      "swap": "Swap",
+      "allowToken": "Allow token",
+      "changeAllowance": "Allow token",
+      "transferAllowance": "Allow token",
+      "deposit": "Deposit",
+      "withdraw": "Withdraw",
+      "pool": "Pool"
+    },
+    "multisigType": {
+      "send": "Send",
+      "sing": "Approved",
+      "revoke": "Revoked"
     },
     "spendType": {
       "out": "out",
@@ -313,7 +448,8 @@
       "contractCreate": "Contract create",
       "contract": "Contract",
       "accountAddress": "Account address",
-      "superheroDex": "Superhero DEX"
+      "superheroDex": "Superhero DEX",
+      "smartContract": "Smart contract"
     },
     "returnType": {
       "abort": "Failed",
@@ -372,7 +508,8 @@
       "seed-phrase": "Seed phrase",
       "network-add": "Add custom network",
       "network-edit": "Edit network",
-      "not-found": "Feature not found"
+      "not-found": "Feature not found",
+      "multisigProposalDetails": "Multisig Tx proposal details"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -408,9 +545,12 @@
       "claim-name": "Claim your .chain name"
     },
     "accounts": {
-      "showWallet": "Show on Wallet Home",
-      "add-account": "Add account",
-      "add-account-description": "Add an account to your wallet to manage funds separately."
+      "addAccount": "Add account",
+      "addAccountDescription": "Add an account to your wallet to manage funds separately."
+    },
+    "vaults": {
+      "addVault": "Add vault",
+      "addVaultDescription": "Add a multisig vault to your wallet to manage funds with multiple accounts."
     },
     "claim": {
       "claim": "Claim tips",
@@ -449,7 +589,8 @@
       "title": "Recent transactions",
       "viewMore": "View full transaction history",
       "noTransactionsFound": "There are no recent transactions for this account.",
-      "searchPlaceholder": "Search transactions by asset name"
+      "searchPlaceholder": "Search transactions by asset name",
+      "unknownMode": "Unknown display mode type:"
     },
     "add-fungible-token": {
       "heading": "Fungible Tokens",
@@ -575,6 +716,7 @@
     "token-details": {
       "details": "Token Details",
       "send": "Send",
+      "proposeTx": "Propose Tx",
       "receive": "Receive",
       "buy": "Buy",
       "swap": "Swap",
@@ -639,7 +781,7 @@
         "register": "Register name"
       },
       "list": {
-        "default-name": "Default name",
+        "default": "Default",
         "default-make": "Make default",
         "valid-identifier-error": "Enter valid ae blockchain identifier",
         "no-names": "There are no .chain names owned by this account. Would you like to register one?",
@@ -769,7 +911,8 @@
       "claimOfTip": "claimed your tip.",
       "claimOfRetip": "claimed your retip.",
       "viewOnSuperhero": "View on Superhero.com",
-      "goToStore": "Go to store"
+      "goToStore": "Go to store",
+      "noNotifications": "You do not have any unread notifications."
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
@@ -912,21 +1055,19 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "fee": "Transaction fee",
       "total": "Total",
       "reject": "Reject",
       "confirm": "Confirm",
       "contractCall": "Contract call",
       "contractCalling": "Calling contract method. Please do not close the window",
       "insufficientBalance": "Insufficient Balance",
-      "inccorectAddress": "Incorrect address",
+      "incorrectAddress": "Incorrect address",
       "compiledCode": "Compiled Code",
       "callData": "Call Data",
       "payload": "Payload",
       "newContract": "New Contract",
       "aens": "AENS",
       "balanceError": "Your account balance is not enough to execute this transaction.",
-      "advanced": "Advanced transaction details",
       "maxSpent": "Maximum spent",
       "minReceived": "Minimum received",
       "from": "From",
@@ -994,7 +1135,6 @@
       "check": "Check",
       "selectAmount": "Select amount",
       "amountToTip": "Amount to tip",
-      "transactionFee": "Transaction fee",
       "balance": "Balance",
       "sendTipBtn": "Send tip",
       "tipDetails": "Details",
@@ -1041,7 +1181,6 @@
       "heading": "Transactions Details",
       "type": "Type",
       "amount": "Amount",
-      "fee": "Transaction fee",
       "total": "Total",
       "txFrom": "From",
       "txTo": "To",
@@ -1087,7 +1226,53 @@
       "deposited": "Deposited",
       "withdrawn": "Withdrawn",
       "rates": "Rates",
-      "swapRoute": "Swap route"
+      "swapRoute": "Swap route",
+      "feePaidBy": "Transaction fee paid by",
+      "vaultContractId": "Vault contract Id"
+    },
+    "proposalDetails": {
+      "receivingAddress": "Receiving address",
+      "proposedBy": "Proposed by",
+      "revoke": "Revoke transaction proposal",
+      "refuse": "Disapprove",
+      "sign": "Approve",
+      "send": "Send",
+      "expiresAt": "Expires at height",
+      "infoBox": {
+        "signatures": "signatures",
+        "signature": "signature",
+        "expired": "Transaction proposal has been expired!!",
+        "pending": "Pending consensus: {0} more {1} is required to approve the transaction proposal.",
+        "approved": "Transaction proposal has been approved by the required number of authorized signers. Transaction can be sent by any of the authorized signers.",
+        "revoked": "Transaction proposal has been disapproved by {0} out of {1} required authorized signers. ",
+        "proposingAccountRevoked": "Transaction proposal has been revoked by the proposing account.",
+        "justRevoked": "Transaction proposal has been revoked.",
+        "completed": "Transaction has been successfully sent."
+      },
+      "signDialog": {
+        "title": "Approve transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Approve",
+        "msg": "Approve transaction proposal?",
+        "cannotDoActionWithSelectedAccount": "Cannot approve the transaction proposal with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already signed this transaction proposal!"
+      },
+      "revokeDialog": {
+        "title": "Revoke transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Revoke proposal",
+        "msg": "Are you sure you would like to revoke the transaction proposal?",
+        "cannotDoActionWithSelectedAccount": "Cannot revoke transaction with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already revoked this transaction!"
+      },
+      "refuseDialog": {
+        "title": "Disapprove transaction proposal",
+        "formSelectText": "Signing account",
+        "btnText": "Disapprove",
+        "msg": "Are you sure you would like to disapprove the transaction?",
+        "cannotDoActionWithSelectedAccount": "Cannot disapprove this transaction proposal with the selected account!",
+        "selectedAccountAlreadyDoneThisAction": "The selected account already disapproved this transaction proposal!"
+      }
     },
     "transactions": {
       "backToAccount": "Back to account",
@@ -1147,13 +1332,6 @@
     "welcome": {
       "send": "Send",
       "across": "across the Globe"
-    },
-    "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node.",
-      "connecting": "Connecting to node...",
-      "connected": "Connected",
-      "initServices": "Initializing services...",
-      "offline": "You are offline. Go online to get real time data."
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1254,7 +1432,9 @@
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
+    "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxValue": "This field must be {0} or less",
+    "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL"
   },
@@ -1266,7 +1446,10 @@
   "addressCopied": "Copied",
   "hashCopied": "Hash copied",
   "copy": "Copy",
-  "tx-fee": "Transaction fee",
   "total": "Total",
-  "priceNotAvailable": "price: n/a"
+  "totalMultisig": "Total in multisig vaults",
+  "priceNotAvailable": "price: n/a",
+  "search": "Search",
+  "tx": "Tx",
+  "smartContract": "Smart contract"
 }

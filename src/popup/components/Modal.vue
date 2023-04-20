@@ -13,6 +13,7 @@
         'has-close-button': hasCloseButton,
         'no-padding': noPadding,
         dense,
+        'semi-dense': semiDense,
         'blur-bg': !(IS_FIREFOX && IS_EXTENSION)
       }"
     >
@@ -40,6 +41,7 @@
           <BtnClose
             v-if="hasCloseButton"
             data-cy="btn-close"
+            class="close-button"
             @click="$emit('close')"
           />
         </div>
@@ -91,6 +93,7 @@ export default defineComponent({
     fullScreen: Boolean,
     fromBottom: Boolean,
     dense: Boolean,
+    semiDense: Boolean,
     noPadding: Boolean,
     centered: Boolean,
     bodyWithoutPaddingBottom: Boolean,
@@ -195,6 +198,12 @@ export default defineComponent({
         padding-bottom: 0;
       }
     }
+
+    .close-button {
+      position: absolute;
+      top: 4px;
+      right: 8px;
+    }
   }
 
   .cover {
@@ -255,6 +264,10 @@ export default defineComponent({
 
   &.dense {
     --screen-padding-x: 8px;
+  }
+
+  &.semi-dense {
+    --screen-padding-x: 12px;
   }
 
   &.no-padding {

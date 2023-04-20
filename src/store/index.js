@@ -1,11 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import VueRx from 'vue-rx';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
-import observables from './plugins/observables';
 import persistState from './plugins/persistState';
 import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
@@ -21,10 +19,9 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { defaultNetwork, NODE_STATUS_OFFLINE } from '../popup/utils/constants';
+import { defaultNetwork, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
 
 Vue.use(Vuex);
-Vue.use(VueRx);
 
 export default new Vuex.Store({
   state: {
@@ -33,7 +30,6 @@ export default new Vuex.Store({
     current: {
       network: defaultNetwork.name,
       token: 0,
-      currency: 'usd',
     },
     userNetworks: [],
     transactions: {
@@ -42,11 +38,9 @@ export default new Vuex.Store({
       pending: {},
       tipWithdrawnTransactions: [],
     },
-    middleware: null,
     tippingV1: null,
     tippingV2: null,
-    nodeStatus: NODE_STATUS_OFFLINE,
-    currencies: {},
+    nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
     tip: null,
@@ -67,7 +61,6 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
-    observables,
     modals,
     tipUrl,
     namesPlugin,

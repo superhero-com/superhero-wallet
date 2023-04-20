@@ -20,7 +20,7 @@
         <div class="name-wrapper">
           <div class="name">
             {{ name }}
-            <TokenAmount :amount="getNameFee(lastBid)" />
+            <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
           </div>
           <div class="expiration">
             {{ $t('pages.names.auctions.expires') }}
@@ -40,17 +40,42 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
-import { watchUntilTruthy, blocksToRelativeTime } from '../../utils';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from '@vue/composition-api';
+import { blocksToRelativeTime, getAeFee } from '../../utils';
+import type {
+  IActiveAuction,
+  ObjectValues,
+  IFilters,
+  IFilterInputPayload,
+} from '../../../types';
+import { useTopHeaderData } from '../../../composables';
+
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 import RegisterName from '../../components/RegisterName.vue';
+import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
-export default {
+const SORT_MODE = {
+  soonest: 'soonest',
+  bid: 'bid',
+  length: 'length',
+} as const;
+
+type AuctionsSortMode = ObjectValues<typeof SORT_MODE>;
+type AuctionsFilters = IFilters<AuctionsSortMode>;
+type AuctionsFilterPayload = IFilterInputPayload<AuctionsSortMode>;
+
+const SORT_ASC = 1;
+const SORT_DESC = -1;
+
+export default defineComponent({
   components: {
     Filters,
     NameRow,
@@ -58,40 +83,51 @@ export default {
     AnimatedSpinner,
     RegisterName,
   },
-  data: () => ({
-    displayMode: { sort: 'soonest', rotated: false },
-    activeAuctions: [],
-    filters: { soonest: { rotated: false }, bid: { rotated: false }, length: { rotated: false } },
-    loading: false,
-  }),
-  subscriptions() {
-    return pick(this.$store.state.observables, ['topBlockHeight']);
+  setup(props, { root }) {
+    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+
+    const loading = ref(false);
+    const activeAuctions = ref<IActiveAuction[]>([]);
+    const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
+    const filters = ref<AuctionsFilters>({
+      soonest: { rotated: false, name: root.$t('filters.soonest') },
+      bid: { rotated: false, name: root.$t('filters.bid') },
+      length: { rotated: false, name: root.$t('filters.length') },
+    });
+
+    const auctions = computed(
+      () => [...activeAuctions.value]
+        .sort((a, b) => {
+          switch (displayMode.value.key) {
+            case SORT_MODE.length:
+              return a.name.length - b.name.length;
+            case SORT_MODE.bid:
+              return parseInt(a.lastBid.nameFee, 10) - parseInt(b.lastBid.nameFee, 10);
+            default:
+              return 1;
+          }
+        })
+        .sort(() => (displayMode.value.rotated ? SORT_DESC : SORT_ASC)),
+    );
+
+    onMounted(async () => {
+      loading.value = true;
+      activeAuctions.value = await root.$store.dispatch('names/fetchAuctions');
+      loading.value = false;
+    });
+
+    return {
+      blocksToRelativeTime,
+      loading,
+      displayMode,
+      activeAuctions,
+      auctions,
+      filters,
+      topBlockHeight,
+      getAeFee,
+    };
   },
-  computed: {
-    ...mapGetters(['getNameFee']),
-    auctions() {
-      return [...this.activeAuctions].sort((a, b) => {
-        switch (this.displayMode.sort) {
-          case 'length':
-            return a.name.length - b.name.length;
-          case 'bid':
-            return a.lastBid.nameFee - b.lastBid.nameFee;
-          default:
-            return 1;
-        }
-      }).sort(() => (this.displayMode.rotated ? -1 : 1));
-    },
-  },
-  async mounted() {
-    this.loading = true;
-    await watchUntilTruthy(() => this.$store.state.middleware);
-    this.activeAuctions = await this.$store.dispatch('names/fetchAuctions');
-    this.loading = false;
-  },
-  methods: {
-    blocksToRelativeTime,
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -109,11 +145,10 @@ export default {
     padding: 0;
 
     .name-wrapper {
-      display: flex;
-      justify-content: space-between;
-
       @extend %face-sans-14-regular;
 
+      display: flex;
+      justify-content: space-between;
       line-height: 16px;
 
       .name {

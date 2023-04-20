@@ -21,30 +21,37 @@
       variant="muted"
       class="add-custom-network"
       data-cy="to-add"
-      has-icon
+      :text="$t('pages.network.addCustomNetwork')"
+      :icon="PlusCircleIcon"
       :to="{ name: 'network-add' }"
-    >
-      <PlusCircleIcon />
-      {{ $t('pages.network.addCustomNetwork') }}
-    </BtnMain>
+    />
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
-import NetworkRow from '../components/NetworkRow.vue';
-import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
-import BtnMain from '../components/buttons/BtnMain.vue';
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { useDispatch, useGetter } from '../../composables/vuex';
 
-export default {
+import NetworkRow from '../components/NetworkRow.vue';
+import BtnMain from '../components/buttons/BtnMain.vue';
+import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
+
+export default defineComponent({
   components: {
     BtnMain,
     NetworkRow,
-    PlusCircleIcon,
   },
-  computed: mapGetters(['networks']),
-  methods: mapActions(['selectNetwork']),
-};
+  setup() {
+    const networks = useGetter('networks');
+    const selectNetwork = useDispatch('selectNetwork');
+
+    return {
+      networks,
+      selectNetwork,
+      PlusCircleIcon,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

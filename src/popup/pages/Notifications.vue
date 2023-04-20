@@ -1,6 +1,7 @@
 <template>
   <div class="notifications">
     <InfiniteScroll
+      v-if="notificationsToShow.length"
       :is-more-data="canLoadMore"
       @loadMore="loadMoreNotifications"
     >
@@ -10,6 +11,12 @@
         :notification="notification"
       />
     </InfiniteScroll>
+    <p
+      v-else
+      class="empty-list-message"
+    >
+      {{ $t('pages.notifications.noNotifications') }}
+    </p>
   </div>
 </template>
 
@@ -31,13 +38,13 @@ export default defineComponent({
     InfiniteScroll,
     NotificationItem,
   },
-  setup() {
+  setup(props, { root }) {
     const {
       notificationsToShow,
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
-    } = useNotifications({ requirePolling: true });
+    } = useNotifications({ store: root.$store, requirePolling: true });
 
     onMounted(async () => {
       loadMoreNotifications();
@@ -65,9 +72,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
+@use '../../styles/typography';
 
 .notifications {
   position: relative;
   padding: 0;
+
+  .empty-list-message {
+    @extend %face-sans-15-regular;
+
+    max-width: 180px;
+    margin-top: 56px;
+    margin-inline: auto;
+    text-align: center;
+    opacity: 0.75;
+  }
 }
 </style>

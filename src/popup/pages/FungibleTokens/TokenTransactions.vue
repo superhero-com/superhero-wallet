@@ -3,6 +3,7 @@
     :token="contractId"
     show-filters
     :scroll-top-threshold="213"
+    :is-multisig="isMultisig"
   />
 </template>
 
@@ -17,6 +18,7 @@ export default defineComponent({
   },
   props: {
     contractId: { type: String, default: null },
+    isMultisig: Boolean,
   },
 });
 </script>

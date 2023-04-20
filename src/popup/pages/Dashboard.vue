@@ -1,192 +1,90 @@
 <template>
-  <div class="dashboard">
-    <AccountSwitcher :notification="!backedUpSeed" />
+  <DashboardWrapper class="dashboard">
+    <template #header>
+      <DashboardHeader />
+    </template>
 
-    <div class="dashboard-cards">
-      <CardRow class="first-card-wrapper">
-        <Card
-          :title="$t('dashboard.receive-card.title')"
-          :description="$t('dashboard.receive-card.description')"
-          clickable
-          dense
-          @click="openTransferReceiveModal()"
-        >
-          <template #icon>
-            <ArrowReceiveIcon />
-          </template>
-        </Card>
-        <Card
-          :title="$t('dashboard.send-card.title')"
-          :description="$t('dashboard.send-card.description')"
-          :disabled="!isConnected"
-          clickable
-          dense
-          @click="openTransferSendModal()"
-        >
-          <template #icon>
-            <ArrowSendIcon />
-          </template>
-        </Card>
-      </CardRow>
-      <CardRow
-        v-if="!backedUpSeed"
-        data-cy="backup-seed-phrase"
-      >
-        <Card
-          :title="$t('dashboard.back-up-card.title')"
-          :description="$t('dashboard.back-up-card.description')"
-          is-big
-        >
-          <template #icon>
-            <SubtractIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            variant="danger"
-            inline
-            :text="$t('dashboard.back-up-card.button')"
-            :to="{ name: 'settings-seed-phrase' }"
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.buy-card.title')"
-          :description="$t('dashboard.buy-card.description')"
-          is-big
-          :background="buyBackground"
-        >
-          <template #icon>
-            <CardIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            :text="$t('dashboard.buy-card.button')"
-            :href="simplexLink"
-            variant="secondary"
-            inline
-          />
-        </Card>
-      </CardRow>
-      <CardRow>
-        <Card
-          :title="$t('dashboard.name-card.title')"
-          :description="$t('dashboard.name-card.description')"
-          is-big
-          :background="chainNameBackground"
-        >
-          <template #icon>
-            <MenuCardIcon />
-          </template>
-          <BtnMain
-            class="card-button"
-            variant="purple"
-            inline
-            :text="$t('dashboard.name-card.button')"
-            :to="{ name: 'account-details-names-claim' }"
-          />
-        </Card>
-      </CardRow>
-    </div>
-  </div>
+    <template #buttons>
+      <OpenTransferReceiveModalButton is-big />
+      <OpenTransferSendModalButton is-big />
+    </template>
+
+    <template #cards>
+      <LatestTransactionsCard />
+
+      <DashboardCard
+        :title="$t('dashboard.buyCard.title')"
+        :description="$t('dashboard.buyCard.description')"
+        :btn-text="$t('dashboard.buyCard.button')"
+        :background="buyBackground"
+        :icon="CardIcon"
+        :href="simplexLink"
+        :card-id="DASHBOARD_CARD_ID.buyAe"
+      />
+
+      <DashboardCard
+        :title="$t('dashboard.nameCard.title')"
+        :description="$t('dashboard.nameCard.description')"
+        :btn-text="$t('dashboard.nameCard.button')"
+        :background="chainNameBackground"
+        :icon="MenuCardIcon"
+        :to="{ name: 'account-details-names-claim' }"
+        :card-id="DASHBOARD_CARD_ID.claimName"
+        variant="purple"
+      />
+    </template>
+  </DashboardWrapper>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import { isEmpty } from 'lodash-es';
+<script lang="ts">
 import {
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_TRANSFER_SEND,
-  buildSimplexLink,
-} from '../utils';
+  computed,
+  defineComponent,
+} from '@vue/composition-api';
 
-import Card from '../components/dashboard/Card.vue';
-import CardRow from '../components/dashboard/CardRow.vue';
-import BtnMain from '../components/buttons/BtnMain.vue';
-import AccountSwitcher from '../components/AccountSwitcher.vue';
+import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
+import { useGetter } from '../../composables/vuex';
 
-import ArrowReceiveIcon from '../../icons/dashboard/arrow-receive.svg?vue-component';
-import ArrowSendIcon from '../../icons/dashboard/arrow-send.svg?vue-component';
-import SubtractIcon from '../../icons/subtract.svg?vue-component';
-import CardIcon from '../../icons/creditcard.fill.svg?vue-component';
+import DashboardCard from '../components/DashboardCard.vue';
+import DashboardWrapper from '../components/DashboardWrapper.vue';
+import DashboardHeader from '../components/DashboardHeader.vue';
+import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
+import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
+import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
+
+import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
+import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
+import CardIcon from '../../icons/credit-card.svg?vue-component';
 import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
 
-export default {
+export default defineComponent({
   name: 'Dashboard',
   components: {
-    CardRow,
-    Card,
-    AccountSwitcher,
-    ArrowReceiveIcon,
-    ArrowSendIcon,
-    SubtractIcon,
-    CardIcon,
-    MenuCardIcon,
-    BtnMain,
+    DashboardCard,
+    LatestTransactionsCard,
+    OpenTransferReceiveModalButton,
+    OpenTransferSendModalButton,
+    DashboardHeader,
+    DashboardWrapper,
   },
-  data: () => ({
-    buyBackground,
-    chainNameBackground,
-  }),
-  computed: {
-    ...mapState(['backedUpSeed', 'transactions']),
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['getAccountPendingTransactions', 'account', 'isConnected']),
-    simplexLink() {
-      return buildSimplexLink(this.account.address);
-    },
+  setup() {
+    const account = useGetter('account');
+
+    const simplexLink = computed(() => buildSimplexLink(account.value.address));
+
+    return {
+      DASHBOARD_CARD_ID,
+      ArrowSendIcon,
+      ArrowReceiveIcon,
+      CardIcon,
+      MenuCardIcon,
+      simplexLink,
+      buyBackground,
+      chainNameBackground,
+    };
   },
-  watch: {
-    activeIdx() { // TODO: remove it, maybe by extracting transactions entity
-      this.$store.commit('initTransactions');
-    },
-    $route: {
-      immediate: true,
-      handler({ query }) {
-        if (!isEmpty(query)) {
-          this.$store.dispatch('modals/open', { name: MODAL_TRANSFER_SEND });
-        }
-      },
-    },
-  },
-  methods: {
-    openTransferReceiveModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_RECEIVE,
-      });
-    },
-    openTransferSendModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_SEND,
-      });
-    },
-  },
-};
+});
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
-
-.dashboard {
-  display: flex;
-  flex-direction: column;
-
-  .dashboard-cards {
-    padding: var(--screen-padding-x);
-    padding-top: 0;
-  }
-
-  .first-card-wrapper {
-    padding-top: 8px;
-  }
-
-  .card-button {
-    margin-top: 12px;
-  }
-}
-</style>

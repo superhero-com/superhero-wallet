@@ -7,11 +7,12 @@ import {
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_SPEND_SUCCESS,
-  NODAL_CONFIRM,
+  MODAL_CONFIRM,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_CONNECT,
   MODAL_ERROR_LOG,
+  MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
   MODAL_READ_QR_CODE,
   MODAL_MESSAGE_SIGN,
@@ -21,6 +22,8 @@ import {
   MODAL_RECIPIENT_INFO,
   MODAL_RECIPIENT_HELPER,
   MODAL_PAYLOAD_FORM,
+  MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
 } from '../utils/constants';
 
 import Default from '../components/Modals/Default.vue';
@@ -30,6 +33,7 @@ import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import SpendSuccess from '../components/Modals/SpendSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ErrorLog from '../components/Modals/ErrorLog.vue';
+import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
@@ -41,6 +45,9 @@ import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
+import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
+import MessageSign from '../pages/Popups/MessageSign.vue';
 
 export default () => {
   registerModal({ name: MODAL_DEFAULT, component: Default });
@@ -48,8 +55,9 @@ export default () => {
   registerModal({ name: MODAL_ACCOUNT_IMPORT, component: AccountImport });
   registerModal({ name: MODAL_CLAIM_SUCCESS, component: ClaimSuccess });
   registerModal({ name: MODAL_SPEND_SUCCESS, component: SpendSuccess });
-  registerModal({ name: NODAL_CONFIRM, component: Confirm });
+  registerModal({ name: MODAL_CONFIRM, component: Confirm });
   registerModal({ name: MODAL_ERROR_LOG, component: ErrorLog });
+  registerModal({ name: MODAL_FORM_SELECT_OPTIONS, component: FormSelectOptions });
   registerModal({ name: MODAL_HELP, component: Help });
   registerModal({
     name: MODAL_CONFIRM_TRANSACTION_SIGN,
@@ -63,7 +71,11 @@ export default () => {
   });
   registerModal({ name: MODAL_CONFIRM_CONNECT, showInPopupIfWebFrame: true });
   registerModal({ name: MODAL_READ_QR_CODE, component: QrCodeReader });
-  registerModal({ name: MODAL_MESSAGE_SIGN, showInPopupIfWebFrame: true });
+  registerModal({
+    name: MODAL_MESSAGE_SIGN,
+    component: MessageSign,
+    showInPopupIfWebFrame: true,
+  });
   registerModal({ name: MODAL_TRANSFER_RECEIVE, component: TransferReceive });
   registerModal({ name: MODAL_TRANSFER_SEND, component: TransferSend });
   registerModal({ name: MODAL_ASSET_SELECTOR, component: AssetSelector });
@@ -71,4 +83,9 @@ export default () => {
   registerModal({ name: MODAL_RECIPIENT_HELPER, component: RecipientHelper });
   registerModal({ name: MODAL_RECIPIENT_INFO, component: RecipientInfo });
   registerModal({ name: MODAL_PAYLOAD_FORM, component: PayloadForm });
+  registerModal({ name: MODAL_MULTISIG_VAULT_CREATE, component: MultisigVaultCreate });
+  registerModal({
+    name: MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+    component: MultisigProposalConfirmActions,
+  });
 };

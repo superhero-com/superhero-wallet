@@ -2,6 +2,13 @@
   "ok": "OK",
   "ae": "AE",
   "mainAccount": "Cuenta principal",
+  "connectionStatus": {
+    "node": {
+      "error": "No puede conectarse al nodo elegido",
+      "connecting": "Conectando al nodo...",
+      "connected": "Conectado"
+    }
+  },
   "badges": {
     "verified": "Verificada",
     "notVerified": "No verificada"
@@ -65,7 +72,7 @@
       "title": "Tu reporte de Error No Fue Enviado",
       "msg": "Hubo un problema enviando tu reporte de error"
     },
-    "confirm-transaction-sign": {
+    "confirmTransactionSign": {
       "unknown": "Desconocido",
       "contract-create": "Crear contrato",
       "aens": "AENS",
@@ -117,6 +124,7 @@
     "confirm": "Confirmar"
   },
   "transaction": {
+    "fee": "Comision de Transacción",
     "type": {
       "SpendTx": "Gastar",
       "ContractCreateTx": "Contrato creado",
@@ -589,14 +597,13 @@
       "name": "Nombre",
       "nameSalt": "Salt del Nombre",
       "nameId": "Id del Nombre",
-      "fee": "Comisión de trasacción",
       "total": "Total",
       "reject": "Rechazado",
       "confirm": "Confirmar",
       "contractCall": "Llamar Contrato",
       "contractCalling": "Método de llamada de contrato. Por favor no cierre la ventana",
       "insufficientBalance": "Saldo Insuficiente",
-      "inccorectAddress": "Dirección incorrecta",
+      "incorrectAddress": "Dirección incorrecta",
       "compiledCode": "Código Compilado",
       "callData": "Llamar Data",
       "payload": "Carga útil",
@@ -660,7 +667,6 @@
       "check": "Chequear",
       "selectAmount": "Seleccionar monto",
       "amountToTip": "Monto de propina",
-      "transactionFee": "Comision de Transacción",
       "balance": "Saldo",
       "sendTipBtn": "Enviar propina",
       "tipDetails": "Detalles",
@@ -699,7 +705,6 @@
       "date": "Fecha",
       "type": "Tipo",
       "amount": "Monto",
-      "fee": "Comision de Transacción",
       "total": "Total",
       "txFrom": "De",
       "txTo": "Para",
@@ -799,12 +804,6 @@
     "welcome": {
       "send": "Enviar",
       "across": "por todo el Planeta"
-    },
-    "nodeConnectionStatus": {
-      "error": "No puede conectarse al nodo elegido",
-      "connecting": "Conectando al nodo...",
-      "connected": "Conectado",
-      "initServices": "Iniciando servicios..."
     },
     "popupMessageSign": {
       "heading": "gustaría firmar mensaje ",

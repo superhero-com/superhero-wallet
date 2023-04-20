@@ -5,6 +5,7 @@
   >
     <Avatar
       v-if="!hideAvatar"
+      v-bind="$attrs"
       :size="avatarSize"
       :address="address"
     />
@@ -18,6 +19,7 @@
     </div>
     <AddressFormatted
       v-else
+      v-bind="$attrs"
       :address="address"
       columns
     />
@@ -61,7 +63,7 @@ export default {
   @include mixins.flex(flex-start, flex-start);
 
   width: 100%;
-  gap: 12px;
+  gap: 8px;
 
   .avatar {
     margin-top: 8px;

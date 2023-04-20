@@ -1,6 +1,14 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
-import { formatDate, formatTime, getLoginState } from '../../../src/popup/utils';
+import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
+import { STUB_CURRENCY } from '../../../src/popup/utils/testsConfig';
+import {
+  formatDate,
+  formatTime,
+  getLoginState,
+  CURRENCY_URL,
+  CURRENCIES_URL,
+} from '../../../src/popup/utils';
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -40,7 +48,13 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('login', (options = {}, route) => {
+Cypress.Commands.add('mockExternalRequests', () => {
+  cy.intercept('GET', CURRENCY_URL, STUB_CURRENCY);
+  cy.intercept('GET', CURRENCIES_URL, { aeternity: { usd: 0.05 } });
+});
+
+Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
+  if (isMockingExternalRequests) cy.mockExternalRequests();
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
@@ -138,7 +152,7 @@ Cypress.Commands.add('pendingTx', (tx = {}) => {
 });
 
 Cypress.Commands.add('enterInputAmount', (amount = 0) => {
-  cy.get('[data-cy=input-number]').clear().type(amount);
+  cy.get('[data-cy=amount] [data-cy=input]').clear().type(amount);
 });
 
 Cypress.Commands.add('goBack', () => {
@@ -146,7 +160,7 @@ Cypress.Commands.add('goBack', () => {
 });
 
 Cypress.Commands.add('enterAddress', (address) => {
-  cy.get('[data-cy=address] input').clear().type(address);
+  cy.get('[data-cy=address] [data-cy=input]').clear().type(address);
 });
 
 Cypress.Commands.add(
@@ -215,13 +229,11 @@ Cypress.Commands.add('selectNetwork', () => {
 });
 
 Cypress.Commands.add('openTransactions', () => {
-  cy.get('[data-cy=view-all-transactions]')
+  cy.get('[data-cy=account-card-base]')
+    .click()
+    .get(`[data-cy=${ROUTE_ACCOUNT_DETAILS_TRANSACTIONS}]`)
     .click()
     .get('[data-cy=loader]')
-    .should('be.visible')
-    .get('[data-cy=list]')
-    .should('be.visible')
-    .get('[data-cy=filters]')
     .should('be.visible');
 });
 

@@ -10,10 +10,15 @@
       data-cy="top-up-container"
     >
       <h2 class="text-heading-2 text-center">
-        {{ $t('modals.receive.title') }}
+        {{ isMultisig ? $t('modals.receiveMultisig.title') : $t('modals.receive.title') }}
       </h2>
 
-      <AccountRow />
+      <div class="account-row">
+        <AccountItem
+          :address="activeAccountAddress"
+          :name="isMultisig ? null : account.name"
+        />
+      </div>
 
       <div class="qrcode-wrapper">
         <QrCode
@@ -41,7 +46,7 @@
 
       <div class="request-specific-amount">
         <InputAmount
-          v-model.number="amount"
+          v-model="amount"
           v-validate="{
             min_value_exclusive: 0,
           }"
@@ -49,6 +54,7 @@
           :label="$t('modals.receive.requestAmount')"
           :message="errors.first('amount')"
           :selected-asset="selectedAsset"
+          :ae-only="isMultisig"
           @asset-selected="handleAssetChange"
         />
       </div>
@@ -65,10 +71,9 @@
       <BtnMain
         v-if="IS_MOBILE_DEVICE"
         class="btn-share"
-        has-icon
+        :icon="ShareIcon"
         @click="share"
       >
-        <ShareIcon />
         {{ $t('modals.receive.share') }}
       </BtnMain>
     </template>
@@ -85,7 +90,7 @@ import type {
 } from '../../../types';
 import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
-import { useCopy } from '../../../composables';
+import { useCopy, useMultisigAccounts } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
@@ -98,10 +103,10 @@ import QrCode from '../QrCode.vue';
 import Scrollable from '../Scrollable.vue';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import AccountRow from '../AccountRow.vue';
 import AddressFormatted from '../AddressFormatted.vue';
 import CopyText from '../CopyText.vue';
 import ShareIcon from '../../../icons/share-2.svg?vue-component';
+import AccountItem from '../AccountItem.vue';
 
 export default defineComponent({
   name: 'TransferReceive',
@@ -110,19 +115,24 @@ export default defineComponent({
     Modal,
     QrCode,
     BtnMain,
-    AccountRow,
     Scrollable,
     AddressFormatted,
-    ShareIcon,
     CopyText,
+    AccountItem,
   },
   props: {
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
+    isMultisig: Boolean,
   },
   setup(props, { root }) {
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+
     const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
     const account = computed<IAccount>(() => root.$store.getters.account);
+    const activeAccountAddress = computed(() => props.isMultisig
+      ? activeMultisigAccountId.value
+      : account.value.address);
     const availableTokens = computed<ITokenList>(
       () => root.$store.state.fungibleTokens.availableTokens,
     );
@@ -139,20 +149,22 @@ export default defineComponent({
       return `token=${token}&amount=${amount.value}`;
     }
 
-    function getAccountLink(value: string) {
-      return `${APP_LINK_WEB}/account?account=${value}&${getTokenInfoQuery()}`;
+    function getAccountLink(value: string | undefined) {
+      return value
+        ? `${APP_LINK_WEB}/account?account=${value}&${getTokenInfoQuery()}`
+        : '';
     }
 
     const accountAddressToCopy = computed(
       () => (amount.value && amount.value > 0)
-        ? getAccountLink(account.value.address)
-        : account.value.address,
+        ? getAccountLink(activeAccountAddress.value)
+        : activeAccountAddress.value,
     );
 
     const accountAddressToDisplay = computed(
       () => (amount.value && amount.value > 0)
-        ? `${account.value.address}?${getTokenInfoQuery()}`
-        : account.value.address,
+        ? `${activeAccountAddress.value}?${getTokenInfoQuery()}`
+        : activeAccountAddress.value,
     );
 
     async function share() {
@@ -184,6 +196,7 @@ export default defineComponent({
 
     return {
       IS_MOBILE_DEVICE,
+      ShareIcon,
       amount,
       selectedAsset,
       share,
@@ -191,6 +204,8 @@ export default defineComponent({
       handleAssetChange,
       copyAddress,
       copied,
+      activeAccountAddress,
+      account,
       accountAddressToDisplay,
       accountAddressToCopy,
     };
@@ -213,6 +228,11 @@ export default defineComponent({
 
     align-self: center;
     color: variables.$color-white;
+  }
+
+  .account-row {
+    display: flex;
+    justify-content: center;
   }
 
   .qrcode-wrapper {

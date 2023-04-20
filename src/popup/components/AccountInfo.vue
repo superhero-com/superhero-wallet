@@ -5,25 +5,32 @@
   >
     <Avatar
       class="avatar"
-      :address="activeAccount.address"
-      :name="activeAccount.name"
+      :address="address"
+      :name="name"
+      :borderless="avatarBorderless"
     />
     <div class="account-details">
-      <Truncate
-        v-if="activeAccount.name"
+      <div
+        v-if="isMultisig"
+        class="account-name"
+      >
+        {{ $t('multisig.multisigVault') }}
+      </div>
+      <div
+        v-else-if="name"
         class="account-name-truncated"
-        :str="activeAccount.name"
-        :gradient-color="color"
-      />
+      >
+        <Truncate :str="name" />
+      </div>
       <div
         v-else
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ accountIdx + 1 }}
+        {{ $t('pages.account.heading') }} {{ idx + 1 }}
       </div>
       <div
-        v-if="truncatedAddress && truncatedAddress.length"
+        v-if="address && address.length"
         class="account-address"
       >
         <CopyText
@@ -41,15 +48,15 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { truncateAddress } from '../utils';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
+import { useGetter } from '../../composables/vuex';
 
-export default {
+export default defineComponent({
   components: {
     AddressTruncated,
     Avatar,
@@ -57,27 +64,23 @@ export default {
     CopyText,
   },
   props: {
-    color: { type: String, default: '#212121' },
+    address: { type: String, required: true },
+    name: { type: String, default: '' },
+    idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
-    accountIdx: { type: Number, required: true },
+    isMultisig: Boolean,
+    avatarBorderless: Boolean,
   },
-  computed: {
-    ...mapGetters(['accounts', 'activeNetwork']),
-    activeAccount() {
-      return this.accounts[this.accountIdx];
-    },
-    explorerUrl() {
-      const { address } = this.activeAccount;
-      return `${this.activeNetwork.explorerUrl}/account/transactions/${address}`;
-    },
-    address() {
-      return this.activeAccount?.address;
-    },
-    truncatedAddress() {
-      return truncateAddress(this.address);
-    },
+  setup(props) {
+    const activeNetwork = useGetter('activeNetwork');
+
+    const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`);
+
+    return {
+      explorerUrl,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -99,28 +102,19 @@ export default {
   }
 
   .account-details {
-    max-width: 230px;
+    max-width: 250px;
     font-weight: 500;
 
     .account-name-truncated,
-    .account-name-number {
+    .account-name {
       @extend %face-sans-16-medium;
 
-      margin-top: 4px;
-      margin-bottom: 2px;
-      line-height: 20px;
+      margin: 4px 0;
     }
 
     .ae-address {
-      @extend %face-mono-12-medium;
-
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      padding: 4px 0;
       color: rgba(variables.$color-white, 0.85);
       opacity: 0.85;
-      letter-spacing: 0.07em;
 
       .icon {
         width: 22px;

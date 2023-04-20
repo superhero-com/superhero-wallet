@@ -1,33 +1,33 @@
 <template>
   <div class="total-amount">
     <span>{{ totalAmount }}</span>
-    <span class="label">
-      {{ $t('total') }}
+    <span
+      class="label"
+    >
+      {{ isMultisig ? $t('totalMultisig') : $t('total') }}
     </span>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
-import BigNumber from 'bignumber.js';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useCurrencies } from '../../composables';
 
-export default {
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balances']);
+export default defineComponent({
+  props: {
+    totalBalance: { type: String, required: true },
+    isMultisig: Boolean,
   },
-  computed: {
-    ...mapGetters(['convertToCurrencyFormatted']),
-    totalAmount() {
-      if (!this.balances?.length) return 0;
-      const total = this.balances.reduce(
-        (previousValue, currentValue) => previousValue.plus(currentValue),
-        BigNumber(0),
-      );
-      return this.convertToCurrencyFormatted(total);
-    },
+  setup(props) {
+    const { getFormattedFiat } = useCurrencies();
+
+    const totalAmount = computed(() => getFormattedFiat(+props.totalBalance));
+
+    return {
+      totalAmount,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

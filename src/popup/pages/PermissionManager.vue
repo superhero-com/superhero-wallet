@@ -27,7 +27,6 @@
             required: true,
             url: permissionHostValidation
           }"
-          type="url"
           name="url"
           :label="$t('pages.permissions.permissions-for-url')"
           :placeholder="$t('pages.permissions.enter-url')"
@@ -100,40 +99,43 @@
     <div class="bottom">
       <div class="actions">
         <BtnMain
-          class="btn"
-          extend
           variant="muted"
+          :text="$t('pages.permissions.cancel')"
           :to="{ name: 'permissions-settings' }"
-        >
-          {{ $t('pages.permissions.cancel') }}
-        </BtnMain>
+        />
         <BtnMain
           class="confirm"
-          extend
+          extra-padded
+          :text="$t('pages.permissions.confirm')"
           :disabled="!permissionChanged"
-          @click="onSavePermission"
-        >
-          {{ $t('pages.permissions.confirm') }}
-        </BtnMain>
+          @click="savePermission"
+        />
       </div>
       <BtnMain
         v-if="editView"
         extend
-        has-icon
         variant="muted"
-        @click="onRemovePermission"
-      >
-        <DeleteIcon />
-        {{ $t('pages.permissions.delete') }}
-      </BtnMain>
+        :text="$t('pages.permissions.delete')"
+        :icon="DeleteIcon"
+        @click="removePermission"
+      />
     </div>
   </div>
 </template>
 
-<script>
-import { pick } from 'lodash-es';
-import { mapGetters } from 'vuex';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
+import { IPermission } from '../../types';
+import { useBalances, useCurrencies } from '../../composables';
+import { useState } from '../../composables/vuex';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
+
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmountV2.vue';
 import InputField from '../components/InputField.vue';
@@ -141,125 +143,108 @@ import TokenAmount from '../components/TokenAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     SwitchButton,
     InputField,
     InputAmount,
     TokenAmount,
     BtnMain,
-    DeleteIcon,
   },
-  data() {
-    return {
-      permission: {
-        host: '',
-        name: '',
-        address: false,
-        messageSign: false,
-        transactionSignLimit: 0,
-        transactionSignLimitLeft: 0,
-        transactionSignFirstAskedOn: null,
-      },
-      permissionChanged: false,
-      originalTransactionSignLimit: null,
-    };
-  },
-  computed: {
-    ...mapGetters([
-      'formatCurrency',
-      'convertToCurrencyFormatted',
-      'currentCurrencyRate',
-    ]),
-    transactionSignLimitError() {
-      return (
-        Number.isNaN(this.permission.transactionSignLimit)
-        || this.permission.transactionSignLimit < 0
-      ) ? { status: 'error' } : null;
-    },
-    host() {
-      return this.$route.params.host;
-    },
-    editView() {
-      return !!this.$route.meta?.isEdit;
-    },
-    selectedAsset() {
-      return {
-        contractId: AETERNITY_CONTRACT_ID,
-        symbol: AETERNITY_SYMBOL,
-        current_price: this.currentCurrencyRate,
-      };
-    },
-    permissionHostValidation() {
-      return !this.permission.host || !this.permission.host.includes('localhost');
-    },
-  },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balance']);
-  },
-  mounted() {
-    if (this.editView) {
-      if (!this.$store.state.permissions[this.host]) {
-        this.$router.replace({ name: 'not-found' });
-      } else {
-        const permission = {
-          ...this.$store.state.permissions[this.host],
-          host: this.host,
-        };
+  setup(props, { root }) {
+    const { balance } = useBalances({ store: root.$store });
+    const { currentCurrencyRate } = useCurrencies();
 
-        if (typeof permission.transactionSignLimit === 'string') {
-          permission.transactionSignLimit = parseInt(permission.transactionSignLimit, 0);
-          this.originalTransactionSignLimit = permission.transactionSignLimit;
-        }
+    const routeHost = root.$route.params.host as string;
+    const editView = !!root.$route.meta?.isEdit;
 
-        if (typeof permission.transactionSignLimitLeft === 'string') {
-          permission.transactionSignLimitLeft = parseInt(permission.transactionSignLimitLeft, 0);
-        }
+    const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
+    const permissionChanged = ref(false);
+    const originalTransactionSignLimit = ref<number>(0);
 
-        this.permission = {
-          ...permission,
-        };
-      }
+    const permissions = useState<Record<string, IPermission>>('permissions');
+
+    const selectedAsset = computed(() => ({
+      contractId: AETERNITY_CONTRACT_ID,
+      symbol: AETERNITY_SYMBOL,
+      current_price: currentCurrencyRate.value,
+    }));
+
+    const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
+
+    function removePermission() {
+      root.$store.commit('permissions/removePermission', routeHost);
+      root.$router.push({ name: 'permissions-settings' });
     }
 
-    this.$watch('permission', (permission) => {
-      this.permissionChanged = !!permission.name;
-    }, { deep: true });
-  },
-  methods: {
-    onRemovePermission() {
-      this.$store.commit('permissions/removePermission', this.host);
-      this.$router.push({ name: 'permissions-settings' });
-    },
-    onSavePermission() {
-      this.$validator.validateAll().then((result) => {
-        if (!result) return;
+    async function savePermission() {
+      if (!(await (root as any).$validator.validateAll())) return;
 
-        const { host } = (new URL(
-          `${this.permission.host.includes('http') ? '' : 'http://'}${this.permission.host}`,
-        ));
+      const hostValue = permission.value.host.toLowerCase();
+      const { host } = (new URL(
+        `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,
+      ));
 
-        if (host !== this.host) {
-          this.$store.commit('permissions/removePermission', this.host);
+      if (host !== routeHost) {
+        root.$store.commit('permissions/removePermission', routeHost);
+      }
+
+      if (!permission.value.dailySpendLimit) {
+        permission.value.transactionSignLimit = 0;
+      } else if (originalTransactionSignLimit.value !== permission.value.transactionSignLimit) {
+        permission.value.transactionSignLimitLeft += (
+          permission.value.transactionSignLimit - originalTransactionSignLimit.value
+        );
+      }
+
+      root.$store.commit('permissions/addPermission', {
+        ...permission.value,
+        host,
+      });
+      root.$router.push({ name: 'permissions-settings' });
+    }
+
+    if (editView) {
+      const savedPermission = permissions.value[routeHost];
+      if (!savedPermission) {
+        root.$router.replace({ name: ROUTE_NOT_FOUND });
+      } else {
+        if (typeof savedPermission.transactionSignLimit === 'string') {
+          savedPermission.transactionSignLimit = parseInt(
+            savedPermission.transactionSignLimit,
+            10,
+          );
+          originalTransactionSignLimit.value = savedPermission.transactionSignLimit;
         }
 
-        if (!this.permission.dailySpendLimit) {
-          this.permission.transactionSignLimit = 0;
-        } else if (this.originalTransactionSignLimit !== this.permission.transactionSignLimit) {
-          this.permission.transactionSignLimitLeft += (
-            this.permission.transactionSignLimit - this.originalTransactionSignLimit
+        if (typeof savedPermission.transactionSignLimitLeft === 'string') {
+          savedPermission.transactionSignLimitLeft = parseInt(
+            savedPermission.transactionSignLimitLeft,
+            10,
           );
         }
 
-        this.$store.commit('permissions/addPermission', {
-          ...this.permission,
-          host,
-        });
-        this.$router.push({ name: 'permissions-settings' });
-      });
-    },
+        permission.value = savedPermission;
+      }
+    }
+
+    watch(permission, (val) => {
+      permissionChanged.value = !!val.name;
+    }, { deep: true });
+
+    return {
+      DeleteIcon,
+      editView,
+      balance,
+      permission,
+      permissionHostValidation,
+      permissionChanged,
+      selectedAsset,
+      removePermission,
+      savePermission,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -268,7 +253,9 @@ export default {
 @use '../../styles/mixins';
 
 .permission-manager {
-  padding: 14px;
+  --screen-padding-x: 14px;
+
+  padding-inline: var(--screen-padding-x);
   color: variables.$color-white;
 
   .inputs {

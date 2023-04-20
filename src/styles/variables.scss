@@ -29,6 +29,8 @@ $color-grey-border: #757575;
 $color-grey-border-avatar: #9e9e9e;
 $color-purple: #8f00ff;
 
+$color-dialog: #2b2b2b;
+
 $color-border: #232323;
 $color-border-hover: #2f2f2f;
 
@@ -50,3 +52,8 @@ $color-danger: #ff4746;
 
 $color-bg-app: #141414;
 $color-bg-modal: $color-bg-4;
+
+$color-scrollbar-thumb: rgba($color-white, 0.15);
+
+// Transition properties for clickable elements like buttons
+$transition-interactive: all 150ms;

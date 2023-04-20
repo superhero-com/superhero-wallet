@@ -69,6 +69,7 @@
     "confirm": "Confirm"
   },
   "transaction": {
+    "fee": "Costo della transazione",
     "type": {
       "SpendTx": "Spend",
       "ContractCreateTx": "Contract create",
@@ -525,14 +526,13 @@
       "name": "Nome",
       "nameSalt": "Nome Salt",
       "nameId": "Nome Id",
-      "fee": "Costo della transazione",
       "total": "Totale",
       "reject": "Rifiutare",
       "confirm": "Confermare",
       "contractCall": "chiamata contratto",
       "contractCalling": "Chiamando il metodo del contratto. Si prega di non chiudere la finestra",
       "insufficientBalance": "Equilibrio insufficiente",
-      "inccorectAddress": "l'indirizzo non corretto",
+      "incorrectAddress": "l'indirizzo non corretto",
       "compiledCode": "Compiled Code",
       "callData": "Call Data",
       "payload": "Payload",
@@ -596,7 +596,6 @@
       "check": "Dai un'occhiata",
       "selectAmount": "Seleziona quantità",
       "amountToTip": "Importo da punta",
-      "transactionFee": "Costo della transazione",
       "balance": "Equilibrio",
       "sendTipBtn": "Invia un consiglio",
       "tipDetails": "Details",
@@ -635,7 +634,6 @@
       "date": "Date",
       "type": "genere",
       "amount": "Quantità",
-      "fee": "Costo della transazione",
       "total": "Totale",
       "txFrom": "A partire dal",
       "txTo": "A",
@@ -736,12 +734,6 @@
       "send": "Send",
       "across": "across the Globe"
     },
-    "nodeConnectionStatus": {
-      "error": "Unable to connect to chosen node",
-      "connecting": "Connecting to node...",
-      "connected": "Connected",
-      "initServices": "Initializing services..."
-    },
     "popupMessageSign": {
       "heading": "would like to sign message ",
       "message": "Message"
@@ -771,5 +763,4 @@
       "donate": "Donate Data"
     }
   },
-  "redirecting": "Redirecting"
 }

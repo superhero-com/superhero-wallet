@@ -39,31 +39,32 @@ export interface UseCopyOptions {
   timeout?: number
 }
 
-export function useCopy(options: UseCopyOptions = {}) {
-  const {
-    timeout = 1000,
-  }: UseCopyOptions = options;
+export function useCopy({
+  timeout = 1000,
+}: UseCopyOptions = {}) {
   const copied = ref(false);
 
   /**
    * Copy text to device clipboard.
    */
-  async function copy(text: string) {
-    try {
-      if (window.cordova?.plugins?.clipboard) {
-        window.cordova.plugins.clipboard.copy(text);
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        fallbackCopyTextToClipboard(text);
-      }
+  async function copy(text?: string) {
+    if (text) {
+      try {
+        if (window.cordova?.plugins?.clipboard) {
+          window.cordova.plugins.clipboard.copy(text);
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          fallbackCopyTextToClipboard(text);
+        }
 
-      copied.value = true;
-      setTimeout(() => {
-        copied.value = false;
-      }, timeout);
-    } catch (error) {
-      handleUnknownError(error);
+        copied.value = true;
+        setTimeout(() => {
+          copied.value = false;
+        }, timeout);
+      } catch (error) {
+        handleUnknownError(error);
+      }
     }
   }
 

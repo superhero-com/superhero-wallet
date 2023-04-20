@@ -14,16 +14,18 @@
           :return-type="transaction.tx.returnType"
         />
         <TransactionTokens
-          :tokens="tokens"
+          :transaction="transaction"
+          :direction="direction"
+          :is-allowance="isAllowance"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
           icon-size="md"
         />
       </div>
       <div class="content">
-        <TransactionOverview v-bind="transaction" />
+        <TransactionOverview :transaction="transaction" />
         <div class="explorer">
-          <LinkButton :to="getExplorerPath(hash)">
+          <LinkButton :to="explorerPath">
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
           </LinkButton>
@@ -38,11 +40,12 @@
             :label="$t('pages.transactionDetails.reason')"
             :value="transaction.tx.return"
             class="reason"
+            data-cy="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance)
-              && tokens"
-            :tokens="tokens"
+            v-if="(isPool || isAllowance)"
+            :transaction="transaction"
+            :direction="direction"
             :tx-function="transaction.tx.function"
             :is-allowance="isAllowance"
             :class="{ reverse: isPool }"
@@ -82,6 +85,60 @@
             </template>
           </DetailsItem>
 
+          <DetailsItem
+            v-if="multisigTransactionFeePaidBy"
+            :label="$t('pages.transactionDetails.feePaidBy')"
+            small
+          >
+            <div class="row payer-id">
+              <Avatar
+                :address="multisigTransactionFeePaidBy"
+                size="sm"
+              />
+              <div>
+                <DialogBox
+                  v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                  class="dialog-box"
+                  dense
+                  position="bottom"
+                >
+                  {{ $t('common.you') }}
+                </DialogBox>
+                <CopyText
+                  hide-icon
+                  :value="multisigTransactionFeePaidBy"
+                  :copied-text="$t('addressCopied')"
+                >
+                  <span class="text-address">
+                    {{ splitAddress(multisigTransactionFeePaidBy) }}
+                  </span>
+                </CopyText>
+              </div>
+            </div>
+          </DetailsItem>
+
+          <DetailsItem
+            v-if="multisigContractId"
+            :label="$t('pages.transactionDetails.vaultContractId')"
+            small
+          >
+            <div class="row">
+              <Avatar
+                :address="multisigContractId"
+                size="sm"
+              />
+              <CopyText
+                hide-icon
+                :value="multisigContractId"
+                :copied-text="$t('addressCopied')"
+              >
+                <span class="text-address">
+                  {{ splitAddress(multisigContractId) }}
+                </span>
+              </CopyText>
+            </div>
+          </DetailsItem>
+
           <PayloadDetails :payload="getPayload(transaction)" />
 
           <div class="span-3-columns">
@@ -118,45 +175,45 @@
             />
           </div>
           <DetailsItem
-            v-if="!(isDex || isAllowance)"
+            v-if="!(isDex || isAllowance || isMultisig)"
             :label="$t('pages.transactionDetails.amount')"
             data-cy="amount"
           >
             <template #value>
               <TokenAmount
-                :amount="getTxAmountTotal(transaction)"
+                :amount="getTxAmountTotal(transaction, direction)"
                 :symbol="getTxSymbol(transaction)"
-                :hide-fiat="isTxAex9(transaction)"
+                :hide-fiat="isTransactionAex9(transaction)"
               />
             </template>
           </DetailsItem>
           <DetailsItem
-            v-if="transaction.tx.gasPrice"
+            v-if="gasPrice"
             :label="$t('pages.transactionDetails.gasPrice')"
             data-cy="gas-price"
           >
             <template #value>
               <TokenAmount
-                :amount="+(aettosToAe(transaction.tx.gasPrice))"
+                :amount="+(aettosToAe(gasPrice))"
                 symbol="AE"
                 hide-fiat
               />
             </template>
           </DetailsItem>
           <DetailsItem
-            v-if="transaction.tx.gasUsed"
-            :value="transaction.tx.gasUsed"
+            v-if="gasUsed"
+            :value="gasUsed"
             :label="$t('pages.transactionDetails.gasUsed')"
             data-cy="gas"
           />
           <DetailsItem
-            v-if="transaction.tx.fee"
-            :label="$t('pages.transactionDetails.fee')"
+            v-if="transactionFee"
+            :label="$t('transaction.fee')"
             data-cy="fee"
           >
             <template #value>
               <TokenAmount
-                :amount="+aettosToAe(transaction.tx.fee)"
+                :amount="+aettosToAe(transactionFee)"
                 :symbol="AETERNITY_SYMBOL"
               />
             </template>
@@ -169,18 +226,35 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, PropType, ref, onMounted,
+  computed,
+  defineComponent,
+  ref,
+  onMounted,
 } from '@vue/composition-api';
 import {
+  AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
+  TX_TYPE_MDW,
   formatDate,
   formatTime,
   aettosToAe,
   watchUntilTruthy,
   splitAddress,
-  AETERNITY_SYMBOL,
   getPayload,
+  getTransactionTipUrl,
+  fetchJson,
+  handleUnknownError,
+  isTransactionAex9,
 } from '../utils';
+import { ROUTE_NOT_FOUND } from '../router/routeNames';
+import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
+import {
+  useAccounts,
+  useTransactionTx,
+  useMultisigAccounts,
+  useMiddleware,
+} from '../../composables';
+
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
 import SwapRates from '../components/SwapRates.vue';
@@ -193,11 +267,12 @@ import CopyText from '../components/CopyText.vue';
 import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
 import PayloadDetails from '../components/PayloadDetails.vue';
 import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
+import Avatar from '../components/Avatar.vue';
+import DialogBox from '../components/DialogBox.vue';
+
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
-import type { ITransaction } from '../../types';
-import { useTransactionToken, useGetter } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -216,65 +291,165 @@ export default defineComponent({
     AnimatedPending,
     AnimatedSpinner,
     ExternalLink,
+    Avatar,
+    DialogBox,
   },
   props: {
-    hash: { type: String as PropType<string>, required: true },
+    hash: { type: String, required: true },
+    multisigDashboard: { type: Boolean },
+    transactionOwner: { type: String, default: '' },
   },
   setup(props, { root }) {
-    const transaction = ref<ITransaction>();
-    const getTx = useGetter('getTx');
+    const { getMiddleware } = useMiddleware({ store: root.$store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+    const { account } = useAccounts({ store: root.$store });
 
-    const getTxTipUrl = useGetter('getTxTipUrl');
-    const getExplorerPath = useGetter('getExplorerPath');
-    const isTxAex9 = useGetter('isTxAex9');
+    const externalAddress = computed((): string => (
+      props.transactionOwner
+      || (
+        props.multisigDashboard
+          ? activeMultisigAccountId.value
+          : account.value.address
+      )));
 
-    const tipUrl = computed(() => getTxTipUrl.value(transaction.value));
     const {
-      setTransaction,
-      getTxSymbol,
-      getTxAmountTotal,
+      setExternalAddress,
+      setTransactionTx,
+      direction,
       isErrorTransaction,
       isAllowance,
-      tokens,
       isDex,
-    } = useTransactionToken(undefined, true);
-
-    onMounted(async () => {
-      transaction.value = getTx.value(props.hash);
-      if (!transaction.value || transaction.value.incomplete) {
-        await watchUntilTruthy(() => root.$store.state.middleware);
-        transaction.value = await root.$store.state?.middleware.getTxByHash(props.hash);
-        root.$store.commit('setTransactionByHash', transaction.value);
-      }
-      if (transaction.value) setTransaction(transaction.value);
+      isMultisig,
+      outerTxType,
+    } = useTransactionTx({
+      store: root.$store,
+      externalAddress: externalAddress.value,
     });
 
-    const isSwap = computed(() => FUNCTION_TYPE_DEX.swap.includes(transaction.value?.tx?.function || ''));
+    const { isLocalAccountAddress } = useAccounts({
+      store: root.$store,
+    });
 
-    const isPool = computed(() => FUNCTION_TYPE_DEX.pool.includes(transaction.value?.tx?.function || ''));
+    const transaction = ref<ITransaction>();
+    const multisigContractId = ref<string>();
 
+    const getTx = computed(() => root.$store.getters.getTx);
+    const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
+    const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
+    const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
+    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+
+    const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
+    const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
+    const isSwap = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
+    );
+    const isPool = computed(
+      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
+    );
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
+    const explorerPath = computed(() => getExplorerPath.value(props.hash));
+
+    const gasPrice = computed(() => {
+      if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
+        return transaction.value.tx.tx.tx.gasPrice;
+      }
+      return transaction.value?.tx?.gasPrice;
+    });
+
+    const gasUsed = computed(() => {
+      if (transaction.value?.tx?.tx?.tx && 'gasUsed' in transaction.value.tx.tx.tx) {
+        return transaction.value.tx.tx.tx.gasUsed;
+      }
+      return transaction.value?.tx?.gasUsed;
+    });
+
+    const multisigTransactionFeePaidBy = computed((): string | null => {
+      if (outerTxType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      return transaction.value?.tx?.payerId ?? null;
+    });
+
+    /**
+     * Computes the total transaction fee, which is the sum of the fee of the main transaction
+     * and any additional fee from nested transactions.
+     * @returns {number} The total transaction fee.
+     */
+    const transactionFee = computed((): number => {
+      const { tx } = transaction.value ?? {};
+      const fee = tx?.fee ?? 0;
+      const extraFee = tx?.tx?.tx?.fee ?? 0;
+      return fee + extraFee;
+    });
+
+    onMounted(async () => {
+      let rawTransaction = getTx.value(props.hash);
+      if (!rawTransaction || rawTransaction.incomplete) {
+        const middleware = await getMiddleware();
+        try {
+          rawTransaction = await middleware.getTxByHash(props.hash);
+        } catch (e) {
+          root.$router.push({ name: ROUTE_NOT_FOUND });
+        }
+
+        if (rawTransaction?.tx) {
+          if (props.multisigDashboard) {
+            await watchUntilTruthy(() => activeMultisigAccountId.value);
+          } else {
+            await watchUntilTruthy(() => account.value);
+          }
+          setExternalAddress(externalAddress.value);
+          transaction.value = {
+            ...rawTransaction,
+            transactionOwner: externalAddress.value,
+          };
+          root.$store.commit('setTransactionByHash', transaction.value);
+        }
+      } else {
+        transaction.value = rawTransaction;
+      }
+      if (transaction.value?.tx) {
+        setTransactionTx(transaction.value.tx);
+      }
+
+      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
+        try {
+          const { contract_id: contractId = null } = await fetchJson(
+            `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
+          );
+          multisigContractId.value = contractId;
+        } catch (e) {
+          handleUnknownError(e);
+        }
+      }
+    });
 
     return {
       AETERNITY_SYMBOL,
       transaction,
-      tipUrl,
       isSwap,
       isPool,
       getTxSymbol,
       getTxAmountTotal,
       isErrorTransaction,
       isAllowance,
-      tokens,
       isDex,
-      getExplorerPath,
-      isTxAex9,
+      isTransactionAex9,
+      isMultisig,
+      tipUrl,
       tipLink,
+      direction,
+      explorerPath,
       getPayload,
       splitAddress,
       aettosToAe,
       formatDate,
       formatTime,
+      isLocalAccountAddress,
+      gasPrice,
+      gasUsed,
+      multisigTransactionFeePaidBy,
+      multisigContractId,
+      transactionFee,
     };
   },
 });
@@ -302,6 +477,12 @@ export default defineComponent({
   .pending-icon {
     width: 16px;
     height: 16px;
+  }
+
+  .row {
+    @include mixins.flex(flex-start, center, row);
+
+    gap: 8px;
   }
 
   .header {
@@ -401,6 +582,18 @@ export default defineComponent({
         }
       }
     }
+
+    .payer-id {
+      position: relative;
+
+      .dialog-box {
+        width: 30px;
+        height: 20px;
+        position: absolute;
+        right: 15px;
+        top: -28px;
+      }
+    }
   }
 
   .details-item::v-deep {
@@ -411,6 +604,7 @@ export default defineComponent({
 
   .reason::v-deep {
     .value {
+      word-break: break-all;
       color: variables.$color-warning;
     }
   }

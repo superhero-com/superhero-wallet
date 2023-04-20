@@ -1,41 +1,101 @@
 <template>
-  <div class="transaction-token-rows">
+  <div
+    v-if="filteredTokens.length"
+    class="transaction-token-rows"
+  >
     <div
-      v-for="token in tokens.filter(({ amount }) => amount != null)"
+      v-for="token in filteredTokens"
       :key="token.symbol"
-      :class="['token-row', token.isReceived ? 'received': 'sent', { error }]"
+      :class="[
+        'token-row',
+        token.isReceived ? TX_FUNCTIONS.received : TX_FUNCTIONS.sent,
+        { error }
+      ]"
+      :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
-        :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+        :tokens="token.isPool ? [filteredTokens[0], filteredTokens[1]] : [token]"
         :icon-size="iconSize"
+        full-ae-symbol
       />
       <span class="amount">
-        {{
-          `${token.isReceived ? '+' : '−'}
-          ${amountRounded(token.decimals
-          ? convertToken(token.amount || 0, -token.decimals) : token.amount)}`
-        }}
+        {{ token.isReceived ? '' : '−' }}
+        {{ amountRounded(tokenAmount(token)) }}
+        <span class="token-name">
+          {{ shrinkString(getTokenName(token), 5) }}
+        </span>
       </span>
     </div>
   </div>
 </template>
 
-<script>
-import { amountRounded, convertToken } from '../utils';
+<script lang="ts">
+import {
+  computed, defineComponent, PropType, ref,
+} from '@vue/composition-api';
+import {
+  amountRounded,
+  convertToken,
+  shrinkString,
+  calculateFontSize,
+  AETERNITY_SYMBOL,
+  TX_FUNCTIONS,
+} from '../utils';
+import { useTransactionTokens } from '../../composables';
+import type { ITokenResolved, ITransaction } from '../../types';
+
 import Tokens from './Tokens.vue';
 
-export default {
+export default defineComponent({
   components: { Tokens },
   props: {
-    tokens: { type: Array, required: true },
+    transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
+    extTokens: { type: Array as PropType<ITokenResolved[] | undefined>, default: null },
     iconSize: { type: String, default: 'rg' },
+    direction: { type: String, default: '' },
     error: Boolean,
+    isAllowance: Boolean,
   },
-  methods: {
-    convertToken,
-    amountRounded,
+  setup(props, { root }) {
+    const localTokens = ref();
+
+    if (!props.extTokens && !!props.transaction) {
+      const { tokens } = useTransactionTokens({
+        store: root.$store,
+        transaction: props.transaction,
+        direction: props.direction,
+        isAllowance: props.isAllowance,
+        showDetailedAllowanceInfo: true,
+      });
+
+      localTokens.value = tokens.value;
+    }
+
+    const filteredTokens = computed<ITokenResolved[]>(
+      () => (props.extTokens || localTokens.value)?.filter(
+        ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
+      ) || [],
+    );
+
+    function tokenAmount(token: ITokenResolved) {
+      return token.decimals
+        ? convertToken(token.amount || 0, -token.decimals)
+        : token.amount;
+    }
+
+    const getTokenName = (token: ITokenResolved) => token?.isAe ? AETERNITY_SYMBOL : token.symbol;
+
+    return {
+      filteredTokens,
+      tokenAmount,
+      shrinkString,
+      getTokenName,
+      amountRounded,
+      calculateFontSize,
+      TX_FUNCTIONS,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -43,32 +103,33 @@ export default {
 @use '../../styles/typography';
 
 .transaction-token-rows {
+  @extend %face-sans-15-regular;
+
   width: 100%;
+  line-height: 20px;
 
   .token-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
+    font-size: var(--font-size);
 
-    @extend %face-sans-15-regular;
-
-    &.error .amount {
-      color: variables.$color-grey-dark;
+    .amount {
+      color: variables.$color-white;
+      font-weight: 500;
     }
 
-    &.received:not(.error) .amount {
+    &.received .amount {
       color: variables.$color-success-dark;
     }
 
-    &.sent:not(.error) .amount {
-      color: variables.$color-danger;
+    .tokens {
+      color: variables.$color-white;
     }
 
-    .tokens {
-      @extend %face-sans-15-regular;
-
-      color: variables.$color-white;
+    .token-name {
+      @extend %face-sans-16-regular;
     }
   }
 }

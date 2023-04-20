@@ -44,10 +44,18 @@ export interface WalletRouteMeta {
    * @default: false
    */
   showScrollbar?: boolean
+  showFilterBar?: boolean
+  hideSearchBar?: boolean
+  hideFilterButton?: boolean
+  isMultisig?: boolean
+  directBackRoute?: boolean
 }
 
 export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {
   meta?: WalletRouteMeta
-  component?: typeof Vue | ComponentOptions<Vue>,
+  component?: typeof Vue | ComponentOptions<Vue> | {
+    functional: boolean
+    render: any
+  },
   children?: WalletAppRouteConfig[],
 }

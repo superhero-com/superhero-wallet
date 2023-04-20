@@ -1,86 +1,65 @@
 <template>
-  <Component
-    :is="component"
+  <BtnBase
     v-bind="$attrs"
     class="btn-main"
-    :to="to"
-    :href="href"
-    :target="(href) ? '_blank' : null"
     :class="[
-      variant,
       {
-        disabled,
         extend,
-        half,
         third,
         inline,
         nowrap,
-        'has-icon': hasIcon,
+        wide,
+        'extra-padded': extraPadded,
+        'has-icon': !!icon,
       },
     ]"
     v-on="$listeners"
   >
+    <Component
+      :is="icon"
+      v-if="icon"
+      class="btn-main-icon"
+      :class="{ 'lg': bigIcon }"
+    />
+
     <slot>{{ text }}</slot>
-  </Component>
+  </BtnBase>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
+import BtnBase from './BtnBase.vue';
 
 export default defineComponent({
+  components: {
+    BtnBase,
+  },
   props: {
-    variant: {
-      type: String,
-      validator: (value: string) => [
-        'primary',
-        'secondary',
-        'muted',
-        'alternative',
-        'danger',
-        'purple',
-        'dark',
-      ].includes(value),
-      default: 'primary',
-    },
     text: { type: String, default: '' },
-    to: { type: [Object, String], default: null },
-    href: { type: String, default: null },
-    disabled: Boolean,
+    icon: { type: Object, default: null },
     extend: Boolean,
-    half: Boolean,
     third: Boolean,
     inline: Boolean,
     nowrap: Boolean,
-    hasIcon: Boolean,
-  },
-  setup(props) {
-    const component = computed((): string => {
-      if (props.to) {
-        return 'RouterLink';
-      }
-      if (props.href) {
-        return 'a';
-      }
-      return 'button';
-    });
-
-    return {
-      component,
-    };
+    // Used for footer buttons that should take 60% of the space
+    wide: Boolean,
+    // Add more inner space on the sides. Useful with buttons with short text like 'OK'.
+    extraPadded: Boolean,
+    // Enlarges the icon from 20px to 24px
+    bigIcon: Boolean,
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/typography';
 
 .btn-main {
-  --color: #{variables.$color-primary};
+  --bg-color: #{$color-primary};
 
   @extend %face-sans-16-regular;
 
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,78 +67,13 @@ export default defineComponent({
   width: fit-content;
   min-height: 40px;
   padding: 8px 16px;
-  border-radius: variables.$border-radius-interactive;
+  border-radius: $border-radius-interactive;
   line-height: 24px;
   font-weight: 500;
   text-align: center;
-  text-decoration: none;
-  color: variables.$color-white;
-  background-color: var(--color);
-  user-select: none;
-  cursor: pointer;
-  transition: all 100ms;
 
-  &::after {
-    position: absolute;
-    content: '';
-    inset: 0;
-    border-radius: inherit;
-    background-color: var(--screen-bg-color);
-    opacity: 0;
-    will-change: opacity;
-    transition: opacity 100ms;
-  }
-
-  &:hover {
-    &::after {
-      opacity: 0.2;
-    }
-  }
-
-  &:active {
-    &::after {
-      opacity: 0.3;
-    }
-  }
-
-  &.disabled {
-    pointer-events: none;
-
-    &::after {
-      opacity: 0.6;
-    }
-  }
-
-  &.secondary {
-    --color: #{variables.$color-secondary};
-  }
-
-  &.muted {
-    --color: #{variables.$color-grey-medium};
-
-    padding: 8px 32px;
-  }
-
-  &.alternative {
-    --color: #{variables.$color-bg-6};
-  }
-
-  &.danger {
-    --color: #{variables.$color-danger};
-  }
-
-  &.purple {
-    --color: #{variables.$color-purple};
-  }
-
-  &.dark {
-    --color: #{rgba(variables.$color-black, 0.2)};
-  }
-
-  &.half {
-    width: 48%;
-    margin: 0;
-    display: inline-block;
+  &.extra-padded {
+    padding-inline: 32px;
   }
 
   &.third {
@@ -179,12 +93,22 @@ export default defineComponent({
   &.has-icon {
     gap: 4px;
 
-    ::v-deep .icon {
+    .btn-main-icon {
+      --icon-size: 20px;
+
       flex-shrink: 0;
-      width: 20px;
-      height: 20px;
+      width: var(--icon-size);
+      height: var(--icon-size);
       color: inherit;
+
+      &.lg {
+        --icon-size: 24px;
+      }
     }
+  }
+
+  &.wide {
+    flex-basis: 60%;
   }
 
   &.extend {

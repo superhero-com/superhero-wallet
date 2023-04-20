@@ -1,88 +1,31 @@
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { isFQDN, isURL } from 'validator';
+import { isURL } from 'validator';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
-  SCHEMA,
   Crypto,
-  AmountFormatter,
   TxBuilder,
   TxBuilderHelper,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import {
   CONNECTION_TYPES,
-  STUB_ADDRESS,
-  STUB_CALLDATA,
-  STUB_NONCE,
-  MAX_UINT256,
-  MAGNITUDE,
   SEED_LENGTH,
   AENS_NAME_MAX_LENGTH,
 } from './constants';
-import { testAccount, txParams } from './config';
+import { testAccount, txParams } from './testsConfig';
 import runMigrations from '../../store/migrations';
 import { IS_FIREFOX } from '../../lib/environment';
 
 // eslint-disable-next-line no-console
 export const handleUnknownError = (error) => console.warn('Unknown rejection', error);
 
-export const aeToAettos = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-});
-export const aettosToAe = (v) => AmountFormatter.formatAmount(v.toString(), {
-  denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-  targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-});
-
 export const calculateSupplyAmount = (_balance, _totalSupply, _reserve) => {
   if (!_balance || !_totalSupply || !_reserve) {
     return null;
   }
-  const share = BigNumber(_balance).times(100).div(_totalSupply);
-  const amount = BigNumber(_reserve).times(share).div(100);
+  const share = new BigNumber(_balance).times(100).div(_totalSupply);
+  const amount = new BigNumber(_reserve).times(share).div(100);
   return amount.toFixed(0);
-};
-
-export const calculateFee = (type, params) => {
-  const MIN_FEE = TxBuilder.calculateMinFee(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return BigNumber(MIN_FEE).shiftedBy(-MAGNITUDE);
-};
-
-export const calculateNameClaimFee = (name) => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
-
-export const toURL = (url) => new URL(url.includes('://') ? url : `https://${url}`);
-
-export const validateTipUrl = (urlAsString) => {
-  try {
-    const url = toURL(urlAsString);
-    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
-  } catch (e) {
-    return false;
-  }
 };
 
 export const detectConnectionType = (port) => {
@@ -98,6 +41,7 @@ export const detectConnectionType = (port) => {
 
 export const fetchJson = async (...args) => {
   const response = await fetch(...args);
+  if (response.status === 204) return null;
   return response.json();
 };
 
@@ -174,53 +118,6 @@ export const isNotFoundError = (error) => error.statusCode === 404;
 
 export const isAccountNotFoundError = (error) => isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
 
-export const setBalanceLocalStorage = (balance) => {
-  localStorage.rxjs = JSON.stringify({ ...JSON.parse(localStorage.rxjs || '{}'), balance });
-};
-
-export const getBalanceLocalStorage = () => (
-  localStorage.rxjs ? JSON.parse(localStorage.rxjs).balance : {}
-);
-
-export const categorizeContractCallTxObject = (transaction) => {
-  if (transaction.tx.type?.toLowerCase() !== SCHEMA.TX_TYPE.contractCall.toLowerCase()) {
-    return null;
-  }
-  if (transaction.incomplete || transaction.pending) {
-    return {
-      amount: transaction.amount,
-      token: transaction.tx.selectedTokenContractId ?? transaction.tx.contractId,
-      to: transaction.incomplete ? transaction.tx.recipientId : transaction.tx.callerId,
-    };
-  }
-  switch (transaction.tx.function) {
-    case 'transfer':
-    case 'transfer_payload':
-    case 'change_allowance':
-    case 'create_allowance':
-      return {
-        to: transaction.tx.arguments[0].value,
-        amount: transaction.tx.arguments[1].value,
-        token: transaction.tx.contractId,
-      };
-    case 'tip_token':
-      return {
-        url: transaction.tx.arguments[0].value,
-        note: transaction.tx.arguments[1].value,
-        amount: transaction.tx.arguments[3].value,
-        token: transaction.tx.arguments[2].value,
-      };
-    case 'retip_token':
-      return {
-        url: transaction.tx.arguments[0].value,
-        amount: transaction.tx.arguments[2].value,
-        token: transaction.tx.arguments[1].value,
-      };
-    default:
-      return null;
-  }
-};
-
 export const readValueFromClipboard = async () => {
   if (!process.env.UNFINISHED_FEATURES) return undefined;
   let value = '';
@@ -242,42 +139,6 @@ export const readValueFromClipboard = async () => {
       }
   }
   return value;
-};
-
-export const getAllPages = async (getFunction, getNextPage) => {
-  const result = [];
-  let nextPageUrl;
-  while (nextPageUrl !== null) {
-    // eslint-disable-next-line no-await-in-loop
-    const { data, next } = await (nextPageUrl
-      ? getNextPage(nextPageUrl)
-      : getFunction());
-    if (data?.length) result.push(...data);
-    nextPageUrl = next || null;
-  }
-  return result;
-};
-
-export const amountRounded = (rawAmount) => {
-  let amount = rawAmount;
-  if (typeof rawAmount !== 'object') {
-    amount = new BigNumber(rawAmount);
-  }
-
-  if (amount < 0.01 && amount.toString().length < 9 + 2) {
-    return amount.toFixed();
-  }
-  return amount.toFixed((amount < 0.01) ? 9 : 2);
-};
-
-export const truncateAddress = (address) => {
-  const addressLength = address.length;
-  const firstPart = address.slice(0, 6).match(/.{3}/g);
-  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g);
-  return [
-    firstPart.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
-    secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
-  ];
 };
 
 export const getHdWalletAccount = (wallet, accountIdx = 0) => {
@@ -306,7 +167,7 @@ export const getLoginState = async ({
     account,
     mnemonic,
     backedUpSeed,
-    current: { network: network || 'Testnet', token: 0, currency: 'usd' },
+    current: { network: network || 'Testnet', token: 0 },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction

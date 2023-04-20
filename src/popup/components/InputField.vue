@@ -6,6 +6,7 @@
       'warning': hasWarning,
       readonly,
       code,
+      thin,
     }"
   >
     <div
@@ -15,6 +16,7 @@
       <label
         :for="inputId"
         class="label-text"
+        @click="$emit('click', $event)"
       >
         <slot name="label">{{ label }}</slot>
       </label>
@@ -40,6 +42,7 @@
     <label
       data-cy="input-wrapper"
       class="input-wrapper"
+      @click="$emit('click', $event)"
     >
       <div class="main-inner">
         <slot
@@ -53,12 +56,11 @@
           <input
             :id="inputId"
             v-bind="$attrs"
-            :type="type"
             class="input"
             autocomplete="off"
             step="any"
+            data-cy="input"
             :value="value"
-            :data-cy="$attrs.type ? `input-${$attrs.type}` : 'input'"
             :disabled="readonly"
             :maxlength="textLimit"
             :inputmode="inputMode"
@@ -92,28 +94,48 @@
         data-cy="input-field-message"
         :for="inputId"
       >
-        {{ typeof message === 'object' ? message && message.text : message }}
+        {{ messageAsObject ? messageAsObject.text : null }}
       </label>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  computed,
+  watch,
+  defineComponent,
+  getCurrentInstance,
+  PropType,
+  ref,
+} from '@vue/composition-api';
+import type { IInputMessage, IInputMessageRaw } from '../../types';
+import { INPUT_MESSAGE_STATUSES } from '../utils';
 import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
 
-export default {
+type InputFieldType = 'text' | 'number';
+
+export default defineComponent({
+  name: 'InputField',
   components: {
     QuestionCircleIcon,
   },
   props: {
     value: { type: [String, Number], default: null },
     label: { type: String, default: '' },
-    type: { type: String, default: 'text' },
+    type: {
+      type: String as PropType<InputFieldType>,
+      default: 'text',
+      validator: (value: string) => [
+        'text',
+        'number',
+      ].includes(value),
+    },
     message: {
-      type: [String, Object],
-      validator(value) {
+      type: [String, Object] as PropType<IInputMessageRaw>,
+      validator: (value: IInputMessageRaw) => {
         if (typeof value === 'object' && value.status) {
-          return ['success', 'warning', 'error'].includes(value.status);
+          return !!INPUT_MESSAGE_STATUSES[value.status];
         }
         return true;
       },
@@ -123,64 +145,75 @@ export default {
     showHelp: Boolean,
     showMessageHelp: Boolean,
     code: Boolean,
+    thin: Boolean,
     textLimit: {
       type: Number,
       default: null,
     },
   },
-  data: () => ({
-    focused: false,
-  }),
-  computed: {
-    inputId() {
-      return `input-${this._uid}`;
-    },
-    inputMode() {
-      return this.type === 'number' ? 'decimal' : 'text';
-    },
-    hasError() {
-      if (typeof this.message === 'object') {
-        return this.message?.status === 'error';
-      }
-      return !!this.message;
-    },
-    hasWarning() {
-      if (typeof this.message === 'object') {
-        return this.message?.status === 'warning';
-      }
-      return false;
-    },
-    showMessage() {
-      if (typeof this.message === 'object') {
-        return !this.message?.hideMessage;
-      }
-      return !!this.message;
-    },
-    availableTextLimit() {
-      return (this.textLimit && this.value?.length)
-        ? this.textLimit - this.value.length
-        : this.textLimit;
-    },
-  },
-  methods: {
-    checkIfNumber(event) {
+  setup(props, { emit }) {
+    const inputId = `input-${getCurrentInstance()?.uid}`;
+
+    const focused = ref(false);
+
+    const inputMode = computed(() => props.type === 'number' ? 'decimal' : 'text');
+    const messageAsObject = computed(
+      (): IInputMessage | null => (typeof props.message === 'object') ? props.message : { text: props.message },
+    );
+    const hasError = computed(
+      () => (
+        messageAsObject.value?.status === INPUT_MESSAGE_STATUSES.error
+        || !!messageAsObject.value?.text
+      ),
+    );
+    const hasWarning = computed(
+      () => (messageAsObject.value?.status === INPUT_MESSAGE_STATUSES.warning),
+    );
+    const showMessage = computed(
+      () => !messageAsObject.value?.hideMessage && !!messageAsObject.value?.text,
+    );
+    const availableTextLimit = computed(
+      () => (props.textLimit && props.value)
+        ? props.textLimit - String(props.value).length
+        : props.textLimit,
+    );
+
+    function checkIfNumber(event: KeyboardEvent) {
       const isSingleChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey;
-      const alreadyHasDot = (typeof this.value === 'string' && this.value?.includes('.')) && [',', '.'].includes(event.key);
+      const alreadyHasDot = (typeof props.value === 'string' && props.value?.includes('.')) && [',', '.'].includes(event.key);
       if (
-        this.type === 'number'
+        props.type === 'number'
         && isSingleChar
         && (alreadyHasDot || !/^([0-9]+|,|\.)$/.test(event.key)) // Non numerical
       ) {
         event.preventDefault();
       }
-    },
-    handleInput(event) {
-      const { value } = event.target;
-      this.$emit('input', this.type === 'number' ? value?.replace(',', '.') : value);
-    },
+    }
 
+    function handleInput(event: InputEvent) {
+      const { value } = event.target as HTMLInputElement;
+      emit('input', props.type === 'number' ? value?.replace(',', '.') : value);
+    }
+
+    watch(
+      () => focused.value,
+      (val) => emit('focus-change', val),
+    );
+
+    return {
+      focused,
+      inputId,
+      inputMode,
+      messageAsObject,
+      hasError,
+      hasWarning,
+      showMessage,
+      availableTextLimit,
+      checkIfNumber,
+      handleInput,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -254,6 +287,7 @@ export default {
     background-color: var(--color-bg);
     border: none;
     border-radius: variables.$border-radius-interactive;
+    overflow: hidden;
     box-shadow: inset 0 0 0 2px var(--color-border);
     transition: 100ms ease-in-out;
     cursor: text;
@@ -262,7 +296,6 @@ export default {
       display: flex;
       align-items: center;
       width: 100%;
-      overflow: hidden;
 
       .icon {
         width: 24px;
@@ -348,6 +381,12 @@ export default {
   &.code {
     .input {
       @extend %face-mono-10-medium;
+    }
+  }
+
+  &.thin {
+    .input {
+      @extend %face-sans-14-regular;
     }
   }
 }

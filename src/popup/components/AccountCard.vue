@@ -1,104 +1,65 @@
 <template>
-  <RouterLink
-    :class="['account-card', { selected }]"
-    :style="cardCssProps"
-    :to="{ name: 'account-details' }"
+  <AccountCardBase
+    class="account-card"
+    :selected="selected"
   >
-    <AccountInfo
-      :account-idx="accountIdx"
-      :color="color"
-    />
+    <template #top>
+      <AccountInfo
+        :address="account.address"
+        :name="account.name"
+        :idx="account.idx"
+        avatar-borderless
+      />
+    </template>
 
-    <BalanceInfo :account-idx="accountIdx" />
-    <div class="misc">
-      <div class="total-tokens">
-        <span class="digit">
-          {{ totalTokens }}
-        </span>
-        <span class="wording">
-          {{ $t('pages.fungible-tokens.tokens') }}
-        </span>
-      </div>
-    </div>
-  </RouterLink>
+    <template #middle>
+      <BalanceInfo :balance="numericBalance" />
+    </template>
+
+    <template #bottom>
+      <AccountCardTotalTokens
+        :current-account="account"
+        :selected="selected"
+      />
+    </template>
+  </AccountCardBase>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from '@vue/composition-api';
+import type { IAccount } from '../../types';
+import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
+import { useBalances } from '../../composables';
+
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
-import { getAddressColor } from '../utils/avatar';
+import AccountCardTotalTokens from './AccountCardTotalTokens.vue';
+import AccountCardBase from './AccountCardBase.vue';
 
-export default {
+export default defineComponent({
   components: {
+    AccountCardBase,
+    AccountCardTotalTokens,
     AccountInfo,
     BalanceInfo,
   },
   props: {
-    accountIdx: { type: Number, required: true },
+    account: { type: Object as PropType<IAccount>, required: true },
     selected: Boolean,
   },
-  computed: {
-    ...mapGetters('fungibleTokens', ['getTokenBalance']),
-    ...mapGetters(['accounts']),
-    cardCssProps() {
-      return { 'background-color': this.color };
-    },
-    totalTokens() {
-      return this.getTokenBalance(this.accounts[this.accountIdx].address).length;
-    },
-    color() {
-      return getAddressColor(this.accounts[this.accountIdx].address);
-    },
+  setup(props, { root }) {
+    const { balance } = useBalances({ store: root.$store });
+
+    const numericBalance = computed<number>(() => balance.value.toNumber());
+
+    return {
+      numericBalance,
+      ROUTE_ACCOUNT_DETAILS,
+    };
   },
-};
+});
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-
-.account-card {
-  display: flex;
-  flex-direction: column;
-  width: 328px;
-  height: 192px;
-  border-radius: variables.$border-radius-card;
-  margin: 8px 16px 32px 16px;
-  padding: 12px;
-  align-items: flex-start;
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0.5;
-  transition-duration: 300ms;
-
-  &.selected {
-    opacity: 1;
-  }
-
-  .balance-info {
-    margin-top: 12px;
-    align-self: center;
-  }
-
-  .misc {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex: 1;
-
-    .total-tokens {
-      @extend %face-sans-14-medium;
-
-      line-height: 16px;
-
-      .wording {
-        opacity: 0.85;
-      }
-    }
-  }
-}
-</style>

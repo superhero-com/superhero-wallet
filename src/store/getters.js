@@ -1,17 +1,16 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { TxBuilderHelper, SCHEMA } from '@aeternity/aepp-sdk';
+import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
-  AVATAR_URL,
   DEX_CONTRACTS,
   NETWORK_ID_MAINNET,
   NETWORK_ID_TESTNET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  TX_TYPE_MDW,
+  TX_FUNCTIONS,
   ACCOUNT_HD_WALLET,
   validateHash,
   convertToken,
@@ -19,7 +18,7 @@ import {
   categorizeContractCallTxObject,
   getHdWalletAccount,
   getMdwEndpointPrefixForHash,
-  AETERNITY_CONTRACT_ID,
+  getTxType,
 } from '../popup/utils';
 
 export default {
@@ -45,19 +44,6 @@ export default {
     return accounts[activeIdx] || {}; // TODO: Return null
   },
   isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
-  currentCurrencyRate: ({ current: { currency }, currencies }) => currencies[currency] || 0,
-  convertToCurrency: (state, { currentCurrencyRate }) => (value) => (
-    +(currentCurrencyRate * value).toFixed(2)),
-  // TODO: Use the current language from i18n module
-  formatCurrency: ({ current: { currency } }) => (value) => new Intl.NumberFormat(
-    navigator.language, { style: 'currency', currencyDisplay: 'narrowSymbol', currency },
-  ).format(value),
-  formatNumber: () => (value) => new Intl.NumberFormat(
-    navigator.language,
-  ).format(value),
-  convertToCurrencyFormatted: (state, { convertToCurrency, formatCurrency }) => (value) => (
-    formatCurrency(convertToCurrency(value))),
-  minTipAmount: ({ currencies: { usd } }) => 0.01 / usd,
   networks({ userNetworks }) {
     return [
       NETWORK_MAINNET,
@@ -71,8 +57,6 @@ export default {
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;
   },
-  getProfileImage: (_, { activeNetwork }) => (address) => `${activeNetwork.backendUrl}/profile/image/${address}`,
-  getAvatar: () => (address) => `${AVATAR_URL}${address}`,
   tippingSupported(state, { activeNetwork }) {
     return (
       [NETWORK_ID_MAINNET, NETWORK_ID_TESTNET].includes(activeNetwork.networkId)
@@ -89,16 +73,15 @@ export default {
   },
   getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
     .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-  getTxType: () => (transaction) => transaction.tx
-    && (TX_TYPE_MDW[transaction.tx.type]
-      || SCHEMA.OBJECT_ID_TX_TYPE[transaction.tx.tag]
-      || (Object.values(SCHEMA.TX_TYPE).includes(transaction.tx.type) && transaction.tx.type)),
+
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
   },
-  getTxAmountTotal: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
+  getTxAmountTotal: (
+    { fungibleTokens: { availableTokens } },
+  ) => (transaction, direction = TX_FUNCTIONS.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
@@ -106,42 +89,34 @@ export default {
         -availableTokens[contractCallData.token].decimals,
       );
     }
+    const isReceived = direction === TX_FUNCTIONS.received;
+
     return +aettosToAe(
       new BigNumber(
-        transaction.amount || transaction.tx?.amount
-        || transaction.nameFee || transaction.tx?.nameFee || 0,
-      ).plus(transaction.fee || transaction.tx?.fee || 0),
+        transaction.tx?.amount
+        || transaction.tx?.tx?.tx?.amount
+        || transaction.tx?.nameFee || 0,
+      )
+        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+        .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
-  getNameFee: () => (transaction) => +aettosToAe(
-    new BigNumber(transaction.nameFee || transaction.tx?.nameFee || 0),
-  ),
-  getTxFee: () => (transaction) => +aettosToAe(
-    new BigNumber(transaction.fee || transaction.tx?.fee || 0),
-  ),
-  getTxDirection: (_, { account: { address } }) => ({ tx }) => (['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'].map((key) => tx?.[key]).includes(address)
-    ? 'sent'
-    : 'received'),
-  getTxTipUrl: () => (transaction) => (
-    transaction.tipUrl
-      || transaction.url
-      || (!transaction.pending
-        && !transaction.claim
-        && transaction.tx.log?.[0]
-        && transaction.function === 'tip'
-        && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
-      || categorizeContractCallTxObject(transaction)?.url
-      || ''
-  ),
-  isTxAex9: () => (transaction) => transaction.tx
-    && !!categorizeContractCallTxObject(transaction)?.token
-    && categorizeContractCallTxObject(transaction)?.token !== AETERNITY_CONTRACT_ID,
-  getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
-  getAmountFiat: (_, { convertToCurrency, formatCurrency }) => (amount) => {
-    const converted = convertToCurrency(amount);
-    if (converted < 0.01) return `<${formatCurrency(0.01)}`;
-    return `≈${formatCurrency(converted)}`;
+  getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
+    const currentAddress = externalAddress || address;
+
+    if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
+      return tx.senderId === currentAddress
+        ? TX_FUNCTIONS.sent
+        : TX_FUNCTIONS.received;
+    }
+
+    return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
+      .map((key) => tx?.[key])
+      .includes(currentAddress)
+      ? TX_FUNCTIONS.sent
+      : TX_FUNCTIONS.received;
   },
+  getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
   getAccountPendingTransactions: (
     { transactions: { pending } }, { activeNetwork, account: { address } },
   ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]

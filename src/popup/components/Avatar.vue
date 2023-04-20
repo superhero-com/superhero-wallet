@@ -2,47 +2,56 @@
   <img
     class="avatar"
     :src="error ? avatar : profileImage"
-    :class="[size, { 'with-border': withBorder }]"
+    :class="[size, { borderless }]"
+    :style="avatarStyle"
     @error="error = true"
   >
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, ref } from '@vue/composition-api';
+import type { INetwork } from '../../types';
+import { useGetter } from '../../composables/vuex';
+import { AVATAR_URL, isContract } from '../utils';
+import { getAddressColor } from '../utils/avatar';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
-export default {
+export default defineComponent({
   props: {
     address: { type: String, default: '' },
-    name: { type: [String, Boolean], default: '' }, // TODO: Name shouldn't be boolean
+    name: { type: String, default: null },
     size: {
       type: String,
       default: 'rg',
-      validator: (val) => SIZES.includes(val),
+      validator: (val: string) => SIZES.includes(val),
     },
-    src: { type: String, default: '' },
-    withBorder: Boolean,
+    borderless: Boolean,
   },
-  data: () => ({
-    error: false,
-  }),
-  computed: mapState({
-    profileImage(state, { getProfileImage }) {
-      if (this.address.startsWith('ct_') || this.address === '') {
-        return this.src || '';
-      }
-      return getProfileImage(this.address);
-    },
-    avatar(state, { getAvatar }) {
-      return getAvatar(this.name || this.address);
-    },
-  }),
-};
+  setup(props) {
+    const error = ref(false);
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const avatar = computed(() => `${AVATAR_URL}${props.name || props.address}`);
+    const color = computed(() => props.address ? getAddressColor(props.address) : null);
+    const profileImage = computed(() => (isContract(props.address) || props.address === '')
+      ? ''
+      : `${activeNetwork.value.backendUrl}/profile/image/${props.address}`);
+    const avatarStyle = computed(() => !props.borderless ? { 'border-color': color.value } : null);
+
+    return {
+      error,
+      avatar,
+      color,
+      profileImage,
+      avatarStyle,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
 @use '../../styles/variables';
+@use '../../styles/mixins';
 
 $size-xs: 18px;
 $size-sm: 24px;
@@ -60,6 +69,7 @@ $size-xl: 56px;
   object-fit: cover;
   user-select: none;
   flex-shrink: 0;
+  border: 1px solid transparent;
 
   &.sm {
     height: $size-sm;
@@ -76,18 +86,26 @@ $size-xl: 56px;
     width: $size-md;
   }
 
+  &.rg {
+    height: $size-rg;
+    width: $size-rg;
+    border-width: 2px;
+  }
+
   &.lg {
     height: $size-lg;
     width: $size-lg;
+    border-width: 2px;
   }
 
   &.xl {
     height: $size-xl;
     width: $size-xl;
+    border-width: 2px;
   }
 
-  &.with-border {
-    border: 1px solid variables.$color-grey-border-avatar;
+  &.borderless {
+    border: none;
   }
 }
 </style>

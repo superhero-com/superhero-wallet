@@ -1,6 +1,6 @@
 <template>
   <div class="retip">
-    <BalanceInfo />
+    <BalanceInfo :balance="numericBalance" />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
     </div>
@@ -18,15 +18,14 @@
       v-validate="{
         required: true,
         min_value_exclusive: 0,
+        min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_ae: fee.toString(),
       }"
       name="amount"
       class="amount-input"
-      show-tokens-with-balance
+      ae-only
       :message="validationStatus.msg || errors.first('amount')"
-      :selected-asset="formModel.selectedAsset"
-      @asset-selected="handleAssetChange"
     />
     <div
       v-if="tip.title"
@@ -34,8 +33,6 @@
     >
       {{ tip.title }}
     </div>
-
-    <pre>{{ validationStatus }}</pre>
 
     <BtnMain
       class="bottom-btn"
@@ -66,18 +63,21 @@ import {
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
-import type { IToken } from '../../types';
+import {
+  IAccount,
+  IToken,
+  IPendingTransaction,
+  ISdk,
+} from '../../types';
 import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
-import { convertToken, watchUntilTruthy, rxJsObservableToVueState } from '../utils';
-import { IPendingTransaction } from '../../types';
+import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
-  useGetter,
-  useState,
   IFormModel,
-  IMaxAmount,
+  useBalances,
 } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -86,66 +86,57 @@ import BalanceInfo from '../components/BalanceInfo.vue';
 export default defineComponent({
   name: 'Retip',
   components: {
-    InputAmount, UrlStatus, BtnMain, BalanceInfo,
+    InputAmount,
+    UrlStatus,
+    BtnMain,
+    BalanceInfo,
   },
   setup(props, { root }) {
+    const formModel = ref<IFormModel>({
+      amount: '',
+    });
+
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+
     const tipId = root.$route.query.id;
     const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
     });
-    const formModel = ref<IFormModel>({
-      amount: 0,
-      selectedAsset: null,
-    });
-    const {
-      max,
-      fee,
-      balance,
-      account,
-    } = useMaxAmount({ formModel } as IMaxAmount);
-    const balanceCurrency = rxJsObservableToVueState<number>(
-      root.$store.state.observables.balanceCurrency,
-    );
 
     const loading = ref<boolean>(false);
-    const getAeternityToken = useGetter('fungibleTokens/getAeternityToken');
-    const sdk = useGetter('sdkPlugin/sdk');
+    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
-    const minTipAmount = useGetter('minTipAmount');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
     const tippingContract = computed(
       () => tipId.includes('_v2') || tipId.includes('_v3')
         ? tippingV2.value
         : tippingV1.value,
     );
+
+    const numericBalance = computed<number>(() => balance.value.toNumber());
+
     const validationStatus = computed<{
       error: boolean, msg?: string | VueI18n.TranslateResult
     }>(() => {
       if (!sdk.value || !tippingContract.value) {
         return { error: true };
       }
-      if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
-        && tipId.includes('_v1')) {
-        return { error: true, msg: root.$t('pages.tipPage.v1FungibleTokenTipError') };
-      }
-      if (formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID
-        && +formModel.value.amount < minTipAmount.value) {
-        return { error: true, msg: root.$t('pages.tipPage.minAmountError') };
-      }
       return { error: false };
     });
 
     async function sendTip() {
       const amount = convertToken(
-        formModel.value.amount,
+        +(formModel.value.amount || 0),
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
           : MAGNITUDE,
-      ).toFixed();
+      ).toNumber();
       loading.value = true;
       await watchUntilTruthy(() => tippingV1.value);
       try {
@@ -174,9 +165,10 @@ export default defineComponent({
         }
         const transaction: IPendingTransaction = {
           hash: retipResponse.hash,
-          amount,
           tipUrl: tip.value.url,
+          pending: true,
           tx: {
+            amount,
             callerId: account.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
@@ -199,16 +191,9 @@ export default defineComponent({
       }
     }
 
-    function handleAssetChange(selectedAsset: any) {
-      formModel.value.selectedAsset = selectedAsset;
-    }
-
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = getAeternityToken.value({
-        tokenBalance: balance.value,
-        balanceCurrency: balanceCurrency.value,
-      });
+      formModel.value.selectedAsset = aeternityToken.value;
 
       if (!tipId) throw new Error('"id" param is missing');
 
@@ -222,13 +207,13 @@ export default defineComponent({
     });
 
     return {
-      handleAssetChange,
       tip,
       formModel,
       loading,
       urlStatus,
       validationStatus,
       tippingSupported,
+      numericBalance,
       sendTip,
       max,
       fee,

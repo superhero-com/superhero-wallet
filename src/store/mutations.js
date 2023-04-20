@@ -2,10 +2,9 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  NODE_STATUS_CONNECTION_DONE,
-  NODE_STATUS_CONNECTED,
+  TX_FUNCTIONS,
   defaultNetwork,
-} from '../popup/utils/constants';
+} from '../popup/utils';
 
 export default {
   switchNetwork(state, payload) {
@@ -25,6 +24,7 @@ export default {
     Vue.set(state.transactions, 'loaded', []);
     Vue.set(state.transactions, 'nextPageUrl', '');
     Vue.set(state.transactions, 'tipWithdrawnTransactions', []);
+    Vue.set(state.transactions, 'pending', []);
   },
   setTransactionsNextPage(state, pageUrl) {
     Vue.set(state.transactions, 'nextPageUrl', pageUrl);
@@ -39,7 +39,7 @@ export default {
   },
   setPendingTransactionSentByHash(state, { network, hash }) {
     const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
-    Vue.set(state.transactions.pending[network][index], 'sent', true);
+    Vue.set(state.transactions.pending[network][index], TX_FUNCTIONS.sent, true);
   },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) Vue.set(state.userNetworks, index, network);
@@ -48,28 +48,12 @@ export default {
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  setMiddleware(state, payload) {
-    state.middleware = payload;
-  },
   setTipping(state, [tippingV1, tippingV2]) {
     state.tippingV1 = tippingV1 || null;
     state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
-
-    // Hide "connected" message after some delay.
-    if (payload === NODE_STATUS_CONNECTION_DONE) {
-      setTimeout(() => {
-        state.nodeStatus = NODE_STATUS_CONNECTED;
-      }, 1000);
-    }
-  },
-  setCurrentCurrency(state, currency) {
-    state.current.currency = currency;
-  },
-  setCurrencies(state, payload) {
-    state.currencies = payload;
   },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;
@@ -96,9 +80,6 @@ export default {
   },
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
-  },
-  toggleMinifiedCard(state) {
-    state.cardMinified = !state.cardMinified;
   },
   setQrScanner(state, payload) {
     state.qrScannerOpen = payload;

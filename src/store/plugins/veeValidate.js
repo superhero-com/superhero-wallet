@@ -9,9 +9,11 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
   checkAensName,
-  validateTipUrl, isValidURL,
-} from '../../popup/utils/helper';
+  validateTipUrl,
+  isValidURL,
+} from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
+import { useBalances, useCurrencies } from '../../composables';
 
 Vue.use(VeeValidate);
 
@@ -44,6 +46,7 @@ Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
 Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
+Validator.extend('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
 Validator.localize('en', {
   messages: {
@@ -58,7 +61,9 @@ Validator.localize('en', {
     min_value: (field, [arg]) => i18n.t('validation.minValue', [arg]),
     min_value_exclusive: (field, [arg]) => i18n.t('validation.minValueExclusive', [arg]),
     max_value: (field, [arg]) => i18n.t('validation.maxValue', [arg]),
+    max_value_vault: (field, [arg]) => i18n.t('validation.maxValueVault', [arg]),
     enough_ae: () => i18n.t('validation.enoughAe'),
+    enough_ae_signer: () => i18n.t('validation.enoughAeSigner'),
     not_token: () => i18n.t('validation.notToken'),
     name_registered_address_or_url: () => i18n.t('validation.invalidAddressChainUrl'),
     min_tip_amount: () => i18n.t('pages.tipPage.minAmountError'),
@@ -69,6 +74,9 @@ Validator.localize('en', {
 });
 
 export default (store) => {
+  const { balance, updateBalances } = useBalances({ store });
+  const { minTipAmount } = useCurrencies({ withoutPolling: true });
+
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
     REGISTERED_ADDRESS: Symbol('name state: registered and points to address'),
@@ -120,7 +128,7 @@ export default (store) => {
     }
   };
 
-  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(store.getters.minTipAmount));
+  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   Validator.extend('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
   Validator.extend('token_to_an_address', {
@@ -133,13 +141,17 @@ export default (store) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
-  Validator.extend('enough_ae', (_, [arg]) => new Promise(
-    (resolve) => store.state.observables.balance
-      .subscribe((balance) => resolve(balance.isGreaterThanOrEqualTo(arg)))
-      .unsubscribe(),
-  ));
+  Validator.extend('enough_ae', async (_, [arg]) => {
+    await updateBalances();
+    return balance.value.isGreaterThanOrEqualTo(arg);
+  });
+  Validator.extend('enough_ae_signer', async (_, [arg]) => {
+    await updateBalances();
+    return balance.value.isGreaterThanOrEqualTo(arg);
+  });
   Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
-    ? checkNameRegisteredAddress(value) : Crypto.isAddressValid(value) || validateTipUrl(value)));
+    ? checkNameRegisteredAddress(value)
+    : Crypto.isAddressValid(value) || validateTipUrl(value)));
   Validator.extend('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);

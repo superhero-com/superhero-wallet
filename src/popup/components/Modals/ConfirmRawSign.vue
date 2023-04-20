@@ -5,7 +5,7 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :title="$t('modals.confirm-raw-sign.title')"
+      :custom-title="$t('modals.confirm-raw-sign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
       :recipient="account"
     />
@@ -28,7 +28,7 @@
     </div>
 
     <DetailsItem
-      :label="$t('modals.confirm-transaction-sign.data-sign')"
+      :label="$t('modals.confirmTransactionSign.data-sign')"
       :value="dataAsString"
       data-cy="data"
     >
@@ -39,18 +39,17 @@
 
     <template #footer>
       <BtnMain
-        third
         variant="muted"
+        third
+        extra-padded
+        :text="$t('modals.cancel')"
         @click="cancel"
-      >
-        {{ $t('modals.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         third
+        :text="$t('modals.confirm')"
         @click="confirm"
-      >
-        {{ $t('modals.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>

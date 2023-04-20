@@ -1,26 +1,25 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { isEqual, isEmpty, uniqBy } from 'lodash-es';
+import { isEmpty, uniqBy } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken,
-  fetchJson,
   handleUnknownError,
   calculateSupplyAmount,
-  AETERNITY_SYMBOL,
-  getAllPages,
-  watchUntilTruthy,
+  fetchAllPages,
 } from '../../popup/utils';
-import { CURRENCY_URL, ZEIT_TOKEN_INTERFACE, AETERNITY_CONTRACT_ID } from '../../popup/utils/constants';
+import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
+import { useMiddleware } from '../../composables';
 
 export default (store) => {
+  const { fetchFromMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store });
+
   store.registerModule('fungibleTokens', {
     namespaced: true,
     state: {
       availableTokens: {},
       tokens: {},
-      aePublicData: {},
       transactions: {},
     },
     getters: {
@@ -28,16 +27,6 @@ export default (store) => {
       tokenBalances: (
         state, { getTokenBalance }, rootState, { account: { address } },
       ) => getTokenBalance(address),
-      getAeternityToken: ({ aePublicData }) => ({ balanceCurrency, tokenBalance }) => {
-        const aePublicDataExists = aePublicData && Object.keys(aePublicData).length > 0;
-        return {
-          ...(aePublicDataExists ? aePublicData : {}),
-          convertedBalance: tokenBalance,
-          symbol: AETERNITY_SYMBOL,
-          balanceCurrency,
-          contractId: AETERNITY_CONTRACT_ID,
-        };
-      },
     },
     mutations: {
       setTransactions(state, { address, transactions }) {
@@ -46,27 +35,18 @@ export default (store) => {
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
-      resetTokens(state) {
+      resetTokensAndTransactions(state) {
         state.tokens = {};
-      },
-      resetTransactions(state) {
         state.transactions = {};
       },
-      addTokenBalance(state, { address, balances }) {
-        if (!(address in state.tokens)) {
-          Vue.set(state.tokens, address, { tokenBalances: [] });
-        }
-        Vue.set(state.tokens[address], 'tokenBalances', balances);
-      },
-      setAePublicData(state, payload) {
-        state.aePublicData = payload;
+      addTokenBalance(state, tokens) {
+        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
       },
     },
     actions: {
-      async loadAvailableTokens({ rootGetters: { activeNetwork }, commit }) {
-        const response = await fetchJson(
-          `${activeNetwork.middlewareUrl}/aex9/by_name`,
-        ).catch(handleUnknownError);
+      async loadAvailableTokens({ commit }) {
+        const response = await fetchFromMiddleware('/aex9/by_name')
+          .catch(handleUnknownError);
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
@@ -76,26 +56,22 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { activeNetwork, accounts },
-        rootState: { middleware },
+        rootGetters: { accounts },
         state: { availableTokens },
         commit,
       }) {
-        accounts.map(async ({ address }) => {
+        const newBalances = {};
+        await Promise.all(accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
-            await watchUntilTruthy(() => middleware);
-            const tokens = await getAllPages(
-              () => fetchJson(
-                `${activeNetwork.middlewareUrl}/v2/aex9/account-balances/${address}?limit=100`,
-              ),
-              middleware.fetchByPath,
+            const tokens = await fetchAllPages(
+              () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+              fetchFromMiddlewareCamelCased,
             );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
 
-            // TODO: remove uniqBy after https://github.com/aeternity/ae_mdw/issues/735 is fixed and released
-            const balances = uniqBy(tokens, 'contract_id').map(({ amount, contract_id: contractId }) => {
+            const balances = tokens.map(({ amount, contract_id: contractId }) => {
               const token = availableTokens[contractId];
               if (!token) return null;
               const balance = convertToken(amount, -token.decimals);
@@ -111,20 +87,12 @@ export default (store) => {
 
               return objectStructure;
             });
-            commit('addTokenBalance', { address, balances });
+            newBalances[address] = { tokenBalances: balances };
           } catch (e) {
             handleUnknownError(e);
           }
-        });
-      },
-      async getAeternityData({ rootState: { current }, commit }) {
-        const [aeternityData] = await fetchJson(
-          `${CURRENCY_URL}${current.currency}`,
-        ).catch((e) => {
-          handleUnknownError(e);
-          return [];
-        });
-        return commit('setAePublicData', aeternityData);
+        }));
+        commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
         { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
@@ -224,26 +192,30 @@ export default (store) => {
       async getTokensHistory(
         {
           state: { transactions },
-          rootGetters: { activeNetwork, account, getDexContracts }, commit,
-        }, recent,
+          rootGetters: { getDexContracts }, commit,
+        }, { recent, address, multipleAccounts },
       ) {
-        const { address } = account;
-        if (transactions[address]?.length && !recent) return transactions[address];
+        if (!address) {
+          return [];
+        }
+        if (transactions[address]?.length && !recent) {
+          return transactions[address];
+        }
 
         let rawTransactions = [];
         const lastTransaction = transactions[address]?.[0];
         if (recent) {
           let nextPageUrl;
-          let isAllNewTransactionsLoadded = false;
-          while (nextPageUrl !== null && !isAllNewTransactionsLoadded) {
+          let isAllNewTransactionsLoaded = false;
+          while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
             // eslint-disable-next-line no-await-in-loop
-            const { data, next } = await (fetchJson(nextPageUrl
-              ? `${activeNetwork.middlewareUrl}/${nextPageUrl}`
-              : `${activeNetwork.middlewareUrl}/v2/aex9/transfers/to/${address}`));
+            const { data, next } = await fetchFromMiddleware(nextPageUrl
+              ? `/${nextPageUrl}`
+              : `/v2/aex9/transfers/to/${address}`);
             if (data?.length) rawTransactions.push(...data);
             if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
             || !transactions[address]?.length) {
-              isAllNewTransactionsLoadded = true;
+              isAllNewTransactionsLoaded = true;
             }
             nextPageUrl = next || null;
           }
@@ -251,7 +223,7 @@ export default (store) => {
             return transactions[address].slice(0, 10);
           }
         } else {
-          rawTransactions = await fetchJson(`${activeNetwork.middlewareUrl}/aex9/transfers/to/${address}`);
+          rawTransactions = await fetchFromMiddleware(`/aex9/transfers/to/${address}`);
         }
 
         const newTransactions = rawTransactions
@@ -259,6 +231,7 @@ export default (store) => {
           .map((tx) => ({
             ...tx,
             tx: {
+              amount: tx.amount,
               contractId: tx.contract_id,
               senderId: tx.sender,
               recipientId: tx.recipient,
@@ -271,42 +244,35 @@ export default (store) => {
             hash: tx.tx_hash,
           }));
 
-        if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
-          commit('setTransactions', {
-            address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
-          });
-          return newTransactions;
+        if (!multipleAccounts) {
+          if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
+            commit('setTransactions', {
+              address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
+            });
+          } else {
+            commit('setTransactions', { address, transactions: newTransactions.reverse() });
+          }
         }
-        commit('setTransactions', { address, transactions: newTransactions.reverse() });
         return newTransactions;
       },
     },
   });
 
   store.watch(
-    ({ middleware }) => middleware,
-    (middleware) => {
-      if (!middleware) return;
+    (state, { activeNetwork }) => activeNetwork,
+    async (network, oldNetwork) => {
+      if (network?.middlewareUrl === oldNetwork?.middlewareUrl) return;
+      store.commit('fungibleTokens/resetTokensAndTransactions');
 
-      store.dispatch('fungibleTokens/loadAvailableTokens');
-      store.dispatch('fungibleTokens/loadTokenBalances');
+      await store.dispatch('fungibleTokens/loadAvailableTokens');
+      await store.dispatch('fungibleTokens/loadTokenBalances');
     },
     { immediate: true },
   );
 
   store.watch(
-    (state, { activeNetwork }) => activeNetwork,
-    async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
-      store.commit('fungibleTokens/resetTokens');
-      store.commit('fungibleTokens/resetTransactions');
-    },
-  );
-
-  store.watch(
     ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
     async () => {
-      if (!store.state.middleware) return;
       await store.dispatch('fungibleTokens/loadTokenBalances');
     },
   );

@@ -5,7 +5,7 @@
       :title="$t('pages.index.seedPhrase')"
     />
     <PanelItem
-      :to="{ name: 'network-settings' }"
+      :to="{ name: ROUTE_NETWORK_SETTINGS }"
       :title="$t('pages.titles.networks')"
       :info="activeNetwork.name"
       data-cy="networks"
@@ -39,28 +39,45 @@
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import PanelItem from '../components/PanelItem.vue';
-import { CURRENCIES } from '../utils/constants';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import type { INetwork } from '../../types';
+import { useGetter, useState } from '../../composables/vuex';
+import { useCurrencies } from '../../composables';
+import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 
-export default {
-  components: { PanelItem },
-  computed: {
-    ...mapState(['saveErrorLog', 'current']),
-    ...mapGetters(['activeNetwork']),
-    activeCurrency() {
-      if (!this.current || !this.current.currency) return null;
-      const currency = CURRENCIES.find((_currency) => _currency.code === this.current.currency);
-      if (!currency) return null;
-      return `${String(currency.code).toUpperCase()} (${String(currency.symbol).toUpperCase()})`;
-    },
+import PanelItem from '../components/PanelItem.vue';
+
+export default defineComponent({
+  name: 'Settings',
+  components: {
+    PanelItem,
   },
-};
+  setup() {
+    const { currentCurrencyInfo } = useCurrencies();
+
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const saveErrorLog = useState('saveErrorLog');
+
+    const activeCurrency = computed(
+      () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
+    );
+
+    return {
+      ROUTE_NETWORK_SETTINGS,
+      activeNetwork,
+      saveErrorLog,
+      activeCurrency,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
 .settings {
+  --screen-padding-x: 8px;
+
   overflow: hidden;
+  padding-inline: var(--screen-padding-x);
 }
 </style>

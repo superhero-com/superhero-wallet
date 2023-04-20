@@ -4,61 +4,70 @@
     class="filters"
   >
     <BtnPlain
-      v-for="filter in Object.entries(filters)"
-      :key="filter[0]"
+      v-for="(filterOptions, filterKey) in filters"
+      :key="filterKey"
       class="filter"
-      :class="{ active: value.sort === filter[0] || value.filter === filter[0] }"
-      @click="handleClick(filter)"
+      :class="{ active: value.key === filterKey || value.filter === filterKey }"
+      @click="handleClick(filterKey)"
     >
-      <span>{{ $t(`filters.${filter[0]}`) }}</span>
-      <Sort
-        v-if="filter[1].rotated !== undefined"
-        :class="{ rotate: !rotatableFilters[filter[0]].rotated }"
+      <span>{{ filterOptions.name }}</span>
+      <SortIcon
+        v-if="filterOptions.rotated !== undefined"
+        :class="{ rotate: !filterOptions.rotated }"
       />
-      <FilterArrow v-else />
+      <FilterArrowIcon v-else />
     </BtnPlain>
   </div>
 </template>
 
-<script>
-import FilterArrow from '../../icons/filter-arrow.svg?vue-component';
-import Sort from '../../icons/sort.svg?vue-component';
+<script lang="ts">
+import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { useViewport } from '../../composables/viewport';
+import FilterArrowIcon from '../../icons/filter-arrow.svg?vue-component';
+import SortIcon from '../../icons/sort.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
+import { IFilterInputPayload, IFilters } from '../../types';
 
-export default {
+export default defineComponent({
   components: {
-    FilterArrow,
-    Sort,
+    FilterArrowIcon,
+    SortIcon,
     BtnPlain,
   },
   props: {
-    value: { type: Object, required: true },
-    filters: { type: Object, required: true },
+    value: { type: Object as PropType<IFilterInputPayload>, required: true },
+    filters: { type: Object as PropType<IFilters>, required: true },
     scrollTopThreshold: { type: Number, default: 140 },
   },
-  data() {
+  setup(props, { emit }) {
+    const { viewportElement } = useViewport();
+
+    const rotatableFilters = ref(props.filters);
+
+    function handleClick(filterKey: string) {
+      const filterOptions = rotatableFilters.value[filterKey];
+
+      if (viewportElement.value && viewportElement.value.scrollTop > props.scrollTopThreshold) {
+        viewportElement.value.scrollTo({ top: props.scrollTopThreshold, behavior: 'smooth' });
+      }
+
+      if (filterOptions.rotated !== undefined && props.value.key === filterKey) {
+        filterOptions.rotated = !filterOptions.rotated;
+      }
+
+      const inputPayload: IFilterInputPayload = {
+        ...rotatableFilters.value[filterKey],
+        key: filterKey,
+      };
+      emit('input', inputPayload);
+    }
+
     return {
-      rotatableFilters: this.filters,
+      rotatableFilters,
+      handleClick,
     };
   },
-  methods: {
-    handleClick([filter, { rotated = null }]) {
-      const appContainer = document.querySelector('.app-inner');
-      if (appContainer.scrollTop > this.scrollTopThreshold) {
-        appContainer.scrollTo({ top: this.scrollTopThreshold, behavior: 'smooth' });
-      }
-      if (rotated !== null) {
-        if (this.value.sort === filter) {
-          this.rotatableFilters[filter].rotated = !this.rotatableFilters[filter].rotated;
-        }
-        this.$emit('input',
-          { ...this.value, sort: filter, rotated: this.rotatableFilters[filter].rotated });
-        return;
-      }
-      this.$emit('input', { ...this.value, filter });
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -83,6 +92,7 @@ export default {
     display: flex;
     align-items: center;
     padding: 2px 8px;
+    max-height: 24px;
     gap: 2px;
     transition: all 0.08s ease-out;
     border-radius: 12px;

@@ -23,7 +23,10 @@
       :label="$t('pages.token-details.contract')"
     >
       <template #text>
-        <AddressShortening :address="tokenData.contractId" />
+        <AddressTruncated
+          show-explorer-link
+          :address="tokenData.contractId"
+        />
       </template>
     </DetailsRow>
     <DetailsRow
@@ -163,11 +166,12 @@ import {
   DEX_URL,
   amountRounded,
   convertToken,
+  formatNumber,
 } from '../../utils';
-import { useGetter } from '../../../composables';
+import { useCurrencies } from '../../../composables';
 
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
-import AddressShortening from '../../components/AddressShortening.vue';
+import AddressTruncated from '../../components/AddressTruncated.vue';
 import Tokens from '../../components/Tokens.vue';
 import ExternalLink from '../../../icons/external-link.svg?vue-component';
 
@@ -175,7 +179,7 @@ export default defineComponent({
   name: 'TokenDetails',
   components: {
     DetailsRow,
-    AddressShortening,
+    AddressTruncated,
     Tokens,
     ExternalLink,
   },
@@ -186,8 +190,7 @@ export default defineComponent({
     tokens: { type: Array, default: () => ([]) },
   },
   setup(props) {
-    const formatNumber = useGetter('formatNumber');
-    const formatCurrency = useGetter('formatCurrency');
+    const { formatCurrency } = useCurrencies();
 
     const displayDexUrl = DEX_URL.replace('https://', '');
 

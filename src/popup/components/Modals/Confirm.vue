@@ -11,16 +11,15 @@
     <template #footer>
       <BtnMain
         variant="muted"
+        extra-padded
+        :text="$t('modals.cancel')"
         @click="cancel"
-      >
-        {{ $t('modals.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         data-cy="to-confirm"
+        :text="$t('modals.confirm')"
         @click="resolve"
-      >
-        {{ $t('modals.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Default>
 </template>

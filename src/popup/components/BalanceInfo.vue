@@ -3,34 +3,48 @@
     class="balance-info"
     data-cy="balance-info"
   >
-    <AeBalance :balance="Number(balances[idx])" />
-    <div class="display-value">
-      {{ formatCurrency(balances[idx] * currentCurrencyRate) }}
-    </div>
+    <template v-if="isOnline">
+      <AeBalance :balance="balance" />
+      <div class="display-value">
+        {{ currencyFormatted }}
+      </div>
+    </template>
+    <MessageOffline
+      v-else
+      :text="$t('common.balanceUnavailable')"
+      :horizontal="horizontalOfflineMessage"
+      :disable-colors="!horizontalOfflineMessage"
+    />
   </div>
 </template>
 
-<script>
-import { pick } from 'lodash-es';
-import { mapGetters, mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useConnection, useCurrencies } from '../../composables';
 import AeBalance from './AeBalance.vue';
+import MessageOffline from './MessageOffline.vue';
 
-export default {
-  components: { AeBalance },
+export default defineComponent({
+  components: {
+    AeBalance,
+    MessageOffline,
+  },
   props: {
-    accountIdx: { type: Number, default: -1 },
+    balance: { type: Number, required: true },
+    horizontalOfflineMessage: Boolean,
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, ['balances']);
+  setup(props) {
+    const { getFormattedFiat } = useCurrencies();
+    const { isOnline } = useConnection();
+
+    const currencyFormatted = computed(() => getFormattedFiat(props.balance));
+
+    return {
+      isOnline,
+      currencyFormatted,
+    };
   },
-  computed: {
-    ...mapState('accounts', ['activeIdx']),
-    ...mapGetters(['formatCurrency', 'currentCurrencyRate', 'accounts']),
-    idx() {
-      return this.accountIdx === -1 ? this.activeIdx : this.accountIdx;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -44,11 +58,11 @@ export default {
   padding-top: 8px;
 
   .display-value {
-    @extend %face-sans-16-regular;
+    @extend %face-sans-16-medium;
 
     color: rgba(variables.$color-white, 1);
     line-height: 18px;
-    margin-top: 2px;
+    margin-top: 4px;
     opacity: 0.75;
   }
 }

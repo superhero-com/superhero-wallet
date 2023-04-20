@@ -9,51 +9,52 @@ import {
 import BigNumber from 'bignumber.js';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import store from '../store';
+import type {
+  IAccount,
+  IAsset,
+  IDefaultComposableOptions,
+  IToken,
+} from '../types';
 import {
   MAGNITUDE,
   STUB_CONTRACT_ADDRESS,
   AETERNITY_CONTRACT_ID,
-  rxJsObservableToVueState,
   executeAndSetInterval,
   calculateFee,
   validateTipUrl,
   checkAensName,
   handleUnknownError,
 } from '../popup/utils';
-import { IAccount, IAsset, IToken } from '../types';
-import { useGetter } from './vuex';
 import { useSdk } from './sdk';
+import { useBalances } from './balances';
 
 export interface IFormModel {
-  amount: number;
-  selectedAsset: IToken | IAsset | null;
+  amount?: string;
+  selectedAsset?: IToken | IAsset;
   address?: string;
   payload?: string;
 }
-export interface IMaxAmount {
+export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
 }
 
-export function useMaxAmount({ formModel }: IMaxAmount) {
-  const { getSdk } = useSdk();
+/**
+ * Composable that allows to use real max amount of selected token
+ * considering the fee that needs to be paid.
+ */
+export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
+  const { getSdk } = useSdk({ store });
+  const { balance } = useBalances({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
-  const fee = ref(new BigNumber(0));
+  const fee = ref<BigNumber>(new BigNumber(0));
   const selectedTokenBalance = ref(new BigNumber(0));
   const tokenInstance = ref<any>(null);
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
-  const balance = rxJsObservableToVueState<any>(
-    (store.state as any).observables.balance,
-  );
-  const balanceCurrency = rxJsObservableToVueState<number>(
-    (store.state as any).observables.balanceCurrency,
-  );
-
-  const account = useGetter<IAccount>('account');
+  const account = computed<IAccount>(() => store.getters.account);
   const max = computed(() => {
     if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
       const _max = balance.value.minus(fee.value);
@@ -81,6 +82,9 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
+      const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
+      const amount = new BigNumber(numericAmount).shiftedBy(MAGNITUDE);
+
       if (
         val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
         || (
@@ -92,14 +96,21 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
             ...sdk.Ae.defaults,
             ttl: 0,
             nonce: nonce.value + 1,
-            amount: (new BigNumber(val.amount > 0 ? val.amount : 0)).shiftedBy(MAGNITUDE),
+            amount,
             callerId: account.value.address,
-            contractId: validateTipUrl(val.address)
+            contractId: (val.address && validateTipUrl(val.address))
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId,
           },
         );
         return;
+      }
+
+      if (
+        val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+        && tokenInstance.value
+      ) {
+        tokenInstance.value = null;
       }
 
       const minFee: BigNumber = new BigNumber(TxBuilder.calculateMinFee('spendTx', {
@@ -108,7 +119,7 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
           ...sdk.Ae.defaults,
           senderId: account.value.address,
           recipientId: account.value.address,
-          amount: new BigNumber(val.amount > 0 ? val.amount : 0).shiftedBy(MAGNITUDE),
+          amount,
           ttl: 0,
           nonce: nonce.value + 1,
           payload: val.payload,
@@ -116,7 +127,10 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
       })).shiftedBy(-MAGNITUDE);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
-    { deep: true },
+    {
+      deep: true,
+      immediate: true,
+    },
   );
 
   onMounted(() => {
@@ -124,7 +138,7 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
       if (!tokenInstance.value) return;
       await getSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.value.methods.balance(account.value.address)).decodedResult,
+        (await tokenInstance.value.methods.balance(account.value.address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
@@ -145,14 +159,7 @@ export function useMaxAmount({ formModel }: IMaxAmount) {
   });
 
   return {
-    fee,
-    selectedTokenBalance,
-    tokenInstance,
-    nonce,
-    selectedAssetDecimals,
-    account,
     max,
-    balance,
-    balanceCurrency,
+    fee,
   };
 }

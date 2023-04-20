@@ -35,10 +35,6 @@ export default {
   margin-inline: calc(-1 * var(--screen-padding-x));
   padding: 8px var(--screen-padding-x);
 
-  &:nth-child(2n) {
-    background: variables.$color-bg-app;
-  }
-
   .title {
     white-space: nowrap;
     overflow: hidden;

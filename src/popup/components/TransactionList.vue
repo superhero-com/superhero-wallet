@@ -1,31 +1,20 @@
 <template>
   <div class="transaction-list">
-    <div
-      v-if="showSearch && showSearchAndFilters"
-      class="search-bar-wrapper"
-    >
-      <InputSearch
-        v-model="searchTerm"
-        :placeholder="$t('pages.recentTransactions.searchPlaceholder')"
-      />
-    </div>
-    <Filters
-      v-if="showSearchAndFilters"
-      v-model="displayMode"
-      :filters="filters"
-      :scroll-top-threshold="scrollTopThreshold"
-    />
-    <div
+    <InfiniteScroll
       class="list"
       data-cy="list"
+      is-more-data
+      @loadMore="loadMore"
     >
       <TransactionItem
         v-for="transaction in filteredTransactions"
         :key="transaction.hash"
-        :transaction="transaction"
+        :transaction="!transaction.isMultisigTransaction ? transaction : null"
+        :multisig-transaction="transaction.isMultisigTransaction ? transaction : null"
+        :is-multisig="isMultisig"
         :data-cy="transaction.pending && 'pending-txs'"
       />
-    </div>
+    </InfiniteScroll>
     <AnimatedSpinner
       v-if="loading"
       class="spinner"
@@ -35,39 +24,63 @@
       v-else-if="!filteredTransactions.length"
       class="message"
     >
-      <p>{{ $t('pages.recentTransactions.noTransactionsFound') }}</p>
+      <p>
+        {{ $t('pages.recentTransactions.noTransactionsFound') }}
+      </p>
     </div>
-    <router-link
+    <RouterLink
       v-if="maxLength && transactions.loaded.length > maxLength"
       to="/transactions"
       class="view-more"
     >
       <Visible class="icon" />
-      <span class="text">{{ $t('pages.recentTransactions.viewMore') }}</span>
-    </router-link>
+      <span class="text">
+        {{ $t('pages.recentTransactions.viewMore') }}
+      </span>
+    </RouterLink>
   </div>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+<script lang="ts">
 import {
+  computed,
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from '@vue/composition-api';
+import type {
+  IAccount,
+  INetwork,
+  ITokenList,
+  ITx,
+} from '../../types';
+import {
+  TX_FUNCTIONS,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
-  watchUntilTruthy,
+  defaultTransactionSortingCallback,
+  getInnerTransaction,
 } from '../utils';
-import Filters from './Filters.vue';
+import { useGetter, useState } from '../../composables/vuex';
+import {
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+  useTransactionAndTokenFilter,
+  useTransactionTx,
+} from '../../composables';
+
 import TransactionItem from './TransactionItem.vue';
-import InputSearch from './InputSearch.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import Visible from '../../icons/visible.svg?vue-component';
+import InfiniteScroll from './InfiniteScroll.vue';
 
-export default {
+export default defineComponent({
   components: {
-    Filters,
+    InfiniteScroll,
     TransactionItem,
-    InputSearch,
     AnimatedSpinner,
     Visible,
   },
@@ -77,136 +90,162 @@ export default {
     scrollTopThreshold: { type: Number, default: undefined },
     showFilters: Boolean,
     showSearch: Boolean,
+    isMultisig: Boolean,
   },
-  data() {
-    return {
-      loading: false,
-      isDestroyed: false,
-      searchTerm: '',
-      displayMode: { rotated: true, filter: 'all', sort: 'date' },
-      filters: {
-        all: {}, in: {}, out: {}, dex: {},
-      },
-    };
-  },
-  computed: {
-    ...mapGetters(['getDexContracts', 'getTxSymbol']),
-    ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapState(['transactions']),
-    ...mapState({
-      filteredTransactions(
-        { transactions: { loaded } },
-        { account: { address }, activeNetwork, getAccountPendingTransactions },
-      ) {
-        const isFungibleTokenTx = (tr) => Object.keys(this.availableTokens)
-          .includes(tr.tx.contractId);
-        return [...loaded, ...getAccountPendingTransactions]
-          .filter((tr) => (!this.token
-            || (this.token !== AETERNITY_CONTRACT_ID
-              ? tr.tx?.contractId === this.token
-              : (!tr.tx.contractId
-                || !isFungibleTokenTx(tr)))))
+  setup(props, { root }) {
+    const loading = ref(false);
+    const isDestroyed = ref(false);
+
+    const {
+      activeMultisigAccount,
+    } = useMultisigAccounts({ store: root.$store });
+
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+
+    const {
+      searchPhrase,
+      displayMode,
+      FILTER_MODE,
+    } = useTransactionAndTokenFilter();
+
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const transactions = useState('transactions');
+    const account = useGetter<IAccount>('account');
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
+    const getTxSymbol = useGetter('getTxSymbol');
+
+    function isFungibleTokenTx(tx: ITx) {
+      return Object.keys(availableTokens.value).includes(tx.contractId);
+    }
+
+    const currentAddress = computed(() => props.isMultisig
+      ? activeMultisigAccount.value?.gaAccountId
+      : account.value.address);
+
+    const filteredTransactions = computed(
+      () => {
+        const transactionListLocal = [
+          ...getAccountPendingTransactions.value,
+          ...transactions.value.loaded,
+        ];
+
+        if (props.isMultisig && pendingMultisigTransaction.value?.tx) {
+          transactionListLocal.push(pendingMultisigTransaction.value);
+        }
+
+        return transactionListLocal
           .filter((tr) => {
-            switch (this.displayMode.filter) {
-              case 'all':
+            const innerTx = getInnerTransaction(tr.tx);
+            return !props.token
+              || (
+                props.token !== AETERNITY_CONTRACT_ID
+                  ? innerTx?.contractId === props.token
+                  : (!innerTx.contractId || !isFungibleTokenTx(innerTx))
+              );
+          })
+          .filter((tr) => {
+            const { direction, isDex } = useTransactionTx({
+              store: root.$store,
+              tx: tr.tx,
+              externalAddress: tr.transactionOwner,
+            });
+            switch (displayMode.value.key) {
+              case FILTER_MODE.all:
                 return true;
-              case 'dex':
-                return this.getDexContracts && tr.tx.contractId && (
-                  this.getDexContracts.router.includes(tr.tx.contractId)
-                  || this.getDexContracts.wae?.includes(tr.tx.contractId)
-                );
-              case 'out':
-                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                    && tr.tx.senderId === address)
-                  || (isFungibleTokenTx(tr)
-                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                    && tr.tx.callerId === address);
-              case 'in':
-                return (this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.spend)
-                    && (tr.tx.recipientId === address || (tr.tx.senderId !== address && tr.tx.recipientId.startsWith('nm_'))))
-                  || (isFungibleTokenTx(tr)
-                    && this.compareCaseInsensitive(tr.tx.type, SCHEMA.TX_TYPE.contractCall)
-                    && tr.recipient === address);
-              case 'tips':
-                return (tr.tx.contractId
-                  && (activeNetwork.tipContractV1 === tr.tx.contractId
-                    || activeNetwork.tipContractV2 === tr.tx.contractId)
-                  && (tr.tx.function === 'tip' || tr.tx.function === 'retip')) || tr.claim;
+              case FILTER_MODE.dex:
+                return isDex.value;
+              case FILTER_MODE.out:
+                return direction.value === TX_FUNCTIONS.sent && !isDex.value;
+              case FILTER_MODE.in:
+                return direction.value === TX_FUNCTIONS.received;
               default:
-                throw new Error(`Unknown display mode type: ${this.displayMode.filter}`);
+                throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
             }
           })
           .filter(
-            (tr) => !this.searchTerm
-              || this.getTxSymbol(tr)
-                .toLocaleLowerCase()
-                .includes(this.searchTerm.toLocaleLowerCase()),
+            (tr) => !searchPhrase.value || getTxSymbol.value(tr)
+              .toLocaleLowerCase()
+              .includes(searchPhrase.value.toLocaleLowerCase()),
           )
-          .sort((a, b) => {
-            const arr = [a, b].map((e) => new Date(e.microTime));
-            if (this.displayMode.rotated) arr.reverse();
-            return (arr[0] - arr[1]) || a.pending;
-          })
-          .slice(0, this.maxLength || Infinity);
+          .sort(defaultTransactionSortingCallback)
+          .slice(0, props.maxLength || Infinity);
       },
-    }),
-    showSearchAndFilters() {
-      return (
-        this.showFilters
-        || this.displayMode.filter !== 'all'
-        || this.searchTerm
-      );
-    },
-  },
-  mounted() {
-    this.loadMore();
-    const polling = setInterval(() => this.getLatest(), 10000);
-    const appInner = document.querySelector('.app-inner');
+    );
 
-    appInner.addEventListener('scroll', this.checkLoadMore);
-    window.addEventListener('scroll', this.checkLoadMore);
-    this.$once('hook:destroyed', () => {
-      appInner.removeEventListener('scroll', this.checkLoadMore);
-      window.removeEventListener('scroll', this.checkLoadMore);
-      clearInterval(polling);
-      this.isDestroyed = true;
-    });
-    this.$watch(({ displayMode }) => displayMode, this.checkLoadMore);
-  },
-  methods: {
-    checkLoadMore() {
-      if (this.isDestroyed || !this.transactions.nextPageUrl) return;
+    const showSearchAndFilters = computed(() => (
+      props.showFilters
+      || displayMode.value.key !== FILTER_MODE.all
+      || searchPhrase.value
+    ));
+
+    function checkLoadMore() {
+      if (isDestroyed.value || !transactions.value.nextPageUrl) return;
       // TODO - use viewport.ts composable after rewriting component to Vue 3
       const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
           || process.env.IS_EXTENSION;
-      const { scrollHeight, scrollTop, clientHeight } = isDesktop
-        ? document.querySelector('.app-inner') : document.documentElement;
-      if (this.maxLength && this.filteredTransactions.length >= this.maxLength) return;
-      if (scrollHeight - scrollTop <= clientHeight + 100) this.loadMore();
-    },
-    compareCaseInsensitive(str1, str2) {
-      return str1.toLocaleLowerCase() === str2.toLocaleLowerCase();
-    },
-    async loadMore() {
-      if (this.loading) return;
-      this.loading = true;
-      try {
-        await watchUntilTruthy(() => this.$store.state.middleware);
-        await this.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE });
-      } finally {
-        this.loading = false;
+      const { scrollHeight, scrollTop, clientHeight } = (isDesktop
+        ? document.querySelector('.app-inner') : document.documentElement)!;
+      if (props.maxLength && filteredTransactions.value.length >= props.maxLength) return;
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+        // eslint-disable-next-line no-use-before-define
+        loadMore();
       }
-      this.checkLoadMore();
-    },
-    async getLatest() {
+    }
+
+    async function loadMore() {
+      if (loading.value) return;
+      loading.value = true;
       try {
-        await this.$store.dispatch('fetchTransactions', { limit: 10, recent: true });
+        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
+      checkLoadMore();
+    }
+
+    async function getLatest() {
+      try {
+        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
+      } finally {
+        loading.value = false;
+      }
+    }
+
+    watch(displayMode, () => {
+      checkLoadMore();
+    });
+
+    let polling: NodeJS.Timer | null = null;
+
+    onMounted(() => {
+      loadMore();
+      polling = setInterval(() => getLatest(), 10000);
+    });
+
+    onUnmounted(() => {
+      if (polling) {
+        clearInterval(polling);
+      }
+      isDestroyed.value = true;
+    });
+
+    return {
+      loading,
+      isDestroyed,
+      displayMode,
+      availableTokens,
+      transactions,
+      account,
+      activeNetwork,
+      getAccountPendingTransactions,
+      getTxSymbol,
+      filteredTransactions,
+      showSearchAndFilters,
+      loadMore,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -294,13 +333,6 @@ export default {
         opacity: 0.44;
       }
     }
-  }
-
-  .search-bar-wrapper {
-    background: var(--screen-bg-color);
-    margin-left: calc(-1 * var(--screen-padding-x));
-    margin-right: calc(-1 * var(--screen-padding-x));
-    padding-inline: var(--screen-padding-x);
   }
 }
 </style>

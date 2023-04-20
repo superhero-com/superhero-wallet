@@ -5,7 +5,7 @@
     type="number"
     placeholder="0.00"
     :value="value"
-    :label="label || $t('pages.tipPage.amountLabel')"
+    :label="label"
     :message="$attrs['message'] || errors.first('amount')"
     @input="$emit('input', $event)"
   >
@@ -27,9 +27,8 @@
       <div
         v-else
         class="ae-symbol"
-      >
-        AE
-      </div>
+        v-text="AETERNITY_SYMBOL"
+      />
     </template>
 
     <template #under="{ focused }">
@@ -43,7 +42,7 @@
           data-cy="total-amount-currency"
         >
           <span v-if="value">&thickapprox;</span>
-          {{ formatCurrency(totalAmount) }}
+          {{ totalAmountFormatted }}
         </span>
 
         <span
@@ -52,7 +51,7 @@
         >
           @{{
             (currentTokenFiatPrice)
-              ? formatCurrency(currentTokenFiatPrice)
+              ? currentTokenFiatPriceFormatted
               : $t('priceNotAvailable')
           }}
         </span>
@@ -61,13 +60,21 @@
   </InputField>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { pick } from 'lodash-es';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  PropType,
+  watch,
+} from '@vue/composition-api';
+import { useBalances, useCurrencies } from '../../composables';
+import type { IAsset } from '../../types';
+import { AETERNITY_SYMBOL } from '../utils';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
-export default {
+export default defineComponent({
   components: {
     InputSelectAsset,
     InputField,
@@ -75,62 +82,50 @@ export default {
   props: {
     value: { type: [String, Number], default: '' },
     label: { type: String, default: null },
-    selectedAsset: { type: Object, default: null },
+    selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
-  subscriptions() {
-    return pick(this.$store.state.observables, [
-      'balance',
-      'balanceCurrency',
-    ]);
-  },
-  data() {
+  setup(props, { root, emit }) {
+    const { aeternityToken } = useBalances({ store: root.$store });
+    const { formatCurrency } = useCurrencies();
+
+    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityToken.value);
+    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const totalAmountFormatted = computed(() => formatCurrency(
+      (currentAsset.value?.current_price)
+        ? (+props.value || 0) * currentAsset.value.current_price
+        : 0,
+    ));
+    const currentTokenFiatPrice = computed(() => currentAsset.value?.current_price);
+    const currentTokenFiatPriceFormatted = computed(
+      () => formatCurrency(currentTokenFiatPrice.value),
+    );
+
+    function handleAssetSelected(asset: IAsset) {
+      emit('asset-selected', asset);
+    }
+
+    watch(hasError, (val) => emit('error', val));
+
+    onMounted(() => {
+      if (!props.selectedAsset) {
+        handleAssetSelected(aeternityToken.value);
+      }
+    });
+
     return {
-      aeToken: null,
+      AETERNITY_SYMBOL,
+      totalAmountFormatted,
+      currentTokenFiatPrice,
+      currentTokenFiatPriceFormatted,
+      currentAsset,
+      hasError,
+      formatCurrency,
+      handleAssetSelected,
     };
   },
-  computed: {
-    ...mapGetters('fungibleTokens', ['getAeternityToken']),
-    ...mapGetters([
-      'formatCurrency',
-      'account',
-    ]),
-    hasError() {
-      return this.$validator.errors.has('amount');
-    },
-    totalAmount() {
-      return (this.currentAsset?.current_price)
-        ? ((+this.value || 0) * this.currentAsset.current_price).toFixed(2)
-        : 0;
-    },
-    currentTokenFiatPrice() {
-      return this.currentAsset?.current_price?.toFixed(2);
-    },
-    currentAsset() {
-      return this.selectedAsset || this.aeToken;
-    },
-  },
-  watch: {
-    hasError(value) {
-      return this.$emit('error', value);
-    },
-  },
-  created() {
-    this.aeToken = this.getAeternityToken({
-      tokenBalance: this.balance,
-      balanceCurrency: this.balanceCurrency,
-    });
-    if (!this.selectedAsset) {
-      this.handleAssetSelected(this.aeToken);
-    }
-  },
-  methods: {
-    handleAssetSelected(asset) {
-      this.$emit('asset-selected', asset);
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -162,6 +157,7 @@ export default {
   .ae-symbol {
     @extend %face-sans-15-medium;
 
+    white-space: nowrap;
     color: variables.$color-primary;
   }
 }

@@ -30,15 +30,13 @@ export default {
     status: {
       type: String,
       required: true,
-      validator(value) {
-        return [
-          'verified',
-          'blacklisted',
-          'not-secure',
-          'not-verified',
-          'default',
-        ].includes(value);
-      },
+      validator: (value) => [
+        'verified',
+        'blacklisted',
+        'not-secure',
+        'not-verified',
+        'default',
+      ].includes(value),
     },
   },
   computed: {

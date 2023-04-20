@@ -1,7 +1,7 @@
 <template>
   <span
     class="tokens"
-    :class="[iconSize, { vertical }]"
+    :class="[iconSize, { vertical, bright }]"
   >
     <span class="icons">
       <img
@@ -44,12 +44,19 @@
 </template>
 
 <script>
+import { computed, defineComponent } from '@vue/composition-api';
 import AeIcon from '../../icons/tokens/ae.svg';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils/constants';
+import {
+  AETERNITY_COIN_NAME,
+  AETERNITY_COIN_SYMBOL,
+  AETERNITY_CONTRACT_ID,
+  AETERNITY_SYMBOL,
+  shrinkString as shrinkStringFactory,
+} from '../utils';
 
-const SIZES = ['rg', 'md', 'xl']; // TODO - add more sizes to icons
+const SIZES = ['rg', 'md', 'lg', 'xl'];
 
-export default {
+export default defineComponent({
   props: {
     /**
      * transactionTokenInfoResolvers []
@@ -64,45 +71,55 @@ export default {
     },
     vertical: Boolean,
     noIcons: Boolean,
+    fullAeSymbol: Boolean,
+    bright: Boolean,
   },
-  computed: {
-    fromToken() {
-      return this.tokens?.[0] ? this.mapToken(this.tokens[0]) : null;
-    },
-    toToken() {
-      return this.tokens?.[1] ? this.mapToken(this.tokens[1]) : null;
-    },
-  },
-  methods: {
-    getAvailableCharLength() {
-      if (this.tokens?.length < 2) return this.symbolLength;
-      const shorterNameLength = [this.tokens[0].symbol.length, this.tokens[1].symbol.length]
-        .find((length) => length < this.doubleSymbolLength);
-      return shorterNameLength ? this.symbolLength - shorterNameLength : this.doubleSymbolLength;
-    },
-    shrinkString(text) {
-      const maxLength = this.getAvailableCharLength();
-      return `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`;
-    },
-    mapToken(token) {
+  setup(props) {
+    function getAvailableCharLength() {
+      if (props.tokens?.length < 2) return props.symbolLength;
+      const shorterNameLength = [props.tokens[0].symbol.length, props.tokens[1].symbol.length]
+        .find((length) => length < props.doubleSymbolLength);
+      return shorterNameLength ? props.symbolLength - shorterNameLength : props.doubleSymbolLength;
+    }
+
+    function shrinkString(text) {
+      const maxLength = getAvailableCharLength();
+      return shrinkStringFactory(text, maxLength);
+    }
+
+    function mapToken(token) {
       let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
       let imgBorder = true;
+
+      let { symbol } = token;
+      let name = token.symbol;
 
       if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
         img = AeIcon;
         imgBorder = false;
+        symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
+        name = AETERNITY_COIN_NAME;
       }
 
       return {
         ...token,
-        symbol: token.isAe ? AETERNITY_SYMBOL : token.symbol,
-        name: token.isAe ? 'Aeternity' : token.symbol,
+        symbol,
+        name,
         img,
         imgBorder,
       };
-    },
+    }
+
+    const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
+    const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
+
+    return {
+      fromToken,
+      toToken,
+      shrinkString,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -116,6 +133,10 @@ export default {
 
   color: rgba(variables.$color-white, 0.75);
 
+  &.bright {
+    color: variables.$color-white;
+  }
+
   &,
   .symbols,
   .icons {
@@ -125,8 +146,12 @@ export default {
   }
 
   .symbol {
+    @extend %face-sans-16-medium;
+
     vertical-align: middle;
     white-space: nowrap;
+    line-height: 20px;
+    letter-spacing: -0.02em;
   }
 
   .separator {
@@ -138,6 +163,10 @@ export default {
     --icon-size: 18px;
   }
 
+  &.lg {
+    --icon-size: 24px;
+  }
+
   &.xl {
     --icon-size: 30px;
   }
@@ -145,7 +174,7 @@ export default {
   img {
     width: var(--icon-size);
     height: var(--icon-size);
-    border-radius: 8px;
+    border-radius: calc(var(--icon-size) / 2);
     vertical-align: middle;
     margin-right: 4px;
 

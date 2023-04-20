@@ -5,9 +5,9 @@
     data-cy="popup-aex2"
   >
     <TransactionInfo
-      :title="$t('pages.popupMessageSign.title')"
+      :custom-title="$t('pages.popupMessageSign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
-      :recipient="account"
+      :recipient="accountExtended"
     />
 
     <div
@@ -31,31 +31,31 @@
       <BtnMain
         variant="muted"
         data-cy="deny"
+        extra-padded
+        :text="$t('pages.signTransaction.reject')"
         @click="cancel()"
-      >
-        {{ $t('pages.signTransaction.reject') }}
-      </BtnMain>
+      />
       <BtnMain
         data-cy="accept"
+        :text="$t('pages.signTransaction.confirm')"
         :disabled="!isConnected"
         @click="resolve()"
-      >
-        {{ $t('pages.signTransaction.confirm') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import type { IAccount, IAccountLabeled, IAppData } from '../../../types';
+import { useGetter } from '../../../composables/vuex';
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
 import DetailsItem from '../../components/DetailsItem.vue';
 import CopyText from '../../components/CopyText.vue';
-import mixin from './mixin';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
@@ -63,27 +63,34 @@ export default {
     DetailsItem,
     CopyText,
   },
-  mixins: [mixin],
   props: {
     message: { type: String, required: true },
-    app: { type: Object, required: true },
+    app: { type: Object as PropType<IAppData>, required: true },
+    resolve: { type: Function as PropType<() => void>, required: true },
+    // eslint-disable-next-line no-unused-vars
+    reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  computed: {
-    ...mapGetters([
-      'isConnected',
-      'getExplorerPath',
-    ]),
-    ...mapState({
-      account(_, { account }) {
-        return {
-          ...account,
-          label: this.$t('transaction.overview.accountAddress'),
-          url: this.getExplorerPath(account.address),
-        };
-      },
-    }),
+  setup(props, { root }) {
+    const isConnected = useGetter('isConnected');
+    const getExplorerPath = useGetter('getExplorerPath');
+    const account = useGetter<IAccount>('account');
+    const accountExtended = computed((): IAccountLabeled => ({
+      ...account.value,
+      label: root.$t('transaction.overview.accountAddress'),
+      url: getExplorerPath.value(account.value.address),
+    }));
+
+    function cancel() {
+      props.reject(new Error('Rejected by user'));
+    }
+
+    return {
+      isConnected,
+      accountExtended,
+      cancel,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

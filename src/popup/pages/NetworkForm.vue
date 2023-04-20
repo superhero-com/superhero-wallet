@@ -24,22 +24,21 @@
         data-cy="cancel"
         variant="muted"
         class="cancel-button"
+        extra-padded
+        :text="$t('pages.network.cancel')"
         @click="goBack"
-      >
-        {{ $t('pages.network.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         :disabled="buttonDisabled"
+        :icon="isEdit ? PlusCircleIcon : null"
         data-cy="connect"
         class="add-button"
-        has-icon
         @click="addOrUpdateNetwork"
       >
         <template v-if="isEdit">
           {{ $t('pages.network.apply') }}
         </template>
         <template v-else>
-          <PlusCircleIcon />
           {{ $t('pages.network.addNetwork') }}
         </template>
       </BtnMain>
@@ -47,111 +46,145 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex';
+<script lang="ts">
+import {
+  computed, defineComponent, onMounted, ref,
+} from '@vue/composition-api';
+import type { TranslateResult } from 'vue-i18n';
+import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
+import { defaultNetwork } from '../utils';
+import { useDispatch, useGetter } from '../../composables/vuex';
+import type { INetworkBase } from '../../types';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InputField from '../components/InputField.vue';
 import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
-import { defaultNetwork } from '../utils';
 
-export const NETWORK_PROPS = {
-  url: null,
-  name: null,
+interface IFormConfig {
+  key: keyof INetworkBase
+  placeholder: TranslateResult
+  label: TranslateResult
+  dataCy?: string
+  textLimit?: number
+}
+
+const NETWORK_PROPS: INetworkBase = {
+  url: '',
+  name: '',
   middlewareUrl: defaultNetwork.middlewareUrl,
   compilerUrl: defaultNetwork.compilerUrl,
   backendUrl: defaultNetwork.backendUrl,
 };
 
-export default {
+export default defineComponent({
   components: {
     BtnMain,
     InputField,
-    PlusCircleIcon,
   },
-  data() {
-    return {
-      newNetwork: {
-        ...NETWORK_PROPS,
+  setup(props, { root }) {
+    const networks = useGetter('networks');
+    const selectNetwork = useDispatch('selectNetwork');
+
+    const newNetwork = ref<INetworkBase>({
+      ...NETWORK_PROPS,
+    });
+
+    const formConfig: IFormConfig[] = [
+      {
+        key: 'name',
+        placeholder: root.$t('pages.network.networkNamePlaceholder'),
+        label: root.$t('pages.network.networkNameLabel'),
+        dataCy: 'network',
+        textLimit: 15,
       },
-      formConfig: [
-        {
-          key: 'name',
-          placeholder: this.$t('pages.network.networkNamePlaceholder'),
-          label: this.$t('pages.network.networkNameLabel'),
-          dataCy: 'network',
-          textLimit: 15,
-        },
-        {
-          key: 'url',
-          placeholder: this.$t('pages.network.networkUrlPlaceholder'),
-          label: this.$t('pages.network.networkUrlLabel'),
-          dataCy: 'url',
-        },
-        {
-          key: 'middlewareUrl',
-          placeholder: this.$t('pages.network.networkMiddlewarePlaceholder'),
-          label: this.$t('pages.network.networkMiddlewareLabel'),
-          dataCy: 'middleware',
-        },
-        {
-          key: 'compilerUrl',
-          placeholder: this.$t('pages.network.networkCompilerPlaceholder'),
-          label: this.$t('pages.network.networkCompilerLabel'),
-          dataCy: 'compiler',
-        },
-        {
-          key: 'backendUrl',
-          placeholder: this.$t('pages.network.backendUrlPlaceholder'),
-          label: this.$t('pages.network.backendUrlLabel'),
-        },
-      ],
-      error: {},
-    };
-  },
-  computed: {
-    ...mapGetters(['networks']),
-    hasErrors() {
-      return this.errors.any();
-    },
-    buttonDisabled() {
-      return !Object.keys(NETWORK_PROPS).every((key) => !!this.newNetwork[key]) || !!this.hasErrors;
-    },
-    isEdit() {
-      return this.$route.name === 'network-edit';
-    },
-  },
-  mounted() {
-    const { name } = this.$route.params;
-    if (name) {
-      this.newNetwork = { ...this.networks[name] };
+      {
+        key: 'url',
+        placeholder: root.$t('pages.network.networkUrlPlaceholder'),
+        label: root.$t('pages.network.networkUrlLabel'),
+        dataCy: 'url',
+      },
+      {
+        key: 'middlewareUrl',
+        placeholder: root.$t('pages.network.networkMiddlewarePlaceholder'),
+        label: root.$t('pages.network.networkMiddlewareLabel'),
+        dataCy: 'middleware',
+      },
+      {
+        key: 'compilerUrl',
+        placeholder: root.$t('pages.network.networkCompilerPlaceholder'),
+        label: root.$t('pages.network.networkCompilerLabel'),
+        dataCy: 'compiler',
+      },
+      {
+        key: 'backendUrl',
+        placeholder: root.$t('pages.network.backendUrlPlaceholder'),
+        label: root.$t('pages.network.backendUrlLabel'),
+      },
+    ];
+
+    const error = ref({});
+
+    const hasErrors = computed(() => (root as any).$validator.errors.items?.length);
+
+    const buttonDisabled = computed(
+      () => !Object.keys(NETWORK_PROPS).every(
+        (key) => !!newNetwork.value[key as keyof INetworkBase],
+      )
+      || !!hasErrors.value,
+    );
+
+    const isEdit = computed(() => root.$route.name === ROUTE_NETWORK_EDIT);
+
+    function goBack() {
+      root.$router.push({ name: ROUTE_NETWORK_SETTINGS });
     }
-  },
-  methods: {
-    ...mapActions(['selectNetwork']),
-    goBack() {
-      this.$router.push({ name: 'network-settings' });
-    },
-    validatorRules(key) {
+
+    function validatorRules(key: keyof INetworkBase) {
       return key === 'name' ? {
         network_name: true,
-        network_exists: [this.newNetwork?.index, this.networks],
+        network_exists: [newNetwork.value?.index, networks.value],
       } : {
         required: true,
         invalid_hostname: true,
       };
-    },
-    async addOrUpdateNetwork() {
-      if (this.hasErrors) return;
+    }
 
-      this.$store.commit('setUserNetwork', {
-        ...this.newNetwork,
-        index: this.newNetwork.index,
+    async function addOrUpdateNetwork() {
+      if (hasErrors.value) {
+        return;
+      }
+
+      root.$store.commit('setUserNetwork', {
+        ...newNetwork.value,
+        index: newNetwork.value.index,
       });
-      await this.selectNetwork(this.newNetwork.name);
-      this.goBack();
-    },
+      await selectNetwork(newNetwork.value.name);
+      goBack();
+    }
+
+    onMounted(() => {
+      const { name } = root.$route.params;
+      if (name) {
+        newNetwork.value = { ...networks.value[name] };
+      }
+    });
+
+    return {
+      newNetwork,
+      error,
+      hasErrors,
+      networks,
+      buttonDisabled,
+      isEdit,
+      formConfig,
+      selectNetwork,
+      addOrUpdateNetwork,
+      validatorRules,
+      goBack,
+      PlusCircleIcon,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

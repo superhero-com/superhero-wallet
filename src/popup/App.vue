@@ -17,16 +17,16 @@
       v-show="!qrScannerOpen"
       ref="innerElement"
       class="app-inner"
-      :class="{ 'show-scrollbar': $route.meta.showScrollbar }"
+      :class="{ 'styled-scrollbar': showScrollbar }"
     >
       <Header v-if="showHeader" />
 
-      <transition name="page-transition">
+      <Transition name="page-transition">
         <RouterView
           :class="{ 'show-header': showHeader }"
           class="main"
         />
-      </transition>
+      </Transition>
 
       <NodeConnectionStatus
         v-if="!modals.length"
@@ -51,10 +51,9 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
+import type { WalletRouteMeta } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
-  NODE_STATUS_OFFLINE,
-  NODE_STATUS_CONNECTION_DONE,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
   watchUntilTruthy,
@@ -69,11 +68,16 @@ import {
   IS_FIREFOX,
   RUNNING_IN_POPUP,
 } from '../lib/environment';
+import {
+  useConnection,
+  useCurrencies,
+  useNotifications,
+  useViewport,
+} from '../composables';
+
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
-import { useNotifications } from '../composables/notifications';
-import { useViewport } from '../composables/viewport';
 
 export default defineComponent({
   name: 'App',
@@ -83,21 +87,25 @@ export default defineComponent({
     Close,
   },
   setup(props, { root }) {
-    const innerElement = ref<HTMLDivElement | null>(null);
+    const { watchConnectionStatus } = useConnection();
+    const { addWalletNotification } = useNotifications({ store: root.$store });
+    const { loadAeternityData } = useCurrencies({ withoutPolling: true });
+    const { initViewport } = useViewport();
+
+    const innerElement = ref<HTMLDivElement>();
+
     const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
     const modals = computed(() => root.$store.getters['modals/opened']);
-
-    const { addWalletNotification } = useNotifications();
-
-    const { initViewport } = useViewport();
+    const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
+    const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
       || root.$route.params.app // TODO determine if still used
-      || root.$route.meta?.hideHeader
+      || routeMeta.value?.hideHeader
     ));
 
     function setDocumentHeight() {
@@ -134,11 +142,6 @@ export default defineComponent({
       }
     }
 
-    function watchAppNetworkAccess() {
-      window.addEventListener('online', () => root.$store.commit('setNodeStatus', NODE_STATUS_CONNECTION_DONE));
-      window.addEventListener('offline', () => root.$store.commit('setNodeStatus', NODE_STATUS_OFFLINE));
-    }
-
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         addWalletNotification({
@@ -156,12 +159,12 @@ export default defineComponent({
       checkExtensionUpdates();
       initViewport(innerElement.value);
 
-      watchAppNetworkAccess();
+      watchConnectionStatus();
 
       await watchUntilTruthy(() => isRestored.value);
       setNotificationSettings();
 
-      root.$store.dispatch('fungibleTokens/getAeternityData');
+      loadAeternityData();
       root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     });
 
@@ -172,6 +175,7 @@ export default defineComponent({
       modals,
       qrScannerOpen,
       showHeader,
+      showScrollbar,
       innerElement,
     };
   },
@@ -217,38 +221,20 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     overflow-y: auto;
-
-    &.show-scrollbar {
-      -ms-overflow-style: auto;
-
-      &::-webkit-scrollbar {
-        display: block;
-        width: 6px;
-        height: 0;
-
-        &-thumb {
-          display: block;
-          background-color: rgba(variables.$color-white, 0.15);
-          border-radius: 4px;
-        }
-      }
-    }
   }
 
   .main {
     padding-bottom: 0;
     padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
     background-color: var(--screen-bg-color);
-
-    @include mixins.desktop {
-      min-height: 100%;
-    }
   }
 
   .connection-status {
     position: fixed;
+    z-index: variables.$z-index-header;
     bottom: 0;
-    bottom: env(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
     left: 0;
     width: 100%;
   }

@@ -5,14 +5,13 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-width: none;
+  -webkit-tap-highlight-color: transparent;
+  -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
     display: none;
   }
-
-  -webkit-tap-highlight-color: transparent;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
 }
 
 html,
@@ -82,6 +81,12 @@ button {
   }
 }
 
+hr {
+  margin: 20px calc(-1 * var(--screen-padding-x));
+  border: none;
+  border-bottom: 1px solid rgba($color-white, 0.06);
+}
+
 .error-msg {
   color: $color-danger;
   margin-top: 22px;
@@ -126,7 +131,7 @@ button {
   }
 
   &-heading-1 {
-    @extend %face-sans-18-regular;
+    @extend %face-sans-18-medium;
 
     margin-bottom: 18px;
     color: $color-white;
@@ -138,6 +143,12 @@ button {
 
     margin-bottom: 0.45em;
     color: $color-white;
+  }
+
+  &-heading-3 {
+    @extend %face-sans-15-medium;
+
+    color: rgba($color-white, 0.75);
   }
 
   &-description {
@@ -171,4 +182,22 @@ button {
 
 .relative {
   position: relative;
+}
+
+.styled-scrollbar {
+  scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
+  scrollbar-width: thin; // Firefox
+  -ms-overflow-style: auto;
+
+  &::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+    height: 0;
+
+    &-thumb {
+      display: block;
+      background-color: $color-scrollbar-thumb;
+      border-radius: 4px;
+    }
+  }
 }

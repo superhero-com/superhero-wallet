@@ -1,23 +1,27 @@
 <template>
-  <BtnPlain
+  <BtnBase
     v-bind="$attrs"
     class="btn-pill"
+    :class="{ dense, static }"
     :to="to"
-    :text="text"
-  />
+  >
+    <slot>{{ text }}</slot>
+  </BtnBase>
 </template>
 
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
-import BtnPlain from './BtnPlain.vue';
+import BtnBase from './BtnBase.vue';
 
 export default defineComponent({
   components: {
-    BtnPlain,
+    BtnBase,
   },
   props: {
     to: { type: [String, Object], default: null },
-    text: { type: String, required: true },
+    text: { type: String, default: null },
+    dense: Boolean,
+    static: Boolean,
   },
 });
 </script>
@@ -38,9 +42,25 @@ export default defineComponent({
   background-color: rgba(variables.$color-white, 0.08);
   color: rgba(variables.$color-white, 0.5);
 
-  &.router-link-active {
+  &.dense {
+    padding-block: 0;
+  }
+
+  &.router-link-exact-active {
     background-color: rgba(variables.$color-white, 0.15);
     color: variables.$color-white;
+  }
+
+  &:not(.static) {
+    color: rgba(variables.$color-white, 0.75);
+
+    &:hover {
+      color: rgba(variables.$color-white, 1);
+    }
+
+    &:active {
+      color: rgba(variables.$color-white, 0.75);
+    }
   }
 }
 </style>

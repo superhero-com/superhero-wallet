@@ -1,79 +1,98 @@
 <template>
-  <Component
-    :is="preventNavigation ? 'BtnPlain' : 'RouterLink'"
+  <ListItemWrapper
     v-if="tokenData"
     class="tokens-list-item"
-    :class="{ extend: preventNavigation, 'asset-selector': assetSelector }"
     :to="preventNavigation ? null : {
       name: targetRouteName,
       params: {
         id: tokenData.contractId,
       },
     }"
-    @click="(event) => $emit('click', event)"
+    :extend="preventNavigation"
+    :selected="selected"
+    v-on="$listeners"
   >
     <div class="row">
-      <div class="left">
-        <Tokens
-          :tokens="[tokenData]"
-          icon-size="xl"
-        />
-      </div>
+      <Tokens
+        :tokens="[tokenData]"
+        icon-size="lg"
+        full-ae-symbol
+        bright
+      />
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
         :symbol="tokenData.symbol"
         :aex9="tokenData.contractId !== AETERNITY_CONTRACT_ID"
+        dynamic-sizing
         no-symbol
         hide-fiat
       />
     </div>
     <div
       v-if="tokenData.contractId === AETERNITY_CONTRACT_ID"
-      class="row"
+      class="row bottom"
     >
       <div class="price">
         @ {{ price }}
       </div>
       <div class="price">
-        {{ convertToCurrencyFormatted(tokenData.convertedBalance) }}
+        {{ balanceFormatted }}
       </div>
     </div>
-  </Component>
+  </ListItemWrapper>
 </template>
 
-<script>
-import { mapGetters, mapState } from 'vuex';
-import { AETERNITY_CONTRACT_ID } from '../../utils/constants';
-import TokenAmount from '../TokenAmount.vue';
-import BtnPlain from '../buttons/BtnPlain.vue';
-import Tokens from '../Tokens.vue';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import type { IToken } from '../../../types';
+import { AETERNITY_CONTRACT_ID } from '../../utils';
+import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
+import { useCurrencies } from '../../../composables';
 
-export default {
+import TokenAmount from '../TokenAmount.vue';
+import Tokens from '../Tokens.vue';
+import ListItemWrapper from '../ListItemWrapper.vue';
+
+export default defineComponent({
   components: {
     TokenAmount,
     Tokens,
-    BtnPlain,
+    ListItemWrapper,
   },
   props: {
-    tokenData: { type: Object, default: null },
+    tokenData: { type: Object as PropType<IToken>, default: null },
     preventNavigation: Boolean,
     showCurrentPrice: Boolean,
-    assetSelector: Boolean,
+    selected: Boolean,
+    isMultisig: Boolean,
   },
-  data: () => ({
-    AETERNITY_CONTRACT_ID,
-  }),
-  computed: {
-    ...mapGetters(['convertToCurrencyFormatted', 'formatCurrency', 'convertToCurrency']),
-    ...mapState('fungibleTokens', ['aePublicData']),
-    price() {
-      return this.formatCurrency(this.aePublicData?.current_price || 0);
-    },
-    targetRouteName() {
-      return this.tokenData.contractId === AETERNITY_CONTRACT_ID ? 'coin-transactions' : 'token-transactions';
-    },
+  setup(props) {
+    const { getFormattedFiat, formatCurrency, aeternityData } = useCurrencies();
+
+    const price = computed(() => formatCurrency(aeternityData.value?.current_price || 0));
+
+    const balanceFormatted = computed(
+      () => getFormattedFiat(props.tokenData.convertedBalance || 0),
+    );
+
+    const targetRouteName = computed(() => {
+      if (props.isMultisig) {
+        return ROUTE_MULTISIG_COIN;
+      }
+      if (props.tokenData.contractId === AETERNITY_CONTRACT_ID) {
+        return ROUTE_COIN;
+      }
+      return ROUTE_TOKEN;
+    });
+
+    return {
+      AETERNITY_CONTRACT_ID,
+      price,
+      targetRouteName,
+      balanceFormatted,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -81,78 +100,21 @@ export default {
 @use '../../../styles/typography';
 
 .tokens-list-item {
-  display: block;
-  padding: 8px var(--screen-padding-x);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  color: unset;
-  text-decoration: unset;
-
-  &:hover {
-    background-color: variables.$color-bg-4-hover;
-  }
-
-  &:active {
-    opacity: 0.5;
-  }
-
   .row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
 
-  ::v-deep .tokens {
-    padding-bottom: 4px;
-
-    img {
-      border-radius: 15px;
-      margin-right: 0;
+    &.bottom {
+      margin-top: 4px;
     }
-
-    .symbols {
-      @extend %face-sans-15-regular;
-
-      color: variables.$color-white;
-      line-height: 28px;
-      padding-left: 4px;
-    }
-  }
-
-  ::v-deep .token-amount {
-    @extend %face-sans-15-regular;
-
-    margin-top: -5px;
   }
 
   .price {
-    @extend %face-sans-14-regular;
-
-    &:last-child {
-      color: variables.$color-grey-light;
-    }
+    @extend %face-sans-12-regular;
 
     color: rgba(variables.$color-white, 0.75);
-    font-weight: 100;
-    margin-top: -5px;
-  }
-
-  &.asset-selector {
-    padding: 8px;
-    transition: background-color 0.12s ease-in-out;
-    background-color: variables.$color-bg-4;
-
-    &.selected {
-      background-color: rgba(variables.$color-primary, 0.2);
-    }
-
-    &:hover {
-      background-color: variables.$color-bg-4-hover;
-    }
-
-    .price {
-      font-weight: 400;
-    }
+    letter-spacing: -0.02em;
   }
 }
 </style>

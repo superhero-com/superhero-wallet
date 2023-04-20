@@ -1,19 +1,28 @@
 import { computed } from '@vue/composition-api';
-import { ISdk } from '../types';
-import { watchUntilTruthy } from '../popup/utils';
-import { useGetter, useState } from './vuex';
+import { Universal, Node } from '@aeternity/aepp-sdk';
+import {
+  NODE_STATUS_CONNECTED,
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_ERROR,
+  watchUntilTruthy,
+} from '../popup/utils';
+import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
+
+let drySdk: ISdk;
 
 /**
  * Composable that will replace the Vuex SDK plugin.
- * For now it works as an abstraction layer.
+ * For now, it works as an abstraction layer.
  */
-export function useSdk() {
-  const sdk = useGetter<ISdk | undefined>('sdkPlugin/sdk');
+export function useSdk({ store }: IDefaultComposableOptions) {
+  const sdk = computed<ISdk | undefined>(() => store.getters['sdkPlugin/sdk']);
   const isSdkReady = computed(() => !!sdk.value);
 
-  const isNodeConnecting = useState<boolean>('sdkPlugin', 'isNodeConnecting');
-  const isNodeReady = useState<boolean>('sdkPlugin', 'isNodeReady');
-  const isNodeError = useState<boolean>('sdkPlugin', 'isNodeError');
+  const nodeStatus = computed((): string => store.state.nodeStatus);
+  const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
+  const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
+  const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.
@@ -23,11 +32,33 @@ export function useSdk() {
     return watchUntilTruthy(() => sdk.value);
   }
 
+  /**
+   * drySdk is the sdk instance with no accounts attached.
+   * To use for multisig operations.
+   */
+  async function getDrySdk(): Promise<ISdk> {
+    if (!drySdk) {
+      const { compilerUrl, name, url } = activeNetwork.value;
+      drySdk = await Universal({
+        nodes: [{
+          name,
+          instance: await Node({ url }),
+        }],
+        compilerUrl,
+      });
+    } else if (activeNetwork.value.url !== drySdk.selectedNode.instance.url) {
+      drySdk.pool.delete(activeNetwork.value.name);
+      drySdk.addNode(activeNetwork.value.name, await Node({ url: activeNetwork.value.url }), true);
+    }
+    return drySdk;
+  }
+
   return {
     isNodeReady,
     isNodeConnecting,
     isNodeError,
     isSdkReady,
     getSdk,
+    getDrySdk,
   };
 }

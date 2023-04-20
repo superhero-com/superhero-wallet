@@ -1,5 +1,5 @@
 import {
-  flatten, orderBy, uniq, uniqBy,
+  flatten, orderBy, uniq,
 } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
@@ -12,18 +12,16 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
-  executeAndSetInterval,
   watchUntilTruthy,
   fetchRespondChallenge,
-  CURRENCIES_URL,
   MODAL_DEFAULT,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
+import { useMiddleware } from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
-    commit('setMiddleware', null);
     commit('initTransactions');
   },
 
@@ -61,17 +59,20 @@ export default {
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
-  // TODO: remove uniqBy and with the `recent` option fetch only recent transactions after https://github.com/aeternity/tipping-community-backend/issues/405, 406 will be resolved
-  async fetchTipWithdrawnTransactions({ state, getters, commit }, recent) {
-    const { address } = getters.account;
+  async fetchTipWithdrawnTransactions(
+    { state, getters, commit },
+    {
+      recent, limit = 5, address, multipleAccounts,
+    },
+  ) {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
     const response = await fetchJson(
-      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn`,
+      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ''}`,
     );
     if (response.message) return [];
-    const tipWithdrawnTransactions = (uniqBy(response, 'hash').map(({
+    const tipWithdrawnTransactions = response.map(({
       amount, contract, height, data: { tx }, ...t
     }) => ({
       tx: {
@@ -85,19 +86,27 @@ export default {
       microTime: new Date(t.createdAt).getTime(),
       blockHeight: height,
       claim: true,
-    })));
-    commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    }));
+    if (!multipleAccounts) {
+      commit('setTipWithdrawnTransactions', tipWithdrawnTransactions);
+    }
     return tipWithdrawnTransactions;
   },
-  async fetchTransactions({
-    state, getters, dispatch, commit,
-  }, { limit, recent }) {
-    if (!state.middleware || (state.transactions.nextPageUrl === null && !recent)) return;
-    const { address } = getters.account;
+  async fetchTransactions(context, { limit, recent, address }) {
+    const {
+      state, getters, dispatch, commit,
+    } = context;
+    if (state.transactions.nextPageUrl === null && !recent) {
+      return;
+    }
+
+    const { getMiddleware, fetchFromMiddleware } = useMiddleware({ store: context });
+    const middleware = await getMiddleware();
+
     let txs = await Promise.all([
       (recent || state.transactions.nextPageUrl === ''
-        ? state.middleware.getTxByAccount(address, limit, 1)
-        : fetchJson(`${getters.activeNetwork.middlewareUrl}${state.transactions.nextPageUrl}`))
+        ? middleware.getTxByAccount(address, limit, 1)
+        : fetchFromMiddleware(state.transactions.nextPageUrl))
         .then(({ data, next }) => {
           const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
@@ -109,14 +118,15 @@ export default {
 
     const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
     const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', recent),
-      dispatch('fetchTipWithdrawnTransactions', recent)]))
+    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent, address }),
+      dispatch('fetchTipWithdrawnTransactions', { recent, address })]))
       .forEach((f) => {
         if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
           txs[0].push(f);
         }
       });
     txs = orderBy(flatten(txs), ['microTime'], ['desc']);
+    txs = txs.map((tx) => ({ ...tx, transactionOwner: address }));
     const network = getters.activeNetwork.networkId;
     if (state.transactions.pending[network]) {
       state.transactions.pending[network].forEach(({ hash }) => {
@@ -125,17 +135,8 @@ export default {
         }
       });
     }
+
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-  },
-  pollCurrencies({ commit }) {
-    return executeAndSetInterval(async () => {
-      try {
-        const { aeternity } = await fetchJson(CURRENCIES_URL);
-        commit('setCurrencies', aeternity);
-      } catch (e) {
-        handleUnknownError(e);
-      }
-    }, 3600000);
   },
   async getWebPageAddresses({ state: { sdk } }) {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });

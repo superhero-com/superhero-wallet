@@ -1,21 +1,43 @@
+import { merge } from 'lodash-es';
 import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
+  ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
-  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_TOKEN,
+  ROUTE_NOT_FOUND,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+  ROUTE_MULTISIG_DETAILS_INFO,
+  ROUTE_NETWORK_SETTINGS,
+  ROUTE_MULTISIG_ACCOUNT,
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+  ROUTE_MULTISIG_TX_DETAILS,
+  ROUTE_TX_DETAILS,
+  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+  ROUTE_MULTISIG_COIN,
+  ROUTE_MULTISIG_COIN_DETAILS,
+  ROUTE_COIN_DETAILS,
+  ROUTE_TOKEN_DETAILS,
+  ROUTE_NETWORK_EDIT,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
 import AccountDetails from '../pages/AccountDetails.vue';
+import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
+import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
 import Dashboard from '../pages/Dashboard.vue';
+import DashboardMultisig from '../pages/DashboardMultisig.vue';
 import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
 import DonateError from '../pages/DonateError.vue';
@@ -53,10 +75,14 @@ import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
 import TransactionDetails from '../pages/TransactionDetails.vue';
+import MultisigProposalDetails from '../pages/MultisigProposalDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
 import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
+import MultisigDetails from '../pages/MultisigDetails.vue';
+import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
+import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -72,68 +98,185 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/account',
-    name: ROUTE_ACCOUNT,
-    component: Dashboard,
-  },
-  {
-    path: '/transfer*',
-    redirect: '/account*',
-  },
-  {
-    path: '/account-details/',
-    component: AccountDetails,
+    path: '/',
+    component: DefaultPagesRouter,
+    redirect: '/account',
     children: [
       {
-        path: '',
-        name: ROUTE_ACCOUNT_DETAILS,
-        component: AccountDetailsTokens,
-        meta: {
-          hideHeader: true,
-        },
+        path: 'account',
+        name: ROUTE_ACCOUNT,
+        component: Dashboard,
       },
       {
-        path: 'transactions',
-        name: 'account-details-transactions',
-        component: AccountDetailsTransactions,
-        meta: {
-          hideHeader: true,
-        },
-      },
-      {
-        path: 'names',
-        component: AccountDetailsNames,
+        path: 'account-details/',
+        component: AccountDetails,
         children: [
           {
             path: '',
-            name: 'account-details-names',
-            component: NamesList,
-            props: true,
+            name: ROUTE_ACCOUNT_DETAILS,
+            component: AccountDetailsTokens,
             meta: {
+              showFilterBar: true,
               hideHeader: true,
+              hideFilterButton: true,
             },
           },
           {
-            path: 'auctions',
-            component: AuctionList,
-            props: true,
-            name: 'account-details-names-auctions',
+            path: 'transactions',
+            name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+            component: AccountDetailsTransactions,
             meta: {
               hideHeader: true,
+              showFilterBar: true,
             },
           },
           {
-            path: 'claim',
-            component: NameClaim,
-            props: true,
-            name: 'account-details-names-claim',
+            path: 'names',
+            component: AccountDetailsNames,
+            children: [
+              {
+                path: '',
+                name: ROUTE_ACCOUNT_DETAILS_NAMES,
+                component: NamesList,
+                props: true,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+              {
+                path: 'auctions',
+                component: AuctionList,
+                props: true,
+                name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+              {
+                path: 'claim',
+                component: NameClaim,
+                props: true,
+                name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+                meta: {
+                  hideHeader: true,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '/multisig',
+    component: DefaultPagesRouter,
+    meta: {
+      isMultisig: true,
+    },
+    children: [
+      {
+        path: '',
+        name: ROUTE_MULTISIG_ACCOUNT,
+        component: DashboardMultisig,
+      },
+      {
+        path: 'details/',
+        component: AccountDetailsMultisig,
+        children: [
+          {
+            path: '',
+            name: ROUTE_MULTISIG_DETAILS,
+            component: AccountDetailsMultisigTokens,
+            meta: {
+              showFilterBar: true,
+              hideHeader: true,
+              hideFilterButton: true,
+            },
+          },
+          {
+            path: 'transactions',
+            name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+            component: AccountDetailsMultisigTransactions,
+            meta: {
+              hideHeader: true,
+              showFilterBar: true,
+            },
+          },
+          {
+            path: 'info',
+            name: ROUTE_MULTISIG_DETAILS_INFO,
+            component: MultisigDetails,
             meta: {
               hideHeader: true,
             },
           },
         ],
       },
+
+      {
+        path: 'details/transactions/:hash',
+        name: ROUTE_MULTISIG_TX_DETAILS,
+        component: {
+          functional: true,
+          render: (h, context) => h(
+            TransactionDetails,
+            merge({}, context, { props: { multisigDashboard: true } }),
+          ),
+        },
+        props: true,
+        meta: {
+          title: 'tx-details',
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        path: 'details/multisig-proposals',
+        name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+        component: MultisigProposalDetails,
+        props: true,
+        meta: {
+          title: 'multisigProposalDetails',
+          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
+          showHeaderNavigation: true,
+        },
+      },
+      {
+        path: 'coins/:id',
+        component: TokenContainer,
+        children: [
+          {
+            name: ROUTE_MULTISIG_COIN,
+            path: '',
+            component: TokenTransactions,
+            props: true,
+            meta: {
+              title: 'coin-details',
+              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              showHeaderNavigation: true,
+              showFilterBar: true,
+              hideSearchBar: true,
+              isMultisig: true,
+            },
+          },
+          {
+            name: ROUTE_MULTISIG_COIN_DETAILS,
+            path: 'details',
+            component: TokenDetails,
+            props: true,
+            meta: {
+              title: 'coin-details',
+              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              showHeaderNavigation: true,
+              isMultisig: true,
+            },
+          },
+        ],
+      },
     ],
+  },
+  {
+    path: '/transfer*',
+    redirect: '/account*',
   },
   {
     name: 'popup-sign-tx',
@@ -245,7 +388,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks',
-    name: 'network-settings',
+    name: ROUTE_NETWORK_SETTINGS,
     component: Networks,
     props: true,
     meta: {
@@ -265,7 +408,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks/:name',
-    name: 'network-edit',
+    name: ROUTE_NETWORK_EDIT,
     component: NetworkForm,
     props: true,
     meta: {
@@ -319,6 +462,7 @@ export const routes: WalletAppRouteConfig[] = [
       showHeaderNavigation: true,
       showScrollbar: true,
       ifNotAuth: true,
+      directBackRoute: true,
     },
   },
   {
@@ -354,7 +498,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/account-details/transactions/:hash',
-    name: 'tx-details',
+    name: ROUTE_TX_DETAILS,
     component: TransactionDetails,
     props: true,
     meta: {
@@ -423,6 +567,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'comment-new',
       notPersist: true,
+      showHeaderNavigation: true,
     },
   },
   {
@@ -448,10 +593,9 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/coins/:id',
     component: TokenContainer,
-    name: ROUTE_COIN,
     children: [
       {
-        name: 'coin-transactions',
+        name: ROUTE_COIN,
         path: '',
         component: TokenTransactions,
         props: true,
@@ -459,10 +603,12 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'coin-details',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
+          showFilterBar: true,
+          hideSearchBar: true,
         },
       },
       {
-        name: 'coin-details',
+        name: ROUTE_COIN_DETAILS,
         path: 'details',
         component: TokenDetails,
         props: true,
@@ -479,7 +625,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: TokenContainer,
     children: [
       {
-        name: 'token-transactions',
+        name: ROUTE_TOKEN,
         path: '',
         component: TokenTransactions,
         props: true,
@@ -487,10 +633,12 @@ export const routes: WalletAppRouteConfig[] = [
           title: 'token-details',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
+          showFilterBar: true,
+          hideSearchBar: true,
         },
       },
       {
-        name: 'token-details',
+        name: ROUTE_TOKEN_DETAILS,
         path: 'details',
         component: TokenDetails,
         props: true,
@@ -541,12 +689,13 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'not-found',
+    name: ROUTE_NOT_FOUND,
     path: '*',
     component: NotFound,
     meta: {
       ifNotAuth: true,
       showHeaderNavigation: true,
+      title: 'not-found',
     },
   },
 ];

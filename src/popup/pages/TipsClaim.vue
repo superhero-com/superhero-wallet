@@ -1,6 +1,10 @@
 <template>
   <div class="tips-claim">
-    <AccountInfo :account-idx="activeIdx" />
+    <AccountInfo
+      :address="account.address"
+      :name="account.name"
+      :idx="account.idx"
+    />
 
     <div class="header">
       <p class="text-description">
@@ -67,7 +71,6 @@ export default {
     BLOG_CLAIM_TIP_URL,
   }),
   computed: {
-    ...mapState('accounts', ['activeIdx']),
     ...mapState(['tippingV1']),
     ...mapGetters('sdkPlugin', ['sdk']),
     ...mapGetters(['account', 'tippingSupported']),

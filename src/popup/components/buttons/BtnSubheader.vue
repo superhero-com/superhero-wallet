@@ -1,36 +1,39 @@
 <template>
-  <BtnMain
+  <BtnBase
     v-bind="$attrs"
     class="button-subheader"
-    :to="to"
     extend
-    variant="alternative"
+    variant="dark"
     @click="$emit('click')"
   >
     <div class="box">
-      <span class="icon">
-        <slot />
-      </span>
+      <IconWrapper
+        v-if="icon"
+        :icon="icon"
+        is-boxed
+      />
 
       <div class="message">
         <span class="heading">{{ header }}</span>
         <span class="description">{{ subheader }}</span>
       </div>
     </div>
-  </BtnMain>
+  </BtnBase>
 </template>
 
 <script>
-import BtnMain from './BtnMain.vue';
+import IconWrapper from '../IconWrapper.vue';
+import BtnBase from './BtnBase.vue';
 
 export default {
   components: {
-    BtnMain,
+    BtnBase,
+    IconWrapper,
   },
   props: {
-    to: { type: [Object, String], default: null },
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
+    icon: { type: Object, default: null },
   },
 };
 </script>
@@ -41,32 +44,19 @@ export default {
 @use '../../../styles/mixins';
 
 .button-subheader {
-  height: 80px;
+  width: 100%;
+  min-height: 80px;
   margin-bottom: 16px;
-  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: variables.$border-radius-interactive;
+  color: variables.$color-white;
 
   .box {
     @include mixins.flex(flex-start, center);
 
-    text-decoration: none;
-    color: variables.$color-grey-dark;
     gap: 16px;
     margin-right: auto;
-
-    .icon {
-      @include mixins.flex(center, center);
-
-      width: 36px;
-      height: 36px;
-      border-radius: 14px;
-      background-color: rgba(variables.$color-white, 0.1);
-
-      ::v-deep svg {
-        width: 22px;
-        height: 22px;
-        color: variables.$color-white;
-      }
-    }
+    text-align: left;
   }
 
   .message {
@@ -76,13 +66,12 @@ export default {
       @extend %face-sans-16-medium;
 
       line-height: 150%;
-      color: variables.$color-white;
     }
 
     .description {
       @extend %face-sans-13-regular;
 
-      color: rgba(variables.$color-white, 0.7);
+      opacity: 0.7;
     }
   }
 }

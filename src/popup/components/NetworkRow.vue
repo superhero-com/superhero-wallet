@@ -21,21 +21,20 @@
           class="action-wrapper"
         >
           <BtnIcon
-            size="rg"
+            size="sm"
             data-cy="edit"
-            variant="dimmed"
-            :to="{ name: 'network-edit', params: { name: network.name } }"
-          >
-            <PencilIcon />
-          </BtnIcon>
+            dimmed
+            :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
+            :icon="PencilIcon"
+          />
           <BtnIcon
-            size="rg"
+            size="sm"
             data-cy="delete"
-            variant="danger"
+            icon-variant="danger"
+            dimmed
+            :icon="TrashIcon"
             @click="deleteNetwork(network.index)"
-          >
-            <TrashIcon />
-          </BtnIcon>
+          />
         </div>
       </RadioButton>
       <p
@@ -60,20 +59,21 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
-import { defaultNetwork } from '../utils/constants';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { defaultNetwork } from '../utils';
+import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
+import { useGetter } from '../../composables/vuex';
+
 import RadioButton from './RadioButton.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import PencilIcon from '../../icons/pencil.svg?vue-component';
 import TrashIcon from '../../icons/trash.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     BtnIcon,
     RadioButton,
-    PencilIcon,
-    TrashIcon,
   },
   props: {
     network: {
@@ -81,21 +81,27 @@ export default {
       required: true,
     },
   },
-  computed: {
-    ...mapGetters(['activeNetwork']),
-    isActive() {
-      return this.network.name === this.activeNetwork.name;
-    },
-  },
-  methods: {
-    async deleteNetwork(networkIndex) {
-      if (networkIndex === this.activeNetwork.index) {
-        this.$emit('selectNetwork', defaultNetwork.name);
+  setup(props, { root, emit }) {
+    const activeNetwork = useGetter('activeNetwork');
+
+    const isActive = computed(() => props.network.name === activeNetwork.value.name);
+
+    async function deleteNetwork(networkIndex: number) {
+      if (networkIndex === activeNetwork.value.index) {
+        emit('selectNetwork', defaultNetwork.name);
       }
-      this.$store.commit('deleteUserNetwork', networkIndex);
-    },
+      root.$store.commit('deleteUserNetwork', networkIndex);
+    }
+
+    return {
+      PencilIcon,
+      TrashIcon,
+      isActive,
+      deleteNetwork,
+      ROUTE_NETWORK_EDIT,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

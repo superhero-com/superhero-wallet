@@ -7,7 +7,7 @@
       <div>
         <TokenAmount
           v-if="!hideAmount"
-          :amount="+convertToken(token.amount, -token.decimals)"
+          :amount="amount"
           hide-fiat
           no-symbol
         />
@@ -16,8 +16,9 @@
             v-if="token"
             :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
           />
-          <AddressShortening
+          <AddressTruncated
             v-if="token.contractId"
+            show-explorer-link
             :address="token.contractId"
           />
         </div>
@@ -31,11 +32,11 @@ import { convertToken } from '../utils';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Tokens from './Tokens.vue';
-import AddressShortening from './AddressShortening.vue';
+import AddressTruncated from './AddressTruncated.vue';
 
 export default {
   components: {
-    AddressShortening,
+    AddressTruncated,
     TokenAmount,
     DetailsItem,
     Tokens,
@@ -56,6 +57,15 @@ export default {
     hideAmount: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    amount() {
+      return +(
+        this.token.decimals
+          ? this.convertToken(this.token.amount, -this.token.decimals)
+          : this.token.amount
+      );
     },
   },
   methods: {
