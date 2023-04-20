@@ -471,6 +471,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'about-privacy',
     meta: {
       title: 'privacy',
+      ifNotAuth: true,
       showHeaderNavigation: true,
       showScrollbar: true,
     },
