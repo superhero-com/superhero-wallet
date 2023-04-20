@@ -6,15 +6,9 @@ jobs:
     env:
       APP_NAME: wallet
     steps:
-      - if: github.ref != 'refs/heads/develop'
-        uses: actions/checkout@v2
-        with:
-          ref: develop
       - uses: actions/checkout@v2
         with:
           fetch-depth: 100
-      - if: github.ref != 'refs/heads/develop'
-        run: git branch develop origin/develop
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
@@ -24,16 +18,11 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - run: npm ci
       - name: Run Commitlint
+        if: github.event_name == 'pull_request'
         env:
-          EVENT_TYPE: ${{ github.event_name }}
           HEAD: ${{ github.event.pull_request.head.sha }}
           BASE: ${{ github.event.pull_request.base.sha }}
-        run: |
-          if [ "$EVENT_TYPE" = "push" ]; then
-            npx commitlint --from HEAD~${{ github.event.push.commits }} --to HEAD --verbose
-          else
-            npx commitlint --from $BASE --to $HEAD --verbose
-          fi
+        run: npx commitlint --from $BASE --to $HEAD --verbose
       - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
       - run: npm test
       - run: |
