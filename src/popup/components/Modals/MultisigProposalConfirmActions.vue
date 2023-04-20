@@ -12,7 +12,7 @@
           <StatusIcon
             class="status-icon"
             :class="[action]"
-            :status="icon"
+            :status="statusIcon"
           />
         </IconBoxed>
       </div>
@@ -74,7 +74,12 @@ import {
   PropType,
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
-import type { IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
+import type {
+  IFormSelectOption,
+  IMultisigFunctionTypes,
+  ResolveRejectCallback,
+  StatusIconType,
+} from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
 import { FUNCTION_TYPE_MULTISIG, getAccountNameToDisplay } from '../../utils';
 
@@ -97,8 +102,8 @@ export default defineComponent({
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
     action: { type: String as PropType<IMultisigFunctionTypes>, required: true },
-    resolve: { type: Function as PropType<() => void>, required: true },
-    reject: { type: Function as PropType<() => void>, required: true },
+    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
   setup(props, { root }) {
     const {
@@ -124,8 +129,7 @@ export default defineComponent({
         })),
     );
 
-    // StatusIcon
-    const icon = computed(() => (
+    const statusIcon = computed((): StatusIconType => (
       props.action === FUNCTION_TYPE_MULTISIG.confirm ? 'success' : 'critical'
     ));
 
@@ -171,7 +175,7 @@ export default defineComponent({
     }
 
     return {
-      icon,
+      statusIcon,
       closeModal,
       eligibleAccounts,
       activeAccount,

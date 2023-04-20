@@ -1,5 +1,5 @@
-import Vue, { ComponentOptions } from 'vue';
 import { RawLocation, RouteConfig } from 'vue-router';
+import type { VueAnyComponent } from '.';
 
 export interface WalletRouteMeta {
   /**
@@ -53,9 +53,6 @@ export interface WalletRouteMeta {
 
 export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {
   meta?: WalletRouteMeta
-  component?: typeof Vue | ComponentOptions<Vue> | {
-    functional: boolean
-    render: any
-  },
+  component?: VueAnyComponent,
   children?: WalletAppRouteConfig[],
 }

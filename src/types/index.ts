@@ -4,6 +4,7 @@
     no-unused-vars,
 */
 
+import Vue, { ComponentOptions } from 'vue';
 import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -14,6 +15,7 @@ import {
   MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
   FUNCTION_TYPE_MULTISIG,
+  ALLOWED_ICON_STATUSES,
 } from '../popup/utils';
 
 export * from './cordova';
@@ -43,6 +45,11 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
 export type ResolveRejectCallback = (...args: any) => void;
+
+export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
+  functional: boolean;
+  render: any;
+}
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
@@ -657,11 +664,4 @@ export interface IDefaultComposableOptions {
   store: Store<any>
 }
 
-export type StatusIconType =
-  | 'critical'
-  | 'alert'
-  | 'warning'
-  | 'info'
-  | 'success'
-  | 'not-secure'
-  | 'help';
+export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
