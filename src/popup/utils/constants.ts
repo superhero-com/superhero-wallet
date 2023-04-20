@@ -574,3 +574,13 @@ export const DASHBOARD_CARD_ID = {
 } as const;
 
 export const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
+
+export const ALLOWED_ICON_STATUSES = [
+  'alert',
+  'critical',
+  'help',
+  'info',
+  'not-secure',
+  'success',
+  'warning',
+] as const;
