@@ -399,7 +399,7 @@
       "payingForTx": "Pay For Tx",
       "gaMetaTx": "GA Meta Tx",
       "gaAttachTx": "GA Attach Tx",
-      "pending": "Pending...",
+      "pending": "Pending",
       "multisigProposal": "Multisig Proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
