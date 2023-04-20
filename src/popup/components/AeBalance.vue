@@ -1,26 +1,32 @@
 <template>
   <div class="ae-balance">
-    <span class="token-symbol">Æ</span>
+    <span class="token-symbol">&aelig;</span>
     <span class="token-integer">{{ balanceParts.integer }}.</span>
     <span class="token-fractional">{{ balanceParts.fraction }}</span>
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+
+export default defineComponent({
   props: {
     balance: { type: Number, default: 0 },
   },
-  computed: {
-    balanceParts() {
-      const [integer, fraction] = this.balance.toFixed(2).split('.');
+  setup(props) {
+    const balanceParts = computed(() => {
+      const [integer, fraction] = props.balance.toFixed(2).split('.');
       return {
         integer: Number(integer).toLocaleString(),
         fraction,
       };
-    },
+    });
+
+    return {
+      balanceParts,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss">
@@ -36,6 +42,7 @@ export default {
 
     color: variables.$color-white;
     margin-right: 4px;
+    text-transform: uppercase;
   }
 
   .token-integer {

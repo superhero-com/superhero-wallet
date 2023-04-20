@@ -78,7 +78,6 @@ export default defineComponent({
   @include mixins.flex(center, center, row);
 
   padding: 4px 8px;
-  margin-right: var(--screen-padding-x);
   background: $color-bg-app;
   border-radius: 12px;
 
