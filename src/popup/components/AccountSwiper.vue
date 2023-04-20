@@ -27,7 +27,8 @@
         <AccountCardAdd :is-multisig="isMultisig" />
       </AccountSwiperSlide>
     </swiper>
-    <div class="swiper-row">
+
+    <div class="account-swiper-bottom">
       <BulletSwitcher
         v-if="addressList"
         :active-color="getAccountColor(currentIdx)"
@@ -138,8 +139,10 @@ export default defineComponent({
 @import '../../../node_modules/swiper/css/swiper.css';
 
 .account-swiper {
-  .swiper-row {
+  .account-swiper-bottom {
     @include mixins.flex(space-between, center, row);
+
+    padding-inline: var(--screen-padding-x);
   }
 }
 </style>
