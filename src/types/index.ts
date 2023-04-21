@@ -9,6 +9,7 @@ import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
+import type { CoinGeckoMarketResponse } from './coinGecko';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
@@ -22,6 +23,7 @@ export * from './cordova';
 export * from './router';
 export * from './filter';
 export * from './forms';
+export * from './coinGecko';
 
 export type Dictionary<T = any> = Record<string, T>;
 
@@ -91,55 +93,42 @@ export interface IInputMessage {
 export type IInputMessageRaw = string | IInputMessage;
 
 export interface IToken {
-  contractId: string
-  convertedBalance?: number
-  decimals: number
-  id?: string // Only for the Aeternity coin
-  name: string
-  symbol: string,
-  extension?: string[]
+  contractId: string;
+  contract_txi?: number;
+  convertedBalance?: number; // Amount of the token that is owned
+  decimals: number;
+  event_supply?: number;
+  extensions?: string[];
+  holders?: number;
+  image?: string;
+  initial_supply?: number;
+  name: string;
+  symbol: string;
+  text?: string; // TODO determine if we can remove this
+  value?: string; // TODO copy of the contractId, maybe we should remove it
 }
 
 export interface ITokenResolved extends Partial<IToken> {
-  amount?: number
-  isAe?: boolean
-  isPool?: boolean
-  isReceived?: boolean
+  amount?: number;
+  isAe?: boolean;
+  isPool?: boolean;
+  isReceived?: boolean;
+  symbol: string; // Ensure its present in the current interface
 }
 
 export type ITokenList = Record<string, IToken>
 
-export interface IAsset {
-  ath: number
-  ath_change_percentage: number
-  ath_date: string
-  atl: number
-  atl_change_percentage: number
-  atl_date: string
-  balanceCurrency: number
-  circulating_supply: number
-  contractId: string
+/**
+ * Token data extended with CoinGecko stats.
+ * TODO: Put the CoinGecko data in a separate property.
+ * TODO: Unify the balanceCurrency and convertedBalance with IToken
+ */
+export interface IAsset extends
+  Omit<IToken, 'convertedBalance'>,
+  Omit<CoinGeckoMarketResponse, 'image'>
+{
+  balanceCurrency: number; // convertedBalance * currency rate
   convertedBalance: Balance;
-  current_price: number
-  decimals: number
-  fully_diluted_valuation: any
-  high_24h: number
-  id: string
-  image: string
-  last_updated: string
-  low_24h: number
-  market_cap: number
-  market_cap_change_24h: number
-  market_cap_change_percentage_24h: number
-  market_cap_rank: number
-  max_supply: any
-  name: string
-  price_change_24h: number
-  price_change_percentage_24h: number
-  roi: object
-  symbol: string
-  total_supply: number
-  total_volume: number
 }
 
 export type AccountKind = 'basic'; // TODO establish other possible values
@@ -393,6 +382,11 @@ export interface ITransaction {
   transactionOwner?: string;
   tx: ITx;
   url?: string;
+}
+
+export interface IStoreTransactions {
+  loaded: ITransaction[];
+  nextPageUrl?: string;
 }
 
 export interface IDashboardTransaction extends ITransaction {

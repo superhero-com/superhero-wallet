@@ -3,29 +3,34 @@
     class="tokens"
     :class="[iconSize, { vertical, bright }]"
   >
-    <span class="icons">
+    <span
+      v-if="!noIcons"
+      class="icons"
+    >
       <img
-        v-if="toToken && !noIcons"
-        :src="toToken.img"
-        :class="['to-token', { border: toToken.imgBorder }]"
+        v-if="toToken"
+        class="to-token"
+        :src="toToken.image || getTokenPlaceholderUrl(toToken)"
+        :class="{ border: !toToken.image }"
         :title="toToken.symbol"
       >
       <img
-        v-if="!noIcons"
-        :src="fromToken.img"
+        v-if="fromToken"
+        :src="fromToken.image || getTokenPlaceholderUrl(fromToken)"
         :class="{
-          border: fromToken.imgBorder,
+          border: !fromToken.image,
           pair: !!toToken,
         }"
         :title="fromToken.symbol"
       >
     </span>
+
     <span class="symbols">
       <span
         v-if="fromToken"
         class="symbol"
       >
-        {{ shrinkString(fromToken.symbol) }}
+        {{ truncateString(fromToken.symbol) }}
       </span>
       <span
         v-if="fromToken && toToken"
@@ -37,37 +42,41 @@
         v-if="toToken"
         class="symbol"
       >
-        {{ shrinkString(toToken.symbol) }}
+        {{ truncateString(toToken.symbol) }}
       </span>
     </span>
   </span>
 </template>
 
-<script>
-import { computed, defineComponent } from '@vue/composition-api';
-import AeIcon from '../../icons/tokens/ae.svg';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { ITokenResolved } from '../../types';
 import {
   AETERNITY_COIN_NAME,
   AETERNITY_COIN_SYMBOL,
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
-  shrinkString as shrinkStringFactory,
+  AVATAR_URL,
+  truncateString as truncateStringFactory,
 } from '../utils';
+import AeIcon from '../../icons/tokens/ae.svg';
 
-const SIZES = ['rg', 'md', 'lg', 'xl'];
+const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
+
+export type AllowedTokenIconSize = typeof SIZES[number];
 
 export default defineComponent({
   props: {
     /**
      * transactionTokenInfoResolvers []
      */
-    tokens: { type: Array, required: true },
+    tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
     iconSize: {
       type: String,
       default: 'rg',
-      validator: (val) => SIZES.includes(val),
+      validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
     },
     vertical: Boolean,
     noIcons: Boolean,
@@ -76,27 +85,30 @@ export default defineComponent({
   },
   setup(props) {
     function getAvailableCharLength() {
-      if (props.tokens?.length < 2) return props.symbolLength;
-      const shorterNameLength = [props.tokens[0].symbol.length, props.tokens[1].symbol.length]
+      if (props.tokens?.length < 2) {
+        return props.symbolLength;
+      }
+      const shorterNameLength = props.tokens
+        .map(({ symbol }) => symbol.length)
         .find((length) => length < props.doubleSymbolLength);
       return shorterNameLength ? props.symbolLength - shorterNameLength : props.doubleSymbolLength;
     }
 
-    function shrinkString(text) {
+    function truncateString(text: string) {
       const maxLength = getAvailableCharLength();
-      return shrinkStringFactory(text, maxLength);
+      return truncateStringFactory(text, maxLength);
     }
 
-    function mapToken(token) {
-      let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
-      let imgBorder = true;
+    function getTokenPlaceholderUrl(token: ITokenResolved) {
+      return `${AVATAR_URL}${token.contractId}`;
+    }
 
-      let { symbol } = token;
+    function mapToken(token: ITokenResolved): ITokenResolved {
+      let { image, symbol } = token;
       let name = token.symbol;
 
       if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
-        img = AeIcon;
-        imgBorder = false;
+        image = AeIcon;
         symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
         name = AETERNITY_COIN_NAME;
       }
@@ -105,8 +117,7 @@ export default defineComponent({
         ...token,
         symbol,
         name,
-        img,
-        imgBorder,
+        image,
       };
     }
 
@@ -116,7 +127,8 @@ export default defineComponent({
     return {
       fromToken,
       toToken,
-      shrinkString,
+      getTokenPlaceholderUrl,
+      truncateString,
     };
   },
 });

@@ -1,6 +1,6 @@
 <template>
   <TransactionList
-    :token="contractId"
+    :token-contract-id="contractId"
     :is-multisig="isMultisig"
   />
 </template>

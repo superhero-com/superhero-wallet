@@ -2,7 +2,7 @@
   <div class="token-details">
     <DetailsRow
       v-if="tokenData.symbol"
-      :label="tokenData.isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
+      :label="isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
       :text="tokenData.symbol"
     >
       <template #text>
@@ -19,7 +19,7 @@
       :text="tokenData.decimals"
     />
     <DetailsRow
-      v-if="tokenData.contractId"
+      v-if="tokenData.contractId && !isAe"
       :label="$t('pages.token-details.contract')"
     >
       <template #text>
@@ -76,7 +76,7 @@
       :text="poolShare"
     />
     <DetailsRow
-      v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+      v-if="!isAe && UNFINISHED_FEATURES"
       :label="$t('pages.token-details.transactions')"
     />
 
@@ -103,12 +103,12 @@
       </template>
     </DetailsRow>
     <DetailsRow
-      v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+      v-if="!isAe && UNFINISHED_FEATURES"
       :label="$t('pages.token-details.feeDaily')"
     />
 
     <DetailsRow
-      v-if="!tokenData.isAe"
+      v-if="!isAe"
       class="link"
       :label="$t('pages.token-details.chart')"
     >
@@ -123,7 +123,7 @@
       </template>
     </DetailsRow>
     <DetailsRow
-      v-if="!tokenData.isAe && UNFINISHED_FEATURES"
+      v-if="!isAe && UNFINISHED_FEATURES"
       :label="$t('pages.token-details.price-ae')"
     />
     <DetailsRow
@@ -160,9 +160,12 @@
 import {
   computed,
   defineComponent,
+  PropType,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
+import type { IToken } from '../../../types';
 import {
+  AETERNITY_CONTRACT_ID,
   DEX_URL,
   amountRounded,
   convertToken,
@@ -186,13 +189,15 @@ export default defineComponent({
   props: {
     contractId: { type: String, default: null },
     tokenPairs: { type: Object, default: () => ({}) },
-    tokenData: { type: Object, default: () => ({}) },
-    tokens: { type: Array, default: () => ([]) },
+    tokenData: { type: Object as PropType<IToken>, default: () => ({}) },
+    tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
   },
   setup(props) {
     const { formatCurrency } = useCurrencies();
 
     const displayDexUrl = DEX_URL.replace('https://', '');
+
+    const isAe = computed(() => props.tokenData.contractId === AETERNITY_CONTRACT_ID);
 
     const poolShare = computed(() => {
       if (!props.tokenPairs || !props.tokenPairs.balance || !props.tokenPairs.totalSupply) {
@@ -207,11 +212,12 @@ export default defineComponent({
     );
 
     return {
-      displayDexUrl,
       DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-      getPooledTokenAmount,
+      displayDexUrl,
+      isAe,
       poolShare,
+      getPooledTokenAmount,
       formatCurrency,
       formatNumber,
     };

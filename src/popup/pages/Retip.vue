@@ -68,7 +68,7 @@ import {
   IPendingTransaction,
   ISdk,
 } from '../../types';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
@@ -137,7 +137,7 @@ export default defineComponent({
         +(formModel.value.amount || 0),
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
-          : MAGNITUDE,
+          : AETERNITY_COIN_PRECISION,
       ).toNumber();
       loading.value = true;
       await watchUntilTruthy(() => tippingV1.value);

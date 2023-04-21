@@ -23,13 +23,13 @@ import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
+  AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
   TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
-  MAGNITUDE,
   MAX_UINT256,
   SEED_LENGTH,
   SIMPLEX_URL,
@@ -313,7 +313,7 @@ export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): 
     },
     ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
   });
-  return new BigNumber(minFee).shiftedBy(-MAGNITUDE);
+  return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
 }
 
 export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
@@ -492,7 +492,7 @@ export function sortTransactionsByDateCallback(
   return pending || compareMicroTime();
 }
 
-export function shrinkString(text: string, maxLength: number) {
+export function truncateString(text: string, maxLength: number) {
   return (text?.length)
     ? `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`
     : '';

@@ -13,7 +13,7 @@
         class="spinner"
       />
       <div v-else>
-        <TransactionItem
+        <TransactionListItem
           v-for="transaction in transactionList"
           :key="`${transaction.transactionOwner}-${transaction.hash}`"
           class="transaction-item"
@@ -28,13 +28,13 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { useConnection, useLatestTransactionList } from '../../composables';
-import TransactionItem from './TransactionItem.vue';
+import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 
 export default defineComponent({
   name: 'LatestTransactionsCard',
   components: {
-    TransactionItem,
+    TransactionListItem,
     AnimatedSpinner,
   },
   setup(props, { root }) {

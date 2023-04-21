@@ -59,7 +59,7 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
-  MAGNITUDE,
+  AETERNITY_COIN_PRECISION,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
@@ -91,7 +91,7 @@ export default defineComponent({
 
     const nameFee = computed(() => convertToken(
       TxBuilderHelper.getMinimumNameFee(`${name.value}${AENS_DOMAIN}`),
-      -MAGNITUDE,
+      -AETERNITY_COIN_PRECISION,
     ).toFixed(4));
 
     const { getSdk, isSdkReady } = useSdk({ store: root.$store });

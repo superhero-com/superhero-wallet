@@ -1,7 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { aeToAettos, aettosToAe } from '../../../src/popup/utils';
-
-const aeToAettosMAGNITUDE = 18;
+import { AETERNITY_COIN_PRECISION, aeToAettos, aettosToAe } from '../../../src/popup/utils';
 
 const testValues = [{
   value: 1,
@@ -42,12 +40,12 @@ describe('AE <-> aettos denomination', () => {
     }
     expect(aeToAettos(test.value)).not.toBe('NaN');
     expect(typeof aeToAettos(test.value)).toBe('string');
-    expect(BigNumber(test.value).shiftedBy(aeToAettosMAGNITUDE)
+    expect(BigNumber(test.value).shiftedBy(AETERNITY_COIN_PRECISION)
       .isEqualTo(aeToAettos(test.value))).toBeTruthy();
 
     expect(aettosToAe(test.value)).not.toBe('NaN');
     expect(typeof aettosToAe(test.value)).toBe('string');
-    expect(BigNumber(test.value).shiftedBy(-aeToAettosMAGNITUDE)
+    expect(BigNumber(test.value).shiftedBy(-AETERNITY_COIN_PRECISION)
       .isEqualTo(aettosToAe(test.value))).toBeTruthy();
   }));
   it('should return initial value after both functions will be triggered', () => {

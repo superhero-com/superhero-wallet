@@ -4,7 +4,7 @@
     :to="redirectRoute"
   >
     <div class="body">
-      <TransactionTokens
+      <TransactionTokenRows
         :ext-tokens="tokens"
         :error="isErrorTransaction"
         icon-size="md"
@@ -55,6 +55,7 @@ import {
   PropType,
   ref,
 } from '@vue/composition-api';
+import { Location } from 'vue-router';
 import dayjs from 'dayjs';
 import {
   FUNCTION_TYPE_DEX,
@@ -81,7 +82,7 @@ import {
   useTransactionTx,
 } from '../../composables';
 
-import TransactionTokens from './TransactionTokenRows.vue';
+import TransactionTokenRows from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 import ListItemWrapper from './ListItemWrapper.vue';
 import ConsensusApprovedLabel from './ConsensusApprovedLabel.vue';
@@ -90,7 +91,7 @@ export default defineComponent({
   components: {
     ConsensusApprovedLabel,
     TransactionLabel,
-    TransactionTokens,
+    TransactionTokenRows,
     ListItemWrapper,
   },
   props: {
@@ -110,9 +111,7 @@ export default defineComponent({
       () => (props.multisigTransaction || props.transaction),
     );
 
-    const transactionOwner = computed((): string | undefined => (
-      props.transaction?.transactionOwner || undefined
-    ));
+    const transactionOwner = computed(() => props.transaction?.transactionOwner);
 
     const {
       isDex,
@@ -133,7 +132,7 @@ export default defineComponent({
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
-    const redirectRoute = computed<any>(() => {
+    const redirectRoute = computed((): Location => {
       if (props.multisigTransaction) {
         return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }
@@ -144,7 +143,7 @@ export default defineComponent({
           : ROUTE_TX_DETAILS,
         params: {
           hash: props.transaction.hash,
-          transactionOwner: props.transaction.transactionOwner,
+          transactionOwner: props.transaction.transactionOwner || '',
         },
       };
     });
