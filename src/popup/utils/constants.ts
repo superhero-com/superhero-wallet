@@ -8,6 +8,7 @@ import type {
   INotificationSetting,
   IPermission,
   TxType,
+  IToken,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
@@ -16,12 +17,20 @@ export const MOBILE_WIDTH = 480;
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
-export const MAGNITUDE = 18;
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 export const AETERNITY_COIN_NAME = 'Aeternity';
+export const AETERNITY_COIN_PRECISION = 18; // Amount of decimals
+
+export const AETERNITY_TOKEN_BASE_DATA: IToken = {
+  contractId: AETERNITY_CONTRACT_ID,
+  decimals: AETERNITY_COIN_PRECISION,
+  name: AETERNITY_COIN_NAME,
+  symbol: AETERNITY_COIN_SYMBOL,
+  convertedBalance: 0,
+};
 
 export const TX_DIRECTION = {
   sent: 'sent',
@@ -89,7 +98,7 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
-export const ACCOUNT_LEDEGR_WALLET = 'ledger';
+export const ACCOUNT_LEDGER_WALLET = 'ledger';
 
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';

@@ -15,9 +15,9 @@ import type {
   IToken,
 } from '../types';
 import {
-  MAGNITUDE,
-  STUB_CONTRACT_ADDRESS,
+  AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
+  STUB_CONTRACT_ADDRESS,
   executeAndSetInterval,
   calculateFee,
   validateTipUrl,
@@ -83,7 +83,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       }
 
       const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
-      const amount = new BigNumber(numericAmount).shiftedBy(MAGNITUDE);
+      const amount = new BigNumber(numericAmount).shiftedBy(AETERNITY_COIN_PRECISION);
 
       if (
         val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
@@ -124,7 +124,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           nonce: nonce.value + 1,
           payload: val.payload,
         },
-      })).shiftedBy(-MAGNITUDE);
+      })).shiftedBy(-AETERNITY_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
     {

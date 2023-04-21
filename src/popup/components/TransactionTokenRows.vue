@@ -22,7 +22,7 @@
         {{ token.isReceived ? '' : '−' }}
         {{ amountRounded(tokenAmount(token)) }}
         <span class="token-name">
-          {{ shrinkString(getTokenName(token), 5) }}
+          {{ truncateString(getTokenName(token), 5) }}
         </span>
       </span>
     </div>
@@ -36,7 +36,7 @@ import {
 import {
   amountRounded,
   convertToken,
-  shrinkString,
+  truncateString,
   calculateFontSize,
   AETERNITY_SYMBOL,
   TX_DIRECTION,
@@ -47,6 +47,7 @@ import type { ITokenResolved, ITransaction } from '../../types';
 import Tokens from './Tokens.vue';
 
 export default defineComponent({
+  name: 'TransactionTokenRows',
   components: { Tokens },
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
@@ -88,7 +89,7 @@ export default defineComponent({
     return {
       filteredTokens,
       tokenAmount,
-      shrinkString,
+      truncateString,
       getTokenName,
       amountRounded,
       calculateFontSize,

@@ -3,14 +3,14 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { ACCOUNT_LEDEGR_WALLET, MODAL_CONFIRM } from '../../../popup/utils';
+import { ACCOUNT_LEDGER_WALLET, MODAL_CONFIRM } from '../../../popup/utils';
 import { useModals } from '../../../composables';
 
 export default {
   namespaced: true,
 
   account: {
-    type: ACCOUNT_LEDEGR_WALLET,
+    type: ACCOUNT_LEDGER_WALLET,
   },
 
   getters: {
@@ -52,7 +52,7 @@ export default {
       let address;
       try {
         address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
-        commit('accounts/add', { address, type: ACCOUNT_LEDEGR_WALLET, idx: nextIdx }, { root: true });
+        commit('accounts/add', { address, type: ACCOUNT_LEDGER_WALLET, idx: nextIdx }, { root: true });
       } catch (error) {
         openDefaultModal({ icon: 'alert', title: 'address not confirmed' });
       }

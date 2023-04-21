@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import {
-  IToken,
   ITokenList,
   ITokenResolved,
   ITransaction,
@@ -30,11 +29,11 @@ type TransactionResolverGenerator = (
 type TransactionResolvers = Partial<Record<TxFunctionParsed, TransactionResolver>>;
 /* eslint-enable no-unused-vars */
 
-const defaultToken: Partial<IToken> = {
-  decimals: 18,
+const defaultToken = {
   symbol: AETERNITY_SYMBOL,
+  decimals: 18,
 };
-const defaultPoolToken: Partial<IToken> = {
+const defaultPoolToken = {
   symbol: 'Pool Token',
   decimals: 18,
 };
@@ -318,38 +317,42 @@ const transferAllowance: TransactionResolver = (transaction, tokens = null) => {
  * ref: WAE.deposit
  */
 const deposit: TransactionResolver = (transaction, tokens = null) => ({
-  tokens: [{
-    ...defaultToken,
-    amount: transaction.tx.amount,
-    isReceived: false,
-    isAe: true,
-  },
-  {
-    ...defaultToken,
-    amount: transaction.tx.amount,
-    symbol: 'WAE',
-    ...tokens?.[transaction.tx.contractId],
-    isReceived: true,
-  }],
+  tokens: [
+    {
+      ...defaultToken,
+      amount: transaction.tx.amount,
+      isReceived: false,
+      isAe: true,
+    },
+    {
+      ...defaultToken,
+      amount: transaction.tx.amount,
+      symbol: 'WAE',
+      ...tokens?.[transaction.tx.contractId],
+      isReceived: true,
+    },
+  ],
 });
 
 /**
  * ref: WAE.withdraw
  */
 const withdraw: TransactionResolver = (transaction, tokens = null) => ({
-  tokens: [{
-    ...defaultToken,
-    amount: transaction.tx.arguments?.[0]?.value,
-    symbol: 'WAE',
-    ...tokens?.[transaction.tx.contractId],
-    isReceived: false,
-  },
-  {
-    ...defaultToken,
-    amount: transaction.tx.arguments?.[0]?.value,
-    isReceived: true,
-    isAe: true,
-  }],
+  tokens: [
+    {
+      ...defaultToken,
+      amount: transaction.tx.arguments?.[0]?.value,
+      symbol: 'WAE',
+      ...tokens?.[transaction.tx.contractId],
+      isReceived: false,
+    },
+    {
+      ...defaultToken,
+      amount: transaction.tx.arguments?.[0]?.value,
+      isReceived: true,
+      isAe: true,
+    },
+  ],
 });
 
 export const transactionTokenInfoResolvers: TransactionResolvers = {

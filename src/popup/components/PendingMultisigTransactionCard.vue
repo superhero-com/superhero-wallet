@@ -6,7 +6,7 @@
     <div class="title">
       {{ $t('dashboard.pendingMultisigCard.title') }}
     </div>
-    <TransactionItem
+    <TransactionListItem
       :multisig-transaction="pendingMultisigTransaction"
     />
   </div>
@@ -16,10 +16,12 @@
 import { defineComponent } from '@vue/composition-api';
 import { usePendingMultisigTransaction } from '../../composables';
 
-import TransactionItem from './TransactionItem.vue';
+import TransactionListItem from './TransactionListItem.vue';
 
 export default defineComponent({
-  components: { TransactionItem },
+  components: {
+    TransactionListItem,
+  },
   setup(props, { root }) {
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 

@@ -6,7 +6,7 @@
       is-more-data
       @loadMore="loadMore"
     >
-      <TransactionItem
+      <TransactionListItem
         v-for="transaction in filteredTransactions"
         :key="transaction.hash"
         :transaction="getTransaction(transaction)"
@@ -63,7 +63,8 @@ import {
   usePendingMultisigTransaction,
   useUi,
 } from '../../composables';
-import TransactionItem from './TransactionItem.vue';
+
+import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
 import {
@@ -79,11 +80,11 @@ import { i18n } from '../../store/plugins/languages';
 export default defineComponent({
   components: {
     InfiniteScroll,
-    TransactionItem,
+    TransactionListItem,
     AnimatedSpinner,
   },
   props: {
-    token: { type: String, default: '' },
+    tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
   },
   setup(props, { root }) {
@@ -142,12 +143,12 @@ export default defineComponent({
     }
 
     function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
-      if (props.token) {
+      if (props.tokenContractId) {
         return transactionList.filter((transaction) => {
           const innerTx = getInnerTransaction(transaction.tx);
 
-          if (props.token !== AETERNITY_CONTRACT_ID) {
-            return innerTx?.contractId === props.token;
+          if (props.tokenContractId !== AETERNITY_CONTRACT_ID) {
+            return innerTx?.contractId === props.tokenContractId;
           }
 
           return !innerTx.contractId || !isFungibleTokenTx(innerTx);

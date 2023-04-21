@@ -85,10 +85,10 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
+import type { IToken, ITokenList } from '../../../types';
 import {
-  DEX_URL,
   AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
+  DEX_URL,
   isContract,
 } from '../../utils';
 import {
@@ -100,12 +100,12 @@ import {
   ROUTE_TOKEN_DETAILS,
 } from '../../router/routeNames';
 import {
+  useAccounts,
+  useCurrencies,
   useSdk,
   useTokensList,
-  useCurrencies,
-  useAccounts,
 } from '../../../composables';
-import { useGetter } from '../../../composables/vuex';
+import { useState, useGetter } from '../../../composables/vuex';
 import { IS_IOS } from '../../../lib/environment';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -136,7 +136,6 @@ export default defineComponent({
     OpenTransferSendModalButton,
   },
   setup(props, { root }) {
-    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
 
     const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store: root.$store });
@@ -177,35 +176,31 @@ export default defineComponent({
       },
     ];
     const loading = ref<boolean>(true);
-    const tokenPairs = ref({ token0: null, token1: null });
-    const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
-    const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
+    const tokenPairs = ref<Record<string, IToken | null>>({ token0: null, token1: null });
+    const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);
     const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
 
-    const tokenData = computed(() => {
-      const defaultData = {
-        decimals: 18,
-        symbol: AETERNITY_SYMBOL,
-        convertedBalance: aeTokenBalance.value,
-        balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
-        contractId: '',
-        description: '',
-        isAe: true,
-      };
+    const tokenData = computed((): IToken => {
+      if (isAe) {
+        return {
+          ...aeternityData.value!,
+          convertedBalance: aeTokenBalance.value.toNumber(),
+        };
+      }
+      return tokenBalances.value.find(
+        (token) => token.contractId === contractId,
+      ) || { ...fungibleToken.value, contractId };
+    });
 
-      return contractId === AETERNITY_CONTRACT_ID
-        ? { ...defaultData, ...aeternityData.value }
-        : tokenBalances.value.find(
-          (token) => token.contractId === contractId,
-        ) || { ...fungibleToken.value, contractId };
-    });
-    const tokens = computed(() => {
+    const tokens = computed((): IToken[] => {
       const [token0, token1] = [tokenPairs.value.token0, tokenPairs.value.token1];
-      return token0 && token1 ? [token0, token1] : [tokenData.value];
+      return (token0 && token1) ? [token0!, token1!] : [tokenData.value];
     });
-    const convertedBalance = computed(() => +tokenData.value.convertedBalance || 0);
+
+    const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {

@@ -1,6 +1,13 @@
 import { computed, ref } from '@vue/composition-api';
-import type { CurrencyCode, IAsset, ICurrency } from '../types';
+import BigNumber from 'bignumber.js';
+import type {
+  CoinGeckoMarketResponse,
+  CurrencyCode,
+  IAsset,
+  ICurrency,
+} from '../types';
 import {
+  AETERNITY_TOKEN_BASE_DATA,
   CURRENCIES,
   CURRENCY_URL,
   CURRENCIES_URL,
@@ -41,7 +48,13 @@ export function useCurrencies({
 
   async function loadAeternityData() {
     try {
-      [aeternityData.value] = await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`) || [];
+      const [aeMarketData] = (await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`) || []) as CoinGeckoMarketResponse[];
+      aeternityData.value = {
+        ...aeMarketData,
+        ...AETERNITY_TOKEN_BASE_DATA,
+        balanceCurrency: 0,
+        convertedBalance: new BigNumber(0),
+      };
     } catch (e) {
       handleUnknownError(e);
       aeternityData.value = undefined;
