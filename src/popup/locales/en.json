@@ -1,18 +1,42 @@
 {
-  "ok": "OK",
-  "ae": "AE",
-  "mainAccount": "Main account",
-  "fellowSuperhero": "Fellow Superhero",
   "common": {
-    "you": "You",
-    "of": "of",
-    "by": "by",
-    "edit": "Edit",
-    "nonce": "Nonce",
-    "callData": "Call data",
-    "contractId": "Contract ID",
+    "address": "Address",
+    "addressCopied": "Copied",
+    "ae": "AE",
+    "all": "All",
+    "amount": "Amount",
     "balanceUnavailable": "Unable to load balance.",
-    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet."
+    "buy": "Buy",
+    "by": "by",
+    "callData": "Call data",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "contractId": "Contract ID",
+    "copy": "Copy",
+    "days": "{n} days | {n} day | {n} days",
+    "edit": "Edit",
+    "fellowSuperhero": "Fellow Superhero",
+    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet.",
+    "hashCopied": "Hash copied",
+    "hours": "{n} hours | {n} hour | {n} hours",
+    "minutes": "{n} minutes | {n} minute | {n} minutes",
+    "next": "Next",
+    "nonce": "Nonce",
+    "of": "of",
+    "ok": "OK",
+    "pending": "Pending",
+    "priceNotAvailable": "price: n/a",
+    "receive": "Receive",
+    "redirecting": "Redirecting",
+    "search": "Search",
+    "seconds": "{n} seconds | {n} second | {n} seconds",
+    "send": "Send",
+    "smartContract": "Smart contract",
+    "swap": "Swap",
+    "total": "Total",
+    "totalMultisig": "Total in multisig vaults",
+    "tx": "Tx",
+    "you": "You"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -31,12 +55,10 @@
   },
   "dashboard": {
     "receiveCard": {
-      "title": "Receive",
       "description": "from existing wallet",
       "descriptionMultisig": "to multisig vault"
     },
     "sendCard": {
-      "title": "Send",
       "description": "assets to others"
     },
     "proposeCard": {
@@ -98,8 +120,7 @@
       "title": "Add payload (optional)",
       "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
       "label": "Payload message",
-      "doneBtn": "Done",
-      "cancelBtn": "Cancel"
+      "doneBtn": "Done"
     },
     "only-chars": {
       "msg": "Only letters and numbers are allowed."
@@ -128,11 +149,9 @@
       "msg": "You don’t have enough AE on your signing account to {action} this transaction."
     },
     "createAccount": {
-      "title": "Add account",
       "titleMultisig": "Add multisig vault",
       "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "btnText": "Add account",
       "btnSubtitle": "Derive another account from your seed"
     },
     "createMultisigAccount": {
@@ -303,8 +322,6 @@
       "cameraNotAllowedSecond": "Please allow camera access in your browser settings and try again.",
       "settings": "Settings"
     },
-    "cancel": "Cancel",
-    "confirm": "Confirm",
     "mobile-share-error": {
       "title": "Only URLs can be tipped at the moment!",
       "msg": "More options are currently being developed - coming to you soon!"
@@ -324,7 +341,6 @@
     "receive": {
       "title": "Receive funds to public address",
       "requestAmount": "Request specific amount (optional)",
-      "copy": "Copy",
       "copied": "Copied!",
       "share": "Share",
       "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
@@ -340,8 +356,6 @@
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
-      "edit": "Edit",
-      "next": "Next",
       "payload": "Payload"
     },
     "multisigTxProposal": {
@@ -370,7 +384,6 @@
     }
   },
   "filters": {
-    "all": "All",
     "out": "Out",
     "in": "In",
     "dex": "DEX",
@@ -403,7 +416,6 @@
       "payingForTx": "Pay For Tx",
       "gaMetaTx": "GA Meta Tx",
       "gaAttachTx": "GA Attach Tx",
-      "pending": "Pending",
       "multisigProposal": "Multisig Proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
@@ -430,7 +442,6 @@
     "dexType": {
       "provideLiquidity": "Liquidity provided",
       "removeLiquidity": "Liquidity removed",
-      "swap": "Swap",
       "allowToken": "Allow token",
       "changeAllowance": "Allow token",
       "transferAllowance": "Allow token",
@@ -439,7 +450,6 @@
       "pool": "Pool"
     },
     "multisigType": {
-      "send": "Send",
       "sing": "Approved",
       "revoke": "Revoked"
     },
@@ -470,7 +480,6 @@
       "language": "Language",
       "security": "Security",
       "about": "About",
-      "send": "Send",
       "send-tip": "Send tip",
       "claim-tips": "Claim tips",
       "scanQr": "Scan QR",
@@ -478,7 +487,6 @@
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "transactions": "Transaction History",
-      "receive": "Receive",
       "currency": "Currency",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
@@ -487,7 +495,6 @@
       "name-auctions": "Name auctions",
       "register-name": "Register name",
       "more": "More",
-      "buy": "Buy AE Tokens",
       "networks": "Network",
       "permissionsSettings": "Permissions",
       "permissionsEdit": "Edit permissions",
@@ -519,7 +526,6 @@
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
     },
     "about": {
-      "heading": "About",
       "systemName": "Superhero",
       "terms": "Terms",
       "privacyPolicy": "Privacy",
@@ -535,7 +541,6 @@
       "heading": "Account",
       "accountName": "Account name",
       "claim": "Claim Tip",
-      "receive": "Receive",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
@@ -601,23 +606,17 @@
       "add": "Add token",
       "contract-label": "Token Contract Address",
       "symbol-label": "Token Symbol",
-      "decimals-label": "Decimals of Precision",
-      "next": "Next",
-      "token": "Token",
-      "balance": "Balance"
+      "decimals-label": "Decimals of Precision"
     },
     "advancedSettings": {
       "heading": "Advanced",
-      "backToSettings": "Settings",
       "exportKeypair": "Export keypair",
       "exportKeystore": "Export keystore"
     },
     "airGapSetup": {
-      "backToAccount": "Back to account",
       "heading": "AirGap Setup",
       "step1heading": "Install AirGap on your phone",
       "step1info": "Search for AirGap.it in the store or scan this QR code",
-      "step1buttonNext": "Next",
       "setupSteps1heading": "Open AirGap on the 2nd device",
       "setupSteps2heading": "Create secret key",
       "setupSteps3heading": "Write it down in the right order",
@@ -639,7 +638,6 @@
       "transfer-allowance-info": "This allows you to take your whole allowance or part of it from someone",
       "all-allowances": "All allowances",
       "all-allowances-info": "See all your allowances and take them",
-      "from": "From",
       "get-allowance": "Get allowance",
       "no-allowances-found": "No allowances found",
       "select-token": "Select token"
@@ -649,16 +647,13 @@
       "here": "here",
       "create": "Create allowance",
       "transfer": "Transfer allowance",
-      "change": "Change allowance",
-      "address": "Address",
-      "amount": "Amount"
+      "change": "Change allowance"
     },
     "auctionBid": {
       "backToAuctions": "Back to auctions",
       "bidding": "Bidding",
       "bidOn": "Bid on",
       "requiredField": "This field is required",
-      "next": "Next",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time",
       "ending-height": "Ending height"
@@ -669,7 +664,6 @@
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
-      "addressLabel": "Address",
       "transactionLabel": "Transaction",
       "addressRequest": "This aepp is requesting access to view your current account address.",
       "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
@@ -679,19 +673,15 @@
       "connecting": "Connecting"
     },
     "fungibleTokens": {
-      "backToAccount": "Back to account",
       "addHeading": "Fungible Tokens",
       "addToken": "Add token",
       "tokenContractLabel": "Token Contract Address",
       "tokenSymbolLabel": "Token Symbol",
       "initialSupply": "Initial Supply",
       "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
       "validContractAddressError": "Valid token contract address",
       "symbolBetween1and12": "Symbol between 1 and 12 characters",
-      "numberBetween0and36": "Number between 0 and 36",
-      "token": "Token",
-      "balance": "Balance"
+      "numberBetween0and36": "Number between 0 and 36"
     },
     "fungible-tokens": {
       "add": "Add Fungible Token",
@@ -705,25 +695,18 @@
       "tokens": "Tokens",
       "searchPlaceholder": "Search by token name or contract address",
       "searchAssetsPlaceholder": "Search for assets",
-      "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "buy": "Buy",
-      "swap": "Swap",
       "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
     "token-details": {
       "details": "Token Details",
-      "send": "Send",
       "proposeTx": "Propose Tx",
-      "receive": "Receive",
-      "buy": "Buy",
-      "swap": "Swap",
       "tip": "Tip",
       "token-details": "Token details",
       "coin-details": "Coin details",
@@ -764,8 +747,6 @@
     },
     "mint-token": {
       "mint": "Mint/Burn token",
-      "amount": "Amount",
-      "address": "Address",
       "type": "Select type",
       "token": "Select token"
     },
@@ -833,7 +814,6 @@
       }
     },
     "languageSettings": {
-      "heading": "Language",
       "chooseLanguage": "Choose Superhero wallet UI language."
     },
     "currencySettings": {
@@ -886,26 +866,20 @@
       "ledgerAccountCreate": "Create a first account by pressing the button bellow"
     },
     "manageAccounts": {
-      "backToAccount": "Back to account",
       "manageAccounts": "Manage accounts",
       "allAccounts": "All accounts",
-      "account": "Account",
-      "add": "Add",
       "enterName": "Enter name"
     },
     "manageNetworks": {
-      "backToAccount": "Back to account",
       "manageNetworks": "Manage networks",
       "networks": "Networks",
       "addNewNetwork": "Add new node",
       "networkName": "Node name",
       "networkURL": "Node URL",
       "addnetworkName": "Add Node name",
-      "addnetworkURL": "Add Node URL",
-      "add": "Add"
+      "addnetworkURL": "Add Node URL"
     },
     "notifications": {
-      "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
       "commentOnComment": "replied to your comment.",
@@ -930,7 +904,6 @@
       "claimOfRetip": "Someone claimed your retip."
     },
     "privacyPolicy": {
-      "backButton": "Back",
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
@@ -992,18 +965,14 @@
     "send": {
       "title": "Transaction has been submitted",
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
-      "send": "Send",
       "success": "Success",
       "viewInExplorer": "View in explorer",
       "scan": "Scan QR",
-      "cancel": "Cancel",
       "review": "Review and send",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
-      "amount": "Amount",
-      "editTxDetails": "Edit",
       "successAlert": "has been successfully sent to",
       "receivingUrl": "Receiving URL",
       "sending": "Sending",
@@ -1012,7 +981,6 @@
       "sendingCryptoToUrl": "Sending tip to URL",
       "tipInfo": "Your transaction will be publicly displayed as URL tip on {0}",
       "to": "To",
-      "from": "From",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
       "scanAddress": "Scan aeternity address",
@@ -1020,9 +988,6 @@
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
     "settings": {
-      "backToAccount": "Back to account",
-      "heading": "Settings",
-      "tabGeneral": "Language",
       "tabGeneralsmall": "Change your language",
       "tabAdvanced": "Advanced",
       "tabAdvancedsmall": "Download your keystore or keypair",
@@ -1043,7 +1008,6 @@
       "password": "Password",
       "signedMessage": "Signed message:",
       "copyBtn": "COPY",
-      "cancelBtn": "Cancel",
       "enterPassword": "Enter your password",
       "signMessage": "Sign message",
       "signAndVerify": "Sign and verify messages",
@@ -1059,9 +1023,7 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "total": "Total",
       "reject": "Reject",
-      "confirm": "Confirm",
       "contractCall": "Contract call",
       "contractCalling": "Calling contract method. Please do not close the window",
       "insufficientBalance": "Insufficient Balance",
@@ -1083,13 +1045,10 @@
       "minimumWithdrawn": "Minimum withdrawn"
     },
     "signTransactionByQrCode": {
-      "backToAccount": "Back to account",
       "backToScan": "Back to scan transaction",
-      "heading": "Scan with AirGap Vault to sign the transaction",
-      "doneBtn": "Done"
+      "heading": "Scan with AirGap Vault to sign the transaction"
     },
     "termsOfService": {
-      "backButton": "Back",
       "terms-of-use": "Terms of use",
       "terms-with-quotes": "(„TERMS“)",
       "terms": "terms",
@@ -1131,7 +1090,6 @@
     },
     "tipPage": {
       "header": "This tip will be public on {0}",
-      "back": "Back",
       "noImage": "No Image",
       "domainVerified": "Verified",
       "domainNotVerified": "Not verified",
@@ -1139,11 +1097,9 @@
       "check": "Check",
       "selectAmount": "Select amount",
       "amountToTip": "Amount to tip",
-      "balance": "Balance",
       "sendTipBtn": "Send tip",
       "tipDetails": "Details",
       "tipWebsite": "Website",
-      "heading": "Send",
       "headingSending": "Sending",
       "selectTip": "Select amount to tip",
       "tipDomain": "Tip domain",
@@ -1154,18 +1110,12 @@
       "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
       "title": "Title",
       "titlePlaceholder": "Send a message of #support along with your donation...",
-      "account": "Account",
-      "next": "Next",
       "url": "Send Tip to",
       "to": "to",
-      "amountLabel": "Amount",
       "insufficientAmountError": "This field must be more than 0",
       "empty": "Empty",
       "availableLabel": "Available",
       "sendToAddress": "Send address to",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "edit": "Edit",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
       "enterUrl": "Type the URL you want to tip",
@@ -1184,20 +1134,14 @@
       "poolFee": "pool fee",
       "heading": "Transactions Details",
       "type": "Type",
-      "amount": "Amount",
-      "total": "Total",
-      "txFrom": "From",
-      "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
       "explorer": "View transaction in blockchain explorer",
       "txName": "Name",
-      "txAccount": "Account",
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
       "blockHeight": "Block height",
       "signatures": "Signatures",
@@ -1217,7 +1161,6 @@
       "moreInfo": "More Info",
       "hash": "Hash",
       "status": "Status",
-      "pending": "Pending",
       "revert": "Reverted",
       "revertInfo": "Transaction has been reverted. All states returned to the state before the transaction.",
       "failed": "Failed",
@@ -1241,7 +1184,6 @@
       "revokeTransaction": "Revoke transaction proposal",
       "refuse": "Disapprove",
       "sign": "Approve",
-      "send": "Send",
       "expiresAt": "Expires at height",
       "infoBox": {
         "signatures": "signatures",
@@ -1280,7 +1222,6 @@
       }
     },
     "transactions": {
-      "backToAccount": "Back to account",
       "heading": "Transaction history",
       "filters": "Filters",
       "loadMore": "Load More",
@@ -1288,7 +1229,6 @@
       "newTransactions": "new transactions",
       "noTransactions": "No transactions found",
       "type": "Type",
-      "all": "All",
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
@@ -1301,12 +1241,10 @@
       "apply": "Apply filter",
       "sent": "Sent",
       "received": "Received",
-      "pending": "Pending",
       "search": "Search by token"
     },
     "utilities": {
       "heading": "Utilities",
-      "backToAccount": "Back to account",
       "tipWebsite": "Tip website",
       "namingSystem": "Naming System",
       "namingSystemInfo": "Register a name so it can be used as your public wallet address",
@@ -1335,7 +1273,6 @@
       "backendServiceUrl": "Backend Service Url"
     },
     "welcome": {
-      "send": "Send",
       "across": "across the Globe"
     },
     "popupMessageSign": {
@@ -1347,11 +1284,9 @@
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
       "url": "URL",
-      "edit": "Edit",
       "delete": "Delete",
       "middleware": "Middleware",
       "allNetworks": "Your networks",
-      "cancel": "Cancel",
       "addCustomNetwork": "Add custom network",
       "addNetwork": "Add network",
       "apply": "Apply",
@@ -1380,7 +1315,6 @@
       "data-collected": "Data Collected",
       "browser": "Browser version",
       "details": "Technical details:",
-      "cancel": "Cancel",
       "donate": "Donate Data"
     },
     "invite": {
@@ -1405,8 +1339,6 @@
       "left-today": "Left today",
       "delete": "Remove permissions",
       "add": "Add permissions",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
       "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
       "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",
@@ -1421,7 +1353,6 @@
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
-      "cancel": "Cancel",
       "reset": "Reset"
     }
   },
@@ -1443,19 +1374,5 @@
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
     "invalidAddress": "Invalid account address"
-  },
-  "redirecting": "Redirecting",
-  "seconds": "{n} seconds | {n} second | {n} seconds",
-  "minutes": "{n} minutes | {n} minute | {n} minutes",
-  "hours": "{n} hours | {n} hour | {n} hours",
-  "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Copied",
-  "hashCopied": "Hash copied",
-  "copy": "Copy",
-  "total": "Total",
-  "totalMultisig": "Total in multisig vaults",
-  "priceNotAvailable": "price: n/a",
-  "search": "Search",
-  "tx": "Tx",
-  "smartContract": "Smart contract"
+  }
 }

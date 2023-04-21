@@ -13,7 +13,7 @@
           v-if="options.length > 3"
           v-model="searchTerm"
           class="search-field"
-          :placeholder="$t('search')"
+          :placeholder="$t('common.search')"
         />
       </div>
     </template>

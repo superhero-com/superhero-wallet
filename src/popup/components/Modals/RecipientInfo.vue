@@ -60,7 +60,7 @@
         extend
         @click="resolve"
       >
-        {{ $t('ok') }}
+        {{ $t('common.ok') }}
       </BtnMain>
     </template>
   </Default>

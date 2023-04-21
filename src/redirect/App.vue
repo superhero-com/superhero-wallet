@@ -7,7 +7,7 @@
         class="loader"
       />
       <p v-if="!error">
-        {{ $t('redirecting') }}
+        {{ $t('common.redirecting') }}
       </p>
       <p v-if="error">
         {{ error }}

@@ -17,7 +17,7 @@
       <OpenTransferSendModalButton is-multisig />
       <BtnBox
         :icon="CreditCardIcon"
-        :text="$t('pages.token-details.buy')"
+        :text="$t('common.buy')"
         :href="simplexLink"
       />
     </template>

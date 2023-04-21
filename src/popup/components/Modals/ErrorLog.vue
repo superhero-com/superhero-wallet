@@ -20,7 +20,7 @@
         variant="muted"
         @click="cancel"
       >
-        {{ $t('modals.cancel') }}
+        {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain @click="createReport">
         {{ $t('modals.error-log.create-report') }}

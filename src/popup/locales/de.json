@@ -1,12 +1,24 @@
 {
-  "ok": "OK",
-  "ae": "AE",
-  "mainAccount": "Main account",
+  "common": {
+    "address": "Adresse",
+    "ae": "AE",
+    "all": "Alle",
+    "amount": "Menge",
+    "cancel": "Stornieren",
+    "confirm": "Bestätigen",
+    "copy": "Kopieren",
+    "next": "Nächster",
+    "ok": "OK",
+    "total": "Gesamt"
+  },
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
   },
   "modals": {
+    "payloadForm": {
+      "doneBtn": "Getan"
+    },
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."
     },
@@ -64,9 +76,7 @@
     "donate-errors-error": {
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report"
-    },
-    "cancel": "Cancel",
-    "confirm": "Confirm"
+    }
   },
   "transaction": {
     "fee": "Transaktionsgebühr",
@@ -143,7 +153,6 @@
       "heading": "Konto",
       "activity": "Activity",
       "accountName": "Kontobezeichnung",
-      "copy": "Kopieren",
       "claim": "Claim Tip",
       "receive": "Erhalten",
       "latestTransactions": "neuesten Transaktionen",
@@ -195,7 +204,7 @@
       "tokenContractLabel": "Token Vertrag Anschrift",
       "tokenSymbolLabel": "Tokensymbol",
       "tokenPrecision": "Dezimalzahlen von Precision",
-      "next": "Nächster",
+
       "validContractAddressError": "Gültige Token Vertrag Adresse",
       "symbolBetween1and12": "Symbol zwischen 1 und 12 Zeichen",
       "numberBetween0and36": "Zahl zwischen 0 und 36",
@@ -212,7 +221,6 @@
       "exportKeystore": "Export keystore"
     },
     "airGapSetup": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "AirGap Einstellungen",
       "step1heading": "Installieren Sie Airgap auf Ihrem Handy",
       "step1info": "Suchen Sie nach AirGap.it im Laden oder QR-Code scannen",
@@ -258,7 +266,6 @@
       "bidding": "Bieten",
       "bidOn": "Gebot abgeben",
       "requiredField": "Dieses Feld wird benötigt",
-      "next": "Nächster",
       "current-highest-bid": "Aktuelles Höchstgebot",
       "remaining-time": "Verbleibende Zeit"
     },
@@ -286,14 +293,12 @@
       "registryFee": "Token in globales TokenRegistry aufnehmen (es fallen Gebühren an)"
     },
     "fungibleTokens": {
-      "backToAccount": "Zurück zu Konto",
       "addHeading": "Fungible Tokens",
       "addToken": "hinzufügen token",
       "tokenContractLabel": "Token Vertrag Anschrift",
       "tokenSymbolLabel": "Tokensymbol",
       "initialSupply": "Erstversorgung",
       "tokenPrecision": "Dezimalzahlen von Precision",
-      "next": "Nächster",
       "validContractAddressError": "Gültige Token Vertrag Adresse",
       "symbolBetween1and12": "Symbol zwischen 1 und 12 Zeichen",
       "numberBetween0and36": "Zahl zwischen 0 und 36",
@@ -314,7 +319,7 @@
       "mint": "Mint/Burn token",
       "mintInfo": "Auf diese Weise können Sie eine Münz- oder Markenmenge herstellen",
       "mintBtn": "Mint/Burn",
-      "amount": "Menge",
+
       "address": "Adresse",
       "enterAmount": "ungültige Menge",
       "enterAddress": "Adresse eingeben"
@@ -387,15 +392,12 @@
       "ledgerAccountCreate": "Erstellen Sie ein erstes Konto mit der Taste unten"
     },
     "manageAccounts": {
-      "backToAccount": "Zurück zu Konto",
       "manageAccounts": "Konten verwalten",
       "allAccounts": "Alle Konten",
-      "account": "Konto",
       "add": "hinzufügen",
       "enterName": "Name eingeben"
     },
     "manageNetworks": {
-      "backToAccount": "Zurück zu Konto",
       "manageNetworks": "verwalten Netzwerke",
       "networks": "Netzwerke",
       "addNewNetwork": "Hinzufügen neuer Knoten",
@@ -411,13 +413,10 @@
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "qrCodeReader": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "Qr Code Scanner"
     },
     "receive": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "Erhalten AE tokens",
-      "copy": "Kopieren",
       "home": "Home",
       "transferExchange": "Swap crypto for AE tokens",
       "purchase": "Buy AE tokens"
@@ -465,16 +464,13 @@
       "toDashboard": "Back to Dashboard"
     },
     "send": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "Neuer Transfer von",
-      "amount": "Menge",
       "txFee": "Min Tx Gebühr:",
       "maxSpendableValue": "Maximale aufwendbare Wert:",
       "send": "Senden",
       "success": "Erfolg",
       "seeTransactionExplorer": "Siehe Transaktion im Explorer.",
       "scan": "Scan",
-      "cancel": "Cancel",
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
@@ -482,12 +478,10 @@
       "recipient": "Receiving address",
       "successalert": "You have successfully sent ",
       "to": "To",
-      "from": "From",
       "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "Einstellungen",
       "tabGeneral": "Allgemeines",
       "tabGeneralsmall": "Fügen Sie den Namen anstelle Adresse, ändern Sie Ihre Sprache",
@@ -526,9 +520,7 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "total": "Gesamt",
       "reject": "Ablehnen",
-      "confirm": "Bestätigen",
       "contractCall": "Vertrag Aufruf",
       "contractCalling": "Aufruf-Contract-Methode. Bitte schließen Sie das Fenster nicht",
       "insufficientBalance": "Mangelhaftes Gleichgewicht",
@@ -541,7 +533,6 @@
       "balanceError": "Your account balance is not enough to execute this transaction."
     },
     "signTransactionByQrCode": {
-      "backToAccount": "Zurück zu Konto",
       "backToScan": "Zurück zur Scan-Transaktion",
       "heading": "Scannen mit Airgap Vault, die Transaktion zu unterzeichnen",
       "doneBtn": "Getan"
@@ -611,16 +602,12 @@
       "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
       "title": "Title",
       "titlePlaceholder": "Send a message of #support along with your donation...",
-      "account": "Account",
       "url": "Send Tip to",
       "to": "to",
       "amountLabel": "Amount",
       "empty": "Empty",
       "availableLabel": "Available",
       "sendToAddress": "Send address to",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "edit": "Edit",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
       "enterUrl": "Type the URL you want to tip",
@@ -633,8 +620,6 @@
       "heading": "Transaktionen Einzelheiten",
       "date": "Datum",
       "type": "Art",
-      "amount": "Menge",
-      "total": "Gesamt",
       "txFrom": "Von",
       "txTo": "Zu",
       "txHash": "Tx hash",
@@ -646,7 +631,6 @@
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "copy": "Kopieren",
       "contractId": "Contract Id",
       "advancedMode": "fortgeschritten Mode",
       "blockHeight": "Blockhöhe",
@@ -668,11 +652,9 @@
       "sent": "Sent",
       "received": "Received",
       "withdrawals": "Withdrawals",
-      "topups": "Top ups",
-      "all": "All"
+      "topups": "Top ups"
     },
     "transactions": {
-      "backToAccount": "Zurück zu Konto",
       "heading": "Transaktionsverlauf",
       "filters": "Filter",
       "loadMore": "Mehr laden",
@@ -680,7 +662,6 @@
       "newTransactions": "neue Transaktionen",
       "noTransactions": "No transactions found",
       "type": "Art",
-      "all": "Alle",
       "incoming": "Eingehend",
       "outgoing": "Ausgehend",
       "spendType": "Ausgabenart",
@@ -692,12 +673,10 @@
       "clear": "Filter löschen",
       "apply": "Filter anwenden",
       "sent": "Sent",
-      "received": "Received",
-      "pending": "Pending"
+      "received": "Received"
     },
     "utilities": {
       "heading": "Dienstprogramme",
-      "backToAccount": "Zurück zu Konto",
       "tipWebsite": "Tipp Website",
       "namingSystem": "Benennungssystem",
       "namingSystemInfo": "Registrieren Sie den Namen und er kann anstelle Ihrer öffentlichen Adresse verwendet werden",
@@ -735,16 +714,15 @@
       "across": "across the Globe"
     },
     "popupMessageSign": {
+      "title": "Sign Nachricht",
       "heading": "would like to sign message ",
       "message": "Message"
     },
     "network": {
       "url": "URL:",
-      "edit": "Edit",
       "delete": "Delete",
       "middleware": "Middleware:",
       "allNetworks": "Your networks",
-      "cancel": "Cancel",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
       "networkUrlPlaceholder": "Enter network URL",
@@ -759,9 +737,7 @@
       "data-collected": "Data Collected",
       "browser": "Browser version",
       "details": "Technical details:",
-      "cancel": "Cancel",
       "donate": "Donate Data"
     }
-  },
-  "redirecting": "Redirecting"
+  }
 }

@@ -10,7 +10,7 @@
       {{
         isMultisig
           ? $t('modals.createAccount.titleMultisig')
-          : $t('modals.createAccount.title')
+          : $t('pages.accounts.addAccount')
       }}
     </h2>
 
@@ -24,7 +24,7 @@
 
     <BtnSubheader
       v-if="!isMultisig"
-      :header="$t('modals.createAccount.btnText')"
+      :header="$t('pages.accounts.addAccount')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
       :icon="PlusCircleIcon"
       :disabled="!isOnline"

@@ -23,7 +23,7 @@
         variant="muted"
         @click="reject"
       >
-        {{ $t('pages.reset-wallet.cancel') }}
+        {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
         variant="danger"

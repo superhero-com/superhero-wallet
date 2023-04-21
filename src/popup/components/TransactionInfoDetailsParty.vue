@@ -11,7 +11,7 @@
     >
       <Truncate
         :right="isRecipient"
-        :str="txParty.name || txParty.label || $t('fellowSuperhero')"
+        :str="txParty.name || txParty.label || $t('common.fellowSuperhero')"
       />
     </a>
     <span

@@ -1,6 +1,6 @@
 <template>
   <BtnBox
-    :text="$t('dashboard.receiveCard.title')"
+    :text="$t('common.receive')"
     :subtitle="subtitle"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"

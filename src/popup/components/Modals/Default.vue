@@ -33,7 +33,7 @@
           :class="{ 'center-button': textCenter }"
           @click="resolve"
         >
-          {{ buttonMessage || $t('ok') }}
+          {{ buttonMessage || $t('common.ok') }}
         </BtnMain>
       </slot>
     </template>

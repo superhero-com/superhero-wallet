@@ -99,7 +99,7 @@
       class="amount-input"
       show-tokens-with-balance
       :ae-only="isMultisig"
-      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
+      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
       :message="amountMessage"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"

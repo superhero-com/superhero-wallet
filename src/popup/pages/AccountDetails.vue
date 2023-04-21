@@ -21,13 +21,13 @@
       <OpenTransferSendModalButton />
       <BtnBox
         :icon="CreditCardIcon"
-        :text="$t('pages.token-details.buy')"
+        :text="$t('common.buy')"
         :href="activeAccountSimplexLink"
         :disabled="!isOnline"
       />
       <BtnBox
         :icon="SwapIcon"
-        :text="$t('pages.token-details.swap')"
+        :text="$t('common.swap')"
         :href="DEX_URL"
         :disabled="!isOnline"
       />

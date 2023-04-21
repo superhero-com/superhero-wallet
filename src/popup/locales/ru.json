@@ -1,7 +1,6 @@
 {
   "ok": "OK",
   "ae": "AE",
-  "mainAccount": "Main account",
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
@@ -64,9 +63,7 @@
     "donate-errors-error": {
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report"
-    },
-    "cancel": "Cancel",
-    "confirm": "Confirm"
+    }
   },
   "transaction": {
     "type": {
@@ -194,7 +191,6 @@
       "tokenContractLabel": "Token Contract Address",
       "tokenSymbolLabel": "Token Symbol",
       "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
       "validContractAddressError": "Valid token contract address",
       "symbolBetween1and12": "Symbol between 1 and 12 characters",
       "numberBetween0and36": "Number between 0 and 36",
@@ -211,11 +207,9 @@
       "exportKeystore": "Export keystore"
     },
     "airGapSetup": {
-      "backToAccount": "Back to account",
       "heading": "AirGap Setup",
       "step1heading": "Install AirGap on your phone",
       "step1info": "Search for AirGap.it in the store or scan this QR code",
-      "step1buttonNext": "Next",
       "setupSteps1heading": "Open AirGap on the 2nd device",
       "setupSteps2heading": "Create secret key",
       "setupSteps3heading": "Write it down in the right order",
@@ -257,7 +251,6 @@
       "bidding": "Bidding",
       "bidOn": "Bid on",
       "requiredField": "This field is required",
-      "next": "Next",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time"
     },
@@ -285,14 +278,12 @@
       "registryFee": "Include token in global TokenRegistry (tx fees apply)"
     },
     "fungibleTokens": {
-      "backToAccount": "Back to account",
       "addHeading": "Fungible Tokens",
       "addToken": "Add token",
       "tokenContractLabel": "Token Contract Address",
       "tokenSymbolLabel": "Token Symbol",
       "initialSupply": "Initial Supply",
       "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
       "validContractAddressError": "Valid token contract address",
       "symbolBetween1and12": "Symbol between 1 and 12 characters",
       "numberBetween0and36": "Number between 0 and 36",
@@ -386,7 +377,6 @@
       "ledgerAccountCreate": "Create a first account by pressing the button bellow"
     },
     "manageAccounts": {
-      "backToAccount": "Back to account",
       "manageAccounts": "Manage accounts",
       "allAccounts": "All accounts",
       "account": "Account",
@@ -394,7 +384,6 @@
       "enterName": "Enter name"
     },
     "manageNetworks": {
-      "backToAccount": "Back to account",
       "manageNetworks": "Manage networks",
       "networks": "Networks",
       "addNewNetwork": "Add new node",
@@ -410,11 +399,9 @@
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "qrCodeReader": {
-      "backToAccount": "Back to account",
       "heading": "Qr Code Scanner"
     },
     "receive": {
-      "backToAccount": "Back to account",
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
       "copy": "Copy",
       "home": "Home",
@@ -464,7 +451,6 @@
       "toDashboard": "Back to Dashboard"
     },
     "send": {
-      "backToAccount": "Back to account",
       "heading": "New Transfer from",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
@@ -472,7 +458,6 @@
       "success": "Success",
       "seeTransactionExplorer": "See transaction in the explorer.",
       "scan": "Scan QR",
-      "cancel": "Cancel",
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
@@ -481,12 +466,10 @@
       "amount": "Amount",
       "successalert": "You have successfully sent ",
       "to": "To",
-      "from": "From",
       "hash": "Transaction Hash",
       "home": "Home"
     },
     "settings": {
-      "backToAccount": "Back to account",
       "heading": "Settings",
       "tabGeneral": "Language",
       "tabGeneralsmall": "Change your language",
@@ -521,7 +504,6 @@
       "message": "Message"
     },
     "signTransactionByQrCode": {
-      "backToAccount": "Back to account",
       "backToScan": "Back to scan transaction",
       "heading": "Scan with AirGap Vault to sign the transaction",
       "doneBtn": "Done"
@@ -568,7 +550,6 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
-      "back": "Back",
       "noImage": "No Image",
       "domainVerified": "Verified",
       "domainNotVerified": "Not verified",
@@ -598,9 +579,6 @@
       "empty": "Empty",
       "availableLabel": "Available",
       "sendToAddress": "Send address to",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "edit": "Edit",
       "whatIsVerifieddUrl": "What is \"Verified\" URL?",
       "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
       "enterUrl": "Type the URL you want to tip",
@@ -647,11 +625,9 @@
       "sent": "Sent",
       "received": "Received",
       "withdrawals": "Withdrawals",
-      "topups": "Top ups",
-      "all": "All"
+      "topups": "Top ups"
     },
     "transactions": {
-      "backToAccount": "Back to account",
       "heading": "Transaction history",
       "filters": "Filters",
       "loadMore": "Load More",
@@ -659,7 +635,6 @@
       "newTransactions": "new transactions",
       "noTransactions": "No transactions found",
       "type": "Type",
-      "all": "All",
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
@@ -672,11 +647,9 @@
       "apply": "Apply filter",
       "sent": "Sent",
       "received": "Received",
-      "pending": "Pending"
     },
     "utilities": {
       "heading": "Utilities",
-      "backToAccount": "Back to account",
       "tipWebsite": "Tip website",
       "namingSystem": "Naming System",
       "namingSystemInfo": "Register a name so it can be used as your public wallet address",
@@ -719,11 +692,9 @@
     },
     "network": {
       "url": "URL:",
-      "edit": "Edit",
       "delete": "Delete",
       "middleware": "Middleware:",
       "allNetworks": "Your networks",
-      "cancel": "Cancel",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
       "networkUrlPlaceholder": "Enter network URL",
@@ -738,9 +709,7 @@
       "data-collected": "Data Collected",
       "browser": "Browser version",
       "details": "Technical details:",
-      "cancel": "Cancel",
       "donate": "Donate Data"
     }
-  },
-  "redirecting": "Redirecting"
+  }
 }

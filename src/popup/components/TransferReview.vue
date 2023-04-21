@@ -51,7 +51,7 @@
       :label="
         (isMultisig)
           ? $t('modals.multisigTxProposal.amountProposed')
-          : $t('pages.tipPage.amountLabel')
+          : $t('common.amount')
       "
       class="details-item"
     >
@@ -97,7 +97,7 @@
 
     <DetailsItem
       v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
-      :label="$t('pages.signTransaction.total')"
+      :label="$t('common.total')"
       class="details-item"
     >
       <template #value>

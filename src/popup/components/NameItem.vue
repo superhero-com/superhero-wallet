@@ -18,7 +18,7 @@
           v-if="nameEntry.pending"
           class="pending"
         >
-          {{ $t('pages.transactions.pending') }}
+          {{ $t('common.pending') }}
         </span>
         <div
           v-else

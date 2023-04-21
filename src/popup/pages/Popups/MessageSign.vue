@@ -37,7 +37,7 @@
       />
       <BtnMain
         data-cy="accept"
-        :text="$t('pages.signTransaction.confirm')"
+        :text="$t('common.confirm')"
         :disabled="!isConnected"
         @click="resolve()"
       />

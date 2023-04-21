@@ -1,6 +1,6 @@
 <template>
   <BtnBox
-    :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('dashboard.sendCard.title')"
+    :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('common.send')"
     :subtitle="subtitle"
     :icon="ArrowSendIcon"
     :disabled="!isOnline || !isConnected || (!!pendingMultisigTransaction && isMultisig)"

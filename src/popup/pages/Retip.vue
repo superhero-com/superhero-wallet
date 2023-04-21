@@ -40,14 +40,14 @@
       :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
-      {{ $t('pages.tipPage.confirm') }}
+      {{ $t('common.confirm') }}
     </BtnMain>
     <BtnMain
       class="bottom-btn"
       extend
       @click="openCallbackOrGoHome(false)"
     >
-      {{ $t('pages.tipPage.cancel') }}
+      {{ $t('common.cancel') }}
     </BtnMain>
 
     <Loader v-if="loading" />

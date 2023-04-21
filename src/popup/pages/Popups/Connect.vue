@@ -21,7 +21,7 @@
     <div class="permissions">
       <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
         <span class="title">
-          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.addressLabel') }}
+          <CheckMark class="icon" /> {{ $t('common.address') }}
         </span>
         <span class="description">
           {{ $t('pages.connectConfirm.addressRequest') }}

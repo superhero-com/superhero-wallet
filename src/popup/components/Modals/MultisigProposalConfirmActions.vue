@@ -49,7 +49,7 @@
     <template #footer>
       <BtnMain
         variant="muted"
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="closeModal"
       />
       <BtnMain

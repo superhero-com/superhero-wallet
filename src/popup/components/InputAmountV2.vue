@@ -52,7 +52,7 @@
           @{{
             (currentTokenFiatPrice)
               ? currentTokenFiatPriceFormatted
-              : $t('priceNotAvailable')
+              : $t('common.priceNotAvailable')
           }}
         </span>
       </div>

@@ -36,7 +36,7 @@
       extend
       @click="claimTips"
     >
-      {{ $t('pages.tipPage.confirm') }}
+      {{ $t('common.confirm') }}
     </BtnMain>
 
     <Loader v-if="loading" />

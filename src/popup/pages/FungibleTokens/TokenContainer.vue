@@ -30,13 +30,13 @@
       />
       <BtnBox
         v-if="isAe"
-        :text="$t('pages.fungible-tokens.buy')"
+        :text="$t('common.buy')"
         :icon="BuyIcon"
         :href="activeAccountSimplexLink"
       />
       <BtnBox
         v-else
-        :text="$t('pages.fungible-tokens.swap')"
+        :text="$t('common.swap')"
         :icon="SwapIcon"
         :href="DEX_URL"
       />

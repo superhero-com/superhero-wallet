@@ -20,7 +20,7 @@
     />
     <PanelItem
       :to="{ name: 'settings-language' }"
-      :title="$t('pages.settings.tabGeneral')"
+      :title="$t('pages.titles.language')"
     />
     <PanelItem
       :to="{ name: 'settings-currency' }"

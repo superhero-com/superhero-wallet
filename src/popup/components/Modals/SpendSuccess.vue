@@ -58,7 +58,7 @@
       <BtnMain
         inline
         nowrap
-        :text="$t('ok')"
+        :text="$t('common.ok')"
         @click="resolve"
       />
     </template>

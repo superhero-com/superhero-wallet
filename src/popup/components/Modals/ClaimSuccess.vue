@@ -11,7 +11,7 @@
 
     <template #footer>
       <BtnMain @click="resolve">
-        {{ $t('ok') }}
+        {{ $t('common.ok') }}
       </BtnMain>
     </template>
   </Modal>

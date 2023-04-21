@@ -57,7 +57,7 @@
 
         <DetailsItem
           v-if="!isDex"
-          :label="$t('pages.signTransaction.total')"
+          :label="$t('common.total')"
         >
           <TokenAmount
             :amount="totalAmount"
@@ -94,7 +94,7 @@
       <BtnMain
         data-cy="accept"
         third
-        :text="$t('pages.signTransaction.confirm')"
+        :text="$t('common.confirm')"
         @click="resolve()"
       />
     </template>

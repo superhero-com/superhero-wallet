@@ -37,7 +37,7 @@
       <BtnMain
         :variant="mobile ? 'secondary' : 'primary'"
         :extend="!mobile"
-        :text="$t('ok')"
+        :text="$t('common.ok')"
         @click="cancelReading"
       />
       <BtnMain

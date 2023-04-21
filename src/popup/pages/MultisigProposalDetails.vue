@@ -52,7 +52,7 @@
                 <CopyText
                   hide-icon
                   :value="multisigTx.recipientId"
-                  :copied-text="$t('addressCopied')"
+                  :copied-text="$t('common.addressCopied')"
                 >
                   <span class="text-address">{{ splitAddress(multisigTx.recipientId) }}</span>
                 </CopyText>
@@ -90,7 +90,7 @@
               <CopyText
                 hide-icon
                 :value="transaction.hash"
-                :copied-text="$t('hashCopied')"
+                :copied-text="$t('common.hashCopied')"
               >
                 <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
               </CopyText>
@@ -177,7 +177,7 @@
 
           <DetailsItem
             v-if="totalSpent"
-            :label="$t('total')"
+            :label="$t('common.total')"
             data-cy="amount"
           >
             <template #value>
@@ -215,7 +215,7 @@
               :disabled="processingAction || pendingMultisigTxExpired"
               @click="processProposal()"
             >
-              {{ $t('pages.proposalDetails.send') }}
+              {{ $t('common.send') }}
             </BtnMain>
             <BtnMain
               v-else

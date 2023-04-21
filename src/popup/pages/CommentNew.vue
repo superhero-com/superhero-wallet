@@ -15,13 +15,13 @@
         class="cancel-button"
         @click="openCallbackOrGoHome(false)"
       >
-        {{ $t('pages.tipPage.cancel') }}
+        {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
         :disabled="!tippingSupported"
         @click="sendComment"
       >
-        {{ $t('pages.tipPage.confirm') }}
+        {{ $t('common.confirm') }}
       </BtnMain>
     </FixedScreenFooter>
 

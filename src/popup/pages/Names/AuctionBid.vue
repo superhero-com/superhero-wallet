@@ -18,7 +18,7 @@
             />
           </template>
         </DetailsItem>
-        <DetailsItem :label="$t('total')">
+        <DetailsItem :label="$t('common.total')">
           <template #value>
             <TokenAmount
               :amount="+amountTotal"

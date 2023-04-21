@@ -238,15 +238,15 @@ export function secondsToRelativeTime(seconds: number) {
   const secondsPerDay = secondsPerHour * 24;
 
   if (seconds < secondsPerMinute) {
-    return i18n.tc('seconds', Math.round(seconds));
+    return i18n.tc('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.tc('minutes', Math.round(seconds / secondsPerMinute));
+    return i18n.tc('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.tc('hours', Math.round(seconds / secondsPerHour));
+    return i18n.tc('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.tc('days', Math.round(seconds / secondsPerDay));
+  return i18n.tc('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {

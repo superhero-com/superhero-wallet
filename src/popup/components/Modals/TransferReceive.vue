@@ -64,7 +64,7 @@
         data-cy="copy"
         :variant="IS_MOBILE_DEVICE ? 'muted' : 'primary'"
         class="btn-copy"
-        :text="copied ? $t('modals.receive.copied') : $t('modals.receive.copy')"
+        :text="copied ? $t('modals.receive.copied') : $t('common.copy')"
         @click="copyAddress()"
       />
 
