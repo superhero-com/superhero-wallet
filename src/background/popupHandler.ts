@@ -1,21 +1,30 @@
 import { v4 as uuid } from 'uuid';
-import { isTxOfASupportedType, POPUP_TYPE_SIGN, POPUP_TYPE_RAW_SIGN } from '../popup/utils';
+import { Browser } from 'webextension-polyfill';
+import { Dictionary } from '../types';
+import {
+  isTxOfASupportedType,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_RAW_SIGN,
+} from '../popup/utils';
 
-const popups = {};
+declare const browser: Browser;
 
-export const getAeppUrl = (v) => new URL(v.connection.port.sender.url);
+const popups: Dictionary = {};
 
-export const showPopup = async (aepp, type, params) => {
+export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
+
+export const showPopup = async (aepp: any, type: string, params: any) => {
   const id = uuid();
   const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
   const tabs = await browser.tabs.query({ active: true });
   tabs.forEach(({ url: tabURL, id: tabId }) => {
-    const tabUrl = new URL(tabURL);
+    const tabUrl = new URL(tabURL as string);
     if (
       tabUrl.searchParams.get('type') === POPUP_TYPE_CONNECT
-      && decodeURIComponent(tabUrl.searchParams.get('url')) === href
+      && decodeURIComponent(tabUrl.searchParams.get('url') || '') === href
     ) {
-      browser.tabs.remove(tabId);
+      browser.tabs.remove(tabId as number);
     }
   });
 
@@ -51,6 +60,6 @@ export const showPopup = async (aepp, type, params) => {
   });
 };
 
-export const removePopup = (id) => delete popups[id];
+export const removePopup = (id: string) => delete popups[id];
 
-export const getPopup = (id) => popups[id];
+export const getPopup = (id: string) => popups[id];
