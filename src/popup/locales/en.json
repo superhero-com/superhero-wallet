@@ -1436,7 +1436,8 @@
     "maxValue": "This field must be {0} or less",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
-    "invalidAddressChainUrl": "Invalid address, .chain name or URL"
+    "invalidAddressChainUrl": "Invalid address, .chain name or URL",
+    "invalidAddress": "Invalid address"
   },
   "redirecting": "Redirecting",
   "seconds": "{n} seconds | {n} second | {n} seconds",

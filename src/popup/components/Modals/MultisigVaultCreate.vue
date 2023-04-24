@@ -33,7 +33,7 @@
           v-model.trim="signer.address"
           v-validate="{
             required: true,
-            name_registered_address_or_url: true,
+            account_address: true,
           }"
           auto-height
           :label="getSignerLabel(index)"
