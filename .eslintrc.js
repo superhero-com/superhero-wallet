@@ -12,7 +12,7 @@ module.exports = {
     // '@vue/airbnb',
     // '@vue/typescript',
     '@vue/eslint-config-airbnb',
-    '@vue/eslint-config-typescript', 
+    '@vue/eslint-config-typescript',
   ],
   // check if imports actually resolve
   settings: {

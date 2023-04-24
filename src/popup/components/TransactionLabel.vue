@@ -43,7 +43,7 @@
         v-if="isErrorTransaction"
         class="error-type"
       >
-        {{ $t('transaction.returnType')[transaction.tx.returnType] }}
+        {{ $t(`transaction.returnType.${transaction.tx.returnType}`) }}
       </span>
       <span
         v-if="transaction.pending"
@@ -117,7 +117,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { accounts, activeAccount } = useAccounts({ store });
-    const { t } = useI18n();
+    const { tm, t } = useI18n();
 
     const {
       outerTxType,
@@ -134,8 +134,8 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
-      const transactionTypes = t('transaction.type') as unknown as Record<TxType, TranslateResult>;
-      const transactionListTypes = t('transaction.listType') as unknown as Record<TxType, TranslateResult>;
+      const transactionTypes = tm('transaction.type') as unknown as Record<TxType, TranslateResult>;
+      const transactionListTypes = tm('transaction.listType') as unknown as Record<TxType, TranslateResult>;
 
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         const isSent = getTxDirection.value(
