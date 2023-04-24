@@ -108,36 +108,6 @@
       "pointers": "Apuntadores",
       "sign-raw": "Firmar transacción sin procesar por",
       "data-sign": "Firmar Datar"
-    },
-    "add-token": {
-      "title": "Token agregado",
-      "msg": "Token agregado exitosamente"
-    },
-    "deploy-token": {
-      "title": "Token desplegado",
-      "msg": "Token desplegado exitosamente en la dirección: {address}"
-    },
-    "mint/burn-token": {
-      "title": "Token {type} ",
-      "msg": "Token {type} exitosamente"
-    },
-    "allowances": {
-      "create": {
-        "title": "Asignación creada",
-        "msg": "Asignación creada exitosamente"
-      },
-      "transfer": {
-        "title": "Asignación creada",
-        "msg": "Asignación transferida exitosamente"
-      },
-      "change": {
-        "title": "Asignación cambiada",
-        "msg": "Asignación cambiada exitosamente"
-      },
-      "balance": {
-        "title": "algo salió mal",
-        "msg": "Saldo insuficiente"
-      }
     }
   },
   "transaction": {
@@ -204,9 +174,6 @@
       "home": "Superhero Inicio",
       "donate-error": "Donar Data",
       "address": "Dirección de Envio",
-      "deploy-token": "Desplegar token",
-      "add-token": "Agregar token",
-      "mint-burn-token": "Crear/Quemar token",
       "allowances": "Asignaciones",
       "sign-message": "Firmar Mensaje"
     },
@@ -253,26 +220,9 @@
       "notFound": "La página solicitada no pudo ser encontrada",
       "initialPage": "Abrir página inicial"
     },
-    "accountPassword": {
-      "heading": "",
-      "passwordSymbolsError": "se requiere un mínimo de símbolos - ",
-      "weakPasswordError": "Contraseña demasiado débil",
-      "incorrectPasswordError": "!Contraseña incorrecta!",
-      "passwordDoesntMatchError": "Las contraseñas no coinciden",
-      "securingAccount": "Asegurando tu cuenta"
-    },
     "recentTransactions": {
       "recentActivity": "Actividad Reciente",
       "noTransactionsFound": "!No se encontraron transacciones!"
-    },
-    "add-fungible-token": {
-      "heading": "Tokens fungibles",
-      "addToken": "Añadir Token",
-      "tokenContractLabel": "Dirección del Contrato del Token",
-      "tokenSymbolLabel": "Símbolo de Token",
-      "tokenPrecision": "Precisión de Decimales",
-      "token": "Token",
-      "balance": "Saldo"
     },
     "advancedSettings": {
       "heading": "Avanzado",
@@ -297,27 +247,6 @@
       "setupSteps5": "Finaliza vinculando tu bóveda con tu dirección aeternity",
       "linkVault": "Vincular Bóveda"
     },
-    "allowances": {
-      "heading": "Asignaciones",
-      "backToUtilities": "Volver a utilidades",
-      "createAllowance": "Crear asignación",
-      "create-allowance-info": "ësto te permite crear una asignación a quien tu quieras con tus nuevos tokens fungibles",
-      "transfer-allowance": "Transferir asignación",
-      "transfer-allowance-info": "Ësto te permite tomar toda o parte de la asignación de alguien",
-      "all-allowances": "Todas las asignaciones",
-      "allAllowancesInfo": "Ver todas las asignaciones y tomarlas",
-      "get-allowance": "Conseguir asignación",
-      "no-allowances-found": "No se encontraron asignaciones",
-      "select-token": "Seleccionar token"
-    },
-    "manage-allowances": {
-      "allowance-exist": "La asiganción existe",
-      "here": "aquí",
-      "create": "Crear asignación",
-      "transfer": "Transferir asignación",
-      "change": "Cambiar asignación",
-      "address": "Dirección"
-    },
     "auctionBid": {
       "backToAuctions": "Volver a subastas",
       "bidding": "Ofertas",
@@ -339,19 +268,6 @@
       "addressesLabel": "Direcciones",
       "addressesRequest": "Esta aepp está solicitando acceso para ver las direcciones de tu cuenta"
     },
-    "fungibleTokens": {
-      "addHeading": "Tokens Fungibles",
-      "addToken": "Agregar token",
-      "tokenContractLabel": "Dirección de Contrato del Token",
-      "tokenSymbolLabel": "Símbolo del Token",
-      "initialSupply": "Suministro Inicial",
-      "tokenPrecision": "Decimales de Precisión",
-      "validContractAddressError": "Dirección de contrato de token válida",
-      "symbolBetween1and12": "Símbolo entre 1 y 12 caracteres",
-      "numberBetween0and36": "Número entre 0 y 36",
-      "token": "Token",
-      "balance": "Saldo"
-    },
     "fungible-tokens": {
       "add": "Agregar Token Fungible",
       "add-info": "Ésto te permite agregar un token desde el contrato de token fungible desplegado",
@@ -362,28 +278,10 @@
       "mint": "Crear/Quemar token",
       "mint-info": "Ésto te permite crear o quemar una cantidad de tokens"
     },
-    "deploy-token": {
-      "name": "Nombre del Token",
-      "symbol": "Símbolo del Token",
-      "initial-supply": "Suministro inicial del Token",
-      "decimals": "Decimales del Token",
-      "registry-fee": "Incluir token en TokenRegistry global (aplican comisiones de transacción)",
-      "extensions": "Extensiones del Token",
-      "deploy": "Desplegar",
-      "require-burnable": "!Atención! !La condición Swappable requiere que sea quemable!",
-      "advanced": "Advanzado"
-    },
-    "mint-token": {
-      "mint": "Crear/Quemar token",
-      "address": "Dirección",
-      "type": "Seleccionar tipo",
-      "token": "Seleccionar token"
-    },
     "names": {
       "default": "por defecto",
       "balance-error": "El saldo de tu cuenta no es sufciente para ejecutar esta transacción.",
       "pointer-added": "!Nombre {type} exitoso!",
-      "pending-claim": "Pendiente",
       "auto-extend": "Auto-extend",
       "list": {
         "no-names": "No se encontraron nombres",
@@ -442,7 +340,6 @@
       "generateWallet": "Generar Nueva Billetera",
       "importWallet": "Recuperar cuenta existente",
       "passwordError": "La contraseña debe contener 4 símbolos por lo menos.",
-      "incorrectPasswordError": "Contraseña incorrecta.",
       "loginButton": "Entrar",
       "seedPhrase": "Frase semilla",
       "enterSeedPhrase": "introduce tu frase semilla. ",
@@ -459,23 +356,6 @@
       "ledgerUsb": "Conecta tu Ledger a través del USB y desbloquéalo",
       "ledgerLedger": "Abrir la aplicación aeternity en su Ledger",
       "ledgerAccountCreate": "Crear una cuenta pulsando el botón de abajo"
-    },
-    "manageAccounts": {
-      "manageAccounts": "Cuentas de administración",
-      "allAccounts": "Todas las cuentas",
-      "addNewSubAccount": "Añadir nueva subcuenta",
-      "add": "Agregar",
-      "enterName": "Introduce tu nombre"
-    },
-    "manageNetworks": {
-      "manageNetworks": "Administrar redes",
-      "networks": "Redes",
-      "addNewNetwork": "Agregar nuevo nodo",
-      "networkName": "Nombre del nodo",
-      "networkURL": "URL del nodo",
-      "addnetworkName": "Agregar el nombre de nodo",
-      "addnetworkURL": "Agrager URL del nodo",
-      "add": "Agregar"
     },
     "privacyPolicy": {
       "backButton": "Atrás",
@@ -551,40 +431,6 @@
       "hash": "Hash de la Transacción",
       "home": "Inicio"
     },
-    "settings": {
-      "heading": "Ajustes",
-      "tabGeneral": "idioma",
-      "tabGeneralsmall": "Cambia tu idioma",
-      "tabAdvanced": "Avanzado",
-      "tabAdvancedsmall": "Descarga tu keystore o keypair",
-      "tabSecurity": "Securidad & Privacidad",
-      "tabSecuritysmall": "Datos de privacidad, revelar llave privada",
-      "tabAbout": "Acerca de",
-      "tabAboutsmall": "Versión, centro de ayuda e información de contacto",
-      "tabNetworks": "Administrar redes",
-      "tabNetworksSmall": "Conectar a nodo personalizado",
-      "tabRemoveAccount": "Restablecer billetera",
-      "tabSaveErrorLog": "Guardar historial de errores",
-      "tabSaveErrorLogSmall": "Ésto nos ayudará a identificar que esta causando los errores."
-    },
-    "signAndVerifyMsg": {
-      "backToSignVerifyMsg": "Regresar a Firmar/Verificar Mensaje",
-      "backToUtilities": "Regresar a utilidades",
-      "signatureTitle": "Firma",
-      "password": "Contraseña",
-      "signedMessage": "Mensaje firmado:",
-      "copyBtn": "COPIAR",
-      "cancelBtn": "Cancelar",
-      "enterPassword": "Introduce tu contraseña",
-      "signMessage": "Firmar mensaje",
-      "signAndVerify": "Firmar y verificar mensajes",
-      "signMessageinfo": "Ésto te permite firmar mensajes con tu llave privada",
-      "signBtn": "Firmar",
-      "verifyMessage": "Vericar mensaje",
-      "verifyMessageinfo": "Ésto te permite verificar mensajes firmados",
-      "verifyBtn": "Vericar",
-      "message": "Mensaje"
-    },
     "signTransaction": {
       "unknownAccount": "Desconocida",
       "name": "Nombre",
@@ -602,11 +448,6 @@
       "aens": "AENS",
       "balanceError": "El saldo de tu cuenta no es suficiente para ejecutar esta transacción.",
       "from": "De"
-    },
-    "signTransactionByQrCode": {
-      "backToScan": "Regresar al scan de la trasacción",
-      "heading": "Scanear con AirGap Vault para firmar la transacción",
-      "doneBtn": "Hecho"
     },
     "termsOfService": {
       "backButton": "Regresar",
@@ -650,42 +491,8 @@
       "section11Title": "11. PROVISIONES FINALES"
     },
     "tipPage": {
-      "noImage": "No hay Imagen",
-      "domainVerified": "Verificado",
-      "domainNotVerified": "No verificado",
-      "sendHeading": "Enviar una propina",
-      "check": "Chequear",
-      "selectAmount": "Seleccionar monto",
-      "amountToTip": "Monto de propina",
-      "balance": "Saldo",
-      "sendTipBtn": "Enviar propina",
-      "tipDetails": "Detalles",
-      "tipWebsite": "Sitio Web",
-      "heading": "Enviar",
-      "headingSending": "Enviando",
-      "selectTip": "Selecionar monto de propina",
-      "tipDomain": "Dar propina al dominio",
-      "claim": "Reclamar Propinas",
-      "tipsForDomain": "Propinas",
-      "tips": "Propinas",
-      "noTips": "No hay propinas para esta url",
-      "claimInfo": "Si has agregado la dirección de tu billetera a tu URL, puedes reclamar las propinas instantáneamente haciendo click en el botón Reclamar abajo",
-      "title": "Título",
-      "titlePlaceholder": "Envia un mensaje de #apoyo junto con tu donación...",
-      "account": "Cuenta",
+      "claimingExplanation": "Si has agregado la dirección de tu billetera a tu URL, puedes reclamar las propinas instantáneamente haciendo click en el botón Reclamar abajo",
       "url": "Enviar Propina a",
-      "to": "para",
-      "amountLabel": "Monto",
-      "empty": "vacio",
-      "availableLabel": "Disponible",
-      "sendToAddress": "Enviar dirección a",
-      "edit": "Editar Detalles de Propina",
-      "whatIsVerifieddUrl": "¿Qué es URl \"Verified\"?",
-      "whatIsNotVerifiedUrl": "¿qué es URL \"Not verified\"?",
-      "enterUrl": "Escriba la URL a la que quiera dar propina",
-      "notClaimableUrlInfo": "Terceras partes evitan que podamos activar la entrefga directa de propinas al propietario de la URL. Estás enviando esta propina a tu propio riesgo.",
-      "notVerifiedUrlInfo": "Esta URL aún no ha sido verificada. El propietario de la URL no ha creado una cuenta para reclamar sus tokens.",
-      "verifiedUrlInfo": "Si una URL es marcada como verificada. significa que el propietatio de esta URL ya es parte de Superhero — !y eso es buenísimo! Una dirección AE se ha incluido en la URL y las propinas puedess ser reclamadas.",
       "minAmountError": "Las Propinas deberían tener un valor sobre los 0.01 USD en tokens para que puedan ser enviadas."
     },
     "transactionDetails": {
@@ -748,43 +555,10 @@
       "sent": "Enviado",
       "received": "Recibido"
     },
-    "utilities": {
-      "heading": "Utilidades",
-      "tipWebsite": "Propina a sitio web",
-      "namingSystem": "Sistema de Nombres",
-      "namingSystemInfo": "Registrar un nombre para que pueda ser usado como tu dirección pública de billetera",
-      "allowances": "Asignaciones",
-      "fungibleTokens": "Tokens Fungibles",
-      "signAndVerifyMsg": "Firmar / Vericar mensaje",
-      "tipWebsiteInfo": "Hacer una donación a cualquier sitio web público",
-      "allowancesInfo": "Dar o tomar una asignación",
-      "fungibleTokensInfo": "Añadir nuevo token, o desplegar contrato de token",
-      "signAndVerifyMsgInfo": "Firmar un mensaje con tu llave privada o verificar mensaje firmado",
-      "tokenMigration": "Migración de Token",
-      "prepareTokenMigration": "Preparar Migración de token"
-    },
-    "tokenMigration": {
-      "heading": "Migración de Token",
-      "addressLabel": "Tu dirección aeternity",
-      "continue": "Continuar",
-      "checkContinue": "Estoy seguro que mi dirección e identicon son los correctos",
-      "ethPrivateKey": "Llave Privada Ethereum",
-      "migrateToken": "Migrar Token",
-      "migrations": "Migraciones",
-      "seeMigrations": "Ver Migraciones",
-      "migrationsInfo": "están en migración ahora. Estarán disponibles luego del siguiente hardfork. ",
-      "migrateTokenInfo": "El monto de tokens que elegiste migrar, estarán disponibles en esta dirección en el siguiente lanzamiento del hardfork.",
-      "backToTokenMigration": "Regresar a información de migración de token",
-      "backendServiceUrl": "URL de Servicio Backend"
-    },
     "aeAddressInput": {
       "label": "Dirección Aeternity",
       "identicon": "Tu identicon",
       "error": "Dirección AE Inválida"
-    },
-    "welcome": {
-      "send": "Enviar",
-      "across": "por todo el Planeta"
     },
     "popupMessageSign": {
       "title": "Firmar mensaje",

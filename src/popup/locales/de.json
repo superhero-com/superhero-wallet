@@ -185,14 +185,6 @@
       "notFound": "Requested page can't be found",
       "initialPage": "Open initial page"
     },
-    "accountPassword": {
-      "heading": "",
-      "passwordSymbolsError": "Erforderliche Mindest Symbole - ",
-      "weakPasswordError": "Zu schwach Passwort!",
-      "incorrectPasswordError": "Falsches Passwort !",
-      "passwordDoesntMatchError": "Passwort stimmt nicht überein!",
-      "securingAccount": "Sichern Sie Ihren Account"
-    },
     "recentTransactions": {
       "recentActivity": "Recent Activity",
       "noTransactionsFound": "No transactions found!"
@@ -237,30 +229,6 @@
       "setupSteps5": "Beenden Sie von Ihrem Tresor Ihre aeternity Adresse in Verbindung bringen",
       "linkVault": "Link Vault"
     },
-    "allowances": {
-      "heading": "Zulagen",
-      "backToUtilities": "Zurück zu Utilities",
-      "createAllowance": "erstellen Sie Geld",
-      "createAllowanceInfo": "Auf diese Weise können Sie Geld mit Ihrem neuen fungible Token erstellen wem Sie möchten",
-      "createButton": "Erstellen",
-      "transferAllowance": "Transfergeld",
-      "transferAllowanceInfo": "Auf diese Weise können Sie Ihre gesamte Zulage oder einen Teil davon von jemandem nehmen",
-      "transferButton": "Transfer",
-      "allAllowances": "Alle Zertifikate",
-      "allAllowancesInfo": "Alle Ihre Zertifikate und nehmen sie",
-      "seeAllButton": "Alles sehen",
-      "backToAllowances": "Zurück zu Zulagen",
-      "chooseToken": "Wählen Sie ein Token",
-      "allowanceExistMsg": "Diese Allowance bereits vorhanden sein. Wenn Sie es ändern wollen, klicken Sie auf",
-      "allowanceExistHere": "Hier",
-      "allowanceFrom": "Von",
-      "getAllowance": "Kapiert",
-      "tokenChoiceRequired": "Bitte wählen Sie ein Token alle Ihre Zertifikate zu sehen!",
-      "noAllowancesFound": "Keine Zulagen gefunden!",
-      "changeAllowance": "ändern Allowance",
-      "allowedAllowanceAmount": "Aktuelle erlaubt Wertberichtigungsbetrag ist",
-      "changeButton": "Veränderung"
-    },
     "auctionBid": {
       "backToAuctions": "Zurück zu den Auktionen",
       "bidding": "Bieten",
@@ -292,19 +260,6 @@
       "deployTokenContract": "Deploy Token Vertrag",
       "registryFee": "Token in globales TokenRegistry aufnehmen (es fallen Gebühren an)"
     },
-    "fungibleTokens": {
-      "addHeading": "Fungible Tokens",
-      "addToken": "hinzufügen token",
-      "tokenContractLabel": "Token Vertrag Anschrift",
-      "tokenSymbolLabel": "Tokensymbol",
-      "initialSupply": "Erstversorgung",
-      "tokenPrecision": "Dezimalzahlen von Precision",
-      "validContractAddressError": "Gültige Token Vertrag Adresse",
-      "symbolBetween1and12": "Symbol zwischen 1 und 12 Zeichen",
-      "numberBetween0and36": "Zahl zwischen 0 und 36",
-      "token": "Token",
-      "balance": "Balance"
-    },
     "fungibleTokensPage": {
       "backToUtilities": "Zurück zu Utilities",
       "heading": "Fungible Tokens",
@@ -314,15 +269,6 @@
       "deployInfo": "Auf diese Weise können Sie Ihre eigenen fungible Token Vertrag bereitstellen",
       "deployButton": "Deploy Token Vertrag",
       "deployFungToken": "Token bereitstellen"
-    },
-    "mintTokenPage": {
-      "mint": "Mint/Burn token",
-      "mintInfo": "Auf diese Weise können Sie eine Münz- oder Markenmenge herstellen",
-      "mintBtn": "Mint/Burn",
-
-      "address": "Adresse",
-      "enterAmount": "ungültige Menge",
-      "enterAddress": "Adresse eingeben"
     },
     "namingSystemPage": {
       "active": "Active",
@@ -372,7 +318,6 @@
       "securingAccount": "Sichern Sie Ihren Account",
       "generateWallet": "generieren Wallet",
       "passwordError": "Das Passwort muss bei damit 4 Symbolen sein!",
-      "incorrectPasswordError": "Falsches Passwort !",
       "loginButton": "Einloggen",
       "importWallet": "Import wallet",
       "seedPhrase": "Seed phrase",
@@ -390,22 +335,6 @@
       "ledgerUsb": "Schließen Sie Ihren Ledger über USB und entsperren",
       "ledgerLedger": "Öffnen Sie die aeternity App auf Ihrem Ledger",
       "ledgerAccountCreate": "Erstellen Sie ein erstes Konto mit der Taste unten"
-    },
-    "manageAccounts": {
-      "manageAccounts": "Konten verwalten",
-      "allAccounts": "Alle Konten",
-      "add": "hinzufügen",
-      "enterName": "Name eingeben"
-    },
-    "manageNetworks": {
-      "manageNetworks": "verwalten Netzwerke",
-      "networks": "Netzwerke",
-      "addNewNetwork": "Hinzufügen neuer Knoten",
-      "networkName": "Knotenname",
-      "networkURL": "Knoten URL",
-      "addnetworkName": "Knoten hinzufügen Name",
-      "addnetworkURL": "Knoten hinzufügen URL",
-      "add": "Hinzufügen"
     },
     "privacyPolicy": {
       "backButton": "Zurück",
@@ -481,40 +410,6 @@
       "hash": "Transaction Hash",
       "home": "Home"
     },
-    "settings": {
-      "heading": "Einstellungen",
-      "tabGeneral": "Allgemeines",
-      "tabGeneralsmall": "Fügen Sie den Namen anstelle Adresse, ändern Sie Ihre Sprache",
-      "tabAdvanced": "fortgeschritten",
-      "tabAdvancedsmall": "Laden Sie Ihre Schlüsselspeicher oder Keypair",
-      "tabSecurity": "Sicherheit",
-      "tabSecuritysmall": "Datenschutz Daten, Reveal private Schlüssel",
-      "tabAbout": "Über",
-      "tabAboutsmall": "Version, Support-Center und Kontaktinfos",
-      "tabNetworks": "Manage networks",
-      "tabNetworksSmall": "Connect to custom node",
-      "tabRemoveAccount": "Brieftasche zurücksetzen",
-      "tabSaveErrorLog": "Save error log",
-      "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
-    },
-    "signAndVerifyMsg": {
-      "backToSignVerifyMsg": "Zurück zu Zeichen / Überprüfen der Nachricht",
-      "backToUtilities": "Zurück zu Utilities",
-      "signatureTitle": "Unterschrift",
-      "password": "Passwort",
-      "signedMessage": "Signierte Nachricht:",
-      "copyBtn": "KOPIEREN",
-      "cancelBtn": "Stornieren",
-      "enterPassword": "Geben Sie Ihr Passwort",
-      "signMessage": "Sign Nachricht",
-      "signAndVerify": "Anmeldung und überprüfen Nachrichten",
-      "signMessageinfo": "Auf diese Weise können Sie eine Nachricht mit Ihrem privaten Schlüssel unterzeichnen",
-      "signBtn": "Zeichen",
-      "verifyMessage": "Stellen Sie sicher, Nachricht",
-      "verifyMessageinfo": "Auf diese Weise können Sie signierte Nachrichten überprüfen",
-      "verifyBtn": "Überprüfen",
-      "message": "Botschaft"
-    },
     "signTransaction": {
       "unknownAccount": "unbekannte",
       "name": "Name",
@@ -531,11 +426,6 @@
       "newContract": "New Contract",
       "aens": "AENS",
       "balanceError": "Your account balance is not enough to execute this transaction."
-    },
-    "signTransactionByQrCode": {
-      "backToScan": "Zurück zur Scan-Transaktion",
-      "heading": "Scannen mit Airgap Vault, die Transaktion zu unterzeichnen",
-      "doneBtn": "Getan"
     },
     "termsOfService": {
       "backButton": "Back",
@@ -577,44 +467,6 @@
       "section10Title": "10. MODIFICATIONS",
       "section10Content": "The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding the present ​TERMS​. The invalidity of one or more clauses/ provisions in the ​TERMS does not lead to the invalidity of the whole agreement. \n The Privacy Policy is an inseparable part of the present ​TERMS and should be considered as a complementary document with compulsory character. Unless explicitly stated otherwise in the Privacy Policy, all rules from the ​TERMS​ apply respectively.",
       "section11Title": "11. FINAL PROVISIONS"
-    },
-    "tipPage": {
-      "backToUtilities": "Zurück zu Utilities",
-      "noImage": "Kein Bild",
-      "domainVerified": "Verifiziert",
-      "domainNotVerified": "Noch nicht verifiziert",
-      "sendHeading": "Sende einen Tipp",
-      "check": "Prüfen",
-      "selectAmount": "Menge auswählen",
-      "amountToTip": "Menge zu Trinkgeld",
-      "balance": "Balance",
-      "sendTipBtn": "Tipp senden",
-      "tipDetails": "Details",
-      "tipWebsite": "Website",
-      "heading": "Send",
-      "headingSending": "Sending",
-      "selectTip": "Select amount to tip",
-      "tipDomain": "Tip domain",
-      "claim": "Claim Tips",
-      "tipsForDomain": "Tips",
-      "tips": "Tips",
-      "noTips": "There are no tips for this url",
-      "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
-      "title": "Title",
-      "titlePlaceholder": "Send a message of #support along with your donation...",
-      "url": "Send Tip to",
-      "to": "to",
-      "amountLabel": "Amount",
-      "empty": "Empty",
-      "availableLabel": "Available",
-      "sendToAddress": "Send address to",
-      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
-      "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
-      "enterUrl": "Type the URL you want to tip",
-      "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
-      "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
-      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
     },
     "transactionDetails": {
       "heading": "Transaktionen Einzelheiten",
@@ -675,43 +527,10 @@
       "sent": "Sent",
       "received": "Received"
     },
-    "utilities": {
-      "heading": "Dienstprogramme",
-      "tipWebsite": "Tipp Website",
-      "namingSystem": "Benennungssystem",
-      "namingSystemInfo": "Registrieren Sie den Namen und er kann anstelle Ihrer öffentlichen Adresse verwendet werden",
-      "allowances": "Zulagen",
-      "fungibleTokens": "Fungible Tokens",
-      "signAndVerifyMsg": "Nachricht signieren / überprüfen",
-      "tipWebsiteInfo": "Spenden Sie für jede gewünschte Website",
-      "allowancesInfo": "Geben oder nehmen Sie eine Zulage",
-      "fungibleTokensInfo": "Fügen Sie ein neues Token hinzu, oder stellen Sie einen Token-Vertrag bereit",
-      "signAndVerifyMsgInfo": "Signieren Sie eine Nachricht mit Ihrem privaten Schlüssel oder überprüfen Sie eine signierte Nachricht",
-      "tokenMigration": "Token-Migration",
-      "prepareTokenMigration": "Bereiten Sie die Token-Migration vor"
-    },
-    "tokenMigration": {
-      "heading": "Token-Migration",
-      "addressLabel": "Deine Adresse für die Ewigkeit",
-      "continue": "Fortsetzen",
-      "checkContinue": "Ich bin sicher, dass meine Adresse und mein Identicon korrekt sind",
-      "ethPrivateKey": "Privater Ethereum-Schlüssel",
-      "migrateToken": "Token migrieren",
-      "migrations": "Migrationen",
-      "seeMigrations": "Siehe Migrationen",
-      "migrationsInfo": "sind jetzt in der Migration. Sie werden nach der nächsten harten Gabelung verfügbar sein. ",
-      "migrateTokenInfo": "Die Anzahl der zu migrierenden Token wird in der nächsten geplanten Hardfork-Version unter dieser Adresse verfügbar sein.",
-      "backToTokenMigration": "Zurück zu den Token-Migrationsinformationen",
-      "backendServiceUrl": "Backend Service Url"
-    },
     "aeAddressInput": {
       "label": "Aeternity Addressе",
       "identicon": "Dein Identicon",
       "error": "Ungültige AE-Adresse"
-    },
-    "welcome": {
-      "send": "Send",
-      "across": "across the Globe"
     },
     "popupMessageSign": {
       "title": "Sign Nachricht",

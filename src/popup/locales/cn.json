@@ -111,36 +111,6 @@
       "pointers": "指向者",
       "sign-raw": "原生交易签名基于",
       "data-sign": "数字签名"
-    },
-    "add-token": {
-      "title": "代币已添加",
-      "msg": "代币已成功添加"
-    },
-    "deploy-token": {
-      "title": "代币已部署",
-      "msg": "代币在地址: {address}已成功部署"
-    },
-    "mint/burn-token": {
-      "title": "代币{type} ",
-      "msg": "代币{type} 已成功"
-    },
-    "allowances": {
-      "create": {
-        "title": "津贴已创建",
-        "msg": "津贴已成功创建"
-      },
-      "transfer": {
-        "title": "津贴已转移",
-        "msg": "津贴已成功转移"
-      },
-      "change": {
-        "title": "津贴已更改",
-        "msg": "津贴已成功更改"
-      },
-      "balance": {
-        "title": "出错了",
-        "msg": "余额不足"
-      }
     }
   },
   "transaction": {
@@ -210,12 +180,11 @@
       "donate-error": "捐赠数据",
       "networks": "网络",
       "address": "发送地址",
-      "deploy-token": "部署代币",
-      "add-token": "添加代币",
-      "mint-burn-token": "铸造/销毁代币",
       "allowances": "津贴",
       "sign-message": "签名信息",
-      "invite": "邀请"
+      "invite": "邀请",
+      "save-errors-log": "保存错误日志",
+      "reset-wallet": "重置钱包"
     },
     "about": {
       "heading": "关于",
@@ -259,26 +228,9 @@
       "notFound": "找不到请求的页面",
       "initialPage": "打开初始页面"
     },
-    "accountPassword": {
-      "heading": "",
-      "passwordSymbolsError": "需要的最小符号- ",
-      "weakPasswordError": "密码强度太弱。",
-      "incorrectPasswordError": "密码错误。",
-      "passwordDoesntMatchError": "密码不匹配。",
-      "securingAccount": "保护你的帐户"
-    },
     "recentTransactions": {
       "recentActivity": "近期活跃情况",
       "noTransactionsFound": "未发现交易!"
-    },
-    "add-fungible-token": {
-      "heading": "可替换的代币",
-      "add": "添加代币",
-      "contract-label": "代币合约地址",
-      "symbol-label": "代币符号",
-      "decimals-label": "小数位数",
-      "token": "代币",
-      "balance": "余额"
     },
     "advancedSettings": {
       "heading": "高级",
@@ -303,26 +255,6 @@
       "setupSteps5": "将你的保险库连接到aeternity地址以结束",
       "linkVault": "连接Vault"
     },
-    "allowances": {
-      "heading": "津贴",
-      "backToUtilities": "返回公共事业",
-      "create-allowance": "创建津贴",
-      "create-allowance-info": "这允许你用新的可替代代币为任何你想要的人创建一个津贴",
-      "transfer-allowance": "转移津贴",
-      "transfer-allowance-info": "这允许你从别人那里拿走你所有的或部分津贴",
-      "all-allowances": "所有津贴",
-      "all-allowances-info": "查看你的所有津贴并拿走",
-      "get-allowance": "获取津贴",
-      "no-allowances-found": "未发现津贴",
-      "select-token": "选择代币"
-    },
-    "manage-allowances": {
-      "allowance-exist": "存在津贴",
-      "here": "这里",
-      "create": "创建津贴",
-      "transfer": "转移津贴",
-      "change": "更改津贴"
-    },
     "auctionBid": {
       "backToAuctions": "返回拍卖",
       "bidding": "出价",
@@ -344,19 +276,6 @@
       "addressesLabel": "地址",
       "addressesRequest": "aepp请求查看你的帐户地址"
     },
-    "fungibleTokens": {
-      "addHeading": "可替代代币",
-      "addToken": "添加代币",
-      "tokenContractLabel": "代币合约地址",
-      "tokenSymbolLabel": "代币符号",
-      "initialSupply": "初始供应量",
-      "tokenPrecision": "小数位数",
-      "validContractAddressError": "有效的代币合约地址",
-      "symbolBetween1and12": "符号为数为1-12个字符",
-      "numberBetween0and36": "数量为0-36位",
-      "token": "代币",
-      "balance": "余额"
-    },
     "token-details": {
       "token": "代币"
     },
@@ -370,27 +289,10 @@
       "mint": "铸造/销毁代币",
       "mint-info": "这允许你铸造或销毁代币数量"
     },
-    "deploy-token": {
-      "name": "代币名称",
-      "symbol": "代币符号",
-      "initial-supply": "代币初始供应量",
-      "decimals": "代币小数位数",
-      "registry-fee": "添加代币到全球代币注册表(收取tx费用)",
-      "extensions": "代币扩展",
-      "deploy": "部署",
-      "require-burnable": "注意！切换需要燃料！",
-      "advanced": "高级"
-    },
-    "mint-token": {
-      "mint": "铸造/销毁代币",
-      "type": "选择类型",
-      "token": "选择代币"
-    },
     "names": {
       "default": "默认",
       "balance-error": "你的帐户余额不足以支付这笔交易。",
       "pointer-added": "名称{type} 成功！",
-      "pending-claim": "待定",
       "auto-extend": "Auto-extend",
       "list": {
         "no-names": "未发现名称",
@@ -449,7 +351,6 @@
       "generateWallet": "生成新钱包",
       "importWallet": "检索现有帐户",
       "passwordError": "密码至少需要4个符号。",
-      "incorrectPasswordError": "密码错误",
       "loginButton": "登录",
       "seedPhrase": "助记词",
       "enterSeedPhrase": "输入你的助记词。 ",
@@ -466,22 +367,6 @@
       "ledgerUsb": "通过USB连接你的Ledger并解锁它",
       "ledgerLedger": "在Ledger上打开aeternity app",
       "ledgerAccountCreate": "点击下方按钮创建第一个帐户"
-    },
-    "manageAccounts": {
-      "manageAccounts": "管理账户",
-      "allAccounts": "所有账户",
-      "add": "增加",
-      "enterName": "输入名称"
-    },
-    "manageNetworks": {
-      "manageNetworks": "管理网络",
-      "networks": "网络",
-      "addNewNetwork": "添加新节点",
-      "networkName": "节点名称",
-      "networkURL": "节点URL",
-      "addnetworkName": "节点的URL",
-      "addnetworkURL": "添加节点名称",
-      "add": "添加"
     },
     "privacyPolicy": {
       "backButton": "返回",
@@ -556,40 +441,6 @@
       "hash": "转账Hash",
       "home": "主页"
     },
-    "settings": {
-      "heading": "设置",
-      "tabGeneral": "语言",
-      "tabGeneralsmall": "更改语言",
-      "tabAdvanced": "高级",
-      "tabAdvancedsmall": "下载你的keystore或keypair",
-      "tabSecurity": "安全 & 隐私",
-      "tabSecuritysmall": "隐私数据，显示私钥",
-      "tabAbout": "关于",
-      "tabAboutsmall": "版本，支持中心，和联系信息",
-      "tabNetworks": "管理网络",
-      "tabNetworksSmall": "连接到常用节点",
-      "tabRemoveAccount": "重置钱包",
-      "tabSaveErrorLog": "保存错误日志",
-      "tabSaveErrorLogSmall": "这将会帮助我们区分是什么引发了错误。"
-    },
-    "signAndVerifyMsg": {
-      "backToSignVerifyMsg": "返回签名/验证消息",
-      "backToUtilities": "回到公用事业",
-      "signatureTitle": "签名",
-      "password": "密码",
-      "signedMessage": "签名消息:",
-      "copyBtn": "复制",
-      "cancelBtn": "取消",
-      "enterPassword": "输入密码",
-      "signMessage": "签名消息",
-      "signAndVerify": "签名并验证消息",
-      "signMessageinfo": "这允许你用私钥签名消息",
-      "signBtn": "签名",
-      "verifyMessage": "验证消息",
-      "verifyMessageinfo": "这允许您验证已签名的消息",
-      "verifyBtn": "验证",
-      "message": "消息"
-    },
     "signTransaction": {
       "unknownAccount": "未知",
       "name": "名称",
@@ -607,11 +458,6 @@
       "aens": "AENS",
       "balanceError": "你的帐户余额不足以执行这笔交易。",
       "from": "从"
-    },
-    "signTransactionByQrCode": {
-      "backToScan": "返回查看交易",
-      "heading": "扫描AirGap Vault来完成交易",
-      "doneBtn": "完成"
     },
     "termsOfService": {
       "backButton": "返回",
@@ -654,40 +500,8 @@
       "section11Title": "11. 最后条款"
     },
     "tipPage": {
-      "noImage": "无图像",
-      "domainVerified": "已验证",
-      "domainNotVerified": "未验证",
-      "sendHeading": "发送小费",
-      "check": "检查",
-      "selectAmount": "选择数量",
-      "amountToTip": "打赏数量",
-      "balance": "余额",
-      "sendTipBtn": "发送小费",
-      "tipDetails": "细节",
-      "tipWebsite": "网站",
-      "heading": "发送",
-      "headingSending": "正在发送",
-      "selectTip": "选择打赏数量",
-      "tipDomain": "打赏域名",
-      "claim": "领取小费",
-      "tipsForDomain": "小费",
-      "tips": "小费",
-      "noTips": "这个url没有小费",
-      "claimInfo": "如果您已经将您的钱包地址添加到您的URL，通过点击下面的领取按钮您可以立即领取小费",
-      "title": "标题",
-      "titlePlaceholder": "发送一条支持信息搭配你的捐赠...",
+      "claimingExplanation": "如果您已经将您的钱包地址添加到您的URL，通过点击下面的领取按钮您可以立即领取小费",
       "url": "发送小费到",
-      "to": "到",
-      "amountLabel": "数量",
-      "empty": "清空",
-      "availableLabel": "可用的",
-      "sendToAddress": "发送地址到",
-      "whatIsVerifieddUrl": "什么是 \"验证过的\" URL?",
-      "whatIsNotVerifiedUrl": "什么是  \"未验证过的\" URL?",
-      "enterUrl": "输入您想打赏的URL",
-      "notClaimableUrlInfo": "第三方问题阻止我们直接发送小费给网址所有者。您发送此小费的风险由您自己承担。",
-      "notVerifiedUrlInfo": "这个网址还没有被验证。URL的所有者必须创建帐户来领取他们的代币。",
-      "verifiedUrlInfo": "如果一个URL被标记为已验证，就意味着这个URL的所有者已经是一个超级英雄了——这太棒了!AE地址已经包含在URL中，可以领取小费。",
       "minAmountError": "小费的代币价值必须超过0.01美元才能发送。"
     },
     "transactionDetails": {
@@ -748,42 +562,10 @@
       "sent": "发送",
       "received": "接收"
     },
-    "utilities": {
-      "heading": "公用事业",
-      "tipWebsite": "打赏网站",
-      "namingSystem": "名称系统",
-      "namingSystemInfo": "注册一个名称当作你的公开钱包地址使用",
-      "allowances": "津贴",
-      "fungibleTokens": "可替代的代币",
-      "signAndVerifyMsg": "签名 / 验证消息",
-      "tipWebsiteInfo": "向任何公开网站捐款",
-      "allowancesInfo": "给出或获取津贴",
-      "fungibleTokensInfo": "增加新代币，或部署代币合约",
-      "signAndVerifyMsgInfo": "用私钥签名消息或验证已签名的消息",
-      "tokenMigration": "代币迁移",
-      "prepareTokenMigration": "为代币迁移做准备"
-    },
-    "tokenMigration": {
-      "heading": "代币迁移",
-      "addressLabel": "你的aeternity地址",
-      "continue": "继续",
-      "checkContinue": "我确认我的地址和identicon是正确的",
-      "ethPrivateKey": "以太坊私钥",
-      "migrateToken": "迁移代币",
-      "migrations": "迁移",
-      "seeMigrations": "查看迁移",
-      "migrationsInfo": "在迁移中。他们将会在下一次硬分叉后有效。",
-      "migrateTokenInfo": "您选择迁移的代币将在下一个计划的硬叉版本后在这个地址上可用。",
-      "backToTokenMigration": "返回代币迁移信息",
-      "backendServiceUrl": "后端服务Url"
-    },
     "aeAddressInput": {
       "label": "Aeternity地址",
       "identicon": "你的 identicon",
       "error": "无效AE地址"
-    },
-    "welcome": {
-      "across": "在全球范围内"
     },
     "popupMessageSign": {
       "title": "签名消息",

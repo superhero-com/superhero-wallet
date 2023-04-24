@@ -29,12 +29,12 @@
     />
     <PanelItem
       :to="{ name: 'settings-errors-log' }"
-      :title="$t('pages.settings.tabSaveErrorLog')"
+      :title="$t('pages.titles.save-errors-log')"
       :info="saveErrorLog ? 'On' : 'Off'"
     />
     <PanelItem
       :to="{ name: 'settings-reset-wallet' }"
-      :title="$t('pages.settings.tabRemoveAccount')"
+      :title="$t('pages.titles.reset-wallet')"
     />
   </div>
 </template>
