@@ -52,7 +52,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t } = useI18n();
+    const { t, tm } = useI18n();
     const {
       direction,
       txType,
@@ -81,7 +81,7 @@ export default defineComponent({
         externalLabels.push(t('transaction.type.payingForTx'));
       }
 
-      const transactionTypes = t('transaction.type') as any;
+      const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
       const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
