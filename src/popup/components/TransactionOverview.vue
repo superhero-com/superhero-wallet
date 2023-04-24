@@ -51,7 +51,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t } = useI18n();
+    const { t, tm } = useI18n();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
@@ -83,7 +83,7 @@ export default defineComponent({
     }
 
     const preparedTransaction = computed((): TransactionData => {
-      const transactionTypes = t('transaction.type') as unknown as Record<TxType, TranslateResult>;
+      const transactionTypes = tm('transaction.type') as unknown as Record<TxType, TranslateResult>;
 
       const {
         senderId,
