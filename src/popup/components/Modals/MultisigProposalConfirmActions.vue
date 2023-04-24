@@ -99,7 +99,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t } = useI18n();
+    const { t, tm } = useI18n();
 
     const {
       activeMultisigAccount,
@@ -129,14 +129,14 @@ export default defineComponent({
       props.action === FUNCTION_TYPE_MULTISIG.confirm ? 'success' : 'critical'
     ));
 
-    const confirmActionContent = computed((): TranslateResult => {
+    const confirmActionContent = computed((): Record<string, TranslateResult> => {
       switch (props.action) {
         case FUNCTION_TYPE_MULTISIG.confirm:
-          return t('pages.proposalDetails.signDialog');
+          return tm('pages.proposalDetails.signDialog');
         case FUNCTION_TYPE_MULTISIG.revoke:
-          return t('pages.proposalDetails.revokeDialog');
+          return tm('pages.proposalDetails.revokeDialog');
         default:
-          return t('pages.proposalDetails.refuseDialog');
+          return tm('pages.proposalDetails.refuseDialog');
       }
     });
 
