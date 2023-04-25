@@ -52,6 +52,7 @@ export default defineComponent({
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
     defaultText: { type: String, required: true },
+    itemTitle: { type: String as PropType<keyof IFormSelectOption>, default: 'text' },
     /**
      * Force to always display the text provided by the `defaultText` prop.
      */
@@ -67,7 +68,7 @@ export default defineComponent({
         return props.defaultText;
       }
       return (props.value)
-        ? props.options.find(({ value }) => value === props.value)?.text
+        ? props.options.find(({ value }) => value === props.value)?.[props.itemTitle]
         : props.defaultText;
     });
 
