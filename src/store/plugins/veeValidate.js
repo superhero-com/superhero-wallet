@@ -42,6 +42,7 @@ Object.assign(ErrorBag.prototype, {
 Validator.extend('url', (url) => isValidURL(url));
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
+Validator.extend('account_address', (value) => Crypto.isAddressValid(value, 'ak'));
 Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
@@ -53,6 +54,7 @@ Validator.localize('en', {
     url: () => i18n.t('validation.url'),
     required: () => i18n.t('validation.required'),
     account: () => i18n.t('validation.address'),
+    account_address: () => i18n.t('validation.invalidAddress'),
     name: () => i18n.t('validation.name'),
     name_registered_address: () => i18n.t('validation.nameRegisteredAddress'),
     name_unregistered: () => i18n.t('validation.nameUnregistered'),
