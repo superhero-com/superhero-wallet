@@ -16,7 +16,6 @@ const store = new Vuex.Store({
     wallet: getters.wallet,
     accounts: getters.accounts,
     account: getters.account,
-    isLoggedIn: getters.isLoggedIn,
     networks: getters.networks,
     activeNetwork: getters.activeNetwork,
   },

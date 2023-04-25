@@ -32,6 +32,7 @@
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
 import type { IFormSelectOption } from '../../../types';
+import { useModals } from '../../../composables';
 
 import BtnPlain from '../buttons/BtnPlain.vue';
 import InputField from '../InputField.vue';
@@ -62,7 +63,9 @@ export default defineComponent({
      */
     unstyled: Boolean,
   },
-  setup(props, { emit, root }) {
+  setup(props, { emit }) {
+    const { openModal } = useModals();
+
     const currentText = computed(() => {
       if (props.persistentDefaultText) {
         return props.defaultText;
@@ -73,15 +76,11 @@ export default defineComponent({
     });
 
     function openOptionsModal() {
-      root.$store.dispatch(
-        'modals/open',
-        {
-          name: MODAL_FORM_SELECT_OPTIONS,
-          value: props.value,
-          options: props.options,
-          title: props.defaultText,
-        },
-      )
+      openModal(MODAL_FORM_SELECT_OPTIONS, {
+        value: props.value,
+        options: props.options,
+        title: props.defaultText,
+      })
         .then((val) => emit('select', val))
         .catch(() => null); // Closing the modal does nothing
     }

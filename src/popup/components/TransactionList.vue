@@ -51,21 +51,21 @@ import {
   watch,
 } from '@vue/composition-api';
 import type {
-  IAccount,
   INetwork,
   ITokenList,
   ITx,
 } from '../../types';
 import {
-  TX_FUNCTIONS,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   MOBILE_WIDTH,
+  TX_DIRECTION,
   defaultTransactionSortingCallback,
   getInnerTransaction,
 } from '../utils';
 import { useGetter, useState } from '../../composables/vuex';
 import {
+  useAccounts,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
@@ -96,9 +96,8 @@ export default defineComponent({
     const loading = ref(false);
     const isDestroyed = ref(false);
 
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    const { activeAccount } = useAccounts({ store: root.$store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
@@ -110,7 +109,6 @@ export default defineComponent({
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const transactions = useState('transactions');
-    const account = useGetter<IAccount>('account');
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
     const getTxSymbol = useGetter('getTxSymbol');
@@ -121,7 +119,7 @@ export default defineComponent({
 
     const currentAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
-      : account.value.address);
+      : activeAccount.value.address);
 
     const filteredTransactions = computed(
       () => {
@@ -156,9 +154,9 @@ export default defineComponent({
               case FILTER_MODE.dex:
                 return isDex.value;
               case FILTER_MODE.out:
-                return direction.value === TX_FUNCTIONS.sent && !isDex.value;
+                return direction.value === TX_DIRECTION.sent && !isDex.value;
               case FILTER_MODE.in:
-                return direction.value === TX_FUNCTIONS.received;
+                return direction.value === TX_DIRECTION.received;
               default:
                 throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
             }
@@ -236,7 +234,6 @@ export default defineComponent({
       displayMode,
       availableTokens,
       transactions,
-      account,
       activeNetwork,
       getAccountPendingTransactions,
       getTxSymbol,

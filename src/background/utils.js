@@ -1,12 +1,34 @@
+import { useAccounts } from '../composables';
+import { IS_FIREFOX } from '../lib/environment';
 import {
-  setContractInstance,
-  contractCall,
+  CONNECTION_TYPES,
   getAddressByNameEntry,
   watchUntilTruthy,
 } from '../popup/utils';
 import store from './store';
 
+const BACKEND_AE_VM = 'aevm';
+const BACKEND_FATE = 'fate';
+
 let tippingContract;
+
+export const setContractInstance = async (tx, sdk, contractAddress = null) => {
+  let contractInstance = false;
+  try {
+    let backend = BACKEND_FATE;
+    if (typeof tx.abi_version !== 'undefined' && tx.abi_version !== 3) {
+      backend = BACKEND_AE_VM;
+    }
+    contractInstance = await sdk.getContractInstance({
+      source: tx.source,
+      contractAddress,
+    });
+    contractInstance.setOptions({ backend });
+  } catch (e) {
+    handleUnknownError(e);
+  }
+  return Promise.resolve(contractInstance);
+};
 
 const getAddress = async (name) => {
   await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
@@ -27,22 +49,62 @@ export const getTippingContractInstance = async (tx) => {
   return tippingContract;
 };
 
-export const contractCallStatic = async ({ tx, callType }) => {
-  const { account } = store.getters;
-  if (typeof callType !== 'undefined' && callType === 'static' && account) {
-    const contractInstance = await getTippingContractInstance(tx);
-    const call = await contractCall({
-      instance: contractInstance,
-      method: tx.method,
-      params: [...tx.params, tx.options],
-    });
-    if (call) return call;
-    const error = new Error('Contract call failed');
-    error.payload = { tx };
-    throw error;
+export const contractCall = async ({
+  instance,
+  method,
+  params = [],
+  decode = false,
+  async = true,
+}) => {
+  let call;
+  try {
+    call = await instance.methods[method](...params);
+  } catch (e) {
+    if (e.message.indexOf('wrong_abi_version') > -1) {
+      instance.setOptions({ backend: BACKEND_AE_VM });
+      return contractCall({
+        instance, method, params, decode, async,
+      });
+    }
+    throw e.message;
   }
-  if (!store.getters.isLoggedIn && typeof callType !== 'undefined' && callType === 'static') {
-    throw new Error('You need to unlock the wallet first');
+
+  if (async) {
+    return decode ? call.decodedResult : call;
+  }
+  return instance.methods[method](...params);
+};
+
+export const contractCallStatic = async ({ tx, callType }) => {
+  const { isLoggedIn } = useAccounts({ store });
+  if (typeof callType !== 'undefined' && callType === 'static') {
+    if (isLoggedIn.value) {
+      const contractInstance = await getTippingContractInstance(tx);
+      const call = await contractCall({
+        instance: contractInstance,
+        method: tx.method,
+        params: [...tx.params, tx.options],
+      });
+      if (call) {
+        return call;
+      }
+      const error = new Error('Contract call failed');
+      error.payload = { tx };
+      throw error;
+    } else {
+      throw new Error('You need to unlock the wallet first');
+    }
   }
   throw new Error('No data to return');
+};
+
+export const detectConnectionType = (port) => {
+  const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
+  const [senderUrl] = port.sender.url.split('?');
+  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
+    || IS_FIREFOX;
+  if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
+    return port.name;
+  }
+  return CONNECTION_TYPES.OTHER;
 };

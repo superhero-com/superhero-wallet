@@ -21,6 +21,8 @@ export * from './router';
 export * from './filter';
 export * from './forms';
 
+export type Dictionary<T = any> = Record<string, T>;
+
 /**
  * Convert `key: val` objects into union of values.
  */
@@ -31,7 +33,16 @@ export type ObjectValues<T> = T[keyof T];
  */
 type PublicPart<T> = {[K in keyof T]: T[K]};
 
+/**
+ * Allowed options that can be passed to our fetch utility functions
+ */
+export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
+  body?: object;
+}
+
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
+
+export type ResolveRejectCallback = (...args: any) => void;
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
@@ -52,6 +63,11 @@ export interface IAppData {
   url: string;
   host: string;
   protocol?: string;
+}
+
+export interface IWallet {
+  privateKey: any;
+  chainCode: any;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -428,13 +444,34 @@ export interface ITopHeader {
 
 export type ISignMessage = (m: any) => Promise<any>
 
+export interface IName {
+  autoExtend: boolean;
+  createdAtHeight: number;
+  expiresAt: number;
+  hash: string;
+  name: string;
+  owner: string;
+  pointers: Dictionary;
+}
+
+/**
+ * Data fetched with the use of `sdk.api.getNameEntryByName` method.
+ */
+export interface INameEntryFetched {
+  id: string;
+  owner: string;
+  pointers: { id: string; key: string }[];
+  ttl: number;
+}
+
 /**
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
  */
 export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
-  Ae: Record<string, any>;
+  addRpcClient: (connection: any) => any;
+  Ae: Dictionary;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
   balance: (address: string) => Promise<number>;
@@ -462,6 +499,7 @@ export interface ISdk {
   payingForTx(arg0: any): any;
   poll: (txHash: string, options: any) => any;
   pool: Map<string, any>;
+  shareWalletInfo: (c: any) => any;
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
@@ -526,14 +564,15 @@ export interface IMiddlewareStatus {
   nodeVersion: string
 }
 
-export interface IName {
-  autoExtend: boolean
-  createdAtHeight: number
-  expiresAt: number
-  hash: string
-  name: string
-  owner: string
-  pointers: Record<string, any>
+export interface IPopupConfig {
+  type: string;
+  app: IAppData;
+  action?: any;
+  data?: string;
+  message?: string;
+  transaction?: Partial<ITx>;
+  resolve?: any;
+  reject?: any;
 }
 
 export interface IResponseChallenge {
@@ -615,3 +654,12 @@ export interface IDefaultComposableOptions {
    */
   store: Store<any>
 }
+
+export type StatusIconType =
+  | 'critical'
+  | 'alert'
+  | 'warning'
+  | 'info'
+  | 'success'
+  | 'not-secure'
+  | 'help';

@@ -21,9 +21,7 @@
             </template>
           </template>
           <template #value>
-            <AccountItem
-              :address="account.address"
-            />
+            <AccountItem :address="activeAccount.address" />
           </template>
         </DetailsItem>
 
@@ -41,8 +39,8 @@
       <ModalHeader :title="$t('modals.send.sendTitle')" />
       <div class="account-row">
         <AccountItem
-          :address="account.address"
-          :name="account.name"
+          :address="activeAccount.address"
+          :name="activeAccount.name"
           size="md"
         />
       </div>
@@ -52,7 +50,7 @@
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
-        not_same_as: isMultisig? multisigVaultAddress : account.address,
+        not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
         name_registered_address_or_url: true,
         token_to_an_address: { isToken: !isAe },
       }"
@@ -181,14 +179,12 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type {
-  IAccount,
   IFormSelectOption,
   IInputMessage,
   IToken,
   ITokenList,
 } from '../../types';
 import {
-  MODAL_DEFAULT,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
@@ -199,11 +195,13 @@ import {
   getAccountNameToDisplay,
 } from '../utils';
 import {
+  useAccounts,
   useBalances,
   useMaxAmount,
+  useModals,
   useMultisigAccounts,
 } from '../../composables';
-import { useState, useGetter } from '../../composables/vuex';
+import { useState } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -258,12 +256,12 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
 
+    const { openModal, openDefaultModal } = useModals();
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { accounts, activeAccount } = useAccounts({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
-    const account = useGetter<IAccount>('account');
-    const accounts = useGetter<IAccount[]>('accounts');
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -387,9 +385,7 @@ export default defineComponent({
     }
 
     function showRecipientHelp() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_RECIPIENT_INFO,
-      });
+      openModal(MODAL_RECIPIENT_INFO);
     }
 
     function handleAssetChange(selectedAsset: IToken) {
@@ -397,11 +393,11 @@ export default defineComponent({
     }
 
     async function openScanQrModal() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
         title: root.$t('pages.send.scanAddress'),
         icon: 'critical',
       });
+
       if (scanResult?.trim().charAt(0) === '{') {
         let parsedScanResult: any = null;
         try {
@@ -410,8 +406,7 @@ export default defineComponent({
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
+          openDefaultModal({
             title: root.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -422,8 +417,7 @@ export default defineComponent({
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
-          formModel.value.address = '';
+          openDefaultModal({ msg: root.$t('modals.insufficient-balance.msg') });
           return;
         }
 
@@ -454,12 +448,13 @@ export default defineComponent({
     }
 
     function editPayload() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_PAYLOAD_FORM,
+      openModal(MODAL_PAYLOAD_FORM, {
         payload: formModel.value.payload,
-      }).then((text) => {
-        formModel.value.payload = text;
-      }).catch(() => null);
+      })
+        .then((text) => {
+          formModel.value.payload = text;
+        })
+        .catch(() => null);
     }
 
     function clearPayload() {
@@ -480,7 +475,7 @@ export default defineComponent({
     onMounted(async () => {
       if (
         props.isMultisig
-        && !activeMultisigAccount.value?.signers.includes(account.value.address)
+        && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
       ) {
         root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
@@ -512,7 +507,7 @@ export default defineComponent({
       error,
       amountMessage,
       availableTokens,
-      account,
+      activeAccount,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
       urlStatus,

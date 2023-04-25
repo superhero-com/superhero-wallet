@@ -41,7 +41,7 @@ export function useCurrencies({
 
   async function loadAeternityData() {
     try {
-      [aeternityData.value] = await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`);
+      [aeternityData.value] = await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`) || [];
     } catch (e) {
       handleUnknownError(e);
       aeternityData.value = undefined;

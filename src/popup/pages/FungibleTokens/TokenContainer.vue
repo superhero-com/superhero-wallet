@@ -32,7 +32,7 @@
         v-if="isAe"
         :text="$t('pages.fungible-tokens.buy')"
         :icon="BuyIcon"
-        :href="simplexLink"
+        :href="activeAccountSimplexLink"
       />
       <BtnBox
         v-else
@@ -83,7 +83,6 @@ import {
   DEX_URL,
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
-  buildSimplexLink,
   isContract,
 } from '../../utils';
 import {
@@ -94,7 +93,12 @@ import {
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
 } from '../../router/routeNames';
-import { useSdk, useTokensList, useCurrencies } from '../../../composables';
+import {
+  useSdk,
+  useTokensList,
+  useCurrencies,
+  useAccounts,
+} from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -104,8 +108,8 @@ import OpenTransferReceiveModalButton from '../../components/OpenTransferReceive
 import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
 import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
-import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 import Tab from '../../components/tabs/Tab.vue';
+import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 
 import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/credit-card.svg?vue-component';
@@ -124,9 +128,11 @@ export default defineComponent({
     OpenTransferSendModalButton,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
     const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+
+    const { getSdk } = useSdk({ store: root.$store });
+    const { activeAccountSimplexLink } = useAccounts({ store: root.$store });
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
       store: root.$store,
@@ -159,12 +165,10 @@ export default defineComponent({
     ];
     const loading = ref<boolean>(true);
     const tokenPairs = ref({ token0: null, token1: null });
-    const account = useGetter('account');
     const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
     const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
     const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
 
     const tokenData = computed(() => {
@@ -207,7 +211,7 @@ export default defineComponent({
       contractId,
       isAe,
       loading,
-      simplexLink,
+      activeAccountSimplexLink,
       tabs,
       tokenData,
       tokenPairs,

@@ -1,5 +1,6 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import { useModals } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -50,8 +51,9 @@ export default {
         : account;
       return Crypto.sign(data, secretKey);
     },
-    async confirmRawDataSigning({ dispatch }, { data, app }) {
-      await dispatch('modals/open', { name: MODAL_CONFIRM_RAW_SIGN, data, app }, { root: true });
+    async confirmRawDataSigning(context, { data, app }) {
+      const { openModal } = useModals();
+      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app });
     },
     async confirmTxSigning({ dispatch }, { encodedTx, app }) {
       if (!isTxOfASupportedType(encodedTx)) {
@@ -66,11 +68,8 @@ export default {
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
-        await dispatch(
-          'modals/open',
-          { name: MODAL_CONFIRM_TRANSACTION_SIGN, transaction: txObject },
-          { root: true },
-        );
+        const { openModal } = useModals();
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { transaction: txObject });
       }
     },
     sign({ dispatch }, data) {

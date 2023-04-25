@@ -8,7 +8,9 @@
   />
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { StatusIconType } from '../../types';
 import TimesCircle from '../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../icons/question-circle.svg?vue-component';
 import Alert from '../../icons/alert.svg?vue-component';
@@ -17,13 +19,13 @@ import CheckCircle from '../../icons/check-circle.svg?vue-component';
 import NotSecure from '../../icons/not-secure.svg?vue-component';
 import Globe from '../../icons/globe.svg?vue-component';
 
-export default {
+export default defineComponent({
   props: {
-    status: { type: String, required: true },
+    status: { type: String as PropType<StatusIconType>, required: true },
   },
-  computed: {
-    icon() {
-      switch (this.status) {
+  setup(props) {
+    const icon = computed(() => {
+      switch (props.status) {
         case 'critical':
           return TimesCircle;
         case 'alert':
@@ -41,9 +43,13 @@ export default {
         default:
           return null;
       }
-    },
+    });
+
+    return {
+      icon,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

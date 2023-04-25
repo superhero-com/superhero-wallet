@@ -1,14 +1,16 @@
+import { useModals } from '../../composables';
 import { MODAL_SPEND_SUCCESS, watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
+  const { openModal } = useModals();
+
   const waitTransactionMined = async ({
     hash, type, tipUrl, recipient: recipientId, tx, ...otherTx
   }) => {
     const network = store.getters.activeNetwork?.networkId;
     try {
       const transaction = await store.getters['sdkPlugin/sdk'].poll(hash);
-      const showSpendModal = () => store.dispatch('modals/open', {
-        name: MODAL_SPEND_SUCCESS,
+      const showSpendModal = () => openModal(MODAL_SPEND_SUCCESS, {
         transaction: {
           tipUrl,
           ...otherTx,

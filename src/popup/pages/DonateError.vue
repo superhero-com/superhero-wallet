@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { useModals } from '../../composables';
 import FormTextarea from '../components/form/FormTextarea.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 
@@ -63,16 +64,18 @@ export default {
   },
   methods: {
     async donate() {
+      const { openDefaultModal } = useModals();
+
       try {
         await this.$store.dispatch('donateError', { ...this.entry, description: this.description });
-        await this.$store.dispatch('modals/open', {
-          name: 'default',
-          ...this.$t('modals.donate-errors'),
+        await openDefaultModal({
+          title: this.$t('modals.donate-errors.title'),
+          msg: this.$t('modals.donate-errors.msg'),
         });
       } catch (e) {
-        await this.$store.dispatch('modals/open', {
-          name: 'default',
-          ...this.$t('modals.donate-errors-error'),
+        await openDefaultModal({
+          title: this.$t('modals.donate-errors-error.title'),
+          msg: this.$t('modals.donate-errors-error.msg'),
         });
       } finally {
         this.$router.push('/account');

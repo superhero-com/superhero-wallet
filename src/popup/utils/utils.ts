@@ -3,9 +3,9 @@ import VueCompositionApi, {
   watch,
   WatchSource,
 } from '@vue/composition-api';
-import { isFQDN } from 'validator';
+import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
-import { defer } from 'lodash-es';
+import { defer, times } from 'lodash-es';
 import {
   SCHEMA,
   AmountFormatter,
@@ -13,17 +13,25 @@ import {
   TxBuilder,
   TxBuilderHelper,
   InvalidTxError,
+  BrowserWindowMessageConnection,
 } from '@aeternity/aepp-sdk';
+import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
+import { mnemonicToSeed } from '@aeternity/bip39';
+import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { testAccount, txParams } from './testsConfig';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
+  AENS_NAME_MAX_LENGTH,
   AETERNITY_CONTRACT_ID,
+  TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
   MAGNITUDE,
   MAX_UINT256,
+  SEED_LENGTH,
   SIMPLEX_URL,
   SUPPORTED_TX_TYPES,
   STUB_ADDRESS,
@@ -46,7 +54,12 @@ import type {
   IPendingTransaction,
   IPageableResponse,
   IDashboardTransaction,
+  INameEntryFetched,
+  IWallet,
+  IRequestInitBodyParsed,
 } from '../../types';
+import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
+import runMigrations from '../../store/migrations';
 
 Vue.use(VueCompositionApi);
 
@@ -78,10 +91,23 @@ export function convertToken(balance: number | string, precision: number): BigNu
   return new BigNumber(balance).shiftedBy(precision);
 }
 
-export const executeAndSetInterval = (handler: () => any, timeout: number) => {
+export function executeAndSetInterval(handler: () => any, timeout: number) {
   handler();
   return setInterval(handler, timeout);
-};
+}
+
+export function handleUnknownError(error: any) {
+  // eslint-disable-next-line no-console
+  return console.warn('Unknown rejection', error);
+}
+
+export function isNotFoundError(error: any) {
+  return error?.statusCode === 404;
+}
+
+export function isAccountNotFoundError(error: any) {
+  return isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
+}
 
 // TODO: Use the current language from i18n module
 export function formatDate(time: number) {
@@ -112,15 +138,6 @@ export function toURL(url: string): URL {
   return new URL(url.includes('://') ? url : `https://${url}`);
 }
 
-export function validateTipUrl(urlAsString: string): boolean {
-  try {
-    const url = toURL(urlAsString);
-    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
-  } catch (e) {
-    return false;
-  }
-}
-
 export function truncateAddress(address: string): [string, string] {
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
@@ -131,7 +148,29 @@ export function truncateAddress(address: string): [string, string] {
   ];
 }
 
-export const validateHash = (fullHash?: string) => {
+export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+  return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+}
+
+export function isValidURL(url: string): boolean {
+  const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
+  return isURL(url) || !!pattern.test(url);
+}
+
+export function validateTipUrl(urlAsString: string): boolean {
+  try {
+    const url = toURL(urlAsString);
+    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
+  } catch (e) {
+    return false;
+  }
+}
+
+export function validateSeedLength(seed: string) {
+  return seed && seed.split(' ').length >= SEED_LENGTH;
+}
+
+export function validateHash(fullHash?: string) {
   const isName = !!fullHash?.endsWith(AENS_DOMAIN);
   let valid = false;
   let prefix = null;
@@ -145,7 +184,7 @@ export const validateHash = (fullHash?: string) => {
   return {
     valid, isName, prefix, hash,
   };
-};
+}
 
 export function getMdwEndpointPrefixForHash(fullHash: string) {
   const { valid, isName, prefix } = validateHash(fullHash);
@@ -168,6 +207,25 @@ export function isContract(fullHash: string) {
 export function isAensName(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
   return (valid && prefix === HASH_PREFIX_NAME);
+}
+
+export function checkAddress(value: string) {
+  return (
+    Crypto.isAddressValid(value, 'ak')
+    || Crypto.isAddressValid(value, 'ct')
+    || Crypto.isAddressValid(value, 'ok')
+  );
+}
+
+export function checkAddressOrChannel(value: string) {
+  return checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+}
+
+export function checkAensName(value: string) {
+  return (
+    value.length <= AENS_NAME_MAX_LENGTH
+    && /^[\p{L}\d]+\.chain$/gu.test(value)
+  );
 }
 
 export function escapeSpecialChars(str = '') {
@@ -258,6 +316,26 @@ export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
     ttl: SCHEMA.NAME_TTL,
   },
 );
+
+export async function fetchJson<T = any>(
+  url: string,
+  options?: RequestInit,
+): Promise<T | null> {
+  const response = await fetch(url, options);
+  if (response.status === 204) {
+    return null;
+  }
+  return response.json();
+}
+
+export function postJson(url: string, options?: IRequestInitBodyParsed) {
+  return fetchJson(url, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+    body: options?.body && JSON.stringify(options.body),
+  });
+}
 
 export async function fetchAllPages<T = any>(
   getFunction: () => Promise<IPageableResponse<T>>,
@@ -384,8 +462,8 @@ export function defaultTransactionSortingCallback(
     const sortDirection = bMicroTime - aMicroTime;
     // Workaround to display received transaction after send (they have the same time)
     if (sortDirection === 0) {
-      const { direction = 'received' } = a as IDashboardTransaction;
-      return direction === 'received' ? -1 : 1;
+      const { direction = TX_DIRECTION.received } = a as IDashboardTransaction;
+      return direction === TX_DIRECTION.received ? -1 : 1;
     }
 
     return sortDirection;
@@ -476,8 +554,82 @@ export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
 }
 
+export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
+  if (!balance || !totalSupply || !reserve) {
+    return null;
+  }
+  const share = new BigNumber(balance).times(100).div(totalSupply);
+  const amount = new BigNumber(reserve).times(share).div(100);
+  return amount.toFixed(0);
+}
+
+export function buildTx(txType: any) {
+  return TxBuilder.buildTx({ ...txParams[txType] }, txType);
+}
+
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
+}
+
+export async function readValueFromClipboard(): Promise<string | undefined> {
+  if (!process.env.UNFINISHED_FEATURES) {
+    return undefined;
+  }
+  let value = '';
+
+  if (IS_CORDOVA) {
+    value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+  } else if (IS_EXTENSION) {
+    value = await browser!.runtime.sendMessage({ method: 'paste' });
+  } else {
+    try {
+      value = await navigator.clipboard.readText();
+    } catch (e: any) {
+      if (!e.message.includes('Read permission denied.')) {
+        handleUnknownError(e);
+      }
+    }
+  }
+  return value;
+}
+
+export async function getLoginState({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}: any) {
+  const { mnemonic, address } = testAccount;
+  const account = {
+    address,
+    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
+  };
+  return {
+    ...(await runMigrations()),
+    account,
+    mnemonic,
+    backedUpSeed,
+    current: { network: network || 'Testnet', token: 0 },
+    balance,
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+  };
+}
+
+export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  return {
+    ...keyPair,
+    idx: accountIdx,
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+  };
+}
+
+export function getTwitterAccountUrl(url: string) {
+  const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
+  return match ? match[0] : false;
 }
 
 export function calculateFontSize(amountValue: BigNumber | number) {
@@ -520,4 +672,54 @@ export function isInsufficientBalanceError(error: any) {
     error instanceof InvalidTxError
     && errorHasValidationKey(error, 'InsufficientBalance')
   );
+}
+
+export function connectFrames(sdk: ISdk | AeSdkWallet) {
+  if (!IN_FRAME) {
+    return;
+  }
+
+  try {
+    const getArrayOfAvailableFrames = (): Window[] => [
+      window.parent,
+      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
+    ];
+
+    const connectedFrames = new Set();
+
+    executeAndSetInterval(
+      () => getArrayOfAvailableFrames()
+        .filter((frame) => frame !== window)
+        .forEach((target) => {
+          if (connectedFrames.has(target)) {
+            return;
+          }
+          connectedFrames.add(target);
+          const connection = BrowserWindowMessageConnection({ target });
+          const originalConnect = connection.connect;
+          let intervalId: NodeJS.Timer;
+
+          connection.connect = function connect(onMessage: any) {
+            originalConnect.call(this, (data: any, origin: any, source: any) => {
+              if (source !== target) {
+                return;
+              }
+              clearInterval(intervalId);
+              onMessage(data, origin, source);
+            });
+          };
+          sdk.addRpcClient(connection);
+          intervalId = executeAndSetInterval(() => {
+            if (!getArrayOfAvailableFrames().includes(target)) {
+              clearInterval(intervalId);
+              return;
+            }
+            sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+          }, 3000);
+        }),
+      3000,
+    );
+  } catch (error: any) {
+    handleUnknownError(error);
+  }
 }

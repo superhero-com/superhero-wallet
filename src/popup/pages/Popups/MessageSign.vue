@@ -47,8 +47,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type { IAccount, IAccountLabeled, IAppData } from '../../../types';
+import type { IAccountLabeled, IAppData } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
+import { useAccounts } from '../../../composables';
+
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
@@ -71,13 +73,14 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
+    const { activeAccount } = useAccounts({ store: root.$store });
+
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
-    const account = useGetter<IAccount>('account');
     const accountExtended = computed((): IAccountLabeled => ({
-      ...account.value,
+      ...activeAccount.value,
       label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(account.value.address),
+      url: getExplorerPath.value(activeAccount.value.address),
     }));
 
     function cancel() {

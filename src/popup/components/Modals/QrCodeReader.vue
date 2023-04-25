@@ -52,10 +52,9 @@
 <script>
 import { mapMutations } from 'vuex';
 import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
-import { openInNewWindow } from '../../utils';
+import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import { handleUnknownError } from '../../utils/helper';
 import QrScan from '../../../icons/qr-scan.svg?vue-component';
 
 export default {

@@ -24,26 +24,30 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api';
+import { MODAL_RESET_WALLET } from '../utils/constants';
+import { useModals } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
-import { MODAL_RESET_WALLET } from '../utils/constants';
 
-export default {
+export default defineComponent({
   components: {
     BtnMain,
   },
-  data: () => ({
-    ResetWalletIcon,
-  }),
-  methods: {
-    onResetWallet() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_RESET_WALLET,
-      });
-    },
+  setup() {
+    const { openModal } = useModals();
+
+    function onResetWallet() {
+      openModal(MODAL_RESET_WALLET);
+    }
+
+    return {
+      ResetWalletIcon,
+      onResetWallet,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

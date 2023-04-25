@@ -24,7 +24,7 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api';
 import { MODAL_ACCOUNT_CREATE } from '../utils';
-import { useDispatch } from '../../composables/vuex';
+import { useModals } from '../../composables';
 
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 
@@ -36,11 +36,10 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const openModal = useDispatch('modals/open');
+    const { openModal } = useModals();
 
     function openCreateAccountModal() {
-      openModal({
-        name: MODAL_ACCOUNT_CREATE,
+      openModal(MODAL_ACCOUNT_CREATE, {
         isMultisig: props.isMultisig,
       });
     }

@@ -23,14 +23,17 @@ export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 export const AETERNITY_COIN_NAME = 'Aeternity';
 
+export const TX_DIRECTION = {
+  sent: 'sent',
+  received: 'received',
+} as const;
+
 export const TX_FUNCTIONS = {
   tip: 'tip',
   retip: 'retip',
   tipToken: 'tip_token',
   retipToken: 'retip_token',
   transfer: 'transfer',
-  sent: 'sent',
-  received: 'received',
   deposit: 'deposit',
   propose: 'propose', // Multisig
   addLiquidity: 'add_liquidity',
@@ -483,8 +486,6 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   transfer: '',
   transfer_payload: '',
   claim: '',
-  received: '',
-  sent: '',
   propose: '',
 } as const;
 
@@ -512,12 +513,14 @@ export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
+export const POPUP_TYPE_TX_SIGN = 'transaction.sign';
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_TX_SIGN,
 ] as const;
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';

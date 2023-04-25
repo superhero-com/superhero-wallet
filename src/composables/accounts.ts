@@ -1,12 +1,16 @@
 import { computed } from '@vue/composition-api';
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
-import { getAccountNameToDisplay } from '../popup/utils';
+import { buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
-  // TODO in th future the state of the accounts should be stored in this composable
-  const accounts = computed((): IAccount[] => store.getters.accounts);
-  const account = computed((): IAccount => store.getters.account);
+  // TODO in the future the state of the accounts should be stored in this composable
+  const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
+  const accounts = computed((): IAccount[] => store.getters.accounts || []);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
+  const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
+  const isLoggedIn = computed(
+    () => activeAccount.value && Object.keys(activeAccount.value).length > 0,
+  );
 
   /**
    * Accounts data formatted as the form select options
@@ -19,6 +23,23 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     })),
   );
 
+  const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
+
+  function getAccountByAddress(address: string): IAccount | undefined {
+    return accounts.value.find((acc) => acc.address === address);
+  }
+
+  function setActiveAccountByIdx(idx: number = 0) {
+    // TODO replace with updating local state after removing the Vuex
+    store.commit('accounts/setActiveIdx', +(accounts.value[idx].idx || 0));
+  }
+
+  function setActiveAccountByAddress(address?: string) {
+    if (address) {
+      setActiveAccountByIdx(getAccountByAddress(address)?.idx);
+    }
+  }
+
   /**
    * Determine if provided address belongs to any of the current user's accounts.
    */
@@ -28,9 +49,15 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   return {
     accounts,
-    account,
     accountsAddressList,
     accountsSelectOptions,
+    activeAccount,
+    activeAccountSimplexLink,
+    activeIdx,
+    isLoggedIn,
     isLocalAccountAddress,
+    getAccountByAddress,
+    setActiveAccountByAddress,
+    setActiveAccountByIdx,
   };
 }

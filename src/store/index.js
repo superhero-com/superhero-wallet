@@ -5,12 +5,10 @@ import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
 import persistState from './plugins/persistState';
-import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
-import openErrorModalPlugin from './plugins/openErrorModal';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
@@ -61,13 +59,11 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
-    modals,
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
-    openErrorModalPlugin,
     veeValidate,
     pollAccountInfo,
   ],

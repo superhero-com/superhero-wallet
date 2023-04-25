@@ -10,7 +10,7 @@ import type {
 import {
   AETERNITY_SYMBOL,
   MAGNITUDE,
-  TX_FUNCTIONS,
+  TX_DIRECTION,
   convertToken,
   isTransactionAex9,
   getInnerTransaction,
@@ -68,7 +68,7 @@ export function useTransactionTokens({
         ? convertToken(innerTx.value?.fee || 0, -MAGNITUDE)
         : getTxAmountTotal.value(transaction, direction),
       symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
-      isReceived: direction === TX_FUNCTIONS.received,
+      isReceived: direction === TX_DIRECTION.received,
       isAe:
         isAllowance
         || (

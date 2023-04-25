@@ -29,6 +29,7 @@ import { i18n } from '../../store/plugins/languages';
 import {
   AENS,
   DEX,
+  TX_DIRECTION,
   FUNCTION_TYPE_DEX,
   includes,
   TX_FUNCTIONS,
@@ -99,7 +100,7 @@ export default defineComponent({
       } else if (txType.value === SCHEMA.TX_TYPE.spend) {
         innerLabels = [
           i18n.t('transaction.type.spendTx'),
-          direction.value === TX_FUNCTIONS.received
+          direction.value === TX_DIRECTION.received
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];

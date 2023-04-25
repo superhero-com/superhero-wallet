@@ -29,13 +29,13 @@
       </Transition>
 
       <NodeConnectionStatus
-        v-if="!modals.length"
+        v-if="!modalsOpen.length"
         class="connection-status"
       />
 
       <Component
         :is="component"
-        v-for="{ component, key, props } in modals"
+        v-for="({ component, key, props }) in modalsOpen"
         :key="key"
         v-bind="props"
       />
@@ -69,8 +69,10 @@ import {
   RUNNING_IN_POPUP,
 } from '../lib/environment';
 import {
+  useAccounts,
   useConnection,
   useCurrencies,
+  useModals,
   useNotifications,
   useViewport,
 } from '../composables';
@@ -88,17 +90,17 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { watchConnectionStatus } = useConnection();
+    const { modalsOpen } = useModals();
+    const { isLoggedIn } = useAccounts({ store: root.$store });
     const { addWalletNotification } = useNotifications({ store: root.$store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
 
-    const isLoggedIn = computed(() => root.$store.getters.isLoggedIn);
     const isRestored = computed(() => root.$store.state.isRestored);
     const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
     const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
-    const modals = computed(() => root.$store.getters['modals/opened']);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -154,6 +156,12 @@ export default defineComponent({
       }
     });
 
+    watch(() => root.$route.fullPath, () => {
+      if (innerElement.value) {
+        innerElement.value.scrollTop = 0;
+      }
+    });
+
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
@@ -172,7 +180,7 @@ export default defineComponent({
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
-      modals,
+      modalsOpen,
       qrScannerOpen,
       showHeader,
       showScrollbar,

@@ -1,37 +1,55 @@
 <template>
-  <div class="bullet-switcher">
-    <div class="bullet-switcher-wrapper">
+  <div
+    class="bullet-switcher"
+    :style="{
+      '--active-color': activeColor,
+      '--bullet-size': `${BULLET_SIZE}px`,
+    }"
+  >
+    <div class="bullet-switcher-container">
       <div
-        class="bullet-switcher-container"
-        :style="cssProps"
+        class="bullet-switcher-track"
+        :style="{
+          '--translate-x-value': `${translateXValue}px`,
+        }"
       >
-        <div
+        <a
           v-for="(_, idx) in optionsSize"
           :key="idx"
-          class="bullet"
           :class="{
-            medium: getMediumCondition(idx),
-            big: getBigCondition(idx),
+            medium: isMedium(idx),
+            small: isSmall(idx),
             active: idx === currentIdx,
           }"
-          :style="getBulletTranslation(idx)"
+          class="bullet-link"
           @click="$emit('change', idx)"
-        />
+        >
+          <span class="bullet" />
+        </a>
       </div>
     </div>
-    <PlusCircle
+
+    <PlusCircleIcon
+      class="add-icon"
       :class="{ active: currentIdx === optionsSize }"
       @click="$emit('change', optionsSize)"
     />
   </div>
 </template>
 
-<script>
-import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
-export default {
+// Physical size of the bullet area in pixels
+const BULLET_SIZE = 16;
+
+// Which bullet stays visible if user navigates right
+const SCROLLING_THRESHOLD = 3;
+
+export default defineComponent({
   components: {
-    PlusCircle,
+    PlusCircleIcon,
   },
   props: {
     activeColor: {
@@ -47,40 +65,39 @@ export default {
       required: true,
     },
   },
-  computed: {
-    cssProps() {
-      return {
-        '--active-color': this.activeColor,
-      };
-    },
+  setup(props) {
+    const translateXValue = computed(() => {
+      let bulletsToMoveLeft: number;
+      if (props.currentIdx < SCROLLING_THRESHOLD) {
+        bulletsToMoveLeft = 0;
+      } else if (props.currentIdx >= props.optionsSize - 1) {
+        bulletsToMoveLeft = props.optionsSize - 5;
+      } else {
+        bulletsToMoveLeft = props.currentIdx - SCROLLING_THRESHOLD;
+      }
+      return -bulletsToMoveLeft * BULLET_SIZE;
+    });
+
+    function calculateIdxDistance(idx: number) {
+      return Math.abs(props.currentIdx - idx) - ((props.currentIdx === 0) ? 1 : 0);
+    }
+
+    function isMedium(idx: number) {
+      return calculateIdxDistance(idx) === 2;
+    }
+
+    function isSmall(idx: number) {
+      return calculateIdxDistance(idx) > 2;
+    }
+
+    return {
+      BULLET_SIZE,
+      translateXValue,
+      isMedium,
+      isSmall,
+    };
   },
-  methods: {
-    getBulletTranslation(idx) {
-      if (idx !== 0) return {};
-      const scrollingTreshold = 3;
-      if (this.currentIdx < scrollingTreshold) return {};
-      const bulletSize = 16;
-      if (this.currentIdx >= this.optionsSize - 1) return { marginLeft: `-${(this.optionsSize - 4) * bulletSize - bulletSize}px` };
-      return { marginLeft: `-${(this.currentIdx - scrollingTreshold) * bulletSize}px` };
-    },
-    getBigCondition(idx) {
-      const firstCondition = this.currentIdx === 0 ? this.currentIdx === (idx - 2) : false;
-      const lastCondition = this.currentIdx === this.optionsSize
-        ? [(idx + 2), (idx + 3)].includes(this.currentIdx)
-        : false;
-      return this.currentIdx === idx
-       || this.currentIdx === idx + 1
-       || this.currentIdx === idx - 1
-        || firstCondition
-        || lastCondition;
-    },
-    getMediumCondition(idx) {
-      // eslint-disable-next-line no-nested-ternary
-      const offset = this.currentIdx === 0 ? 3 : this.currentIdx === this.optionsSize ? 4 : 2;
-      return this.currentIdx === (idx - offset) || this.currentIdx === (idx + offset);
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -90,10 +107,13 @@ export default {
 .bullet-switcher {
   @include mixins.flex(flex-start, center);
 
-  .plus-circle-fill {
+  height: 40px;
+  padding-left: 4px;
+
+  .add-icon {
     width: 19px;
     height: 19px;
-    margin-left: 12px;
+    margin-left: 8px;
     cursor: pointer;
     color: rgba(variables.$color-white, 0.5);
     transition: all 0.25s ease-out;
@@ -103,43 +123,55 @@ export default {
       color: variables.$color-white;
     }
   }
-}
 
-.bullet-switcher-wrapper {
-  padding-left: 24px;
-}
+  .bullet-switcher-container {
+    max-width: calc(var(--bullet-size) * 5);
+    overflow: hidden;
 
-.bullet-switcher-wrapper,
-.bullet-switcher-container {
-  max-width: 96px;
-  overflow: hidden;
-}
-
-.bullet-switcher-container {
-  @include mixins.flex(flex-start, center);
-
-  height: 40px;
-  gap: 8px;
-
-  .bullet {
-    background-color: rgba(variables.$color-white, 0.2);
-    min-width: 8px;
-    min-height: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.25s ease-out;
-    transform: scale(0.5);
-
-    &.big {
-      transform: scale(1);
+    .bullet-switcher-track {
+      display: flex;
+      margin-left: var(--translate-x-value);
+      transition: margin-left 0.3s ease-out;
     }
 
-    &.medium {
-      transform: scale(0.75);
-    }
+    .bullet-link {
+      --bullet-scale: 1;
 
-    &.active {
-      background-color: var(--active-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: var(--bullet-size);
+      height: var(--bullet-size);
+
+      &:hover {
+        .bullet {
+          transform: scale(1.2) !important;
+        }
+      }
+
+      &.small {
+        --bullet-scale: 0.5;
+      }
+
+      &.medium {
+        --bullet-scale: 0.75;
+      }
+
+      &.active {
+        .bullet {
+          background-color: var(--active-color);
+        }
+      }
+
+      .bullet {
+        background-color: rgba(variables.$color-white, 0.2);
+        min-width: 8px;
+        min-height: 8px;
+        border-radius: 50%;
+        transform: scale(var(--bullet-scale));
+        transition: all 0.25s ease-out;
+      }
     }
   }
 }

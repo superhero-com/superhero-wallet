@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { ICordova } from '../../types';
+import { Dictionary, ICordova } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
@@ -16,8 +16,8 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  MODAL_DEFAULT,
   watchUntilTruthy,
+  POPUP_TYPE_TX_SIGN,
 } from '../utils';
 import {
   RUNNING_IN_POPUP,
@@ -25,6 +25,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
+import { useAccounts, useModals } from '../../composables';
 
 Vue.use(VueRouter);
 
@@ -36,6 +37,8 @@ const router = new VueRouter({
 
 const lastRouteKey = 'last-path';
 
+const { isLoggedIn } = useAccounts({ store });
+
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
@@ -46,9 +49,7 @@ const unbind = router.beforeEach(async (to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-  const { isLoggedIn } = store.getters;
-
-  if (!isLoggedIn) {
+  if (!isLoggedIn.value) {
     if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
       next();
     } else {
@@ -66,16 +67,14 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
       [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
       [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
+      [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
     if (name !== to.name) {
-      next({ name, params: await getPopupProps() });
+      next({ name, params: await getPopupProps() as Dictionary });
       return;
     }
   }
-  // TODO: rethink this approach
-  // @ts-ignore
-  document.querySelector('.app-inner').scroll(0, 0);
 
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
@@ -99,6 +98,7 @@ const routerReadyPromise = new Promise((resolve) => {
 
 if (IS_CORDOVA) {
   (async () => {
+    const { openDefaultModal } = useModals();
     const cordova = window.cordova as ICordova;
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
@@ -117,7 +117,10 @@ if (IS_CORDOVA) {
       if (url) {
         router.push({ name: ROUTE_ACCOUNT, query: { url } });
       } else {
-        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') as any });
+        openDefaultModal({
+          title: i18n.t('modals.mobile-share-error.title'),
+          msg: i18n.t('modals.mobile-share-error.msg'),
+        });
       }
     });
 

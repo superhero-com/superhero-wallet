@@ -1,28 +1,28 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import type { IAppData, ITx } from '../../types';
-import { MAX_UINT256 } from './constants';
+import type { IPopupConfig } from '../../types';
+import {
+  MAX_UINT256,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+} from './constants';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
 };
 
+export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
+export const contractCallAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
+
 export const STUB_CURRENCY = [{
   id: 'aeternity', symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', current_price: 0.076783, market_cap: 31487891, market_cap_rank: 523, fully_diluted_valuation: null, total_volume: 217034, high_24h: 0.078539, low_24h: 0.076793, price_change_24h: -0.001092194951687525, price_change_percentage_24h: -1.4025, market_cap_change_24h: -429134.39267925173, market_cap_change_percentage_24h: -1.34453, circulating_supply: 409885828.49932, total_supply: 536306702.0, max_supply: null, ath: 5.69, ath_change_percentage: -98.65091, ath_date: '2018-04-29T03:50:39.593Z', atl: 0.059135, atl_change_percentage: 29.84246, atl_date: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, last_updated: '2023-01-17T11:38:23.610Z',
 }];
 
-interface IPopupConfig {
-  type: string;
-  app: IAppData;
-  action?: any;
-  data?: string;
-  message?: string;
-  transaction?: Partial<ITx>;
-}
-
 export const popupProps: Record<string, IPopupConfig> = {
-  connectConfirm: {
-    type: 'connectConfirm',
+  [POPUP_TYPE_CONNECT]: {
+    type: POPUP_TYPE_CONNECT,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -30,8 +30,8 @@ export const popupProps: Record<string, IPopupConfig> = {
       host: 'localhost',
     },
   },
-  messageSign: {
-    type: 'messageSign',
+  [POPUP_TYPE_MESSAGE_SIGN]: {
+    type: POPUP_TYPE_MESSAGE_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -40,8 +40,8 @@ export const popupProps: Record<string, IPopupConfig> = {
     },
     message: 'test',
   },
-  rawSign: {
-    type: 'rawSign',
+  [POPUP_TYPE_RAW_SIGN]: {
+    type: POPUP_TYPE_RAW_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -50,8 +50,8 @@ export const popupProps: Record<string, IPopupConfig> = {
     },
     data: 'test',
   },
-  sign: {
-    type: 'sign',
+  [POPUP_TYPE_SIGN]: {
+    type: POPUP_TYPE_SIGN,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -61,9 +61,9 @@ export const popupProps: Record<string, IPopupConfig> = {
     transaction: {
       tag: '12',
       VSN: '1',
-      senderId: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
-      recipientId: 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q',
-      amount: 100000000000000000,
+      senderId: testAccount.address,
+      recipientId,
+      amount: 1000000000000000,
       fee: 16820000000000,
       nonce: 190,
       payload: 'ba_Xfbg4g==',
@@ -81,7 +81,6 @@ export const popupProps: Record<string, IPopupConfig> = {
   },
 };
 
-export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
 const commonParams = {
   amount: 100000000000000000,
   ttl: MAX_UINT256,
@@ -126,7 +125,7 @@ export const txParams = {
     ...commonParams,
   },
   [SCHEMA.TX_TYPE.contractCall]: {
-    contractId: 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio',
+    contractId: contractCallAddress,
     callerId: testAccount.address,
     ...commonParams,
   },

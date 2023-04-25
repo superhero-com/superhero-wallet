@@ -9,12 +9,15 @@
   </BtnPlain>
 </template>
 
-<script>
-import ChevronDown from '../../icons/chevron-down.svg?vue-component';
+<script lang="ts">
+import { computed, defineComponent } from '@vue/composition-api';
+import { useModals } from '../../composables';
 import { MODAL_ASSET_SELECTOR } from '../utils/constants';
+import type { IToken } from '../../types';
+import ChevronDown from '../../icons/chevron-down.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
 
-export default {
+export default defineComponent({
   components: {
     BtnPlain,
     ChevronDown,
@@ -25,31 +28,39 @@ export default {
     focused: Boolean,
     showTokensWithBalance: Boolean,
   },
-  computed: {
-    displayToken() {
-      if (!this.value) return '';
-      const { symbol } = this.value;
-      return `${String(symbol).substring(0, 11)}${symbol.length > 11 ? '...' : ''}`;
-    },
-  },
-  methods: {
-    handleChange(token) {
-      this.$emit('input', token);
-    },
-    openAssetSelector() {
-      if (this.disabled) return;
+  setup(props, { emit }) {
+    const { openModal } = useModals();
 
-      this.$store.dispatch('modals/open',
-        {
-          ...this.$attrs,
-          name: MODAL_ASSET_SELECTOR,
-          selectedToken: this.value,
-          showTokensWithBalance: this.showTokensWithBalance,
+    const displayToken = computed(() => {
+      if (props.value) {
+        const { symbol } = props.value;
+        return `${String(symbol).substring(0, 11)}${symbol.length > 11 ? '...' : ''}`;
+      }
+      return '';
+    });
+
+    function handleChange(token: IToken) {
+      emit('input', token);
+    }
+
+    function openAssetSelector() {
+      if (!props.disabled) {
+        openModal(MODAL_ASSET_SELECTOR, {
+          selectedToken: props.value,
+          showTokensWithBalance: props.showTokensWithBalance,
           resolve: (token) => token,
-        }).then((token) => this.handleChange(token));
-    },
+        })
+          .then((token) => handleChange(token));
+      }
+    }
+
+    return {
+      displayToken,
+      handleChange,
+      openAssetSelector,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
