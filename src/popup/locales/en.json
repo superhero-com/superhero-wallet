@@ -121,7 +121,11 @@
     },
     "vaultLowBalance": {
       "title": "Insufficient vault balance",
-      "msg": "Multisig vault balance is not enough to pay for the transaction fee.<br /><br />Please top up multisig vault."
+      "msg": "The vault does not have enough funds to pay for this transaction (proposed amount + network fee)."
+    },
+    "accountLowBalance": {
+      "title": "Insufficient funds",
+      "msg": "You don’t have enough AE on your signing account to {action} this transaction."
     },
     "createAccount": {
       "title": "Add account",
@@ -1233,7 +1237,8 @@
     "proposalDetails": {
       "receivingAddress": "Receiving address",
       "proposedBy": "Proposed by",
-      "revoke": "Revoke transaction proposal",
+      "revoke": "Revoke",
+      "revokeTransaction": "Revoke transaction proposal",
       "refuse": "Disapprove",
       "sign": "Approve",
       "send": "Send",
