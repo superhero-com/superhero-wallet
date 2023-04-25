@@ -17,6 +17,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   watchUntilTruthy,
+  POPUP_TYPE_TX_SIGN,
 } from '../utils';
 import {
   RUNNING_IN_POPUP,
@@ -66,6 +67,7 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
       [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
       [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
+      [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
     if (name !== to.name) {
