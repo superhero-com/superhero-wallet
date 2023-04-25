@@ -188,6 +188,14 @@
       "takingLong": "This step may take a few moments.",
       "syncing": "Syncing..."
     },
+    "consensusInfo": {
+      "title": "Multisig consensus",
+      "subtitle": " X/Y of Z",
+      "firstPoint": "<strong>X =</strong> accounts that have already signed the transaction;",
+      "secondPoint": "<strong>Y =</strong> number of signatures required to approve the transaction;",
+      "thirdPoint": "<strong>Z =</strong> number of authorized signers.",
+      "description": "If <strong>X=Y</strong> the multisig consensus has been reached. The transaction proposal has been approved and the transaction can be sent by any of the authorized signers."
+    },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
       "msg": "This action will remove your account from the wallet and will delete the extension storage. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone!"

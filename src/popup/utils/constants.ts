@@ -448,6 +448,7 @@ export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
+export const MODAL_CONSENSUS_INFO = 'consensus-info';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
