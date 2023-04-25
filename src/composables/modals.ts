@@ -124,7 +124,7 @@ export function useModals() {
   }
 
   function openErrorModal(entry: Record<string, any>) {
-    return openModal(MODAL_ERROR_LOG, entry).catch(handleUnknownError);
+    return openModal(MODAL_ERROR_LOG, { entry }).catch(handleUnknownError);
   }
 
   return {
