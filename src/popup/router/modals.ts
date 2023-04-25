@@ -19,6 +19,7 @@ import {
   MODAL_TRANSFER_SEND,
   MODAL_RECIPIENT_INFO,
   MODAL_RECIPIENT_HELPER,
+  MODAL_CONSENSUS_INFO,
   MODAL_PAYLOAD_FORM,
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
@@ -43,6 +44,7 @@ import ResetWallet from '../components/Modals/ResetWallet.vue';
 import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
+import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
@@ -113,6 +115,9 @@ export default () => {
   });
   registerModal(MODAL_RECIPIENT_INFO, {
     component: RecipientInfo,
+  });
+  registerModal(MODAL_CONSENSUS_INFO, {
+    component: ConsensusInfo,
   });
   registerModal(MODAL_PAYLOAD_FORM, {
     component: PayloadForm,

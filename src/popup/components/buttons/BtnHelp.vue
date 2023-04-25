@@ -24,17 +24,21 @@ export default defineComponent({
     option: { type: Object, default: null },
     small: Boolean,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { openModal } = useModals();
 
-    async function showHelpModal() {
-      return openModal(MODAL_HELP, {
-        icon: props.icon || 'info',
-        title: props.title,
-        msg: props.msg,
-        option: props.option,
-        textCenter: true,
-      });
+    function showHelpModal() {
+      emit('help');
+
+      if (props.title.length || props.msg.length) {
+        openModal(MODAL_HELP, {
+          icon: props.icon || 'info',
+          title: props.title,
+          msg: props.msg,
+          option: props.option,
+          textCenter: true,
+        });
+      }
     }
 
     return {
