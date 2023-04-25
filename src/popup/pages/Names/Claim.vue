@@ -43,7 +43,7 @@
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!sdk || !name || errors.any()"
+      :disabled="!isSdkReady || !name || errors.any()"
       @click="claim"
     >
       {{
@@ -55,7 +55,8 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, computed } from '@vue/composition-api';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import {
   MAGNITUDE,
@@ -72,7 +73,7 @@ import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import BtnHelp from '../../components/buttons/BtnHelp.vue';
 
-export default {
+export default defineComponent({
   name: 'Claim',
   components: {
     InputField,
@@ -80,55 +81,51 @@ export default {
     BtnMain,
     BtnHelp,
   },
-  data: () => ({
-    AENS_DOMAIN,
-    name: '',
-    loading: false,
-    autoExtend: false,
-    maxNameLength: AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length,
-  }),
-  computed: {
-    isNameValid() {
-      return this.name && checkAensName(`${this.name}${AENS_DOMAIN}`);
-    },
-    nameFee() {
-      return convertToken(
-        TxBuilderHelper.getMinimumNameFee(`${this.name}${AENS_DOMAIN}`),
-        -MAGNITUDE,
-      ).toFixed(4);
-    },
-  },
-  methods: {
-    async claim() {
-      if (!await this.$validator.validateAll()) return;
+  setup(props, { root }) {
+    const name = ref('');
+    const autoExtend = ref(false);
+    const loading = ref(false);
+    const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
 
-      const { getSdk } = useSdk({ store: this.$store });
+    const isNameValid = computed(() => name.value && checkAensName(`${name.value}${AENS_DOMAIN}`));
+
+    const nameFee = computed(() => convertToken(
+      TxBuilderHelper.getMinimumNameFee(`${name.value}${AENS_DOMAIN}`),
+      -MAGNITUDE,
+    ).toFixed(4));
+
+    const { getSdk, isSdkReady } = useSdk({ store: root.$store });
+
+    async function claim() {
+      if (!await (root as any).$validator.validateAll()) return;
+
       const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store: this.$store });
+      const { activeAccount } = useAccounts({ store: root.$store });
 
-      const name = `${this.name}${AENS_DOMAIN}`;
-      const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
+      const sdk = await getSdk();
+
+      const fullName = `${name.value}${AENS_DOMAIN}`;
+      const nameEntry = await sdk.api.getNameEntryByName(fullName).catch(() => false);
 
       if (nameEntry) {
         openDefaultModal({
-          title: this.$t('modals.name-exist.msg'),
+          title: root.$t('modals.name-exist.msg'),
         });
       } else {
-        this.loading = true;
+        loading.value = true;
         let claimTxHash;
-        const sdk = await getSdk();
 
         try {
-          const { salt } = await sdk.aensPreclaim(name);
-          claimTxHash = (await sdk.aensClaim(name, salt, { waitMined: false })).hash;
-          if (this.autoExtend) {
-            this.$store.commit('names/setPendingAutoExtendName', name);
+          const { salt } = await sdk.aensPreclaim(fullName);
+          claimTxHash = (await sdk.aensClaim(fullName, salt, { waitMined: false })).hash;
+          if (autoExtend.value) {
+            root.$store.commit('names/setPendingAutoExtendName', fullName);
           }
-          this.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
-        } catch (e) {
+          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+        } catch (e: any) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
-            msg = this.$t('pages.names.balance-error');
+            msg = root.$t('pages.names.balance-error');
           }
           openDefaultModal({
             icon: 'critical',
@@ -136,30 +133,39 @@ export default {
           });
           return;
         } finally {
-          this.loading = false;
+          loading.value = false;
         }
 
         try {
-          this.$store.dispatch('names/fetchOwned');
+          root.$store.dispatch('names/fetchOwned');
           await sdk.poll(claimTxHash);
-          const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= name.length;
-          if (!isAuction) {
-            this.$store.dispatch('names/updatePointer', {
-              name,
+          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
+            root.$store.dispatch('names/updatePointer', {
+              name: fullName,
               address: activeAccount.value.address,
             });
           }
-        } catch (e) {
-          openDefaultModal({
-            msg: e.message,
-          });
+        } catch (e: any) {
+          openDefaultModal({ msg: e.message });
         } finally {
-          this.$store.dispatch('names/fetchOwned');
+          root.$store.dispatch('names/fetchOwned');
         }
       }
-    },
+    }
+
+    return {
+      AENS_DOMAIN,
+      autoExtend,
+      isNameValid,
+      isSdkReady,
+      name,
+      nameFee,
+      loading,
+      maxNameLength,
+      claim,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
