@@ -199,7 +199,10 @@
               nowrap
               extra-padded
               :disabled="processingAction"
-              @click="dispatchProposalAction(FUNCTION_TYPE_MULTISIG.refuse)"
+              @click="dispatchProposalAction(
+                FUNCTION_TYPE_MULTISIG.refuse,
+                $t('pages.proposalDetails.refuse')
+              )"
             >
               {{ $t('pages.proposalDetails.refuse') }}
             </BtnMain>
@@ -224,7 +227,10 @@
                   || pendingMultisigTxConfirmedByLocalSigners
                   || pendingMultisigTxExpired
               "
-              @click="dispatchProposalAction(FUNCTION_TYPE_MULTISIG.confirm)"
+              @click="dispatchProposalAction(
+                FUNCTION_TYPE_MULTISIG.confirm,
+                $t('pages.proposalDetails.sign')
+              )"
             >
               {{ $t('pages.proposalDetails.sign') }}
             </BtnMain>
@@ -236,9 +242,12 @@
             nowrap
             extra-padded
             :disabled="processingAction"
-            @click="dispatchProposalAction(FUNCTION_TYPE_MULTISIG.revoke)"
+            @click="dispatchProposalAction(
+              FUNCTION_TYPE_MULTISIG.revoke,
+              $t('pages.proposalDetails.revoke')
+            )"
           >
-            {{ $t('pages.proposalDetails.revoke') }}
+            {{ $t('pages.proposalDetails.revokeTransaction') }}
           </BtnMain>
         </div>
       </div>
@@ -255,6 +264,7 @@ import {
   onBeforeUnmount,
   watch,
 } from '@vue/composition-api';
+import { TranslateResult } from 'vue-i18n';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import {
@@ -267,7 +277,6 @@ import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   FUNCTION_TYPE_MULTISIG,
   getPayload,
-  handleUnknownError,
   blocksToRelativeTime,
   isInsufficientBalanceError,
 } from '../utils';
@@ -395,10 +404,39 @@ export default defineComponent({
       } as ITx;
     }
 
+    function handleInsufficientBalanceError(
+      error: any,
+      isVault = false,
+      action?: string | TranslateResult,
+    ) {
+      if (error) {
+        let title;
+        let { message } = error;
+        if (isInsufficientBalanceError(error)) {
+          message = isVault
+            ? root.$t('modals.vaultLowBalance.msg')
+            : root.$t('modals.accountLowBalance.msg', { action });
+          title = isVault
+            ? root.$t('modals.vaultLowBalance.title')
+            : root.$t('modals.accountLowBalance.title');
+        }
+        openModal({
+          name: MODAL_DEFAULT,
+          icon: 'warning',
+          title,
+          msg: message,
+          textCenter: true,
+        });
+      }
+    }
+
     /**
      * Utilized to open the confirmation modal for approving, disapproving, or revoking the proposal
      */
-    async function dispatchProposalAction(action: IMultisigFunctionTypes) {
+    async function dispatchProposalAction(
+      action: IMultisigFunctionTypes,
+      actionName: string | TranslateResult,
+    ) {
       if (!activeMultisigAccount.value) {
         return;
       }
@@ -419,7 +457,7 @@ export default defineComponent({
           root.$router.push({ name: ROUTE_ACCOUNT });
         }
       } catch (error: any) {
-        handleUnknownError(error);
+        handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());
       }
 
       processingAction.value = false;
@@ -443,18 +481,7 @@ export default defineComponent({
 
         proposalCompleted.value = true;
       } catch (error) {
-        let title;
-        if (isInsufficientBalanceError(error)) {
-          error.message = root.$t('modals.vaultLowBalance.msg');
-          title = root.$t('modals.vaultLowBalance.title');
-        }
-        openModal({
-          name: MODAL_DEFAULT,
-          icon: 'warning',
-          title,
-          msg: error.message,
-          textCenter: true,
-        });
+        handleInsufficientBalanceError(error, true);
       }
       processingAction.value = false;
     }

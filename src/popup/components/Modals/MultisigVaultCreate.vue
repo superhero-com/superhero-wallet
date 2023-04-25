@@ -26,6 +26,7 @@
           v-model.trim="signer.address"
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
+          item-title="address"
           :options="accountsSelectOptions"
         />
         <FormTextarea
@@ -33,7 +34,7 @@
           v-model.trim="signer.address"
           v-validate="{
             required: true,
-            name_registered_address_or_url: true,
+            account_address: true,
           }"
           auto-height
           :label="getSignerLabel(index)"
@@ -267,6 +268,7 @@ export default defineComponent({
       () => (
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
+        && !(root as any).$validator.errors.items?.length
       ),
     );
 
