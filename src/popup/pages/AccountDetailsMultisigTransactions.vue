@@ -2,9 +2,7 @@
   <div class="transaction-list-wrapper">
     <TransactionList
       v-if="isOnline"
-      :show-filters="showFilters"
       is-multisig
-      show-search
     />
     <MessageOffline
       v-else

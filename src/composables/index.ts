@@ -17,6 +17,7 @@ export * from './sdk';
 export * from './tokensList';
 export * from './topHeader';
 export * from './transactionTx';
+export * from './transactionItemList';
 export * from './transactionTokens';
 export * from './transactionAndTokenFilter';
 export * from './ui';

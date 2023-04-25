@@ -36,6 +36,7 @@ import {
   STUB_NONCE,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
+  FUNCTION_TYPE_DEX,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -54,6 +55,9 @@ import type {
   INameEntryFetched,
   IWallet,
   IRequestInitBodyParsed,
+  IActiveMultisigTx,
+  IDexContracts,
+  TxFunctionRaw,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
@@ -441,10 +445,18 @@ export function getAccountNameToDisplay(acc: IAccount | undefined) {
 }
 
 export function defaultTransactionSortingCallback(
-  a: ITransaction,
-  b: ITransaction,
+  a: ITransaction | IActiveMultisigTx,
+  b: ITransaction | IActiveMultisigTx,
 ) {
-  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  const [aMicroTime, bMicroTime] = [a, b].map(
+    (transaction) => (new Date(
+      (transaction as any).isMultisigTransaction
+        ? (transaction as IActiveMultisigTx).createdAt
+        : (transaction as ITransaction)?.microTime,
+    )
+    ).getTime(),
+  );
+
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
   const compareMicroTime = () => {
     const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
@@ -655,6 +667,25 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
     return false;
   }
   return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
+}
+
+// eslint-disable-next-line no-unused-vars
+export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
+  return (data: T) => fns.reduce((currData, func) => func(currData), data);
+}
+
+export function isTxDex(tx: ITx, dexContractx: IDexContracts) {
+  const { wae, router } = dexContractx;
+
+  return !!(
+    tx?.contractId
+    && tx?.function
+    && (
+      Object.values(FUNCTION_TYPE_DEX).flat()
+        .includes(tx?.function as TxFunctionRaw)
+    )
+    && [...wae, ...router].includes(tx.contractId)
+  );
 }
 
 export function errorHasValidationKey(error: any, expectedKey: string) {

@@ -17,6 +17,7 @@ import {
   getTxType,
   isContainingNestedTx,
   getInnerTransaction,
+  isTxDex,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
 
@@ -83,19 +84,7 @@ export function useTransactionTx({
     },
   );
 
-  const isDex = computed((): boolean => {
-    const { wae, router } = getDexContracts.value;
-
-    return !!(
-      innerTx.value?.contractId
-      && innerTx.value?.function
-      && (
-        Object.values(FUNCTION_TYPE_DEX).flat()
-          .includes(innerTx.value?.function as TxFunctionRaw)
-      )
-      && [...wae, ...router].includes(innerTx.value.contractId)
-    );
-  });
+  const isDex = computed((): boolean => isTxDex(innerTx.value!, getDexContracts.value));
 
   const txOwnerAddress = computed(() => innerTx.value?.accountId || innerTx.value?.callerId);
 
