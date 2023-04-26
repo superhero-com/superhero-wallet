@@ -5,7 +5,6 @@ module.exports = {
   },
   env: {
     browser: true,
-    webextensions: true,
   },
   extends: [
     'plugin:vue-i18n/recommended',
@@ -43,7 +42,6 @@ module.exports = {
   overrides: [
     {
       files: [
-        '**/__tests__/*.{j,t}s?(x)',
         '**/tests/unit/**/*.spec.{j,t}s?(x)',
       ],
       env: {
