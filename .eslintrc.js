@@ -15,7 +15,7 @@ module.exports = {
   // check if imports actually resolve
   settings: {
     'vue-i18n': {
-      localeDir: './src/locales/*.json',
+      localeDir: './src/popup/locales/*.json',
     },
   },
   // add your custom rules here
