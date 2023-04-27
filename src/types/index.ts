@@ -472,6 +472,8 @@ export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
   addRpcClient: (connection: any) => any;
   Ae: Dictionary;
+  aensClaim: (name: string, salt: string, options?: any) => Promise<any>;
+  aensPreclaim: (name: string) => Promise<any>;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
   balance: (address: string) => Promise<number>;
@@ -497,7 +499,7 @@ export interface ISdk {
     }
   ) => Promise<{ hash: string, rawTx: string }>;
   payingForTx(arg0: any): any;
-  poll: (txHash: string, options: any) => any;
+  poll: (txHash: string, options?: any) => any;
   pool: Map<string, any>;
   shareWalletInfo: (c: any) => any;
   signTransaction: (t: any, o: any) => Promise<any>
