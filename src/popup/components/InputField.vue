@@ -282,7 +282,7 @@ export default defineComponent({
       align-items: center;
       width: 100%;
 
-      .icon {
+      :deep(.icon) {
         width: 24px;
         height: 24px;
         flex-shrink: 0;
