@@ -29,38 +29,47 @@
           item-title="address"
           :options="accountsSelectOptions"
         />
-        <FormTextarea
+        <Field
           v-else
-          v-model.trim="signer.address"
-          v-validate="{
+          v-slot="{ field, errorMessage }"
+          :name="`signer-address-${index}`"
+          :rules="{
             required: true,
             account_address: true,
           }"
-          auto-height
-          :label="getSignerLabel(index)"
-          :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
-          :name="`signer-address-${index}`"
-          :message="errors.first(`signer-address-${index}`) || getErrorMessage(signer)"
-          :class="{
-            error: checkIfSignerAddressDuplicated(signer)
-          }"
         >
-          <template #label-after>
-            <a
-              class="scan-button"
-              @click.prevent="openScanQrModal(index)"
-            >
-              <QrScanIcon />
-            </a>
-          </template>
-          <template #after>
-            <PlusCircleIcon
-              v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
-              class="btn-remove-signer"
-              @click="removeSigner(index)"
-            />
-          </template>
-        </FormTextarea>
+          <FormTextarea
+            v-bind="field"
+            v-model.trim="signer.address"
+            auto-height
+            :label="getSignerLabel(index)"
+            :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
+            :name="`signer-address-${index}`"
+            :message="errorMessage || getErrorMessage(signer)"
+            :class="{
+              error: checkIfSignerAddressDuplicated(signer)
+            }"
+          >
+            <template #label-after>
+              <a
+                class="scan-button"
+                @click.prevent="openScanQrModal(index)"
+              >
+                <QrScanIcon />
+              </a>
+            </template>
+            <template #after>
+              <a
+                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+                @click="removeSigner(index)"
+              >
+                <PlusCircleIcon
+                  class="btn-remove-signer"
+                />
+              </a>
+            </template>
+          </FormTextarea>
+        </Field>
       </div>
 
       <div class="signers-add-wrapper">
@@ -169,6 +178,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { Field } from 'vee-validate';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -222,6 +232,7 @@ export default defineComponent({
     PlusCircleIcon,
     MultisigVaultCreateReview,
     FormSelect,
+    Field,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -461,6 +472,7 @@ export default defineComponent({
       transform: rotate(45deg);
       cursor: pointer;
       transition: variables.$transition-interactive;
+      color: variables.$color-grey-light;
 
       &:hover {
         opacity: 0.8;

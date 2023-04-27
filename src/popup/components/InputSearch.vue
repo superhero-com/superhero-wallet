@@ -3,7 +3,7 @@
     class="input-search"
     v-bind="$attrs"
     thin
-    @input="$emit('update:modelValue', $event)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template #after>
       <Search

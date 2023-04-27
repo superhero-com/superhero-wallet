@@ -3,7 +3,7 @@
     v-bind="$attrs"
     class="textarea"
     :class="[ size, { 'auto-height' : autoHeight } ]"
-    @input="handleInput"
+    @update:modelValue="handleInput"
   >
     <template #default="{ inputId }">
       <textarea

@@ -1,23 +1,29 @@
 <template>
   <div class="claim">
-    <InputField
-      v-model="name"
-      v-validate="'required|name|name_unregistered'"
+    <Field
+      v-slot="{ field, errorMessage }"
       name="name"
-      class="chain-name"
-      :label="$t('pages.names.claim.register-name')"
-      :message="errors.first('name')"
-      :placeholder="$t('pages.names.claim.name-placeholder')"
+      :rules="'required|name|name_unregistered'"
     >
-      <template #label-after>
-        <span class="chain-name-counter">
-          {{ name.length }}/{{ maxNameLength }}
-        </span>
-      </template>
-      <template #after>
-        {{ AENS_DOMAIN }}
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model="name"
+        name="name"
+        class="chain-name"
+        :label="$t('pages.names.claim.register-name')"
+        :message="errorMessage"
+        :placeholder="$t('pages.names.claim.name-placeholder')"
+      >
+        <template #label-after>
+          <span class="chain-name-counter">
+            {{ name.length }}/{{ maxNameLength }}
+          </span>
+        </template>
+        <template #after>
+          {{ AENS_DOMAIN }}
+        </template>
+      </InputField>
+    </Field>
 
     <CheckBox v-model="autoExtend">
       <div class="auto-extend-label">
@@ -44,7 +50,7 @@
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!isSdkReady || !name || errors.any()"
+      :disabled="!isSdkReady || !name || errorName"
       @click="claim"
     >
       {{
@@ -58,11 +64,13 @@
 
 <script lang="ts">
 import {
-  defineComponent, ref, computed, getCurrentInstance,
+  defineComponent, ref, computed,
 } from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useForm, useFieldError, Field } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
 import {
   MAGNITUDE,
   AENS_DOMAIN,
@@ -85,12 +93,14 @@ export default defineComponent({
     CheckBox,
     BtnMain,
     BtnHelp,
+    Field,
   },
-  setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+  setup() {
     const router = useRouter();
     const store = useStore();
+    const { validate } = useForm();
+    const errorName = useFieldError('name');
+    const { t } = useI18n();
 
     const name = ref('');
     const autoExtend = ref(false);
@@ -107,7 +117,7 @@ export default defineComponent({
     const { getSdk, isSdkReady } = useSdk({ store });
 
     async function claim() {
-      if (!await (root as any).$validator.validateAll()) return;
+      if (!await validate()) return;
 
       const { openDefaultModal } = useModals();
       const { activeAccount } = useAccounts({ store });
@@ -119,7 +129,7 @@ export default defineComponent({
 
       if (nameEntry) {
         openDefaultModal({
-          title: root.$t('modals.name-exist.msg'),
+          title: t('modals.name-exist.msg'),
         });
       } else {
         loading.value = true;
@@ -135,7 +145,7 @@ export default defineComponent({
         } catch (e: any) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
-            msg = root.$t('pages.names.balance-error');
+            msg = t('pages.names.balance-error');
           }
           openDefaultModal({
             icon: 'critical',
@@ -170,6 +180,7 @@ export default defineComponent({
       isSdkReady,
       name,
       nameFee,
+      errorName,
       loading,
       maxNameLength,
       claim,

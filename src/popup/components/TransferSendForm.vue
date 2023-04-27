@@ -45,76 +45,87 @@
         />
       </div>
     </template>
-
-    <InputField
-      v-model.trim="formModel.address"
-      v-validate="{
+    <Field
+      v-slot="{ field }"
+      name="address"
+      :rules="{
         required: true,
         not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
         name_registered_address_or_url: true,
-        token_to_an_address: { isToken: !isAe },
+        token_to_an_address: [ !isAe ],
       }"
-      name="address"
-      data-cy="address"
-      show-help
-      show-message-help
-      :label="$t('modals.send.recipientLabel')"
-      :placeholder="isMultisig
-        ? $t('modals.send.recipientPlaceholder')
-        : $t('modals.send.recipientPlaceholderUrl')"
-      :message="addressMessage"
-      @help="showRecipientHelp()"
     >
-      <template #label-after>
-        <a
-          class="scan-button"
-          data-cy="scan-button"
-          @click="openScanQrModal"
-        >
-          <QrScanIcon />
-        </a>
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model.trim="formModel.address"
+        name="address"
+        data-cy="address"
+        show-help
+        show-message-help
+        :label="$t('modals.send.recipientLabel')"
+        :placeholder="isMultisig
+          ? $t('modals.send.recipientPlaceholder')
+          : $t('modals.send.recipientPlaceholderUrl')"
+        :message="addressMessage"
+        @help="showRecipientHelp()"
+      >
+        <template #label-after>
+          <a
+            class="scan-button"
+            data-cy="scan-button"
+            @click="openScanQrModal"
+          >
+            <QrScanIcon />
+          </a>
+        </template>
+      </InputField>
+    </Field>
     <div class="status">
       <UrlStatus
         v-show="isTipUrl"
         :status="urlStatus"
       />
     </div>
-
-    <InputAmount
-      v-model="formModel.amount"
-      v-validate="{
+    <Field
+      v-slot="{ field }"
+      ref="amountField"
+      name="amount"
+      :rules="{
         required: true,
         min_value_exclusive: 0,
         ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
         ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
         ...+balance.minus(fee) > 0 && isMultisig
-          ? { max_value_vault: activeMultisigAccount.balance.toString() }
+          ? { max_value_vault: activeMultisigAccount?.balance.toString() }
           : {},
         min_tip_amount: isTipUrl,
       }"
-      name="amount"
-      data-cy="amount"
-      class="amount-input"
-      show-tokens-with-balance
-      :ae-only="isMultisig"
-      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
-      :message="amountMessage"
-      :selected-asset="formModel.selectedAsset"
-      @asset-selected="handleAssetChange"
     >
-      <template #label-after>
-        <BtnPlain
-          v-if="!isMultisig"
-          class="max-button"
-          :class="{ chosen: isMaxValue }"
-          @click="setMaxValue"
-        >
-          MAX
-        </BtnPlain>
-      </template>
-    </InputAmount>
+      <InputAmount
+        v-bind="field"
+        v-model="formModel.amount"
+        name="amount"
+        data-cy="amount"
+        class="amount-input"
+        show-tokens-with-balance
+        :ae-only="isMultisig"
+        :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
+        :message="amountMessage"
+        :selected-asset="formModel.selectedAsset"
+        @asset-selected="handleAssetChange"
+      >
+        <template #label-after>
+          <BtnPlain
+            v-if="!isMultisig"
+            class="max-button"
+            :class="{ chosen: isMaxValue }"
+            @click="setMaxValue"
+          >
+            MAX
+          </BtnPlain>
+        </template>
+      </InputAmount>
+    </Field>
 
     <template v-if="isAe">
       <div
@@ -176,12 +187,13 @@ import {
   onMounted,
   PropType,
   nextTick,
-  getCurrentInstance,
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useForm, Field } from 'vee-validate';
+import { anyExcept } from '../../store/plugins/veeValidate';
 import type {
   IFormSelectOption,
   IInputMessage,
@@ -245,6 +257,7 @@ export default defineComponent({
     FormSelect,
     UrlStatus,
     QrScanIcon,
+    Field,
   },
   model: {
     prop: 'transferData',
@@ -255,17 +268,18 @@ export default defineComponent({
   },
   compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+
+    const { validate, errors } = useForm();
 
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
+    const amountField = ref<InstanceType<typeof Field> | null>(null);
 
     const { openModal, openDefaultModal } = useModals();
     const { max, fee } = useMaxAmount({ formModel, store });
@@ -278,14 +292,25 @@ export default defineComponent({
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
-      const warning = (root as any).errors.items
-        .filter(({ field }: any) => field === fieldName)
-        .find((_error: any) => WARNING_RULES.includes(_error.rule))?.msg || null;
-      if (warning) return { status: 'warning', text: warning };
-      const _error = (root as any).errors.items
-        .filter(({ field }: any) => field === fieldName)
-        .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null;
-      if (_error) return { status: 'error', text: _error };
+      if (!errors.value) return { status: 'success' };
+
+      const items = errors.value[fieldName as keyof typeof errors.value];
+      if (items) {
+        // eslint-disable-next-line no-console
+        console.log(items);
+        // TODO: Vee-validate v4 does not return error codes with errors
+        // We need to find a new way to filter messages
+        throw new Error('Function needs refactoring.');
+      }
+      // if (items) {
+      //   const warning = items
+      //     .find((_error) => WARNING_RULES.includes(_error.rule))?.msg || null;
+      //   if (warning) return { status: 'warning', text: warning };
+
+      //   const _error = items
+      //     .filter(({ rule }) => !WARNING_RULES.includes(rule))[0]?.msg || null;
+      //   if (_error) return { status: 'error', text: _error };
+      // }
       return { status: 'success' };
     }
     const amountMessage = computed(() => getMessageByFieldName('amount'));
@@ -350,8 +375,8 @@ export default defineComponent({
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
-        if (formModel.value.amount) {
-          (root as any).$validator.validate('amount');
+        if (formModel.value.amount && amountField.value) {
+          amountField.value.validate();
         }
       }
     }
@@ -388,7 +413,7 @@ export default defineComponent({
 
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      const isValid = !(await (root as any).$validator._base.anyExcept('address', WARNING_RULES));
+      const isValid = !anyExcept('address', WARNING_RULES, errors.value);
       if (isValid) {
         await emitCurrentFormModelState();
         emit('success');
@@ -428,7 +453,7 @@ export default defineComponent({
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           formModel.value.address = '';
-          openDefaultModal({ msg: root.$t('modals.insufficient-balance.msg') });
+          openDefaultModal({ msg: t('modals.insufficient-balance.msg') });
           return;
         }
 
@@ -444,7 +469,7 @@ export default defineComponent({
         ).toString();
         invoiceId.value = parsedScanResult.invoiceId;
         invoiceContract.value = parsedScanResult.invoiceContract;
-        await (root as any).validate();
+        await validate();
       } else {
         if (!scanResult) return;
         if (scanResult.startsWith('ak_')) formModel.value.address = scanResult;
@@ -475,6 +500,7 @@ export default defineComponent({
     watch(
       () => hasError.value,
       (val) => emit('error', val),
+      { deep: true },
     );
 
     watch(
@@ -534,6 +560,7 @@ export default defineComponent({
       max,
       editPayload,
       clearPayload,
+      amountField,
     };
   },
 });
