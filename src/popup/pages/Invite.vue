@@ -5,28 +5,34 @@
         <NewInviteLink class="section-title-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
-      <InputAmount
-        v-model="formModel.amount"
-        v-validate="{
+      <Field
+        v-slot="{ field, errors }"
+        name="amount"
+        :rules="{
           min_value_exclusive: 0,
           ...+balance.minus(fee) > 0 ? { max_value: max } : {},
           enough_ae: fee.toString(),
         }"
-        class="amount"
-        name="amount"
-        :label="$t('pages.invite.tip-attached')"
-        :message="errors.first('amount')"
-        ae-only
-        :selected-asset="formModel.selectedAsset"
-        @asset-selected="(val) => formModel.selectedAsset = val"
-      />
-      <BtnMain
-        extend
-        :disabled="!formModel.amount || !!errors.first('amount')"
-        @click="generate"
       >
-        {{ $t('pages.invite.generate') }}
-      </BtnMain>
+        <InputAmount
+          v-bind="field"
+          v-model="formModel.amount"
+          class="amount"
+          name="amount"
+          :label="$t('pages.invite.tip-attached')"
+          :message="errors[0]"
+          ae-only
+          :selected-asset="formModel.selectedAsset"
+          @asset-selected="(val) => formModel.selectedAsset = val"
+        />
+        <BtnMain
+          extend
+          :disabled="!formModel.amount || !!errors[0]"
+          @click="generate"
+        >
+          {{ $t('pages.invite.generate') }}
+        </BtnMain>
+      </Field>
     </div>
     <div
       v-if="invites.length > 0"
@@ -49,6 +55,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
+import { Field } from 'vee-validate';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 
 import { useStore } from 'vuex';
@@ -73,8 +80,9 @@ export default defineComponent({
     InviteItem,
     InviteIcon,
     NewInviteLink,
+    Field,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const loading = ref(false);
 

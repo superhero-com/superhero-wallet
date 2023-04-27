@@ -12,21 +12,27 @@
       <UrlStatus :status="urlStatus" />
       <a>{{ tip.url }}</a>
     </div>
-
-    <InputAmount
-      v-model="formModel.amount"
-      v-validate="{
+    <Field
+      v-slot="{ field, errorMessage}"
+      name="amount"
+      :rules="{
         required: true,
         min_value_exclusive: 0,
         min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_ae: fee.toString(),
       }"
-      name="amount"
-      class="amount-input"
-      ae-only
-      :message="errors.first('amount')"
-    />
+    >
+      <InputAmount
+        v-bind="field"
+        v-model="formModel.amount"
+        name="amount"
+        class="amount-input"
+        ae-only
+        :message="errorMessage"
+      />
+    </Field>
+
     <div
       v-if="tip.title"
       class="tip-note-preview"
@@ -37,7 +43,7 @@
     <BtnMain
       class="bottom-btn"
       extend
-      :disabled="!isTippingSupported || $validator.errors.has('amount')"
+      :disabled="!isTippingSupported || errorAmount"
       @click="sendTip"
     >
       {{ $t('common.confirm') }}
@@ -65,6 +71,7 @@ import { SCHEMA } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { Field, useFieldError } from 'vee-validate';
 import {
   IToken,
   IPendingTransaction,
@@ -94,12 +101,14 @@ export default defineComponent({
     UrlStatus,
     BtnMain,
     BalanceInfo,
+    Field,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
+    const errorAmount = useFieldError();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -224,6 +233,7 @@ export default defineComponent({
       fee,
       balance,
       openCallbackOrGoHome,
+      errorAmount,
     };
   },
 });

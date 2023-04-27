@@ -6,8 +6,8 @@
     placeholder="0.00"
     :model-value="modelValue"
     :label="label"
-    :message="$attrs['message'] || errors.first('amount')"
-    @input="$emit('update:modelValue', $event)"
+    :message="$attrs['message'] || errorMessage"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template
       v-for="(index, name) in $slots"
@@ -65,7 +65,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   PropType,
   watch,
@@ -74,6 +73,7 @@ import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 import { useStore } from 'vuex';
+import { useField } from 'vee-validate';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -91,15 +91,15 @@ export default defineComponent({
   },
   emits: ['update:modelValue', 'error', 'asset-selected'],
   setup(props, { emit }) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { errorMessage } = useField('amount');
+    
     
     const { aeternityCoin } = useBalances({ store });
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const hasError = computed(() => !!errorMessage.value);
     const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
       () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
@@ -112,6 +112,7 @@ export default defineComponent({
         ? (+props.modelValue || 0) * currentAssetFiatPrice.value
         : 0,
     ));
+    
 
     function handleAssetSelected(asset: IAsset) {
       emit('asset-selected', asset);
@@ -133,6 +134,7 @@ export default defineComponent({
       currentAssetFiatPriceFormatted,
       currentAsset,
       hasError,
+      errorMessage,
       formatCurrency,
       handleAssetSelected,
     };

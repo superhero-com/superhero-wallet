@@ -46,7 +46,7 @@ export default {
       else state[host].addresses.push(address);
     },
     addPermission(state, permission) {
-      state.permission[host] = permission;
+      state[permission.host] = permission;
     },
     removePermission(state, host) {
       delete state[host];

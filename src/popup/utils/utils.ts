@@ -259,18 +259,16 @@ export function secondsToRelativeTime(seconds: number) {
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
-
   if (seconds < secondsPerMinute) {
-    // @ts-ignore
     return i18n.global.tc('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.global.tc('common.minutes', Math.round(seconds / secondsPerMinute));
+    return i18n.global.rt('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.global.tc('common.hours', Math.round(seconds / secondsPerHour));
+    return i18n.global.rt('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.global.tc('common.days', Math.round(seconds / secondsPerDay));
+  return i18n.global.rt('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {
