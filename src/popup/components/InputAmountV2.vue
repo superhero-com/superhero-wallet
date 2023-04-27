@@ -6,8 +6,8 @@
     placeholder="0.00"
     :model-value="modelValue"
     :label="label"
-    :message="$attrs['message'] || errors.first('amount')"
-    @input="$emit('update:modelValue', $event)"
+    :message="$attrs['message'] || errors[0]"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template
       v-for="(index, name) in $slots"
@@ -64,12 +64,12 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   PropType,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useField } from 'vee-validate';
 import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
@@ -91,15 +91,14 @@ export default defineComponent({
   emits: ['update:modelValue', 'asset-selected', 'error'],
   compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
+    const { errors } = useField('amount');
 
     const { aeternityCoin } = useBalances({ store });
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const hasError = computed(() => errors.value.length > 0);
     const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
       () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
@@ -133,6 +132,7 @@ export default defineComponent({
       currentAssetFiatPriceFormatted,
       currentAsset,
       hasError,
+      errors,
       formatCurrency,
       handleAssetSelected,
     };

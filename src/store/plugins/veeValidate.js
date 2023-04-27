@@ -1,9 +1,9 @@
-import { Validator, ErrorBag, install as VeeValidate } from 'vee-validate/dist/vee-validate.minimal.esm';
-import { required } from 'vee-validate/dist/rules.esm';
+import { defineRule, configure } from 'vee-validate';
+import { localize } from '@vee-validate/i18n';
+import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Crypto } from '@aeternity/aepp-sdk';
-import { getCurrentInstance } from 'vue';
 import { i18n } from './languages';
 import {
   isNotFoundError,
@@ -15,70 +15,56 @@ import {
 import { AENS_DOMAIN } from '../../popup/utils/constants';
 import { useBalances, useCurrencies } from '../../composables';
 
-const app = getCurrentInstance();
-if (app) app.appContext.app.use(VeeValidate);
-
+// TODO refactor way of accessing errors & filtering them
 const filteredRules = (errors, validatedField, rules) => errors.filter(
   ({ field, rule }) => field === validatedField && !rules.includes(rule),
 );
+export const firstExcept = (field, rules, errors) => filteredRules(errors, field, rules)[0]?.msg;
+export const anyExcept = (field, rules, errors) => !!(
+  filteredRules(errors, field, rules).length
+);
 
-Object.assign(Validator.prototype, {
-  firstExcept(field, rules) {
-    return filteredRules(this.errors.items, field, rules)[0]?.msg;
-  },
-  anyExcept(field, rules) {
-    return !!(filteredRules(this.errors.items, field, rules).length);
-  },
-});
-
-Object.assign(ErrorBag.prototype, {
-  firstByRules(field, rules) {
-    return rules.map((r) => this.firstByRule(field, r)).find((r) => r);
-  },
-  anyByRules(field, rules) {
-    return !!this.firstByRules(field, rules);
-  },
-});
-
-Validator.extend('max', {
+defineRule('max', {
   validate: (val, maxLength) => val && val.length <= maxLength,
-  getMessage: (field, [arg]) => i18n.t('validation.maxLength', [arg]),
+  getMessage: (field, [arg]) => i18n.global.t('validation.maxLength', [arg]),
 });
 
-Validator.extend('url', (url) => isValidURL(url));
-Validator.extend('required', required);
-Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
-Validator.extend('account_address', (value) => Crypto.isAddressValid(value, 'ak'));
-Validator.extend('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
-Validator.extend('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
-Validator.extend('min_value_exclusive', (value, [arg]) => BigNumber(value).isGreaterThan(arg));
-Validator.extend('max_value', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
-Validator.extend('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
+defineRule('url', (url) => isValidURL(url));
+defineRule('required', required);
+defineRule('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
+defineRule('account_address', (value) => Crypto.isAddressValid(value, 'ak'));
+defineRule('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
+defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
+defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
+defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
+defineRule('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 
-Validator.localize('en', {
-  messages: {
-    url: () => i18n.global.t('validation.url'),
-    required: () => i18n.global.t('validation.required'),
-    account: () => i18n.global.t('validation.address'),
-    account_address: () => i18n.global.t('validation.invalidAddress'),
-    name: () => i18n.global.t('validation.name'),
-    name_registered_address: () => i18n.global.t('validation.nameRegisteredAddress'),
-    name_unregistered: () => i18n.global.t('validation.nameUnregistered'),
-    not_same_as: () => i18n.global.t('validation.notSameAs'),
-    token_to_an_address: () => i18n.global.t('validation.tokenToAnAddress'),
-    min_value: (field, [arg]) => i18n.global.t('validation.minValue', [arg]),
-    min_value_exclusive: (field, [arg]) => i18n.global.t('validation.minValueExclusive', [arg]),
-    max_value: (field, [arg]) => i18n.global.t('validation.maxValue', [arg]),
-    max_value_vault: (field, [arg]) => i18n.global.t('validation.maxValueVault', [arg]),
-    enough_ae: () => i18n.global.t('validation.enoughAe'),
-    enough_ae_signer: () => i18n.global.t('validation.enoughAeSigner'),
-    not_token: () => i18n.global.t('validation.notToken'),
-    name_registered_address_or_url: () => i18n.global.t('validation.invalidAddressChainUrl'),
-    min_tip_amount: () => i18n.global.t('pages.tipPage.minAmountError'),
-    invalid_hostname: () => i18n.global.t('pages.network.error.invalidHostname'),
-    network_name: () => i18n.global.t('pages.network.error.enterName'),
-    network_exists: () => i18n.global.t('pages.network.error.networkExists'),
-  },
+configure({
+  generateMessage: localize('en', {
+    messages: {
+      url: () => i18n.global.t('validation.url'),
+      required: () => i18n.global.t('validation.required'),
+      account: () => i18n.global.t('validation.address'),
+      account_address: () => i18n.global.t('validation.invalidAddress'),
+      name: () => i18n.global.t('validation.name'),
+      name_registered_address: () => i18n.global.t('validation.nameRegisteredAddress'),
+      name_unregistered: () => i18n.global.t('validation.nameUnregistered'),
+      not_same_as: () => i18n.global.t('validation.notSameAs'),
+      token_to_an_address: () => i18n.global.t('validation.tokenToAnAddress'),
+      min_value: ({ rule }) => i18n.global.t('validation.minValue', [rule.params[0]]),
+      min_value_exclusive: ({ rule }) => i18n.global.t('validation.minValueExclusive', [rule.params[0]]),
+      max_value: ({ rule }) => i18n.global.t('validation.maxValue', [rule.params[0]]),
+      max_value_vault: ({ rule }) => i18n.global.t('validation.maxValueVault', [rule.params[0]]),
+      enough_ae: () => i18n.global.t('validation.enoughAe'),
+      enough_ae_signer: () => i18n.global.t('validation.enoughAeSigner'),
+      not_token: () => i18n.global.t('validation.notToken'),
+      name_registered_address_or_url: () => i18n.global.t('validation.invalidAddressChainUrl'),
+      min_tip_amount: () => i18n.global.t('pages.tipPage.minAmountError'),
+      invalid_hostname: () => i18n.global.t('pages.network.error.invalidHostname'),
+      network_name: () => i18n.global.t('pages.network.error.enterName'),
+      network_exists: () => i18n.global.t('pages.network.error.networkExists'),
+    },
+  }),
 });
 
 export default (store) => {
@@ -136,39 +122,32 @@ export default (store) => {
     }
   };
 
-  Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
-  Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
-  Validator.extend('name_registered_address', (value) => (checkAensName(value)
+  defineRule('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
+  defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
+  defineRule('name_registered_address', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value)));
 
-  Validator.extend('token_to_an_address', {
-    validate(value, args) {
-      return !checkAensName(value) || (checkAensName(value) && !args.isToken);
-    },
-    params: ['isToken'],
-  });
-
-  Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
+  defineRule('token_to_an_address',
+    (value, [isToken]) => !checkAensName(value) || (checkAensName(value) && !isToken), {
+      params: ['isToken'],
+    });
+  defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
-
-  Validator.extend('enough_ae', async (_, [arg]) => {
+  defineRule('enough_ae', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
-
-  Validator.extend('enough_ae_signer', async (_, [arg]) => {
+  defineRule('enough_ae_signer', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
-
-  Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
+  defineRule('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value) || validateTipUrl(value)));
-
-  Validator.extend('invalid_hostname', (value) => {
+  defineRule('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);
       return !!_url.hostname;
@@ -176,8 +155,7 @@ export default (store) => {
       return false;
     }
   });
-
-  Validator.extend('network_name', (value) => ({
+  defineRule('network_name', (value) => ({
     valid: !!value,
     data: {
       required: true,
@@ -185,8 +163,7 @@ export default (store) => {
   }), {
     computesRequired: true,
   });
-
-  Validator.extend('network_exists', (name, [index, networks]) => {
+  defineRule('network_exists', (name, [index, networks]) => {
     const networkWithSameName = networks[name];
     return (
       !networkWithSameName

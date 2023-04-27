@@ -1,58 +1,66 @@
 <template>
-  <div
-    class="network-form"
-    data-cy="network-form"
-  >
-    <p
-      v-if="isNetworkPrefilled"
-      class="text-description color-warning"
+  <Form v-slot="{ errors }">
+    <div
+      class="network-form"
+      data-cy="network-form"
     >
-      {{ $t('pages.network.thirdPartyDetails') }}
-    </p>
-    <p
-      v-else
-      class="text-description"
-    >
-      {{ $t('pages.network.formLabel') }}
-    </p>
-    <InputField
-      v-for="input in formConfig"
-      :key="input.key"
-      v-model="newNetwork[input.key]"
-      v-validate="validatorRules(input.key)"
-      :name="input.key"
-      :placeholder="input.placeholder"
-      :label="input.label"
-      :data-cy="input.dataCy"
-      :message="errors.first(input.key)"
-      :model-value="newNetwork[input.key]"
-      :text-limit="input.textLimit"
-    />
-    <div class="button-wrapper">
-      <BtnMain
-        data-cy="cancel"
-        variant="muted"
-        class="cancel-button"
-        extra-padded
-        :text="$t('common.cancel')"
-        @click="goBack"
-      />
-      <BtnMain
-        :disabled="buttonDisabled"
-        :icon="isEdit ? null : PlusCircleIcon"
-        data-cy="connect"
-        class="add-button"
-        @click="addOrUpdateNetwork"
+      <p
+        v-if="isNetworkPrefilled"
+        class="text-description color-warning"
       >
-        <template v-if="isEdit">
-          {{ $t('pages.network.apply') }}
-        </template>
-        <template v-else>
-          {{ $t('pages.network.addNetwork') }}
-        </template>
-      </BtnMain>
+        {{ $t('pages.network.thirdPartyDetails') }}
+      </p>
+      <p
+        v-else
+        class="text-description"
+      >
+        {{ $t('pages.network.formLabel') }}
+      </p>
+      <Field
+        v-for="input in formConfig"
+        v-slot="{ field, errorMessage }"
+        :key="input.key"
+        :name="input.key"
+        :rules="validatorRules(input.key)"
+      >
+        <InputField
+          v-bind="field"
+          v-model="newNetwork[input.key]"
+          v-validate="validatorRules(input.key)"
+          :name="input.key"
+          :placeholder="input.placeholder"
+          :label="input.label"
+          :data-cy="input.dataCy"
+          :message="errorMessage"
+          :text-limit="input.textLimit"
+        />
+      </Field>
+      <div class="button-wrapper">
+        <BtnMain
+          data-cy="cancel"
+          variant="muted"
+          class="cancel-button"
+          extra-padded
+          :text="$t('common.cancel')"
+          @click="goBack"
+        />
+        <BtnMain
+          :disabled="buttonDisabled || (errors && Object.keys(errors).length > 0)"
+          :icon="isEdit ? PlusCircleIcon : null"
+          data-cy="connect"
+          class="add-button"
+          @click="addOrUpdateNetwork"
+        >
+          <template v-if="isEdit">
+            {{ $t('pages.network.apply') }}
+          </template>
+          <template v-else>
+            {{ $t('pages.network.addNetwork') }}
+          </template>
+        </BtnMain>
+      </div>
     </div>
-  </div>
+  </Form>
 </template>
 
 <script lang="ts">
@@ -60,15 +68,15 @@ import {
   computed,
   defineComponent,
   getCurrentScope,
-  getCurrentInstance,
   nextTick,
   onMounted,
   ref,
   set,
 } from 'vue';
-import type { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { Field, Form } from 'vee-validate';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { NETWORK_DEFAULT } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
@@ -100,17 +108,19 @@ export default defineComponent({
   components: {
     BtnMain,
     InputField,
+    Field,
+    Form,
   },
-  setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+  setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { t } = useI18n();
 
     const isEdit = route.name === ROUTE_NETWORK_EDIT;
 
     const { $validator } = (getCurrentScope() as any).vm;
+
     const networks = useGetter('networks');
     const selectNetwork = useDispatch('selectNetwork');
 
@@ -122,45 +132,42 @@ export default defineComponent({
     const formConfig: IFormConfig[] = [
       {
         key: 'name',
-        placeholder: root.$t('pages.network.networkNamePlaceholder'),
-        label: root.$t('pages.network.networkNameLabel'),
+        placeholder: t('pages.network.networkNamePlaceholder'),
+        label: t('pages.network.networkNameLabel'),
         dataCy: 'network',
         textLimit: NETWORK_NAME_MAX_LENGTH,
       },
       {
         key: 'url',
-        placeholder: root.$t('pages.network.networkUrlPlaceholder'),
-        label: root.$t('pages.network.networkUrlLabel'),
+        placeholder: t('pages.network.networkUrlPlaceholder'),
+        label: t('pages.network.networkUrlLabel'),
         dataCy: 'url',
       },
       {
         key: 'middlewareUrl',
-        placeholder: root.$t('pages.network.networkMiddlewarePlaceholder'),
-        label: root.$t('pages.network.networkMiddlewareLabel'),
+        placeholder: t('pages.network.networkMiddlewarePlaceholder'),
+        label: t('pages.network.networkMiddlewareLabel'),
         dataCy: 'middleware',
       },
       {
         key: 'compilerUrl',
-        placeholder: root.$t('pages.network.networkCompilerPlaceholder'),
-        label: root.$t('pages.network.networkCompilerLabel'),
+        placeholder: t('pages.network.networkCompilerPlaceholder'),
+        label: t('pages.network.networkCompilerLabel'),
         dataCy: 'compiler',
       },
       {
         key: 'backendUrl',
-        placeholder: root.$t('pages.network.backendUrlPlaceholder'),
-        label: root.$t('pages.network.backendUrlLabel'),
+        placeholder: t('pages.network.backendUrlPlaceholder'),
+        label: t('pages.network.backendUrlLabel'),
       },
     ];
 
     const error = ref({});
 
-    const hasErrors = computed(() => (root as any).$validator.errors.items?.length);
-
     const buttonDisabled = computed(
       () => !Object.keys(NETWORK_PROPS).every(
         (key) => !!newNetwork.value[key as keyof INetworkBase],
-      )
-      || !!hasErrors.value,
+      ),
     );
 
     function goBack() {
@@ -201,7 +208,7 @@ export default defineComponent({
           const val = query[key];
 
           if (val && typeof val === 'string') {
-            set(newNetwork.value, key, val);
+            newNetwork.value[key] = val;
             isNetworkPrefilled.value = true;
           }
         });
@@ -215,7 +222,6 @@ export default defineComponent({
       newNetwork,
       isNetworkPrefilled,
       error,
-      hasErrors,
       networks,
       buttonDisabled,
       isEdit,

@@ -1,5 +1,5 @@
 <template>
-  <div :class="['switch-button', { disabled: disabled, active: !!value }]">
+  <div :class="['switch-button', { disabled: disabled, active: !!modelValue }]">
     <div class="label">
       {{ label }}
     </div>
@@ -26,10 +26,10 @@ export default {
   computed: {
     active: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
-      set(value) {
-        this.$emit('update:modelValue', value);
+      set(modelValue) {
+        this.$emit('update:modelValue', modelValue);
       },
     },
   },

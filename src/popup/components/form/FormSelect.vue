@@ -79,7 +79,10 @@ export default defineComponent({
         options: props.options,
         title: props.defaultText,
       })
-        .then((val) => emit('select', val))
+        .then((val) => {
+          emit('select', val);
+          emit('update:modelValue', val);
+        })
         .catch(() => null); // Closing the modal does nothing
     }
 

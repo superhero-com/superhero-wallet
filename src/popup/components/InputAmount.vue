@@ -1,20 +1,14 @@
 <template>
   <InputField
-    v-validate="{
-      required: true,
-      min_value_exclusive: 0,
-      enough_ae: fee.toString(),
-      max_value: (max > 0) ? max : undefined,
-    }"
     v-bind="$attrs"
     name="amount"
     class="input-amount"
     type="number"
     placeholder="0.00"
     :model-value="modelValue"
-    :message="$attrs['message'] || errors.first('amount')"
-    :label="$attrs.label || $t('common.amount')"
-    @input="$emit('input', $event)"
+    :message="$attrs['message'] || errors[0]"
+    :label="$attrs.label as string || $t('common.amount')"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template #after>
       <span class="token">{{ AETERNITY_SYMBOL }}</span>
@@ -32,7 +26,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   ref,
   watch,
@@ -40,6 +33,7 @@ import {
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
+import { useField } from 'vee-validate';
 import { AETERNITY_SYMBOL, calculateFee } from '../utils';
 import { useBalances, useCurrencies, useSdk } from '../../composables';
 import InputField from './InputField.vue';
@@ -55,18 +49,23 @@ export default defineComponent({
   emits: ['update:modelValue', 'error'],
   compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
-    const store = useStore();
+    const fee = ref(new BigNumber(0));
 
+    const store = useStore();
     const { getSdk } = useSdk({ store });
     const { balance } = useBalances({ store });
     const { getFormattedFiat } = useCurrencies();
 
-    const fee = ref(new BigNumber(0));
-
-    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const max = computed(() => balance.value.minus(fee.value).toNumber());
+
+    const { errors } = useField('amount', {
+      required: true,
+      min_value_exclusive: 0,
+      enough_ae: fee.toString(),
+      max_value: (max.value > 0) ? max : undefined,
+    });
+
+    const hasError = computed(() => errors.value.length > 0);
     const currencyAmount = computed(() => getFormattedFiat(+props.modelValue || 0));
 
     onMounted(async () => {
@@ -81,6 +80,7 @@ export default defineComponent({
       fee,
       max,
       currencyAmount,
+      errors,
     };
   },
 });
