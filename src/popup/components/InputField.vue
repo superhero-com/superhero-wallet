@@ -261,7 +261,7 @@ export default defineComponent({
       display: flex;
       margin-left: 10px;
 
-      .icon {
+      :deep(.icon) {
         color: variables.$color-white;
         height: 24px;
         width: 24px;
@@ -269,7 +269,7 @@ export default defineComponent({
       }
 
       &:hover {
-        .icon {
+        :deep(.icon) {
           opacity: 1;
         }
       }
@@ -299,7 +299,7 @@ export default defineComponent({
       align-items: center;
       width: 100%;
 
-      .icon {
+      :deep(.icon) {
         width: 24px;
         height: 24px;
         flex-shrink: 0;
