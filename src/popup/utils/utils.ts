@@ -182,17 +182,16 @@ export function secondsToRelativeTime(seconds: number) {
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
-
   if (seconds < secondsPerMinute) {
-    return i18n.global.tc('seconds', Math.round(seconds));
+    return i18n.global.rt('seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.global.tc('minutes', Math.round(seconds / secondsPerMinute));
+    return i18n.global.rt('minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.global.tc('hours', Math.round(seconds / secondsPerHour));
+    return i18n.global.rt('hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.global.tc('days', Math.round(seconds / secondsPerDay));
+  return i18n.global.rt('days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {

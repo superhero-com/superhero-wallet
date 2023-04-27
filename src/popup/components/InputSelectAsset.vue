@@ -5,7 +5,10 @@
     @click="openAssetSelector"
   >
     {{ displayToken }}
-    <ChevronDown v-if="!disabled" />
+    <ChevronDown
+      v-if="!disabled"
+      class="chevron-down"
+    />
   </BtnPlain>
 </template>
 

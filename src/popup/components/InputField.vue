@@ -151,7 +151,7 @@ export default defineComponent({
       default: null,
     },
   },
-  emits: ['update:modelValue', 'input', 'focus-change', 'click', 'help'],
+  emits: ['update:modelValue', 'focus-change', 'click', 'help'],
   compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const inputId = `input-${getCurrentInstance()?.uid}`;
@@ -192,8 +192,8 @@ export default defineComponent({
       }
     }
 
-    function handleInput(event: InputEvent) {
-      const { value } = event.target as HTMLInputElement;
+    function handleInput(payload: Event) {
+      const { value } = payload.target as HTMLInputElement;
       emit('update:modelValue', props.type === 'number' ? value?.replace(',', '.') : value);
     }
 
@@ -327,6 +327,7 @@ export default defineComponent({
 
       &[type='number'] {
         -moz-appearance: textfield;
+        appearance: textfield;
 
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {

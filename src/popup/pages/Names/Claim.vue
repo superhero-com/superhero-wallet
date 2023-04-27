@@ -1,23 +1,29 @@
 <template>
   <div class="claim">
-    <InputField
-      v-model="name"
-      v-validate="'required|name|name_unregistered'"
+    <Field
+      v-slot="{ field, errorMessage }"
       name="name"
-      class="chain-name"
-      :label="$t('pages.names.claim.register-name')"
-      :message="errors.first('name')"
-      :placeholder="$t('pages.names.claim.name-placeholder')"
+      :rules="'required|name|name_unregistered'"
     >
-      <template #label-after>
-        <span class="chain-name-counter">
-          {{ name.length }}/{{ maxNameLength }}
-        </span>
-      </template>
-      <template #after>
-        {{ AENS_DOMAIN }}
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model="name"
+        name="name"
+        class="chain-name"
+        :label="$t('pages.names.claim.register-name')"
+        :message="errorMessage"
+        :placeholder="$t('pages.names.claim.name-placeholder')"
+      >
+        <template #label-after>
+          <span class="chain-name-counter">
+            {{ name.length }}/{{ maxNameLength }}
+          </span>
+        </template>
+        <template #after>
+          {{ AENS_DOMAIN }}
+        </template>
+      </InputField>
+    </Field>
 
     <CheckBox v-model="autoExtend">
       <div class="auto-extend-label">
@@ -44,7 +50,7 @@
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!sdk || !name || errors.any()"
+      :disabled="!sdk || !name || errorName"
       @click="claim"
     >
       {{
@@ -57,8 +63,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, useStore } from 'vuex';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { useForm, useFieldError, Field } from 'vee-validate';
 import {
   MAGNITUDE,
   MODAL_DEFAULT,
@@ -80,6 +87,13 @@ export default {
     CheckBox,
     BtnMain,
     BtnHelp,
+    Field,
+  },
+  setup() {
+    const errorName = useFieldError('name');
+    return {
+      errorName,
+    };
   },
   data: () => ({
     AENS_DOMAIN,
@@ -107,7 +121,10 @@ export default {
       openModal: 'open',
     }),
     async claim() {
-      if (!await this.$validator.validateAll()) return;
+      const store = useStore();
+      const { validate } = useForm();
+
+      if (!await validate()) return;
       const name = `${this.name}${AENS_DOMAIN}`;
       const nameEntry = await this.sdk.api.getNameEntryByName(name).catch(() => false);
       if (nameEntry) {
@@ -122,7 +139,7 @@ export default {
           const { salt } = await this.sdk.aensPreclaim(name);
           claimTxHash = (await this.sdk.aensClaim(name, salt, { waitMined: false })).hash;
           if (this.autoExtend) {
-            this.$store.commit('names/setPendingAutoExtendName', name);
+            store.commit('names/setPendingAutoExtendName', name);
           }
           this.$router.push({ name: 'account-details-names' });
         } catch (e) {
@@ -141,13 +158,13 @@ export default {
         }
 
         try {
-          this.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
           await this.sdk.poll(claimTxHash);
           const isAuction = AENS_NAME_AUCTION_MAX_LENGTH >= name.length;
           if (!isAuction) {
-            this.$store.dispatch('names/updatePointer', {
+            store.dispatch('names/updatePointer', {
               name,
-              address: this.$store.getters.account.address,
+              address: store.getters.account.address,
             });
           }
         } catch (e) {
@@ -156,7 +173,7 @@ export default {
             msg: e.message,
           });
         } finally {
-          this.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
         }
       }
     },

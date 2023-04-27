@@ -9,30 +9,42 @@
 
     <div class="inputs">
       <div class="permission-row">
-        <InputField
-          v-model="permission.name"
-          v-validate="'required'"
+        <Field
+          v-slot="{ field, errorMessage }"
           name="name"
-          :label="$t('pages.permissions.custom-name')"
-          :placeholder="$t('pages.permissions.enter-custom-name')"
-          :text-limit="32"
-          :message="errors.first('name')"
-        />
+          rules="required"
+        >
+          <InputField
+            v-bind="field"
+            v-model="permission.name"
+            name="name"
+            :label="$t('pages.permissions.custom-name')"
+            :placeholder="$t('pages.permissions.enter-custom-name')"
+            :text-limit="32"
+            :message="errorMessage"
+          />
+        </Field>
       </div>
 
       <div class="permission-row">
-        <InputField
-          v-model="permission.host"
-          v-validate="{
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="url"
+          :rules="{
             required: true,
             url: permissionHostValidation
           }"
-          type="url"
-          name="url"
-          :label="$t('pages.permissions.permissions-for-url')"
-          :placeholder="$t('pages.permissions.enter-url')"
-          :message="errors.first('url')"
-        />
+        >
+          <InputField
+            v-bind="field"
+            v-model="permission.host"
+            type="url"
+            name="url"
+            :label="$t('pages.permissions.permissions-for-url')"
+            :placeholder="$t('pages.permissions.enter-url')"
+            :message="errorMessage"
+          />
+        </Field>
       </div>
     </div>
     <div class="permission-row switch">
@@ -64,17 +76,23 @@
         v-if="permission.dailySpendLimit"
         class="transaction-sign-limit"
       >
-        <InputAmount
-          v-model="permission.transactionSignLimit"
-          v-validate="{
+        <Field
+          v-slot="{ field }"
+          name="transactionSignLimit"
+          :rules="{
             min_value_exclusive: 0,
           }"
-          class="transaction-limit-input"
-          name="transactionSignLimit"
-          label=" "
-          :selected-asset="selectedAsset"
-          ae-only
-        />
+        >
+          <InputAmount
+            v-bind="field"
+            v-model="permission.transactionSignLimit"
+            class="transaction-limit-input"
+            name="transactionSignLimit"
+            label=" "
+            :selected-asset="selectedAsset"
+            ae-only
+          />
+        </Field>
 
         <div class="limit-info">
           <TokenAmount
@@ -128,12 +146,12 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { useForm, Field } from 'vee-validate';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
 import { useBalances, useCurrencies } from '../../composables';
@@ -154,13 +172,13 @@ export default defineComponent({
     InputAmount,
     TokenAmount,
     BtnMain,
+    Field,
   },
-  setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+  setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { validate, setValues } = useForm();
 
     const { balance } = useBalances({ store });
     const { currentCurrencyRate } = useCurrencies();
@@ -188,7 +206,8 @@ export default defineComponent({
     }
 
     async function savePermission() {
-      if (!(await (root as any).$validator.validateAll())) return;
+      const isValid = (await validate()).valid;
+      if (!isValid) return;
 
       const { host } = (new URL(
         `${permission.value.host.includes('http') ? '' : 'http://'}${permission.value.host}`,
@@ -233,6 +252,7 @@ export default defineComponent({
           );
         }
 
+        setValues({ url: savedPermission.host, ...savedPermission });
         permission.value = savedPermission;
       }
     }

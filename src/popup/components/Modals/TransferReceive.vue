@@ -45,18 +45,24 @@
       </div>
 
       <div class="request-specific-amount">
-        <InputAmount
-          v-model="amount"
-          v-validate="{
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="amount"
+          :rules="{
             min_value_exclusive: 0,
           }"
-          name="amount"
-          :label="$t('modals.receive.requestAmount')"
-          :message="errors.first('amount')"
-          :selected-asset="selectedAsset"
-          :ae-only="isMultisig"
-          @asset-selected="handleAssetChange"
-        />
+        >
+          <InputAmount
+            v-bind="field"
+            v-model="amount"
+            name="amount"
+            :label="$t('modals.receive.requestAmount')"
+            :message="errorMessage"
+            :selected-asset="selectedAsset"
+            :ae-only="isMultisig"
+            @asset-selected="handleAssetChange"
+          />
+        </Field>
       </div>
     </div>
     <template #footer>
@@ -86,6 +92,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { Field } from 'vee-validate';
 import type {
   IAccount,
   IAsset,
@@ -122,6 +129,7 @@ export default defineComponent({
     AddressFormatted,
     CopyText,
     AccountItem,
+    Field,
   },
   props: {
     defaultAmount: { type: [String, Number], default: null },

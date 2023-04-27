@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <Modal
     class="transfer-send-modal"
@@ -11,7 +12,7 @@
         <component
           :is="currentStepConfig.component"
           ref="currentRenderedComponent"
-          v-model="transferData"
+          v-model:transferData="transferData"
           :is-multisig="isMultisig"
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"

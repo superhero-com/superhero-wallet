@@ -1,53 +1,63 @@
 <template>
-  <div
-    class="network-form"
-    data-cy="network-form"
-  >
-    <p class="text-description">
-      {{ $t('pages.network.formLabel') }}
-    </p>
-    <InputField
-      v-for="input in formConfig"
-      :key="input.key"
-      v-model="newNetwork[input.key]"
-      v-validate="validatorRules(input.key)"
-      :name="input.key"
-      :placeholder="input.placeholder"
-      :label="input.label"
-      :data-cy="input.dataCy"
-      :message="errors.first(input.key)"
-      :model-value="newNetwork[input.key]"
-      :text-limit="input.textLimit"
-    />
-    <div class="button-wrapper">
-      <BtnMain
-        data-cy="cancel"
-        variant="muted"
-        class="cancel-button"
-        extra-padded
-        :text="$t('pages.network.cancel')"
-        @click="goBack"
-      />
-      <BtnMain
-        :disabled="buttonDisabled"
-        :icon="isEdit ? PlusCircleIcon : null"
-        data-cy="connect"
-        class="add-button"
-        @click="addOrUpdateNetwork"
+  <Form v-slot="{ errors }">
+    <div
+      class="network-form"
+      data-cy="network-form"
+    >
+      <p class="text-description">
+        {{ $t('pages.network.formLabel') }}
+      </p>
+      <Field
+        v-for="input in formConfig"
+        v-slot="{ field, errorMessage }"
+        :key="input.key"
+        :name="input.key"
+        :rules="validatorRules(input.key)"
       >
-        <template v-if="isEdit">
-          {{ $t('pages.network.apply') }}
-        </template>
-        <template v-else>
-          {{ $t('pages.network.addNetwork') }}
-        </template>
-      </BtnMain>
+        <InputField
+          v-bind="field"
+          v-model="newNetwork[input.key]"
+          :name="input.key"
+          :placeholder="input.placeholder"
+          :label="input.label"
+          :data-cy="input.dataCy"
+          :message="errorMessage"
+          :model-value="newNetwork[input.key]"
+          :text-limit="input.textLimit"
+        />
+      </Field>
+
+      <div class="button-wrapper">
+        <BtnMain
+          data-cy="cancel"
+          variant="muted"
+          class="cancel-button"
+          extra-padded
+          :text="$t('pages.network.cancel')"
+          @click="goBack"
+        />
+        <BtnMain
+          :disabled="buttonDisabled || (errors && Object.keys(errors).length > 0)"
+          :icon="isEdit ? PlusCircleIcon : null"
+          data-cy="connect"
+          class="add-button"
+          @click="addOrUpdateNetwork"
+        >
+          <template v-if="isEdit">
+            {{ $t('pages.network.apply') }}
+          </template>
+          <template v-else>
+            {{ $t('pages.network.addNetwork') }}
+          </template>
+        </BtnMain>
+      </div>
     </div>
-  </div>
+  </Form>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import { Field, Form } from 'vee-validate';
 import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { defaultNetwork } from '../utils';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -66,6 +76,8 @@ export default {
   components: {
     BtnMain,
     InputField,
+    Field,
+    Form,
   },
   data() {
     return {
@@ -110,11 +122,8 @@ export default {
   },
   computed: {
     ...mapGetters(['networks']),
-    hasErrors() {
-      return this.errors.any();
-    },
     buttonDisabled() {
-      return !Object.keys(NETWORK_PROPS).every((key) => !!this.newNetwork[key]) || !!this.hasErrors;
+      return !Object.keys(NETWORK_PROPS).every((key) => !!this.newNetwork[key]);
     },
     isEdit() {
       return this.$route.name === 'network-edit';
@@ -141,8 +150,6 @@ export default {
       };
     },
     async addOrUpdateNetwork() {
-      if (this.hasErrors) return;
-
       this.$store.commit('setUserNetwork', {
         ...this.newNetwork,
         index: this.newNetwork.index,

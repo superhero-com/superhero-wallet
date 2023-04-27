@@ -3,6 +3,7 @@
     v-bind="$attrs"
     class="list-item-wrapper"
     :class="{ selected }"
+    @click="$emit('click', $event)"
   >
     <slot />
   </BtnPlain>
