@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/aeternity/superhero-wallet/compare/v1.1.0...v1.1.1) (2023-04-25)
+
+
+### Bug Fixes
+
+* disable possibility of vault creation with chain name or an url ([b619cbe](https://github.com/aeternity/superhero-wallet/commit/b619cbea2a722ef0c664f36fd834c741f6ede1ab))
+* handle insufficient balance issue for every action ([5e39fcd](https://github.com/aeternity/superhero-wallet/commit/5e39fcd14a478c64566f453ac4e5426ca7839c57))
+
 ## [1.1.0](https://github.com/aeternity/superhero-wallet/compare/v1.0.2...v1.1.0) (2023-04-20)
 
 
