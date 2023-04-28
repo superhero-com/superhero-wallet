@@ -28,7 +28,6 @@
         :text="$t('common.edit')"
         class="button-action-secondary"
         data-cy="edit"
-        extra-padded
         @click="editTransfer"
       />
       <BtnMain
