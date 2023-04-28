@@ -5,9 +5,6 @@
     :sender="preparedTransaction.sender"
     :recipient="preparedTransaction.recipient"
     :transaction-function="preparedTransaction.function"
-    :is-incomplete="transaction.incomplete"
-    :is-pending="transaction.pending"
-    :is-claim="transaction.claim"
     :transaction="transaction"
   />
 </template>

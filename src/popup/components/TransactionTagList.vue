@@ -18,7 +18,6 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
 import { useTransactionTx } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
 import {
   INetwork,
   ITokenList,
@@ -45,9 +44,6 @@ export default defineComponent({
   props: {
     customTitle: { type: String, default: null },
     transaction: { type: Object as PropType<ITransaction>, default: null },
-    isIncomplete: Boolean,
-    isPending: Boolean,
-    isClaim: Boolean,
     dense: Boolean,
   },
   setup(props, { root }) {
@@ -64,8 +60,10 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+    const availableTokens = computed<ITokenList>(
+      () => root.$store.state.fungibleTokens.availableTokens,
+    );
 
     const labels = computed<(string | TranslateResult)[]>(() => {
       if (props.customTitle) return [props.customTitle];
@@ -118,11 +116,11 @@ export default defineComponent({
           innerTx.value.contractId
           && [tipContractV1, tipContractV2].includes(innerTx.value.contractId)
           && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
-        ) || props.isClaim
+        ) || props.transaction.claim
       ) {
         innerLabels = [
           i18n.t('pages.token-details.tip'),
-          props.isClaim
+          props.transaction.claim
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];
@@ -138,7 +136,7 @@ export default defineComponent({
         && availableTokens.value[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
-          || props.isIncomplete
+          || props.transaction.incomplete
         )
       ) {
         innerLabels = [
@@ -150,7 +148,7 @@ export default defineComponent({
             ? i18n.t('transaction.spendType.out')
             : i18n.t('transaction.spendType.in'),
         ];
-      } else if (props.isPending) {
+      } else if (props.transaction.pending) {
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [
