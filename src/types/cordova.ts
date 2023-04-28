@@ -2,5 +2,4 @@
 export interface ICordova {
   platformId?: string
   plugins?: Record<string, any>
-  openwith?: any // cordova-plugin-openwith
 }

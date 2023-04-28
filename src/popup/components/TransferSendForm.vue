@@ -479,12 +479,6 @@ export default defineComponent({
       ) {
         root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
-      const tipUrlEncoded: any = root.$route.query.url;
-      if (tipUrlEncoded) {
-        const tipUrl = decodeURIComponent(tipUrlEncoded);
-        const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
-        formModel.value.address = tipUrlNormalised.toString();
-      }
 
       const { query } = root.$route;
 
