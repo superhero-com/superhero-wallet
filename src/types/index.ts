@@ -24,6 +24,7 @@ import {
   FUNCTION_TYPE_MULTISIG,
   ALLOWED_ICON_STATUSES,
   AETERNITY_COIN_ID,
+  WEB_SOCKET_CHANNEL_NAMES,
 } from '../popup/utils';
 import { RejectedByUserError } from '../lib/errors';
 
@@ -225,6 +226,7 @@ export interface INetworkBase {
    */
   name: string;
   middlewareUrl: string;
+  websocketUrl: string;
   /**
    * TODO: Replace with different way of differentiating the networks
    */
@@ -720,4 +722,13 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
     contactId: Encoded.ContractAddress,
     amount: number
   ) => Encoded.TxHash;
+}
+
+export type WebSocketChannelName = typeof WEB_SOCKET_CHANNEL_NAMES[number];
+
+// https://github.com/aeternity/ae_mdw#websocket-interface
+export interface IMiddlewareWebSocketSubscriptionMessage {
+  op: 'Subscribe' | 'Unsubscribe';
+  payload: WebSocketChannelName | 'Object';
+  target?: string;
 }

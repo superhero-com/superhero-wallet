@@ -125,6 +125,7 @@ export const NETWORK_MAINNET: INetwork = {
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
   explorerUrl: 'https://aescan.io',
   compilerUrl: 'https://compiler.aepps.com',
+  websocketUrl: 'wss://mainnet.aeternity.io/mdw/v2/websocket',
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z' as Encoded.ContractAddress,
   multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
@@ -137,6 +138,7 @@ export const NETWORK_TESTNET: INetwork = {
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
   explorerUrl: 'https://testnet.aescan.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
+  websocketUrl: 'wss://testnet.aeternity.io/mdw/v2/websocket',
   backendUrl: 'https://testnet.superhero.aeternity.art',
   tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd' as Encoded.ContractAddress,
   tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu' as Encoded.ContractAddress,
@@ -595,4 +597,18 @@ export const ALLOWED_ICON_STATUSES = [
   'not-secure',
   'success',
   'warning',
+] as const;
+
+export const WEB_SOCKET_CHANNEL_TRANSACTIONS = 'Transactions';
+export const WEB_SOCKET_CHANNEL_MICRO_BLOCKS = 'MicroBlocks';
+export const WEB_SOCKET_CHANNEL_KEY_BLOCKS = 'KeyBlocks';
+export const WEB_SOCKET_CHANNEL_KEY_OBJECT = 'Object';
+export const WEB_SOCKET_SUBSCRIBE = 'Subscribe';
+export const WEB_SOCKET_UN_SUBSCRIBE = 'Unsubscribe';
+
+export const WEB_SOCKET_CHANNEL_NAMES = [
+  WEB_SOCKET_CHANNEL_TRANSACTIONS,
+  WEB_SOCKET_CHANNEL_MICRO_BLOCKS,
+  WEB_SOCKET_CHANNEL_KEY_BLOCKS,
+  WEB_SOCKET_CHANNEL_KEY_OBJECT,
 ] as const;
