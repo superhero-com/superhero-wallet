@@ -774,7 +774,9 @@
       "claimOfRetip": "claimed your retip.",
       "viewOnSuperhero": "View on Superhero.com",
       "goToStore": "Go to store",
-      "noNotifications": "You do not have any unread notifications."
+      "noNotifications": "There are no unread notifications for you.",
+      "incomingTransaction": "Incoming Transaction",
+      "viewTransaction": "View transaction"
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",

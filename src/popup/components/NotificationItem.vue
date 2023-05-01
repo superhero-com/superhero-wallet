@@ -12,8 +12,15 @@
         {{ createdAt }}
       </span>
     </div>
+    <Avatar
+      v-if="isIncomingTransaction"
+      size="md"
+      :address="notification.receiver"
+      class="notification-avatar"
+      with-border
+    />
     <DefaultWalletNotificationIcon
-      v-if="isWallet && !isSeedBackup"
+      v-else-if="isWallet && !isSeedBackup"
       class="notification-icon"
     />
     <BackupSeedNotificationIcon
@@ -30,7 +37,7 @@
     />
     <div class="content">
       <AddressTruncated
-        v-if="!chainName && address"
+        v-if="!chainName && address && !isIncomingTransaction"
         :address="address"
         class="address"
       />
@@ -129,6 +136,7 @@ export default defineComponent({
     );
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
+    const isIncomingTransaction = computed(() => props.notification.isIncomingTransaction);
     const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
     const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
@@ -159,6 +167,7 @@ export default defineComponent({
       redirectInfo,
       isWallet,
       isSeedBackup,
+      isIncomingTransaction,
       handleClick,
       IS_MOBILE_DEVICE,
       initialStatus,

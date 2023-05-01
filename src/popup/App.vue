@@ -51,13 +51,19 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
+<<<<<<< HEAD
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { WalletRouteMeta } from '../types';
+=======
+} from '@vue/composition-api';
+import type { INetwork, WalletRouteMeta } from '../types';
+>>>>>>> e1e27861 (feat: incoming transactions listeners)
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
@@ -83,10 +89,13 @@ import {
   useUi,
   useViewport,
 } from '../composables';
+import { useGetter } from '../composables/vuex';
+import WebSocketClient from '../lib/webSocketClient';
 
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
+import { useIncomingTransactions } from '../composables/incomingTransactions';
 
 export default defineComponent({
   name: 'App',
@@ -95,10 +104,15 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
+<<<<<<< HEAD
   setup() {
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+=======
+  setup(props, { root }) {
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
+>>>>>>> e1e27861 (feat: incoming transactions listeners)
 
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
@@ -107,6 +121,10 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
+    const {
+      startListeningForIncomingTransactions,
+      stopListeningForIncomingTransactions,
+    } = useIncomingTransactions({ store: root.$store, router: root.$router });
 
     const innerElement = ref<HTMLDivElement>();
 
@@ -179,6 +197,10 @@ export default defineComponent({
       }
     });
 
+    watch(activeNetwork, (network) => {
+      WebSocketClient.connect(network.websocketUrl);
+    }, { immediate: true });
+
     initVisibilityListeners();
 
     onMounted(async () => {
@@ -187,6 +209,7 @@ export default defineComponent({
       initViewport(innerElement.value);
 
       watchConnectionStatus();
+      startListeningForIncomingTransactions();
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([
@@ -195,6 +218,10 @@ export default defineComponent({
           setNotificationSettings(),
         ]);
       }
+    });
+
+    onUnmounted(() => {
+      stopListeningForIncomingTransactions();
     });
 
     return {
