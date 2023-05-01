@@ -19,6 +19,7 @@ import {
 import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import PushNotification from '../lib/pushNotification';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean
@@ -87,7 +88,7 @@ export function useNotifications({
   }
 
   async function modifyNotifications(
-    ids: number[],
+    ids: (number | string)[],
     status: NotificationStatus,
   ) {
     if (!ids.length) return;
@@ -107,6 +108,10 @@ export function useNotifications({
       status: NOTIFICATION_STATUS_CREATED,
       createdAt: new Date().toISOString(),
     });
+
+    if (payload.pushNotification) {
+      PushNotification.send(payload);
+    }
   }
 
   function setWalletNotificationsStatus(createdAt: string, status: NotificationStatus) {

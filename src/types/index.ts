@@ -279,6 +279,8 @@ export interface INotification {
   isSeedBackup?: boolean
   buttonLabel?: TranslateResult,
   title?: TranslateResult,
+  isIncomingTransaction?: boolean;
+  pushNotification?: boolean;
 }
 
 export interface INotificationSetting {

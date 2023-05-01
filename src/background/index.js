@@ -3,10 +3,13 @@ import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
 import * as wallet from './wallet';
 import Logger from '../lib/logger';
+import PushNotification from '../lib/pushNotification';
 import store from './store';
 import { useAccounts } from '../composables';
 
 Logger.init({ background: true });
+PushNotification.init();
+
 initDeeplinkHandler();
 
 browser.runtime.onMessage.addListener(async (msg) => {
