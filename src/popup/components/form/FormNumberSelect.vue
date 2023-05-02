@@ -33,7 +33,6 @@ export default defineComponent({
     modelValue: { type: Number, required: true },
   },
   emits: ['update:modelValue'],
-  compatConfig: { COMPONENT_V_MODEL: false },
 });
 </script>
 

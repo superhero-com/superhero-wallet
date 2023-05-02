@@ -56,7 +56,6 @@ export default defineComponent({
     autoHeight: Boolean,
   },
   emits: ['update:modelValue', 'submit'],
-  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const textarea = ref<HTMLTextAreaElement>();
     const height = ref<string | undefined>();

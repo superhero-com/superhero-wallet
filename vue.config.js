@@ -85,20 +85,6 @@ module.exports = {
   },
 
   chainWebpack: (config) => {
-    // configure vue to use the migration build
-    config.resolve.alias.set('vue', '@vue/compat');
-    config.module
-      .rule('vue')
-      .use('vue-loader')
-      .tap((options) => ({
-        ...options,
-        compilerOptions: {
-          compatConfig: {
-            MODE: 3,
-          },
-        },
-      }));
-
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
