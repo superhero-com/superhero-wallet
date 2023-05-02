@@ -4,7 +4,7 @@
     <span
       class="label"
     >
-      {{ isMultisig ? $t('totalMultisig') : $t('total') }}
+      {{ isMultisig ? $t('common.totalMultisig') : $t('common.total') }}
     </span>
   </div>
 </template>

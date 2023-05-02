@@ -18,7 +18,7 @@
         <PendingIcon
           class="animated-pending-icon"
         />
-        <span class="tx-text">{{ $t('tx') }}</span>
+        <span class="tx-text">{{ $t('common.tx') }}</span>
       </div>
       <span class="text">{{ $t('multisig.showMultisigVaults') }}</span>
     </template>

@@ -109,7 +109,7 @@ export default defineComponent({
           DEX,
           FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
             ? i18n.t('transaction.dexType.pool')
-            : i18n.t('transaction.dexType.swap'),
+            : i18n.t('common.swap'),
         ];
       } else if (
         (

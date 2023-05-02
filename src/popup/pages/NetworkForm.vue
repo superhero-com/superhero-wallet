@@ -25,7 +25,7 @@
         variant="muted"
         class="cancel-button"
         extra-padded
-        :text="$t('pages.network.cancel')"
+        :text="$t('common.cancel')"
         @click="goBack"
       />
       <BtnMain

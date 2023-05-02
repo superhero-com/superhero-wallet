@@ -49,7 +49,7 @@
         v-if="transaction.pending"
         :class="{ secondary: !label.customPending || showTransactionOwner }"
       >
-        {{ label.customPending || $t('transaction.type.pending') }}...
+        {{ label.customPending || $t('common.pending') }}...
       </span>
       <span
         v-else-if="!showTransactionOwner"
@@ -165,7 +165,7 @@ export default defineComponent({
         )) {
           return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
         }
-        return { text: root.$t('transaction.dexType.swap'), hasComma: true };
+        return { text: root.$t('common.swap'), hasComma: true };
       }
       if (
         (

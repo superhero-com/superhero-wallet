@@ -12,12 +12,12 @@
       <BtnMain
         variant="muted"
         extra-padded
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="cancel"
       />
       <BtnMain
         data-cy="to-confirm"
-        :text="$t('modals.confirm')"
+        :text="$t('common.confirm')"
         @click="resolve"
       />
     </template>

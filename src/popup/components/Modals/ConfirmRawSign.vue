@@ -42,12 +42,12 @@
         variant="muted"
         third
         extra-padded
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="cancel"
       />
       <BtnMain
         third
-        :text="$t('modals.confirm')"
+        :text="$t('common.confirm')"
         @click="confirm"
       />
     </template>

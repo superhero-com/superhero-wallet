@@ -28,7 +28,7 @@
       extra-padded
       to="/"
     >
-      {{ $t('pages.donate-error.cancel') }}
+      {{ $t('common.cancel') }}
     </BtnMain>
     <BtnMain
       inline

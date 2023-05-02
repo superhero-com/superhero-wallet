@@ -78,7 +78,7 @@
               <CopyText
                 hide-icon
                 :value="hash"
-                :copied-text="$t('hashCopied')"
+                :copied-text="$t('common.hashCopied')"
               >
                 <span class="text-address">{{ splitAddress(hash) }}</span>
               </CopyText>
@@ -107,7 +107,7 @@
                 <CopyText
                   hide-icon
                   :value="multisigTransactionFeePaidBy"
-                  :copied-text="$t('addressCopied')"
+                  :copied-text="$t('common.addressCopied')"
                 >
                   <span class="text-address">
                     {{ splitAddress(multisigTransactionFeePaidBy) }}
@@ -130,7 +130,7 @@
               <CopyText
                 hide-icon
                 :value="multisigContractId"
-                :copied-text="$t('addressCopied')"
+                :copied-text="$t('common.addressCopied')"
               >
                 <span class="text-address">
                   {{ splitAddress(multisigContractId) }}
@@ -158,7 +158,7 @@
                 <AnimatedPending
                   class="pending-icon"
                 />
-                {{ $t('pages.transactionDetails.pending') }}...
+                {{ $t('common.pending') }}...
               </template>
             </DetailsItem>
             <DetailsItem
@@ -176,7 +176,7 @@
           </div>
           <DetailsItem
             v-if="!(isDex || isAllowance || isMultisig)"
-            :label="$t('pages.transactionDetails.amount')"
+            :label="$t('common.amount')"
             data-cy="amount"
           >
             <template #value>

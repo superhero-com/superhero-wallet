@@ -25,10 +25,9 @@
       <BtnMain
         v-if="showEditButton"
         variant="muted"
-        :text="$t('pages.send.editTxDetails')"
+        :text="$t('common.edit')"
         class="button-action-secondary"
         data-cy="edit"
-        extra-padded
         @click="editTransfer"
       />
       <BtnMain
@@ -115,12 +114,12 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('modals.send.next');
+        return root.$t('common.next');
       }
       if (props.isMultisig) {
         return root.$t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('pages.send.send');
+      return root.$t('common.send');
     });
 
     function proceedToNextStep() {

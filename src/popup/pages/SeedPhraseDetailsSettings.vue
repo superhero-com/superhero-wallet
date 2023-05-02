@@ -20,7 +20,7 @@
         </template>
 
         <template v-else>
-          {{ $t('addressCopied') }}
+          {{ $t('common.addressCopied') }}
         </template>
       </BtnMain>
     </div>
