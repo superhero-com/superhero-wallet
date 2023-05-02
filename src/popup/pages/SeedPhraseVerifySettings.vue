@@ -127,7 +127,7 @@ export default defineComponent({
     watch(() => selectedWordIds.value, () => {
       showNotification.value = false;
       hasError.value = false;
-    });
+    }, { deep: true });
 
     return {
       selectedWordIds,
