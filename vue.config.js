@@ -1,10 +1,9 @@
-// const path = require('path');
+const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const sass = require('sass');
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
-const path = require('path');
 
 // eslint-disable-next-line camelcase
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;

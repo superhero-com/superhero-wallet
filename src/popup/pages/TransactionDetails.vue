@@ -273,7 +273,7 @@ import Avatar from '../components/Avatar.vue';
 import DialogBox from '../components/DialogBox.vue';
 
 import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
