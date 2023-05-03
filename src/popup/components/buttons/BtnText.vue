@@ -5,7 +5,7 @@
       'has-icon': !!icon,
     }"
     :disabled="disabled"
-    @click="$emit('click')"
+    @click.capture="$emit('click')"
   >
     <Component
       :is="icon"

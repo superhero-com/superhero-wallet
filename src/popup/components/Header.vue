@@ -41,7 +41,7 @@
         v-if="showHeaderNavigation"
         data-cy="close"
         class="btn-close"
-        @click="close"
+        @click.capture="close"
       />
       <template v-else>
         <NetworkButton />

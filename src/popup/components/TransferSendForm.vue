@@ -135,7 +135,7 @@
         <BtnText
           :icon="PlusCircleIcon"
           :text="$t('modals.send.payload')"
-          @click="editPayload"
+          @click.capture="editPayload"
         />
         <BtnHelp
           :title="$t('modals.payloadInfo.title')"
@@ -266,7 +266,6 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const store = useStore();
     const route = useRoute();
@@ -294,14 +293,14 @@ export default defineComponent({
     function getMessageByFieldName(fieldName: string): IInputMessage {
       if (!errors.value) return { status: 'success' };
 
-      const items = errors.value[fieldName as keyof typeof errors.value];
-      if (items) {
-        // eslint-disable-next-line no-console
-        console.log(items);
-        // TODO: Vee-validate v4 does not return error codes with errors
-        // We need to find a new way to filter messages
-        throw new Error('Function needs refactoring.');
-      }
+      // const items = errors.value[fieldName as keyof typeof errors.value];
+      // if (items) {
+      //   // eslint-disable-next-line no-console
+      //   console.log(items);
+      //   // TODO: Vee-validate v4 does not return error codes with errors
+      //   // We need to find a new way to filter messages
+      //   throw new Error('Function needs refactoring.');
+      // }
       // if (items) {
       //   const warning = items
       //     .find((_error) => WARNING_RULES.includes(_error.rule))?.msg || null;
@@ -413,11 +412,11 @@ export default defineComponent({
 
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      const isValid = !anyExcept('address', WARNING_RULES, errors.value);
-      if (isValid) {
-        await emitCurrentFormModelState();
-        emit('success');
-      }
+      // const isValid = !anyExcept('address', WARNING_RULES, errors.value);
+      // if (isValid) {
+      await emitCurrentFormModelState();
+      emit('success');
+      // }
     }
 
     function showRecipientHelp() {

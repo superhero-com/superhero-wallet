@@ -76,7 +76,7 @@
         <BtnText
           :icon="PlusCircleIcon"
           :text="$t('modals.createMultisigAccount.addSigner')"
-          @click="addNewSigner"
+          @click.capture="addNewSigner"
         />
 
         <BtnHelp
