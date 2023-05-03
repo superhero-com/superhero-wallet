@@ -2,7 +2,7 @@
   <BtnPlain
     class="select-asset"
     :class="{ focused, disabled }"
-    @click="openAssetSelector"
+    @click.capture="openAssetSelector"
   >
     {{ displayToken }}
     <ChevronDown

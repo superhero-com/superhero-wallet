@@ -58,7 +58,7 @@
           />
         </div>
       </div>
-      <BtnPlain @click="onExpandCollapse">
+      <BtnPlain @click.capture="onExpandCollapse">
         <ChevronDownIcon :class="['icon', { rotated: expand, hidden: nameEntry.pending }]" />
       </BtnPlain>
     </div>

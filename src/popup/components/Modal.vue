@@ -42,7 +42,7 @@
             v-if="hasCloseButton"
             data-cy="btn-close"
             class="close-button"
-            @click="$emit('close')"
+            @click.capture="$emit('close')"
           />
         </div>
 
@@ -287,7 +287,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 
@@ -307,7 +307,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 

@@ -9,7 +9,7 @@
     <Component
       :is="expandable ? 'BtnPlain' : 'div'"
       class="label"
-      @click="toggleExpanded()"
+      @click.capture="toggleExpanded()"
     >
       {{ label }}
       <span
