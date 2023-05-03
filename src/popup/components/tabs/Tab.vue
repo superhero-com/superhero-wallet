@@ -2,7 +2,7 @@
   <BtnPlain
     v-bind="$attrs"
     class="tab"
-    :class="{ active }"
+    :class="[ active, exactPath ? 'exact' : 'not-exact' ]"
     :text="text"
   />
 </template>
@@ -18,6 +18,7 @@ export default defineComponent({
   props: {
     text: { type: String, required: true },
     active: Boolean,
+    exactPath: Boolean,
   },
 });
 </script>
@@ -42,7 +43,21 @@ export default defineComponent({
     color: variables.$color-white;
   }
 
-  &.router-link-active,
+  &.router-link-active {
+    &.not-exact {
+      background-color: rgba(variables.$color-white, 0.15);
+      color: variables.$color-white;
+    }
+
+    &.exact {
+      &.active {
+        background-color: transparent;
+        color: variables.$color-white;
+      }
+    }
+  }
+
+  &.router-link-exact-active,
   &.active {
     background-color: rgba(variables.$color-white, 0.15);
     color: variables.$color-white;
