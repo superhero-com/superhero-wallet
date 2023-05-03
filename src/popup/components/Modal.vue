@@ -3,8 +3,10 @@
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
     @after-enter="$emit('opened')"
+    @after-leave="$emit('close')"
   >
     <div
+      v-if="isModalVisible"
       class="modal"
       :class="{
         'full-screen': fullScreen,
@@ -66,7 +68,7 @@
 
       <div
         class="cover"
-        @click="$emit('close')"
+        @click="handleClose"
       />
     </div>
   </transition>
@@ -78,6 +80,7 @@ import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
+  ref,
 } from 'vue';
 import { IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import BtnClose from './buttons/BtnClose.vue';
@@ -89,6 +92,7 @@ export default defineComponent({
     BtnClose,
   },
   props: {
+    isVisible: Boolean,
     hasCloseButton: Boolean,
     fullScreen: Boolean,
     fromBottom: Boolean,
@@ -101,19 +105,27 @@ export default defineComponent({
   },
   emits: ['close', 'opened'],
   setup(props, { slots }) {
+    const isModalVisible = ref(props.isVisible);
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
     onMounted(() => {
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
       }
+      isModalVisible.value = true;
     });
+
+    const handleClose = () => {
+      isModalVisible.value = false;
+    };
 
     onBeforeUnmount(() => {
       document.body.style.overflow = '';
     });
 
     return {
+      handleClose,
+      isModalVisible,
       IS_FIREFOX,
       IS_EXTENSION,
       showHeader,
