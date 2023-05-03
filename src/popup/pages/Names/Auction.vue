@@ -54,10 +54,10 @@ export default defineComponent({
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
       try {
-        const res = await middleware.getNameById(props.name);
+        const res = await middleware.getName(props.name);
         const { auctionEnd, bids } = res.auction ?? res.info;
         const loadedBids = await Promise.all(bids.map(async (txId: number) => {
-          const { tx } = await middleware.getTxByIndex(txId);
+          const { tx } = await middleware.getTx(txId.toString());
           return {
             nameFee: new BigNumber(aettosToAe(tx.nameFee)),
             accountId: tx.accountId,

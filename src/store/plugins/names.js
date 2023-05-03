@@ -106,19 +106,21 @@ export default (store) => {
         const names = await Promise.all(
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
-            middleware.getNamesOwnedBy(address)
-              .then(({ active }) => active.map(({ info, name, hash }) => ({
-                createdAtHeight: info.activeFrom,
-                expiresAt: info.expireHeight,
-                owner: info.ownership.current,
-                pointers: info.pointers,
-                autoExtend: !!(
-                  owned.find((n) => n.name === name)?.autoExtend
-                  || pendingAutoExtendNames?.includes(name)
-                ),
-                name,
-                hash,
-              }))),
+            fetchAllPages(
+              () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
+              fetchFromMiddlewareCamelCased,
+            ).then((data) => data.map(({ info, name, hash }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
+              autoExtend: !!(
+                owned.find((n) => n.name === name)?.autoExtend
+                || pendingAutoExtendNames?.includes(name)
+              ),
+              name,
+              hash,
+            }))),
           ])),
         ).then((arr) => arr.flat(2));
 
@@ -131,7 +133,7 @@ export default (store) => {
         // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
           await fetchAllPages(
-            () => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
+            () => middleware.getNamesAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
             fetchFromMiddlewareCamelCased,
           )
         ).map(({ name, info }) => ({
@@ -201,7 +203,7 @@ export default (store) => {
         if (checkAddress(id)) return id;
         if (checkAensName(id)) {
           const middleware = await getMiddleware();
-          const { info: nameEntry } = await middleware.getNameById(id);
+          const { info: nameEntry } = await middleware.getName(id);
           return nameEntry.pointers?.accountPubkey;
         }
         return '';

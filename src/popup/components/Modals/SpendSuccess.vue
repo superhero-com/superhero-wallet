@@ -122,7 +122,7 @@ export default {
     const { recipientId } = this.transaction.tx;
     if (recipientId.includes('nm_')) {
       this.hideAvatar = true;
-      this.nameRecipient = (await middleware.getNameById(recipientId)).name;
+      this.nameRecipient = (await middleware.getName(recipientId)).name;
     }
   },
   methods: {
