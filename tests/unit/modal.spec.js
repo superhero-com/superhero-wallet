@@ -1,15 +1,19 @@
-import Vue from 'vue';
-import { mount } from '@vue/test-utils';
+import { mount, config } from '@vue/test-utils';
 import Modal from '../../src/popup/components/Modal.vue';
 
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
-});
+config.global = {
+  mocks: {
+    $t: () => 'locale-specific-text',
+    $store: {
+      state: {},
+    },
+  },
+};
 
 describe('Modal', () => {
   it('should close on button close click', async () => {
     const wrapper = mount(Modal, {
-      propsData: {
+      props: {
         hasCloseButton: true,
       },
     });
@@ -20,12 +24,7 @@ describe('Modal', () => {
 
   it('should have "full-screen" variant', async () => {
     const wrapper = mount(Modal, {
-      mocks: {
-        $store: {
-          state: {},
-        },
-      },
-      propsData: {
+      props: {
         fullScreen: true,
       },
     });
@@ -34,7 +33,7 @@ describe('Modal', () => {
 
   it('should have "from-bottom" variant', async () => {
     const wrapper = mount(Modal, {
-      propsData: {
+      props: {
         fromBottom: true,
       },
     });

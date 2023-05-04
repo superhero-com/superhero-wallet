@@ -19,11 +19,10 @@ module.exports = {
   },
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',
-    '<rootDir>/config/jest/setup.js', // Setup no longer needed
   ],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.vue$': '@vue/vue3-jest@27',
+    '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.mjs$': 'babel-jest',
   },
 };

@@ -1,18 +1,11 @@
 import { shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
 import Vuex from 'vuex';
+import { createRouter, createWebHistory } from 'vue-router';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
 import { AETERNITY_SYMBOL, DEX_CONTRACTS, NETWORK_ID_TESTNET } from '../../src/popup/utils';
 import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
-
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
-  $te: () => true,
-});
-
-Vue.use(Vuex);
 
 function mountComponent({ hasError = false } = {}) {
   const testTransaction = {
@@ -81,6 +74,15 @@ function mountComponent({ hasError = false } = {}) {
     },
   };
 
+  const mockRouter = createRouter({
+    history: createWebHistory(),
+    routes: [{
+      path: '/',
+      name: 'test',
+      component: TransactionDetails,
+    }],
+  });
+
   const store = new Vuex.Store({
     state: {
       fungibleTokens: {
@@ -128,8 +130,14 @@ function mountComponent({ hasError = false } = {}) {
   });
 
   return shallowMount(TransactionDetails, {
-    store,
-    propsData: {
+    global: {
+      plugins: [store, mockRouter],
+      mocks: {
+        $t: () => 'locale-specific-text',
+        $te: () => true,
+      },
+    },
+    props: {
       hash,
     },
   });
