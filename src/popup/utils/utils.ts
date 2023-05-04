@@ -673,7 +673,8 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
   let txObject;
   try {
     if (isTxBase64) {
-      txObject = TxBuilder.unpackTx(TxBuilderHelper.decode(encodedTx, 'tx'), true).tx;
+      const decodedTx = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
+      txObject = TxBuilder.unpackTx(decodedTx, true).tx;
     } else {
       txObject = TxBuilder.unpackTx(encodedTx, true).tx;
     }

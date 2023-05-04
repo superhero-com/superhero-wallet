@@ -5,7 +5,7 @@ describe('BtnMain', () => {
   it('handles properly the variants', () => {
     const variant = 'primary';
     const wrapper = mount(BtnMain, {
-      propsData: { variant },
+      props: { variant },
     });
     expect(wrapper.classes()).toContain(`variant-${variant}`);
   });
