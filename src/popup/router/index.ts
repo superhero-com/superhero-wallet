@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { Dictionary, ICordova } from '../../types';
+import { Dictionary } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
 } from './routeNames';
 import { routes } from './routes';
-import { i18n } from '../../store/plugins/languages';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
@@ -25,7 +24,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts, useModals } from '../../composables';
+import { useAccounts } from '../../composables';
 
 Vue.use(VueRouter);
 
@@ -98,8 +97,6 @@ const routerReadyPromise = new Promise((resolve) => {
 
 if (IS_CORDOVA) {
   (async () => {
-    const { openDefaultModal } = useModals();
-    const cordova = window.cordova as ICordova;
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
       const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => url.startsWith(p));
@@ -108,19 +105,6 @@ if (IS_CORDOVA) {
         window.location.href = `#/${url.slice(prefix.length)}`;
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
-      }
-    });
-
-    cordova.openwith.init();
-    cordova.openwith.addHandler((intent: any) => {
-      const url = intent.items.find(({ type }: any) => type.includes('url'))?.data;
-      if (url) {
-        router.push({ name: ROUTE_ACCOUNT, query: { url } });
-      } else {
-        openDefaultModal({
-          title: i18n.t('modals.mobile-share-error.title'),
-          msg: i18n.t('modals.mobile-share-error.msg'),
-        });
       }
     });
 
