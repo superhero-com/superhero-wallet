@@ -362,6 +362,7 @@ export default defineComponent({
         || aeternityToken.value;
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
+      if (query.payload) formModel.value.payload = query.payload;
     }
 
     function setMaxValue() {
