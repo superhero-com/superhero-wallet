@@ -1,15 +1,11 @@
-import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import Modal from '../../src/popup/components/Modal.vue';
-
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
-});
 
 describe('Modal', () => {
   it('should close on button close click', async () => {
     const wrapper = mount(Modal, {
-      propsData: {
+      props: {
+        show: true,
         hasCloseButton: true,
       },
     });
@@ -20,12 +16,16 @@ describe('Modal', () => {
 
   it('should have "full-screen" variant', async () => {
     const wrapper = mount(Modal, {
-      mocks: {
-        $store: {
-          state: {},
+      global: {
+        mocks: {
+          $t: () => 'locale-specific-text',
+          $store: {
+            state: {},
+          },
         },
       },
-      propsData: {
+      props: {
+        show: true,
         fullScreen: true,
       },
     });
@@ -34,7 +34,8 @@ describe('Modal', () => {
 
   it('should have "from-bottom" variant', async () => {
     const wrapper = mount(Modal, {
-      propsData: {
+      props: {
+        show: true,
         fromBottom: true,
       },
     });
@@ -57,8 +58,19 @@ describe('Modal', () => {
   ].forEach(({ slot, className }) => it(`should have ${slot} slot`, async () => {
     const slotText = `${slot} test`;
     const wrapper = mount(Modal, {
+      props: {
+        show: true,
+      },
       slots: {
         [slot]: slotText,
+      },
+      global: {
+        mocks: {
+          $t: () => 'locale-specific-text',
+          $store: {
+            state: {},
+          },
+        },
       },
     });
 

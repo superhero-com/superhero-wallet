@@ -5,7 +5,7 @@ describe('LinkButton', () => {
   it('should have correct "href" attribute', () => {
     const to = 'google.com';
     const wrapper = shallowMount(LinkButton, {
-      propsData: { to },
+      props: { to },
     });
     expect(wrapper.find('.link-button').attributes().href).toEqual(to);
   });
