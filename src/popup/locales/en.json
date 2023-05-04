@@ -103,7 +103,9 @@
     "consensusPending": "Consensus pending",
     "multisigVaultCreationFailed": "Multisig creation failed",
     "needForApproval": "Needed for approval",
-    "creatingAccount": "Creating account (pays for the transaction)"
+    "creatingAccount": "Creating account (pays for the transaction)",
+    "approved": "Approved",
+    "waitingToBeSent": "Waiting to be sent..."
   },
   "modals": {
     "transaction-failed": {
@@ -1110,8 +1112,8 @@
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
       "left-today": "Left today",
-      "delete": "Remove permissions",
-      "add": "Add permissions",
+      "delete": "Remove permission",
+      "add": "Add permission",
       "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
       "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",

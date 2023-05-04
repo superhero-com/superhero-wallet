@@ -14,16 +14,12 @@
           v-if="!!multisigTransaction && !hasConsensus"
           class="consensus"
         >
-          <PendingIcon class="icon" />
-          <span class="pending">
-            {{ $t('multisig.consensusPending') }}
-            <ConsensusLabel
-              :confirmations-required="multisigTransaction.confirmationsRequired"
-              :has-pending-transaction="multisigTransaction.hasPendingTransaction"
-              :confirmed-by="multisigTransaction.confirmedBy"
-              :signers="multisigTransaction.signers"
-            />
-          </span>
+          <ConsensusApprovedLabel
+            :confirmations-required="multisigTransaction.confirmationsRequired"
+            :has-pending-transaction="multisigTransaction.hasPendingTransaction"
+            :confirmed-by="multisigTransaction.confirmedBy"
+            :signers="multisigTransaction.signers"
+          />
         </div>
 
         <TransactionLabel
@@ -87,14 +83,12 @@ import {
 
 import TransactionTokens from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
-import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import ListItemWrapper from './ListItemWrapper.vue';
-import ConsensusLabel from './ConsensusLabel.vue';
+import ConsensusApprovedLabel from './ConsensusApprovedLabel.vue';
 
 export default defineComponent({
   components: {
-    ConsensusLabel,
-    PendingIcon,
+    ConsensusApprovedLabel,
     TransactionLabel,
     TransactionTokens,
     ListItemWrapper,
