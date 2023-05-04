@@ -7,7 +7,7 @@ import {
   Ref,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
+import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/contracts/fungible-token-full-interface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import type {
   IAsset,

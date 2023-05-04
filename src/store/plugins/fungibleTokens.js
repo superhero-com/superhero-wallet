@@ -1,8 +1,8 @@
 import Vue from 'vue';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { isEmpty, uniqBy } from 'lodash-es';
-import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
+import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/contracts/fungible-token-full-interface.aes';
+import pairInterface from 'dex-contracts-v2/contracts/AedexV2Pair.aes';
 import {
   convertToken,
   handleUnknownError,

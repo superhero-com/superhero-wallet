@@ -1,7 +1,7 @@
 import { computed } from '@vue/composition-api';
 import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
+import multisigContract from '@aeternity/ga-multisig-contract/contracts/SimpleGAMultiSig.aes';
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 

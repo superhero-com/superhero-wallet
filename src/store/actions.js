@@ -1,6 +1,6 @@
 import { flatten, orderBy } from 'lodash-es';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
+import TIPPING_V1_INTERFACE from 'tipping-contract/contracts/v1/Tipping_v1_Interface.aes';
+import TIPPING_V2_INTERFACE from 'tipping-contract/contracts/v2/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import {
