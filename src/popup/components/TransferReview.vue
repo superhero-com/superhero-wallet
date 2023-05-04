@@ -252,6 +252,7 @@ export default defineComponent({
               contractId: selectedAsset.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
               function: TX_FUNCTIONS.transfer,
+              recipientId: recipient,
             },
           };
 
