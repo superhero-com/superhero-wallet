@@ -73,10 +73,23 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
+    function getTransactionParty(address: string) {
+      return {
+        address,
+        label: root.$t('transaction.overview.accountAddress'),
+        url: getExplorerPath.value(address),
+      };
+    }
+
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
-      const { senderId, recipientId, contractId } = innerTx.value;
+      const {
+        senderId,
+        recipientId,
+        contractId,
+        callerId,
+      } = innerTx.value;
 
       switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
@@ -103,22 +116,29 @@ export default defineComponent({
           };
 
           let transactionOwner;
+          let transactionReceiver = contract;
 
           if (props.transaction.transactionOwner) {
-            transactionOwner = {
-              address: props.transaction.transactionOwner,
-              label: root.$t('transaction.overview.accountAddress'),
-              url: getExplorerPath.value(props.transaction.transactionOwner),
-            };
+            transactionOwner = getTransactionParty(props.transaction.transactionOwner);
+          }
+
+          if (innerTx.value.function === TX_FUNCTIONS.transfer) {
+            const sentRecipientId = recipientId || innerTx.value.arguments?.[0].value;
+
+            transactionReceiver = getTransactionParty(
+              direction.value === TX_DIRECTION.received
+                ? callerId
+                : sentRecipientId,
+            );
           }
 
           return {
             sender: direction.value === TX_DIRECTION.sent
               ? ownershipAccount.value
-              : contract,
+              : transactionReceiver,
             recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? ownershipAccount.value
-              : contract,
+              : transactionReceiver,
             title: root.$t('transaction.type.contractCallTx'),
             function: innerTx.value.function,
           };
