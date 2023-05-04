@@ -1,5 +1,4 @@
 import { shallowMount } from '@vue/test-utils';
-import Vue from 'vue';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
 import { AETERNITY_SYMBOL, NETWORK_ID_TESTNET } from '../../src/popup/utils';
@@ -7,12 +6,11 @@ import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
-  $te: () => true,
-});
+jest.mock('vue-router', () => ({
+  useRouter: jest.fn(() => ({})),
+}));
 
-Vue.use(Vuex);
+jest.mock('../../src/store/index.js', () => ({}));
 
 function mountComponent({ hasError = false } = {}) {
   const testTransaction = {
@@ -127,8 +125,14 @@ function mountComponent({ hasError = false } = {}) {
   });
 
   return shallowMount(TransactionDetails, {
-    store,
-    propsData: {
+    global: {
+      plugins: [store],
+      mocks: {
+        $t: () => 'locale-specific-text',
+        $te: () => true,
+      },
+    },
+    props: {
       hash,
     },
   });

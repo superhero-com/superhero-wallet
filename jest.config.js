@@ -16,14 +16,14 @@ module.exports = {
   moduleNameMapper: {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
     '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
+    '\\.(css|scss)$': 'identity-obj-proxy',
   },
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',
-    '<rootDir>/config/jest/setup.js', // Setup no longer needed
   ],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.vue$': '@vue/vue3-jest@27',
+    '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.mjs$': 'babel-jest',
   },
 };
