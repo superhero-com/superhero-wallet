@@ -90,7 +90,10 @@ export default async function initSdk() {
         if (isEqual(network, oldNetwork)) return;
         try {
           store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
-          await initMiddleware();
+          await Promise.all([
+            initMiddleware(),
+            store.dispatch('sdkPlugin/changeNode', network),
+          ]);
           store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
         } catch (error) {
           store.commit('setNodeStatus', NODE_STATUS_ERROR);

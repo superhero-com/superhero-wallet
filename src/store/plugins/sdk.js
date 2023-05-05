@@ -1,5 +1,4 @@
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
-import { isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
 import { MODAL_CONFIRM_CONNECT, MODAL_MESSAGE_SIGN, watchUntilTruthy } from '../../popup/utils';
@@ -174,18 +173,13 @@ export default (store) => {
         });
         commit('setSdkReady');
       },
+      async changeNode(_, network) {
+        await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+        sdk.pool.delete(network.name);
+        sdk.addNode(network.name, await Node({ url: network.url }), true);
+      },
     },
   });
-
-  store.watch(
-    (state, getters) => getters.activeNetwork,
-    async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-      sdk.pool.delete(network.name);
-      sdk.addNode(network.name, await Node({ url: network.url }), true);
-    },
-  );
 
   store.watch(
     ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
