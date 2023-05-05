@@ -74,6 +74,7 @@ import {
   useCurrencies,
   useModals,
   useNotifications,
+  useUi,
   useViewport,
 } from '../composables';
 
@@ -90,6 +91,7 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { watchConnectionStatus } = useConnection();
+    const { initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store: root.$store });
     const { addWalletNotification } = useNotifications({ store: root.$store });
@@ -161,6 +163,8 @@ export default defineComponent({
         innerElement.value.scrollTop = 0;
       }
     });
+
+    initVisibilityListeners();
 
     onMounted(async () => {
       setDocumentHeight();

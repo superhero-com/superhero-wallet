@@ -24,11 +24,13 @@
 import { computed, defineComponent, onBeforeUnmount } from '@vue/composition-api';
 import type { IName } from '../../../types';
 import { executeAndSetInterval } from '../../utils';
-import { useState } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+import { useDispatch, useState } from '../../../composables/vuex';
+import { useAccounts, useUi } from '../../../composables';
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+
+const POLLING_INTERVAL = 10000;
 
 export default defineComponent({
   components: {
@@ -37,15 +39,21 @@ export default defineComponent({
     RegisterName,
   },
   setup(props, { root }) {
+    const { isAppActive } = useUi();
     const { activeAccount } = useAccounts({ store: root.$store });
     const areNamesFetching = useState('names', 'areNamesFetching');
     const namesOwned = useState<IName[]>('names', 'owned');
+    const fetchOwned = useDispatch('names/fetchOwned');
 
     const namesForAccount = computed(
       () => namesOwned.value.filter(({ owner }) => owner === activeAccount.value.address),
     );
 
-    const id = executeAndSetInterval(() => root.$store.dispatch('names/fetchOwned'), 10000);
+    const id = executeAndSetInterval(() => {
+      if (isAppActive.value) {
+        fetchOwned();
+      }
+    }, POLLING_INTERVAL);
 
     onBeforeUnmount(() => {
       clearInterval(id);

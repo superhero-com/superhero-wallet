@@ -70,6 +70,7 @@ import {
   usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
   useTransactionTx,
+  useUi,
 } from '../../composables';
 
 import TransactionItem from './TransactionItem.vue';
@@ -96,6 +97,7 @@ export default defineComponent({
     const loading = ref(false);
     const isDestroyed = ref(false);
 
+    const { isAppActive } = useUi();
     const { activeAccount } = useAccounts({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
 
@@ -218,7 +220,11 @@ export default defineComponent({
 
     onMounted(() => {
       loadMore();
-      polling = setInterval(() => getLatest(), 10000);
+      polling = setInterval(() => {
+        if (isAppActive.value) {
+          getLatest();
+        }
+      }, 10000);
     });
 
     onUnmounted(() => {

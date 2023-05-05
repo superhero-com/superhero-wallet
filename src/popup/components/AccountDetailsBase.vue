@@ -77,7 +77,7 @@ export default defineComponent({
 
     const { resetFilter } = useTransactionAndTokenFilter();
 
-    const { homeRouteName } = useUi({ store: root.$store });
+    const { homeRouteName } = useUi();
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,

@@ -9,4 +9,4 @@ export const useState = <T = any>(nameOrModule: string, subName?: string) => com
     : (store.state as any)[nameOrModule],
 );
 
-export const useDispatch = (type: string) => (payload: any) => store.dispatch(type, payload);
+export const useDispatch = (type: string) => (payload?: any) => store.dispatch(type, payload);
