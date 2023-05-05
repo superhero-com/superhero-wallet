@@ -91,7 +91,7 @@ export default defineComponent({
     BtnIcon,
   },
   setup(props, { root }) {
-    const { homeRouteName } = useUi({ store: root.$store });
+    const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts({ store: root.$store });
 
     const currentHomeRouteName = computed(

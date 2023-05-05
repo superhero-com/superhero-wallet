@@ -6,6 +6,7 @@ import {
 import { Store } from 'vuex';
 import { INetwork } from '../types';
 import { useConnection } from './connection';
+import { useUi } from './ui';
 
 /**
  * Monitor the network state and compare it with stored custom state to know when
@@ -35,17 +36,18 @@ export function createNetworkWatcher() {
  */
 export function createPollingBasedOnMountedComponents(interval: number) {
   const { isOnline } = useConnection();
+  const { isAppActive } = useUi();
 
   let initialCallDone = false;
   let pollingIntervalId: NodeJS.Timer | null = null;
   let mountedComponents = 0;
 
   /**
-   * Polling watcher - function that should be called inside of an composable.
+   * Polling watcher - function that should be called inside a composable.
    */
   return (callback: () => void) => {
     function callbackWrapper() {
-      if (isOnline.value) {
+      if (isOnline.value && isAppActive.value) {
         initialCallDone = true;
         callback();
       }
