@@ -38,9 +38,30 @@ export default async function initSdk() {
 
   store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
   try {
+    const { getMiddleware, initMiddleware } = useMiddleware({ store });
+    store.watch(
+      (state, getters) => getters.activeNetwork,
+      async (network, oldNetwork) => {
+        if (isEqual(network, oldNetwork)) return;
+        try {
+          if (store.state.nodeStatus === NODE_STATUS_ERROR && !store.getters['sdkPlugin/sdk']) {
+            await initSdk();
+            return;
+          }
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
+          await Promise.all([
+            initMiddleware(),
+            store.dispatch('sdkPlugin/changeNode', network),
+          ]);
+          store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
+        } catch (error) {
+          store.commit('setNodeStatus', NODE_STATUS_ERROR);
+          Logger.write(error);
+        }
+      },
+    );
     await store.dispatch('sdkPlugin/initialize');
     await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-    const { getMiddleware, initMiddleware } = useMiddleware({ store });
 
     if (IN_FRAME) {
       const getArrayOfAvailableFrames = () => [
@@ -83,24 +104,6 @@ export default async function initSdk() {
       getMiddleware(),
     ]);
     store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
-
-    store.watch(
-      (state, getters) => getters.activeNetwork,
-      async (network, oldNetwork) => {
-        if (isEqual(network, oldNetwork)) return;
-        try {
-          store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
-          await Promise.all([
-            initMiddleware(),
-            store.dispatch('sdkPlugin/changeNode', network),
-          ]);
-          store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
-        } catch (error) {
-          store.commit('setNodeStatus', NODE_STATUS_ERROR);
-          Logger.write(error);
-        }
-      },
-    );
   } catch (e) {
     store.commit('setNodeStatus', NODE_STATUS_ERROR);
     Logger.write(e);
