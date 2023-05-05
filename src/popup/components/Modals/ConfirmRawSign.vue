@@ -7,7 +7,7 @@
     <TransactionInfo
       :custom-title="$t('modals.confirm-raw-sign.title')"
       :sender="{ name: app.name, address: app.host, url: app.url }"
-      :recipient="account"
+      :recipient="fromAccount || account"
     />
 
     <div
@@ -77,6 +77,7 @@ export default {
     reject: { type: Function, required: true },
     data: { type: [String, Uint8Array], required: true },
     app: { type: Object, required: true },
+    fromAccount: { type: String, default: undefined },
   },
   computed: {
     ...mapGetters(['getExplorerPath']),

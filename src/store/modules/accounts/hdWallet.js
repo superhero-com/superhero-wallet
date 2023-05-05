@@ -51,13 +51,13 @@ export default {
         : account;
       return Crypto.sign(data, secretKey);
     },
-    async confirmRawDataSigning(context, { data, app }) {
+    async confirmRawDataSigning(context, { data, app, fromAccount }) {
       const { openModal } = useModals();
-      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app });
+      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app, fromAccount });
     },
-    async confirmTxSigning({ dispatch }, { encodedTx, app }) {
+    async confirmTxSigning({ dispatch }, { encodedTx, app, fromAccount }) {
       if (!isTxOfASupportedType(encodedTx)) {
-        await dispatch('confirmRawDataSigning', { data: encodedTx, app });
+        await dispatch('confirmRawDataSigning', { data: encodedTx, app, fromAccount });
         return;
       }
       const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
@@ -75,34 +75,21 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', { data });
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction({ dispatch, rootGetters: { activeNetwork, account } }, {
       txBase64,
-      opt: { modal = true, app = null },
+      opt: { modal = true, app = null, fromAccount = null },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
-      const encodedTx = decode(txBase64, 'tx');
-      if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+      if (app && fromAccount !== account.address) {
+        throw Error('External requests cannot access an inactive account');
       }
-      const signature = await dispatch(
-        'signWithoutConfirmation',
-        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
-      );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
-    },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
-      txBase64,
-      opt: { modal = true, app = null, fromAccount },
-    }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+        await dispatch('confirmTxSigning', { encodedTx, app, fromAccount });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
         {
-          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
+          data: Buffer.concat([Buffer.from(activeNetwork.networkId), Buffer.from(encodedTx)]),
           opt: { fromAccount },
         },
       );
