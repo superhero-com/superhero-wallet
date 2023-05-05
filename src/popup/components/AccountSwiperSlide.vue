@@ -13,7 +13,7 @@
         <BtnPlain
           v-if="idx !== 0"
           class="swiper-button prev"
-          @click.capture="$emit('slide', idx - 1)"
+          @click="$emit('slide', idx - 1)"
         >
           <ChevronIcon />
         </BtnPlain>
@@ -21,7 +21,7 @@
         <BtnPlain
           v-if="!hideNext"
           class="swiper-button next"
-          @click.capture="$emit('slide', idx + 1)"
+          @click="$emit('slide', idx + 1)"
         >
           <ChevronIcon />
         </BtnPlain>

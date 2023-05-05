@@ -135,7 +135,7 @@
         <BtnText
           :icon="PlusCircleIcon"
           :text="$t('modals.send.payload')"
-          @click.capture="editPayload"
+          @click="editPayload"
         />
         <BtnHelp
           :title="$t('modals.payloadInfo.title')"

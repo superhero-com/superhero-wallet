@@ -3,7 +3,6 @@
     class="btn-close"
     v-bind="$attrs"
     :icon="CloseIcon"
-    @click="$emit('click', $event)"
   />
 </template>
 

@@ -4,7 +4,7 @@
     :subtitle="subtitle"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
-    @click.capture="openTransferReceiveModal()"
+    @click="openTransferReceiveModal()"
   />
 </template>
 
