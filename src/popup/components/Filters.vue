@@ -8,7 +8,7 @@
       :key="filterKey"
       class="filter"
       :class="{ active: modelValue.key === filterKey || modelValue.filter === filterKey }"
-      @click.capture="handleClick(filterKey)"
+      @click="handleClick(filterKey)"
     >
       <span>{{ filterOptions.name }}</span>
       <SortIcon

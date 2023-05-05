@@ -2,7 +2,7 @@
   <BtnPlain
     class="btn-help"
     :class="{ small }"
-    @click.capture="showHelpModal"
+    @click="showHelpModal"
   >
     <QuestionCircle class="icon" />
   </BtnPlain>

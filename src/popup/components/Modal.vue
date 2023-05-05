@@ -44,7 +44,7 @@
             v-if="hasCloseButton"
             data-cy="btn-close"
             class="close-button"
-            @click.capture="$emit('close')"
+            @click="handleClose"
           />
         </div>
 
