@@ -85,7 +85,7 @@ export function useTransactionTx({
   );
 
   const isDex = computed((): boolean => {
-    const { wae, router } = getDexContracts.value;
+    const { wae = [], router = [] } = getDexContracts.value || {};
 
     return !!(
       innerTx.value?.contractId

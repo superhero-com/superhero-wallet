@@ -227,7 +227,7 @@ export default (store) => {
         }
 
         const newTransactions = rawTransactions
-          .filter((tx) => !getDexContracts.router.includes(tx.contract_id))
+          .filter((tx) => !getDexContracts?.router?.includes(tx.contract_id))
           .map((tx) => ({
             ...tx,
             tx: {
