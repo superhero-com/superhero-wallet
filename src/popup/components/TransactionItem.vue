@@ -200,11 +200,6 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .transaction-item {
-  @include mixins.flex(center, center, column);
-
-  padding: 10px var(--screen-padding-x);
-  margin: 0 calc(-1 * var(--screen-padding-x));
-
   .body {
     width: 100%;
 

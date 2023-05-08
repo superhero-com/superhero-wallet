@@ -252,6 +252,7 @@ export default defineComponent({
 .transaction-list {
   display: flex;
   flex-direction: column;
+  margin: 0 calc(-1 * var(--screen-padding-x));
 
   .list {
     padding: 0;
