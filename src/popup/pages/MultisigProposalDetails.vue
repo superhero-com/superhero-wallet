@@ -311,7 +311,7 @@ import MultisigProposalConsensus from '../components/MultisigProposalConsensus.v
 import Avatar from '../components/Avatar.vue';
 import TransactionTokens from '../components/TransactionTokenRows.vue';
 
-import AnimatedSpinner from '../../icons/animated-spinner.svg?vue-component';
+import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
