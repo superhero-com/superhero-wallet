@@ -40,13 +40,12 @@
 
 <script lang="ts">
 import {
-  getCurrentInstance,
   defineComponent,
   PropType,
   ref,
   watch,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -69,10 +68,9 @@ export default defineComponent({
     reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
+    const { t } = useI18n();
     const { getSdk } = useSdk({ store });
 
     const mnemonic = ref('');
@@ -90,11 +88,11 @@ export default defineComponent({
         .trim();
 
       if (!validateSeedLength(mnemonicParsed)) {
-        error.value = root.$t('pages.index.invalidSeed');
+        error.value = t('pages.index.invalidSeed');
         return;
       }
       if (!mnemonicParsed || !validateMnemonic(mnemonicParsed)) {
-        error.value = root.$t('pages.index.accountNotFound');
+        error.value = t('pages.index.accountNotFound');
         return;
       }
       store.commit('setMnemonic', mnemonicParsed);
