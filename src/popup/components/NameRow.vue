@@ -1,25 +1,27 @@
 <template>
-  <Component
-    :is="to ? 'RouterLink' : 'li'"
+  <ListItemWrapper
     :to="to"
     class="name-row"
     @click="$emit('click')"
   >
-    <Avatar
-      :name="name"
-      :address="address"
-    />
-    <div class="name-info">
-      <slot />
+    <div class="content">
+      <Avatar
+        :name="name"
+        :address="address"
+      />
+      <div class="name-info">
+        <slot />
+      </div>
     </div>
-  </Component>
+  </ListItemWrapper>
 </template>
 
 <script>
 import Avatar from './Avatar.vue';
+import ListItemWrapper from './ListItemWrapper.vue';
 
 export default {
-  components: { Avatar },
+  components: { ListItemWrapper, Avatar },
   props: {
     name: { type: String, default: '' },
     address: { type: String, default: '' },
@@ -35,19 +37,16 @@ export default {
 .name-row {
   @extend %face-sans-14-medium;
 
-  display: flex;
-  align-items: center;
-  padding: 8px var(--screen-padding-x);
-  margin-left: calc(-1 * var(--screen-padding-x));
-  margin-right: calc(-1 * var(--screen-padding-x));
-  color: variables.$color-white;
-  background-color: var(--screen-bg-color);
-  text-align: left;
-  text-decoration: none;
-  transition: 0.2s;
+  padding: 0 12px;
 
-  &:hover {
-    background-color: variables.$color-bg-4-hover;
+  .content {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    color: variables.$color-white;
+    text-align: left;
+    text-decoration: none;
+    transition: 0.2s;
   }
 
   .name-info {

@@ -143,6 +143,7 @@ export default defineComponent({
 
   .list {
     padding: 0;
+    margin-inline: calc(-1 * var(--screen-padding-x));
 
     .name-wrapper {
       @extend %face-sans-14-regular;
