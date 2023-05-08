@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, getCurrentInstance, onMounted } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -15,8 +15,6 @@ export default defineComponent({
     secretKey: { type: String, required: true },
   },
   setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
     const store = useStore();
     const router = useRouter();
     const { getSdk } = useSdk({ store });

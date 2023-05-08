@@ -63,7 +63,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '../../types';
 import {
@@ -123,7 +123,7 @@ export default defineComponent({
       }
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return router.push(backRoute);
+        return router.push(backRoute as RouteLocationRaw);
       }
       const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 

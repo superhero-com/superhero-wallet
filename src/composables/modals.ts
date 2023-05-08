@@ -1,4 +1,4 @@
-import Vue, { ComponentOptions, computed, ref } from 'vue';
+import { Component, computed, ref } from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { ResolveRejectCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
@@ -6,7 +6,7 @@ import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
 
 interface IModalSettings {
-  component?: typeof Vue | ComponentOptions<Vue>;
+  component?: Component;
   showInPopupIfWebFrame?: boolean;
 }
 
@@ -88,7 +88,7 @@ export function useModals() {
         }
 
         lastPopupPromise
-          .catch(() => {})
+          .catch(() => { })
           .finally(() => {
             popupWindow = window.open(
               `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
