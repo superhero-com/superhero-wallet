@@ -3,10 +3,9 @@
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
     @after-enter="$emit('opened')"
-    @after-leave="$emit('close')"
   >
     <div
-      v-if="isModalVisible"
+      v-if="isVisible"
       class="modal"
       :class="{
         'full-screen': fullScreen,
@@ -92,7 +91,6 @@ export default defineComponent({
     BtnClose,
   },
   props: {
-    isVisible: Boolean,
     hasCloseButton: Boolean,
     fullScreen: Boolean,
     fromBottom: Boolean,
@@ -104,19 +102,22 @@ export default defineComponent({
     header: { type: String, default: null },
   },
   emits: ['close', 'opened'],
-  setup(props, { slots }) {
-    const isModalVisible = ref(props.isVisible);
+  setup(props, { slots, emit }) {
+    const isVisible = ref(true);
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
     onMounted(() => {
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
       }
-      isModalVisible.value = true;
+      isVisible.value = true;
     });
 
     const handleClose = () => {
-      isModalVisible.value = false;
+      // we need to toggle the visibility to trigger the exit transition
+      // before the component is removed from the DOM
+      isVisible.value = false;
+      emit('close');
     };
 
     onBeforeUnmount(() => {
@@ -125,7 +126,7 @@ export default defineComponent({
 
     return {
       handleClose,
-      isModalVisible,
+      isVisible,
       IS_FIREFOX,
       IS_EXTENSION,
       showHeader,
