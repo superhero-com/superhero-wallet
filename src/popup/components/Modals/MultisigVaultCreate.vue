@@ -9,7 +9,7 @@
     <!--
       Step 1: The form
     -->
-    <form
+    <Form
       v-if="currentStep === STEPS.form"
       class="multisig-vault-create-form"
       @submit.prevent="openReviewStep"
@@ -111,7 +111,7 @@
           />
         </div>
       </div>
-    </form>
+    </Form>
 
     <!--
       Step 2: Review
@@ -178,7 +178,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Field } from 'vee-validate';
+import { Field, Form, useFormErrors } from 'vee-validate';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -233,6 +233,7 @@ export default defineComponent({
     MultisigVaultCreateReview,
     FormSelect,
     Field,
+    Form,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -245,6 +246,7 @@ export default defineComponent({
 
     const { accountsSelectOptions } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
+    const errors = useFormErrors();
 
     const {
       setActiveMultisigAccountId,
@@ -288,7 +290,7 @@ export default defineComponent({
       () => (
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
-        && !(root as any).$validator.errors.items?.length
+        && !errors.value?.length
       ),
     );
 

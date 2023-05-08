@@ -166,7 +166,7 @@ export default defineComponent({
       }
     });
 
-    watch(() => root.$route.fullPath, () => {
+    watch(() => route.fullPath, () => {
       if (innerElement.value) {
         innerElement.value.scrollTop = 0;
       }

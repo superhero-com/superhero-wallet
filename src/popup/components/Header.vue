@@ -63,16 +63,15 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useGetter } from '../../composables/vuex';
 import { WalletRouteMeta } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '../router/routeNames';
-import { useUi } from '../../composables';
+import { useAccounts, useUi } from '../../composables';
 
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
@@ -101,7 +100,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { homeRouteName } = useUi({ store });
-    const isLoggedIn = useGetter('isLoggedIn');
+    const { isLoggedIn } = useAccounts({ store });
 
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
@@ -124,7 +123,7 @@ export default defineComponent({
       }
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return router.push(backRoute);
+        return router.push(backRoute as RouteLocationRaw);
       }
       const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 
