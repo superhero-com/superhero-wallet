@@ -1,4 +1,6 @@
-import { Component, computed, ref } from 'vue';
+import {
+  Component, computed, nextTick, ref,
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { ResolveRejectCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
@@ -14,6 +16,7 @@ interface IModalProps {
   [key: string]: any; // Props defined on the component's level
   resolve?: ResolveRejectCallback;
   reject?: ResolveRejectCallback;
+  show?: boolean;
 }
 
 interface IOpenModalParams {
@@ -60,7 +63,10 @@ export function useModals() {
 
   function closeModalByKey(key: number) {
     const idx = modalsOpenRaw.value.findIndex((modal) => modal.key === key);
-    modalsOpenRaw.value.splice(idx, 1);
+    modalsOpenRaw.value[idx].props.show = false;
+    nextTick(() => {
+      modalsOpenRaw.value.splice(idx, 1);
+    });
   }
 
   function openModal(name: string, props: IModalProps = {}): Promise<any> {
@@ -79,7 +85,9 @@ export function useModals() {
         name,
         key,
         inPopup,
-        props: { ...props, resolve, reject },
+        props: {
+          ...props, resolve, reject, show: true,
+        },
       });
 
       if (inPopup) {

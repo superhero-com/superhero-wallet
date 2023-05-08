@@ -462,6 +462,7 @@ export function categorizeContractCallTxObject(
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return (
+    // @ts-ignore
     acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
   );
 }
@@ -494,8 +495,7 @@ export function defaultTransactionSortingCallback(
 
 export function shrinkString(text: string, maxLength: number) {
   return text?.length
-    ? `${String(text).substring(0, maxLength)}${
-      text.length > maxLength ? '...' : ''
+    ? `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''
     }`
     : '';
 }
@@ -634,7 +634,7 @@ export async function getLoginState({
     balance,
     ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction
-        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+      && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
   };
 }
 
