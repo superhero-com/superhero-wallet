@@ -1,5 +1,8 @@
 <template>
-  <BtnPlain :class="['seed-phrase-badge', { selected, editable }]">
+  <BtnPlain
+    :class="['seed-phrase-badge', { selected, editable }]"
+    @click="$emit('click')"
+  >
     <div>{{ text }}</div>
     <CloseIcon
       v-if="editable"
@@ -23,6 +26,7 @@ export default defineComponent({
     editable: Boolean,
     text: { type: String, required: true },
   },
+  emits: ['click'],
 });
 </script>
 
