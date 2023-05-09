@@ -991,7 +991,7 @@ export default {
   }
 
   .bolder {
-    font-weight: bold;
+    font-weight: 600;
   }
 
   h1 {
