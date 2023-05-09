@@ -13,6 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
+        v-if="!IS_IOS"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
         :btn-text="$t('dashboard.buyCard.button')"
@@ -41,6 +42,7 @@ import { defineComponent } from '@vue/composition-api';
 
 import { DASHBOARD_CARD_ID } from '../utils';
 import { useAccounts } from '../../composables';
+import { IS_IOS } from '../../lib/environment';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -79,6 +81,7 @@ export default defineComponent({
       activeAccountSimplexLink,
       buyBackground,
       chainNameBackground,
+      IS_IOS,
     };
   },
 });

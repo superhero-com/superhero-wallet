@@ -20,6 +20,7 @@
       <OpenTransferReceiveModalButton />
       <OpenTransferSendModalButton />
       <BtnBox
+        v-if="!IS_IOS"
         :icon="CreditCardIcon"
         :text="$t('common.buy')"
         :href="activeAccountSimplexLink"
@@ -43,6 +44,7 @@
 import { computed, defineComponent } from '@vue/composition-api';
 import { useAccounts, useBalances, useConnection } from '../../composables';
 import { DEX_URL } from '../utils';
+import { IS_IOS } from '../../lib/environment';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -74,6 +76,7 @@ export default defineComponent({
 
     return {
       DEX_URL,
+      IS_IOS,
       isOnline,
       balanceNumeric,
       activeAccount,
