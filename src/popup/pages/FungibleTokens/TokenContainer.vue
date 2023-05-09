@@ -139,7 +139,9 @@ export default defineComponent({
       isMultisig: isMultisig.value,
     });
 
-    const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
+    const isCoin: boolean = !!root.$route.matched.find(
+      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),
+    );
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
