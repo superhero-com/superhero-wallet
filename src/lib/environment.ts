@@ -36,7 +36,10 @@ export const IS_EXTENSION = PLATFORM === 'extension' && !process.env.RUNNING_IN_
 
 export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 
-export const IS_IOS = /ipad|iphone|ipod/.test(userAgentLowerCase) && !(window as any).MSStream;
+export const IS_IOS = (
+  (/ipad|iphone|ipod/.test(userAgentLowerCase) && !(window as any).MSStream)
+  || !!window.cordova?.platformId?.toLowerCase()?.includes('ios')
+);
 
 export const IS_ANDROID = !!(
   userAgentLowerCase.includes('android')
