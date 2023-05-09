@@ -29,7 +29,7 @@
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
-        v-if="isAe"
+        v-if="isAe && !IS_IOS"
         :text="$t('common.buy')"
         :icon="BuyIcon"
         :href="activeAccountSimplexLink"
@@ -100,6 +100,7 @@ import {
   useAccounts,
 } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
+import { IS_IOS } from '../../../lib/environment';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -222,6 +223,7 @@ export default defineComponent({
       convertedBalance,
       routeName,
       isMultisig,
+      IS_IOS,
     };
   },
 });
