@@ -205,13 +205,25 @@ export interface IRawMultisigAccount {
 }
 
 export interface INetworkBase {
-  url: string
-  name: string
-  middlewareUrl: string
-  networkId: string
-  compilerUrl: string
-  backendUrl: string
-  index?: number
+  /**
+   * Node backend URL
+   */
+  url: string;
+  /**
+   * Unique name provided by the user
+   */
+  name: string;
+  middlewareUrl: string;
+  /**
+   * TODO: Replace with different way of differentiating the networks
+   */
+  networkId: string;
+  compilerUrl: string;
+  /**
+   * Tipping backend URL
+   */
+  backendUrl: string;
+  index?: number;
 }
 
 export interface INetwork extends INetworkBase {
@@ -519,29 +531,38 @@ export interface ISdk {
     options: {
       waitMined: boolean;
       modal: boolean;
-      innerTx?: boolean
+      innerTx?: boolean;
     }
   ) => Promise<{ hash: string, rawTx: string }>;
   payingForTx(arg0: any): any;
   poll: (txHash: string, options?: any) => any;
   pool: Map<string, any>;
+  rpcClients: any[];
   shareWalletInfo: (c: any) => any;
-  signTransaction: (t: any, o: any) => Promise<any>
-  signMessage: ISignMessage
+  signTransaction: (t: any, o: any) => Promise<any>;
+  signMessage: ISignMessage;
   send: (
     tx: any,
     options?: {
-      innerTx?: boolean,
-      onAccount: string,
-      authData?: any,
+      innerTx?: boolean;
+      onAccount: string;
+      authData?: any;
     }
-  ) => Promise<ITransaction>
-  sendTransaction: (t: any, o: any) => Promise<any>
-  selectedNode: any
-  spend: (a: any, r: any, o: any) => Promise<any>
-  spendTx: (a: any) => Promise<any>
-  address: () => Promise<string>
-  aensBid: (name: string, aettos: any) => Promise<any>
+  ) => Promise<ITransaction>;
+  sendTransaction: (t: any, o: any) => Promise<any>;
+  selectedNode: {
+    consensusProtocolVersion: number;
+    instance: any; // Node instance
+    internalUrl?: any;
+    name: string; // Testnet / Mainnet
+    networkId: string; // ae_uat / ae_mainnet
+    url: string;
+    version: string;
+  };
+  spend: (a: any, r: any, o: any) => Promise<any>;
+  spendTx: (a: any) => Promise<any>;
+  address: () => Promise<string>;
+  aensBid: (name: string, aettos: any) => Promise<any>;
 }
 
 /**

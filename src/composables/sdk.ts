@@ -1,6 +1,8 @@
-import { computed } from '@vue/composition-api';
+import { computed, ref } from '@vue/composition-api';
 import { Universal, Node } from '@aeternity/aepp-sdk';
+import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
 import {
+  DEX_CONTRACTS,
   NETWORK_ID_MAINNET,
   NETWORK_ID_TESTNET,
   NODE_STATUS_CONNECTED,
@@ -8,8 +10,9 @@ import {
   NODE_STATUS_ERROR,
   watchUntilTruthy,
 } from '../popup/utils';
-import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
+import { RUNNING_IN_TESTS } from '../lib/environment';
 
+const nodeNetworkId = ref<string>();
 let drySdk: ISdk;
 
 /**
@@ -26,9 +29,28 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
   const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
   const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
-  const isNodeMainnet = computed(() => activeNetwork.value.networkId === NETWORK_ID_MAINNET);
-  const isNodeTestnet = computed(() => activeNetwork.value.networkId === NETWORK_ID_TESTNET);
+
+  const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
+  const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
   const isCustomNodeNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
+
+  const isTippingSupported = computed(() => (RUNNING_IN_TESTS && !isCustomNodeNetwork.value));
+
+  const dexContracts = computed(
+    () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
+  );
+
+  async function createNewNodeInstance(url: string): Promise<Node | null> {
+    try {
+      const nodeInstance = await Node({ url });
+      nodeNetworkId.value = nodeInstance.nodeNetworkId;
+      return nodeInstance;
+    } catch (error) {
+      nodeNetworkId.value = undefined;
+      store.commit('setNodeStatus', NODE_STATUS_ERROR);
+      throw new Error();
+    }
+  }
 
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.
@@ -60,13 +82,17 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   }
 
   return {
+    nodeNetworkId,
     isNodeReady,
     isNodeConnecting,
     isNodeError,
-    isSdkReady,
     isNodeMainnet,
     isNodeTestnet,
     isCustomNodeNetwork,
+    isSdkReady,
+    isTippingSupported,
+    dexContracts,
+    createNewNodeInstance,
     getSdk,
     getDrySdk,
   };

@@ -666,16 +666,16 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
   return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
-export function isTxDex(tx: ITx, dexContracts: IDexContracts) {
-  const { wae = [], router = [] } = dexContracts;
+export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
+  const { wae = [], router = [] } = dexContracts || {};
 
   return !!(
-    tx.contractId
+    tx
+    && wae.length
+    && router.length
+    && tx.contractId
     && tx.function
-    && (
-      Object.values(FUNCTION_TYPE_DEX).flat()
-        .includes(tx.function as TxFunctionRaw)
-    )
+    && Object.values(FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId)
   );
 }

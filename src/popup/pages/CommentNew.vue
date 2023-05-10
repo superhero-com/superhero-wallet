@@ -18,7 +18,7 @@
         {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
-        :disabled="!tippingSupported"
+        :disabled="!isTippingSupported"
         @click="sendComment"
       >
         {{ $t('common.confirm') }}
@@ -42,7 +42,6 @@ import {
   useModals,
   useSdk,
 } from '../../composables';
-import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 import AccountSelector from '../components/AccountSelector.vue';
@@ -57,7 +56,7 @@ export default defineComponent({
     FixedScreenFooter,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+    const { isTippingSupported, getSdk } = useSdk({ store: root.$store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const {
@@ -71,7 +70,6 @@ export default defineComponent({
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
     const loading = ref<boolean>(false);
-    const tippingSupported = useGetter('tippingSupported');
 
     watch(
       () => root.$route,
@@ -111,7 +109,7 @@ export default defineComponent({
       }
     }
 
-    // Wait until the `tippingSupported` is established by the SDK
+    // Wait until the `isTippingSupported` is established by the SDK
     (async () => {
       loading.value = true;
       await getSdk();
@@ -125,7 +123,7 @@ export default defineComponent({
       parentId,
       text,
       loading,
-      tippingSupported,
+      isTippingSupported,
       sendComment,
       openCallbackOrGoHome,
       setActiveAccountByAddress,

@@ -103,7 +103,7 @@ export default defineComponent({
 
     const { $validator } = (getCurrentScope() as any).vm;
     const networks = useGetter('networks');
-    const selectNetwork = useDispatch('selectNetwork');
+    const switchNetwork = useDispatch('switchNetwork');
 
     const newNetwork = ref<INetworkBase>({
       ...NETWORK_PROPS,
@@ -175,7 +175,7 @@ export default defineComponent({
           ...newNetwork.value,
           index: newNetwork.value.index,
         });
-        await selectNetwork(newNetwork.value.name);
+        await switchNetwork(newNetwork.value.name);
         goBack();
       }
     }
@@ -211,7 +211,6 @@ export default defineComponent({
       buttonDisabled,
       isEdit,
       formConfig,
-      selectNetwork,
       addOrUpdateNetwork,
       validatorRules,
       goBack,

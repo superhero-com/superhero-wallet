@@ -30,7 +30,6 @@
         v-if="isNodeTestnet"
         :icon="FaucetIcon"
         :text="$t('common.faucet')"
-        :subtitle="'Testnet coin'"
         :href="activeAccountFaucetUrl"
       />
       <BtnBox

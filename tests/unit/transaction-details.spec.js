@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
-import { AETERNITY_SYMBOL, DEX_CONTRACTS, NETWORK_ID_TESTNET } from '../../src/popup/utils';
+import { AETERNITY_SYMBOL, NETWORK_ID_TESTNET } from '../../src/popup/utils';
 import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
@@ -17,7 +17,7 @@ Vue.use(Vuex);
 function mountComponent({ hasError = false } = {}) {
   const testTransaction = {
     blockHeight: 624848,
-    hash: 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
+    hash,
     microIndex: 23,
     microTime: 1656518730553,
     tx: {
@@ -115,7 +115,6 @@ function mountComponent({ hasError = false } = {}) {
       getTx: () => () => testTransaction,
       getTxType: () => () => 'provide liquidity',
       getTxSymbol: () => () => AETERNITY_SYMBOL,
-      getDexContracts: () => DEX_CONTRACTS.ae_uat,
       getTransactionTipUrl: () => () => '',
       getTxAmountTotal: () => () => 1,
       getTxDirection: () => () => 'sent',
@@ -148,7 +147,7 @@ describe('Transaction Details', () => {
     expect(wrapper.find('[data-cy=timestamp]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=block-height]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=nonce]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-cy=amount]').exists()).not.toBeTruthy();
+    expect(wrapper.find('[data-cy=amount]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=gas]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=fee]').exists()).toBeTruthy();
     expect(wrapper.find('.explorer').exists()).toBeTruthy();

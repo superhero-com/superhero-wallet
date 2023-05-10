@@ -142,7 +142,7 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
       await watchUntilTruthy(isSdkReady);
     } else if (!sdk) {
       await initSdk();
-    } else if (sdkCurrentNetwork.networkId !== activeNetwork.value.networkId) {
+    } else if (sdkCurrentNetwork.url !== activeNetwork.value.url) {
       await resetSdkNode();
     }
     return sdk;

@@ -16,6 +16,7 @@ import { useMiddleware, useModals, useSdk } from '../../composables';
 
 export default (store) => {
   const {
+    nodeNetworkId,
     getSdk,
   } = useSdk({ store });
 
@@ -40,17 +41,16 @@ export default (store) => {
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
-      getDefault: ({ defaults }, getters, _, { activeNetwork }) => (address) => {
+      getDefault: ({ defaults }) => (address) => {
         if (!defaults) return '';
-        const { networkId } = activeNetwork;
-        return defaults[`${address}-${networkId}`];
+        return defaults[`${address}-${nodeNetworkId.value}`];
       },
       getPreferred: (
-        { preferred }, { getDefault }, _, { account, activeNetwork },
+        { preferred }, { getDefault }, _, { account },
       ) => (address) => {
         if (account.address === address) return getDefault(address);
         store.dispatch('names/setPreferred', address);
-        return preferred[`${address}-${activeNetwork.networkId}`] || '';
+        return preferred[`${address}-${nodeNetworkId.value}`] || '';
       },
       getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getAuction: ({ auctions }) => (name) => auctions[name] || null,
@@ -65,18 +65,16 @@ export default (store) => {
         state.owned = names;
       },
       setDefault({ defaults }, { address, name }) {
-        const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
-        else Vue.delete(defaults, `${address}-${networkId}`);
+        if (name) Vue.set(defaults, `${address}-${nodeNetworkId.value}`, name);
+        else Vue.delete(defaults, `${address}-${nodeNetworkId.value}`);
       },
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
         Vue.set(state.owned[index], 'autoExtend', value);
       },
       setPreferred({ preferred }, { address, name }) {
-        const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(preferred, `${address}-${networkId}`, name);
-        else Vue.delete(preferred, `${address}-${networkId}`);
+        if (name) Vue.set(preferred, `${address}-${nodeNetworkId.value}`, name);
+        else Vue.delete(preferred, `${address}-${nodeNetworkId.value}`);
       },
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };

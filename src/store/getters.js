@@ -4,9 +4,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
-  DEX_CONTRACTS,
-  NETWORK_ID_MAINNET,
-  NETWORK_ID_TESTNET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
@@ -20,6 +17,7 @@ import {
   getMdwEndpointPrefixForHash,
   getTxType,
 } from '../popup/utils';
+import { useSdk } from '../composables';
 
 export default {
   wallet({ mnemonic }) {
@@ -56,12 +54,6 @@ export default {
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;
   },
-  tippingSupported(state, { activeNetwork }) {
-    return (
-      [NETWORK_ID_MAINNET, NETWORK_ID_TESTNET].includes(activeNetwork.networkId)
-      || process.env.RUNNING_IN_TESTS
-    );
-  },
   getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
     const { valid } = validateHash(hash);
     if (!valid) {
@@ -70,9 +62,12 @@ export default {
     const endpoint = getMdwEndpointPrefixForHash(hash);
     return `${explorerUrl}/${endpoint}/${hash}`;
   },
-  getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
-    .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-
+  getTx: (state, getters) => (hash) => {
+    const { nodeNetworkId } = useSdk({ store: { state, getters } });
+    return state.transactions.loaded
+      .concat(state.transactions.pending[nodeNetworkId.value])
+      ?.find((tx) => tx?.hash === hash);
+  },
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -115,13 +110,17 @@ export default {
       ? TX_DIRECTION.sent
       : TX_DIRECTION.received;
   },
-  getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
-  getAccountPendingTransactions: (
-    { transactions: { pending } }, { activeNetwork, account: { address } },
-  ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]
-    ?.filter((transaction) => transaction.tx.callerId === address
-    || transaction.tx.senderId === address
-    || transaction.tx.recipientId === address
-    || transaction.recipientId === address
-    || transaction.recipient === address) : []),
+  getAccountPendingTransactions: (state, getters) => {
+    const { nodeNetworkId } = useSdk({ store: { state, getters } });
+    const { address } = getters.account;
+    const pendingTransactions = state.transactions.pending[nodeNetworkId.value];
+
+    if (pendingTransactions?.length) {
+      return pendingTransactions.filter(({ tx, recipient, recipientId }) => [
+        tx.callerId, tx.senderId, tx.recipientId, recipientId, recipient,
+      ].includes(address));
+    }
+
+    return [];
+  },
 };
