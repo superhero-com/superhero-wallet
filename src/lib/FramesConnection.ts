@@ -1,6 +1,5 @@
 import { times } from 'lodash-es';
-import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
-import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
+import { AeSdkWallet, BrowserWindowMessageConnection } from '@aeternity/aepp-sdk-13';
 import { ISdk } from '../types';
 import { executeAndSetInterval, handleUnknownError } from '../popup/utils';
 
@@ -36,7 +35,7 @@ export const FramesConnection = (() => {
             }
 
             connectedFrames.add(target);
-            const connection = BrowserWindowMessageConnection({ target });
+            const connection = new BrowserWindowMessageConnection({ target });
             const originalConnect = connection.connect;
             let intervalId: NodeJS.Timer;
 
@@ -47,17 +46,17 @@ export const FramesConnection = (() => {
                 }
                 clearInterval(intervalId);
                 onMessage(data, origin, source);
-              });
+              }, () => {});
             };
 
-            sdk.addRpcClient(connection);
+            const clientId = sdk.addRpcClient(connection);
 
             intervalId = executeAndSetInterval(() => {
               if (!getArrayOfAvailableFrames().includes(target)) {
                 clearInterval(intervalId);
                 return;
               }
-              sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+              sdk.shareWalletInfo(clientId);
             }, 3000);
           }),
         POLLING_INTERVAL,

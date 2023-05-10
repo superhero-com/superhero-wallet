@@ -8,18 +8,21 @@ import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useSdk } from '../composables';
+import { useMiddleware, useSdk, useSdk13 } from '../composables';
 
 let initSdkRunning = false;
 
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
-      async reset({ rootGetters }) {
-        Object.values(rootGetters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
+      async reset() {
+        const { getSdk } = useSdk13({ store });
+        const sdk = await getSdk();
+
+        Object.values(sdk._clients).forEach((aepp) => {
           if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
             aepp.sendMessage(
-              { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+              { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
               true,
             );
             aepp.disconnect();

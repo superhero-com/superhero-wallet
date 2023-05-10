@@ -20,7 +20,7 @@ import type {
   IRespondChallenge,
 } from '../types';
 import { App } from '../store/modules/permissions';
-import { IN_FRAME, IS_EXTENSION_BACKGROUND } from '../lib/environment';
+import { IN_FRAME, IS_EXTENSION, IS_EXTENSION_BACKGROUND } from '../lib/environment';
 import {
   MODAL_CONFIRM_CONNECT,
   POPUP_TYPE_CONNECT,
@@ -29,6 +29,7 @@ import {
 import { showPopup } from '../background/popupHandler';
 import { useAccounts } from './accounts';
 import { FramesConnection } from '../lib/FramesConnection';
+import { useModals } from './modals';
 
 let sdk: ShSdkWallet;
 let drySdk: AeSdk;
@@ -46,6 +47,8 @@ const nodeNetworkId = ref<string>();
  */
 export function useSdk13({ store }: IDefaultComposableOptions) {
   const { isLoggedIn, activeAccount } = useAccounts({ store });
+  const { openModal } = useModals();
+
   const isSdkReady = computed(() => !!sdk);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -89,7 +92,7 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
         instance: nodeInstance!,
       }],
       id: 'Superhero Wallet',
-      type: WALLET_TYPE.extension,
+      type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
       onCompiler: new CompilerHttp(activeNetwork.value.compilerUrl),
       onConnection(aeppId: string, params: any, origin: string) {
         aeppInfo[aeppId] = { ...params, origin };
@@ -107,13 +110,13 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
           address: activeAccount.value.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
-            : store.dispatch('modals/open', {
-              name: MODAL_CONFIRM_CONNECT,
+            : openModal(MODAL_CONFIRM_CONNECT, {
               app: {
                 name: app.host.hostname,
                 icons: [],
                 protocol: app.host.protocol,
                 host: app.host.host,
+                url: app.host.href,
               },
             }),
         }))
