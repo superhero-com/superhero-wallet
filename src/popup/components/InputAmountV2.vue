@@ -141,6 +141,8 @@ export default defineComponent({
   &-desc {
     @include mixins.flex(space-between, center);
 
+    user-select: none;
+
     &-total {
       word-break: break-word;
 
@@ -163,6 +165,7 @@ export default defineComponent({
 
     white-space: nowrap;
     color: variables.$color-primary;
+    user-select: none;
   }
 }
 </style>

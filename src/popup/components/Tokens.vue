@@ -153,6 +153,10 @@ export default defineComponent({
     align-self: center;
   }
 
+  .icons {
+    user-select: none;
+  }
+
   .symbol {
     @extend %face-sans-16-regular;
 

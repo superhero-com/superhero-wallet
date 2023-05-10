@@ -131,6 +131,7 @@ export default defineComponent({
     .ae-address {
       color: rgba(variables.$color-white, 0.85);
       opacity: 0.85;
+      user-select: none;
 
       .icon {
         width: 22px;

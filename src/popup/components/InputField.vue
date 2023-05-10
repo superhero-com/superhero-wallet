@@ -250,6 +250,7 @@ export default defineComponent({
     &-text {
       margin: 4px 0;
       display: inline-block;
+      user-select: none;
     }
 
     .btn-help {
@@ -260,6 +261,7 @@ export default defineComponent({
       @extend %face-sans-15-regular;
 
       margin-left: auto;
+      user-select: none;
       color: variables.$color-grey-dark;
     }
   }
@@ -304,6 +306,7 @@ export default defineComponent({
         @extend %face-sans-15-regular;
 
         color: var(--color-placeholder);
+        user-select: none;
       }
 
       &[type='number'] {

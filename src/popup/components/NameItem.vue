@@ -329,6 +329,7 @@ export default defineComponent({
       .buttons {
         display: flex;
         margin-top: 2px;
+        user-select: none;
 
         button:not(.btn-help) {
           @extend %face-sans-12-medium;
