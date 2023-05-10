@@ -129,9 +129,10 @@ export default defineComponent({
 .tokens {
   --icon-size: 16px;
 
-  @extend %face-sans-15-medium;
+  @extend %face-sans-16-semi-bold;
 
   color: rgba(variables.$color-white, 0.75);
+  letter-spacing: -2%;
 
   &.bright {
     color: variables.$color-white;
@@ -146,7 +147,7 @@ export default defineComponent({
   }
 
   .symbol {
-    @extend %face-sans-16-medium;
+    @extend %face-sans-16-regular;
 
     vertical-align: middle;
     white-space: nowrap;

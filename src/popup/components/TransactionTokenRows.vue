@@ -118,6 +118,7 @@ export default defineComponent({
     .amount {
       color: variables.$color-white;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     &.received .amount {
@@ -130,6 +131,8 @@ export default defineComponent({
 
     .token-name {
       @extend %face-sans-16-regular;
+
+      letter-spacing: -2%;
     }
   }
 }

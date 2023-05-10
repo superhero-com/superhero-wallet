@@ -321,7 +321,7 @@ export default defineComponent({
       }
 
       .truncate {
-        @extend %face-sans-14-bold;
+        @extend %face-sans-15-medium;
 
         line-height: 16px;
       }
