@@ -134,6 +134,7 @@ export default defineComponent({
 
       margin-right: 4px;
       opacity: 0.6;
+      user-select: none;
     }
   }
 

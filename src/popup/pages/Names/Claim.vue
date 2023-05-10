@@ -15,7 +15,7 @@
         </span>
       </template>
       <template #after>
-        {{ AENS_DOMAIN }}
+        <span class="aens-domain">{{ AENS_DOMAIN }}</span>
       </template>
     </InputField>
 
@@ -180,6 +180,10 @@ export default defineComponent({
       @extend %face-sans-13-regular;
 
       color: variables.$color-grey-dark;
+    }
+
+    .aens-domain {
+      user-select: none;
     }
   }
 

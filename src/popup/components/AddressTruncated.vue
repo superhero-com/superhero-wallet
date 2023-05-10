@@ -58,6 +58,7 @@ export default defineComponent({
 .address-truncated {
   display: flex;
   align-items: center;
+  user-select: none;
 
   &-chunks {
     @extend %face-mono-12-medium;

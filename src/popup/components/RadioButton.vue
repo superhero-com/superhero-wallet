@@ -53,6 +53,7 @@ export default defineComponent({
   @include mixins.flex(flex-start, center);
 
   cursor: pointer;
+  user-select: none;
 
   &.disabled {
     opacity: 50%;

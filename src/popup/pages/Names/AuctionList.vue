@@ -159,6 +159,7 @@ export default defineComponent({
 
       .expiration {
         align-self: flex-end;
+        user-select: none;
         color: variables.$color-grey-dark;
       }
     }
