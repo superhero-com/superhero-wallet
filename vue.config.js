@@ -30,12 +30,6 @@ module.exports = {
       filename: 'index.html',
     },
     ...PLATFORM === 'extension' && {
-      override: {
-        template: 'src/redirect/redirect.html',
-        entry: 'src/redirect/redirect.js',
-        title: 'redirect',
-        filename: 'redirect.html',
-      },
       permissions: {
         template: 'src/popup/CameraRequestPermission.html',
         entry: 'src/popup/cameraPermission.js',
@@ -57,9 +51,6 @@ module.exports = {
         componentOptions: {
           background: {
             entry: 'src/background/index.js',
-          },
-          override: {
-            entry: 'src/redirect/redirect.js',
           },
           contentScripts: {
             entries: {

@@ -19,8 +19,6 @@
     "webRequest",
     "webRequestBlocking",
     "webNavigation",
-    "*://*.chain/*",
-    "*://*.google.com/*",
     "https://wallet.superhero.com/*"
   ],
   "icons": {

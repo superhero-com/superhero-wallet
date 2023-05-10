@@ -1,7 +1,6 @@
 import '../lib/environment';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
-import RedirectChainNames from './redirect-chain-names';
 import * as wallet from './wallet';
 import TipClaimRelay from './tip-claim-relay';
 import Logger from '../lib/logger';
@@ -10,7 +9,6 @@ import store from './store';
 import { useAccounts } from '../composables';
 
 Logger.init({ background: true });
-RedirectChainNames.init();
 initDeeplinkHandler();
 
 const openTipPopup = (pageUrl) => browser.windows.create({
