@@ -63,21 +63,3 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
 });
 
 wallet.init();
-
-const contextMenuItem = {
-  id: 'superheroTip',
-  title: 'Tip',
-};
-
-browser.webNavigation.onHistoryStateUpdated.addListener(async ({ tabId, url }) => {
-  if (
-    (({ origin, pathname }) => origin + pathname)(new URL(url)) !== 'https://www.youtube.com/watch'
-  ) return;
-  browser.tabs.executeScript(tabId, { file: 'js/youtube.js' });
-});
-
-browser.contextMenus.removeAll();
-browser.contextMenus.create(contextMenuItem);
-browser.contextMenus.onClicked.addListener(({ menuItemId, pageUrl }) => {
-  if (menuItemId === contextMenuItem.id) openTipPopup(pageUrl);
-});
