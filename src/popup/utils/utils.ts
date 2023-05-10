@@ -633,16 +633,20 @@ export function getTwitterAccountUrl(url: string) {
 }
 
 export function calculateFontSize(amountValue: BigNumber | number) {
-  const amount = new BigNumber(amountValue);
-  if (amount.isLessThanOrEqualTo(999999)) {
+  const amountLength = amountRounded(amountValue).replace(/\D/g, '').length;
+
+  if (amountLength <= 8) {
     return '18px';
   }
-  if (amount.isLessThanOrEqualTo(999999999)) {
+
+  if (amountLength <= 11) {
     return '16px';
   }
-  if (amount.isLessThanOrEqualTo(999999999999)) {
+
+  if (amountLength <= 14) {
     return '14px';
   }
+
   return '12px';
 }
 

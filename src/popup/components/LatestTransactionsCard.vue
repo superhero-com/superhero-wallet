@@ -75,8 +75,9 @@ export default defineComponent({
   flex-direction: column;
 
   .title {
-    @extend %face-sans-15-bold;
+    @extend %face-sans-16-semi-bold;
 
+    line-height: 24px;
     padding-inline: 12px;
     margin-bottom: 4px;
   }
