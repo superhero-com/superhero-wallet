@@ -1,6 +1,6 @@
 import { computed } from '@vue/composition-api';
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
-import { buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
+import { FAUCET_URL, buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -24,6 +24,8 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   );
 
   const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
+
+  const activeAccountFaucetUrl = computed(() => `${FAUCET_URL}?address=${activeAccount.value.address}`);
 
   function getAccountByAddress(address: string): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
@@ -53,6 +55,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accountsSelectOptions,
     activeAccount,
     activeAccountSimplexLink,
+    activeAccountFaucetUrl,
     activeIdx,
     isLoggedIn,
     isLocalAccountAddress,

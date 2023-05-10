@@ -215,6 +215,7 @@ export interface INetworkBase {
   url: string
   name: string
   middlewareUrl: string
+  networkId: string
   compilerUrl: string
   backendUrl: string
   index?: number
@@ -222,7 +223,6 @@ export interface INetworkBase {
 
 export interface INetwork extends INetworkBase {
   explorerUrl: string
-  networkId: string
   tipContractV1: string
   tipContractV2?: string
   multisigBackendUrl: string

@@ -20,13 +20,21 @@
       <OpenTransferReceiveModalButton />
       <OpenTransferSendModalButton />
       <BtnBox
-        v-if="!IS_IOS"
+        v-if="isNodeMainnet && !IS_IOS"
         :icon="CreditCardIcon"
         :text="$t('common.buy')"
         :href="activeAccountSimplexLink"
         :disabled="!isOnline"
       />
       <BtnBox
+        v-if="isNodeTestnet"
+        :icon="FaucetIcon"
+        :text="$t('common.faucet')"
+        :subtitle="'Testnet coin'"
+        :href="activeAccountFaucetUrl"
+      />
+      <BtnBox
+        v-if="isNodeMainnet || isNodeTestnet"
         :icon="SwapIcon"
         :text="$t('common.swap')"
         :href="DEX_URL"
@@ -42,9 +50,14 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useAccounts, useBalances, useConnection } from '../../composables';
-import { DEX_URL } from '../utils';
 import { IS_IOS } from '../../lib/environment';
+import { DEX_URL } from '../utils';
+import {
+  useAccounts,
+  useBalances,
+  useConnection,
+  useSdk,
+} from '../../composables';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -56,8 +69,10 @@ import BtnBox from '../components/buttons/BtnBox.vue';
 
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
+import FaucetIcon from '../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
+  name: 'AccountDetails',
   components: {
     BtnBox,
     OpenTransferSendModalButton,
@@ -69,20 +84,32 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();
-    const { activeAccount, activeAccountSimplexLink } = useAccounts({ store: root.$store });
+
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+
+    const {
+      activeAccount,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store: root.$store });
+
     const { balance } = useBalances({ store: root.$store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 
     return {
+      CreditCardIcon,
+      SwapIcon,
+      FaucetIcon,
       DEX_URL,
       IS_IOS,
       isOnline,
+      isNodeMainnet,
+      isNodeTestnet,
       balanceNumeric,
       activeAccount,
       activeAccountSimplexLink,
-      CreditCardIcon,
-      SwapIcon,
+      activeAccountFaucetUrl,
     };
   },
 });

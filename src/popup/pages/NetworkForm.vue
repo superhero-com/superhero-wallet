@@ -69,11 +69,10 @@ interface IFormConfig {
 }
 
 const NETWORK_PROPS: INetworkBase = {
+  ...NETWORK_DEFAULT,
   url: '',
   name: '',
-  middlewareUrl: NETWORK_DEFAULT.middlewareUrl,
-  compilerUrl: NETWORK_DEFAULT.compilerUrl,
-  backendUrl: NETWORK_DEFAULT.backendUrl,
+  networkId: 'custom', // TODO: In the future `networkId` will be removed from INetwork
 };
 
 export default defineComponent({
