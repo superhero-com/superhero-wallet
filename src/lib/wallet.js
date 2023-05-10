@@ -50,8 +50,8 @@ export default async function initSdk() {
           }
           store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
           await Promise.all([
-            initMiddleware(),
-            store.dispatch('sdkPlugin/changeNode', network),
+            network.middlewareUrl !== oldNetwork.middlewareUrl ? initMiddleware() : null,
+            network.url !== oldNetwork.url ? store.dispatch('sdkPlugin/changeNode', network) : null,
           ]);
           store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
         } catch (error) {
