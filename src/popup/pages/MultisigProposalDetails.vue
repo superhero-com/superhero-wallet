@@ -32,6 +32,7 @@
           <LinkButton
             :to="getExplorerPath(activeMultisigAccount.contractId)"
             variant="muted"
+            underlined
           >
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
