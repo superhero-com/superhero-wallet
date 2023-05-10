@@ -29,13 +29,19 @@
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
-        v-if="isAe && !IS_IOS"
+        v-if="isAe && isNodeMainnet && !IS_IOS"
         :text="$t('common.buy')"
         :icon="BuyIcon"
         :href="activeAccountSimplexLink"
       />
       <BtnBox
-        v-else
+        v-else-if="isAe && isNodeTestnet"
+        :text="$t('common.faucet')"
+        :icon="FaucetIcon"
+        :href="activeAccountFaucetUrl"
+      />
+      <BtnBox
+        v-else-if="isNodeMainnet || isNodeTestnet"
         :text="$t('common.swap')"
         :icon="SwapIcon"
         :href="DEX_URL"
@@ -114,6 +120,7 @@ import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilte
 
 import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/credit-card.svg?vue-component';
+import FaucetIcon from '../../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
   name: 'TokenContainer',
@@ -132,8 +139,11 @@ export default defineComponent({
     const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { activeAccountSimplexLink } = useAccounts({ store: root.$store });
+    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store: root.$store });
+    const {
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store: root.$store });
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
       store: root.$store,
@@ -208,13 +218,17 @@ export default defineComponent({
     return {
       BuyIcon,
       SwapIcon,
+      FaucetIcon,
       DEX_URL,
       AETERNITY_CONTRACT_ID,
       fungibleToken,
       contractId,
       isAe,
+      isNodeMainnet,
+      isNodeTestnet,
       loading,
       activeAccountSimplexLink,
+      activeAccountFaucetUrl,
       tabs,
       tokenData,
       tokenPairs,

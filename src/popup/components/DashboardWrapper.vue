@@ -17,7 +17,7 @@
         :title="$t('dashboard.backUpCard.title')"
         :description="$t('dashboard.backUpCard.description')"
         :btn-text="$t('dashboard.backUpCard.button')"
-        :icon="SubtractIcon"
+        :icon="WarningTriangleIcon"
         :to="{ name: 'settings-seed-phrase' }"
         data-cy="backup-seed-phrase"
         variant="danger"
@@ -41,7 +41,7 @@ import { useModals } from '../../composables';
 
 import DashboardCard from './DashboardCard.vue';
 
-import SubtractIcon from '../../icons/subtract.svg?vue-component';
+import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardWrapper',
@@ -61,7 +61,7 @@ export default defineComponent({
 
     return {
       backedUpSeed,
-      SubtractIcon,
+      WarningTriangleIcon,
     };
   },
 });

@@ -2,7 +2,6 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  NETWORK_DEFAULT,
   TX_DIRECTION,
 } from '../popup/utils';
 
@@ -42,8 +41,11 @@ export default {
     Vue.set(state.transactions.pending[network][index], TX_DIRECTION.sent, true);
   },
   setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) Vue.set(state.userNetworks, index, network);
-    else state.userNetworks.push({ ...NETWORK_DEFAULT, ...network });
+    if (index !== undefined) {
+      Vue.set(state.userNetworks, index, network);
+    } else {
+      state.userNetworks.push(network);
+    }
   },
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
