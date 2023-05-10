@@ -12,7 +12,7 @@
         v-for="network in networks"
         :key="network.name"
         :network="network"
-        @selectNetwork="selectNetwork"
+        @selectNetwork="switchNetwork"
       />
     </div>
 
@@ -43,11 +43,11 @@ export default defineComponent({
   },
   setup() {
     const networks = useGetter('networks');
-    const selectNetwork = useDispatch('selectNetwork');
+    const switchNetwork = useDispatch('switchNetwork');
 
     return {
       networks,
-      selectNetwork,
+      switchNetwork,
       PlusCircleIcon,
     };
   },

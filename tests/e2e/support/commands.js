@@ -253,14 +253,6 @@ Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
     .should('contain', middleware);
 });
 
-Cypress.Commands.add('selectNetwork', () => {
-  cy.get('[data-cy=networks] .network-row')
-    .eq(1)
-    .find('.checkmark')
-    .click()
-    .should('have.class', 'checked');
-});
-
 Cypress.Commands.add('openTransactions', () => {
   cy.get('[data-cy=account-card-base]')
     .click()

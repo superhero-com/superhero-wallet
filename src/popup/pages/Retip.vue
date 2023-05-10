@@ -25,7 +25,7 @@
       name="amount"
       class="amount-input"
       ae-only
-      :message="validationStatus.msg || errors.first('amount')"
+      :message="errors.first('amount')"
     />
     <div
       v-if="tip.title"
@@ -37,7 +37,7 @@
     <BtnMain
       class="bottom-btn"
       extend
-      :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
+      :disabled="!isTippingSupported || $validator.errors.has('amount')"
       @click="sendTip"
     >
       {{ $t('common.confirm') }}
@@ -71,6 +71,7 @@ import {
 import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken } from '../utils';
 import {
+  useSdk,
   useDeepLinkApi,
   useMaxAmount,
   IFormModel,
@@ -98,6 +99,7 @@ export default defineComponent({
       amount: '',
     });
 
+    const { isTippingSupported } = useSdk({ store: root.$store });
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
@@ -112,20 +114,9 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const tippingSupported = useGetter('tippingSupported');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
-
-    const validationStatus = computed<{
-      error: boolean, msg?: string | VueI18n.TranslateResult
-    }>(() => {
-      if (!sdk.value || !tippingSupported.value) {
-        return { error: true };
-      }
-      return { error: false };
-    });
 
     async function sendTip() {
       const amount = convertToken(
@@ -220,8 +211,7 @@ export default defineComponent({
       formModel,
       loading,
       urlStatus,
-      validationStatus,
-      tippingSupported,
+      isTippingSupported,
       numericBalance,
       sendTip,
       max,

@@ -12,15 +12,14 @@ export default defineComponent({
   setup(props, { root }) {
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { getSdk } = useSdk({ store: root.$store });
+      const { nodeNetworkId, getSdk } = useSdk({ store: root.$store });
       const { openDefaultModal } = useModals();
 
       try {
         const sdk = await getSdk();
         const { transaction, networkId, broadcast } = root.$route.query;
-        const currentNetworkId = root.$store.getters.activeNetwork.networkId;
 
-        if (networkId !== currentNetworkId) {
+        if (networkId !== nodeNetworkId.value) {
           await openDefaultModal({
             icon: 'warning',
             title: root.$t('modals.wrongNetwork.title'),

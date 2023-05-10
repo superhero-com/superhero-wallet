@@ -59,55 +59,60 @@ const isAdditionalInfoNeeded = ref(false);
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
-  const { getSdk } = useSdk({ store });
+  const { nodeNetworkId, getSdk } = useSdk({ store });
   const { accounts } = useAccounts({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-  const allMultisigAccounts = computed<IMultisigAccount[]>(
-    () => [...multisigAccounts.value, ...pendingMultisigAccounts.value],
-  );
+  const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
+    ...multisigAccounts.value,
+    ...pendingMultisigAccounts.value,
+  ]);
 
   const activeMultisigAccount = computed<IMultisigAccount | undefined>(
     () => allMultisigAccounts.value
       .find((account) => account.gaAccountId === activeMultisigAccountId.value),
   );
 
-  if (
-    !multisigAccounts.value.length
-    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
-  ) {
-    multisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId);
-    pendingMultisigAccounts.value = getStoredMultisigAccounts(activeNetwork.value.networkId, true);
-  }
+  // Get initial data for currently used network
+  (async () => {
+    await getSdk(); // Ensure we are connected
+    if (
+      !multisigAccounts.value.length
+      || activeMultisigNetworkId.value !== nodeNetworkId.value
+    ) {
+      multisigAccounts.value = getStoredMultisigAccounts(nodeNetworkId.value!);
+      pendingMultisigAccounts.value = getStoredMultisigAccounts(nodeNetworkId.value!, true);
+    }
 
-  if (
-    !activeMultisigAccountId.value
-    || activeMultisigNetworkId.value !== activeNetwork.value.networkId
-  ) {
-    activeMultisigAccountId.value = getLocalStorageItem<string>([
-      LOCAL_STORAGE_MULTISIG_KEY,
-      'active',
-      activeNetwork.value.networkId,
-    ]) || '';
-    activeMultisigNetworkId.value = activeNetwork.value.networkId;
-  }
+    if (
+      !activeMultisigAccountId.value
+      || activeMultisigNetworkId.value !== nodeNetworkId.value
+    ) {
+      activeMultisigAccountId.value = getLocalStorageItem<string>([
+        LOCAL_STORAGE_MULTISIG_KEY,
+        'active',
+        nodeNetworkId.value!,
+      ]) || '';
+      activeMultisigNetworkId.value = nodeNetworkId.value!;
+    }
+  })();
 
   function setActiveMultisigAccountId(gaAccountId: string) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
-      activeMultisigNetworkId.value = activeNetwork.value.networkId;
+      activeMultisigNetworkId.value = nodeNetworkId.value!;
 
       setLocalStorageItem([
         LOCAL_STORAGE_MULTISIG_KEY,
         'active',
-        activeNetwork.value.networkId,
+        nodeNetworkId.value!,
       ], gaAccountId);
     }
   }
 
   function addPendingMultisigAccount(multisigAccount: IMultisigAccount) {
     pendingMultisigAccounts.value.push(multisigAccount);
-    storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
+    storeMultisigAccounts(pendingMultisigAccounts.value, nodeNetworkId.value!, true);
   }
 
   function addTransactionToPendingMultisigAccount(
@@ -125,7 +130,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         }
         : account,
     );
-    storeMultisigAccounts(pendingMultisigAccounts.value, activeNetwork.value.networkId, true);
+    storeMultisigAccounts(pendingMultisigAccounts.value, nodeNetworkId.value!, true);
   }
 
   function removeDuplicatesFromPendingAccounts() {
@@ -136,7 +141,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         ),
       );
       pendingMultisigAccounts.value = newPendingMultisigAccounts;
-      storeMultisigAccounts(newPendingMultisigAccounts, activeNetwork.value.networkId, true);
+      storeMultisigAccounts(newPendingMultisigAccounts, nodeNetworkId.value!, true);
     }
   }
 
@@ -268,12 +273,12 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
 
     if (
       !activeMultisigAccountId.value
-      || activeMultisigNetworkId.value !== activeNetwork.value.networkId
+      || activeMultisigNetworkId.value !== nodeNetworkId.value
     ) {
       setActiveMultisigAccountId(result[0]?.gaAccountId);
     }
 
-    storeMultisigAccounts(result, activeNetwork.value.networkId);
+    storeMultisigAccounts(result, nodeNetworkId.value!);
     removeDuplicatesFromPendingAccounts();
   }
 
@@ -289,7 +294,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
   function getMultisigAccountByContractId(contractId: string) {
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
-  if (pollOnce && !getStoredMultisigAccounts(activeNetwork.value.networkId).length) {
+  if (pollOnce && !getStoredMultisigAccounts(nodeNetworkId.value!).length) {
     updateMultisigAccounts();
   } else if (!pollOnce) {
     initPollingWatcher(() => updateMultisigAccounts());

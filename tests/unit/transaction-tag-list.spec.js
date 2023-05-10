@@ -7,9 +7,7 @@ import { i18n } from '../../src/store/plugins/languages';
 import { transactions, testAccount } from '../../src/popup/utils/testsConfig';
 import {
   AENS,
-  DEX_CONTRACTS,
   NETWORK_TESTNET,
-  NETWORK_ID_TESTNET,
   STUB_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
 } from '../../src/popup/utils';
@@ -19,7 +17,6 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   getters: {
     activeNetwork: () => NETWORK_TESTNET,
-    getDexContracts: () => ({ value: DEX_CONTRACTS[NETWORK_ID_TESTNET] }),
     getTxDirection: () => getters.getTxDirection(null, { account: { address: STUB_ADDRESS } }),
   },
   state: {

@@ -101,6 +101,7 @@ import ClaimTips from '../../icons/claim-tips.svg?vue-component';
 import FaucetIcon from '../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
+  name: 'More',
   components: {
     PanelItem,
     Invites,

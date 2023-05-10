@@ -32,7 +32,7 @@
     />
 
     <BtnMain
-      :disabled="!normalizedUrl || !tippingSupported"
+      :disabled="!normalizedUrl || !isTippingSupported"
       extend
       @click="claimTips"
     >
@@ -58,7 +58,12 @@ import {
   validateTipUrl,
 } from '../utils';
 import { IS_EXTENSION } from '../../lib/environment';
-import { useAccounts, useModals, useTippingContracts } from '../../composables';
+import {
+  useAccounts,
+  useModals,
+  useSdk,
+  useTippingContracts,
+} from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -66,6 +71,7 @@ import BtnHelp from '../components/buttons/BtnHelp.vue';
 import AccountInfo from '../components/AccountInfo.vue';
 
 export default defineComponent({
+  name: 'TipsClaim',
   components: {
     InputField,
     BtnMain,
@@ -73,13 +79,13 @@ export default defineComponent({
     AccountInfo,
   },
   setup(props, { root }) {
+    const { isTippingSupported } = useSdk({ store: root.$store });
     const { activeAccount } = useAccounts({ store: root.$store });
     const { openModal, openDefaultModal } = useModals();
     const { getTippingContracts } = useTippingContracts({ store: root.$store });
 
     const tipUrl = ref('');
     const loading = ref(false);
-    const tippingSupported = computed(() => root.$store.getters.tippingSupported);
 
     const normalizedUrl = computed(
       () => validateTipUrl(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
@@ -152,7 +158,7 @@ export default defineComponent({
       loading,
       normalizedUrl,
       tipUrl,
-      tippingSupported,
+      isTippingSupported,
       BLOG_CLAIM_TIP_URL,
     };
   },

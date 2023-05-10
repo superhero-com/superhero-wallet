@@ -10,7 +10,7 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { IAppData } from '../../types';
-import { useAccounts, useDeepLinkApi } from '../../composables';
+import { useAccounts, useDeepLinkApi, useSdk } from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
 
@@ -18,6 +18,7 @@ export default defineComponent({
   name: 'Address',
   components: { Connect },
   setup(props, { root }) {
+    const { nodeNetworkId } = useSdk({ store: root.$store });
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
 
@@ -29,7 +30,7 @@ export default defineComponent({
 
     const onResolve = () => openCallbackOrGoHome(true, {
       address: activeAccount.value.address,
-      networkId: root.$store.getters.activeNetwork.networkId,
+      networkId: nodeNetworkId.value!,
     });
 
     const onReject = () => openCallbackOrGoHome(false);

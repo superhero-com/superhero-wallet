@@ -102,6 +102,10 @@ export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMM
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
 export const ACCOUNT_LEDGER_WALLET = 'ledger';
 
+/**
+ * Default `networkId` values returned by the Node after establishing the connection.
+ * Nodes returns different values when connecting to the Hyperchains.
+ */
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
 

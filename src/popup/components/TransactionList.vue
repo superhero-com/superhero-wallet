@@ -62,13 +62,13 @@ import {
   useAccounts,
   usePendingMultisigTransaction,
   useUi,
+  useSdk,
 } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
 import {
-  IDexContracts,
   ITokenList,
   ITransaction,
   ICommonTransaction,
@@ -109,6 +109,8 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
+    const { dexContracts } = useSdk({ store: root.$store });
+
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
 
     const loading = ref(false);
@@ -119,7 +121,6 @@ export default defineComponent({
     const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
     const getTxDirection = useGetter('getTxDirection');
-    const getDexContracts = useGetter<IDexContracts>('getDexContracts');
     const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
     const fetchTransactions = useDispatch('fetchTransactions');
 
@@ -174,7 +175,7 @@ export default defineComponent({
           ),
         );
 
-        const isDex = isTxDex(innerTx, getDexContracts.value);
+        const isDex = isTxDex(innerTx, dexContracts.value);
 
         switch (displayMode.value.key) {
           case FILTER_MODE.all:

@@ -6,38 +6,26 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
-  watchUntilTruthy,
   fetchRespondChallenge,
 } from '../popup/utils';
-import { i18n } from './plugins/languages';
-import { useMiddleware, useModals } from '../composables';
+import { useMiddleware, useSdk } from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
     commit('switchNetwork', payload);
     commit('initTransactions');
   },
-
-  async selectNetwork({ dispatch, getters }, network) {
-    await dispatch('switchNetwork', network);
-    if (!getters.tippingSupported) {
-      const { openDefaultModal } = useModals();
-      await openDefaultModal({
-        title: i18n.t('modals.tip-mainnet-warning.title'),
-        msg: i18n.t('modals.tip-mainnet-warning.msg'),
-      });
-    }
-  },
-  addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
-    commit('addPendingTransaction', {
-      network: activeNetwork.networkId,
+  addPendingTransaction(context, transaction) {
+    const { nodeNetworkId } = useSdk({ store: context });
+    context.commit('addPendingTransaction', {
+      network: nodeNetworkId.value,
       transaction: { ...transaction, microTime: Date.now(), pending: true },
     });
   },
-  async fetchPendingTransactions(
-    { state: { transactions }, getters }, address,
-  ) {
-    const sdk = await watchUntilTruthy(() => getters['sdkPlugin/sdk']);
+  async fetchPendingTransactions(context, address) {
+    const { state: { transactions } } = context;
+    const { nodeNetworkId, getSdk } = useSdk({ store: context });
+    const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => r.transactions,
@@ -49,7 +37,7 @@ export default {
         },
       )
     )
-      .filter((transaction) => !transactions.pending[getters.activeNetwork.networkId]
+      .filter((transaction) => !transactions.pending[nodeNetworkId.value]
         ?.find((tx) => tx?.hash === transaction?.hash))
       .map((transaction) => ({ ...transaction, pending: true }));
   },
@@ -96,6 +84,7 @@ export default {
       return null;
     }
 
+    const { nodeNetworkId } = useSdk({ store: context });
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
 
     let txs = await Promise.all([
@@ -150,7 +139,7 @@ export default {
     if (state.transactions.pending[network] && !multipleAccounts) {
       state.transactions.pending[network].forEach(({ hash }) => {
         if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
-          commit('removePendingTransactionByHash', { hash, network });
+          commit('removePendingTransactionByHash', { hash, network: nodeNetworkId.value });
         }
       });
     }

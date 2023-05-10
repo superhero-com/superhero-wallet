@@ -1,12 +1,12 @@
-import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
-import { isEqual } from 'lodash-es';
+import { RpcWallet, Crypto } from '@aeternity/aepp-sdk';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
 import { MODAL_CONFIRM_CONNECT, MODAL_MESSAGE_SIGN, watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
-import { useAccounts, useModals } from '../../composables';
+import { useAccounts, useModals, useSdk } from '../../composables';
 
 export default (store) => {
+  const { getSdk, createNewNodeInstance } = useSdk({ store });
   const { openModal } = useModals();
   let sdk;
 
@@ -139,7 +139,9 @@ export default (store) => {
             }),
           },
         })({
-          nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
+          nodes: [
+            { name: activeNetwork.name, instance: await createNewNodeInstance(activeNetwork.url) },
+          ],
           name: 'Superhero',
           onConnection: cbAccept,
           onDisconnect(_, client) {
@@ -177,20 +179,10 @@ export default (store) => {
   });
 
   store.watch(
-    (state, getters) => getters.activeNetwork,
-    async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-      sdk.pool.delete(network.name);
-      sdk.addNode(network.name, await Node({ url: network.url }), true);
-    },
-  );
-
-  store.watch(
     ({ accounts: { activeIdx } }, { accounts }) => accounts?.length + activeIdx,
     async () => {
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-      Object.values(sdk.rpcClients)
+      const sdkLocal = await getSdk();
+      Object.values(sdkLocal.rpcClients)
         .filter((client) => client.isConnected() && client.isSubscribed())
         .forEach((client) => client.setAccounts({
           current: { [activeAccount.value.address]: {} },

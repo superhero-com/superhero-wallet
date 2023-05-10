@@ -1,7 +1,6 @@
 import { computed, ref } from '@vue/composition-api';
 import type {
   IAccountLabeled,
-  IDexContracts,
   ITokenList,
   TxFunctionRaw,
   ITx,
@@ -23,6 +22,7 @@ import {
   getTxOwnerAddress,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
+import { useSdk } from './sdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
@@ -34,6 +34,7 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
+  const { dexContracts } = useSdk({ store });
   const { accounts, activeAccount } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
@@ -54,7 +55,6 @@ export function useTransactionTx({
   );
 
   const getTxDirection = computed(() => store.getters.getTxDirection);
-  const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
   const getExplorerPath = computed(() => store.getters.getExplorerPath);
   const getPreferred = computed(() => store.getters['names/getPreferred']);
 
@@ -87,7 +87,7 @@ export function useTransactionTx({
     },
   );
 
-  const isDex = computed((): boolean => isTxDex(innerTx.value!, getDexContracts.value));
+  const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
 
   const txOwnerAddress = computed(() => getTxOwnerAddress(innerTx.value));
 
