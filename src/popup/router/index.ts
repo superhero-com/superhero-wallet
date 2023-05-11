@@ -4,6 +4,7 @@ import { Dictionary } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
+  ROUTE_NOT_FOUND,
 } from './routeNames';
 import { routes } from './routes';
 import getPopupProps from '../utils/getPopupProps';
@@ -63,7 +64,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (!store.getters['sdkPlugin/sdk'] && !RUNNING_IN_POPUP) initSdk();
 
-  if (RUNNING_IN_POPUP) {
+  if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
       [POPUP_TYPE_CONNECT]: 'connect',
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
@@ -72,8 +73,18 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
+    let params: Dictionary = {};
+
+    if (!Object.keys(to.params).length) {
+      params = await getPopupProps();
+      if (!params?.app) {
+        next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
+        return;
+      }
+    }
+
     if (name !== to.name) {
-      next({ name, params: await getPopupProps() as Dictionary });
+      next({ name, params });
       return;
     }
   }
