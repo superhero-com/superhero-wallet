@@ -25,4 +25,7 @@ module.exports = {
     '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.mjs$': 'babel-jest',
   },
+	globals: {
+		Uint8Array: Uint8Array,
+	},
 };
