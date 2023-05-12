@@ -36,7 +36,8 @@
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
-    "you": "You"
+    "you": "You",
+    "max": "MAX"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -1144,7 +1145,7 @@
     "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
-    "nameRegisteredAddress": "This name isn't registered or pointed to address",
+    "nameRegisteredAddress": "Invalid address or .chain name",
     "nameUnregistered": "This name has already been registered.",
     "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
