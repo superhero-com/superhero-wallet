@@ -148,7 +148,7 @@ export const NETWORK_TESTNET: INetwork = {
   name: 'Testnet',
 };
 
-export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
+export const NETWORK_DEFAULT = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 

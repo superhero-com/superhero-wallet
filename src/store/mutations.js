@@ -2,7 +2,7 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  defaultNetwork,
+  NETWORK_DEFAULT,
   TX_DIRECTION,
 } from '../popup/utils';
 
@@ -43,7 +43,7 @@ export default {
   },
   setUserNetwork(state, { index, ...network }) {
     if (index !== undefined) Vue.set(state.userNetworks, index, network);
-    else state.userNetworks.push({ ...defaultNetwork, ...network });
+    else state.userNetworks.push({ ...NETWORK_DEFAULT, ...network });
   },
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
