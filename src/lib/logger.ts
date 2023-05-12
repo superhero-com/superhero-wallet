@@ -29,13 +29,8 @@ export default class Logger {
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
-        console.error(message);
-        console.error(info);
-        Logger.write({
-          message,
-          stack: info,
-          type: 'vue-warn',
-        });
+        console.warn(message);
+        console.warn(info);
       };
     }
 
