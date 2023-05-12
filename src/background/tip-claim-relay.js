@@ -1,7 +1,7 @@
 import { uniq } from 'lodash-es';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import { postJson } from '../popup/utils';
-import { defaultNetwork } from '../popup/utils/constants';
+import { NETWORK_DEFAULT } from '../popup/utils/constants';
 import { contractCallStatic, getAddressFromChainName } from './utils';
 import Logger from '../lib/logger';
 import store from './store';
@@ -14,7 +14,7 @@ export default {
   async abortIfZeroClaim(url) {
     const tx = {
       method: 'unclaimed_for_url',
-      address: defaultNetwork.tipContractV1,
+      address: NETWORK_DEFAULT.tipContractV1,
       params: [url],
       source: TIPPING_V1_INTERFACE,
     };
@@ -43,7 +43,7 @@ export default {
         if (this.checkAddressMatch(account.address, uniq(addresses))) {
           await this.abortIfZeroClaim(url);
           // This check is only used on mainnet
-          const { backendUrl } = defaultNetwork;
+          const { backendUrl } = NETWORK_DEFAULT;
           await postJson(`${backendUrl}/claim/submit`, {
             body: { url, address: account.address },
           });
