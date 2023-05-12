@@ -3,31 +3,42 @@
     <swiper
       ref="customSwiper"
       class="swiper"
-      :options="swiperOptions"
+      :slides-per-view="1.1"
+      :space-between="8"
+      :centered-slides="true"
+      virtual
       @slideChange="onSlideChange"
     >
-      <AccountSwiperSlide
+      <swiper-slide
         v-for="(address, index) in addressList"
         :key="address"
-        :idx="index"
-        :selected="index === activeIdx"
-        :to="to"
-        :address="address"
-        @slide="(newIndex) => setCurrentSlide(newIndex)"
+        :virtual-index="index"
+        class="account-swiper-slide"
       >
-        <slot
-          name="slide"
-          :index="index"
-        />
-      </AccountSwiperSlide>
-      <AccountSwiperSlide
-        hide-next
-        @slide="() => setCurrentSlide(addressList.length - 1)"
-      >
-        <AccountCardAdd :is-multisig="isMultisig" />
-      </AccountSwiperSlide>
+        <AccountSwiperSlide
+          :idx="index"
+          :selected="index === activeIdx"
+          :to="to"
+          :address="address"
+          :custom-ref="swiper"
+          @slide="(newIndex) => setCurrentSlide(newIndex)"
+        >
+          <slot
+            name="slide"
+            :index="index"
+          />
+        </AccountSwiperSlide>
+      </swiper-slide>
+      <swiper-slide class="account-swiper-slide">
+        <AccountSwiperSlide
+          hide-next
+          :custom-ref="swiper"
+          @slide="() => setCurrentSlide(addressList.length - 1)"
+        >
+          <AccountCardAdd :is-multisig="isMultisig" />
+        </AccountSwiperSlide>
+      </swiper-slide>
     </swiper>
-
     <div class="account-swiper-bottom">
       <BulletSwitcher
         v-if="addressList"
@@ -51,9 +62,15 @@ import {
   ref,
   watch,
 } from 'vue';
-// import { Swiper } from 'vue-awesome-swiper';
 import { RouteLocation } from 'vue-router';
 import { useStore } from 'vuex';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import SwiperCore, { Virtual } from 'swiper';
+
+import 'swiper/swiper.scss';
+import 'swiper/components/navigation/navigation.scss';
+import 'swiper/components/pagination/pagination.scss';
+import 'swiper/components/scrollbar/scrollbar.scss';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -62,12 +79,14 @@ import ToggleMultisigButton from './ToggleMultisigButton.vue';
 
 import { getAddressColor } from '../utils/avatar';
 
+SwiperCore.use([Virtual]);
 export default defineComponent({
   components: {
     ToggleMultisigButton,
     BulletSwitcher,
     AccountSwiperSlide,
-    // Swiper,
+    Swiper,
+    SwiperSlide,
     AccountCardAdd,
   },
   props: {
@@ -79,16 +98,10 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
 
-    const swiperOptions = {
-      slidesPerView: 1.1,
-      centeredSlides: true,
-      spaceBetween: 8,
-    };
-
     const customSwiper = ref();
     const currentIdx = ref(0);
 
-    const swiper = computed(() => customSwiper.value?.$swiper);
+    const swiper = computed(() => customSwiper.value?.$el.swiper);
 
     function setCurrentSlide(idx: number, slideParams?: number) {
       if (currentIdx.value !== idx) {
@@ -98,12 +111,12 @@ export default defineComponent({
 
     function onSlideChange() {
       store.commit('initTransactions');
-      const { realIndex } = swiper.value;
-      if (realIndex < props.addressList.length && realIndex >= 0) {
-        emit('selectAccount', realIndex);
+      const { activeIndex } = swiper.value;
+      if (activeIndex < props.addressList.length && activeIndex >= 0) {
+        emit('selectAccount', activeIndex);
       }
-      if (currentIdx.value !== realIndex) {
-        currentIdx.value = realIndex;
+      if (currentIdx.value !== activeIndex) {
+        currentIdx.value = activeIndex;
       }
     }
     function getAccountColor(idx: number) {
@@ -125,7 +138,6 @@ export default defineComponent({
     return {
       IS_CORDOVA: process.env.IS_CORDOVA,
       currentIdx,
-      swiperOptions,
       customSwiper,
       swiper,
       getAccountColor,
@@ -138,8 +150,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/mixins';
-
-@import '../../../node_modules/swiper/css/swiper.css';
 
 .account-swiper {
   .account-swiper-bottom {

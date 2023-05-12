@@ -29,11 +29,12 @@
       </div>
     </div>
 
-    <PlusCircleIcon
-      class="add-icon"
-      :class="{ active: currentIdx === optionsSize }"
-      @click="$emit('change', optionsSize)"
-    />
+    <a @click="$emit('change', optionsSize)">
+      <PlusCircleIcon
+        class="add-icon"
+        :class="{ active: currentIdx === optionsSize }"
+      />
+    </a>
   </div>
 </template>
 
