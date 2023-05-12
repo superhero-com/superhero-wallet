@@ -59,7 +59,7 @@
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "qr-code-styling": "github:aeternity/qr-code-styling",
-    "swiper": "^5.4.5",
+    "swiper": "^6.8.4",
     "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
     "ts-jest": "^27.1.5",
     "uuid": "^8.3.2",
