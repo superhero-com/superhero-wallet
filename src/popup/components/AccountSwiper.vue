@@ -9,7 +9,7 @@
       virtual
       @slideChange="onSlideChange"
     >
-      <swiper-slide
+      <SwiperSlide
         v-for="(address, index) in addressList"
         :key="address"
         :virtual-index="index"
@@ -20,7 +20,6 @@
           :selected="index === activeIdx"
           :to="to"
           :address="address"
-          :custom-ref="swiper"
           @slide="(newIndex) => setCurrentSlide(newIndex)"
         >
           <slot
@@ -28,16 +27,15 @@
             :index="index"
           />
         </AccountSwiperSlide>
-      </swiper-slide>
-      <swiper-slide class="account-swiper-slide">
+      </SwiperSlide>
+      <SwiperSlide class="account-swiper-slide">
         <AccountSwiperSlide
           hide-next
-          :custom-ref="swiper"
           @slide="() => setCurrentSlide(addressList.length - 1)"
         >
           <AccountCardAdd :is-multisig="isMultisig" />
         </AccountSwiperSlide>
-      </swiper-slide>
+      </SwiperSlide>
     </swiper>
     <div class="account-swiper-bottom">
       <BulletSwitcher
@@ -80,6 +78,7 @@ import ToggleMultisigButton from './ToggleMultisigButton.vue';
 import { getAddressColor } from '../utils/avatar';
 
 SwiperCore.use([Virtual]);
+
 export default defineComponent({
   components: {
     ToggleMultisigButton,
