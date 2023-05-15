@@ -11,16 +11,9 @@ import { useAccounts } from '../composables';
 Logger.init({ background: true });
 initDeeplinkHandler();
 
-const openTipPopup = (pageUrl) => browser.windows.create({
-  url: browser.extension.getURL(`./index.html#/tips?url=${encodeURIComponent(pageUrl)}`),
-  type: 'popup',
-  height: 600,
-  width: 375,
-});
-
 browser.runtime.onMessage.addListener(async (msg, sender) => {
   const {
-    method, from, type, data, url: tipUrl,
+    method, from, type, data,
   } = msg;
 
   if (method === 'reload') {
@@ -54,7 +47,6 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
       } = await getState();
       if (sender.url === url && network === 'Mainnet') TipClaimRelay.checkUrlHasBalance(url, data);
     }
-    if (type === 'openTipPopup') openTipPopup(tipUrl || url);
   }
 
   return true;
