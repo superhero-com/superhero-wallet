@@ -32,7 +32,11 @@
 
 <script lang="ts">
 import {
-  defineComponent, ref, nextTick, watch,
+  defineComponent,
+  ref,
+  nextTick,
+  watch,
+  onMounted,
 } from '@vue/composition-api';
 import InputField from '../InputField.vue';
 
@@ -69,15 +73,17 @@ export default defineComponent({
       }
     }
 
-    watch(() => props.value, () => {
-      if (props.autoHeight && textarea.value) {
-        height.value = 'auto';
-        nextTick(() => {
-          const { scrollHeight, clientHeight } = textarea.value!;
-          const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
-          height.value = `${newHeight}px`;
-        });
-      }
+    onMounted(() => {
+      watch(() => props.value, () => {
+        if (props.autoHeight && textarea.value) {
+          height.value = 'auto';
+          nextTick(() => {
+            const { scrollHeight, clientHeight } = textarea.value!;
+            const newHeight = clientHeight > scrollHeight ? clientHeight : scrollHeight;
+            height.value = `${newHeight}px`;
+          });
+        }
+      }, { immediate: true });
     });
 
     return {
