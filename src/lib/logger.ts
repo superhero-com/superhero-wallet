@@ -21,21 +21,14 @@ export default class Logger {
 
     if (!background) {
       Vue.config.errorHandler = (error, vm, info) => {
-        console.error(info);
-        console.error(error);
+        console.error(error, info);
         if (error && error instanceof RejectedByUserError) {
           Logger.write({ message: error.toString(), info, type: 'vue-error' });
         }
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
-        console.error(message);
-        console.error(info);
-        Logger.write({
-          message,
-          stack: info,
-          type: 'vue-warn',
-        });
+        console.warn(message, info);
       };
     }
 
