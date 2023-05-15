@@ -33,67 +33,6 @@ const runContentScript = () => {
     false,
   );
 
-  const getAddresses = () => {
-    const address = document.all[0].outerHTML.match(/(ak_[A-Za-z0-9]{48,50})/g);
-    const chainName = document.all[0].outerHTML.match(/\b[A-Za-z0-9]*\.chain\b/g);
-
-    return {
-      address,
-      chainName,
-    };
-  };
-
-  const sendDomData = async ({ interval = 3000, attempts = 3 } = {}) => {
-    const pause = async (duration) => {
-      await new Promise((resolve) => setTimeout(resolve, duration));
-    };
-
-    async function send(attempt) {
-      const { address, chainName } = getAddresses();
-      if (address || chainName) {
-        setTimeout(() => {
-          browser.runtime.sendMessage({
-            from: 'content',
-            type: 'readDom',
-            data: {
-              address,
-              chainName,
-            },
-          });
-        }, 1000);
-      }
-      if (!address && !chainName && attempt > 0) {
-        await pause(interval);
-        send(attempt - 1);
-      }
-    }
-
-    send(attempts);
-  };
-
-  window.addEventListener('load', () => {
-    sendDomData();
-    document.addEventListener(
-      'visibilitychange',
-      () => {
-        if (!document.hidden) {
-          sendDomData({ attempts: 1 });
-        }
-      },
-      false,
-    );
-  });
-
-  // Handle message from background and redirect to page
-  browser.runtime.onMessage.addListener(({ data }) => {
-    const {
-      method, uuid,
-    } = data;
-    if (method === 'getAddresses') {
-      browser.runtime.sendMessage({ uuid, data: { ...getAddresses() } });
-    }
-  });
-
   /**
    * Aex-2 Aepp communication
    */
