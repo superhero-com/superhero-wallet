@@ -132,7 +132,9 @@ export default (store) => {
 
   Validator.extend('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
   Validator.extend('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
-  Validator.extend('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
+  Validator.extend('name_registered_address', (value) => (checkAensName(value)
+    ? checkNameRegisteredAddress(value)
+    : Crypto.isAddressValid(value)));
   Validator.extend('token_to_an_address', {
     validate(value, args) {
       return !checkAensName(value) || (checkAensName(value) && !args.isToken);
