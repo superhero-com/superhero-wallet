@@ -41,7 +41,10 @@ const { isLoggedIn } = useAccounts({ store });
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
-    (to.name === ROUTE_INDEX && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
+    (
+      !RUNNING_IN_POPUP
+      && to.name === ROUTE_INDEX
+      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
     || undefined,
   );
   unbind();
@@ -58,7 +61,7 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (!store.getters['sdkPlugin/sdk']) initSdk();
+  if (!store.getters['sdkPlugin/sdk'] && !RUNNING_IN_POPUP) initSdk();
 
   if (RUNNING_IN_POPUP) {
     const name = {
@@ -79,6 +82,7 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.afterEach(async (to) => {
+  if (RUNNING_IN_POPUP) return;
   if (to.meta?.notPersist) {
     await browser?.storage.local.remove(lastRouteKey);
   } else {
