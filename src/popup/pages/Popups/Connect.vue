@@ -48,7 +48,6 @@
       <BtnMain
         data-cy="accept"
         :text="$t('pages.connectConfirm.confirmButton')"
-        :disabled="!isConnected"
         @click="confirm()"
       />
     </template>
@@ -99,7 +98,6 @@ export default defineComponent({
   setup(props, { root }) {
     const { activeAccount } = useAccounts({ store: root.$store });
 
-    const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
 
     const permission = useState<IPermission>('permissions', props.app.host);
@@ -127,7 +125,6 @@ export default defineComponent({
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       appName,
-      isConnected,
       accountExtended,
       confirm,
       cancel,

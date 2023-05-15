@@ -38,7 +38,6 @@
       <BtnMain
         data-cy="accept"
         :text="$t('common.confirm')"
-        :disabled="!isConnected"
         @click="resolve()"
       />
     </template>
@@ -76,7 +75,6 @@ export default defineComponent({
   setup(props, { root }) {
     const { activeAccount } = useAccounts({ store: root.$store });
 
-    const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
     const accountExtended = computed((): IAccountLabeled => ({
       ...activeAccount.value,
@@ -89,7 +87,6 @@ export default defineComponent({
     }
 
     return {
-      isConnected,
       accountExtended,
       cancel,
     };

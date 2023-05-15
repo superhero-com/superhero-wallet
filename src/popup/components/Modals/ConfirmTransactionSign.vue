@@ -121,6 +121,8 @@ import {
   convertToken,
   isTransactionAex9,
   getAeFee,
+  fetchJson,
+  postJson,
 } from '../../utils';
 import type {
   ITokenResolved,
@@ -130,7 +132,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk, useTransactionTx } from '../../../composables';
+import { useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -175,8 +177,6 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-
     const {
       direction,
       isAllowance,
@@ -194,6 +194,7 @@ export default defineComponent({
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
+    const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
@@ -312,12 +313,13 @@ export default defineComponent({
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
-          const sdk = await getSdk();
-          const { bytecode } = await sdk.getContractByteCode(props.transaction.contractId);
-          const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
-            bytecode,
-            calldata: props.transaction.callData,
-          });
+          const { bytecode } = await fetchJson(
+            `${activeNetwork.value.url}/v3/contracts/${props.transaction.contractId}/code`,
+          );
+          const txParams: ITx = await postJson(
+            `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+            { body: { bytecode, calldata: props.transaction.callData } },
+          );
           txFunction.value = txParams.function as TxFunctionRaw;
 
           setTransactionTx({ ...txParams, ...props.transaction });
