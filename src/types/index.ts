@@ -31,7 +31,7 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = {[K in keyof T]: T[K]};
+type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
  * Allowed options that can be passed to our fetch utility functions
@@ -409,7 +409,7 @@ export interface IAccountOverView extends Partial<IAccount> {
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
-  label: TranslateResult;
+  label?: TranslateResult;
 }
 
 export interface ITransactionOverview {
@@ -645,8 +645,8 @@ export interface IKeyPair {
 }
 
 export interface ILabel {
-  text: string | LocaleMessages | TranslateResult,
-  customPending?: string | LocaleMessages | TranslateResult
+  text: string | TranslateResult;
+  customPending?: string | TranslateResult;
   hasComma?: boolean;
 }
 

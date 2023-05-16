@@ -115,8 +115,8 @@ export function useTransactionTx({
   const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
     ? TX_DIRECTION.received
     : getTxDirection.value(
-        outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        externalAddress
+      outerTx.value?.payerId ? outerTx.value : innerTx.value,
+      externalAddress
         || (
           ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
