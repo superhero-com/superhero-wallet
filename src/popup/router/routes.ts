@@ -693,6 +693,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: ROUTE_NOT_FOUND,
     path: '*',
     component: NotFound,
+    props: true,
     meta: {
       ifNotAuth: true,
       showHeaderNavigation: true,
