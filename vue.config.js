@@ -1,5 +1,6 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
@@ -103,6 +104,14 @@ module.exports = {
 
       return [definitions];
     }).end();
+
+    config
+      .plugin('node-polyfill')
+      .use(NodePolyfillPlugin)
+      .tap(() => [{
+        includeAliases: ['stream', 'Buffer'],
+      }]).end();
+
     if (PLATFORM === 'extension') {
       config.plugin('copy')
         .use(CopyWebpackPlugin, [{
@@ -130,6 +139,7 @@ module.exports = {
       config.module.rules.delete('provide-webextension-polyfill');
       config.plugins.delete('extension-reloader');
     }
+
     config.resolve.alias
       .delete('@')
       .set('core-js-pure', 'core-js')
@@ -143,7 +153,9 @@ module.exports = {
       .end();
 
     config.module.rule('svg')
-      .uses.clear().end()
+      .set('type', 'javascript/auto')
+      .uses.clear()
+      .end()
       .oneOf('vue-component')
       .resourceQuery(/vue-component/)
       .use('vue-loader')
