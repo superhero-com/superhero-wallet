@@ -428,7 +428,7 @@ export interface IAccountOverView extends Partial<IAccount> {
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
-  label: TranslateResult;
+  label?: TranslateResult;
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
@@ -683,8 +683,8 @@ export interface IKeyPair {
 }
 
 export interface ILabel {
-  text: string | LocaleMessages | TranslateResult,
-  customPending?: string | LocaleMessages | TranslateResult
+  text: string | TranslateResult;
+  customPending?: string | TranslateResult;
   hasComma?: boolean;
 }
 

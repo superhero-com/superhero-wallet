@@ -3,8 +3,8 @@ import {
   AeSdkWallet,
   sendTransaction,
   spend,
+  Encoded,
 } from '@aeternity/aepp-sdk-13';
-import { Encoded } from '@aeternity/aepp-sdk-13/src/utils/encoder';
 import { Store } from 'vuex';
 import { useAccounts } from '../composables/accounts';
 import { AccountSuperhero } from './accounts/superhero';
