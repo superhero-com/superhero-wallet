@@ -7,7 +7,7 @@ module.exports = {
     browser: true,
   },
   extends: [
-    'plugin:vue-i18n/recommended',
+    'plugin:@intlify/vue-i18n/recommended',
     'plugin:vue/recommended',
     // '@vue/airbnb',
     // '@vue/typescript',
@@ -18,6 +18,7 @@ module.exports = {
   settings: {
     'vue-i18n': {
       localeDir: './src/popup/locales/*.json',
+      messageSyntaxVersion: '^9.2.2',
     },
   },
   // add your custom rules here
@@ -36,10 +37,10 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
     'import/prefer-default-export': 'off',
-    'vue-i18n/no-dynamic-keys': 'warn',
-    'vue-i18n/no-unused-keys': 'error',
-    'vue-i18n/no-missing-keys': 'off',
-    'vue-i18n/no-raw-text': 'off',
+    '@intlify/vue-i18n/no-dynamic-keys': 'warn',
+    '@intlify/vue-i18n/no-unused-keys': 'error',
+    '@intlify/vue-i18n/no-missing-keys': 'off',
+    '@intlify/vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
