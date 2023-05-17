@@ -16,6 +16,8 @@ const middleware = ref<IMiddleware | null>(null);
 const initializing = ref(false);
 const isMiddlewareReady = computed(() => !!middleware.value);
 
+let middlewareCurrentNetwork: INetwork;
+
 export function useMiddleware({ store }: IDefaultComposableOptions) {
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -36,10 +38,13 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
    * Force to initialize new middleware instance.
    */
   async function initMiddleware() {
+    initializing.value = true;
     const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
 
     const swagger = await fetch(`${middlewareUrl}/swagger/swagger_v2.yaml`).then((response) => response.text());
     const spec = load(swagger);
+
+    middlewareCurrentNetwork = activeNetwork.value;
 
     middleware.value = mapObject(
       (await genSwaggerClient(middlewareUrl, { spec })).api,
@@ -50,12 +55,16 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
   }
 
   /**
-   * Get the current middleware instance. Create new one if it's not instantiated.
+   * Get the current middleware instance. Create new one if it's not instantiated
+   * or the currently used app network settings has different value for the `middlewareUrl`.
    */
   async function getMiddleware(): Promise<IMiddleware> {
     if (initializing.value) {
       await watchUntilTruthy(middleware);
-    } else if (!middleware.value) {
+    } else if (
+      !middleware.value
+      || middlewareCurrentNetwork?.middlewareUrl !== activeNetwork.value.middlewareUrl
+    ) {
       await initMiddleware();
     }
     return middleware.value!;
@@ -66,7 +75,6 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
   }
 
   return {
-    initMiddleware,
     getMiddleware,
     getMiddlewareRef,
     fetchFromMiddleware,
