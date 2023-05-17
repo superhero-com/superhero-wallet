@@ -10,6 +10,14 @@ import {
   CURRENCIES_URL,
 } from '../../../src/popup/utils';
 
+Cypress.Commands.add('getByTestId', (testId) => {
+  cy.get(`[data-cy=${testId}]`);
+});
+
+Cypress.Commands.add('getInputByTestId', (testId) => {
+  cy.getByTestId(testId).find('input');
+});
+
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
 });
@@ -204,13 +212,13 @@ Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler)
 Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
   cy.get('[data-cy=to-add]')
     .click()
-    .get('[data-cy=connect]')
+    .getByTestId('connect')
     .should('be.visible')
     .buttonShouldBeDisabled('[data-cy=connect]')
     .enterNetworkDetails(network, url, middleware, compiler)
-    .get('[data-cy=connect]')
+    .getByTestId('connect')
     .click()
-    .get('[data-cy=networks]')
+    .getByTestId('networks')
     .should('be.visible')
     .get('[data-cy=network-name]')
     .should('contain', network)

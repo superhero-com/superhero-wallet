@@ -55,8 +55,8 @@
       v-validate="{
         required: true,
         not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
-        name_registered_address_or_url: isUrlTipingEnabled,
-        name_registered_address: !isUrlTipingEnabled,
+        name_registered_address_or_url: isUrlTippingEnabled,
+        name_registered_address: !isUrlTippingEnabled,
         token_to_an_address: { isToken: !isAe },
       }"
       name="address"
@@ -64,7 +64,7 @@
       show-help
       show-message-help
       :label="$t('modals.send.recipientLabel')"
-      :placeholder="isMultisig || !isUrlTipingEnabled
+      :placeholder="isMultisig || !isUrlTippingEnabled
         ? $t('modals.send.recipientPlaceholder')
         : $t('modals.send.recipientPlaceholderUrl')"
       :message="addressMessage"
@@ -184,6 +184,7 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type {
+  Dictionary,
   IFormSelectOption,
   IInputMessage,
   IToken,
@@ -261,7 +262,7 @@ export default defineComponent({
     const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
-    const isUrlTipingEnabled = ref<boolean>(false);
+    const isUrlTippingEnabled = ref<boolean>(false);
 
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
@@ -272,6 +273,7 @@ export default defineComponent({
       activeAccount,
       prepareAccountSelectOptions,
     } = useAccounts({ store: root.$store });
+
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -294,7 +296,7 @@ export default defineComponent({
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
-      && isUrlTipingEnabled.value
+      && isUrlTippingEnabled.value
       && validateTipUrl(formModel.value.address)
       && !checkAensName(formModel.value.address)
     ));
@@ -319,7 +321,7 @@ export default defineComponent({
     const isAe = computed(
       () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
     );
-    const isMaxValue = computed<boolean>(() => {
+    const isMaxValue = computed((): boolean => {
       const amountInt = +(formModel.value?.amount || 0);
       return amountInt > 0 && amountInt === +max.value;
     });
@@ -363,12 +365,23 @@ export default defineComponent({
       return nextTick();
     }
 
-    async function queryHandler(query: any) {
-      formModel.value.selectedAsset = availableTokens.value[query.token]
-        || aeternityToken.value;
-      if (query.account) formModel.value.address = query.account;
-      if (query.amount) formModel.value.amount = query.amount;
-      if (query.payload) formModel.value.payload = query.payload;
+    async function updateFormModelValues({
+      account,
+      amount,
+      payload,
+      token,
+    }: Dictionary) {
+      formModel.value.selectedAsset = availableTokens.value[token] || aeternityToken.value;
+
+      if (account) {
+        formModel.value.address = account;
+      }
+      if (amount) {
+        formModel.value.amount = amount;
+      }
+      if (payload) {
+        formModel.value.payload = payload;
+      }
     }
 
     function setMaxValue() {
@@ -442,7 +455,7 @@ export default defineComponent({
         await (root as any).validate();
       } else {
         if (!scanResult) return;
-        queryHandler([
+        updateFormModelValues([
           ...new URL(
             scanResult.startsWith('ak_')
               ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
@@ -488,9 +501,9 @@ export default defineComponent({
 
       const { query } = root.$route;
       if ([query['x-success'], query['x-cancel']].every((value) => value === AGGREGATOR_URL)) {
-        isUrlTipingEnabled.value = true;
+        isUrlTippingEnabled.value = true;
       }
-      queryHandler({
+      updateFormModelValues({
         ...query,
         token: query.token || formModel.value?.selectedAsset?.contractId,
       });
@@ -519,7 +532,7 @@ export default defineComponent({
       multisigVaultAddress,
       multisigVaultOwnedByManyAccounts,
       activeMultisigAccount,
-      isUrlTipingEnabled,
+      isUrlTippingEnabled,
       openScanQrModal,
       selectAccount,
       setMaxValue,

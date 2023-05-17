@@ -184,6 +184,12 @@ hr {
   position: relative;
 }
 
+.color {
+  &-warning {
+    color: $color-warning;
+  }
+}
+
 .styled-scrollbar {
   scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
   scrollbar-width: thin; // Firefox

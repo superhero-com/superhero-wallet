@@ -29,15 +29,8 @@
 </template>
 
 <script lang="ts">
-import { isEmpty } from 'lodash-es';
-import {
-  computed,
-  defineComponent,
-  watch,
-} from '@vue/composition-api';
-import { MODAL_TRANSFER_SEND } from '../utils';
+import { defineComponent } from '@vue/composition-api';
 import { useState } from '../../composables/vuex';
-import { useModals } from '../../composables';
 
 import DashboardCard from './DashboardCard.vue';
 
@@ -48,16 +41,8 @@ export default defineComponent({
   components: {
     DashboardCard,
   },
-  setup(props, { root }) {
-    const { openModal } = useModals();
+  setup() {
     const backedUpSeed = useState('backedUpSeed');
-    const query = computed(() => root.$route.query);
-
-    watch(query, (value) => {
-      if (!isEmpty(value)) {
-        openModal(MODAL_TRANSFER_SEND);
-      }
-    }, { immediate: true });
 
     return {
       backedUpSeed,
