@@ -3,11 +3,11 @@ import {
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
   NODE_STATUS_CONNECTED,
-  connectFrames,
 } from '../popup/utils';
 import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
+import { FramesConnection } from './FramesConnection';
 import { useMiddleware, useSdk } from '../composables';
 
 let initSdkRunning = false;
@@ -60,7 +60,10 @@ export default async function initSdk() {
             getMiddleware(),
           ]);
           sdk = await getSdk();
-          connectFrames(sdk);
+
+          if (IN_FRAME && !FramesConnection.initialized) {
+            FramesConnection.init(sdk);
+          }
         }
 
         store.commit('setNodeStatus', NODE_STATUS_CONNECTED);

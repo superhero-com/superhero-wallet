@@ -13,15 +13,15 @@ import type {
   IRespondChallenge,
 } from '../types';
 import { App } from '../store/modules/permissions';
-import { IS_EXTENSION_BACKGROUND } from '../lib/environment';
+import { IN_FRAME, IS_EXTENSION_BACKGROUND } from '../lib/environment';
 import {
   MODAL_CONFIRM_CONNECT,
   POPUP_TYPE_CONNECT,
-  connectFrames,
   watchUntilTruthy,
 } from '../popup/utils';
 import { showPopup } from '../background/popupHandler';
 import { useAccounts } from './accounts';
+import { FramesConnection } from '../lib/FramesConnection';
 
 let sdk: ShSdkWallet;
 let sdkBlocked = false;
@@ -119,7 +119,9 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
       },
     });
 
-    connectFrames(sdk);
+    if (IN_FRAME) {
+      FramesConnection.init(sdk);
+    }
 
     sdkBlocked = false;
   }

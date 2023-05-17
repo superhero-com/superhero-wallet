@@ -5,7 +5,7 @@ import VueCompositionApi, {
 } from '@vue/composition-api';
 import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
-import { defer, times } from 'lodash-es';
+import { defer } from 'lodash-es';
 import {
   SCHEMA,
   AmountFormatter,
@@ -13,9 +13,7 @@ import {
   TxBuilder,
   TxBuilderHelper,
   InvalidTxError,
-  BrowserWindowMessageConnection,
 } from '@aeternity/aepp-sdk';
-import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   ADDRESS_TYPES,
@@ -63,7 +61,7 @@ import type {
   ICommonTransaction,
   Truthy,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
+import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
 
 Vue.use(VueCompositionApi);
 
@@ -725,56 +723,6 @@ export function getMultisigTransaction(
   return (transaction as any).isMultisigTransaction
     ? transaction as IActiveMultisigTransaction
     : undefined;
-}
-
-export function connectFrames(sdk: ISdk | AeSdkWallet) {
-  if (!IN_FRAME) {
-    return;
-  }
-
-  try {
-    const getArrayOfAvailableFrames = (): Window[] => [
-      window.parent,
-      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
-    ];
-
-    const connectedFrames = new Set();
-
-    executeAndSetInterval(
-      () => getArrayOfAvailableFrames()
-        .filter((frame) => frame !== window)
-        .forEach((target) => {
-          if (connectedFrames.has(target)) {
-            return;
-          }
-          connectedFrames.add(target);
-          const connection = BrowserWindowMessageConnection({ target });
-          const originalConnect = connection.connect;
-          let intervalId: NodeJS.Timer;
-
-          connection.connect = function connect(onMessage: any) {
-            originalConnect.call(this, (data: any, origin: any, source: any) => {
-              if (source !== target) {
-                return;
-              }
-              clearInterval(intervalId);
-              onMessage(data, origin, source);
-            });
-          };
-          sdk.addRpcClient(connection);
-          intervalId = executeAndSetInterval(() => {
-            if (!getArrayOfAvailableFrames().includes(target)) {
-              clearInterval(intervalId);
-              return;
-            }
-            sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-          }, 3000);
-        }),
-      3000,
-    );
-  } catch (error: any) {
-    handleUnknownError(error);
-  }
 }
 
 /**
