@@ -3,7 +3,16 @@
     class="network-form"
     data-cy="network-form"
   >
-    <p class="text-description">
+    <p
+      v-if="isNetworkPrefilled"
+      class="text-description color-warning"
+    >
+      {{ $t('pages.network.thirdPartyDetails') }}
+    </p>
+    <p
+      v-else
+      class="text-description"
+    >
       {{ $t('pages.network.formLabel') }}
     </p>
     <InputField
@@ -30,7 +39,7 @@
       />
       <BtnMain
         :disabled="buttonDisabled"
-        :icon="isEdit ? PlusCircleIcon : null"
+        :icon="isEdit ? null : PlusCircleIcon"
         data-cy="connect"
         class="add-button"
         @click="addOrUpdateNetwork"
@@ -48,7 +57,13 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, onMounted, ref,
+  computed,
+  defineComponent,
+  getCurrentScope,
+  nextTick,
+  onMounted,
+  ref,
+  set,
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
@@ -75,18 +90,25 @@ const NETWORK_PROPS: INetworkBase = {
   networkId: 'custom', // TODO: In the future `networkId` will be removed from INetwork
 };
 
+const NETWORK_NAME_MAX_LENGTH = 15;
+
 export default defineComponent({
+  name: 'NetworkForm',
   components: {
     BtnMain,
     InputField,
   },
   setup(props, { root }) {
+    const isEdit = root.$route.name === ROUTE_NETWORK_EDIT;
+
+    const { $validator } = (getCurrentScope() as any).vm;
     const networks = useGetter('networks');
     const selectNetwork = useDispatch('selectNetwork');
 
     const newNetwork = ref<INetworkBase>({
       ...NETWORK_PROPS,
     });
+    const isNetworkPrefilled = ref(false);
 
     const formConfig: IFormConfig[] = [
       {
@@ -94,7 +116,7 @@ export default defineComponent({
         placeholder: root.$t('pages.network.networkNamePlaceholder'),
         label: root.$t('pages.network.networkNameLabel'),
         dataCy: 'network',
-        textLimit: 15,
+        textLimit: NETWORK_NAME_MAX_LENGTH,
       },
       {
         key: 'url',
@@ -132,8 +154,6 @@ export default defineComponent({
       || !!hasErrors.value,
     );
 
-    const isEdit = computed(() => root.$route.name === ROUTE_NETWORK_EDIT);
-
     function goBack() {
       root.$router.push({ name: ROUTE_NETWORK_SETTINGS });
     }
@@ -142,6 +162,7 @@ export default defineComponent({
       return key === 'name' ? {
         network_name: true,
         network_exists: [newNetwork.value?.index, networks.value],
+        max: NETWORK_NAME_MAX_LENGTH,
       } : {
         required: true,
         invalid_hostname: true,
@@ -149,27 +170,41 @@ export default defineComponent({
     }
 
     async function addOrUpdateNetwork() {
-      if (hasErrors.value) {
-        return;
+      if (await $validator.validateAll()) {
+        root.$store.commit('setUserNetwork', {
+          ...newNetwork.value,
+          index: newNetwork.value.index,
+        });
+        await selectNetwork(newNetwork.value.name);
+        goBack();
       }
-
-      root.$store.commit('setUserNetwork', {
-        ...newNetwork.value,
-        index: newNetwork.value.index,
-      });
-      await selectNetwork(newNetwork.value.name);
-      goBack();
     }
 
-    onMounted(() => {
-      const { name } = root.$route.params;
-      if (name) {
-        newNetwork.value = { ...networks.value[name] };
+    onMounted(async () => {
+      const { params, query } = root.$route;
+
+      if (isEdit) {
+        newNetwork.value = { ...networks.value[params.name] };
+      } else if (Object.keys(query).length) {
+        // Fields that values are allowed to be passed from the URL query to the form model
+        const keys: (keyof INetworkBase)[] = ['name', 'url', 'middlewareUrl', 'compilerUrl'];
+        keys.forEach((key) => {
+          const val = query[key];
+
+          if (val && typeof val === 'string') {
+            set(newNetwork.value, key, val);
+            isNetworkPrefilled.value = true;
+          }
+        });
+
+        await nextTick();
+        $validator.validateAll();
       }
     });
 
     return {
       newNetwork,
+      isNetworkPrefilled,
       error,
       hasErrors,
       networks,

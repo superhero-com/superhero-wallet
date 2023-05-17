@@ -22,14 +22,14 @@
         >
           <BtnIcon
             size="sm"
-            data-cy="edit"
+            data-cy="network-edit"
             dimmed
             :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
             :icon="PencilIcon"
           />
           <BtnIcon
             size="sm"
-            data-cy="delete"
+            data-cy="network-delete"
             icon-variant="danger"
             dimmed
             :icon="TrashIcon"

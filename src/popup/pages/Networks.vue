@@ -67,7 +67,7 @@ export default defineComponent({
   }
 
   .add-custom-network {
-    margin-top: 20px;
+    margin-block: 20px;
   }
 }
 </style>

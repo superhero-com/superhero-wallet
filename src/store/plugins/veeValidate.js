@@ -39,6 +39,11 @@ Object.assign(ErrorBag.prototype, {
   },
 });
 
+Validator.extend('max', {
+  validate: (val, maxLength) => val && val.length <= maxLength,
+  getMessage: (field, [arg]) => i18n.t('validation.maxLength', [arg]),
+});
+
 Validator.extend('url', (url) => isValidURL(url));
 Validator.extend('required', required);
 Validator.extend('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
@@ -135,27 +140,33 @@ export default (store) => {
   Validator.extend('name_registered_address', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value)));
+
   Validator.extend('token_to_an_address', {
     validate(value, args) {
       return !checkAensName(value) || (checkAensName(value) && !args.isToken);
     },
     params: ['isToken'],
   });
+
   Validator.extend('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
+
   Validator.extend('enough_ae', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
+
   Validator.extend('enough_ae_signer', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
+
   Validator.extend('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value) || validateTipUrl(value)));
+
   Validator.extend('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);
@@ -164,6 +175,7 @@ export default (store) => {
       return false;
     }
   });
+
   Validator.extend('network_name', (value) => ({
     valid: !!value,
     data: {
@@ -172,9 +184,12 @@ export default (store) => {
   }), {
     computesRequired: true,
   });
+
   Validator.extend('network_exists', (name, [index, networks]) => {
     const networkWithSameName = networks[name];
-    return !networkWithSameName
-      && (index === undefined || networkWithSameName?.index !== index);
+    return (
+      !networkWithSameName
+      || (index !== undefined && networkWithSameName?.index === index)
+    );
   });
 };

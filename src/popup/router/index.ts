@@ -26,6 +26,7 @@ import {
   IS_WEB,
 } from '../../lib/environment';
 import { useAccounts } from '../../composables';
+import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 Vue.use(VueRouter);
 
@@ -39,13 +40,16 @@ const lastRouteKey = 'last-path';
 
 const { isLoggedIn } = useAccounts({ store });
 
+RouteQueryActionsController.init(router);
+
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
     (
       !RUNNING_IN_POPUP
       && to.name === ROUTE_INDEX
-      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
+      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey]
+    )
     || undefined,
   );
   unbind();

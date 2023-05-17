@@ -24,6 +24,7 @@ import {
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
 } from './routeNames';
 
@@ -398,7 +399,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks/add',
-    name: 'network-add',
+    name: ROUTE_NETWORK_ADD,
     component: NetworkForm,
     props: true,
     meta: {

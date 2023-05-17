@@ -95,11 +95,11 @@ import type {
 } from '../../../types';
 import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
+import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
 import { useAccounts, useCopy, useMultisigAccounts } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
-  APP_LINK_WEB,
 } from '../../utils';
 
 import InputAmount from '../InputAmountV2.vue';
@@ -146,17 +146,17 @@ export default defineComponent({
       () => root.$store.state.fungibleTokens.availableTokens,
     );
 
-    function getTokenInfoQuery() {
-      if (!amount.value || amount.value <= 0) return '';
-      const token = selectedAsset.value && selectedAsset.value.contractId === AETERNITY_CONTRACT_ID
+    function getTokenInfoQuery(): Record<string, string> {
+      if (!amount.value || amount.value <= 0) return {};
+      const token = (selectedAsset.value?.contractId === AETERNITY_CONTRACT_ID)
         ? AETERNITY_SYMBOL
-        : selectedAsset.value?.contractId;
-      return `token=${token}&amount=${amount.value}`;
+        : selectedAsset.value?.contractId || AETERNITY_SYMBOL;
+      return { token, amount: amount.value.toString() };
     }
 
     function getAccountLink(value: string | undefined) {
       return value
-        ? `${APP_LINK_WEB}/account?account=${value}&${getTokenInfoQuery()}`
+        ? RouteQueryActionsController.createUrl('/account', 'transferSend', getTokenInfoQuery())
         : '';
     }
 
@@ -168,7 +168,7 @@ export default defineComponent({
 
     const accountAddressToDisplay = computed(
       () => (amount.value && amount.value > 0)
-        ? `${activeAccountAddress.value}?${getTokenInfoQuery()}`
+        ? `${activeAccountAddress.value}?${new URLSearchParams(getTokenInfoQuery()).toString()}`
         : activeAccountAddress.value,
     );
 

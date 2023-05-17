@@ -1,78 +1,76 @@
-process.env.NETWORK = 'Testnet';
-const { NETWORK_DEFAULT } = require('../../../src/popup/utils/constants');
+import { NETWORK_TESTNET } from '../../../src/popup/utils/constants';
 
 describe('Test cases for networks page', () => {
-  beforeEach(() => {
-    cy.login().openNetworks();
-  });
-
   it('Opens network page, cancels/adds network, can not add network with default name/invalid url', () => {
-    cy.get('[data-cy=networks]')
+    cy.login()
+      .openNetworks()
+      .getByTestId('networks')
       .should('be.visible')
-      .get('[data-cy=network-name]')
-      .should('contain', NETWORK_DEFAULT.name)
-      .get('[data-cy=network-url]')
-      .should('contain', NETWORK_DEFAULT.url)
-      .get('[data-cy=network-middleware]')
-      .should('contain', NETWORK_DEFAULT.middlewareUrl)
+      .getByTestId('network-name')
+      .should('contain', NETWORK_TESTNET.name)
+      .getByTestId('network-url')
+      .should('contain', NETWORK_TESTNET.url)
+      .getByTestId('network-middleware')
+      .should('contain', NETWORK_TESTNET.middlewareUrl)
 
-      .get('[data-cy=to-add]')
+      .getByTestId('to-add')
       .click()
       .enterNetworkDetails(
-        NETWORK_DEFAULT.name,
-        NETWORK_DEFAULT.url,
-        NETWORK_DEFAULT.middlewareUrl,
-        NETWORK_DEFAULT.compilerUrl,
+        NETWORK_TESTNET.name,
+        NETWORK_TESTNET.url,
+        NETWORK_TESTNET.middlewareUrl,
+        NETWORK_TESTNET.compilerUrl,
       )
-      .get('[data-cy=connect]')
+      .getByTestId('connect')
       .buttonShouldBeDisabled('[data-cy=connect]')
-      .get('[data-cy=input-message]')
+      .getByTestId('input-message')
       .should('exist')
 
       .enterNetworkDetails('test', 'test', 'test', 'test')
-      .get('[data-cy=connect]')
       .buttonShouldBeDisabled('[data-cy=connect]')
-      .get('[data-cy=input-message]')
+      .getByTestId('input-message')
       .should('exist')
 
-      .get('[data-cy=cancel]')
+      .getByTestId('cancel')
       .should('be.visible')
       .click()
       .urlEquals('/more/settings/networks');
   });
 
   it('Can add, select, edit, delete new network, can not add network with the same name', () => {
-    cy.addNetwork(
-      'NewNetwork',
-      NETWORK_DEFAULT.url,
-      NETWORK_DEFAULT.middlewareUrl,
-      NETWORK_DEFAULT.compilerUrl,
-    )
-      .get('[data-cy=edit]')
+    cy.login()
+      .openNetworks()
+      .addNetwork(
+        'NewNetwork',
+        NETWORK_TESTNET.url,
+        NETWORK_TESTNET.middlewareUrl,
+        NETWORK_TESTNET.compilerUrl,
+      )
+      .getByTestId('network-edit')
       .should('be.visible')
       .click()
-      .get('[data-cy=network] input')
+      .getInputByTestId('network')
       .should('have.value', 'NewNetwork')
-      .get('[data-cy=url] input')
-      .should('have.value', NETWORK_DEFAULT.url)
+      .getInputByTestId('url')
+      .should('have.value', NETWORK_TESTNET.url)
       .clear()
-      .type(NETWORK_DEFAULT.url)
-      .get('[data-cy=middleware] input')
-      .should('have.value', NETWORK_DEFAULT.middlewareUrl)
+      .type(NETWORK_TESTNET.url)
+      .getInputByTestId('middleware')
+      .should('have.value', NETWORK_TESTNET.middlewareUrl)
       .clear()
-      .type(NETWORK_DEFAULT.middlewareUrl)
-      .get('[data-cy=connect]')
+      .type(NETWORK_TESTNET.middlewareUrl)
+      .getByTestId('connect')
       .click()
-      .get('[data-cy=network-url]')
+      .getByTestId('network-url')
       .eq(-1)
-      .should('contain', NETWORK_DEFAULT.url)
-      .get('[data-cy=network-middleware]')
+      .should('contain', NETWORK_TESTNET.url)
+      .getByTestId('network-middleware')
       .eq(-1)
-      .should('contain', NETWORK_DEFAULT.middlewareUrl)
+      .should('contain', NETWORK_TESTNET.middlewareUrl)
       .goBack()
       .goBack()
       .goBack()
-      .get('.account-card-base')
+      .getByTestId('account-card-base')
       .should('exist')
 
       .openNetworks()
@@ -80,17 +78,17 @@ describe('Test cases for networks page', () => {
       .click()
       .enterNetworkDetails(
         'NewNetwork',
-        NETWORK_DEFAULT.url,
-        NETWORK_DEFAULT.middlewareUrl,
-        NETWORK_DEFAULT.compilerUrl,
+        NETWORK_TESTNET.url,
+        NETWORK_TESTNET.middlewareUrl,
+        NETWORK_TESTNET.compilerUrl,
       )
       .buttonShouldBeDisabled('[data-cy=connect]')
-      .get('[data-cy=input-message]')
+      .getByTestId('input-message')
       .should('exist')
-      .get('[data-cy=cancel]')
+      .getByTestId('cancel')
       .click()
 
-      .get('[data-cy=delete]')
+      .getByTestId('network-delete')
       .should('be.visible')
       .click()
       .get('[data-cy=networks] .network-row')
