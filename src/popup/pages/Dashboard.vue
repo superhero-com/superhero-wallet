@@ -15,7 +15,6 @@
       <DashboardCard
         v-if="isNodeMainnet && !IS_IOS"
         :title="$t('dashboard.buyCard.title')"
-        :description="$t('dashboard.buyCard.description')"
         :btn-text="$t('dashboard.buyCard.button')"
         :background="buyBackground"
         :icon="CardIcon"
@@ -25,6 +24,7 @@
 
       <DashboardCard
         v-if="isNodeMainnet || isNodeTestnet"
+        class="wide-button-test"
         :title="$t('dashboard.nameCard.title')"
         :description="$t('dashboard.nameCard.description')"
         :btn-text="$t('dashboard.nameCard.button')"
@@ -97,3 +97,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+.wide-button-test {
+  .btn-main {
+    width: 100%;
+  }
+}
+</style>

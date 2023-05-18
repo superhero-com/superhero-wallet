@@ -43,12 +43,6 @@
             :src="require('../../icons/platforms/firefox.svg')"
             alt="Firefox"
           />
-          <PlatformIcon
-            :to="APP_LINK_CHROME"
-            :disabled="IS_FIREFOX || IS_MOBILE_DEVICE"
-            :src="require('../../icons/platforms/chrome.svg')"
-            alt="Chrome"
-          />
         </div>
       </div>
       <div class="web-icons">
@@ -124,6 +118,7 @@ export default {
 
     margin-top: 28px;
     margin-bottom: 12px;
+    text-align: left;
   }
 
   .mobile-web-icons {
