@@ -1,11 +1,11 @@
-import Vue from 'vue';
+import { createApp } from 'vue';
 import App from './App.vue';
 import { i18n } from '../store/plugins/languages';
 
 window.browser = require('webextension-polyfill');
 
-export default new Vue({
-  el: '#app',
-  i18n,
-  render: (h) => h(App),
-});
+const app = createApp(App);
+app.use(i18n);
+app.mount('#app');
+
+export default app;

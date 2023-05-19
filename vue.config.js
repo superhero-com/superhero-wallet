@@ -125,6 +125,15 @@ module.exports = {
       }]).end();
 
     if (PLATFORM === 'extension') {
+      config.module.rule('i18nTest')
+        .test(/\.json$/)
+        .include
+        .add(path.resolve(__dirname, './src/popup/locales'))
+        .end()
+        .type('javascript/auto')
+        .use('@intlify/vue-i18n-loader')
+        .loader('@intlify/vue-i18n-loader');
+
       config.plugin('copy')
         .use(CopyWebpackPlugin, [{
           patterns: [
@@ -134,7 +143,7 @@ module.exports = {
             {
               from: 'src/content-scripts/tipButton.scss',
               to: 'other/tipButton.css',
-              transform: (_, f) => sass.compile({ file: f }).css.toString(),
+              transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
             },
           ],
         }])
