@@ -5,9 +5,6 @@ import permissions from '../store/modules/permissions';
 import accounts from '../store/modules/accounts';
 import getters from '../store/getters';
 
-const app = getCurrentInstance();
-if (app) app.appContext.app.use(Vuex);
-
 const store = new Vuex.Store({
   plugins: [sdk, persistState()],
   modules: { permissions, accounts },
