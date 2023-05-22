@@ -15,15 +15,6 @@ import {
 import { AENS_DOMAIN } from '../../popup/utils/constants';
 import { useBalances, useCurrencies } from '../../composables';
 
-// TODO refactor way of accessing errors & filtering them
-const filteredRules = (errors, validatedField, rules) => errors.filter(
-  ({ field, rule }) => field === validatedField && !rules.includes(rule),
-);
-export const firstExcept = (field, rules, errors) => filteredRules(errors, field, rules)[0]?.msg;
-export const anyExcept = (field, rules, errors) => !!(
-  filteredRules(errors, field, rules).length
-);
-
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
 defineRule('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
@@ -122,8 +113,8 @@ export default (store) => {
   defineRule('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
   defineRule('token_to_an_address',
     (value, [isToken]) => !checkAensName(value) || (checkAensName(value) && !isToken), {
-      params: ['isToken'],
-    });
+    params: ['isToken'],
+  });
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
