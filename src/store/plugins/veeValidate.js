@@ -15,20 +15,6 @@ import {
 import { AENS_DOMAIN } from '../../popup/utils/constants';
 import { useBalances, useCurrencies } from '../../composables';
 
-// TODO refactor way of accessing errors & filtering them
-const filteredRules = (errors, validatedField, rules) => errors.filter(
-  ({ field, rule }) => field === validatedField && !rules.includes(rule),
-);
-export const firstExcept = (field, rules, errors) => filteredRules(errors, field, rules)[0]?.msg;
-export const anyExcept = (field, rules, errors) => !!(
-  filteredRules(errors, field, rules).length
-);
-
-defineRule('max', {
-  validate: (val, maxLength) => val && val.length <= maxLength,
-  getMessage: (field, [arg]) => i18n.global.t('validation.maxLength', [arg]),
-});
-
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
 defineRule('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
