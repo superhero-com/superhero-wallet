@@ -36,6 +36,7 @@
       </template>
     </PanelItem>
     <PanelItem
+      v-if="!IS_IOS"
       :href="SIMPLEX_URL"
       :title="$t('pages.fungible-tokens.buyAe')"
     >
@@ -73,6 +74,7 @@ import Buy from '../../icons/credit-card.svg?vue-component';
 import Dex from '../../icons/dex.svg?vue-component';
 import ClaimTips from '../../icons/claim-tips.svg?vue-component';
 import { DEX_URL, SIMPLEX_URL, BUG_REPORT_URL } from '../utils/constants';
+import { IS_IOS } from '../../lib/environment';
 
 export default {
   components: {
@@ -89,6 +91,7 @@ export default {
     SIMPLEX_URL,
     DEX_URL,
     BUG_REPORT_URL,
+    IS_IOS,
   }),
 };
 </script>

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/aeternity/superhero-wallet/compare/v1.1.1...v1.1.2) (2023-05-23)
+
+
+### Bug Fixes
+
+* remove buy tokens on ios devices & ios platform detector ([94dc748](https://github.com/aeternity/superhero-wallet/commit/94dc7481a3ff42e0423d82f0df98bdaab4b7a1ab))
+
+
+### Maintenance
+
+* **send-modal:** support qr code with string parameters ([108cc5b](https://github.com/aeternity/superhero-wallet/commit/108cc5b2eec155ce7ee7f2012e11695ad2c2ad3f))
+
 ### [1.1.1](https://github.com/aeternity/superhero-wallet/compare/v1.1.0...v1.1.1) (2023-04-25)
 
 

@@ -13,6 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
+        v-if="!IS_IOS"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
         :btn-text="$t('dashboard.buyCard.button')"
@@ -44,6 +45,7 @@ import {
 
 import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
 import { useGetter } from '../../composables/vuex';
+import { IS_IOS } from '../../lib/environment';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -84,6 +86,7 @@ export default defineComponent({
       simplexLink,
       buyBackground,
       chainNameBackground,
+      IS_IOS,
     };
   },
 });

@@ -20,6 +20,7 @@
       <OpenTransferReceiveModalButton />
       <OpenTransferSendModalButton />
       <BtnBox
+        v-if="!IS_IOS"
         :icon="CreditCardIcon"
         :text="$t('pages.token-details.buy')"
         :href="simplexLink"
@@ -44,6 +45,7 @@ import { computed, defineComponent } from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
 import { useBalances, useConnection } from '../../composables';
 import { buildSimplexLink, DEX_URL } from '../utils';
+import { IS_IOS } from '../../lib/environment';
 import type { IAccount } from '../../types';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -79,6 +81,7 @@ export default defineComponent({
 
     return {
       DEX_URL,
+      IS_IOS,
       isOnline,
       balanceNumeric,
       account,
