@@ -18,7 +18,6 @@ import { computed, defineComponent, PropType } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult } from 'vue-i18n';
 import { useTransactionTx } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
 import {
   INetwork,
   ITokenList,
@@ -29,6 +28,7 @@ import { i18n } from '../../store/plugins/languages';
 import {
   AENS,
   DEX,
+  TX_DIRECTION,
   FUNCTION_TYPE_DEX,
   includes,
   TX_FUNCTIONS,
@@ -44,9 +44,6 @@ export default defineComponent({
   props: {
     customTitle: { type: String, default: null },
     transaction: { type: Object as PropType<ITransaction>, default: null },
-    isIncomplete: Boolean,
-    isPending: Boolean,
-    isClaim: Boolean,
     dense: Boolean,
   },
   setup(props, { root }) {
@@ -63,8 +60,10 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+    const availableTokens = computed<ITokenList>(
+      () => root.$store.state.fungibleTokens.availableTokens,
+    );
 
     const labels = computed<(string | TranslateResult)[]>(() => {
       if (props.customTitle) return [props.customTitle];
@@ -99,7 +98,7 @@ export default defineComponent({
       } else if (txType.value === SCHEMA.TX_TYPE.spend) {
         innerLabels = [
           i18n.t('transaction.type.spendTx'),
-          direction.value === TX_FUNCTIONS.received
+          direction.value === TX_DIRECTION.received
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];
@@ -110,18 +109,18 @@ export default defineComponent({
           DEX,
           FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
             ? i18n.t('transaction.dexType.pool')
-            : i18n.t('transaction.dexType.swap'),
+            : i18n.t('common.swap'),
         ];
       } else if (
         (
           innerTx.value.contractId
           && [tipContractV1, tipContractV2].includes(innerTx.value.contractId)
           && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
-        ) || props.isClaim
+        ) || props.transaction.claim
       ) {
         innerLabels = [
           i18n.t('pages.token-details.tip'),
-          props.isClaim
+          props.transaction.claim
             ? i18n.t('transaction.spendType.in')
             : i18n.t('transaction.spendType.out'),
         ];
@@ -137,7 +136,7 @@ export default defineComponent({
         && availableTokens.value[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
-          || props.isIncomplete
+          || props.transaction.incomplete
         )
       ) {
         innerLabels = [
@@ -149,7 +148,7 @@ export default defineComponent({
             ? i18n.t('transaction.spendType.out')
             : i18n.t('transaction.spendType.in'),
         ];
-      } else if (props.isPending) {
+      } else if (props.transaction.pending) {
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [

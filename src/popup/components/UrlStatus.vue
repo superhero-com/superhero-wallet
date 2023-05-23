@@ -19,6 +19,7 @@
 <script>
 import Default from '../../icons/badges/default.svg?vue-component';
 import { MODAL_RECIPIENT_HELPER } from '../utils/constants';
+import { useModals } from '../../composables';
 import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
 
 export default {
@@ -59,8 +60,8 @@ export default {
   },
   methods: {
     showModal() {
-      this.$store.dispatch('modals/open', {
-        name: MODAL_RECIPIENT_HELPER,
+      const { openModal } = useModals();
+      openModal(MODAL_RECIPIENT_HELPER, {
         title: this.data.content.title,
         msg: this.data.content.msg,
         icon: this.data.icon,

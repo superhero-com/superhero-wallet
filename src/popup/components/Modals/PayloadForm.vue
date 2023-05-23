@@ -28,7 +28,7 @@
         class="btn-cancel"
         variant="muted"
         extra-padded
-        :text="$t('modals.payloadForm.cancelBtn')"
+        :text="$t('common.cancel')"
         @click="reject()"
       />
       <BtnMain

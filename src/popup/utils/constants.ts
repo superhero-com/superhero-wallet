@@ -23,14 +23,17 @@ export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 export const AETERNITY_COIN_NAME = 'Aeternity';
 
+export const TX_DIRECTION = {
+  sent: 'sent',
+  received: 'received',
+} as const;
+
 export const TX_FUNCTIONS = {
   tip: 'tip',
   retip: 'retip',
   tipToken: 'tip_token',
   retipToken: 'retip_token',
   transfer: 'transfer',
-  sent: 'sent',
-  received: 'received',
   deposit: 'deposit',
   propose: 'propose', // Multisig
   addLiquidity: 'add_liquidity',
@@ -91,35 +94,6 @@ export const ACCOUNT_LEDEGR_WALLET = 'ledger';
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
 
-export const DEX_CONTRACTS: Record<string, IDexContracts> = {
-  [NETWORK_ID_MAINNET]: {
-    router: [
-      'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
-    ],
-    wae: [
-      'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
-    ],
-  },
-  [NETWORK_ID_TESTNET]: {
-    router: [
-      STUB_CONTRACT_ADDRESS,
-      'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
-      'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
-      'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
-      'ct_2mZo6oniJYbbAuBqJxqydc2ZzUhgrdFbTaR4vq2QxocChGUymJ',
-      'ct_MLXQEP12MBn99HL6WDaiTqDbG4bJQ3Q9Bzr57oLfvEkghvpFb',
-    ],
-    wae: [
-      'ct_RzxedNERBDa9Kfx8FENNKQ33TQTt5FzV8i1WppiaTSC4adRXd',
-      'ct_y1sufvYLCwbbumgV16p8Bk9f5uHGFiteRDC1x8WNxxyvGJEw2',
-      'ct_2kc9naWGGnx4TWGK7UR9gut2cVcDvf7pv8CBYG1a8WML2jzUeb',
-      'ct_24gNuddxAbMYtT32sh8Xm1PpB2fZ3HMGtfST5sA3irect3Yu76',
-      'ct_2mdY71wG4zAjrdmqDJPXU6h8dYpzNs4mMZ81ujeNnrQPU2jMto',
-      'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
-    ],
-  },
-};
-
 export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
   networkId: NETWORK_ID_MAINNET,
@@ -145,7 +119,7 @@ export const NETWORK_TESTNET: INetwork = {
   name: 'Testnet',
 };
 
-export const defaultNetwork = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
+export const NETWORK_DEFAULT = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 
@@ -161,8 +135,6 @@ export const AENS_NAME_MAX_LENGTH = 63 + AENS_DOMAIN.length;
 export const AENS_NAME_AUCTION_MAX_LENGTH = 12 + AENS_DOMAIN.length;
 export const AENS_BID_MIN_RATIO = 1.05;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
-
-export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
 export const NOTIFICATION_STATUS_READ = 'READ';
@@ -413,13 +385,14 @@ export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=c
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
 
 export const SIMPLEX_URL = 'https://simplex.superhero.com';
+export const FAUCET_URL = 'https://faucet.aepps.com';
+export const DEX_URL = 'https://aepp.dex.superhero.com';
+export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 
 export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=';
 export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
-
-export const DEX_URL = 'https://aepp.dex.superhero.com';
 
 export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
 
@@ -445,9 +418,39 @@ export const MODAL_ASSET_SELECTOR = 'asset-selector';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_RECIPIENT_HELPER = 'recipient-helper';
 export const MODAL_RECIPIENT_INFO = 'recipient-info';
+export const MODAL_CONSENSUS_INFO = 'consensus-info';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
+
+export const DEX_CONTRACTS: Record<string, IDexContracts> = {
+  [NETWORK_ID_MAINNET]: {
+    router: [
+      'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
+    ],
+    wae: [
+      'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
+    ],
+  },
+  [NETWORK_ID_TESTNET]: {
+    router: [
+      STUB_CONTRACT_ADDRESS,
+      'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
+      'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
+      'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
+      'ct_2mZo6oniJYbbAuBqJxqydc2ZzUhgrdFbTaR4vq2QxocChGUymJ',
+      'ct_MLXQEP12MBn99HL6WDaiTqDbG4bJQ3Q9Bzr57oLfvEkghvpFb',
+    ],
+    wae: [
+      'ct_RzxedNERBDa9Kfx8FENNKQ33TQTt5FzV8i1WppiaTSC4adRXd',
+      'ct_y1sufvYLCwbbumgV16p8Bk9f5uHGFiteRDC1x8WNxxyvGJEw2',
+      'ct_2kc9naWGGnx4TWGK7UR9gut2cVcDvf7pv8CBYG1a8WML2jzUeb',
+      'ct_24gNuddxAbMYtT32sh8Xm1PpB2fZ3HMGtfST5sA3irect3Yu76',
+      'ct_2mdY71wG4zAjrdmqDJPXU6h8dYpzNs4mMZ81ujeNnrQPU2jMto',
+      'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
+    ],
+  },
+};
 
 export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
 export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
@@ -483,8 +486,6 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   transfer: '',
   transfer_payload: '',
   claim: '',
-  received: '',
-  sent: '',
   propose: '',
 } as const;
 
@@ -512,12 +513,14 @@ export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
+export const POPUP_TYPE_TX_SIGN = 'transaction.sign';
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_TX_SIGN,
 ] as const;
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
@@ -567,6 +570,17 @@ export const MULTISIG_PROPOSAL_CONFIRM_ACTIONS = {
 export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
+  faucet: 'faucet',
 } as const;
 
 export const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
+
+export const ALLOWED_ICON_STATUSES = [
+  'alert',
+  'critical',
+  'help',
+  'info',
+  'not-secure',
+  'success',
+  'warning',
+] as const;

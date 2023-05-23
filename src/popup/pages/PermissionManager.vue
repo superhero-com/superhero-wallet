@@ -100,13 +100,13 @@
       <div class="actions">
         <BtnMain
           variant="muted"
-          :text="$t('pages.permissions.cancel')"
+          :text="$t('common.cancel')"
           :to="{ name: 'permissions-settings' }"
         />
         <BtnMain
           class="confirm"
           extra-padded
-          :text="$t('pages.permissions.confirm')"
+          :text="$t('common.confirm')"
           :disabled="!permissionChanged"
           @click="savePermission"
         />

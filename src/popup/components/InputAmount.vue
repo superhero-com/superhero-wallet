@@ -13,7 +13,7 @@
     placeholder="0.00"
     :value="value"
     :message="$attrs['message'] || errors.first('amount')"
-    :label="$attrs.label || $t('pages.tipPage.amountLabel')"
+    :label="$attrs.label || $t('common.amount')"
     @input="$emit('input', $event)"
   >
     <template #after>

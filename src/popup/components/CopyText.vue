@@ -9,7 +9,7 @@
       class="copied"
     >
       <CopyOutlinedIcon class="copy-icon-copied" />
-      {{ copiedText || $t('addressCopied') }}
+      {{ copiedText || $t('common.addressCopied') }}
     </div>
 
     <slot>{{ value }}</slot>

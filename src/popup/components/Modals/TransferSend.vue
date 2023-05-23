@@ -4,7 +4,7 @@
     has-close-button
     from-bottom
     :body-without-padding-bottom="currentStep === STEPS.form"
-    @close="closeModal"
+    @close="resolve()"
   >
     <div class="relative">
       <transition name="fade-between">
@@ -25,10 +25,9 @@
       <BtnMain
         v-if="showEditButton"
         variant="muted"
-        :text="$t('pages.send.editTxDetails')"
+        :text="$t('common.edit')"
         class="button-action-secondary"
         data-cy="edit"
-        extra-padded
         @click="editTransfer"
       />
       <BtnMain
@@ -44,11 +43,16 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  PropType,
+  ref,
+} from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import type { ITokenList, ObjectValues } from '../../../types';
+import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
 import { IFormModel } from '../../../composables';
-import { AENS_DOMAIN, MODAL_TRANSFER_SEND, validateTipUrl } from '../../utils';
+import { AENS_DOMAIN, validateTipUrl } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -81,6 +85,7 @@ export default defineComponent({
     BtnMain,
   },
   props: {
+    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
     address: { type: String, default: null },
     isMultisig: Boolean,
@@ -109,17 +114,13 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('modals.send.next');
+        return root.$t('common.next');
       }
       if (props.isMultisig) {
         return root.$t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('pages.send.send');
+      return root.$t('common.send');
     });
-
-    function closeModal() {
-      root.$store.commit('modals/closeByKey', MODAL_TRANSFER_SEND);
-    }
 
     function proceedToNextStep() {
       (currentRenderedComponent.value as any).submit();
@@ -141,7 +142,7 @@ export default defineComponent({
      * after the transfer is finished.
      */
     function handleReviewSuccess() {
-      closeModal();
+      props.resolve();
     }
 
     function editTransfer() {
@@ -188,7 +189,6 @@ export default defineComponent({
       showEditButton,
       showSendButton,
       primaryButtonText,
-      closeModal,
       proceedToNextStep,
       editTransfer,
     };

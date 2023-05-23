@@ -61,7 +61,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { defaultNetwork } from '../utils';
+import { NETWORK_DEFAULT } from '../utils';
 import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
 import { useGetter } from '../../composables/vuex';
 
@@ -88,7 +88,7 @@ export default defineComponent({
 
     async function deleteNetwork(networkIndex: number) {
       if (networkIndex === activeNetwork.value.index) {
-        emit('selectNetwork', defaultNetwork.name);
+        emit('selectNetwork', NETWORK_DEFAULT.name);
       }
       root.$store.commit('deleteUserNetwork', networkIndex);
     }

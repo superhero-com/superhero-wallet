@@ -21,7 +21,7 @@
     <div class="permissions">
       <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
         <span class="title">
-          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.addressLabel') }}
+          <CheckMark class="icon" /> {{ $t('common.address') }}
         </span>
         <span class="description">
           {{ $t('pages.connectConfirm.addressRequest') }}
@@ -48,7 +48,6 @@
       <BtnMain
         data-cy="accept"
         :text="$t('pages.connectConfirm.confirmButton')"
-        :disabled="!isConnected"
         @click="confirm()"
       />
     </template>
@@ -58,17 +57,18 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type {
-  IAccount,
   IAccountLabeled,
   IAppData,
   IPermission,
 } from '../../../types';
+import { RejectedByUserError } from '../../../lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
+import { useAccounts } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -96,16 +96,16 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
-    const isConnected = useGetter('isConnected');
+    const { activeAccount } = useAccounts({ store: root.$store });
+
     const getExplorerPath = useGetter('getExplorerPath');
-    const account = useGetter<IAccount>('account');
 
     const permission = useState<IPermission>('permissions', props.app.host);
     const appName = computed(() => permission.value?.name || props.app.name);
     const accountExtended = computed((): IAccountLabeled => ({
-      ...account.value,
+      ...activeAccount.value,
       label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(account.value.address),
+      url: getExplorerPath.value(activeAccount.value.address),
     }));
 
     function confirm() {
@@ -118,14 +118,13 @@ export default defineComponent({
     }
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       appName,
-      isConnected,
       accountExtended,
       confirm,
       cancel,

@@ -54,9 +54,9 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
   const { currentCurrencyRate, aeternityData } = useCurrencies();
-  const { account, accounts } = useAccounts({ store });
+  const { activeAccount, accounts } = useAccounts({ store });
 
-  const balance = computed(() => balances.value[account.value.address] || new BigNumber(0));
+  const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
   const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
   const balancesTotal = computed(
     () => Object.keys(balances.value)

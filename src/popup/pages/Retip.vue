@@ -40,14 +40,14 @@
       :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
-      {{ $t('pages.tipPage.confirm') }}
+      {{ $t('common.confirm') }}
     </BtnMain>
     <BtnMain
       class="bottom-btn"
       extend
       @click="openCallbackOrGoHome(false)"
     >
-      {{ $t('pages.tipPage.cancel') }}
+      {{ $t('common.cancel') }}
     </BtnMain>
 
     <Loader v-if="loading" />
@@ -64,18 +64,19 @@ import {
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
 import {
-  IAccount,
   IToken,
   IPendingTransaction,
   ISdk,
 } from '../../types';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
+import { MAGNITUDE, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken, watchUntilTruthy } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
   IFormModel,
   useBalances,
+  useModals,
+  useAccounts,
 } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import InputAmount from '../components/InputAmountV2.vue';
@@ -96,6 +97,8 @@ export default defineComponent({
       amount: '',
     });
 
+    const { openDefaultModal } = useModals();
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
@@ -108,7 +111,6 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const account = useGetter<IAccount>('account');
     const tippingV1 = useState('tippingV1');
     const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
@@ -169,7 +171,7 @@ export default defineComponent({
           pending: true,
           tx: {
             amount,
-            callerId: account.value.address,
+            callerId: activeAccount.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
@@ -179,8 +181,7 @@ export default defineComponent({
         root.$store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });

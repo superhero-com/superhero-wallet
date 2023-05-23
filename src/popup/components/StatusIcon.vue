@@ -8,7 +8,11 @@
   />
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { StatusIconType, VueAnyComponent } from '../../types';
+import { ALLOWED_ICON_STATUSES } from '../utils';
+
 import TimesCircle from '../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../icons/question-circle.svg?vue-component';
 import Alert from '../../icons/alert.svg?vue-component';
@@ -17,33 +21,32 @@ import CheckCircle from '../../icons/check-circle.svg?vue-component';
 import NotSecure from '../../icons/not-secure.svg?vue-component';
 import Globe from '../../icons/globe.svg?vue-component';
 
-export default {
+export default defineComponent({
   props: {
-    status: { type: String, required: true },
-  },
-  computed: {
-    icon() {
-      switch (this.status) {
-        case 'critical':
-          return TimesCircle;
-        case 'alert':
-          return Alert;
-        case 'warning':
-          return Warning;
-        case 'info':
-          return QuestionCircle;
-        case 'success':
-          return CheckCircle;
-        case 'not-secure':
-          return NotSecure;
-        case 'help':
-          return Globe;
-        default:
-          return null;
-      }
+    status: {
+      type: String as PropType<StatusIconType>,
+      required: true,
+      validator: (val: StatusIconType) => ALLOWED_ICON_STATUSES.includes(val),
     },
   },
-};
+  setup(props) {
+    const statusIcons: Record<StatusIconType, VueAnyComponent> = {
+      critical: TimesCircle,
+      alert: Alert,
+      warning: Warning,
+      info: QuestionCircle,
+      success: CheckCircle,
+      'not-secure': NotSecure,
+      help: Globe,
+    };
+
+    const icon = computed(() => statusIcons[props.status]);
+
+    return {
+      icon,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

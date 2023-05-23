@@ -1,7 +1,6 @@
 {
   "ok": "OK",
   "ae": "AE",
-  "mainAccount": "Main account",
   "badges": {
     "verified": "Verified",
     "notVerified": "Not verified"
@@ -64,9 +63,7 @@
     "donate-errors-error": {
       "title": "Your Error Report Was not send",
       "msg": "There was problem sending your error report"
-    },
-    "cancel": "Cancel",
-    "confirm": "Confirm"
+    }
   },
   "transaction": {
     "type": {
@@ -175,14 +172,6 @@
       "notFound": "Requested page can't be found",
       "initialPage": "Open initial page"
     },
-    "accountPassword": {
-      "heading": "",
-      "passwordSymbolsError": "Required minimum symbols - ",
-      "weakPasswordError": "Password is too weak.",
-      "incorrectPasswordError": "Incorrect password.",
-      "passwordDoesntMatchError": "Passwords do not match.",
-      "securingAccount": "Securing your account"
-    },
     "recentTransactions": {
       "recentActivity": "Recent Activity",
       "noTransactionsFound": "No transactions found!"
@@ -194,7 +183,6 @@
       "tokenContractLabel": "Token Contract Address",
       "tokenSymbolLabel": "Token Symbol",
       "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
       "validContractAddressError": "Valid token contract address",
       "symbolBetween1and12": "Symbol between 1 and 12 characters",
       "numberBetween0and36": "Number between 0 and 36",
@@ -211,11 +199,9 @@
       "exportKeystore": "Export keystore"
     },
     "airGapSetup": {
-      "backToAccount": "Back to account",
       "heading": "AirGap Setup",
       "step1heading": "Install AirGap on your phone",
       "step1info": "Search for AirGap.it in the store or scan this QR code",
-      "step1buttonNext": "Next",
       "setupSteps1heading": "Open AirGap on the 2nd device",
       "setupSteps2heading": "Create secret key",
       "setupSteps3heading": "Write it down in the right order",
@@ -228,36 +214,11 @@
       "setupSteps5": "Finish by linking your vault to your aeternity address",
       "linkVault": "Link Vault"
     },
-    "allowances": {
-      "heading": "Allowances",
-      "backToUtilities": "Back to utilities",
-      "createAllowance": "Create allowance",
-      "createAllowanceInfo": "This allows you to create allowance with your new fungible tokens for anyone you want",
-      "createButton": "Create",
-      "transferAllowance": "Transfer allowance",
-      "transferAllowanceInfo": "This allows you to take your whole allowance or part of it from someone",
-      "transferButton": "Transfer",
-      "allAllowances": "All allowances",
-      "allAllowancesInfo": "See all your allowances and take them",
-      "seeAllButton": "See all",
-      "backToAllowances": "Back to Allowances",
-      "chooseToken": "Choose a token",
-      "allowanceExistMsg": "This Allowance already exist. If you want to change it click",
-      "allowanceExistHere": "here",
-      "allowanceFrom": "From",
-      "getAllowance": "Get it",
-      "tokenChoiceRequired": "Please choose a token to see all your allowances!",
-      "noAllowancesFound": "No allowances found!",
-      "changeAllowance": "Change Allowance",
-      "allowedAllowanceAmount": "Current allowed allowance amount is",
-      "changeButton": "Change"
-    },
     "auctionBid": {
       "backToAuctions": "Back to auctions",
       "bidding": "Bidding",
       "bidOn": "Bid on",
       "requiredField": "This field is required",
-      "next": "Next",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time"
     },
@@ -284,21 +245,6 @@
       "deployTokenContract": "Deploy Token Contract",
       "registryFee": "Include token in global TokenRegistry (tx fees apply)"
     },
-    "fungibleTokens": {
-      "backToAccount": "Back to account",
-      "addHeading": "Fungible Tokens",
-      "addToken": "Add token",
-      "tokenContractLabel": "Token Contract Address",
-      "tokenSymbolLabel": "Token Symbol",
-      "initialSupply": "Initial Supply",
-      "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
-      "validContractAddressError": "Valid token contract address",
-      "symbolBetween1and12": "Symbol between 1 and 12 characters",
-      "numberBetween0and36": "Number between 0 and 36",
-      "token": "Token",
-      "balance": "Balance"
-    },
     "fungibleTokensPage": {
       "backToUtilities": "Back to utilities",
       "heading": "Fungible Tokens",
@@ -308,15 +254,6 @@
       "deployInfo": "This allows you to deploy your own fungible token contract",
       "deployButton": "Deploy Token Contract",
       "deployFungToken": "Deploy Token"
-    },
-    "mintTokenPage": {
-      "mint": "Mint/Burn token",
-      "mintInfo": "This allows you to mint or burn token amount",
-      "mintBtn": "Mint/Burn",
-      "amount": "Amount",
-      "address": "Address",
-      "enterAmount": "Invalid amount",
-      "enterAddress": "Enter address"
     },
     "namingSystemPage": {
       "active": "Active",
@@ -367,7 +304,6 @@
       "generateWallet": "Generate New Wallet",
       "importWallet": "Retrieve existing account",
       "passwordError": "Password must be at lest 4 symbols.",
-      "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Enter your seed phrase. ",
@@ -385,36 +321,15 @@
       "ledgerLedger": "Open the aeternity app on your Ledger",
       "ledgerAccountCreate": "Create a first account by pressing the button bellow"
     },
-    "manageAccounts": {
-      "backToAccount": "Back to account",
-      "manageAccounts": "Manage accounts",
-      "allAccounts": "All accounts",
-      "account": "Account",
-      "add": "Add",
-      "enterName": "Enter name"
-    },
-    "manageNetworks": {
-      "backToAccount": "Back to account",
-      "manageNetworks": "Manage networks",
-      "networks": "Networks",
-      "addNewNetwork": "Add new node",
-      "networkName": "Node name",
-      "networkURL": "Node URL",
-      "addnetworkName": "Add Node name",
-      "addnetworkURL": "Add Node URL",
-      "add": "Add"
-    },
     "privacyPolicy": {
       "backButton": "Back",
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
     "qrCodeReader": {
-      "backToAccount": "Back to account",
       "heading": "Qr Code Scanner"
     },
     "receive": {
-      "backToAccount": "Back to account",
       "heading": "To receive tokens, provide this address or have the payor scan the QR code below.",
       "copy": "Copy",
       "home": "Home",
@@ -464,7 +379,6 @@
       "toDashboard": "Back to Dashboard"
     },
     "send": {
-      "backToAccount": "Back to account",
       "heading": "New Transfer from",
       "txFee": "Min Tx fee:",
       "maxSpendableValue": "Maximum spendable value:",
@@ -472,7 +386,6 @@
       "success": "Success",
       "seeTransactionExplorer": "See transaction in the explorer.",
       "scan": "Scan QR",
-      "cancel": "Cancel",
       "review": "Review",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
@@ -481,50 +394,8 @@
       "amount": "Amount",
       "successalert": "You have successfully sent ",
       "to": "To",
-      "from": "From",
       "hash": "Transaction Hash",
       "home": "Home"
-    },
-    "settings": {
-      "backToAccount": "Back to account",
-      "heading": "Settings",
-      "tabGeneral": "Language",
-      "tabGeneralsmall": "Change your language",
-      "tabAdvanced": "Advanced",
-      "tabAdvancedsmall": "Download your keystore or keypair",
-      "tabSecurity": "Security & Privacy",
-      "tabSecuritysmall": "Privacy data, Reveal private key",
-      "tabAbout": "About",
-      "tabAboutsmall": "Version, support center, and contact info",
-      "tabNetworks": "Manage networks",
-      "tabNetworksSmall": "Connect to custom node",
-      "tabRemoveAccount": "Сбросить кошелек",
-      "tabSaveErrorLog": "Save error log",
-      "tabSaveErrorLogSmall": "This will help us identify what's causing errors."
-    },
-    "signAndVerifyMsg": {
-      "backToSignVerifyMsg": "Back to Sign/Verify Message",
-      "backToUtilities": "Back to utilities",
-      "signatureTitle": "Signature",
-      "password": "Password",
-      "signedMessage": "Signed message:",
-      "copyBtn": "COPY",
-      "cancelBtn": "Cancel",
-      "enterPassword": "Enter your password",
-      "signMessage": "Sign message",
-      "signAndVerify": "Sign and verify messages",
-      "signMessageinfo": "This allows you to sign message with your private key",
-      "signBtn": "Sign",
-      "verifyMessage": "Verify message",
-      "verifyMessageinfo": "This allows you to verify signed messages",
-      "verifyBtn": "Verify",
-      "message": "Message"
-    },
-    "signTransactionByQrCode": {
-      "backToAccount": "Back to account",
-      "backToScan": "Back to scan transaction",
-      "heading": "Scan with AirGap Vault to sign the transaction",
-      "doneBtn": "Done"
     },
     "termsOfService": {
       "backButton": "Back",
@@ -567,48 +438,6 @@
       "section10Content": "The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding the present ​TERMS​. The invalidity of one or more clauses/ provisions in the ​TERMS does not lead to the invalidity of the whole agreement. \n The Privacy Policy is an inseparable part of the present ​TERMS and should be considered as a complementary document with compulsory character. Unless explicitly stated otherwise in the Privacy Policy, all rules from the ​TERMS​ apply respectively.",
       "section11Title": "11. FINAL PROVISIONS"
     },
-    "tipPage": {
-      "back": "Back",
-      "noImage": "No Image",
-      "domainVerified": "Verified",
-      "domainNotVerified": "Not verified",
-      "sendHeading": "Send a tip",
-      "check": "Check",
-      "selectAmount": "Select amount",
-      "amountToTip": "Amount to tip",
-      "balance": "Balance",
-      "sendTipBtn": "Send tip",
-      "tipDetails": "Details",
-      "tipWebsite": "Website",
-      "heading": "Send",
-      "headingSending": "Sending",
-      "selectTip": "Select amount to tip",
-      "tipDomain": "Tip domain",
-      "claim": "Claim Tips",
-      "tipsForDomain": "Tips",
-      "tips": "Tips",
-      "noTips": "There are no tips for this url",
-      "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
-      "title": "Title",
-      "titlePlaceholder": "Send a message of #support along with your donation...",
-      "account": "Account",
-      "url": "Send Tip to",
-      "to": "to",
-      "amountLabel": "Amount",
-      "empty": "Empty",
-      "availableLabel": "Available",
-      "sendToAddress": "Send address to",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "edit": "Edit",
-      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
-      "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
-      "enterUrl": "Type the URL you want to tip",
-      "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
-      "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
-      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens in order to push through."
-    },
     "transactionDetails": {
       "heading": "Transactions Details",
       "date": "Date",
@@ -647,11 +476,9 @@
       "sent": "Sent",
       "received": "Received",
       "withdrawals": "Withdrawals",
-      "topups": "Top ups",
-      "all": "All"
+      "topups": "Top ups"
     },
     "transactions": {
-      "backToAccount": "Back to account",
       "heading": "Transaction history",
       "filters": "Filters",
       "loadMore": "Load More",
@@ -659,7 +486,6 @@
       "newTransactions": "new transactions",
       "noTransactions": "No transactions found",
       "type": "Type",
-      "all": "All",
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
@@ -671,47 +497,12 @@
       "clear": "Clear filter",
       "apply": "Apply filter",
       "sent": "Sent",
-      "received": "Received",
-      "pending": "Pending"
-    },
-    "utilities": {
-      "heading": "Utilities",
-      "backToAccount": "Back to account",
-      "tipWebsite": "Tip website",
-      "namingSystem": "Naming System",
-      "namingSystemInfo": "Register a name so it can be used as your public wallet address",
-      "allowances": "Allowances",
-      "fungibleTokens": "Fungible Tokens",
-      "signAndVerifyMsg": "Sign / Verify message",
-      "tipWebsiteInfo": "Make a donation to any public website",
-      "allowancesInfo": "Give or take an allowance",
-      "fungibleTokensInfo": "Add new token, or deploy token contract",
-      "signAndVerifyMsgInfo": "Sign a message with your private key or verify a signed message",
-      "tokenMigration": "Token Migration",
-      "prepareTokenMigration": "Prepare for Token Migration"
-    },
-    "tokenMigration": {
-      "heading": "Token Migration",
-      "addressLabel": "Your aeternity address",
-      "continue": "Continue",
-      "checkContinue": "I am certain my address and identicon are correct",
-      "ethPrivateKey": "Ethereum Private Key",
-      "migrateToken": "Migrate Token",
-      "migrations": "Migrations",
-      "seeMigrations": "See Migrations",
-      "migrationsInfo": "are in migration now. They will be available after the next hardfork. ",
-      "migrateTokenInfo": "The amount of tokens you choose to migrate, will be available on this address in the next scheduled hardfork release.",
-      "backToTokenMigration": "Back to token migration info",
-      "backendServiceUrl": "Backend Service Url"
+      "received": "Received"
     },
     "aeAddressInput": {
       "label": "Aeternity Address",
       "identicon": "Your identicon",
       "error": "Invalid AE Address"
-    },
-    "welcome": {
-      "send": "Send",
-      "across": "across the Globe"
     },
     "popupMessageSign": {
       "heading": "would like to sign message ",
@@ -719,11 +510,9 @@
     },
     "network": {
       "url": "URL:",
-      "edit": "Edit",
       "delete": "Delete",
       "middleware": "Middleware:",
       "allNetworks": "Your networks",
-      "cancel": "Cancel",
       "networkNamePlaceholder": "Enter network name",
       "networkNameLabel": "Network name",
       "networkUrlPlaceholder": "Enter network URL",
@@ -738,9 +527,7 @@
       "data-collected": "Data Collected",
       "browser": "Browser version",
       "details": "Technical details:",
-      "cancel": "Cancel",
       "donate": "Donate Data"
     }
-  },
-  "redirecting": "Redirecting"
+  }
 }

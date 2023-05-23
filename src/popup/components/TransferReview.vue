@@ -18,8 +18,8 @@
     >
       <template #value>
         <AvatarWithChainName
-          :address="account.address"
-          :name="account.name"
+          :address="activeAccount.address"
+          :name="activeAccount.name"
           :show-address="!isRecipientName"
         />
       </template>
@@ -51,7 +51,7 @@
       :label="
         (isMultisig)
           ? $t('modals.multisigTxProposal.amountProposed')
-          : $t('pages.tipPage.amountLabel')
+          : $t('common.amount')
       "
       class="details-item"
     >
@@ -97,7 +97,7 @@
 
     <DetailsItem
       v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
-      :label="$t('pages.signTransaction.total')"
+      :label="$t('common.total')"
       class="details-item"
     >
       <template #value>
@@ -127,12 +127,18 @@ import {
   ref,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { useDeepLinkApi, useMultisigAccounts, useMultisigTransactions } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { encode, Encoding } from '@aeternity/aepp-sdk-13';
+import {
+  useAccounts,
+  useDeepLinkApi,
+  useModals,
+  useMultisigAccounts,
+  useMultisigTransactions,
+  useSdk13,
+} from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
-  MODAL_DEFAULT,
   TX_FUNCTIONS,
   aeToAettos,
   checkAensName,
@@ -141,7 +147,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IAccount, IPendingTransaction, ISdk } from '../../types';
+import { IPendingTransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -172,17 +178,19 @@ export default defineComponent({
     amount: { type: Number, default: null },
   },
   setup(props, { root, emit }) {
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { activeAccount } = useAccounts({ store: root.$store });
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
     } = useMultisigAccounts({ store: root.$store });
+
     const loading = ref<boolean>(false);
-    const account = computed<IAccount>(() => root.$store.getters.account);
     const tippingV1 = computed(() => root.$store.state.tippingV1);
     const tippingV2 = computed(() => root.$store.state.tippingV2);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
+    const { getSdk } = useSdk13({ store: root.$store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -197,14 +205,14 @@ export default defineComponent({
     const PROPOSE_TRANSACTION_FEE = 0.000182940;
 
     function openTransactionFailedModal() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_DEFAULT,
+      openDefaultModal({
         title: root.$t('modals.transaction-failed.msg'),
         icon: 'critical',
       });
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
+      const sdk = await getSdk();
       loading.value = true;
       try {
         let actionResult;
@@ -225,10 +233,9 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk.value.spend(amount, recipient, {
-            waitMined: false,
+          actionResult = await sdk.spendWithCustomOptions(amount, recipient, {
+            payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
-            payload: props.transferData.payload,
           });
         }
 
@@ -241,10 +248,11 @@ export default defineComponent({
             type: 'spendToken',
             tx: {
               amount,
-              callerId: account.value.address,
+              callerId: activeAccount.value.address,
               contractId: selectedAsset.contractId,
               type: SCHEMA.TX_TYPE.contractCall,
               function: TX_FUNCTIONS.transfer,
+              recipientId: recipient,
             },
           };
 
@@ -256,7 +264,7 @@ export default defineComponent({
             type: 'spend',
             tx: {
               amount,
-              senderId: account.value.address,
+              senderId: activeAccount.value.address,
               recipientId: recipient,
               type: SCHEMA.TX_TYPE.spend,
             },
@@ -310,7 +318,7 @@ export default defineComponent({
           tipUrl: recipient,
           tx: {
             amount,
-            callerId: account.value.address,
+            callerId: activeAccount.value.address,
             contractId: tippingContract.value.deployInfo.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
@@ -350,7 +358,7 @@ export default defineComponent({
             addTransactionToPendingMultisigAccount(
               txHash,
               activeMultisigAccount.value.gaAccountId,
-              account.value.address,
+              activeAccount.value.address,
             );
           }
 
@@ -409,7 +417,7 @@ export default defineComponent({
       isRecipientName,
       isSelectedAssetAex9,
       tokenSymbol,
-      account,
+      activeAccount,
       activeMultisigAccount,
     };
   },

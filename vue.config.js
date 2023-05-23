@@ -1,7 +1,6 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
-const sass = require('sass');
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
 
@@ -31,12 +30,6 @@ module.exports = {
       filename: 'index.html',
     },
     ...PLATFORM === 'extension' && {
-      override: {
-        template: 'src/redirect/redirect.html',
-        entry: 'src/redirect/redirect.js',
-        title: 'redirect',
-        filename: 'redirect.html',
-      },
       permissions: {
         template: 'src/popup/CameraRequestPermission.html',
         entry: 'src/popup/cameraPermission.js',
@@ -59,14 +52,9 @@ module.exports = {
           background: {
             entry: 'src/background/index.js',
           },
-          override: {
-            entry: 'src/redirect/redirect.js',
-          },
           contentScripts: {
             entries: {
               inject: 'src/content-scripts/inject.js',
-              twitter: 'src/content-scripts/twitter.js',
-              youtube: 'src/content-scripts/youtube.js',
             },
           },
         },
@@ -79,7 +67,7 @@ module.exports = {
     i18n: {
       locale: 'en',
       fallbackLocale: 'en',
-      localeDir: 'locales',
+      localeDir: 'popup/locales',
       enableInSFC: false,
     },
   },
@@ -116,11 +104,6 @@ module.exports = {
             { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
             { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
             { from: 'public/favicons/request_permission.jpg', to: 'icons/request_permission.jpg' },
-            {
-              from: 'src/content-scripts/tipButton.scss',
-              to: 'other/tipButton.css',
-              transform: (_, f) => sass.renderSync({ file: f }).css.toString(),
-            },
           ],
         }])
         .end();

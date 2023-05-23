@@ -1,9 +1,9 @@
 <template>
   <div class="tips-claim">
     <AccountInfo
-      :address="account.address"
-      :name="account.name"
-      :idx="account.idx"
+      :address="activeAccount.address"
+      :name="activeAccount.name"
+      :idx="activeAccount.idx"
     />
 
     <div class="header">
@@ -36,7 +36,7 @@
       extend
       @click="claimTips"
     >
-      {{ $t('pages.tipPage.confirm') }}
+      {{ $t('common.confirm') }}
     </BtnMain>
 
     <Loader v-if="loading" />
@@ -47,12 +47,15 @@
 import { mapGetters, mapState } from 'vuex';
 import {
   BLOG_CLAIM_TIP_URL,
+  MODAL_CLAIM_SUCCESS,
   aettosToAe,
   toURL,
   validateTipUrl,
   watchUntilTruthy,
 } from '../utils';
 import { IS_EXTENSION } from '../../lib/environment';
+import { useAccounts, useModals } from '../../composables';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -65,6 +68,13 @@ export default {
     BtnHelp,
     AccountInfo,
   },
+  setup(props, { root }) {
+    const { activeAccount } = useAccounts({ store: root.$store });
+
+    return {
+      activeAccount,
+    };
+  },
   data: () => ({
     url: '',
     loading: false,
@@ -73,7 +83,7 @@ export default {
   computed: {
     ...mapState(['tippingV1']),
     ...mapGetters('sdkPlugin', ['sdk']),
-    ...mapGetters(['account', 'tippingSupported']),
+    ...mapGetters(['tippingSupported']),
     normalizedUrl() {
       if (!validateTipUrl(this.url)) return '';
       return toURL(this.url).toString();
@@ -89,6 +99,9 @@ export default {
   },
   methods: {
     async claimTips() {
+      const { openModal, openDefaultModal } = useModals();
+      const { activeAccount } = useAccounts({ store: this.$store });
+
       const url = this.normalizedUrl;
       this.loading = true;
       await watchUntilTruthy(() => this.sdk && this.tippingV1);
@@ -101,12 +114,16 @@ export default {
               .catch(() => 1),
           ),
         );
-        if (!claimAmount) throw new Error('NO_ZERO_AMOUNT_PAYOUT');
-        await this.$store.dispatch('claimTips', { url, address: this.account.address });
+        if (!claimAmount) {
+          throw new Error('NO_ZERO_AMOUNT_PAYOUT');
+        }
+        await this.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
         await this.$store.dispatch('cacheInvalidateOracle');
         await this.$store.dispatch('cacheInvalidateTips');
-        this.$store.dispatch('modals/open', { name: 'claim-success', url, claimAmount });
-        this.$router.push({ name: 'account' });
+
+        openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
+
+        this.$router.push({ name: ROUTE_ACCOUNT });
       } catch (e) {
         const { error = '' } = e.response ? e.response.data : {};
         let msg;
@@ -118,8 +135,9 @@ export default {
         ) msg = this.$t('pages.claim.noZeroClaim');
         else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) msg = this.$t('pages.claim.oracleFailed');
         else if (error) msg = error;
-        if (msg) this.$store.dispatch('modals/open', { name: 'default', msg });
-        else {
+        if (msg) {
+          openDefaultModal({ msg });
+        } else {
           e.payload = { url };
           throw e;
         }

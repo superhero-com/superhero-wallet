@@ -6,11 +6,11 @@
     <div
       v-for="token in filteredTokens"
       :key="token.symbol"
-      :class="[
-        'token-row',
-        token.isReceived ? TX_FUNCTIONS.received : TX_FUNCTIONS.sent,
-        { error }
-      ]"
+      class="token-row"
+      :class="{
+        error,
+        received: token.isReceived
+      }"
       :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
@@ -39,7 +39,7 @@ import {
   shrinkString,
   calculateFontSize,
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
+  TX_DIRECTION,
 } from '../utils';
 import { useTransactionTokens } from '../../composables';
 import type { ITokenResolved, ITransaction } from '../../types';
@@ -92,7 +92,7 @@ export default defineComponent({
       getTokenName,
       amountRounded,
       calculateFontSize,
-      TX_FUNCTIONS,
+      TX_DIRECTION,
     };
   },
 });
@@ -118,6 +118,7 @@ export default defineComponent({
     .amount {
       color: variables.$color-white;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     &.received .amount {
@@ -130,6 +131,8 @@ export default defineComponent({
 
     .token-name {
       @extend %face-sans-16-regular;
+
+      letter-spacing: -2%;
     }
   }
 }

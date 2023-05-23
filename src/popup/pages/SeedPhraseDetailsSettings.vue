@@ -20,7 +20,7 @@
         </template>
 
         <template v-else>
-          {{ $t('addressCopied') }}
+          {{ $t('common.addressCopied') }}
         </template>
       </BtnMain>
     </div>
@@ -62,6 +62,7 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { useCopy } from '../../composables';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
@@ -77,7 +78,7 @@ export default defineComponent({
 
     function setBackedUpSeed() {
       root.$store.commit('setBackedUpSeed');
-      root.$router.push({ name: 'account' });
+      root.$router.push({ name: ROUTE_ACCOUNT });
     }
 
     return {

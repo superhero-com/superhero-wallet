@@ -5,12 +5,10 @@ import mutations from './mutations';
 import actions from './actions';
 import sdkPlugin from './plugins/sdk';
 import persistState from './plugins/persistState';
-import modals from './plugins/modals';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
 import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
-import openErrorModalPlugin from './plugins/openErrorModal';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
@@ -19,7 +17,7 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { defaultNetwork, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
+import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
 
 Vue.use(Vuex);
 
@@ -28,7 +26,7 @@ export default new Vuex.Store({
     isRestored: false,
     mnemonic: null,
     current: {
-      network: defaultNetwork.name,
+      network: NETWORK_DEFAULT.name,
       token: 0,
     },
     userNetworks: [],
@@ -61,13 +59,11 @@ export default new Vuex.Store({
       stateReducer,
     ),
     sdkPlugin,
-    modals,
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
     pendingTransactionHandler,
     languagesPlugin,
-    openErrorModalPlugin,
     veeValidate,
     pollAccountInfo,
   ],

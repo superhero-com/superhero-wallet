@@ -79,12 +79,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref } from '@vue/composition-api';
 import { generateMnemonic } from '@aeternity/bip39';
 import {
   IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
 } from '../../lib/environment';
 import { MODAL_ACCOUNT_IMPORT } from '../utils';
+import { useModals } from '../../composables';
+
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
 import Platforms from '../components/Platforms.vue';
@@ -92,33 +95,39 @@ import SuperheroLogoIcon from '../../icons/logo.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 import CheckCircleIcon from '../../icons/check-circle-fill.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     SuperheroLogoIcon,
     CheckBox,
     BtnSubheader,
     Platforms,
   },
-  data: () => ({
-    PlusCircleIcon,
-    CheckCircleIcon,
-    termsAgreed: false,
-    IS_WEB,
-    IS_MOBILE_DEVICE,
-    IN_FRAME,
-  }),
-  methods: {
-    async createWallet() {
-      this.$store.commit('setMnemonic', generateMnemonic());
-      this.$router.push(this.$store.state.loginTargetLocation);
-    },
-    async importWallet() {
-      await this.$store.dispatch('modals/open', {
-        name: MODAL_ACCOUNT_IMPORT,
-      });
-    },
+  setup(props, { root }) {
+    const { openModal } = useModals();
+
+    const termsAgreed = ref(false);
+
+    async function createWallet() {
+      root.$store.commit('setMnemonic', generateMnemonic());
+      root.$router.push(root.$store.state.loginTargetLocation);
+    }
+
+    async function importWallet() {
+      return openModal(MODAL_ACCOUNT_IMPORT);
+    }
+
+    return {
+      PlusCircleIcon,
+      CheckCircleIcon,
+      IS_WEB,
+      IS_MOBILE_DEVICE,
+      IN_FRAME,
+      termsAgreed,
+      createWallet,
+      importWallet,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

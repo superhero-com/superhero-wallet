@@ -16,6 +16,7 @@
         <TransactionItem
           v-for="transaction in transactionList"
           :key="`${transaction.transactionOwner}-${transaction.hash}`"
+          class="transaction-item"
           :transaction="transaction"
           show-transaction-owner
         />
@@ -69,13 +70,15 @@ export default defineComponent({
   width: 100%;
   background-color: variables.$color-bg-6;
   border-radius: variables.$border-radius-interactive;
-  padding: 8px 12px;
+  padding-block: 8px;
   display: flex;
   flex-direction: column;
 
   .title {
-    @extend %face-sans-15-bold;
+    @extend %face-sans-16-semi-bold;
 
+    line-height: 24px;
+    padding-inline: 12px;
     margin-bottom: 4px;
   }
 
@@ -87,6 +90,10 @@ export default defineComponent({
   .spinner {
     align-self: center;
     height: 60px;
+  }
+
+  .transaction-item {
+    padding-block: 10px;
   }
 }
 </style>

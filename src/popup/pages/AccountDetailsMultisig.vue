@@ -18,7 +18,7 @@
       <BtnBox
         v-if="!IS_IOS"
         :icon="CreditCardIcon"
-        :text="$t('pages.token-details.buy')"
+        :text="$t('common.buy')"
         :href="simplexLink"
       />
     </template>

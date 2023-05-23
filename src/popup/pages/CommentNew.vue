@@ -2,7 +2,7 @@
   <div class="comment-new">
     <AccountSelector
       v-model="creatorAddress"
-      @select="selectAccount"
+      @select="setActiveAccountByAddress"
     />
     <div class="comment-text">
       {{ text }}
@@ -15,13 +15,13 @@
         class="cancel-button"
         @click="openCallbackOrGoHome(false)"
       >
-        {{ $t('pages.tipPage.cancel') }}
+        {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
         :disabled="!tippingSupported"
         @click="sendComment"
       >
-        {{ $t('pages.tipPage.confirm') }}
+        {{ $t('common.confirm') }}
       </BtnMain>
     </FixedScreenFooter>
 
@@ -36,9 +36,14 @@ import {
   watch,
 } from '@vue/composition-api';
 import { Route } from 'vue-router';
-import { MODAL_DEFAULT } from '../utils';
-import { useDeepLinkApi, useSdk, useAccounts } from '../../composables';
+import {
+  useAccounts,
+  useDeepLinkApi,
+  useModals,
+  useSdk,
+} from '../../composables';
 import { useGetter } from '../../composables/vuex';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -53,10 +58,15 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { account, accounts, accountsSelectOptions } = useAccounts({ store: root.$store });
+    const {
+      activeAccount,
+      accountsSelectOptions,
+      setActiveAccountByAddress,
+    } = useAccounts({ store: root.$store });
 
-    const creatorAddress = ref<string>(account.value.address);
+    const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
@@ -71,7 +81,7 @@ export default defineComponent({
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: 'account' });
+          root.$router.push({ name: ROUTE_ACCOUNT });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -90,8 +100,7 @@ export default defineComponent({
         ]);
         openCallbackOrGoHome(true);
       } catch (e: any) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
@@ -99,15 +108,6 @@ export default defineComponent({
         throw e;
       } finally {
         loading.value = false;
-      }
-    }
-
-    function selectAccount(val: string) {
-      if (val) {
-        root.$store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === val)?.idx,
-        );
       }
     }
 
@@ -128,7 +128,7 @@ export default defineComponent({
       tippingSupported,
       sendComment,
       openCallbackOrGoHome,
-      selectAccount,
+      setActiveAccountByAddress,
     };
   },
 });

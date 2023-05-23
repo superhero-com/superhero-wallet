@@ -1,6 +1,6 @@
 <template>
   <a
-    :class="['link-button', variant]"
+    :class="['link-button', variant, { underlined }]"
     :href="to"
     target="blank"
   >
@@ -21,6 +21,7 @@ export type LinkButtonVariant = typeof LINK_BUTTON_VARIANT[number];
 export default defineComponent({
   props: {
     to: { type: String, required: true },
+    underlined: Boolean,
     variant: {
       type: String,
       validator: (value: LinkButtonVariant) => LINK_BUTTON_VARIANT.includes(value),
@@ -79,11 +80,16 @@ export default defineComponent({
 
     &:hover {
       color: variables.$color-white;
-      text-decoration: underline;
 
       svg {
         color: variables.$color-white;
       }
+    }
+  }
+
+  &.underlined {
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

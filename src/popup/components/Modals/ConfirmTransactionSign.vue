@@ -57,7 +57,7 @@
 
         <DetailsItem
           v-if="!isDex"
-          :label="$t('pages.signTransaction.total')"
+          :label="$t('common.total')"
         >
           <TokenAmount
             :amount="totalAmount"
@@ -94,7 +94,7 @@
       <BtnMain
         data-cy="accept"
         third
-        :text="$t('pages.signTransaction.confirm')"
+        :text="$t('common.confirm')"
         @click="resolve()"
       />
     </template>
@@ -110,16 +110,19 @@ import {
   ref,
 } from '@vue/composition-api';
 import { camelCase } from 'lodash-es';
+import { RejectedByUserError } from '../../../lib/errors';
 import {
   FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
+  TX_DIRECTION,
   convertToken,
   isTransactionAex9,
   getAeFee,
+  fetchJson,
+  postJson,
 } from '../../utils';
 import type {
   ITokenResolved,
@@ -129,7 +132,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk, useTransactionTx } from '../../../composables';
+import { useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -174,8 +177,6 @@ export default defineComponent({
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-
     const {
       direction,
       isAllowance,
@@ -193,6 +194,7 @@ export default defineComponent({
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
+    const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
@@ -223,7 +225,7 @@ export default defineComponent({
     const totalAmount = computed(() => getTxAmountTotal.value(txWrapped.value, direction.value));
 
     const singleToken = computed((): ITokenResolved => ({
-      isReceived: direction.value === TX_FUNCTIONS.received,
+      isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
       symbol: getTxSymbol.value(props.transaction),
     }));
@@ -303,7 +305,7 @@ export default defineComponent({
     }
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     onMounted(async () => {
@@ -311,12 +313,13 @@ export default defineComponent({
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
-          const sdk = await getSdk();
-          const { bytecode } = await sdk.getContractByteCode(props.transaction.contractId);
-          const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
-            bytecode,
-            calldata: props.transaction.callData,
-          });
+          const { bytecode } = await fetchJson(
+            `${activeNetwork.value.url}/v3/contracts/${props.transaction.contractId}/code`,
+          );
+          const txParams: ITx = await postJson(
+            `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+            { body: { bytecode, calldata: props.transaction.callData } },
+          );
           txFunction.value = txParams.function as TxFunctionRaw;
 
           setTransactionTx({ ...txParams, ...props.transaction });

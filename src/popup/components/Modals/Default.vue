@@ -8,14 +8,19 @@
     :full-screen="fullScreen"
     v-on="{ close: close || resolve }"
   >
-    <div class="icon-box">
-      <StatusIcon
-        :status="icon"
-        class="icon"
-      />
+    <div
+      v-if="icon"
+      class="top-icon-wrapper"
+    >
+      <IconBoxed>
+        <StatusIcon
+          :status="icon"
+          class="status-icon"
+        />
+      </IconBoxed>
     </div>
 
-    <h2 class="text-heading-2 text-center">
+    <h2 class="text-heading-2 text-center title">
       {{ title }}
     </h2>
 
@@ -33,38 +38,41 @@
           :class="{ 'center-button': textCenter }"
           @click="resolve"
         >
-          {{ buttonMessage || $t('ok') }}
+          {{ buttonMessage || $t('common.ok') }}
         </BtnMain>
       </slot>
     </template>
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from '@vue/composition-api';
+import type { StatusIconType } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
+import IconBoxed from '../IconBoxed.vue';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
     TemplateRenderer,
     StatusIcon,
+    IconBoxed,
   },
   props: {
     resolve: { type: Function, required: true },
     close: { type: Function, default: null },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },
-    type: { type: String, default: '' },
-    icon: { type: String, default: '' },
+    icon: { type: String as PropType<StatusIconType>, default: '' },
     buttonMessage: { type: String, default: '' },
     textCenter: Boolean,
     fullScreen: Boolean,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -72,29 +80,18 @@ export default {
 @use '../../../styles/mixins';
 
 .default {
-  .text-heading-2 {
+  .title {
     margin-bottom: 16px;
   }
 
-  .icon-box {
-    @include mixins.flex(center, center, column);
+  .top-icon-wrapper {
+    margin-bottom: 20px;
+    text-align: center;
+  }
 
-    gap: 20px;
-
-    .icon {
-      padding: 4px;
-      border: 4px solid variables.$color-disabled;
-      border-radius: 200%;
-      height: 64px;
-      width: 64px;
-      margin-bottom: 20px;
-      background-color: variables.$color-bg-1;
-    }
-
-    .center-button {
-      width: auto;
-      padding: 0 24px;
-    }
+  .center-button {
+    width: auto;
+    padding: 0 24px;
   }
 }
 </style>

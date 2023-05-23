@@ -13,23 +13,24 @@
       <LatestTransactionsCard />
 
       <DashboardCard
-        v-if="!IS_IOS"
+        v-if="isNodeMainnet && !IS_IOS"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
         :btn-text="$t('dashboard.buyCard.button')"
         :background="buyBackground"
         :icon="CardIcon"
-        :href="simplexLink"
+        :href="activeAccountSimplexLink"
         :card-id="DASHBOARD_CARD_ID.buyAe"
       />
 
       <DashboardCard
+        v-if="isNodeMainnet || isNodeTestnet"
         :title="$t('dashboard.nameCard.title')"
         :description="$t('dashboard.nameCard.description')"
         :btn-text="$t('dashboard.nameCard.button')"
         :background="chainNameBackground"
         :icon="MenuCardIcon"
-        :to="{ name: 'account-details-names-claim' }"
+        :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
         :card-id="DASHBOARD_CARD_ID.claimName"
         variant="purple"
       />
@@ -38,14 +39,12 @@
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-} from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 
-import { buildSimplexLink, DASHBOARD_CARD_ID } from '../utils';
-import { useGetter } from '../../composables/vuex';
 import { IS_IOS } from '../../lib/environment';
+import { DASHBOARD_CARD_ID } from '../utils';
+import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
+import { useAccounts, useSdk } from '../../composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -72,21 +71,28 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup() {
-    const account = useGetter('account');
+  setup(props, { root }) {
+    const {
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store: root.$store });
 
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
 
     return {
       DASHBOARD_CARD_ID,
+      IS_IOS,
+      ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
-      simplexLink,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
       buyBackground,
       chainNameBackground,
-      IS_IOS,
+      isNodeMainnet,
+      isNodeTestnet,
     };
   },
 });

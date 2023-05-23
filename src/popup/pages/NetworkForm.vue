@@ -25,7 +25,7 @@
         variant="muted"
         class="cancel-button"
         extra-padded
-        :text="$t('pages.network.cancel')"
+        :text="$t('common.cancel')"
         @click="goBack"
       />
       <BtnMain
@@ -52,7 +52,7 @@ import {
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
-import { defaultNetwork } from '../utils';
+import { NETWORK_DEFAULT } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
 import type { INetworkBase } from '../../types';
 
@@ -69,11 +69,10 @@ interface IFormConfig {
 }
 
 const NETWORK_PROPS: INetworkBase = {
+  ...NETWORK_DEFAULT,
   url: '',
   name: '',
-  middlewareUrl: defaultNetwork.middlewareUrl,
-  compilerUrl: defaultNetwork.compilerUrl,
-  backendUrl: defaultNetwork.backendUrl,
+  networkId: 'custom', // TODO: In the future `networkId` will be removed from INetwork
 };
 
 export default defineComponent({

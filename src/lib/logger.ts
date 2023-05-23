@@ -1,45 +1,54 @@
 /* eslint-disable no-console */
-import { pick } from 'lodash-es';
 import Vue from 'vue';
+import { pick } from 'lodash-es';
+import { Browser } from 'webextension-polyfill';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
-import { openErrorModal } from '../store/plugins/openErrorModal';
+import { useModals } from '../composables';
+import { RejectedByUserError } from './errors';
+
+interface ILoggerOptions {
+  background?: boolean;
+}
 
 export default class Logger {
-  static background;
+  static background: boolean;
 
-  static init(options = {}) {
-    const { background } = options;
+  static init(options: ILoggerOptions = {}) {
+    const { background = false } = options;
+
     Logger.background = background;
+
     if (!background) {
       Vue.config.errorHandler = (error, vm, info) => {
-        console.error(info);
-        console.error(error);
-        if (error && error.message !== 'Rejected by user') Logger.write({ message: error.toString(), info, type: 'vue-error' });
+        console.error(error, info);
+        if (error && error instanceof RejectedByUserError) {
+          Logger.write({ message: error.toString(), info, type: 'vue-error' });
+        }
       };
 
       Vue.config.warnHandler = (message, vm, info) => {
-        console.error(message);
-        console.error(info);
-        Logger.write({
-          message,
-          stack: info,
-          type: 'vue-warn',
-        });
+        console.warn(message, info);
       };
     }
 
     window.addEventListener('unhandledrejection', async (promise) => {
-      const { stack, message, name } = promise.reason || {};
+      const reason = promise.reason || {};
+      const { stack, message, name } = reason;
       if (
-        (typeof promise.reason === 'string'
-          && promise.reason.includes('CompileError: WebAssembly.instantiate()'))
+        (
+          typeof reason === 'string'
+          && reason.includes('CompileError: WebAssembly.instantiate()')
+        )
         || name === 'NavigationDuplicated'
-        || message === 'Rejected by user'
-      ) return;
+        || (reason && reason instanceof RejectedByUserError)
+      ) {
+        return;
+      }
+
       try {
         await Logger.write({
-          message: typeof promise.reason === 'string' ? promise.reason : message,
+          message: typeof reason === 'string' ? reason : message,
           stack,
           type: 'unhandledrejection',
         });
@@ -69,14 +78,15 @@ export default class Logger {
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
-    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
+    (browser as Browser).storage.local.set({ errorLog: [...errorLog, logEntry] });
     if (!Logger.background && modal && error.message) {
+      const { openErrorModal } = useModals();
       openErrorModal(logEntry);
     }
   }
 
   static async get() {
-    const { errorLog = [] } = await browser.storage.local.get('errorLog');
+    const { errorLog = [] } = await (browser as Browser).storage.local.get('errorLog');
     return errorLog;
   }
 

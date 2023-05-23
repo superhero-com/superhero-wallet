@@ -10,8 +10,8 @@ import {
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  TX_FUNCTIONS,
   ACCOUNT_HD_WALLET,
+  TX_DIRECTION,
   validateHash,
   convertToken,
   aettosToAe,
@@ -43,7 +43,6 @@ export default {
   account({ accounts: { activeIdx } }, { accounts }) {
     return accounts[activeIdx] || {}; // TODO: Return null
   },
-  isLoggedIn: (state, { account }) => Object.keys(account).length > 0,
   networks({ userNetworks }) {
     return [
       NETWORK_MAINNET,
@@ -81,7 +80,7 @@ export default {
   },
   getTxAmountTotal: (
     { fungibleTokens: { availableTokens } },
-  ) => (transaction, direction = TX_FUNCTIONS.sent) => {
+  ) => (transaction, direction = TX_DIRECTION.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
       return +convertToken(
@@ -89,7 +88,7 @@ export default {
         -availableTokens[contractCallData.token].decimals,
       );
     }
-    const isReceived = direction === TX_FUNCTIONS.received;
+    const isReceived = direction === TX_DIRECTION.received;
 
     return +aettosToAe(
       new BigNumber(
@@ -106,15 +105,15 @@ export default {
 
     if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
       return tx.senderId === currentAddress
-        ? TX_FUNCTIONS.sent
-        : TX_FUNCTIONS.received;
+        ? TX_DIRECTION.sent
+        : TX_DIRECTION.received;
     }
 
     return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
       .map((key) => tx?.[key])
       .includes(currentAddress)
-      ? TX_FUNCTIONS.sent
-      : TX_FUNCTIONS.received;
+      ? TX_DIRECTION.sent
+      : TX_DIRECTION.received;
   },
   getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
   getAccountPendingTransactions: (

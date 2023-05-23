@@ -1,19 +1,35 @@
-import { ref } from '@vue/composition-api';
+import { onBeforeUnmount, onMounted, ref } from '@vue/composition-api';
 import { ROUTE_ACCOUNT } from '../popup/router/routeNames';
-import type { IDefaultComposableOptions } from '../types';
 
 const homeRouteName = ref(ROUTE_ACCOUNT);
+const isAppActive = ref(false);
 
-export function useUi({ store }: IDefaultComposableOptions) {
-  function setHomeRouteName(routeName: string) {
+export function useUi() {
+  function setHomeRouteName(routeName: string, onChangeCallback: () => any) {
     if (homeRouteName.value !== routeName) {
       homeRouteName.value = routeName;
-      store.commit('initTransactions');
+      onChangeCallback();
     }
+  }
+
+  function handleVisibilityChange(event: Event) {
+    isAppActive.value = !(event.target as Document).hidden;
+  }
+
+  function initVisibilityListeners() {
+    onMounted(() => {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    });
   }
 
   return {
     homeRouteName,
+    isAppActive,
+    initVisibilityListeners,
     setHomeRouteName,
   };
 }

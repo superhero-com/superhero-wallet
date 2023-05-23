@@ -3,8 +3,9 @@ import {
   defineComponent,
   onMounted,
 } from '@vue/composition-api';
-import { useDeepLinkApi, useSdk } from '../../composables';
-import { MODAL_DEFAULT, handleUnknownError } from '../utils';
+import { RejectedByUserError } from '../../lib/errors';
+import { handleUnknownError } from '../utils';
+import { useDeepLinkApi, useModals, useSdk } from '../../composables';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -12,6 +13,7 @@ export default defineComponent({
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
       const { getSdk } = useSdk({ store: root.$store });
+      const { openDefaultModal } = useModals();
 
       try {
         const sdk = await getSdk();
@@ -19,8 +21,7 @@ export default defineComponent({
         const currentNetworkId = root.$store.getters.activeNetwork.networkId;
 
         if (networkId !== currentNetworkId) {
-          await root.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
+          await openDefaultModal({
             icon: 'warning',
             title: root.$t('modals.wrongNetwork.title'),
             msg: root.$t('modals.wrongNetwork.msg', [networkId]),
@@ -40,10 +41,12 @@ export default defineComponent({
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
-      } catch (e: any) {
+      } catch (error: any) {
         openCallbackOrGoHome(false);
 
-        if (e.message !== 'Rejected by user') handleUnknownError(e);
+        if (error instanceof RejectedByUserError) {
+          handleUnknownError(error);
+        }
       }
     });
   },

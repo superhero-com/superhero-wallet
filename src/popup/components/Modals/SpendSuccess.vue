@@ -15,7 +15,7 @@
       disable-subtitle-margin
     />
     <div class="pending-wrapper">
-      <Pending />
+      <IconBoxed :icon="PendingIcon" />
     </div>
     <TokenAmount
       :amount="getTxAmountTotal(transaction)"
@@ -58,7 +58,7 @@
       <BtnMain
         inline
         nowrap
-        :text="$t('ok')"
+        :text="$t('common.ok')"
         @click="resolve"
       />
     </template>
@@ -77,8 +77,9 @@ import AvatarWithChainName from '../AvatarWithChainName.vue';
 import ModalHeader from '../ModalHeader.vue';
 import PayloadDetails from '../PayloadDetails.vue';
 
-import Pending from '../../../icons/animated-pending.svg?vue-component';
+import PendingIcon from '../../../icons/animated-pending.svg?vue-component';
 import ExternalLink from '../../../icons/external-link-big.svg?vue-component';
+import IconBoxed from '../IconBoxed.vue';
 
 export default {
   components: {
@@ -86,15 +87,16 @@ export default {
     ModalHeader,
     AvatarWithChainName,
     Modal,
-    Pending,
     TokenAmount,
     BtnMain,
+    IconBoxed,
   },
   props: {
     resolve: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
   data: () => ({
+    PendingIcon,
     ExternalLink,
     hideAvatar: false,
     nameRecipient: null,
@@ -165,18 +167,10 @@ export default {
   }
 
   .pending-wrapper {
-    @include mixins.flex(center, center, column);
-
-    background-color: variables.$color-bg-1;
-    border: 4px solid rgba(variables.$color-white, 0.05);
-    border-radius: 50%;
+    display: flex;
+    justify-content: center;
     margin-top: 34px;
     margin-bottom: 24px;
-  }
-
-  .animated-pending {
-    width: 48px;
-    height: 48px;
   }
 
   .sending-to {

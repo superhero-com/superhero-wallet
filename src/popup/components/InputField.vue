@@ -21,14 +21,11 @@
         <slot name="label">{{ label }}</slot>
       </label>
 
-      <a
+      <BtnHelp
         v-if="showHelp"
-        class="label-help"
-        @click.prevent="$emit('help')"
-      >
-        <QuestionCircleIcon />
-      </a>
-
+        class="btn-help"
+        @help="$emit('help')"
+      />
       <div
         v-if="$slots['label-after'] || textLimit"
         class="label-after"
@@ -111,14 +108,14 @@ import {
 } from '@vue/composition-api';
 import type { IInputMessage, IInputMessageRaw } from '../../types';
 import { INPUT_MESSAGE_STATUSES } from '../utils';
-import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
+import BtnHelp from './buttons/BtnHelp.vue';
 
 type InputFieldType = 'text' | 'number';
 
 export default defineComponent({
   name: 'InputField',
   components: {
-    QuestionCircleIcon,
+    BtnHelp,
   },
   props: {
     value: { type: [String, Number], default: null },
@@ -255,22 +252,8 @@ export default defineComponent({
       display: inline-block;
     }
 
-    &-help {
-      display: flex;
+    .btn-help {
       margin-left: 10px;
-
-      .icon {
-        color: variables.$color-white;
-        height: 24px;
-        width: 24px;
-        opacity: 0.5;
-      }
-
-      &:hover {
-        .icon {
-          opacity: 1;
-        }
-      }
     }
 
     &-after {

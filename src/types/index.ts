@@ -4,6 +4,7 @@
     no-unused-vars,
 */
 
+import Vue, { ComponentOptions } from 'vue';
 import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -14,12 +15,15 @@ import {
   MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
   FUNCTION_TYPE_MULTISIG,
+  ALLOWED_ICON_STATUSES,
 } from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
 export * from './filter';
 export * from './forms';
+
+export type Dictionary<T = any> = Record<string, T>;
 
 /**
  * Convert `key: val` objects into union of values.
@@ -31,7 +35,21 @@ export type ObjectValues<T> = T[keyof T];
  */
 type PublicPart<T> = {[K in keyof T]: T[K]};
 
+/**
+ * Allowed options that can be passed to our fetch utility functions
+ */
+export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
+  body?: object;
+}
+
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
+
+export type ResolveRejectCallback = (...args: any) => void;
+
+export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
+  functional: boolean;
+  render: any;
+}
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
@@ -52,6 +70,11 @@ export interface IAppData {
   url: string;
   host: string;
   protocol?: string;
+}
+
+export interface IWallet {
+  privateKey: any;
+  chainCode: any;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -192,6 +215,7 @@ export interface INetworkBase {
   url: string
   name: string
   middlewareUrl: string
+  networkId: string
   compilerUrl: string
   backendUrl: string
   index?: number
@@ -199,7 +223,6 @@ export interface INetworkBase {
 
 export interface INetwork extends INetworkBase {
   explorerUrl: string
-  networkId: string
   tipContractV1: string
   tipContractV2?: string
   multisigBackendUrl: string
@@ -428,13 +451,36 @@ export interface ITopHeader {
 
 export type ISignMessage = (m: any) => Promise<any>
 
+export interface IName {
+  autoExtend: boolean;
+  createdAtHeight: number;
+  expiresAt: number;
+  hash: string;
+  name: string;
+  owner: string;
+  pointers: Dictionary;
+}
+
+/**
+ * Data fetched with the use of `sdk.api.getNameEntryByName` method.
+ */
+export interface INameEntryFetched {
+  id: string;
+  owner: string;
+  pointers: { id: string; key: string }[];
+  ttl: number;
+}
+
 /**
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
  */
 export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
-  Ae: Record<string, any>;
+  addRpcClient: (connection: any) => any;
+  Ae: Dictionary;
+  aensClaim: (name: string, salt: string, options?: any) => Promise<any>;
+  aensPreclaim: (name: string) => Promise<any>;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
   balance: (address: string) => Promise<number>;
@@ -460,8 +506,9 @@ export interface ISdk {
     }
   ) => Promise<{ hash: string, rawTx: string }>;
   payingForTx(arg0: any): any;
-  poll: (txHash: string, options: any) => any;
+  poll: (txHash: string, options?: any) => any;
   pool: Map<string, any>;
+  shareWalletInfo: (c: any) => any;
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
@@ -526,14 +573,15 @@ export interface IMiddlewareStatus {
   nodeVersion: string
 }
 
-export interface IName {
-  autoExtend: boolean
-  createdAtHeight: number
-  expiresAt: number
-  hash: string
-  name: string
-  owner: string
-  pointers: Record<string, any>
+export interface IPopupConfig {
+  type: string;
+  app: IAppData;
+  action?: any;
+  data?: string;
+  message?: string;
+  transaction?: Partial<ITx>;
+  resolve?: any;
+  reject?: any;
 }
 
 export interface IResponseChallenge {
@@ -615,3 +663,5 @@ export interface IDefaultComposableOptions {
    */
   store: Store<any>
 }
+
+export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];

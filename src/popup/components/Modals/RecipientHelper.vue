@@ -25,7 +25,7 @@
         class="footer"
         @click="resolve"
       >
-        {{ $t('ok') }}
+        {{ $t('common.ok') }}
       </BtnMain>
     </template>
   </Default>

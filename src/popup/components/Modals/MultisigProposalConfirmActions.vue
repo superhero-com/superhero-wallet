@@ -7,12 +7,14 @@
     @close="closeModal"
   >
     <div class="content">
-      <div class="icon-box">
-        <StatusIcon
-          :status="icon"
-          class="icon"
-          :class="[action]"
-        />
+      <div class="icon-wrapper">
+        <IconBoxed>
+          <StatusIcon
+            class="status-icon"
+            :class="[action]"
+            :status="statusIcon"
+          />
+        </IconBoxed>
       </div>
 
       <h2 class="text-heading-2 text-center">
@@ -25,12 +27,12 @@
         class="account-selector"
         persistent-default-text
         unstyled
-        @select="selectAccount($event)"
+        @select="setActiveAccountByAddress($event)"
       />
 
       <div>
         <div class="active-account">
-          <AccountItem :address="account.address" />
+          <AccountItem :address="activeAccount.address" />
         </div>
 
         <div
@@ -49,7 +51,7 @@
     <template #footer>
       <BtnMain
         variant="muted"
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="closeModal"
       />
       <BtnMain
@@ -72,15 +74,21 @@ import {
   PropType,
 } from '@vue/composition-api';
 import type { TranslateResult } from 'vue-i18n';
-import type { IAccount, IFormSelectOption, IMultisigFunctionTypes } from '../../../types';
+import type {
+  IFormSelectOption,
+  IMultisigFunctionTypes,
+  ResolveRejectCallback,
+  StatusIconType,
+} from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
-import { FUNCTION_TYPE_MULTISIG } from '../../utils';
+import { FUNCTION_TYPE_MULTISIG, getAccountNameToDisplay } from '../../utils';
 
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountItem from '../AccountItem.vue';
 import StatusIcon from '../StatusIcon.vue';
+import IconBoxed from '../IconBoxed.vue';
 
 export default defineComponent({
   components: {
@@ -89,20 +97,21 @@ export default defineComponent({
     BtnMain,
     AccountItem,
     StatusIcon,
+    IconBoxed,
   },
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
     action: { type: String as PropType<IMultisigFunctionTypes>, required: true },
-    resolve: { type: Function as PropType<() => void>, required: true },
-    reject: { type: Function as PropType<() => void>, required: true },
+    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
   setup(props, { root }) {
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
     const {
-      account,
-      accounts,
+      activeAccount,
+      setActiveAccountByAddress,
     } = useAccounts({ store: root.$store });
     const {
       pendingMultisigTxSigners,
@@ -110,10 +119,6 @@ export default defineComponent({
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction({ store: root.$store });
-
-    function getAccountNameToDisplay(acc: IAccount) {
-      return acc.name || `${root.$t('pages.account.heading')} ${(acc.idx || 0) + 1}`;
-    }
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => pendingMultisigTxLocalSigners.value
@@ -124,8 +129,7 @@ export default defineComponent({
         })),
     );
 
-    // StatusIcon
-    const icon = computed(() => (
+    const statusIcon = computed((): StatusIconType => (
       props.action === FUNCTION_TYPE_MULTISIG.confirm ? 'success' : 'critical'
     ));
 
@@ -142,24 +146,24 @@ export default defineComponent({
 
     const actionHasError = computed(() => {
       const confirmActionText = confirmActionContent.value as Record<string, TranslateResult>;
-      if (!pendingMultisigTxSigners.value.includes(account.value.address)) {
+      if (!pendingMultisigTxSigners.value.includes(activeAccount.value.address)) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.revoke
-        && activeMultisigAccount.value?.proposedBy !== account.value.address
+        && activeMultisigAccount.value?.proposedBy !== activeAccount.value.address
       ) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.confirm
-        && pendingMultisigTxConfirmedBy.value.includes(account.value.address)
+        && pendingMultisigTxConfirmedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
       if (
         props.action === FUNCTION_TYPE_MULTISIG.refuse
-        && pendingMultisigTxRefusedBy.value.includes(account.value.address)
+        && pendingMultisigTxRefusedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
@@ -170,21 +174,12 @@ export default defineComponent({
       props.reject();
     }
 
-    function selectAccount(accountAddress: string) {
-      if (accountAddress) {
-        root.$store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === accountAddress)?.idx,
-        );
-      }
-    }
-
     return {
-      icon,
+      statusIcon,
       closeModal,
       eligibleAccounts,
-      account,
-      selectAccount,
+      activeAccount,
+      setActiveAccountByAddress,
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,
@@ -240,19 +235,11 @@ export default defineComponent({
     padding: 0 18px;
   }
 
-  .icon-box {
-    @include mixins.flex(center, center, column);
+  .icon-wrapper {
+    margin-bottom: 20px;
 
-    gap: 20px;
-
-    .icon {
-      padding: 8px;
-      border: 4px solid variables.$color-disabled;
-      border-radius: 200%;
-      height: 56px;
-      width: 56px;
-      margin-bottom: 20px;
-      background-color: variables.$color-bg-1;
+    .status-icon {
+      margin: 8px;
 
       &.refuse {
         color: variables.$color-warning;

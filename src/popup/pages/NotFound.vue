@@ -12,6 +12,7 @@
     </div>
     <div class="button-wrapper">
       <BtnMain
+        v-if="!hideHomeButton"
         class="button"
         :to="{ name: 'index' }"
       >
@@ -40,6 +41,9 @@ import { BUG_REPORT_URL } from '../utils';
 
 export default defineComponent({
   components: { BtnMain, BugIcon },
+  props: {
+    hideHomeButton: Boolean,
+  },
   setup() {
     return {
       NotFoundImage,

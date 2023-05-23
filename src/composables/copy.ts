@@ -1,5 +1,5 @@
 import { ref } from '@vue/composition-api';
-import { handleUnknownError } from '../popup/utils/helper';
+import { handleUnknownError } from '../popup/utils';
 
 function fallbackCopyTextToClipboard(text: string) {
   const textarea = document.createElement('textarea');

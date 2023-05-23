@@ -22,7 +22,7 @@
           </template>
           <template #value>
             <AccountItem
-              :address="account.address"
+              :address="activeAccount.address"
             />
           </template>
         </DetailsItem>
@@ -41,8 +41,8 @@
       <ModalHeader :title="$t('modals.send.sendTitle')" />
       <div class="account-row">
         <AccountItem
-          :address="account.address"
-          :name="account.name"
+          :address="activeAccount.address"
+          :name="activeAccount.name"
           size="md"
         />
       </div>
@@ -52,8 +52,9 @@
       v-model.trim="formModel.address"
       v-validate="{
         required: true,
-        not_same_as: isMultisig? multisigVaultAddress : account.address,
-        name_registered_address_or_url: true,
+        not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
+        name_registered_address_or_url: isUrlTipingEnabled,
+        name_registered_address: !isUrlTipingEnabled,
         token_to_an_address: { isToken: !isAe },
       }"
       name="address"
@@ -61,7 +62,7 @@
       show-help
       show-message-help
       :label="$t('modals.send.recipientLabel')"
-      :placeholder="isMultisig
+      :placeholder="isMultisig || !isUrlTipingEnabled
         ? $t('modals.send.recipientPlaceholder')
         : $t('modals.send.recipientPlaceholderUrl')"
       :message="addressMessage"
@@ -101,7 +102,7 @@
       class="amount-input"
       show-tokens-with-balance
       :ae-only="isMultisig"
-      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('pages.send.amount')"
+      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
       :message="amountMessage"
       :selected-asset="formModel.selectedAsset"
       @asset-selected="handleAssetChange"
@@ -113,7 +114,7 @@
           :class="{ chosen: isMaxValue }"
           @click="setMaxValue"
         >
-          MAX
+          {{ $t('common.max') }}
         </BtnPlain>
       </template>
     </InputAmount>
@@ -181,18 +182,17 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type {
-  IAccount,
   IFormSelectOption,
   IInputMessage,
   IToken,
   ITokenList,
 } from '../../types';
 import {
-  MODAL_DEFAULT,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
   AETERNITY_CONTRACT_ID,
+  AGGREGATOR_URL,
   APP_LINK_WEB,
   convertToken,
   validateTipUrl,
@@ -200,11 +200,13 @@ import {
   getAccountNameToDisplay,
 } from '../utils';
 import {
+  useAccounts,
   useBalances,
   useMaxAmount,
+  useModals,
   useMultisigAccounts,
 } from '../../composables';
-import { useState, useGetter } from '../../composables/vuex';
+import { useState } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmountV2.vue';
@@ -258,13 +260,13 @@ export default defineComponent({
     const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
+    const isUrlTipingEnabled = ref<boolean>(false);
 
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
-
-    const account = useGetter<IAccount>('account');
-    const accounts = useGetter<IAccount[]>('accounts');
+    const { openModal, openDefaultModal } = useModals();
+    const { accounts, activeAccount } = useAccounts({ store: root.$store });
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -287,6 +289,7 @@ export default defineComponent({
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
+      && isUrlTipingEnabled.value
       && validateTipUrl(formModel.value.address)
       && !checkAensName(formModel.value.address)
     ));
@@ -365,6 +368,7 @@ export default defineComponent({
         || aeternityToken.value;
       if (query.account) formModel.value.address = query.account;
       if (query.amount) formModel.value.amount = query.amount;
+      if (query.payload) formModel.value.payload = query.payload;
     }
 
     function setMaxValue() {
@@ -388,9 +392,7 @@ export default defineComponent({
     }
 
     function showRecipientHelp() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_RECIPIENT_INFO,
-      });
+      openModal(MODAL_RECIPIENT_INFO);
     }
 
     function handleAssetChange(selectedAsset: IToken) {
@@ -398,8 +400,7 @@ export default defineComponent({
     }
 
     async function openScanQrModal() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
         title: root.$t('pages.send.scanAddress'),
         icon: 'critical',
       });
@@ -411,8 +412,7 @@ export default defineComponent({
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', {
-            name: MODAL_DEFAULT,
+          openDefaultModal({
             title: root.$t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
@@ -423,8 +423,7 @@ export default defineComponent({
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
           formModel.value.address = '';
-          root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, type: 'insufficient-balance' });
-          formModel.value.address = '';
+          openDefaultModal({ msg: root.$t('modals.insufficient-balance.msg') });
           return;
         }
 
@@ -457,8 +456,7 @@ export default defineComponent({
     }
 
     function editPayload() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_PAYLOAD_FORM,
+      openModal(MODAL_PAYLOAD_FORM, {
         payload: formModel.value.payload,
       }).then((text) => {
         formModel.value.payload = text;
@@ -483,19 +481,15 @@ export default defineComponent({
     onMounted(async () => {
       if (
         props.isMultisig
-        && !activeMultisigAccount.value?.signers.includes(account.value.address)
+        && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
       ) {
         root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
       }
-      const tipUrlEncoded: any = root.$route.query.url;
-      if (tipUrlEncoded) {
-        const tipUrl = decodeURIComponent(tipUrlEncoded);
-        const tipUrlNormalised = new URL(/^\w+:\D+/.test(tipUrl) ? tipUrl : `https://${tipUrl}`);
-        formModel.value.address = tipUrlNormalised.toString();
-      }
 
       const { query } = root.$route;
-
+      if ([query['x-success'], query['x-cancel']].every((value) => value === AGGREGATOR_URL)) {
+        isUrlTipingEnabled.value = true;
+      }
       queryHandler({
         ...query,
         token: query.token || formModel.value?.selectedAsset?.contractId,
@@ -515,7 +509,7 @@ export default defineComponent({
       error,
       amountMessage,
       availableTokens,
-      account,
+      activeAccount,
       accounts,
       accountsAllowedToProposeTxSelectOptions,
       urlStatus,
@@ -525,7 +519,7 @@ export default defineComponent({
       multisigVaultAddress,
       multisigVaultOwnedByManyAccounts,
       activeMultisigAccount,
-      getAccountNameToDisplay,
+      isUrlTipingEnabled,
       openScanQrModal,
       selectAccount,
       setMaxValue,

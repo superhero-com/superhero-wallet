@@ -2,9 +2,9 @@
   <AccountDetailsBase class="account-details">
     <template #account-info>
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
+        :address="activeAccount.address"
+        :name="activeAccount.name"
+        :idx="activeAccount.idx"
         can-copy-address
       />
     </template>
@@ -20,15 +20,23 @@
       <OpenTransferReceiveModalButton />
       <OpenTransferSendModalButton />
       <BtnBox
-        v-if="!IS_IOS"
+        v-if="isNodeMainnet && !IS_IOS"
         :icon="CreditCardIcon"
-        :text="$t('pages.token-details.buy')"
-        :href="simplexLink"
+        :text="$t('common.buy')"
+        :href="activeAccountSimplexLink"
         :disabled="!isOnline"
       />
       <BtnBox
+        v-if="isNodeTestnet"
+        :icon="FaucetIcon"
+        :text="$t('common.faucet')"
+        :subtitle="'Testnet coin'"
+        :href="activeAccountFaucetUrl"
+      />
+      <BtnBox
+        v-if="isNodeMainnet || isNodeTestnet"
         :icon="SwapIcon"
-        :text="$t('pages.token-details.swap')"
+        :text="$t('common.swap')"
         :href="DEX_URL"
         :disabled="!isOnline"
       />
@@ -42,11 +50,14 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
-import { useBalances, useConnection } from '../../composables';
-import { buildSimplexLink, DEX_URL } from '../utils';
 import { IS_IOS } from '../../lib/environment';
-import type { IAccount } from '../../types';
+import { DEX_URL } from '../utils';
+import {
+  useAccounts,
+  useBalances,
+  useConnection,
+  useSdk,
+} from '../../composables';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
 import AccountInfo from '../components/AccountInfo.vue';
@@ -58,8 +69,10 @@ import BtnBox from '../components/buttons/BtnBox.vue';
 
 import CreditCardIcon from '../../icons/credit-card.svg?vue-component';
 import SwapIcon from '../../icons/swap.svg?vue-component';
+import FaucetIcon from '../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
+  name: 'AccountDetails',
   components: {
     BtnBox,
     OpenTransferSendModalButton,
@@ -71,23 +84,32 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();
-    const { balance } = useBalances({ store: root.$store });
 
-    const account = useGetter<IAccount>('account');
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+
+    const {
+      activeAccount,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store: root.$store });
+
+    const { balance } = useBalances({ store: root.$store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
-
     return {
+      CreditCardIcon,
+      SwapIcon,
+      FaucetIcon,
       DEX_URL,
       IS_IOS,
       isOnline,
+      isNodeMainnet,
+      isNodeTestnet,
       balanceNumeric,
-      account,
-      CreditCardIcon,
-      SwapIcon,
-      simplexLink,
+      activeAccount,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
     };
   },
 });

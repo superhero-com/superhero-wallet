@@ -3,6 +3,7 @@
     :to="explorerUrl"
     target="_blank"
     class="account-item"
+    variant="muted"
   >
     <Avatar
       :address="address"
@@ -112,23 +113,6 @@ export default defineComponent({
     margin-top: -2px; // Compensate the icon position
     width: 22px;
     height: 22px;
-  }
-
-  .name,
-  .address,
-  .external-link-icon {
-    color: variables.$color-white;
-    opacity: 0.75;
-    transition: 100ms;
-  }
-
-  &:hover {
-    .name,
-    .address,
-    .external-link-icon {
-      color: variables.$color-white;
-      opacity: 1;
-    }
   }
 }
 </style>

@@ -2,16 +2,16 @@ import Vue from 'vue';
 import { watch } from '@vue/composition-api';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
-  MODAL_DEFAULT,
   fetchJson,
   postJson,
   checkAddress,
   checkAensName,
   fetchAllPages,
   fetchRespondChallenge,
+  isInsufficientBalanceError,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware, useSdk } from '../../composables';
+import { useMiddleware, useModals, useSdk } from '../../composables';
 
 export default (store) => {
   const {
@@ -24,6 +24,8 @@ export default (store) => {
     getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
   } = useMiddleware({ store });
+
+  const { openDefaultModal } = useModals();
 
   store.registerModule('names', {
     namespaced: true,
@@ -138,24 +140,23 @@ export default (store) => {
         }));
       },
       async updatePointer(
-        { dispatch },
+        _,
         { name, address, type = 'update' },
       ) {
         const sdk = await getSdk();
         const nameEntry = await sdk.aensQuery(name);
+        let msg;
         try {
           if (type === 'extend') {
             await nameEntry.extendTtl();
           } else if (type === 'update') {
             await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
-          dispatch(
-            'modals/open',
-            { name: MODAL_DEFAULT, msg: i18n.t('pages.names.pointer-added', { type }) },
-            { root: true },
-          );
+          msg = i18n.t('pages.names.pointer-added', { type });
         } catch (e) {
-          dispatch('modals/open', { name: MODAL_DEFAULT, msg: e.message }, { root: true });
+          msg = isInsufficientBalanceError(e) ? i18n.t('modals.insufficient-balance.msg') : e.message;
+        } finally {
+          openDefaultModal({ msg });
         }
       },
       async setDefaults(
