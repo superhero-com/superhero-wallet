@@ -193,7 +193,6 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useForm, Field } from 'vee-validate';
-import { anyExcept } from '../../store/plugins/veeValidate';
 import type {
   IFormSelectOption,
   IInputMessage,
@@ -293,24 +292,10 @@ export default defineComponent({
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
       if (!errors.value) return { status: 'success' };
-
       const items = errors.value[fieldName as keyof typeof errors.value];
       if (items) {
-        // eslint-disable-next-line no-console
-        console.log(items);
-        // TODO: Vee-validate v4 does not return error codes with errors
-        // We need to find a new way to filter messages
-        throw new Error('Function needs refactoring.');
+        return { status: 'error', text: items };
       }
-      // if (items) {
-      //   const warning = items
-      //     .find((_error) => WARNING_RULES.includes(_error.rule))?.msg || null;
-      //   if (warning) return { status: 'warning', text: warning };
-
-      //   const _error = items
-      //     .filter(({ rule }) => !WARNING_RULES.includes(rule))[0]?.msg || null;
-      //   if (_error) return { status: 'error', text: _error };
-      // }
       return { status: 'success' };
     }
     const amountMessage = computed(() => getMessageByFieldName('amount'));
@@ -389,7 +374,7 @@ export default defineComponent({
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
-      emit('input', inputPayload);
+      emit('update:transferData', inputPayload);
       return nextTick();
     }
 
@@ -413,7 +398,7 @@ export default defineComponent({
 
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      const isValid = !anyExcept('address', WARNING_RULES, errors.value);
+      const isValid = Object.keys(errors.value).length === 0;
       if (isValid) {
         await emitCurrentFormModelState();
         emit('success');
