@@ -421,6 +421,7 @@ export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_CONSENSUS_INFO = 'consensus-info';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
+export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 
 export const DEX_CONTRACTS: Record<string, IDexContracts> = {

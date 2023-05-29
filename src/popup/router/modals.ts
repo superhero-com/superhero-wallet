@@ -23,6 +23,7 @@ import {
   MODAL_PAYLOAD_FORM,
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+  MODAL_ACCOUNT_SELECT_OPTIONS,
 } from '../utils/constants';
 import { useModals } from '../../composables';
 
@@ -49,6 +50,7 @@ import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
+import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -76,6 +78,9 @@ export default () => {
   });
   registerModal(MODAL_FORM_SELECT_OPTIONS, {
     component: FormSelectOptions,
+  });
+  registerModal(MODAL_ACCOUNT_SELECT_OPTIONS, {
+    component: AccountSelectOptions,
   });
   registerModal(MODAL_HELP, {
     component: Help,

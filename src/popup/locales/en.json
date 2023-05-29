@@ -160,6 +160,7 @@
     "createMultisigAccount": {
       "title": "Create new multisig vault",
       "btnText": "Create multisig vault",
+      "btnTextShort": "Create vault",
       "btnSubtitle": "Manage funds with multiple accounts",
       "signer": "Signer",
       "signerInputPlaceholder": "Signer's account address",
@@ -521,6 +522,7 @@
     },
     "accounts": {
       "addAccount": "Add account",
+      "searchAccountsPlaceholder": "Search for account",
       "addAccountDescription": "Add an account to your wallet to manage funds separately."
     },
     "vaults": {

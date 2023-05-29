@@ -11,9 +11,11 @@
               v-if="multisigVaultOwnedByManyAccounts"
               :options="accountsAllowedToProposeTxSelectOptions"
               :default-text="$t('modals.multisigTxProposal.signingAccount')"
+              :value="account.address"
               class="account-selector"
               persistent-default-text
               unstyled
+              account-select
               @select="selectAccount($event)"
             />
             <template v-else>
@@ -197,7 +199,6 @@ import {
   convertToken,
   validateTipUrl,
   checkAensName,
-  getAccountNameToDisplay,
 } from '../utils';
 import {
   useAccounts,
@@ -266,7 +267,11 @@ export default defineComponent({
     const { balance, aeternityToken } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
     const { openModal, openDefaultModal } = useModals();
-    const { accounts, activeAccount } = useAccounts({ store: root.$store });
+    const {
+      accounts,
+      activeAccount,
+      prepareAccountSelectOptions,
+    } = useAccounts({ store: root.$store });
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
@@ -331,12 +336,7 @@ export default defineComponent({
     const multisigVaultOwnedByManyAccounts = computed(() => mySignerAccounts?.length > 1);
 
     const accountsAllowedToProposeTxSelectOptions = computed(
-      (): IFormSelectOption[] => mySignerAccounts
-        .map((acc): IFormSelectOption => ({
-          text: getAccountNameToDisplay(acc),
-          value: acc.address,
-          address: acc.address,
-        })),
+      (): IFormSelectOption[] => prepareAccountSelectOptions(mySignerAccounts),
     );
 
     function selectAccount(val: string) {

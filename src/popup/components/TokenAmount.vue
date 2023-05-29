@@ -1,7 +1,7 @@
 <template>
   <span
     class="token-amount"
-    :class="{ large, 'has-label': !!label }"
+    :class="[{ large, 'has-label': !!label, small }]"
   >
     <span>
       <span
@@ -57,6 +57,7 @@ export default defineComponent({
     noSymbol: Boolean,
     highPrecision: Boolean,
     dynamicSizing: Boolean,
+    small: Boolean,
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -100,6 +101,7 @@ export default defineComponent({
   .amount {
     font-size: var(--font-size);
     line-height: 20px;
+    white-space: nowrap;
   }
 
   .symbol {
@@ -116,6 +118,7 @@ export default defineComponent({
       display: block;
       margin-left: 0;
       padding-top: 4px;
+      white-space: nowrap;
     }
   }
 
@@ -139,6 +142,12 @@ export default defineComponent({
 
     .fiat {
       @extend %face-sans-18-regular;
+    }
+  }
+
+  &.small {
+    .fiat {
+      @extend %face-sans-12-regular;
     }
   }
 }

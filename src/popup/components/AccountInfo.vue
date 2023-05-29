@@ -7,9 +7,13 @@
       class="avatar"
       :address="address"
       :name="name"
+      :size="avatarSize"
       :borderless="avatarBorderless"
     />
-    <div class="account-details">
+    <div
+      class="account-details"
+      :class="{ 'list-name': isListName }"
+    >
       <div
         v-if="isMultisig"
         class="account-name"
@@ -66,10 +70,12 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
+    avatarSize: { type: String, default: 'lg' },
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
+    isListName: Boolean,
   },
   setup(props) {
     const activeNetwork = useGetter('activeNetwork');
@@ -96,8 +102,6 @@ export default defineComponent({
 
   .avatar {
     margin-right: 8px;
-    width: 48px;
-    height: 48px;
     background-color: variables.$color-black;
   }
 
@@ -110,6 +114,18 @@ export default defineComponent({
       @extend %face-sans-16-medium;
 
       margin: 4px 0;
+    }
+
+    &.list-name {
+      width: 100%;
+      min-width: 0;
+
+      .account-name-truncated,
+      .account-name {
+        @extend %face-sans-15-bold;
+
+        margin: 0;
+      }
     }
 
     .ae-address {

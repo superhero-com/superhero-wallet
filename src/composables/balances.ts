@@ -72,6 +72,10 @@ export function useBalances({ store }: IDefaultComposableOptions) {
     contractId: AETERNITY_CONTRACT_ID,
   }) as IAsset);
 
+  function getAccountBalance(address: string) {
+    return balances.value[address] || new BigNumber(0);
+  }
+
   async function updateBalances() {
     const sdk = await getSdk();
     const balancesPromises = accounts.value.map(
@@ -103,6 +107,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
     balancesTotal,
     balance,
     balanceCurrency,
+    getAccountBalance,
     updateBalances,
   };
 }
