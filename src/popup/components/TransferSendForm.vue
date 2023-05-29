@@ -193,6 +193,7 @@ import {
   MODAL_PAYLOAD_FORM,
   AETERNITY_CONTRACT_ID,
   AGGREGATOR_URL,
+  APP_LINK_WEB,
   convertToken,
   validateTipUrl,
   checkAensName,
@@ -441,12 +442,14 @@ export default defineComponent({
         await (root as any).validate();
       } else {
         if (!scanResult) return;
-        if (scanResult.startsWith('ak_')) formModel.value.address = scanResult;
-        else {
-          queryHandler([
-            ...new URL(scanResult).searchParams.entries(),
-          ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
-        }
+        queryHandler([
+          ...new URL(
+            scanResult.startsWith('ak_')
+              ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
+              : scanResult,
+          )
+            .searchParams.entries(),
+        ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
         invoiceId.value = null;
       }
       if (!formModel.value.address) formModel.value.address = '';
