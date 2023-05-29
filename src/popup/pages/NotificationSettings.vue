@@ -13,7 +13,7 @@
         :key="setting.type"
         :class="{ unchecked: !setting.checked }"
         :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
-        :value="setting.checked"
+        :model-value="setting.checked"
         :label="setting.text"
         @update:modelValue="toggleNotificationSetting(setting.type)"
       />

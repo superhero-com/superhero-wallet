@@ -405,7 +405,7 @@ export default defineComponent({
     > .details-item {
       margin: 8px 0;
 
-      :deep(.value){
+      :deep(.value) {
         @extend %face-mono-10-medium;
 
         letter-spacing: 0;

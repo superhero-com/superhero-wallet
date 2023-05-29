@@ -22,7 +22,6 @@ export default {
     disabled: { type: Boolean, default: false },
   },
   emits: ['update:modelValue'],
-  compatConfig: { COMPONENT_V_MODEL: false },
   computed: {
     active: {
       get() {

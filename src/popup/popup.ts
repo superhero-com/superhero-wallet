@@ -1,7 +1,6 @@
 import '../lib/environment';
 import '../lib/initPolyfills';
 import { createApp } from 'vue';
-import './plugins/compositionApi'; // * this is no longer needed as of Vue3
 import store from '../store';
 import router from './router';
 import { i18n } from '../store/plugins/languages';
@@ -20,4 +19,4 @@ app.use(router);
 app.component('Loader', LoaderComponent);
 app.mount('#app');
 
-Logger.init();
+Logger.init({ app });

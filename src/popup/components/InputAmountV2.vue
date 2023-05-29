@@ -89,7 +89,6 @@ export default defineComponent({
     showTokensWithBalance: Boolean,
   },
   emits: ['update:modelValue', 'asset-selected', 'error'],
-  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const store = useStore();
     const { errors } = useField('amount');

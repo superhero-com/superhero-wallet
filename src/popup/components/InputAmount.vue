@@ -47,7 +47,6 @@ export default defineComponent({
     noToken: Boolean,
   },
   emits: ['update:modelValue', 'error'],
-  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
     const fee = ref(new BigNumber(0));
 
