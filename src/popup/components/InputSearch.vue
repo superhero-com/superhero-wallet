@@ -29,7 +29,6 @@ export default {
     Search,
     Eraser,
   },
-  compatConfig: { COMPONENT_V_MODEL: false },
 };
 </script>
 

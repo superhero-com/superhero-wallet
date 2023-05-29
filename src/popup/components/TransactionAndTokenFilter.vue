@@ -101,7 +101,7 @@ export default defineComponent({
 
     onMounted(() => {
       if (showFilterBar.value) {
-        maxHeight.value = (refs?.transactionFilter as HTMLDivElement)?.clientHeight;
+        maxHeight.value = (instance?.refs?.transactionFilter as HTMLDivElement)?.clientHeight;
         firstRender.value = false;
       }
     });

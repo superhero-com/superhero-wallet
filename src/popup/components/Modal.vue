@@ -5,6 +5,7 @@
     @after-enter="$emit('opened')"
   >
     <div
+      v-if="show"
       class="modal"
       :class="{
         'full-screen': fullScreen,
@@ -42,7 +43,7 @@
             v-if="hasCloseButton"
             data-cy="btn-close"
             class="close-button"
-            @click="$emit('close')"
+            @click="handleClose"
           />
         </div>
 
@@ -66,7 +67,7 @@
 
       <div
         class="cover"
-        @click="$emit('close')"
+        @click="handleClose"
       />
     </div>
   </transition>
@@ -89,6 +90,7 @@ export default defineComponent({
     BtnClose,
   },
   props: {
+    show: Boolean,
     hasCloseButton: Boolean,
     fullScreen: Boolean,
     fromBottom: Boolean,
@@ -100,7 +102,7 @@ export default defineComponent({
     header: { type: String, default: null },
   },
   emits: ['close', 'opened'],
-  setup(props, { slots }) {
+  setup(props, { slots, emit }) {
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
     onMounted(() => {
@@ -109,11 +111,16 @@ export default defineComponent({
       }
     });
 
+    function handleClose() {
+      emit('close');
+    }
+
     onBeforeUnmount(() => {
       document.body.style.overflow = '';
     });
 
     return {
+      handleClose,
       IS_FIREFOX,
       IS_EXTENSION,
       showHeader,
@@ -231,8 +238,8 @@ export default defineComponent({
 
   &.full-screen {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: 0; // needed to overwrite #app .main styles
-    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite #app .main styles
+    padding-bottom: 0; // needed to overwrite .app-wrapper .main styles
+    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite .app-wrapper .main styles
 
     @include mixins.desktop {
       position: absolute;
@@ -287,7 +294,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 
@@ -307,7 +314,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 

@@ -38,7 +38,6 @@
     "@rushstack/eslint-patch": "^1.2.0",
     "@vee-validate/i18n": "^4.8.6",
     "@vee-validate/rules": "^4.8.6",
-    "@vue/compat": "^3.1.0-0",
     "@vue/vue3-jest": "^27.0.0",
     "@zxing/library": "^0.19.1",
     "bignumber.js": "^9.0.2",

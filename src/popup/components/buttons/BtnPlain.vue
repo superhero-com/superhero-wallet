@@ -5,7 +5,6 @@
     class="button-plain"
     :class="{ extend }"
     :to="to"
-    @click.prevent="$emit('click', $event)"
   >
     <slot>{{ text }}</slot>
   </Component>

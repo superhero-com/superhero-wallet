@@ -115,9 +115,11 @@ export default (store) => {
     : Crypto.isAddressValid(value)));
 
   defineRule('token_to_an_address',
-    (value, [isToken]) => !checkAensName(value) || (checkAensName(value) && !isToken), {
-      params: ['isToken'],
-    });
+    (value, [isToken]) => (
+      !checkAensName(value)
+      || (checkAensName(value) && !isToken)
+    ),
+    { params: ['isToken'] });
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);

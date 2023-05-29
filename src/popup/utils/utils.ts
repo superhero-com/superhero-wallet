@@ -14,6 +14,7 @@ import {
   InvalidTxError,
 } from '@aeternity/aepp-sdk';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { useI18n } from 'vue-i18n';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -256,19 +257,20 @@ export function escapeSpecialChars(str = '') {
 }
 
 export function secondsToRelativeTime(seconds: number) {
+  const { t } = useI18n();
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
   if (seconds < secondsPerMinute) {
-    return i18n.global.tc('common.seconds', Math.round(seconds));
+    return t('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.global.rt('common.minutes', Math.round(seconds / secondsPerMinute));
+    return t('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.global.rt('common.hours', Math.round(seconds / secondsPerHour));
+    return t('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.global.rt('common.days', Math.round(seconds / secondsPerDay));
+  return t('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {
@@ -480,6 +482,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return (
+    // @ts-ignore
     acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
   );
 }

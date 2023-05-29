@@ -11,7 +11,6 @@
         dimmed,
       }
     ]"
-    @click="$emit('click')"
   >
     <Badge
       class="badge"

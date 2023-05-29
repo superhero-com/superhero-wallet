@@ -15,11 +15,13 @@
 }
 
 html,
-body {
+body,
+#app {
   height: var(--height);
 }
 
-body {
+body,
+#app {
   margin: 0;
   background-color: $color-black;
 
