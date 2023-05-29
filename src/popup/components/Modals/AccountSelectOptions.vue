@@ -1,9 +1,10 @@
 <template>
   <Modal
-    class="form-select-options"
-    from-bottom
+    class="account-select-options"
     has-close-button
     no-padding
+    from-bottom
+    full-screen
     @close="reject()"
   >
     <template #header>
@@ -11,15 +12,17 @@
         v-model="searchPhrase"
         :title="title"
         :options-length="options.length"
+        :search-placeholder="$t('pages.accounts.searchAccountsPlaceholder')"
       />
     </template>
 
     <div>
-      <FormSelectOptionsItem
-        v-for="(option, index) in optionsFiltered"
+      <AccountSelectOptionsItem
+        v-for="(account, index) in optionsFiltered"
         :key="index"
-        :option="option"
-        @click="resolve(option.value)"
+        :account="account"
+        :value="value"
+        @click="resolve(account.address)"
       />
     </div>
   </Modal>
@@ -35,13 +38,13 @@ import {
 import type { IFormSelectOption, ResolveRejectCallback } from '../../../types';
 
 import Modal from '../Modal.vue';
-import FormSelectOptionsItem from '../FormSelectOptionsItem.vue';
+import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';
 import FormSelectOptionsHeader from '../FormSelectOptionsHeader.vue';
 
 export default defineComponent({
   components: {
     FormSelectOptionsHeader,
-    FormSelectOptionsItem,
+    AccountSelectOptionsItem,
     Modal,
   },
   props: {

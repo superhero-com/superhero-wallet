@@ -28,6 +28,7 @@
           :label="getSignerLabel(index)"
           item-title="address"
           :options="accountsSelectOptions"
+          account-select
         />
         <FormTextarea
           v-else
@@ -139,7 +140,7 @@
           @click="openFormStep"
         />
         <BtnMain
-          :text="$t('modals.createMultisigAccount.btnText')"
+          :text="$t('modals.createMultisigAccount.btnTextShort')"
           wide
           :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed
             || notEnoughBalanceToCreateMultisig"

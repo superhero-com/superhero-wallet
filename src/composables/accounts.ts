@@ -15,13 +15,17 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   /**
    * Accounts data formatted as the form select options
    */
-  const accountsSelectOptions = computed(
-    (): IFormSelectOption[] => accounts.value.map((acc) => ({
+  function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelectOption[] {
+    return accountList.map((acc) => ({
       text: getAccountNameToDisplay(acc),
       value: acc.address,
       address: acc.address,
-    })),
-  );
+      name: acc.name,
+      idx: acc.idx,
+    }));
+  }
+
+  const accountsSelectOptions = computed(() => prepareAccountSelectOptions(accounts.value));
 
   const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
@@ -58,6 +62,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     activeAccountFaucetUrl,
     activeIdx,
     isLoggedIn,
+    prepareAccountSelectOptions,
     isLocalAccountAddress,
     getAccountByAddress,
     setActiveAccountByAddress,

@@ -22,11 +22,13 @@
       </h2>
 
       <FormSelect
+        :value="activeAccount.address"
         :options="eligibleAccounts"
         :default-text="confirmActionContent.formSelectText"
         class="account-selector"
         persistent-default-text
         unstyled
+        account-select
         @select="setActiveAccountByAddress($event)"
       />
 
@@ -81,7 +83,7 @@ import type {
   StatusIconType,
 } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
-import { FUNCTION_TYPE_MULTISIG, getAccountNameToDisplay } from '../../utils';
+import { FUNCTION_TYPE_MULTISIG } from '../../utils';
 
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -112,6 +114,7 @@ export default defineComponent({
     const {
       activeAccount,
       setActiveAccountByAddress,
+      prepareAccountSelectOptions,
     } = useAccounts({ store: root.$store });
     const {
       pendingMultisigTxSigners,
@@ -121,12 +124,7 @@ export default defineComponent({
     } = usePendingMultisigTransaction({ store: root.$store });
 
     const eligibleAccounts = computed(
-      (): IFormSelectOption[] => pendingMultisigTxLocalSigners.value
-        .map((acc): IFormSelectOption => ({
-          text: getAccountNameToDisplay(acc),
-          value: acc.address,
-          address: acc.address,
-        })),
+      (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),
     );
 
     const statusIcon = computed((): StatusIconType => (
