@@ -106,7 +106,9 @@ export function useModals() {
             if (!popupWindow) {
               reject(new Error("Can't show popup window"));
             } else {
-              popupWindow.popupProps = { ...props, resolve, reject };
+              popupWindow.popupProps = {
+                ...props, resolve, reject, show: true,
+              };
             }
           });
       }
