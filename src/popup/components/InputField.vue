@@ -47,7 +47,7 @@
           name="before"
         />
         <slot
-          :id="_uid"
+          :id="uid"
           :input-id="inputId"
         >
           <input
@@ -149,9 +149,9 @@ export default defineComponent({
     },
   },
   emits: ['update:modelValue', 'focus-change', 'click', 'help'],
-  compatConfig: { COMPONENT_V_MODEL: false },
   setup(props, { emit }) {
-    const inputId = `input-${getCurrentInstance()?.uid}`;
+    const uid = getCurrentInstance()?.uid;
+    const inputId = `input-${uid}`;
 
     const focused = ref(false);
 
@@ -201,6 +201,7 @@ export default defineComponent({
 
     return {
       focused,
+      uid,
       inputId,
       inputMode,
       messageAsObject,

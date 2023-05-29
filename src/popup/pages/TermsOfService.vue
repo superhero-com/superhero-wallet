@@ -951,7 +951,7 @@ export default {
   components: { ChevronDownIcon },
   data() {
     return {
-      details: Object.entries(this.$t('pages.termsOfService'))
+      details: Object.entries(this.$tm('pages.termsOfService'))
         .filter(([k]) => /section[0-9]+Title/.test(k))
         .map(([, title]) => ({ title, open: false })),
       APP_LINK_WEB,

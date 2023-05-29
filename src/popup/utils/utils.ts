@@ -480,6 +480,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return (
+    // @ts-ignore
     acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
   );
 }

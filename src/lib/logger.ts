@@ -1,33 +1,34 @@
 /* eslint-disable no-console */
-import Vue from 'vue';
 import { pick } from 'lodash-es';
 import { Browser } from 'webextension-polyfill';
 import { detect } from 'detect-browser';
+import { App } from 'vue';
 import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
 import { RejectedByUserError } from './errors';
 
 interface ILoggerOptions {
   background?: boolean;
+  app?: App;
 }
 
 export default class Logger {
   static background: boolean;
 
   static init(options: ILoggerOptions = {}) {
-    const { background = false } = options;
+    const { background = false, app } = options;
 
     Logger.background = background;
 
-    if (!background) {
-      Vue.config.errorHandler = (error, vm, info) => {
+    if (!background && app) {
+      app.config.errorHandler = (error, vm, info) => {
         console.error(error, info);
         if (error && error instanceof RejectedByUserError) {
           Logger.write({ message: error.toString(), info, type: 'vue-error' });
         }
       };
 
-      Vue.config.warnHandler = (message, vm, info) => {
+      app.config.warnHandler = (message, vm, info) => {
         console.warn(message, info);
       };
     }
