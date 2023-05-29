@@ -6,7 +6,6 @@ export interface IScrollCallbackParams {
   isOutsideOfViewport: boolean
 }
 
-// eslint-disable-next-line no-unused-vars
 export type OnViewportScrollCallback = (p: IScrollCallbackParams) => any;
 
 const viewportElement = ref<Element | undefined>();

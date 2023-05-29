@@ -30,7 +30,7 @@ module.exports = {
     }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-unused-vars': 'error',
+    'no-unused-vars': 'off',
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
     'import/prefer-default-export': 'off',
@@ -39,6 +39,7 @@ module.exports = {
     'vue-i18n/no-missing-keys': 'off',
     'vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
   overrides: [
     {

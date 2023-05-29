@@ -12,7 +12,6 @@ interface PopupMessageData {
 }
 
 interface IPendingRequest {
-  // eslint-disable-next-line no-unused-vars
   resolve: (res: any) => void;
   reject: () => void;
 }

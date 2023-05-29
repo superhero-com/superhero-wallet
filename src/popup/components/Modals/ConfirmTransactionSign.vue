@@ -173,7 +173,6 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITx>, required: true },
     resolve: { type: Function, required: true },
-    // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {

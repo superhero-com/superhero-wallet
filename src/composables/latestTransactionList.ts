@@ -13,7 +13,6 @@ import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
 
-// eslint-disable-next-line no-unused-vars
 type TransactionFetchCallbackFunction = (address: string)
   => Promise<ITransaction[] | { data: ITransaction[]}>;
 
