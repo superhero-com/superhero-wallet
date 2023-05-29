@@ -12,11 +12,12 @@ export function useUi() {
     }
   }
 
-  function handleVisibilityChange(event: Event) {
-    isAppActive.value = !(event.target as Document).hidden;
+  function handleVisibilityChange() {
+    isAppActive.value = !document.hidden;
   }
 
   function initVisibilityListeners() {
+    handleVisibilityChange();
     onMounted(() => {
       document.addEventListener('visibilitychange', handleVisibilityChange);
     });
