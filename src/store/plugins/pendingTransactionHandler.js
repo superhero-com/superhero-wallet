@@ -38,7 +38,7 @@ export default async (store) => {
     }
   };
 
-  await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
+  await watchUntilTruthy(() => store.state.sdkPlugin.ready);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[store.getters.activeNetwork?.networkId]

@@ -1,5 +1,6 @@
 <template>
   <Modal
+    show
     full-screen
     class="confirm-transaction-sign"
     data-cy="popup-aex2"
@@ -61,7 +62,7 @@
         >
           <TokenAmount
             :amount="totalAmount"
-            :symbol="getTxSymbol(transaction)"
+            :symbol="getTxSymbol(popupProps?.transaction)"
             :aex9="isTransactionAex9(txWrapped)"
             data-cy="total"
           />
@@ -76,7 +77,7 @@
           v-for="key in filteredTxFields"
           :key="key"
           :label="$t('modals.confirmTransactionSign')[key]"
-          :value="transaction[key]"
+          :value="popupProps?.transaction?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
       </DetailsItem>
@@ -95,7 +96,7 @@
         data-cy="accept"
         third
         :text="$t('common.confirm')"
-        @click="resolve()"
+        @click="popupProps?.resolve()"
       />
     </template>
   </Modal>
@@ -106,7 +107,7 @@ import {
   computed,
   defineComponent,
   onMounted,
-  PropType,
+  onUnmounted,
   ref,
 } from 'vue';
 import { camelCase } from 'lodash-es';
@@ -131,7 +132,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { useSdk, useTransactionTx } from '../../../composables';
+import { usePopupProps, useSdk, useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -169,17 +170,12 @@ export default defineComponent({
     TransactionDetailsPoolTokenRow,
     AnimatedSpinner,
   },
-  props: {
-    transaction: { type: Object as PropType<ITx>, required: true },
-    resolve: { type: Function, required: true },
-    // eslint-disable-next-line no-unused-vars
-    reject: { type: Function as PropType<(e: Error) => void>, required: true },
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { t } = useI18n();
 
     const { getSdk } = useSdk({ store });
+    const { popupProps, setPopupProps } = usePopupProps();
 
     const {
       direction,
@@ -188,7 +184,7 @@ export default defineComponent({
       setTransactionTx,
     } = useTransactionTx({
       store,
-      tx: props.transaction,
+      tx: popupProps.value?.transaction as ITx,
     });
 
     const showAdvanced = ref(false);
@@ -200,7 +196,9 @@ export default defineComponent({
     const getTxSymbol = useGetter('getTxSymbol');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
-    const txWrapped = computed((): Partial<ITransaction> => ({ tx: props.transaction }));
+    const txWrapped = computed(
+      (): Partial<ITransaction> => ({ tx: popupProps.value?.transaction as ITx }),
+    );
 
     const isSwap = computed(
       () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
@@ -210,8 +208,8 @@ export default defineComponent({
       () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
 
-    const txAeFee = computed(() => getAeFee(props.transaction.fee));
-    const nameAeFee = computed(() => getAeFee(props.transaction.nameFee));
+    const txAeFee = computed(() => getAeFee(popupProps.value?.transaction?.fee!));
+    const nameAeFee = computed(() => getAeFee(popupProps.value?.transaction?.nameFee!));
 
     const swapDirection = computed(() => {
       if (txFunction.value) {
@@ -230,11 +228,11 @@ export default defineComponent({
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(props.transaction),
+      symbol: getTxSymbol.value(popupProps.value?.transaction),
     }));
 
     const filteredTxFields = computed(
-      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!props.transaction[field]),
+      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!popupProps.value?.transaction?.[field]),
     );
 
     const swapTokenAmountData = computed(
@@ -251,7 +249,7 @@ export default defineComponent({
     );
 
     const completeTransaction = computed(
-      () => ({ tx: { ...props.transaction, function: txFunction.value } }),
+      () => ({ tx: { ...popupProps.value?.transaction, function: txFunction.value } }),
     );
 
     const isProvideLiquidity = computed(
@@ -268,7 +266,7 @@ export default defineComponent({
         return [];
       }
       const tokens = resolver(
-        { tx: { ...txParams, ...props.transaction } } as ITransaction,
+        { tx: { ...txParams, ...popupProps.value?.transaction } } as ITransaction,
         availableTokens.value,
       )?.tokens;
       if (!isPool.value) {
@@ -308,23 +306,25 @@ export default defineComponent({
     }
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      popupProps.value?.reject(new Error('Rejected by user'));
     }
 
     onMounted(async () => {
-      if (props.transaction.contractId) {
+      if (popupProps.value?.transaction?.contractId) {
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
           const sdk = await getSdk();
-          const { bytecode } = await sdk.getContractByteCode(props.transaction.contractId);
+          const { bytecode } = await sdk.getContractByteCode(
+            popupProps.value?.transaction?.contractId,
+          );
           const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
             bytecode,
-            calldata: props.transaction.callData,
+            calldata: popupProps.value.transaction.callData,
           });
           txFunction.value = txParams.function as TxFunctionRaw;
 
-          setTransactionTx({ ...txParams, ...props.transaction });
+          setTransactionTx({ ...txParams, ...popupProps.value.transaction });
 
           const allTokens = getTokens(txParams);
 
@@ -343,11 +343,16 @@ export default defineComponent({
       }
     });
 
+    onUnmounted(() => {
+      setPopupProps(null);
+    });
+
     return {
       AETERNITY_SYMBOL,
       loading,
       showAdvanced,
       txWrapped,
+      popupProps,
       filteredTxFields,
       completeTransaction,
       tokenList,

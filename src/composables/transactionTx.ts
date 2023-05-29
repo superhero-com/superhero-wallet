@@ -117,10 +117,10 @@ export function useTransactionTx({
     : getTxDirection.value(
       outerTx.value?.payerId ? outerTx.value : innerTx.value,
       externalAddress
-        || (
-          ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
-          && txOwnerAddress.value
-        ),
+      || (
+        ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
+        && txOwnerAddress.value
+      ),
     ));
 
   function getOwnershipAccount(

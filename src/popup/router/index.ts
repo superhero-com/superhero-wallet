@@ -25,7 +25,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts } from '../../composables';
+import { useAccounts, usePopupProps } from '../../composables';
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
@@ -36,6 +36,7 @@ const router = createRouter({
 const lastRouteKey = 'last-path';
 
 const { isLoggedIn } = useAccounts({ store });
+const { setPopupProps } = usePopupProps();
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
@@ -69,7 +70,9 @@ router.beforeEach(async (to, from, next) => {
     }[POPUP_TYPE];
 
     if (name !== to.name) {
-      next({ name, params: await getPopupProps() as Dictionary });
+      const popupProps = await getPopupProps() as Dictionary;
+      setPopupProps(popupProps);
+      next({ name });
       return;
     }
   }

@@ -1,12 +1,13 @@
 <template>
   <Modal
+    show
     full-screen
     class="message-sign"
     data-cy="popup-aex2"
   >
     <TransactionInfo
       :custom-title="$t('pages.popupMessageSign.title')"
-      :sender="{ name: app.name, address: app.host, url: app.url }"
+      :sender="sender"
       :recipient="accountExtended"
     />
 
@@ -14,8 +15,8 @@
       class="subtitle"
       data-cy="aepp"
     >
-      <span class="app-name">{{ app.name }}</span>
-      ({{ app.host }}) {{ $t('pages.popupMessageSign.heading') }}
+      <span class="app-name">{{ sender.name }}</span>
+      ({{ sender.address }}) {{ $t('pages.popupMessageSign.heading') }}
     </div>
 
     <DetailsItem
@@ -23,7 +24,7 @@
       data-cy="message"
     >
       <template #value>
-        <CopyText :value="message" />
+        <CopyText :value="popupProps?.message" />
       </template>
     </DetailsItem>
 
@@ -39,21 +40,19 @@
         data-cy="accept"
         :text="$t('common.confirm')"
         :disabled="!isConnected"
-        @click="resolve()"
+        @click="popupProps?.resolve()"
       />
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, PropType,
-} from 'vue';
+import { computed, defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import type { IAccountLabeled, IAppData } from '../../../types';
+import type { IAccountLabeled, IAccountOverView } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+import { useAccounts, usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -69,33 +68,39 @@ export default defineComponent({
     DetailsItem,
     CopyText,
   },
-  props: {
-    message: { type: String, required: true },
-    app: { type: Object as PropType<IAppData>, required: true },
-    resolve: { type: Function as PropType<() => void>, required: true },
-    // eslint-disable-next-line no-unused-vars
-    reject: { type: Function as PropType<(e: Error) => void>, required: true },
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
+    const { popupProps, setPopupProps } = usePopupProps();
     const { t } = useI18n();
 
     const isConnected = useGetter('isConnected');
     const getExplorerPath = useGetter('getExplorerPath');
+
     const accountExtended = computed((): IAccountLabeled => ({
       ...activeAccount.value,
       label: t('transaction.overview.accountAddress'),
       url: getExplorerPath.value(activeAccount.value.address),
     }));
+    const sender = computed((): IAccountOverView => ({
+      name: popupProps.value?.app?.name,
+      address: popupProps.value?.app?.host,
+      url: popupProps.value?.app?.url,
+    }));
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      popupProps.value?.reject(new Error('Rejected by user'));
     }
+
+    onUnmounted(() => {
+      setPopupProps(null);
+    });
 
     return {
       isConnected,
       accountExtended,
+      popupProps,
+      sender,
       cancel,
     };
   },

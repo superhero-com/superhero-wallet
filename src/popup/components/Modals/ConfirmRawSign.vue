@@ -1,12 +1,13 @@
 <template>
   <Modal
+    show
     full-screen
     class="confirm-raw-sign"
     data-cy="popup-aex2"
   >
     <TransactionInfo
       :custom-title="$t('modals.confirm-raw-sign.title')"
-      :sender="{ name: app.name, address: app.host, url: app.url }"
+      :sender="sender"
       :recipient="account"
     />
 
@@ -55,14 +56,19 @@
   </Modal>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex';
+<script lang="ts">
+import { computed, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import { IAccountLabeled, IAccountOverView } from '../../../types';
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../icons/warning.svg?vue-component';
 import CopyText from '../CopyText.vue';
+import { usePopupProps } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 export default {
   components: {
@@ -73,35 +79,47 @@ export default {
     Warning,
     CopyText,
   },
-  props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
-    data: { type: [String, Uint8Array], required: true },
-    app: { type: Object, required: true },
-  },
-  computed: {
-    ...mapGetters(['getExplorerPath']),
-    ...mapState({
-      account(_, { account }) {
-        return {
-          ...account,
-          label: this.$t('transaction.overview.accountAddress'),
-          url: this.getExplorerPath(account.address),
-        };
-      },
-    }),
-    dataAsString() {
-      if (typeof this.data === 'string') return this.data;
-      return Buffer.from(this.data).toString('hex');
-    },
-  },
-  methods: {
-    confirm() {
-      this.resolve();
-    },
-    cancel() {
-      this.reject(new Error('Rejected by user'));
-    },
+  setup() {
+    const { popupProps, setPopupProps } = usePopupProps();
+    const { t } = useI18n();
+    const store = useStore();
+
+    const dataAsString = computed(() => {
+      if (typeof popupProps.value?.data === 'string') return popupProps.value?.data;
+      return Buffer.from(popupProps.value?.data as any).toString('hex');
+    });
+    const sender = computed((): IAccountOverView => ({
+      name: popupProps.value?.app?.name,
+      address: popupProps.value?.app?.host,
+      url: popupProps.value?.app?.url,
+    }));
+
+    const getExplorerPath = useGetter('fungibleTokens/getTokenBalance');
+    const account: IAccountLabeled = {
+      ...store.getters.account,
+      label: t('transaction.overview.accountAddress'),
+      url: getExplorerPath.value(store.getters.account.address),
+    };
+
+    function confirm() {
+      popupProps.value?.resolve();
+    }
+
+    function cancel() {
+      popupProps.value?.reject(new Error('Rejected by user'));
+    }
+
+    onUnmounted(() => {
+      setPopupProps(null);
+    });
+
+    return {
+      confirm,
+      cancel,
+      account,
+      dataAsString,
+      sender,
+    };
   },
 };
 </script>
