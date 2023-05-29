@@ -105,7 +105,7 @@ export default defineComponent({
     BtnSubheader,
     Platforms,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
     const { openModal } = useModals();

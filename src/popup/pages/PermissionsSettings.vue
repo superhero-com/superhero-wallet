@@ -35,7 +35,9 @@
 </template>
 
 <script>
-import { markRaw } from 'vue';
+import { useStore } from 'vuex';
+import { computed } from 'vue';
+
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
@@ -45,13 +47,14 @@ export default {
     PanelItem,
     BtnMain,
   },
-  data: () => ({
-    PlusIcon: markRaw(PlusIcon),
-  }),
-  computed: {
-    permissions() {
-      return Object.values(this.$store.state.permissions);
-    },
+  setup() {
+    const store = useStore();
+    const permissions = computed(() => Object.values(store.state.permissions));
+
+    return {
+      PlusIcon,
+      permissions,
+    };
   },
 };
 </script>

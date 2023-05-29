@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import { pick } from 'lodash-es';
-import Vue from 'vue';
 import { detect } from 'detect-browser';
 import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
@@ -9,16 +8,16 @@ export default class Logger {
   static background;
 
   static init(options = {}) {
-    const { background } = options;
+    const { background, app } = options;
     Logger.background = background;
-    if (!background) {
-      Vue.config.errorHandler = (error, vm, info) => {
+    if (!background && app) {
+      app.config.errorHandler = (error, vm, info) => {
         console.error(info);
         console.error(error);
         if (error && error.message !== 'Rejected by user') Logger.write({ message: error.toString(), info, type: 'vue-error' });
       };
 
-      Vue.config.warnHandler = (message, vm, info) => {
+      app.config.warnHandler = (message, vm, info) => {
         console.error(message);
         console.error(info);
         Logger.write({

@@ -35,7 +35,6 @@ export default defineComponent({
     disabled: Boolean,
   },
   emits: ['update:modelValue'],
-  compatConfig: { COMPONENT_V_MODEL: false },
 });
 </script>
 
