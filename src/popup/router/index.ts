@@ -26,7 +26,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts } from '../../composables';
+import { useAccounts, usePopupProps } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
@@ -38,6 +38,7 @@ const router = createRouter({
 const lastRouteKey = 'last-path';
 
 const { isLoggedIn } = useAccounts({ store });
+const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router);
 
@@ -76,18 +77,19 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
-    let params: Dictionary = {};
+    let popupProps: Dictionary = {};
 
     if (!Object.keys(to.params).length) {
-      params = await getPopupProps();
-      if (!params?.app) {
+      popupProps = await getPopupProps() as Dictionary;
+      if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;
       }
     }
 
     if (name !== to.name) {
-      next({ name, params });
+      setPopupProps(popupProps);
+      next({ name });
       return;
     }
   }
