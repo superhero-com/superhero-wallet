@@ -19,7 +19,7 @@
     "serve": "cross-env PLATFORM=web vue-cli-service serve",
     "watch": "npm run build:extension -- --watch",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "cross-env RUNNING_IN_TESTS=true vue-cli-service test:e2e",
+    "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true vue-cli-service test:e2e",
     "test": "npm run test:unit && npm run test:e2e -- --headless",
     "gen:cordova-resources": "cordova-res --icon-background-source '#141414'",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build:extension",
