@@ -1,8 +1,5 @@
 <template>
   <Connect
-    :app="app"
-    :resolve="onResolve"
-    :reject="onReject"
     :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
   />
 </template>
@@ -12,7 +9,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { IAppData } from '../../types';
-import { useAccounts, useDeepLinkApi } from '../../composables';
+import { useAccounts, useDeepLinkApi, usePopupProps } from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
 
@@ -25,6 +22,7 @@ export default defineComponent({
 
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
     const { activeAccount } = useAccounts({ store });
+    const { setPopupProps } = usePopupProps();
 
     const app = computed((): Partial<IAppData> => callbackOrigin.value ? ({
       name: callbackOrigin.value.hostname,
@@ -39,10 +37,13 @@ export default defineComponent({
 
     const onReject = () => openCallbackOrGoHome(false);
 
+    setPopupProps({
+      app: app.value as IAppData,
+      resolve: onResolve,
+      reject: onReject,
+    });
+
     return {
-      onResolve,
-      onReject,
-      app,
       POPUP_CONNECT_ADDRESS_PERMISSION,
     };
   },

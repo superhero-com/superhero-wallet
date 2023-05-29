@@ -1,4 +1,5 @@
 import { Component, VNode, h } from 'vue';
+import { usePopupProps } from '../../composables';
 import { WalletAppRouteConfig } from '../../types';
 import { IN_POPUP, IS_WEB } from '../../lib/environment';
 import { RejectedByUserError } from '../../lib/errors';
@@ -24,11 +25,16 @@ const iFrameComponent = (component: Component | VNode) => {
     window.close();
   };
 
-  return h(component, {
+  const wrappedPopupProps = {
     ...window.popupProps,
     resolve: closingWrapper(window.popupProps.resolve),
     reject: closingWrapper(window.popupProps.reject),
-  }, {});
+  };
+
+  const { setPopupProps } = usePopupProps();
+  setPopupProps(wrappedPopupProps);
+
+  return h(component);
 };
 
 /**
