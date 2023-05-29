@@ -44,7 +44,7 @@ Cypress.Commands.add('getInputByTestId', (testId) => {
 });
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
-  cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
+  cy.visit(route || '', { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
