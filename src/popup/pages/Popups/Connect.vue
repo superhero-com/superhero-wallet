@@ -92,7 +92,6 @@ export default defineComponent({
       ]),
     },
     resolve: { type: Function as PropType<() => void>, required: true },
-    // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {

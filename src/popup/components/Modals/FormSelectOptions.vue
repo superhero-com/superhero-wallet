@@ -60,7 +60,6 @@ export default defineComponent({
     Avatar,
   },
   props: {
-    // eslint-disable-next-line no-unused-vars
     resolve: { type: Function as PropType<(o: any) => any>, required: true },
     reject: { type: Function, required: true },
     title: { type: String, default: null },

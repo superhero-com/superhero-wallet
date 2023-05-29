@@ -339,7 +339,6 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
 
 export async function fetchAllPages<T = any>(
   getFunction: () => Promise<IPageableResponse<T>>,
-  // eslint-disable-next-line no-unused-vars
   getNextPage: (url: string) => Promise<IPageableResponse<T>>,
 ) {
   const result = [];
