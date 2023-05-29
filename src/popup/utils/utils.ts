@@ -726,3 +726,14 @@ export function connectFrames(sdk: ISdk | AeSdkWallet) {
     handleUnknownError(error);
   }
 }
+
+/**
+ * Check if the image is available by making a HEAD request.
+ * Needed for Cordova because when using <img /> tag and the image is not available
+ * the DOM ready event is not fired.
+ */
+export function checkImageAvailability(url: string): Promise<boolean> {
+  return fetch(url, { method: 'HEAD' })
+    .then((response) => !!response.ok)
+    .catch(() => false);
+}
