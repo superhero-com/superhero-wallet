@@ -2,8 +2,6 @@
   <div class="transaction-list-wrapper">
     <TransactionList
       v-if="isOnline"
-      :show-filters="showFilters"
-      show-search
     />
     <MessageOffline
       v-else
@@ -23,9 +21,6 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
-  },
-  props: {
-    showFilters: Boolean,
   },
   setup() {
     const { isOnline } = useConnection();

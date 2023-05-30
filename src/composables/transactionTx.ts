@@ -18,6 +18,9 @@ import {
   getTxType,
   isContainingNestedTx,
   getInnerTransaction,
+  isTxDex,
+  getOwnershipStatus,
+  getTxOwnerAddress,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
 
@@ -84,33 +87,15 @@ export function useTransactionTx({
     },
   );
 
-  const isDex = computed((): boolean => {
-    const { wae = [], router = [] } = getDexContracts.value || {};
+  const isDex = computed((): boolean => isTxDex(innerTx.value!, getDexContracts.value));
 
-    return !!(
-      innerTx.value?.contractId
-      && innerTx.value?.function
-      && (
-        Object.values(FUNCTION_TYPE_DEX).flat()
-          .includes(innerTx.value?.function as TxFunctionRaw)
-      )
-      && [...wae, ...router].includes(innerTx.value.contractId)
-    );
-  });
+  const txOwnerAddress = computed(() => getTxOwnerAddress(innerTx.value));
 
-  const txOwnerAddress = computed(() => innerTx.value?.accountId || innerTx.value?.callerId);
-
-  const ownershipStatus = computed(
-    () => {
-      if (activeAccount.value?.address === txOwnerAddress.value) {
-        return TRANSACTION_OWNERSHIP_STATUS.current;
-      }
-      if (accounts.value?.find(({ address }) => address === txOwnerAddress.value)) {
-        return TRANSACTION_OWNERSHIP_STATUS.subAccount;
-      }
-      return TRANSACTION_OWNERSHIP_STATUS.other;
-    },
-  );
+  const ownershipStatus = computed(() => getOwnershipStatus(
+    activeAccount.value,
+    accounts.value,
+    innerTx.value,
+  ));
 
   const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
     ? TX_DIRECTION.received

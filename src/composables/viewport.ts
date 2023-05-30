@@ -11,13 +11,15 @@ export type OnViewportScrollCallback = (p: IScrollCallbackParams) => any;
 const viewportElement = ref<Element | undefined>();
 
 export const useViewport = () => {
-  const viewportScroll = debounce((callback: OnViewportScrollCallback) => {
-    const isDesktop = (
+  function checkIsDesktop(): boolean {
+    return !!(
       document.documentElement.clientWidth > MOBILE_WIDTH
       || process.env.IS_EXTENSION
     );
+  }
 
-    const element = isDesktop ? viewportElement.value : document.documentElement;
+  const viewportScroll = debounce((callback: OnViewportScrollCallback) => {
+    const element = checkIsDesktop() ? viewportElement.value : document.documentElement;
 
     if (element) {
       const { scrollHeight, scrollTop, clientHeight } = element;
