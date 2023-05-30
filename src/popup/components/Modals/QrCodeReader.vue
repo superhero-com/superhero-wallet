@@ -159,7 +159,7 @@ export default {
 
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
-          ['body', '#app'].forEach((s) => {
+          ['body', '#app', '.app-wrapper'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
           });
 
@@ -173,7 +173,7 @@ export default {
     },
     async stopReading() {
       if (this.mobile) {
-        ['body', '#app'].forEach((s) => {
+        ['body', '#app', '.app-wrapper'].forEach((s) => {
           document.querySelector(s).style = 'background: #141414';
         });
         await window.QRScanner.pausePreview();
