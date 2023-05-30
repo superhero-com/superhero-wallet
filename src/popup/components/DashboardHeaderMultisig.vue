@@ -43,7 +43,7 @@ export default defineComponent({
     AccountSwiper,
     TotalWalletAmount,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const {

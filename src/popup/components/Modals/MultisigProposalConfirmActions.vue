@@ -110,7 +110,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t, tm } = useI18n();
+    const { tm } = useI18n();
 
     const {
       activeMultisigAccount,

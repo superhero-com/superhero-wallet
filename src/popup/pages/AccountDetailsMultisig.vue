@@ -56,7 +56,7 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
 
