@@ -12,7 +12,7 @@ import { useUi } from '../../composables';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
-  setup(props) {
+  setup() {
     const store = useStore();
     const route = useRoute();
 

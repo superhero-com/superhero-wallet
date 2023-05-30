@@ -101,7 +101,7 @@ export default {
   props: {
     transferData: { type: Object, required: true },
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
 

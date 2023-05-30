@@ -39,7 +39,7 @@ export default defineComponent({
     InfiniteScroll,
     NotificationItem,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const {

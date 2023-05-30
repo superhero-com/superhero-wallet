@@ -59,7 +59,7 @@ export default defineComponent({
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
   },
   emits: ['update:modelValue'],
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const { accountsSelectOptions } = useAccounts({ store });

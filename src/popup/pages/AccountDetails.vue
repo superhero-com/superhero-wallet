@@ -66,7 +66,7 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { isOnline } = useConnection();
     const { activeAccount, activeAccountSimplexLink } = useAccounts({ store });

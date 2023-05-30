@@ -21,7 +21,7 @@ import TransactionItem from './TransactionItem.vue';
 
 export default defineComponent({
   components: { TransactionItem },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 

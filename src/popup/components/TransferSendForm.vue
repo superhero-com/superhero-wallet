@@ -237,8 +237,6 @@ import EditIcon from '../../icons/pencil.svg?vue-component';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
-const WARNING_RULES = ['not_same_as', 'max_value_vault'];
-
 export default defineComponent({
   name: 'TransferSendForm',
   components: {

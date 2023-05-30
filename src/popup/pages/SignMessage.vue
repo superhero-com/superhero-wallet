@@ -7,7 +7,7 @@ import { MODAL_MESSAGE_SIGN, handleUnknownError } from '../utils';
 
 export default defineComponent({
   name: 'SignMessage',
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();

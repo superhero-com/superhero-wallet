@@ -36,7 +36,7 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
     const areNamesFetching = useState('names', 'areNamesFetching');

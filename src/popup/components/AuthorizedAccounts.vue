@@ -46,7 +46,7 @@ export default defineComponent({
       default: () => [],
     },
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const { isLocalAccountAddress } = useAccounts({ store });

@@ -52,7 +52,7 @@ export default defineComponent({
     account: { type: Object as PropType<IAccount>, required: true },
     selected: Boolean,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const { balance } = useBalances({ store });
