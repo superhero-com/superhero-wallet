@@ -12,7 +12,7 @@
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
-        @click="$emit('slide', idx - 1)"
+        @click.prevent="$emit('slide', idx - 1)"
       >
         <ChevronIcon />
       </BtnPlain>
@@ -20,7 +20,7 @@
       <BtnPlain
         v-if="!hideNext"
         class="swiper-button next"
-        @click="$emit('slide', idx + 1)"
+        @click.prevent="$emit('slide', idx + 1)"
       >
         <ChevronIcon />
       </BtnPlain>
@@ -51,6 +51,7 @@ export default defineComponent({
     selected: Boolean,
     hideNext: Boolean,
   },
+  emits: ['slide'],
   setup(props) {
     const color = computed(() => getAddressColor(props.address));
 
