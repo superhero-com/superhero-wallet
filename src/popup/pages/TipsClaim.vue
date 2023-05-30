@@ -49,10 +49,10 @@ import {
   computed,
   ref,
   onMounted,
-  getCurrentInstance
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
@@ -81,9 +81,8 @@ export default defineComponent({
     BtnHelp,
     AccountInfo,
   },
-  setup(props) {
-    const instance = getCurrentInstance();
-    const root = instance?.root as any;
+  setup() {
+    const { t } = useI18n();
     const store = useStore();
     const router = useRouter();
 
@@ -127,16 +126,16 @@ export default defineComponent({
         const { error: errorMessage = '' } = error.response ? error.response.data : {};
         let msg;
         if (errorMessage.includes('MORE_ORACLES_NEEDED')) {
-          msg = root.$t('pages.claim.moreOracles');
+          msg = t('pages.claim.moreOracles');
         } else if (errorMessage.includes('URL_NOT_EXISTING')) {
-          msg = root.$t('pages.claim.urlNotExisting');
+          msg = t('pages.claim.urlNotExisting');
         } else if (
           errorMessage.includes('NO_ZERO_AMOUNT_PAYOUT')
           || error.message.includes('NO_ZERO_AMOUNT_PAYOUT')
         ) {
-          msg = root.$t('pages.claim.noZeroClaim');
+          msg = t('pages.claim.noZeroClaim');
         } else if (errorMessage.includes('ORACLE_SERVICE_CHECK_CLAIM_FAILED')) {
-          msg = root.$t('pages.claim.oracleFailed');
+          msg = t('pages.claim.oracleFailed');
         } else if (errorMessage) {
           msg = errorMessage;
         }

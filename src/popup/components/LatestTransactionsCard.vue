@@ -38,7 +38,7 @@ export default defineComponent({
     TransactionListItem,
     AnimatedSpinner,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const { isOnline } = useConnection();

@@ -27,7 +27,7 @@ import { useAccounts, useConnection, useSdk } from '../../composables';
 const CONNECTED_DISPLAY_TIME = 2000;
 
 export default defineComponent({
-  setup(props) {
+  setup() {
     const store = useStore();
     const { t } = useI18n();
 

@@ -71,7 +71,7 @@ export default defineComponent({
     TransactionAndTokenFilter,
     BtnClose,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const route = useRoute();
 

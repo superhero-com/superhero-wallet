@@ -117,7 +117,7 @@ export default defineComponent({
     DetailsItem,
     ExternalLinkIcon,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const getExplorerPath = useGetter('getExplorerPath');
