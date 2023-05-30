@@ -71,7 +71,7 @@ import {
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
 } from '../router/routeNames';
 import {
-  IActiveMultisigTx,
+  IActiveMultisigTransaction,
   ITransaction,
   TxFunctionRaw,
 } from '../../types';
@@ -95,7 +95,7 @@ export default defineComponent({
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, default: null },
-    multisigTransaction: { type: Object as PropType<IActiveMultisigTx>, default: null },
+    multisigTransaction: { type: Object as PropType<IActiveMultisigTransaction>, default: null },
     isMultisig: Boolean,
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,

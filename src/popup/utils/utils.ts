@@ -39,6 +39,8 @@ import {
   STUB_NONCE,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
+  FUNCTION_TYPE_DEX,
+  TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -57,6 +59,10 @@ import type {
   INameEntryFetched,
   IWallet,
   IRequestInitBodyParsed,
+  IActiveMultisigTransaction,
+  IDexContracts,
+  TxFunctionRaw,
+  ICommonTransaction,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
@@ -69,6 +75,10 @@ Vue.use(VueCompositionApi);
  */
 export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
   return arr.includes(elem as any);
+}
+
+export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
+  return (data: T) => fns.reduce((currData, func) => func(currData), data);
 }
 
 export function isNumbersEqual(a: number, b: number) {
@@ -387,6 +397,13 @@ export function compareCaseInsensitive(
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
 }
 
+export function includesCaseInsensitive(
+  baseString: string,
+  searchString: string,
+) {
+  return baseString?.toLocaleLowerCase().includes(searchString?.toLocaleLowerCase());
+}
+
 export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
   amount?: string | number
   to?: string
@@ -442,11 +459,16 @@ export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return acc?.name || `${i18n.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
 }
 
-export function defaultTransactionSortingCallback(
-  a: ITransaction,
-  b: ITransaction,
+export function sortTransactionsByDateCallback(
+  a: ICommonTransaction,
+  b: ICommonTransaction,
 ) {
-  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  const [aMicroTime, bMicroTime] = [a, b].map(
+    (transaction) => (
+      new Date(transaction.microTime!).getTime()
+    ),
+  );
+
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
   const compareMicroTime = () => {
     const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
@@ -508,8 +530,12 @@ export function isContainingNestedTx(tx: ITx): boolean {
   ].includes(getTxType(tx));
 }
 
-export function getInnerTransaction(tx: ITx): any {
-  return tx && isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+export function getInnerTransaction(tx?: ITx): any {
+  if (!tx) {
+    return null;
+  }
+
+  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
 export function getTransactionTipUrl(transaction: ITransaction): string {
@@ -663,6 +689,39 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
   return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
+export function isTxDex(tx: ITx, dexContracts: IDexContracts) {
+  const { wae = [], router = [] } = dexContracts;
+
+  return !!(
+    tx.contractId
+    && tx.function
+    && (
+      Object.values(FUNCTION_TYPE_DEX).flat()
+        .includes(tx.function as TxFunctionRaw)
+    )
+    && [...wae, ...router].includes(tx.contractId)
+  );
+}
+
+export function getTxOwnerAddress(innerTx?: ITx) {
+  return innerTx?.accountId || innerTx?.callerId;
+}
+
+export function getOwnershipStatus(
+  activeAccount: IAccount,
+  accounts: IAccount[],
+  innerTx?: ITx,
+) {
+  const txOwnerAddress = getTxOwnerAddress(innerTx);
+  if (activeAccount.address === txOwnerAddress) {
+    return TRANSACTION_OWNERSHIP_STATUS.current;
+  }
+  if (accounts.find(({ address }) => address === txOwnerAddress)) {
+    return TRANSACTION_OWNERSHIP_STATUS.subAccount;
+  }
+  return TRANSACTION_OWNERSHIP_STATUS.other;
+}
+
 export function errorHasValidationKey(error: any, expectedKey: string) {
   return (
     error.validation
@@ -675,6 +734,20 @@ export function isInsufficientBalanceError(error: any) {
     error instanceof InvalidTxError
     && errorHasValidationKey(error, 'InsufficientBalance')
   );
+}
+
+export function getTransaction(transaction: ICommonTransaction): ITransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? undefined
+    : transaction as ITransaction;
+}
+
+export function getMultisigTransaction(
+  transaction: ICommonTransaction,
+): IActiveMultisigTransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? transaction as IActiveMultisigTransaction
+    : undefined;
 }
 
 export function connectFrames(sdk: ISdk | AeSdkWallet) {

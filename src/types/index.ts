@@ -419,6 +419,14 @@ export interface IAccountOverView extends Partial<IAccount> {
   label: TranslateResult;
 }
 
+export interface IActiveMultisigTransaction extends IMultisigAccount {
+  totalConfirmations: number;
+  hash?: string;
+  tx?: ITx;
+  isMultisigTransaction: boolean;
+  microTime?: number;
+}
+
 export interface ITransactionOverview {
   sender: IAccountOverView | IAccount;
   recipient: IAccountOverView | IAccount;
@@ -429,6 +437,15 @@ export interface ITransactionOverview {
 export interface IDexContracts {
   router: string[];
   wae: string[];
+}
+
+export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
+
+export type ITransactionsState = {
+  loaded: ITransaction[];
+  nextPageUrl?: string;
+  pending: ITransaction[];
+  tipWithdrawnTransactions: ITransaction[];
 }
 
 /**
@@ -629,13 +646,6 @@ export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
 
 export interface ICreateMultisigAccount {
   address: string;
-}
-
-export interface IActiveMultisigTx extends IMultisigAccount {
-  totalConfirmations: number;
-  hash?: string;
-  tx?: ITx;
-  isMultisigTransaction: boolean;
 }
 
 export interface IRawMultisigTx {

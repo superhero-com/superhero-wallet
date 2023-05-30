@@ -14,7 +14,7 @@ import { useSdk } from './sdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
 import type {
-  IActiveMultisigTx,
+  IActiveMultisigTransaction,
   IDefaultComposableOptions,
   IMultisigFunctionTypes,
   INetwork,
@@ -62,7 +62,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @param contractAddress multisig contract
    * @returns transaction with consensus details if exists or null
    */
-  async function fetchActiveMultisigTx(): Promise<IActiveMultisigTx | null> {
+  async function fetchActiveMultisigTx(): Promise<IActiveMultisigTransaction | null> {
     const { activeMultisigAccount } = useMultisigAccounts({ store });
     const txHash = activeMultisigAccount.value?.txHash;
 
@@ -81,6 +81,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
         hash: txHash,
         tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
         isMultisigTransaction: true,
+        microTime: rawTx ? new Date(rawTx.createdAt).getTime() : undefined,
       };
     }
     return null;

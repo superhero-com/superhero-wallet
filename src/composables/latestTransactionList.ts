@@ -4,7 +4,7 @@ import type { IDefaultComposableOptions, ITransaction } from '../types';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   MDW_TO_NODE_APPROX_DELAY_TIME,
-  defaultTransactionSortingCallback,
+  sortTransactionsByDateCallback,
   handleUnknownError,
 } from '../popup/utils';
 import { useMiddleware } from './middleware';
@@ -106,7 +106,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     transactionList.value = uniqWith(allTransactions.flat(), (a, b) => (
       a.hash === b.hash && a.transactionOwner === b.transactionOwner
     ))
-      .sort(defaultTransactionSortingCallback)
+      .sort(sortTransactionsByDateCallback)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
 
     isTransactionListLoading.value = false;
