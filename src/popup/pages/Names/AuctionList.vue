@@ -85,7 +85,7 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { t } = useI18n();
 

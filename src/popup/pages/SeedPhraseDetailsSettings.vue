@@ -76,7 +76,7 @@ export default defineComponent({
   components: {
     BtnMain,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
 

@@ -113,7 +113,7 @@ export default defineComponent({
     Github,
     ExternalLink,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { fetchMiddlewareStatus } = useMiddleware({ store });
     const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');

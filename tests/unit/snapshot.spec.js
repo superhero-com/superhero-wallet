@@ -1,4 +1,4 @@
-import { mount, RouterLinkStub, config } from '@vue/test-utils';
+import { mount, RouterLinkStub } from '@vue/test-utils';
 import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';

@@ -68,7 +68,7 @@ export default {
     BtnHelp,
     AccountInfo,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
 

@@ -90,7 +90,7 @@ export default defineComponent({
     FixedScreenFooter,
     BtnMain,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();

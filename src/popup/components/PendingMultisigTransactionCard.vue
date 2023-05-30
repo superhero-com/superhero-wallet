@@ -23,7 +23,7 @@ export default defineComponent({
   components: { 
     TransactionListItem
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
