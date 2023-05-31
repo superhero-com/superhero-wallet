@@ -14,7 +14,7 @@
       :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
-        :tokens="token.isPool ? [filteredTokens[0], filteredTokens[1]] : [token]"
+        :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
         full-ae-symbol
       />

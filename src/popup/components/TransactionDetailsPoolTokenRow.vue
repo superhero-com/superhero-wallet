@@ -14,7 +14,7 @@
         <div class="token-info">
           <Tokens
             v-if="token"
-            :tokens="token.isPool ? [tokens[0], tokens[1]] : [token]"
+            :tokens="token.isPool ? tokens : [token]"
           />
           <AddressTruncated
             v-if="token.contractId"
