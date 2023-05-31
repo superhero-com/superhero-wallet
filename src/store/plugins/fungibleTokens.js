@@ -8,6 +8,7 @@ import {
   handleUnknownError,
   calculateSupplyAmount,
   fetchAllPages,
+  urlWithParams,
 } from '../../popup/utils';
 import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 import { useMiddleware } from '../../composables';
@@ -65,7 +66,9 @@ export default (store) => {
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
-              () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+              () => fetchFromMiddleware(urlWithParams(`/v2/aex9/account-balances/${address}`, {
+                limit: 100,
+              })),
               fetchFromMiddlewareCamelCased,
             );
 

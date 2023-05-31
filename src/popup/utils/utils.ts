@@ -336,6 +336,10 @@ export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
   },
 );
 
+export function urlWithParams(url: string, params: Record<string, any>) {
+  return `${url}?${new URLSearchParams(JSON.parse(JSON.stringify(params)))}`;
+}
+
 export async function fetchJson<T = any>(
   url: string,
   options?: RequestInit,

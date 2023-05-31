@@ -10,6 +10,7 @@ import {
   isAccountNotFoundError,
   watchUntilTruthy,
   fetchRespondChallenge,
+  urlWithParams,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
 import { useMiddleware, useModals } from '../composables';
@@ -64,9 +65,15 @@ export default {
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
-    const response = await fetchJson(
-      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ''}`,
-    );
+
+    const response = await fetchJson(urlWithParams(
+      `${getters.activeNetwork.backendUrl}/cache/events/`, {
+        address,
+        event: 'TipWithdrawn',
+        limit: recent ? limit : undefined,
+      },
+    ));
+
     if (response.message) return [];
     const tipWithdrawnTransactions = response.map(({
       amount, contract, height, data: { tx }, ...t
