@@ -61,7 +61,6 @@ export default defineComponent({
   setup(props) {
     const instance = getCurrentInstance();
     const route = useRoute();
-    const refs = instance?.refs;
 
     const {
       isSearchBarAndFilterExpanded,
