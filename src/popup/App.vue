@@ -1,6 +1,6 @@
 <template>
   <div
-    id="app"
+    class="app-wrapper"
     :class="{
       'show-header': showHeader,
       'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
@@ -207,7 +207,7 @@ export default defineComponent({
 @use '../styles/typography';
 @use '../styles/mixins';
 
-#app {
+.app-wrapper {
   --screen-padding-x: 16px;
   --screen-border-radius: 0;
   --screen-bg-color: #{variables.$color-bg-app};
