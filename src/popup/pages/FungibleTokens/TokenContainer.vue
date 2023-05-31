@@ -197,7 +197,7 @@ export default defineComponent({
 
     const tokens = computed((): IToken[] => {
       const [token0, token1] = [tokenPairs.value.token0, tokenPairs.value.token1];
-      return (token0 && token1) ? [token0!, token1!] : [tokenData.value];
+      return (token0 && token1) ? [token0!, token1!, tokenData.value] : [tokenData.value];
     });
 
     const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);

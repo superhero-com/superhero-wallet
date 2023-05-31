@@ -8,20 +8,9 @@
       class="icons"
     >
       <img
-        v-if="toToken"
-        class="to-token"
-        :src="toToken.image || getTokenPlaceholderUrl(toToken)"
-        :class="{ border: !toToken.image }"
-        :title="toToken.symbol"
-      >
-      <img
-        v-if="fromToken"
-        :src="fromToken.image || getTokenPlaceholderUrl(fromToken)"
-        :class="{
-          border: !fromToken.image,
-          pair: !!toToken,
-        }"
-        :title="fromToken.symbol"
+        :src="imgToken.image || getTokenPlaceholderUrl(imgToken)"
+        :class="{ 'with-border': !imgToken.image }"
+        :title="imgToken.symbol"
       >
     </span>
 
@@ -123,10 +112,16 @@ export default defineComponent({
 
     const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
     const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
+    const imgToken = computed(() => (
+        props.tokens?.[2]
+          ? mapToken(props.tokens[2])
+          : fromToken.value
+    ));
 
     return {
       fromToken,
       toToken,
+      imgToken,
       getTokenPlaceholderUrl,
       truncateString,
     };
@@ -191,16 +186,7 @@ export default defineComponent({
     vertical-align: middle;
     margin-right: 4px;
 
-    &.to-token {
-      margin-left: 10px;
-    }
-
-    &.pair {
-      margin-right: 16px;
-      margin-left: -30px;
-    }
-
-    &.border {
+    &.with-border {
       border: 0.25px solid rgba(variables.$color-white, 0.75);
     }
   }
@@ -224,10 +210,6 @@ export default defineComponent({
         height: 44px;
         margin: 0;
         border-radius: 22px;
-
-        &.pair {
-          margin-left: -80px;
-        }
       }
     }
   }
