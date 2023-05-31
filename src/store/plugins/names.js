@@ -68,7 +68,7 @@ export default (store) => {
         // eslint-disable-next-line no-param-reassign
         if (name) defaults[`${address}-${networkId}`] = name;
         // eslint-disable-next-line no-param-reassign
-        delete defaults[`${address}-${networkId}`];
+        else delete defaults[`${address}-${networkId}`];
       },
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
@@ -79,7 +79,7 @@ export default (store) => {
         // eslint-disable-next-line no-param-reassign
         if (name) preferred[`${address}-${networkId}`] = name;
         // eslint-disable-next-line no-param-reassign
-        delete preferred[`${address}-${networkId}`];
+        else delete preferred[`${address}-${networkId}`];
       },
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };
