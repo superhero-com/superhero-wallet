@@ -111,7 +111,9 @@ export default {
         })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
+      dispatch('fetchTipWithdrawnTransactions', { recent, address, multipleAccounts }),
     ]);
+    const tipWithdrawnTransactions = txs[2];
 
     const lastTransaction = txs[0]?.[txs[0].length - 1];
     // DEX transaction is represented in 3 objects, only last one should be used
@@ -139,12 +141,11 @@ export default {
 
     txs = uniqBy(txs.reverse(), 'hash').reverse();
     const minMicroTime = Math.min.apply(null, txs.map((tx) => tx.microTime));
-    (await dispatch('fetchTipWithdrawnTransactions', { recent, address, multipleAccounts }))
-      .forEach((f) => {
-        if (minMicroTime < f.microTime || (txs.length === 0 && minMicroTime > f.microTime)) {
-          txs.push({ ...f, transactionOwner: address });
-        }
-      });
+    tipWithdrawnTransactions.forEach((f) => {
+      if (minMicroTime < f.microTime || (txs.length === 0 && minMicroTime > f.microTime)) {
+        txs.push({ ...f, transactionOwner: address });
+      }
+    });
     txs = orderBy(txs, ['microTime'], ['desc']);
     const network = getters.activeNetwork.networkId;
     if (state.transactions.pending[network] && !multipleAccounts) {
