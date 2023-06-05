@@ -1,22 +1,21 @@
 import { computed, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import type {
-  CoinGeckoMarketResponse,
   CurrencyCode,
-  IAsset,
+  CurrencyRates,
+  ICoin,
   ICurrency,
 } from '../types';
 import {
   AETERNITY_TOKEN_BASE_DATA,
   CURRENCIES,
-  CURRENCY_URL,
-  CURRENCIES_URL,
-  fetchJson,
   getLocalStorageItem,
   handleUnknownError,
   setLocalStorageItem,
+  AETERNITY_COIN_ID,
 } from '../popup/utils';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import { CoinGecko } from '../lib/CoinGecko';
 
 export interface UseCurrenciesOptions {
   withoutPolling?: boolean;
@@ -24,11 +23,18 @@ export interface UseCurrenciesOptions {
 
 const POLLING_INTERVAL = 3600000;
 const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
-const APP_CURRENCY_CODES = CURRENCIES.map(({ code }) => code).join(',');
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 
-const aeternityData = ref<IAsset>();
-const currencyRates = ref<Record<string, number>>({});
+/**
+ * AE Coin details with additional market info
+ */
+const aeternityData = ref<ICoin>();
+
+/**
+ * Stores the list of currencies with the AE coin fiat exchange rate for each of them.
+ */
+const currencyRates = ref<CurrencyRates>({} as any);
+
 const currentCurrencyCode = ref<CurrencyCode>(
   getLocalStorageItem<CurrencyCode>([LOCAL_STORAGE_CURRENCY_KEY]) || DEFAULT_CURRENCY_CODE,
 );
@@ -48,9 +54,13 @@ export function useCurrencies({
 
   async function loadAeternityData() {
     try {
-      const [aeMarketData] = (await fetchJson(`${CURRENCY_URL}${currentCurrencyCode.value}`) || []) as CoinGeckoMarketResponse[];
+      const aeMarketData = await CoinGecko.fetchCoinMarketData(
+        AETERNITY_COIN_ID,
+        currentCurrencyCode.value,
+      );
+
       aeternityData.value = {
-        ...aeMarketData,
+        ...aeMarketData || {} as any,
         ...AETERNITY_TOKEN_BASE_DATA,
         balanceCurrency: 0,
         convertedBalance: new BigNumber(0),
@@ -68,11 +78,10 @@ export function useCurrencies({
   }
 
   async function loadCurrencyRates() {
-    try {
-      const { aeternity } = await fetchJson(`${CURRENCIES_URL}${APP_CURRENCY_CODES}`);
-      currencyRates.value = aeternity;
-    } catch (e) {
-      handleUnknownError(e);
+    const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(AETERNITY_COIN_ID);
+
+    if (fetchedCurrencyRates) {
+      currencyRates.value = fetchedCurrencyRates;
     }
   }
 

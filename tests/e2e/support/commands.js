@@ -6,8 +6,6 @@ import {
   formatDate,
   formatTime,
   getLoginState,
-  CURRENCY_URL,
-  CURRENCIES_URL,
 } from '../../../src/popup/utils';
 
 Cypress.Commands.add('getByTestId', (testId) => {
@@ -56,13 +54,7 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('mockExternalRequests', () => {
-  cy.intercept('GET', CURRENCY_URL, STUB_CURRENCY);
-  cy.intercept('GET', CURRENCIES_URL, { aeternity: { usd: 0.05 } });
-});
-
-Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
-  if (isMockingExternalRequests) cy.mockExternalRequests();
+Cypress.Commands.add('login', (options = {}, route) => {
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
