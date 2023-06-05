@@ -60,7 +60,10 @@
         class="external-link-button"
       >
         {{ redirectInfo }}
-        <ExternalLinkIcon class="external-link-icon" />
+        <ExternalLinkIcon
+          v-if="!isIncomingTransaction"
+          class="external-link-icon"
+        />
       </div>
     </div>
   </div>

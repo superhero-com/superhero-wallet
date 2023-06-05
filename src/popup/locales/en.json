@@ -361,7 +361,9 @@
     "tips": "Tips",
     "bid": "Bid",
     "soonest": "Ending soon",
-    "length": "Name length"
+    "length": "Name length",
+    "superhero": "Superhero",
+    "wallet": "Wallet"
   },
   "transaction": {
     "fee": "Transaction fee",

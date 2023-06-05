@@ -1,7 +1,12 @@
 /* eslint-disable class-methods-use-this */
 import { v4 as genUuid } from 'uuid';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { IMiddlewareWebSocketSubscriptionMessage, WebSocketChannelName } from '../types';
+import type {
+  IMiddlewareWebSocketSubscriptionMessage,
+  ITopHeader,
+  ITransaction,
+  WebSocketChannelName,
+} from '../types';
 import {
   WEB_SOCKET_CHANNELS,
   WEB_SOCKET_SUBSCRIBE,
@@ -14,7 +19,9 @@ let isWsConnected: boolean;
 
 const subscribersQueue: IMiddlewareWebSocketSubscriptionMessage[] = [];
 
-const subscribers: Record<WebSocketChannelName, Record<string, (payload: any) => void>> = {
+const subscribers: Record<WebSocketChannelName, Record<string, (
+  payload: ITransaction | ITopHeader
+) => void>> = {
   [WEB_SOCKET_CHANNELS.Transactions]: {},
   [WEB_SOCKET_CHANNELS.MicroBlocks]: {},
   [WEB_SOCKET_CHANNELS.KeyBlocks]: {},
@@ -63,7 +70,7 @@ class WebSocketClient {
     };
   }
 
-  subscribeForAccountUpdates(address: string, callback: (payload: any) => void) {
+  subscribeForAccountUpdates(address: string, callback: (payload: ITransaction) => void) {
     return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
@@ -74,7 +81,7 @@ class WebSocketClient {
     );
   }
 
-  subscribeForTransactionsUpdates(callback: (payload: any) => void) {
+  subscribeForTransactionsUpdates(callback: (payload: ITransaction) => void) {
     return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
@@ -84,7 +91,7 @@ class WebSocketClient {
     );
   }
 
-  subscribeForMicroBlocksUpdates(callback: (payload: any) => void) {
+  subscribeForMicroBlocksUpdates(callback: (payload: ITopHeader) => void) {
     return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
@@ -94,7 +101,7 @@ class WebSocketClient {
     );
   }
 
-  subscribeForKeyBlocksUpdates(callback: (payload: any) => void) {
+  subscribeForKeyBlocksUpdates(callback: (payload: ITopHeader) => void) {
     return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
@@ -110,6 +117,10 @@ class WebSocketClient {
     }
     try {
       const data = camelcaseKeysDeep(JSON.parse(message.data));
+
+      if (!data.payload) {
+        return;
+      }
 
       // Call all subscribers for the channel
       Object.values(subscribers[data.subscription as WebSocketChannelName]).forEach(

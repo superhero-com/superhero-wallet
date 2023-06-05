@@ -3,7 +3,7 @@ import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplink-handler';
 import * as wallet from './wallet';
 import Logger from '../lib/logger';
-import PushNotification from '../lib/PushNotification';
+import PushNotification from '../lib/Push';
 import store from './store';
 import { useAccounts } from '../composables';
 

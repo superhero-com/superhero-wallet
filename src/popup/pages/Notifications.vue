@@ -1,5 +1,11 @@
 <template>
   <div class="notifications">
+    <Filters
+      v-model="displayMode"
+      class="filters"
+      :filters="filtersConfig"
+    />
+
     <InfiniteScroll
       v-if="notificationsToShow.length"
       :is-more-data="canLoadMore"
@@ -33,11 +39,16 @@ import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
 import { IS_EXTENSION } from '../../lib/environment';
 
+import NotificationItem from '../components/NotificationItem.vue';
+import InfiniteScroll from '../components/InfiniteScroll.vue';
+import Filters from '../components/Filters.vue';
+
 export default defineComponent({
   name: 'Notifications',
   components: {
     InfiniteScroll,
     NotificationItem,
+    Filters,
   },
   setup() {
     const store = useStore();
@@ -68,6 +79,8 @@ export default defineComponent({
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
+      displayMode,
+      filtersConfig,
     };
   },
 });
@@ -89,6 +102,10 @@ export default defineComponent({
     margin-inline: auto;
     text-align: center;
     opacity: 0.75;
+  }
+
+  .filters {
+    margin: 0;
   }
 }
 </style>

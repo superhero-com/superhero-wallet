@@ -484,6 +484,8 @@ export interface ITopHeader {
   time: number
   txsHash: string
   version: number
+  beneficiary?: string
+  miner?: string
 }
 
 export type ISignMessage = (m: any) => Promise<any>

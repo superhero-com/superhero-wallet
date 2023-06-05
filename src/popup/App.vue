@@ -54,16 +54,11 @@ import {
   onUnmounted,
   ref,
   watch,
-<<<<<<< HEAD
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { WalletRouteMeta } from '../types';
-=======
-} from '@vue/composition-api';
-import type { INetwork, WalletRouteMeta } from '../types';
->>>>>>> e1e27861 (feat: incoming transactions listeners)
+import type { WalletRouteMeta, INetwork } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
@@ -90,7 +85,7 @@ import {
   useViewport,
 } from '../composables';
 import { useGetter } from '../composables/vuex';
-import WebSocketClient from '../lib/WebSocketClient';
+import WebSocketClient from '../lib/WebSocket';
 
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
@@ -104,15 +99,11 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
-<<<<<<< HEAD
   setup() {
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
-=======
-  setup(props, { root }) {
     const activeNetwork = useGetter<INetwork>('activeNetwork');
->>>>>>> e1e27861 (feat: incoming transactions listeners)
 
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
@@ -124,7 +115,7 @@ export default defineComponent({
     const {
       startListeningForIncomingTransactions,
       stopListeningForIncomingTransactions,
-    } = useIncomingTransactions({ store: root.$store, router: root.$router });
+    } = useIncomingTransactions({ store });
 
     const innerElement = ref<HTMLDivElement>();
 
