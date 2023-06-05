@@ -44,26 +44,24 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { getSdk } = useSdk({ store });
-  const { currentCurrencyRate, aeternityData } = useCurrencies();
+  const { aeternityData } = useCurrencies();
   const { activeAccount, accounts } = useAccounts({ store });
 
   const balances = useStorageRef(store);
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
-  const balanceCurrency = computed(() => balance.value.toNumber() * currentCurrencyRate.value);
   const balancesTotal = computed(
     () => Object.keys(balances.value)
       .reduce((total, key) => total.plus(balances.value[key]), new BigNumber(0))
       .toFixed(),
   );
 
-  const aeternityToken = computed((): ICoin => ({
-    ...aeternityData.value,
-    convertedBalance: balance.value,
-    symbol: AETERNITY_SYMBOL,
-    balanceCurrency: balanceCurrency.value,
+  const aeternityCoin = computed((): ICoin => ({
+    ...aeternityData.value!,
     contractId: AETERNITY_CONTRACT_ID,
-  } as ICoin));
+    convertedBalance: +balance.value,
+    symbol: AETERNITY_SYMBOL,
+  }));
 
   function getAccountBalance(address: string) {
     return balances.value[address] || new BigNumber(0);
@@ -95,11 +93,10 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   initPollingWatcher(() => updateBalances());
 
   return {
-    aeternityToken,
+    aeternityCoin,
     balances,
     balancesTotal,
     balance,
-    balanceCurrency,
     getAccountBalance,
     updateBalances,
   };

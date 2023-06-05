@@ -265,7 +265,7 @@ export default defineComponent({
     const isUrlTippingEnabled = ref<boolean>(false);
 
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { balance, aeternityCoin } = useBalances({ store: root.$store });
     const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
     const { openModal, openDefaultModal } = useModals();
     const {
@@ -371,7 +371,7 @@ export default defineComponent({
       payload,
       token,
     }: Dictionary) {
-      formModel.value.selectedAsset = availableTokens.value[token] || aeternityToken.value;
+      formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
 
       if (account) {
         formModel.value.address = account;

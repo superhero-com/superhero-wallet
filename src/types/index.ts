@@ -127,15 +127,8 @@ export type ITokenList = Record<string, IToken>
  * Coins are specific to the network user can connect to. We assume each network
  * can have only one coin and many tokens.
  * TODO: Put the CoinGecko data in a separate property.
- * TODO: Unify the balanceCurrency and convertedBalance with IToken
  */
-export interface ICoin extends
-  Omit<IToken, 'convertedBalance'>,
-  Omit<CoinGeckoMarketResponse, 'image'>
-{
-  balanceCurrency: number; // convertedBalance * currency rate
-  convertedBalance: Balance;
-}
+export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
 
 /**
  * In general the "Asset" is any form of coin or fungible token we use in the app.

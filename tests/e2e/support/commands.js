@@ -7,6 +7,7 @@ import {
   formatTime,
   getLoginState,
 } from '../../../src/popup/utils';
+import { CoinGecko } from '../../../src/lib/CoinGecko';
 
 Cypress.Commands.add('getByTestId', (testId) => {
   cy.get(`[data-cy=${testId}]`);
@@ -54,7 +55,13 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
   cy.get(el).should('exist').should('be.visible');
 });
 
-Cypress.Commands.add('login', (options = {}, route) => {
+Cypress.Commands.add('mockExternalRequests', () => {
+  cy.stub(CoinGecko, 'fetchCoinMarketData', STUB_CURRENCY);
+  cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
+});
+
+Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
+  if (isMockingExternalRequests) cy.mockExternalRequests();
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
