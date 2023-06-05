@@ -87,10 +87,10 @@ export default defineComponent({
     showTokensWithBalance: Boolean,
   },
   setup(props, { root, emit }) {
-    const { aeternityToken } = useBalances({ store: root.$store });
+    const { aeternityCoin } = useBalances({ store: root.$store });
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
-    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityToken.value);
+    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
@@ -113,7 +113,7 @@ export default defineComponent({
 
     onMounted(() => {
       if (!props.selectedAsset) {
-        handleAssetSelected(aeternityToken.value);
+        handleAssetSelected(aeternityCoin.value);
       }
     });
 

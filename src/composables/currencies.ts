@@ -62,7 +62,6 @@ export function useCurrencies({
       aeternityData.value = {
         ...aeMarketData || {} as any,
         ...AETERNITY_TOKEN_BASE_DATA,
-        balanceCurrency: 0,
         convertedBalance: new BigNumber(0),
       };
     } catch (e) {

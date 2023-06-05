@@ -100,7 +100,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { balance, aeternityCoin } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
 
     const tipId = root.$route.query.id;
@@ -194,7 +194,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = aeternityToken.value;
+      formModel.value.selectedAsset = aeternityCoin.value;
 
       if (!tipId) throw new Error('"id" param is missing');
 
