@@ -37,7 +37,7 @@
         :class="{ focused }"
       >
         <span
-          v-if="currentTokenFiatPrice && !hasError"
+          v-if="currentAssetFiatPrice && !hasError"
           class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
@@ -46,12 +46,12 @@
         </span>
 
         <span
-          v-if="currentTokenFiatPrice"
+          v-if="currentAssetFiatPrice"
           class="input-amount-desc-at"
         >
           @{{
-            (currentTokenFiatPrice)
-              ? currentTokenFiatPriceFormatted
+            (currentAssetFiatPrice)
+              ? currentAssetFiatPriceFormatted
               : $t('common.priceNotAvailable')
           }}
         </span>
@@ -70,7 +70,7 @@ import {
 } from '@vue/composition-api';
 import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
-import { AETERNITY_SYMBOL } from '../utils';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -88,19 +88,22 @@ export default defineComponent({
   },
   setup(props, { root, emit }) {
     const { aeternityToken } = useBalances({ store: root.$store });
-    const { formatCurrency } = useCurrencies();
+    const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityToken.value);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
+    const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
+    const currentAssetFiatPrice = computed(
+      () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
+    );
+    const currentAssetFiatPriceFormatted = computed(
+      () => formatCurrency(currentAssetFiatPrice.value),
+    );
     const totalAmountFormatted = computed(() => formatCurrency(
-      (currentAsset.value?.current_price)
-        ? (+props.value || 0) * currentAsset.value.current_price
+      (currentAssetFiatPrice.value)
+        ? (+props.value || 0) * currentAssetFiatPrice.value
         : 0,
     ));
-    const currentTokenFiatPrice = computed(() => currentAsset.value?.current_price);
-    const currentTokenFiatPriceFormatted = computed(
-      () => formatCurrency(currentTokenFiatPrice.value),
-    );
 
     function handleAssetSelected(asset: IAsset) {
       emit('asset-selected', asset);
@@ -115,10 +118,11 @@ export default defineComponent({
     });
 
     return {
+      currentCurrencyRate,
       AETERNITY_SYMBOL,
       totalAmountFormatted,
-      currentTokenFiatPrice,
-      currentTokenFiatPriceFormatted,
+      currentAssetFiatPrice,
+      currentAssetFiatPriceFormatted,
       currentAsset,
       hasError,
       formatCurrency,

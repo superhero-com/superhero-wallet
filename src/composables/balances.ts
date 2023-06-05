@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import type {
   Balance,
   BalanceRaw,
-  IAsset,
+  ICoin,
   IDefaultComposableOptions,
 } from '../types';
 import {
@@ -57,13 +57,13 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       .toFixed(),
   );
 
-  const aeternityToken = computed((): IAsset => ({
+  const aeternityToken = computed((): ICoin => ({
     ...aeternityData.value,
     convertedBalance: balance.value,
     symbol: AETERNITY_SYMBOL,
     balanceCurrency: balanceCurrency.value,
     contractId: AETERNITY_CONTRACT_ID,
-  }) as IAsset);
+  } as ICoin));
 
   function getAccountBalance(address: string) {
     return balances.value[address] || new BigNumber(0);

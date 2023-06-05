@@ -20,6 +20,7 @@ export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 export const SEED_LENGTH = 12;
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
+export const AETERNITY_COIN_ID = 'aeternity';
 export const AETERNITY_COIN_SYMBOL = 'AE Coin';
 export const AETERNITY_COIN_NAME = 'Aeternity';
 export const AETERNITY_COIN_PRECISION = 18; // Amount of decimals
@@ -397,9 +398,6 @@ export const SIMPLEX_URL = 'https://simplex.superhero.com';
 export const FAUCET_URL = 'https://faucet.aepps.com';
 export const DEX_URL = 'https://aepp.dex.superhero.com';
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
-
-export const CURRENCIES_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=aeternity&vs_currencies=';
-export const CURRENCY_URL = 'https://api.coingecko.com/api/v3/coins/markets?ids=aeternity&vs_currency=';
 
 export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
 

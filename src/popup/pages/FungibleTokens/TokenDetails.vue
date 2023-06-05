@@ -163,7 +163,7 @@ import {
   PropType,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import type { IToken } from '../../../types';
+import type { IAsset, IToken } from '../../../types';
 import {
   AETERNITY_CONTRACT_ID,
   DEX_URL,
@@ -189,7 +189,7 @@ export default defineComponent({
   props: {
     contractId: { type: String, default: null },
     tokenPairs: { type: Object, default: () => ({}) },
-    tokenData: { type: Object as PropType<IToken>, default: () => ({}) },
+    tokenData: { type: Object as PropType<IAsset>, default: () => ({}) },
     tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
   },
   setup(props) {
