@@ -599,16 +599,14 @@ export const ALLOWED_ICON_STATUSES = [
   'warning',
 ] as const;
 
-export const WEB_SOCKET_CHANNEL_TRANSACTIONS = 'Transactions';
-export const WEB_SOCKET_CHANNEL_MICRO_BLOCKS = 'MicroBlocks';
-export const WEB_SOCKET_CHANNEL_KEY_BLOCKS = 'KeyBlocks';
-export const WEB_SOCKET_CHANNEL_KEY_OBJECT = 'Object';
+export const WEB_SOCKET_CHANNELS = {
+  Transactions: 'Transactions',
+  MicroBlocks: 'MicroBlocks',
+  KeyBlocks: 'KeyBlocks',
+  Object: 'Object',
+};
+
 export const WEB_SOCKET_SUBSCRIBE = 'Subscribe';
 export const WEB_SOCKET_UN_SUBSCRIBE = 'Unsubscribe';
 
-export const WEB_SOCKET_CHANNEL_NAMES = [
-  WEB_SOCKET_CHANNEL_TRANSACTIONS,
-  WEB_SOCKET_CHANNEL_MICRO_BLOCKS,
-  WEB_SOCKET_CHANNEL_KEY_BLOCKS,
-  WEB_SOCKET_CHANNEL_KEY_OBJECT,
-] as const;
+export const PUSH_NOTIFICATION_AUTO_CLOSE_TIMEOUT = 10000;

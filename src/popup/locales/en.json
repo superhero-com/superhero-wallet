@@ -1084,6 +1084,8 @@
       "networkCompilerLabel": "Network compiler",
       "backendUrlPlaceholder": "Enter tipping Backend URL",
       "backendUrlLabel": "Tipping backend",
+      "websocketUrlPlaceholder": "Enter websocket URL",
+      "websocketUrlLabel": "Websocket URL",
       "showTippingConfig": "Show Tipping Configuration",
       "hideTippingConfig": "Hide Tipping Configuration",
       "save": "Connect",

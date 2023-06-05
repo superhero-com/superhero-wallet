@@ -1,5 +1,5 @@
 import webNotification from 'simple-web-notification';
-import { handleUnknownError } from '../popup/utils';
+import { PUSH_NOTIFICATION_AUTO_CLOSE_TIMEOUT, handleUnknownError } from '../popup/utils';
 import { INotification } from '../types';
 import { IS_CORDOVA, IS_EXTENSION, IS_WEB } from './environment';
 
@@ -8,6 +8,16 @@ export default class PushNotification {
     if (IS_WEB) {
       webNotification.requestPermission();
     }
+
+    if (IS_CORDOVA) {
+      try {
+        if (window.cordova?.plugins?.notification) {
+          window.cordova.plugins.notification.local.requestPermission(() => {});
+        }
+      } catch (error) {
+        handleUnknownError(error);
+      }
+    }
   }
 
   static scheduleWebNotification(notification: Partial<INotification>) {
@@ -15,7 +25,7 @@ export default class PushNotification {
       body: notification.text,
       icon: '/favicons/favicon-128.png',
       actions: [],
-      autoClose: 10000,
+      autoClose: PUSH_NOTIFICATION_AUTO_CLOSE_TIMEOUT,
     });
   }
 

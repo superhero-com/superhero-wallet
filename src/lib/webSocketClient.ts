@@ -1,12 +1,11 @@
+/* eslint-disable class-methods-use-this */
 import { v4 as genUuid } from 'uuid';
 import camelcaseKeysDeep from 'camelcase-keys-deep';
 import { IMiddlewareWebSocketSubscriptionMessage, WebSocketChannelName } from '../types';
 import {
-  WEB_SOCKET_CHANNEL_KEY_BLOCKS,
-  WEB_SOCKET_CHANNEL_KEY_OBJECT,
-  WEB_SOCKET_CHANNEL_MICRO_BLOCKS,
-  WEB_SOCKET_CHANNEL_TRANSACTIONS,
+  WEB_SOCKET_CHANNELS,
   WEB_SOCKET_SUBSCRIBE,
+  WEB_SOCKET_UN_SUBSCRIBE,
   handleUnknownError,
 } from '../popup/utils';
 
@@ -14,33 +13,41 @@ let wsClient: WebSocket;
 let isWsConnected: boolean;
 
 const subscribersQueue: IMiddlewareWebSocketSubscriptionMessage[] = [];
-// eslint-disable-next-line no-unused-vars
-const subscribers:Record<WebSocketChannelName, Record<string, (payload: any) => void>> = {
-  [WEB_SOCKET_CHANNEL_TRANSACTIONS]: {},
-  [WEB_SOCKET_CHANNEL_MICRO_BLOCKS]: {},
-  [WEB_SOCKET_CHANNEL_KEY_BLOCKS]: {},
-  [WEB_SOCKET_CHANNEL_KEY_OBJECT]: {},
+
+const subscribers: Record<WebSocketChannelName, Record<string, (payload: any) => void>> = {
+  [WEB_SOCKET_CHANNELS.Transactions]: {},
+  [WEB_SOCKET_CHANNELS.MicroBlocks]: {},
+  [WEB_SOCKET_CHANNELS.KeyBlocks]: {},
+  [WEB_SOCKET_CHANNELS.Object]: {},
 };
 
-export default class WebSocketClient {
-  static handleWebsocketOpen() {
+class WebSocketClient {
+  private static instance: WebSocketClient;
+
+  static getInstance(): WebSocketClient {
+    if (!WebSocketClient.instance) {
+      WebSocketClient.instance = new WebSocketClient();
+    }
+    return WebSocketClient.instance;
+  }
+
+  private handleWebsocketOpen() {
     isWsConnected = true;
     subscribersQueue.forEach((message) => {
       wsClient.send(JSON.stringify(message));
     });
   }
 
-  static handleWebsocketClose() {
+  private handleWebsocketClose() {
     isWsConnected = false;
   }
 
-  static isWsConnected() {
+  isConnected(): boolean {
     return isWsConnected;
   }
 
-  static subscribeForChannel(
+  subscribeForChannel(
     message: IMiddlewareWebSocketSubscriptionMessage,
-    // eslint-disable-next-line no-unused-vars
     callback: (payload: any) => void,
   ) {
     if (isWsConnected) {
@@ -50,59 +57,54 @@ export default class WebSocketClient {
     subscribersQueue.push(message);
 
     const uuid = genUuid();
-    // const uuid = message.target || genUuid();
     subscribers[message.payload][uuid] = callback;
     return () => {
       delete subscribers[message.payload][uuid];
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
-  static subscribeForAccountUpdates(address: string, callback: (payload: any) => void) {
-    return WebSocketClient.subscribeForChannel(
+  subscribeForAccountUpdates(address: string, callback: (payload: any) => void) {
+    return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
-        payload: WEB_SOCKET_CHANNEL_KEY_OBJECT,
+        payload: WEB_SOCKET_CHANNELS.Object,
         target: address,
       },
       callback,
     );
   }
 
-  // eslint-disable-next-line no-unused-vars
-  static subscribeForTransactionsUpdates(callback: (payload: any) => void) {
-    return WebSocketClient.subscribeForChannel(
+  subscribeForTransactionsUpdates(callback: (payload: any) => void) {
+    return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
-        payload: WEB_SOCKET_CHANNEL_TRANSACTIONS,
+        payload: WEB_SOCKET_CHANNELS.Transactions,
       },
       callback,
     );
   }
 
-  // eslint-disable-next-line no-unused-vars
-  static subscribeForMicroBlocksUpdates(callback: (payload: any) => void) {
-    return WebSocketClient.subscribeForChannel(
+  subscribeForMicroBlocksUpdates(callback: (payload: any) => void) {
+    return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
-        payload: WEB_SOCKET_CHANNEL_MICRO_BLOCKS,
+        payload: WEB_SOCKET_CHANNELS.MicroBlocks,
       },
       callback,
     );
   }
 
-  // eslint-disable-next-line no-unused-vars
-  static subscribeForKeyBlocksUpdates(callback: (payload: any) => void) {
-    return WebSocketClient.subscribeForChannel(
+  subscribeForKeyBlocksUpdates(callback: (payload: any) => void) {
+    return this.subscribeForChannel(
       {
         op: WEB_SOCKET_SUBSCRIBE,
-        payload: WEB_SOCKET_CHANNEL_KEY_BLOCKS,
+        payload: WEB_SOCKET_CHANNELS.KeyBlocks,
       },
       callback,
     );
   }
 
-  static handleWebsocketMessage(message: MessageEvent) {
+  private handleWebsocketMessage(message: MessageEvent) {
     if (!message.data) {
       return;
     }
@@ -118,21 +120,31 @@ export default class WebSocketClient {
     }
   }
 
-  static disconnect() {
-    wsClient.addEventListener('open', WebSocketClient.handleWebsocketOpen);
-    wsClient.addEventListener('close', WebSocketClient.handleWebsocketClose);
-    wsClient.addEventListener('message', WebSocketClient.handleWebsocketClose);
+  disconnect() {
+    subscribersQueue.forEach((message) => {
+      wsClient.send(
+        JSON.stringify({
+          ...message,
+          op: WEB_SOCKET_UN_SUBSCRIBE,
+        }),
+      );
+    });
     wsClient.close();
+    wsClient.removeEventListener('open', this.handleWebsocketOpen);
+    wsClient.removeEventListener('close', this.handleWebsocketClose);
+    wsClient.removeEventListener('message', this.handleWebsocketClose);
   }
 
-  static connect(url: string) {
+  connect(url: string) {
     if (wsClient) {
-      WebSocketClient.disconnect();
+      this.disconnect();
     }
 
     wsClient = new WebSocket(url);
-    wsClient.addEventListener('open', WebSocketClient.handleWebsocketOpen);
-    wsClient.addEventListener('close', WebSocketClient.handleWebsocketClose);
-    wsClient.addEventListener('message', WebSocketClient.handleWebsocketMessage);
+    wsClient.addEventListener('open', this.handleWebsocketOpen);
+    wsClient.addEventListener('close', this.handleWebsocketClose);
+    wsClient.addEventListener('message', this.handleWebsocketMessage);
   }
 }
+
+export default WebSocketClient.getInstance();

@@ -24,7 +24,7 @@ import {
   FUNCTION_TYPE_MULTISIG,
   ALLOWED_ICON_STATUSES,
   AETERNITY_COIN_ID,
-  WEB_SOCKET_CHANNEL_NAMES,
+  WEB_SOCKET_CHANNELS,
 } from '../popup/utils';
 import { RejectedByUserError } from '../lib/errors';
 
@@ -726,7 +726,7 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
   ) => Encoded.TxHash;
 }
 
-export type WebSocketChannelName = typeof WEB_SOCKET_CHANNEL_NAMES[number];
+export type WebSocketChannelName = ObjectValues<typeof WEB_SOCKET_CHANNELS>;
 
 // https://github.com/aeternity/ae_mdw#websocket-interface
 export interface IMiddlewareWebSocketSubscriptionMessage {

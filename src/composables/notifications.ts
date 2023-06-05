@@ -19,7 +19,7 @@ import {
 import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
-import PushNotification from '../lib/pushNotification';
+import PushNotification from '../lib/PushNotification';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean

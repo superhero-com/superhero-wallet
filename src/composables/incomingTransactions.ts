@@ -6,7 +6,7 @@ import { useAccounts } from './accounts';
 import { useNotifications } from './notifications';
 import { useGetter } from './vuex';
 import { ROUTE_TX_DETAILS } from '../popup/router/routeNames';
-import WebSocketClient from '../lib/webSocketClient';
+import WebSocketClient from '../lib/WebSocketClient';
 
 export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
   const router = useRouter();
