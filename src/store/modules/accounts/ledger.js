@@ -4,7 +4,7 @@ import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { ACCOUNT_LEDGER_WALLET, MODAL_CONFIRM } from '../../../popup/utils';
-import { useModals } from '../../../composables';
+import { useAccounts, useModals, useSdk } from '../../../composables';
 
 export default {
   namespaced: true,
@@ -71,7 +71,10 @@ export default {
 
     sign: () => Promise.reject(new Error('Not implemented yet')),
 
-    async signTransaction({ rootGetters: { account, 'sdkPlugin/sdk': sdk }, dispatch }, { txBase64 }) {
+    async signTransaction(context, { txBase64 }) {
+      const { nodeNetworkId } = useSdk({ store: context });
+      const { activeIdx } = useAccounts({ store: context });
+
       await dispatch('ensureCurrentAccountAvailable');
 
       const txObject = TxBuilder.unpackTx(txBase64).tx;
@@ -81,12 +84,12 @@ export default {
         { vsn: txObject.VSN },
       ).rlpEncoded;
 
-      const signature = Buffer.from(await dispatch('request', {
+      const signature = Buffer.from(await context.dispatch('request', {
         name: 'signTransaction',
         args: [
-          account.idx,
+          activeIdx.value,
           binaryTx,
-          sdk.getNetworkId(),
+          nodeNetworkId.value,
         ],
       }), 'hex');
 

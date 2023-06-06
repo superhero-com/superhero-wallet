@@ -32,9 +32,9 @@ export function useSdk({ store }: IDefaultComposableOptions) {
 
   const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
   const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
-  const isCustomNodeNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
+  const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
 
-  const isTippingSupported = computed(() => (RUNNING_IN_TESTS && !isCustomNodeNetwork.value));
+  const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));
 
   const dexContracts = computed(
     () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
@@ -88,7 +88,7 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     isNodeError,
     isNodeMainnet,
     isNodeTestnet,
-    isCustomNodeNetwork,
+    isNodeCustomNetwork,
     isSdkReady,
     isTippingSupported,
     dexContracts,

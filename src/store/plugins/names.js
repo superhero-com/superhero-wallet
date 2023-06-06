@@ -73,8 +73,12 @@ export default (store) => {
         Vue.set(state.owned[index], 'autoExtend', value);
       },
       setPreferred({ preferred }, { address, name }) {
-        if (name) Vue.set(preferred, `${address}-${nodeNetworkId.value}`, name);
-        else Vue.delete(preferred, `${address}-${nodeNetworkId.value}`);
+        const key = `${address}-${nodeNetworkId.value}`;
+        if (name) {
+          Vue.set(preferred, key, name);
+        } else {
+          Vue.delete(preferred, key);
+        }
       },
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };

@@ -44,8 +44,10 @@ export default async (store) => {
   store.state.transactions.pending[nodeNetworkId.value]
     ?.filter(({ sent = false }) => !sent).forEach((t) => {
       if (Date.now() - t.microTime > 600000) {
-        store.commit('removePendingTransactionByHash',
-          { hash: t.hash, network: nodeNetworkId.value });
+        store.commit('removePendingTransactionByHash', {
+          hash: t.hash,
+          network: nodeNetworkId.value,
+        });
       } else {
         waitTransactionMined(t);
       }

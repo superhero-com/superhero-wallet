@@ -22,11 +22,11 @@ export default defineComponent({
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
 
-    const app = computed((): Partial<IAppData> => callbackOrigin.value ? ({
+    const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
       url: callbackOrigin.value.origin,
       host: callbackOrigin.value.host,
-    }) : {});
+    } : {} as IAppData);
 
     const onResolve = () => openCallbackOrGoHome(true, {
       address: activeAccount.value.address,
