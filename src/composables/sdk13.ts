@@ -119,7 +119,7 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
       },
     });
 
-    if (IN_FRAME) {
+    if (IN_FRAME && !FramesConnection.initialized) {
       FramesConnection.init(sdk);
     }
 

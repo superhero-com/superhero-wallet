@@ -233,13 +233,14 @@ export default defineComponent({
       () => TX_FIELDS_TO_DISPLAY.filter((field) => !!props.transaction[field]),
     );
 
-    const swapTokenAmountData = computed(
-      (): ITokenResolved => swapDirection.value === 'maxSpent' ? tokenList.value[0] : tokenList.value[1],
-    );
+    const swapTokenAmountData = computed((): ITokenResolved => {
+      const token = swapDirection.value === 'maxSpent' ? tokenList.value[0] : tokenList.value[1];
+      return token || {};
+    });
 
     const tokenAmount = computed((): number => +convertToken(
-      swapTokenAmountData.value.amount as number,
-      -(swapTokenAmountData.value.decimals as number),
+      swapTokenAmountData.value.amount || 0,
+      -(swapTokenAmountData.value.decimals || 0),
     ));
 
     const tokenSymbol = computed(

@@ -66,6 +66,7 @@ export default async function initSdk() {
           }
         }
 
+        // TODO node status should be kept in the SDK composable separated from the mdw status
         store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
       } catch (error) {
         store.commit('setNodeStatus', NODE_STATUS_ERROR);

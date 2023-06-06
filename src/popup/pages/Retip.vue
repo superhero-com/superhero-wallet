@@ -62,11 +62,9 @@ import {
   computed,
 } from '@vue/composition-api';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import VueI18n from 'vue-i18n';
 import {
   IToken,
   IPendingTransaction,
-  ISdk,
 } from '../../types';
 import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken } from '../utils';
