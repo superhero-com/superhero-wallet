@@ -28,3 +28,6 @@
 *.pub
 *.zip
 /artifacts
+
+# ionic files
+/android

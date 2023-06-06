@@ -1,0 +1,7 @@
+{
+  "name": "shw",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
