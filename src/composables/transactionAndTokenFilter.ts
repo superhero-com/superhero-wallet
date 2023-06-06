@@ -27,7 +27,7 @@ export const useTransactionAndTokenFilter = () => {
 
   const filtersConfig = ref<IFilters<ObjectValues<typeof FILTER_MODE>>>({
     // @ts-ignore
-    all: { name: i18n.global.t('filters.all') },
+    all: { name: i18n.global.t('common.all') },
     in: { name: i18n.global.t('filters.in') },
     out: { name: i18n.global.t('filters.out') },
     dex: { name: i18n.global.t('filters.dex') },
