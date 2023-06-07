@@ -203,7 +203,7 @@ export default defineComponent({
     amount: { type: Number, default: null },
   },
   setup(props, { root, emit }) {
-    const { openDefaultModal } = useModals();
+    const { openDefaultModal, openModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { activeAccount } = useAccounts({ store: root.$store });
     const { extractSignedTransactionResponseData } = useAirGap();
@@ -418,8 +418,7 @@ export default defineComponent({
     }
 
     async function scanSignedTransaction() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
         heading: root.$t('modals.scanAirGapTx.heading'),
         title: root.$t('modals.scanAirGapTx.title'),
         icon: 'critical',

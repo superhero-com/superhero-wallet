@@ -131,6 +131,8 @@ export default {
     },
   },
   async mounted() {
+    this.decoder = new URDecoder();
+
     if (this.mobile) {
       try {
         await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (
@@ -169,7 +171,6 @@ export default {
       const { BrowserQRCodeReader } = await import('@zxing/library');
 
       this.browserReader = new BrowserQRCodeReader();
-      this.decoder = new URDecoder();
     },
     async scan() {
       return this.mobile

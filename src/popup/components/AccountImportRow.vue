@@ -10,6 +10,7 @@
     <TokenAmount
       :amount="+numericBalance"
       fiat-below
+      fiat-right
     />
   </div>
 </template>
@@ -48,7 +49,7 @@ export default defineComponent({
     const isAirGapAccount = computed((): boolean => props.account.type === ACCOUNT_AIR_GAP_WALLET);
     onMounted(async () => {
       const sdk = await getSdk();
-      const fetchedBalance = await (sdk as any).balance(props.account.address);
+      const fetchedBalance = await sdk.balance(props.account.address);
       balance.value = new BigNumber(aettosToAe(fetchedBalance));
     });
 

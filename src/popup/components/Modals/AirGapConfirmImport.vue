@@ -6,18 +6,15 @@
     class="air-gap-confirm-import"
     @close="cancel()"
   >
-    <template #header>
+    <div>
       <div class="title">
         {{ $t('modals.importAirGapAccount.importConfirmDialog.title') }}
       </div>
-    </template>
-    <div>
       <div
-        v-if="filteredAccounts.length"
-        class="select-all"
+        v-if="accounts.length"
+        class="description"
       >
-        <CheckBox v-model="selectAll" />
-        {{ $t('modals.importAirGapAccount.importConfirmDialog.selectAll') }}
+        {{ $t('modals.importAirGapAccount.importConfirmDialog.description') }}
       </div>
       <div
         v-else
@@ -26,28 +23,24 @@
         {{ $t('modals.importAirGapAccount.importConfirmDialog.noAccountsFound') }}
       </div>
       <div
-        v-for="account in filteredAccounts"
+        v-for="account in accounts"
         :key="account.address"
         class="account-row"
         :class="{disabled: isAccountAlreadyImported(account)}"
       >
-        <CheckBox
-          v-model="selectedAccounts[account.address]"
-          :disabled="isAccountAlreadyImported(account)"
-        />
         <AccountImportRow :account="account" />
       </div>
     </div>
     <template #footer>
       <BtnMain
         variant="muted"
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="cancel()"
       />
       <BtnMain
         extra-padded
-        :text="$t('modals.importAirGapAccount.importConfirmDialog.importAccounts')"
-        :disabled="!hasSelectedAccounts"
+        :text="$t('modals.importAirGapAccount.importConfirmDialog.importAccount')"
+        :disabled="!canImportAccounts"
         @click="confirm()"
       />
     </template>
@@ -55,18 +48,11 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  watch,
-  computed,
-  PropType,
-} from '@vue/composition-api';
+import { computed, defineComponent, PropType } from '@vue/composition-api';
 import type { IAccount } from '../../../types';
 import { useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
-import CheckBox from '../CheckBox.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AccountImportRow from '../AccountImportRow.vue';
 
@@ -75,7 +61,6 @@ export default defineComponent({
     Modal,
     BtnMain,
     AccountImportRow,
-    CheckBox,
   },
   props: {
     resolve: {
@@ -88,52 +73,25 @@ export default defineComponent({
   },
   setup(props) {
     const importedAccounts = useState<IAccount[]>('accounts', 'list');
-    const searchPhrase = ref<string>('');
-    const selectAll = ref<boolean>(false);
-    const selectedAccounts = ref<Record<string, boolean>>({});
-    const hasSelectedAccounts = computed((): boolean => props.accounts.some(
-      (account) => selectedAccounts.value[account.address],
-    ));
-    const filteredAccounts = computed((): IAccount[] => (
-      props.accounts.filter((account) => account.address.includes(searchPhrase.value))
-    ));
+    const canImportAccounts = computed(() => props.accounts.length > 0);
 
     function isAccountAlreadyImported(account: IAccount) {
       return importedAccounts.value.some((acc) => acc.address === account.address);
     }
 
     function confirm() {
-      props.resolve(props.accounts.filter(
-        (account) => selectedAccounts.value[account.address],
-      ));
+      props.resolve(props.accounts.filter((account) => !isAccountAlreadyImported(account)));
     }
 
     function cancel() {
       props.reject();
     }
 
-    watch(
-      selectAll,
-      (_selectAll) => {
-        const _selectedAccounts: Record<string, boolean> = {
-          ...selectedAccounts.value,
-        };
-        props.accounts.forEach((account: IAccount) => {
-          _selectedAccounts[account.address] = _selectAll;
-        });
-        selectedAccounts.value = _selectedAccounts;
-      },
-    );
-
     return {
       confirm,
       cancel,
-      searchPhrase,
-      selectAll,
-      selectedAccounts,
-      filteredAccounts,
-      hasSelectedAccounts,
       isAccountAlreadyImported,
+      canImportAccounts,
     };
   },
 });
@@ -146,14 +104,23 @@ export default defineComponent({
 
 .air-gap-confirm-import {
   .title {
-    @extend %face-sans-15-medium;
+    @extend %face-sans-18-bold;
 
-    color: rgba(variables.$color-white, 0.75);
-    text-align: left;
+    color: variables.$color-white;
+    text-align: center;
     padding: 12px;
   }
 
-  .select-all,
+  .description {
+    @extend %face-sans-16-regular;
+
+    color: variables.$color-white;
+    line-height: 24px;
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+
   .account-row {
     @include mixins.flex(flex-start, center, row);
 
