@@ -1,5 +1,35 @@
-import { CoinGeckoMarketResponse, CurrencyRates } from '../types';
+import camelCaseKeysDeep from 'camelcase-keys-deep';
+import { CurrencyRates } from '../types';
 import { CURRENCIES, fetchJson } from '../popup/utils';
+
+export interface CoinGeckoMarketResponse {
+  ath: number;
+  athChangePercentage: number;
+  athDate: string;
+  atl: number;
+  atlChangePercentage: number;
+  atlDate: string;
+  circulatingSupply: number;
+  currentPrice: number;
+  fullyDilutedValuation: any;
+  high24h: number;
+  id: string;
+  image: string;
+  lastUpdated: string;
+  low24h: number;
+  marketCap: number;
+  marketCapChange24h: number;
+  marketCapChangePercentage24h: number;
+  marketCapRank: number;
+  maxSupply: any;
+  name: string;
+  priceChange24h: number;
+  priceChangePercentage24h: number;
+  roi: object;
+  symbol: string;
+  totalSupply: number;
+  totalVolume: number;
+}
 
 const COIN_GECKO_API_URL = 'https://api.coingecko.com/api/v3';
 
@@ -20,11 +50,11 @@ export class CoinGecko {
     currencyCode: string,
   ): Promise<CoinGeckoMarketResponse | null> {
     try {
-      const [marketData] = (await CoinGecko.fetchFromApi<CoinGeckoMarketResponse[]>('/coins/markets', {
+      const [marketData] = (await CoinGecko.fetchFromApi<any[]>('/coins/markets', {
         ids: coinId,
         vs_currency: currencyCode,
       })) || [];
-      return marketData || null;
+      return marketData ? camelCaseKeysDeep(marketData) as CoinGeckoMarketResponse : null;
     } catch (error) {
       return null;
     }

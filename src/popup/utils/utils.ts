@@ -16,9 +16,7 @@ import {
   BrowserWindowMessageConnection,
 } from '@aeternity/aepp-sdk';
 import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
-import { mnemonicToSeed } from '@aeternity/bip39';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
-import { testAccount, txParams } from './testsConfig';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -66,7 +64,6 @@ import type {
   Truthy,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
-import runMigrations from '../../store/migrations';
 
 Vue.use(VueCompositionApi);
 
@@ -597,10 +594,6 @@ export function calculateSupplyAmount(balance: number, totalSupply: number, rese
   return amount.toFixed(0);
 }
 
-export function buildTx(txType: any) {
-  return TxBuilder.buildTx({ ...txParams[txType] }, txType);
-}
-
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
 }
@@ -625,31 +618,6 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
     }
   }
   return value;
-}
-
-export async function getLoginState({
-  backedUpSeed,
-  balance,
-  name,
-  pendingTransaction,
-  network,
-}: any) {
-  const { mnemonic, address } = testAccount;
-  const account = {
-    address,
-    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
-  };
-  return {
-    ...(await runMigrations()),
-    account,
-    mnemonic,
-    backedUpSeed,
-    current: { network: network || 'Testnet', token: 0 },
-    balance,
-    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
-    ...(pendingTransaction
-        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
-  };
 }
 
 export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {

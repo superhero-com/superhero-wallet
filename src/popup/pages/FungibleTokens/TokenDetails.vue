@@ -30,20 +30,20 @@
       </template>
     </DetailsRow>
     <DetailsRow
-      v-if="tokenData.circulating_supply"
+      v-if="tokenData.circulatingSupply"
       :label="$t('pages.token-details.max-supply')"
-      :text="formatNumber(tokenData.circulating_supply)"
+      :text="formatNumber(tokenData.circulatingSupply)"
     />
     <DetailsRow
-      v-if="tokenData.total_supply"
+      v-if="tokenData.totalSupply"
       :label="$t('pages.token-details.total-supply')"
-      :text="formatNumber(tokenData.total_supply)"
+      :text="formatNumber(tokenData.totalSupply)"
     />
     <DetailsRow
-      v-if="tokenData.market_cap"
+      v-if="tokenData.marketCap"
       :label="$t('pages.token-details.market-cap')"
       class="price"
-      :text="formatCurrency(tokenData.market_cap)"
+      :text="formatCurrency(tokenData.marketCap)"
     />
     <DetailsRow
       v-if="tokenPairs.balances"
@@ -81,25 +81,25 @@
     />
 
     <DetailsRow
-      v-if="tokenData.total_volume"
+      v-if="tokenData.totalVolume"
       :label="$t('pages.token-details.volume')"
-      :text="formatCurrency(tokenData.total_volume)"
+      :text="formatCurrency(tokenData.totalVolume)"
     />
     <DetailsRow
-      v-if="tokenData.market_cap_change_24h"
+      v-if="tokenData.marketCapChange24h"
       class="price"
       :label="$t('pages.token-details.volumeDaily')"
     >
       <template #text>
         <span
           :class="{
-            green: tokenData.market_cap_change_percentage_24h > 0,
-            red: tokenData.market_cap_change_percentage_24h < 0,
+            green: tokenData.marketCapChangePercentage24h > 0,
+            red: tokenData.marketCapChangePercentage24h < 0,
           }"
         >
-          {{ Number(tokenData.market_cap_change_percentage_24h).toFixed(2) }}%
+          {{ Number(tokenData.marketCapChangePercentage24h).toFixed(2) }}%
         </span>
-        {{ formatCurrency(tokenData.market_cap_change_24h) }}
+        {{ formatCurrency(tokenData.marketCapChange24h) }}
       </template>
     </DetailsRow>
     <DetailsRow
@@ -127,20 +127,20 @@
       :label="$t('pages.token-details.price-ae')"
     />
     <DetailsRow
-      v-if="tokenData.current_price"
+      v-if="tokenData.currentPrice"
       class="price"
       :label="$t('pages.token-details.price')"
     >
       <template #text>
         <span
           :class="{
-            green: tokenData.price_change_percentage_24h > 0,
-            red: tokenData.price_change_percentage_24h < 0,
+            green: tokenData.priceChangePercentage24h > 0,
+            red: tokenData.priceChangePercentage24h < 0,
           }"
         >
-          {{ Number(tokenData.price_change_percentage_24h).toFixed(2) }}%
+          {{ Number(tokenData.priceChangePercentage24h).toFixed(2) }}%
         </span>
-        {{ formatCurrency(tokenData.current_price) }}
+        {{ formatCurrency(tokenData.currentPrice) }}
       </template>
     </DetailsRow>
     <DetailsRow
