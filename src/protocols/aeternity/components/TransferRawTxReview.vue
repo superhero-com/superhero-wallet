@@ -84,6 +84,7 @@ import {
 import { TxBuilder } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import { useGetter } from '../../composables/vuex';
+import { useModals } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
@@ -110,6 +111,8 @@ export default defineComponent({
     txRaw: { type: String, required: true },
   },
   setup(props, { root, emit }) {
+    const { openModal } = useModals();
+
     const transferData = ref<TransferFormModel>();
     const loading = ref<boolean>(true);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
@@ -122,13 +125,11 @@ export default defineComponent({
         const transaction = await sdk.value.sendTransaction(props.txRaw, {
           waitMined: true,
         });
-        root.$store.dispatch('modals/open', {
-          name: MODAL_SPEND_SUCCESS,
+        openModal(MODAL_SPEND_SUCCESS, {
           transaction,
         });
       } catch (error) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openModal(MODAL_DEFAULT, {
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });

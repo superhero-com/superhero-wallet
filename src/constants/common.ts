@@ -5,6 +5,7 @@ export const APP_URL = 'wallet.superhero.com';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
+export const MOBILE_SCHEMA = 'superhero://';
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 

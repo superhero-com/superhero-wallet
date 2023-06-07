@@ -23,13 +23,13 @@
     <template #footer>
       <BtnMain
         variant="muted"
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="reject()"
       />
       <BtnMain
         extra-padded
         :icon="QrScanIcon"
-        :text="$t('modals.scan')"
+        :text="$t('common.scan')"
         @click="scanSignedTransaction()"
       />
     </template>
@@ -49,7 +49,7 @@ import type {
   TransactionSignResponse,
 } from '@airgap/serializer';
 import { useGetter } from '../../../composables/vuex';
-import { useAccounts, useAirGap } from '../../../composables';
+import { useAccounts, useModals, useAirGap } from '../../../composables';
 import type { INetwork } from '../../../types';
 import { MODAL_READ_QR_CODE } from '../../utils';
 
@@ -73,21 +73,21 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const fragments = ref();
-    const { account } = useAccounts({ store: root.$store });
+    const { openModal } = useModals();
+    const { activeAccount } = useAccounts({ store: root.$store });
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const { generateTransactionURDataFragments } = useAirGap();
 
     onMounted(async () => {
       fragments.value = await generateTransactionURDataFragments(
-        account.value.airGapPublicKey as string,
+        activeAccount.value.airGapPublicKey as string,
         props.txRaw,
         activeNetwork.value.networkId,
       );
     });
 
     async function scanSignedTransaction() {
-      const scanResult: IACMessageDefinitionObjectV3[] = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult: IACMessageDefinitionObjectV3[] = await openModal(MODAL_READ_QR_CODE, {
         heading: root.$t('modals.importAirGapAccount.scanTitle'),
         title: root.$t('modals.importAirGapAccount.scanDescription'),
         icon: 'critical',

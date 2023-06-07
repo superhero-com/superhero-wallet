@@ -116,7 +116,7 @@ export default defineComponent({
         return t('modals.multisigTxProposal.proposeAndApprove');
       }
       if (props.isAirGap && showScanButton.value) {
-        return t('modals.scan');
+        return t('common.scan');
       }
       return '';
     });

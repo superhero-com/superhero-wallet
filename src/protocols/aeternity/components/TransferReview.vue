@@ -98,7 +98,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { MODAL_READ_QR_CODE, PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -156,7 +156,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { openDefaultModal } = useModals();
+    const { openDefaultModal, openModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
@@ -385,10 +385,9 @@ export default defineComponent({
     }
 
     async function scanSignedTransaction() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
-        heading: root.$t('modals.scanAirGapTx.heading'),
-        title: root.$t('modals.scanAirGapTx.title'),
+      const scanResult = await await openModal(MODAL_READ_QR_CODE, {
+        heading: tg('modals.scanAirGapTx.heading'),
+        title: tg('modals.scanAirGapTx.title'),
         icon: 'critical',
       });
 

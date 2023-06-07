@@ -31,20 +31,25 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, PropType } from 'vue';
-import type { Protocol, ResolveCallback } from '@/types';
+import type { IAccount, Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
+  MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_READ_QR_CODE,
   PROTOCOLS,
   PROTOCOL_LIST,
 } from '@/constants';
 import {
   useAccounts,
+  useAirGap,
   useConnection,
   useModals,
   useUi,
 } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import { handleUnknownError } from '@/utils';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 
@@ -61,6 +66,7 @@ export default defineComponent({
     const { isOnline } = useConnection();
     const { openModal } = useModals();
     const { setLoaderVisible } = useUi();
+    const { extractAccountShareResponseData } = useAirGap();
 
     async function createAccount(protocol: Protocol) {
       setLoaderVisible(true);
@@ -88,6 +94,32 @@ export default defineComponent({
       props.resolve();
     }
 
+    async function connectHardwareWallet() {
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
+        heading: tg('modals.importAirGapAccount.scanTitle'),
+        title: tg('modals.importAirGapAccount.scanDescription'),
+        icon: 'critical',
+      });
+
+      if (!scanResult) return;
+
+      const accounts = await extractAccountShareResponseData(scanResult) || [];
+
+      // Show Account import.
+      try {
+        const selectedAccounts = await openModal(MODAL_AIR_GAP_CONFIRM_IMPORT, {
+          accounts,
+        });
+        selectedAccounts.forEach((account: IAccount) => {
+          root.$store.dispatch('accounts/airgap/import', account);
+        });
+      } catch (error) {
+        handleUnknownError(error);
+      }
+      setLoaderVisible(false);
+      props.resolve();
+    }
+
     function getProtocolName(protocol: Protocol) {
       return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
@@ -100,6 +132,7 @@ export default defineComponent({
       PROTOCOL_LIST,
       isOnline,
       createAccount,
+      connectHardwareWallet,
       getProtocolName,
     };
   },

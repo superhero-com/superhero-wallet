@@ -36,7 +36,7 @@ export default defineComponent({
   setup(props, { root }) {
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const { getSdk } = useSdk({ store: root.$store });
-    const { account } = useAccounts({ store: root.$store });
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { generateTransactionURDataFragments } = useAirGap();
     const fragments = ref();
 
@@ -48,7 +48,7 @@ export default defineComponent({
         selectedAsset,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset || !account.value.airGapPublicKey) {
+      if (!amountRaw || !recipient || !selectedAsset || !activeAccount.value.airGapPublicKey) {
         return null;
       }
 
@@ -57,13 +57,13 @@ export default defineComponent({
         : convertToken(amountRaw, selectedAsset.decimals);
 
       const txRaw = await sdk.spendTx({
-        senderId: account.value.address,
+        senderId: activeAccount.value.address,
         recipientId: recipient,
         amount,
         payload: props.transferData.payload,
       });
       fragments.value = await generateTransactionURDataFragments(
-        account.value.airGapPublicKey,
+        activeAccount.value.airGapPublicKey,
         txRaw,
         activeNetwork.value.networkId,
       );

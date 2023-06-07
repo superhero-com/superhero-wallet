@@ -11,7 +11,7 @@ import type {
 import { AeternityAddress } from '@airgap/aeternity';
 import { MainProtocolSymbols } from '@airgap/coinlib-core';
 import type { IAccount } from '../types';
-import { ACCOUNT_AIR_GAP_WALLET, handleUnknownError } from '../popup/utils';
+import { ACCOUNT_AIR_GAP_WALLET, MOBILE_SCHEMA, handleUnknownError } from '../popup/utils';
 
 export function useAirGap() {
   /**
@@ -45,8 +45,11 @@ export function useAirGap() {
         );
         const fragments = [];
 
-        // eslint-disable-next-line no-restricted-syntax, guard-for-in, no-unused-vars
-        for (const _index in [...Array(multiEncoder.fragmentsLength)]) {
+        // eslint-disable-next-line no-restricted-syntax, guard-for-in
+        for (
+          // eslint-disable-next-line  @typescript-eslint/no-unused-vars
+          const _index in [...Array(multiEncoder.fragmentsLength)]
+        ) {
           // eslint-disable-next-line no-await-in-loop
           fragments.push(await multiEncoder.nextPart());
         }
@@ -110,7 +113,7 @@ export function useAirGap() {
     networkId: string,
   ): Promise<string[]> {
     const id = Math.floor(Math.random() * 90000000 + 10000000);
-    const callbackURL = 'superhero://?d=';
+    const callbackURL = `${MOBILE_SCHEMA}?d=`;
     const payload: TransactionSignRequest = {
       callbackURL,
       publicKey,

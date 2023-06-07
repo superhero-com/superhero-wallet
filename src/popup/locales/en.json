@@ -250,10 +250,9 @@
       "scanTitle": "Scan QR code",
       "scanDescription": "Scan QR code from your AirGap vault in order to pair wallets and import accounts.",
       "importConfirmDialog": {
-        "title": "Select accounts to import from AirGap",
-        "selectAll": "Select all",
-        "search": "Search for account",
-        "importAccounts": "Import Accounts",
+        "title": "Import account from AirGap",
+        "description": "Import æternity account from AirGap into your Superhero wallet in order to manage cryptocurrency funds signing transactions through QR-codes.",
+        "importAccount": "Import Account",
         "noAccountsFound": "There are no accounts found."
       }
     },
