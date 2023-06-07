@@ -132,7 +132,7 @@ export default defineComponent({
     });
 
     return {
-      IS_CORDOVA: process.env.IS_CORDOVA,
+      IS_IONIC: process.env.IS_IONIC,
       PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,

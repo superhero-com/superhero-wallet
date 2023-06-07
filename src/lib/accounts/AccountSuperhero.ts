@@ -12,7 +12,7 @@ import { useAccounts } from '@/composables/accounts';
 import { useModals } from '@/composables/modals';
 import {
   IN_FRAME,
-  IS_CORDOVA,
+  IS_IONIC,
   IS_EXTENSION_BACKGROUND,
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
@@ -35,7 +35,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
-    if (IS_CORDOVA && options.aeppOrigin) {
+    if (IS_IONIC && options.aeppOrigin) {
       return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -55,7 +55,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   async signMessage(message: string, options: any): Promise<Uint8Array> {
-    if ((IS_CORDOVA || IN_FRAME) && options.aeppOrigin) {
+    if ((IS_IONIC || IN_FRAME) && options.aeppOrigin) {
       return this.fgPermissionCheckAndSign('message.sign', message, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -84,7 +84,7 @@ export class AccountSuperhero extends AccountBase {
   async fgPermissionCheckAndSign(method: any, payload: any, options: any, origin?: string) {
     try {
       const app = origin ? new URL(origin) : null;
-      const permission = (!origin && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
+      const permission = (!origin && IS_IONIC) || await this.store.dispatch('permissions/checkPermissions', {
         host: app ? app.host : null,
         method,
         params: payload,

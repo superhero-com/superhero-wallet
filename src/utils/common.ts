@@ -22,7 +22,7 @@ import type {
 import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
-  IS_CORDOVA,
+  IS_IONIC,
   LOCAL_STORAGE_PREFIX,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
@@ -202,7 +202,7 @@ export function includesCaseInsensitive(baseString: string, searchString: string
  * Invokes the native sharing mechanism of the device to share data such as text.
  */
 export async function invokeDeviceShare(text: string): Promise<void> {
-  return (IS_CORDOVA)
+  return (IS_IONIC)
     ? new Promise<void>((resolve) => (window as any).plugins.socialsharing.shareW3C(
       { text },
       ({ app }: any) => app && resolve(),
