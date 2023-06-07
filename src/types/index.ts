@@ -572,7 +572,7 @@ export interface IPopupConfig {
   action?: any;
   data?: string;
   message?: string;
-  transaction?: Partial<ITx>;
+  tx?: Partial<ITx>;
   resolve?: any;
   reject?: any;
 }

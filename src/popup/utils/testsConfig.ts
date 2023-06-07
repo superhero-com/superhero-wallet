@@ -63,7 +63,7 @@ export const popupProps: Record<string, IPopupConfig> = {
       protocol: 'http:',
       host: 'localhost',
     },
-    transaction: {
+    tx: {
       tag: '12',
       VSN: '1',
       senderId: testAccount.address,
