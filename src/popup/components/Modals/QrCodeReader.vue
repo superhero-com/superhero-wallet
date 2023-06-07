@@ -53,7 +53,7 @@
 <script>
 import { mapMutations } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
+import { IS_EXTENSION, IS_IONIC } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -77,9 +77,9 @@ export default {
     };
   },
   data: () => ({
-    mobile: IS_CORDOVA,
+    mobile: IS_IONIC,
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    cameraAllowed: IS_CORDOVA,
+    cameraAllowed: IS_IONIC,
     browserReader: null,
     videoInputDevices: [],
     headerText: '',

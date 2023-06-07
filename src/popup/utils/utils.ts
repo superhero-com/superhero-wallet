@@ -61,7 +61,7 @@ import type {
   ICommonTransaction,
   Truthy,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
+import { IS_IONIC, IS_EXTENSION } from '../../lib/environment';
 
 /**
  * Replacement for `Array.includes` which has some TypeScript issues.
@@ -616,7 +616,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   }
   let value = '';
 
-  if (IS_CORDOVA) {
+  if (IS_IONIC) {
     value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
   } else if (IS_EXTENSION) {
     value = await browser!.runtime.sendMessage({ method: 'paste' });

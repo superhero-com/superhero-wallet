@@ -3,7 +3,7 @@ import type { IPopupType } from '../types';
 const userAgentLowerCase = navigator.userAgent.toLowerCase();
 const url = new URL(window.location.href);
 
-export const PLATFORM = process.env.PLATFORM as 'web' | 'cordova' | 'extension';
+export const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
 
 export const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
 
@@ -30,7 +30,7 @@ export const IS_WEB = PLATFORM === 'web';
 /**
  * Running as mobile app
  */
-export const IS_CORDOVA = PLATFORM === 'cordova';
+export const IS_IONIC = PLATFORM === 'ionic';
 
 /**
  * Running as a browser extension
