@@ -111,8 +111,6 @@
     </platform>
     <preference name="SplashScreen" value="screen" />
     <preference name="ShowSplashScreenSpinner" value="false" />
-    <preference name="StatusBarOverlaysWebView" value="false" />
-    <preference name="StatusBarBackgroundColor" value="#141414" />
     <preference name="BackgroundColor" value="0xff141414" />
     <feature name="SplashScreen">
         <param name="onload" value="true" />

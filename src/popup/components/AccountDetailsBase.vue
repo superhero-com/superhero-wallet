@@ -80,7 +80,7 @@ import {
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/constants';
+import { EXTENSION_HEIGHT, IS_IONIC } from '@/constants';
 
 import {
   useAccounts,
@@ -168,8 +168,8 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#191919');
+      if (IS_IONIC) {
+        window.StatusBar.setBackgroundColor('#191919');
       }
       if (accountDetailsElem.value && appInnerElem.value) {
         resizeObserver.observe(accountDetailsElem.value);
@@ -182,8 +182,8 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#141414');
+      if (IS_IONIC) {
+        window.StatusBar.setBackgroundColor('#141414');
       }
 
       resizeObserver.disconnect();
