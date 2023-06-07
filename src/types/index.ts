@@ -9,7 +9,7 @@ import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
-import type { CoinGeckoMarketResponse } from './coinGecko';
+import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
@@ -23,7 +23,6 @@ export * from './cordova';
 export * from './router';
 export * from './filter';
 export * from './forms';
-export * from './coinGecko';
 
 export type Dictionary<T = any> = Record<string, T>;
 

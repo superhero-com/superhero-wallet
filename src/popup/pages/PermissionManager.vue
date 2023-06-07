@@ -167,7 +167,7 @@ export default defineComponent({
     const selectedAsset = computed(() => ({
       contractId: AETERNITY_CONTRACT_ID,
       symbol: AETERNITY_SYMBOL,
-      current_price: currentCurrencyRate.value,
+      currentPrice: currentCurrencyRate.value,
     }));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));

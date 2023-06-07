@@ -1,8 +1,9 @@
 import { v4 as genUuid } from 'uuid';
 import type { Browser } from 'webextension-polyfill';
+import { TxBuilder } from '@aeternity/aepp-sdk';
 import type { Dictionary, IPopupConfig } from '../../types';
-import { popupProps } from './testsConfig';
-import { buildTx, CONNECTION_TYPES } from './index';
+import { txParams, popupProps } from './testsConfig';
+import { CONNECTION_TYPES } from './index';
 import { IS_EXTENSION, POPUP_TYPE, RUNNING_IN_TESTS } from '../../lib/environment';
 import '../../lib/initPolyfills';
 
@@ -17,6 +18,10 @@ interface IPendingRequest {
 }
 
 type PostMessageReturn = Promise<Partial<IPopupConfig> | null>;
+
+export function buildTx(txType: any) {
+  return TxBuilder.buildTx({ ...txParams[txType] }, txType);
+}
 
 const postMessage = (() => {
   const pendingRequests: Dictionary<IPendingRequest> = {};

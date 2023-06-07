@@ -1,13 +1,39 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
+import { mnemonicToSeed } from '@aeternity/bip39';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { STUB_CURRENCY } from '../../../src/popup/utils/testsConfig';
+import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig';
 import {
   formatDate,
   formatTime,
-  getLoginState,
 } from '../../../src/popup/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
+import runMigrations from '../../../src/store/migrations';
+
+export async function getLoginState({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}) {
+  const { mnemonic, address } = testAccount;
+  const account = {
+    address,
+    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
+  };
+  return {
+    ...(await runMigrations()),
+    account,
+    mnemonic,
+    backedUpSeed,
+    current: { network: network || 'Testnet', token: 0 },
+    balance,
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+  };
+}
 
 Cypress.Commands.add('getByTestId', (testId) => {
   cy.get(`[data-cy=${testId}]`);

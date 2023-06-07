@@ -118,7 +118,7 @@ export function useCurrencies({
    * @param value Aeternity coin amount
    */
   function getFormattedAndRoundedFiat(value: number): string {
-    if (value === 0) {
+    if (!currentCurrencyRate.value || value === 0) {
       return formatCurrency(0);
     }
     const converted = getFiat(value);
