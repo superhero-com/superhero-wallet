@@ -252,7 +252,7 @@
       "remaining-time": "剩余时间"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "想要连接到你的帐户",
+      "websiteRequestConnect": "想要连接到你的帐户",
       "websiteRequest": "网站请求查看你的当前地址。请确认当前网站可信。 ",
       "cancelButton": "拒绝",
       "confirmButton": "接受",

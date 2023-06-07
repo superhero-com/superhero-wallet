@@ -194,7 +194,7 @@
       "remaining-time": "Verbleibende Zeit"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "möchte Ihr Konto verbinden",
+      "websiteRequestConnect": "möchte Ihr Konto verbinden",
       "websiteRequest": "Diese Webseite fordert Zugriff Ihr Girokonto-Adresse anzuzeigen. Achten Sie stets darauf, die Website vertrauen Sie wirken mit.",
       "cancelButton": "Stornieren",
       "confirmButton": "Bestätigen",

@@ -5,11 +5,17 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
 } from '../../../src/popup/utils';
 import { popupProps, txParams } from '../../../src/popup/utils/testsConfig';
 import locale from '../../../src/popup/locales/en.json';
 
-const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
+const popups = [
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
+];
 
 const txTags = [
   Tag.SpendTx,
@@ -22,7 +28,7 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.login();
   });
 
-  it('Sign Message popup, Connect, Raw Sign display correct data', () => {
+  it('Sign Message popup, Connect, Account list, Raw Sign display correct data', () => {
     const props = popupProps[POPUP_TYPE_MESSAGE_SIGN];
     cy.openAex2Popup(POPUP_TYPE_MESSAGE_SIGN)
       .get('[data-cy=aepp]')
@@ -50,6 +56,13 @@ describe('Tests cases for AEX-2 popups', () => {
       .get('[data-cy=sender]')
       .should('be.visible')
       .should('contain', props2.app.host);
+
+    const props3 = popupProps[POPUP_TYPE_ACCOUNT_LIST];
+    cy.openAex2Popup(POPUP_TYPE_ACCOUNT_LIST)
+      .get('[data-cy=aepp]')
+      .should('be.visible')
+      .should('contain', props3.app.name)
+      .should('contain', props3.app.host);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {

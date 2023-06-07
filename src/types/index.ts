@@ -170,6 +170,7 @@ export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   contractCreate?: boolean;
   aens?: boolean;
   label?: TranslateResult;
+  wallet?: string; // Is the whole Wallet is being accessed by an Aepp
 }
 
 export interface IMultisigConsensus {
@@ -241,6 +242,7 @@ export interface INetwork extends INetworkBase {
 
 export interface IPermission {
   address: boolean
+  addressList: boolean,
   host: string
   messageSign: boolean
   name: string
@@ -406,15 +408,6 @@ export interface IStoreTransactions {
 
 export interface IDashboardTransaction extends ITransaction {
   direction?: 'received' | 'send'
-}
-
-export interface IAccountOverView extends Partial<Omit<IAccount, 'address'>> {
-  // TODO: use a proper type for a address since it can be a url
-  address?: Encoded.AccountAddress | string;
-  url?: string;
-  contractCreate?: boolean;
-  aens?: boolean;
-  label?: TranslateResult;
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {

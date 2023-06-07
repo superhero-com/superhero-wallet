@@ -18,6 +18,7 @@ import {
   STUB_CONTRACT_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
   AETERNITY_COIN_ID,
+  POPUP_TYPE_ACCOUNT_LIST,
 } from './constants';
 import { CoinGeckoMarketResponse } from '../../lib/CoinGecko';
 
@@ -36,6 +37,15 @@ export const STUB_CURRENCY: CoinGeckoMarketResponse = {
 export const popupProps: Record<string, IPopupConfig> = {
   [POPUP_TYPE_CONNECT]: {
     type: POPUP_TYPE_CONNECT,
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
+    },
+  },
+  [POPUP_TYPE_ACCOUNT_LIST]: {
+    type: POPUP_TYPE_ACCOUNT_LIST,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',

@@ -16,12 +16,13 @@ import store from '../../store';
 import initSdk from '../../lib/wallet';
 import {
   APP_LINK_WEB,
+  watchUntilTruthy,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  watchUntilTruthy,
   POPUP_TYPE_TX_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
 } from '../utils';
 import {
   RUNNING_IN_POPUP,
@@ -78,6 +79,7 @@ router.beforeEach(async (to, from, next) => {
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
       [POPUP_TYPE_CONNECT]: 'connect',
+      [POPUP_TYPE_ACCOUNT_LIST]: 'account-list',
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
       [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
       [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',

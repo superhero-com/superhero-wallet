@@ -78,6 +78,7 @@ export default {
         'connection.open': 'address',
         'address.subscribe': 'address',
         'message.sign': 'messageSign',
+        'address.get': 'addressList',
       };
       return state[host]?.[permissionsMethods[method]];
     },
@@ -86,6 +87,18 @@ export default {
       connectionPopupCb,
     }) {
       if (await dispatch('checkPermissions', { host, method: 'connection.open' })) return true;
+      try {
+        await connectionPopupCb();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    async requestAllAddressesForHost({ dispatch }, {
+      host,
+      connectionPopupCb,
+    }) {
+      if (await dispatch('checkPermissions', { host, method: 'address.get' })) return true;
       try {
         await connectionPopupCb();
         return true;

@@ -196,7 +196,7 @@
       "remaining-time": "Tempo rimanente"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "vorrebbe connettersi al proprio account",
+      "websiteRequestConnect": "vorrebbe connettersi al proprio account",
       "websiteRequest": "Questo sito richiede l'accesso per visualizzare l'indirizzo del conto corrente. Assicurarsi sempre di fiducia il sito web che interagiscono con. ",
       "cancelButton": "Annulla",
       "confirmButton": "Confermare",

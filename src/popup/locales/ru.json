@@ -180,7 +180,7 @@
       "remaining-time": "Remaining Time"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "would like to connect to your account",
+      "websiteRequestConnect": "would like to connect to your account",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",

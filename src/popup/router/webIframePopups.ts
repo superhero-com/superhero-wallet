@@ -5,6 +5,7 @@ import { IN_POPUP, IS_WEB } from '../../lib/environment';
 import { RejectedByUserError } from '../../lib/errors';
 import {
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
@@ -12,6 +13,7 @@ import {
 import { ROUTE_WEB_IFRAME_POPUP } from './routeNames';
 
 import ConfirmConnect from '../pages/Popups/Connect.vue';
+import ConfirmAccountList from '../pages/Popups/AccountList.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
@@ -46,6 +48,7 @@ const createIframeComponent = (component: Component | VNode) => {
 const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
   ? [
     { name: MODAL_CONFIRM_CONNECT, component: ConfirmConnect },
+    { name: MODAL_CONFIRM_ACCOUNT_LIST, component: ConfirmAccountList },
     { name: MODAL_CONFIRM_RAW_SIGN, component: ConfirmRawSign },
     { name: MODAL_CONFIRM_TRANSACTION_SIGN, component: ConfirmTransactionSign },
     { name: MODAL_MESSAGE_SIGN, component: MessageSign },

@@ -2,13 +2,13 @@
   <Modal
     show
     full-screen
-    class="connect"
+    class="account-list"
     data-cy="popup-aex2"
   >
     <TransactionInfo
       :custom-title="$t('pages.connectConfirm.title')"
       :sender="sender"
-      :recipient="activeAccountExtended"
+      :recipient="recipient"
     />
 
     <div
@@ -16,7 +16,7 @@
       data-cy="aepp"
     >
       <span class="app-name">{{ sender.name }}</span>
-      ({{ sender.address }}) {{ $t('pages.connectConfirm.websiteRequestConnect') }}
+      ({{ sender.address }}) {{ $t('pages.accountListConfirm.websiteRequestConnect') }}
     </div>
 
     <div class="permissions">
@@ -24,17 +24,14 @@
         <span class="title">
           <CheckMark class="icon" /> {{ $t('common.address') }}
         </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.addressRequest') }}
-        </span>
-      </template>
-      <template v-if="access.includes(POPUP_CONNECT_TRANSACTIONS_PERMISSION)">
-        <span class="title">
-          <CheckMark class="icon" /> {{ $t('pages.connectConfirm.transactionLabel') }}
-        </span>
-        <span class="description">
-          {{ $t('pages.connectConfirm.transactionRequest') }}
-        </span>
+        <div class="description">
+          <p>
+            {{ $t('pages.accountListConfirm.addressesRequest') }}
+          </p>
+          <p class="color-warning">
+            {{ $t('pages.accountListConfirm.message') }}
+          </p>
+        </div>
       </template>
     </div>
 
@@ -63,15 +60,14 @@ import {
   onUnmounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { IPermission } from '../../../types';
+import type { IAccountOverview, IPermission } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
-  POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
 import { useState } from '../../../composables/vuex';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -90,19 +86,21 @@ export default defineComponent({
       type: Array,
       default: () => ([
         POPUP_CONNECT_ADDRESS_PERMISSION,
-        POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       ]),
     },
   },
   setup() {
     const store = useStore();
 
-    const { activeAccountExtended } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
 
     const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
 
     const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
+
+    const recipient: IAccountOverview = {
+      wallet: 'Superhero Wallet',
+    };
 
     function confirm() {
       store.commit('permissions/addPermission', {
@@ -127,21 +125,20 @@ export default defineComponent({
 
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
-      POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-      activeAccountExtended,
       sender,
       confirm,
       cancel,
+      recipient,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
+@use '../../../styles/variables' as *;
 @use '../../../styles/typography';
 
-.connect {
+.account-list {
   .transaction-info {
     margin-bottom: 16px;
   }
@@ -151,11 +148,11 @@ export default defineComponent({
 
     margin-top: 24px;
     margin-bottom: 16px;
-    color: variables.$color-grey-light;
+    color: $color-grey-light;
     text-align: center;
 
     .app-name {
-      color: variables.$color-white;
+      color: $color-white;
     }
   }
 
@@ -168,12 +165,12 @@ export default defineComponent({
       display: flex;
       align-items: center;
       padding-bottom: 4px;
-      color: variables.$color-grey-dark;
+      color: $color-grey-dark;
 
       .icon {
         width: 24px;
         height: 24px;
-        color: variables.$color-success;
+        color: $color-success;
         padding-right: 4px;
       }
     }
@@ -183,7 +180,7 @@ export default defineComponent({
 
       display: block;
       padding-bottom: 16px;
-      color: variables.$color-white;
+      color: $color-white;
       text-align: left;
     }
   }
