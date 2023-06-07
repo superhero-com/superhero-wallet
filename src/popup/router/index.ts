@@ -5,7 +5,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
-  IS_CORDOVA,
+  IS_IONIC,
   IS_WEB,
   POPUP_TYPE,
   POPUP_TYPE_CONNECT,
@@ -83,7 +83,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
-    if (!IS_CORDOVA && !UNFINISHED_FEATURES) {
+    if (!IS_IONIC && !UNFINISHED_FEATURES) {
       next({ name: ROUTE_NOT_FOUND });
       return;
     }
@@ -152,7 +152,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (IS_CORDOVA) {
+if (IS_IONIC) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
