@@ -181,7 +181,7 @@ export default {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
   async share(_, options) {
-    await (process.env.IS_CORDOVA
+    await (process.env.IS_IONIC
       ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
         options,
         ({ app }) => app && resolve(),

@@ -8,7 +8,7 @@
   >
     <slot />
 
-    <template v-if="!IS_CORDOVA">
+    <template v-if="!IS_IONIC">
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
@@ -57,7 +57,7 @@ export default defineComponent({
 
     return {
       color,
-      IS_CORDOVA: process.env.IS_CORDOVA,
+      IS_IONIC: process.env.IS_IONIC,
     };
   },
 });

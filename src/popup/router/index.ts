@@ -24,7 +24,7 @@ import {
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,
-  IS_CORDOVA,
+  IS_IONIC,
   IS_WEB,
 } from '../../lib/environment';
 import { useAccounts, usePopupProps } from '../../composables';
@@ -117,7 +117,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (IS_CORDOVA) {
+if (IS_IONIC) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
