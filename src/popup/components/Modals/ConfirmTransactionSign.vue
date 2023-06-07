@@ -43,7 +43,7 @@
           <TokenAmount
             :amount="tokenAmount"
             :symbol="tokenSymbol"
-            :aex9="isTransactionAex9(txWrapped)"
+            :aex9="isTransactionAex9(transactionWrapped)"
             :hide-fiat="!swapTokenAmountData.isAe"
             data-cy="total"
           />
@@ -62,8 +62,8 @@
         >
           <TokenAmount
             :amount="totalAmount"
-            :symbol="getTxSymbol(popupProps?.transaction)"
-            :aex9="isTransactionAex9(txWrapped)"
+            :symbol="getTxSymbol(popupProps?.tx)"
+            :aex9="isTransactionAex9(transactionWrapped)"
             data-cy="total"
           />
         </DetailsItem>
@@ -77,7 +77,7 @@
           v-for="key in filteredTxFields"
           :key="key"
           :label="$t('modals.confirmTransactionSign')[key]"
-          :value="popupProps?.transaction?.[key]"
+          :value="popupProps?.tx?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
       </DetailsItem>
@@ -186,7 +186,7 @@ export default defineComponent({
       setTransactionTx,
     } = useTransactionTx({
       store,
-      tx: popupProps.value?.transaction as ITx,
+      tx: popupProps.value?.tx as ITx,
     });
 
     const showAdvanced = ref(false);
@@ -199,8 +199,8 @@ export default defineComponent({
     const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
-    const txWrapped = computed(
-      (): Partial<ITransaction> => ({ tx: popupProps.value?.transaction as ITx }),
+    const transactionWrapped = computed(
+      (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
     );
 
     const isSwap = computed(
@@ -211,8 +211,8 @@ export default defineComponent({
       () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
 
-    const txAeFee = computed(() => getAeFee(popupProps.value?.transaction?.fee!));
-    const nameAeFee = computed(() => getAeFee(popupProps.value?.transaction?.nameFee!));
+    const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
+    const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
 
     const swapDirection = computed(() => {
       if (txFunction.value) {
@@ -226,16 +226,18 @@ export default defineComponent({
       return 'total';
     });
 
-    const totalAmount = computed(() => getTxAmountTotal.value(txWrapped.value, direction.value));
+    const totalAmount = computed(
+      () => getTxAmountTotal.value(transactionWrapped.value, direction.value),
+    );
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(popupProps.value?.transaction),
+      symbol: getTxSymbol.value(popupProps.value?.tx),
     }));
 
     const filteredTxFields = computed(
-      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!popupProps.value?.transaction?.[field]),
+      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!popupProps.value?.tx?.[field]),
     );
 
     const swapTokenAmountData = computed((): ITokenResolved => {
@@ -253,7 +255,7 @@ export default defineComponent({
     );
 
     const completeTransaction = computed(
-      () => ({ tx: { ...popupProps.value?.transaction, function: txFunction.value } }),
+      () => ({ tx: { ...popupProps.value?.tx, function: txFunction.value } }),
     );
 
     const isProvideLiquidity = computed(
@@ -270,7 +272,7 @@ export default defineComponent({
         return [];
       }
       const tokens = resolver(
-        { tx: { ...txParams, ...popupProps.value?.transaction } } as ITransaction,
+        { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
         availableTokens.value,
       )?.tokens;
       if (!isPool.value) {
@@ -314,7 +316,7 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      if (popupProps.value?.transaction?.contractId) {
+      if (popupProps.value?.tx?.contractId) {
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
@@ -322,7 +324,7 @@ export default defineComponent({
           const [
             { bytecode },
           ] = await Promise.all([
-            fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.transaction.contractId}/code`),
+            fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.tx.contractId}/code`),
             // SDK is needed to establish the `networkId` and the dex contracts for the network
             // TODO replace with `getSdk` after migration to SDK13
             store.dispatch('sdkPlugin/initialize'),
@@ -330,11 +332,11 @@ export default defineComponent({
 
           const txParams: ITx = await postJson(
             `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
-            { body: { bytecode, calldata: popupProps.value.transaction.callData } },
+            { body: { bytecode, calldata: popupProps.value.tx.callData } },
           );
           txFunction.value = txParams.function as TxFunctionRaw;
 
-          setTransactionTx({ ...txParams, ...popupProps.value.transaction });
+          setTransactionTx({ ...txParams, ...popupProps.value.tx });
 
           const allTokens = getTokens(txParams);
 
@@ -361,7 +363,7 @@ export default defineComponent({
       AETERNITY_SYMBOL,
       loading,
       showAdvanced,
-      txWrapped,
+      transactionWrapped,
       popupProps,
       filteredTxFields,
       completeTransaction,

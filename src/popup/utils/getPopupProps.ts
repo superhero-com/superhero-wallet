@@ -57,7 +57,7 @@ const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn =>
       const { txType } = await (browser as Browser).storage.local.get('txType');
       if (txType) {
         const props = popupProps.base as IPopupConfig;
-        props.transaction = buildTx(txType).txObject;
+        props.tx = buildTx(txType).txObject;
         return props;
       }
       return POPUP_TYPE ? popupProps[POPUP_TYPE] : {};
