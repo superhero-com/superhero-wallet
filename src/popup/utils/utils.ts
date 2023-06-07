@@ -58,7 +58,7 @@ import type {
   IWallet,
   IRequestInitBodyParsed,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
+import { IS_IONIC, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
 
 /**
@@ -599,7 +599,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   }
   let value = '';
 
-  if (IS_CORDOVA) {
+  if (IS_IONIC) {
     value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
   } else if (IS_EXTENSION) {
     value = await browser!.runtime.sendMessage({ method: 'paste' });

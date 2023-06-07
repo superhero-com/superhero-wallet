@@ -112,11 +112,17 @@ export default (store) => {
   defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
   defineRule('name_registered_address', (value) => checkAensName(value) && checkNameRegisteredAddress(value));
   defineRule('token_to_an_address',
+<<<<<<< HEAD
     (value, [isToken]) => (
       !checkAensName(value)
       || (checkAensName(value) && !isToken)
     ),
     { params: ['isToken'] });
+=======
+    (value, [isToken]) => !checkAensName(value) || (checkAensName(value) && !isToken), {
+      params: ['isToken'],
+    });
+>>>>>>> 8cbcd48a (refactor: use capacitor status-bar)
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
