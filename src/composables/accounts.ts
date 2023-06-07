@@ -44,7 +44,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   function setActiveAccountByIdx(idx: number = 0) {
     // TODO replace with updating local state after removing the Vuex
-    store.commit('accounts/setActiveIdx', +(accounts.value[idx].idx || 0));
+    store.commit('accounts/setActiveIdx', idx);
   }
 
   function setActiveAccountByAddress(address?: string) {

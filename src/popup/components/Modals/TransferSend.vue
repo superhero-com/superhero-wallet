@@ -147,7 +147,7 @@ export default defineComponent({
       }
 
       if (props.isAirGap && showScanButton.value) {
-        return root.$t('modals.scan');
+        return root.$t('common.scan');
       }
 
       return root.$t('common.send');

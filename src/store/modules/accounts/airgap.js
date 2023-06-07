@@ -1,4 +1,5 @@
 import { MODAL_DEFAULT, ACCOUNT_AIR_GAP_WALLET, MODAL_AIR_GAP_SIGN_TRANSACTION } from '../../../popup/utils';
+import { useModals } from '../../../composables';
 
 export default {
   namespaced: true,
@@ -25,20 +26,21 @@ export default {
     },
 
     async ensureCurrentAccountAvailable({ rootGetters: { account }, dispatch }) {
+      const { openModal } = useModals();
       const address = await dispatch('request', { name: 'getAddress', args: [account.idx] });
       if (account.address !== address) {
         if (!process.env.IS_EXTENSION) {
-          dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'account not found' }, { root: true });
+          openModal(MODAL_DEFAULT, { icon: 'alert', title: 'account not found' });
         }
         throw new Error('Account not found');
       }
     },
 
     sign: () => Promise.reject(new Error('AirGap Sign Not implemented yet')),
-    signTransaction: async ({ dispatch }, { txBase64 }) => dispatch('modals/open', {
-      name: MODAL_AIR_GAP_SIGN_TRANSACTION,
-      txRaw: txBase64,
-    }, { root: true }),
+    signTransaction: async (_, { txBase64 }) => {
+      const { openModal } = useModals();
+      openModal(MODAL_AIR_GAP_SIGN_TRANSACTION, { txRaw: txBase64 });
+    },
 
     async signTransactionFromAccount({ dispatch }, { txBase64 }) {
       return dispatch('signTransaction', { txBase64 });

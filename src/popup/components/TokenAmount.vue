@@ -29,7 +29,7 @@
     <span
       v-if="amountFiat"
       class="fiat"
-      :class="{ 'fiat-below': fiatBelow }"
+      :class="{ 'fiat-below': fiatBelow, 'fiat-right': fiatRight }"
     >
       {{ amountFiat }}
     </span>
@@ -51,6 +51,7 @@ export default defineComponent({
     symbol: { type: String, default: AETERNITY_SYMBOL },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
+    fiatRight: Boolean,
     hideFiat: Boolean,
     large: Boolean,
     row: Boolean,
@@ -119,6 +120,9 @@ export default defineComponent({
       margin-left: 0;
       padding-top: 4px;
       white-space: nowrap;
+    }
+
+    &.fiat-right {
       text-align: right;
     }
   }

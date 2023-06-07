@@ -58,7 +58,7 @@ export class AccountSuperhero extends AccountBase {
   sign(data: string | Uint8Array, opt: any): Promise<Uint8Array> {
     const { activeAccount } = useAccounts({ store: this.store });
     return IS_EXTENSION_BACKGROUND
-      ? sign(data, activeAccount.value.secretKey) as any
+      ? sign(data, activeAccount.value.secretKey as any) as any
       : this.store.dispatch('accounts/sign', data, opt);
   }
 

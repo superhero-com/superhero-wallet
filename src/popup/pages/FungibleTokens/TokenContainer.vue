@@ -149,7 +149,7 @@ export default defineComponent({
       store: root.$store,
       isMultisig: isMultisig.value,
     });
-    const { account, isAirGap } = useAccounts({ store: root.$store });
+    const { isAirGap } = useAccounts({ store: root.$store });
 
     const isCoin: boolean = !!root.$route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),

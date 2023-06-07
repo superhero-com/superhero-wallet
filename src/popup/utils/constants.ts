@@ -14,6 +14,7 @@ import { i18n } from '../../store/plugins/languages';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
+export const MOBILE_SCHEMA = 'superhero://';
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 

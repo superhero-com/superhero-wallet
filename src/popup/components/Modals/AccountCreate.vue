@@ -96,8 +96,7 @@ export default defineComponent({
     }
 
     async function connectHardwareWallet() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
         heading: root.$t('modals.importAirGapAccount.scanTitle'),
         title: root.$t('modals.importAirGapAccount.scanDescription'),
         icon: 'critical',
@@ -109,8 +108,7 @@ export default defineComponent({
 
       // Show Account import.
       try {
-        const selectedAccounts = await root.$store.dispatch('modals/open', {
-          name: MODAL_AIR_GAP_CONFIRM_IMPORT,
+        const selectedAccounts = await openModal(MODAL_AIR_GAP_CONFIRM_IMPORT, {
           accounts,
         });
         selectedAccounts.forEach((account: IAccount) => {
