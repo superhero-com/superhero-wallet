@@ -21,7 +21,7 @@ import {
 import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
-import PushNotification from '../lib/Push';
+import PushNotification from '../lib/PushNotification';
 import { i18n } from '../store/plugins/languages';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {

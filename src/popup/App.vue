@@ -85,7 +85,7 @@ import {
   useViewport,
 } from '../composables';
 import { useGetter } from '../composables/vuex';
-import WebSocketClient from '../lib/WebSocket';
+import WebSocketClient from '../lib/WebSocketClient';
 
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';

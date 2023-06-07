@@ -6,7 +6,7 @@ import router from './router';
 import { i18n } from '../store/plugins/languages';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
-import PushNotification from '../lib/Push';
+import PushNotification from '../lib/PushNotification';
 import App from './App.vue';
 import LoaderComponent from './components/Loader.vue';
 

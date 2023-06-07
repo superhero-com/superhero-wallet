@@ -13,7 +13,7 @@
       </span>
     </div>
     <Avatar
-      v-if="isIncomingTransaction"
+      v-if="hasIncomingTransaction"
       size="md"
       :address="notification.receiver"
       class="notification-avatar"
@@ -37,7 +37,7 @@
     />
     <div class="content">
       <AddressTruncated
-        v-if="!chainName && address && !isIncomingTransaction"
+        v-if="!chainName && address && !hasIncomingTransaction"
         :address="address"
         class="address"
       />
@@ -61,7 +61,7 @@
       >
         {{ redirectInfo }}
         <ExternalLinkIcon
-          v-if="!isIncomingTransaction"
+          v-if="!hasIncomingTransaction"
           class="external-link-icon"
         />
       </div>
@@ -139,7 +139,7 @@ export default defineComponent({
     );
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
-    const isIncomingTransaction = computed(() => props.notification.isIncomingTransaction);
+    const hasIncomingTransaction = computed(() => props.notification.hasIncomingTransaction);
     const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
     const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
@@ -170,7 +170,7 @@ export default defineComponent({
       redirectInfo,
       isWallet,
       isSeedBackup,
-      isIncomingTransaction,
+      hasIncomingTransaction,
       handleClick,
       IS_MOBILE_DEVICE,
       initialStatus,

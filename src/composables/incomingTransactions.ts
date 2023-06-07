@@ -6,7 +6,7 @@ import { useAccounts } from './accounts';
 import { useNotifications } from './notifications';
 import { useGetter } from './vuex';
 import { ROUTE_TX_DETAILS } from '../popup/router/routeNames';
-import WebSocketClient from '../lib/WebSocket';
+import WebSocketClient from '../lib/WebSocketClient';
 
 export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
   const router = useRouter();
@@ -49,7 +49,7 @@ export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
               path: router.resolve({ name: ROUTE_TX_DETAILS, params: { hash } }).href,
               sender: senderId,
               receiver: recipientId,
-              isIncomingTransaction: true,
+              hasIncomingTransaction: true,
               pushNotification: true,
             });
           }
