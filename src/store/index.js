@@ -27,7 +27,6 @@ export default new Vuex.Store({
     mnemonic: null,
     current: {
       network: NETWORK_DEFAULT.name,
-      token: 0,
     },
     userNetworks: [],
     transactions: {
@@ -41,12 +40,10 @@ export default new Vuex.Store({
     nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
-    tip: null,
     migrations: {},
     backedUpSeed: null,
     saveErrorLog: true,
     loginTargetLocation: { name: 'account' },
-    cardMinified: false,
     qrScannerOpen: false,
     hiddenCards: [],
   },
