@@ -619,7 +619,9 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
 
   if (IS_IONIC) {
     const { type, value } = await Clipboard.read();
-    if (type === 'string') { text = value; }
+    if (type === 'string') {
+      text = value;
+    }
   } else if (IS_EXTENSION) {
     text = await browser!.runtime.sendMessage({ method: 'paste' });
   } else {
