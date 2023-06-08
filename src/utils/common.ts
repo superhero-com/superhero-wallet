@@ -7,6 +7,7 @@
 import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
+import { Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
@@ -26,7 +27,6 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
-  IS_IONIC,
   LOCAL_STORAGE_PREFIX,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
@@ -204,14 +204,16 @@ export function includesCaseInsensitive(baseString: string, searchString: string
 
 /**
  * Invokes the native sharing mechanism of the device to share data such as text.
+ * The Share API works on iOS, Android, and the Web
  */
 export async function invokeDeviceShare(text: string): Promise<void> {
-  return (IS_IONIC)
-    ? new Promise<void>((resolve) => (window as any).plugins.socialsharing.shareW3C(
-      { text },
-      ({ app }: any) => app && resolve(),
-    ))
-    : navigator.share({ text });
+  const canShare = (await Share.canShare()).value;
+
+  if (canShare) {
+    await Share.share({
+      text,
+    });
+  }
 }
 
 export function isNotFoundError(error: any) {
