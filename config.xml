@@ -20,7 +20,6 @@
     <platform name="android">
         <allow-intent href="market:*" />
         <preference name="SplashMaintainAspectRatio" value="true" />
-        <preference name="HeaderColor" value="#141414" />
         <preference name="android-targetSdkVersion" value="30" />
         <resource-file src="resources/values/colors.xml" target="/app/src/main/res/values/colors.xml" />
         <icon background="@color/background" density="ldpi" foreground="resources/android/icon/ldpi-foreground.png" />
