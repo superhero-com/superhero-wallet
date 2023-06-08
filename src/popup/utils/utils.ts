@@ -13,6 +13,7 @@ import {
   TxBuilderHelper,
   InvalidTxError,
 } from '@aeternity/aepp-sdk';
+import { Clipboard } from '@capacitor/clipboard';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { useI18n } from 'vue-i18n';
 
@@ -612,22 +613,23 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   if (!process.env.UNFINISHED_FEATURES) {
     return undefined;
   }
-  let value = '';
+  let text = '';
 
   if (IS_IONIC) {
-    value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+    const { type, value } = await Clipboard.read();
+    if (type === 'string') { text = value; }
   } else if (IS_EXTENSION) {
-    value = await browser!.runtime.sendMessage({ method: 'paste' });
+    text = await browser!.runtime.sendMessage({ method: 'paste' });
   } else {
     try {
-      value = await navigator.clipboard.readText();
+      text = await navigator.clipboard.readText();
     } catch (e: any) {
       if (!e.message.includes('Read permission denied.')) {
         handleUnknownError(e);
       }
     }
   }
-  return value;
+  return text;
 }
 
 export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
