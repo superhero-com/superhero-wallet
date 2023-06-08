@@ -55,7 +55,6 @@
     "bignumber.js": "^9.0.2",
     "camelcase-keys-deep": "^0.1.0",
     "cordova-ios": "^6.2.0",
-    "cordova-plugin-headercolor": "^1.0.0",
     "cordova-plugin-network-information": "^3.0.0",
     "cordova-plugin-x-socialsharing": "^6.0.4",
     "dayjs": "^1.11.7",
