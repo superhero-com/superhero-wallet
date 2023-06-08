@@ -56,7 +56,7 @@ import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CardIcon from '../../icons/credit-card.svg?vue-component';
-import MenuCardIcon from '../../icons/menucard.fill.svg?vue-component';
+import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';

@@ -109,7 +109,7 @@ import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AddressFormatted from '../AddressFormatted.vue';
 import CopyText from '../CopyText.vue';
-import ShareIcon from '../../../icons/share-2.svg?vue-component';
+import ShareIcon from '../../../icons/share.svg?vue-component';
 import AccountItem from '../AccountItem.vue';
 
 export default defineComponent({
