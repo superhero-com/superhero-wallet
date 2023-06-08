@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { Clipboard } from '@capacitor/clipboard';
 import { handleUnknownError } from '@/utils';
 
 function fallbackCopyTextToClipboard(text: string) {
@@ -50,8 +51,8 @@ export function useCopy({
   async function copy(text?: string) {
     if (text) {
       try {
-        if (window.cordova?.plugins?.clipboard) {
-          window.cordova.plugins.clipboard.copy(text);
+        if (Clipboard) {
+          Clipboard.write({ string: text });
         } else if (navigator.clipboard) {
           await navigator.clipboard.writeText(text);
         } else {
