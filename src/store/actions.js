@@ -1,4 +1,5 @@
 import { flatten, orderBy } from 'lodash-es';
+import { Share } from '@capacitor/share';
 import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
@@ -192,12 +193,18 @@ export default {
 
     commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
+
+  /**
+   * @param {{text: String}} options
+   */
   async share(_, options) {
-    await (process.env.IS_IONIC
-      ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
-        options,
-        ({ app }) => app && resolve(),
-      ))
-      : navigator.share(options));
+    // The Share API works on iOS, Android, and the Web
+    const canShare = (await Share.canShare()).value;
+
+    if (canShare) {
+      await Share.share({
+        text: options.text,
+      });
+    }
   },
 };

@@ -600,7 +600,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   }
   let text = '';
 
-  if (IS_CORDOVA) {
+  if (IS_IONIC) {
     const { type, value } = await Clipboard.read();
     if (type === 'string') {
       text = value;
