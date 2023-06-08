@@ -1,4 +1,5 @@
 import { uniqBy, orderBy } from 'lodash-es';
+import { Share } from '@capacitor/share';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AEX9_TRANSFER_EVENT,
@@ -180,12 +181,18 @@ export default {
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
+
+  /**
+   * @param {{text: String}} options
+   */
   async share(_, options) {
-    await (process.env.IS_IONIC
-      ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
-        options,
-        ({ app }) => app && resolve(),
-      ))
-      : navigator.share(options));
+    // The Share API works on iOS, Android, and the Web
+    const canShare = (await Share.canShare()).value;
+
+    if (canShare) {
+      await Share.share({
+        text: options.text,
+      });
+    }
   },
 };
