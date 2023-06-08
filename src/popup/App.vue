@@ -178,11 +178,13 @@ export default defineComponent({
 
       watchConnectionStatus();
 
-      Promise.allSettled([
-        loadAeternityData(),
-        fetchAndSetChainNames(),
-        setNotificationSettings(),
-      ]);
+      if (!RUNNING_IN_POPUP) {
+        Promise.allSettled([
+          loadAeternityData(),
+          fetchAndSetChainNames(),
+          setNotificationSettings(),
+        ]);
+      }
     });
 
     return {
