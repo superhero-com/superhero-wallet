@@ -146,9 +146,10 @@ import {
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IName } from '@/types';
+import { Clipboard } from '@capacitor/clipboard';
 import {
-  IS_CORDOVA,
   IS_EXTENSION,
+  IS_IONIC,
   MODAL_CONFIRM,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -215,22 +216,23 @@ export default defineComponent({
       if (!UNFINISHED_FEATURES) {
         return undefined;
       }
-      let value = '';
+      let text = '';
 
-      if (IS_CORDOVA) {
-        value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+      if (IS_IONIC) {
+        const { type, value } = await Clipboard.read();
+        if (type === 'string') { text = value; }
       } else if (IS_EXTENSION) {
-        value = await browser!.runtime.sendMessage({ method: 'paste' });
+        text = await browser!.runtime.sendMessage({ method: 'paste' });
       } else {
         try {
-          value = await navigator.clipboard.readText();
+          text = await navigator.clipboard.readText();
         } catch (e: any) {
           if (!e.message.includes('Read permission denied.')) {
             Logger.write(e);
           }
         }
       }
-      return value;
+      return text;
     }
 
     async function insertValueFromClipboard() {
