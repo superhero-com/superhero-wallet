@@ -10,6 +10,7 @@
     >
       <span class="invite-link-url">{{ link }}</span>
     </CopyText>
+
     <div
       v-if="!topUp"
       class="centered-buttons"
@@ -17,61 +18,76 @@
       <BtnMain
         v-if="inviteLinkBalance > 0"
         class="button"
+        :text="$t('pages.invite.claim')"
         @click="claim"
-      >
-        {{ $t('pages.invite.claim') }}
-      </BtnMain>
+      />
       <BtnMain
         v-else
         class="button"
         variant="muted"
+        :text="$t('pages.invite.delete')"
         @click="deleteItem"
-      >
-        {{ $t('pages.invite.delete') }}
-      </BtnMain>
+      />
       <BtnMain
         class="button"
+        :text="$t('pages.invite.top-up')"
         @click="topUp = true"
-      >
-        {{ $t('pages.invite.top-up') }}
-      </BtnMain>
+      />
     </div>
     <template v-else>
       <InputAmount
-        v-model="topUpAmount"
+        v-model="formModel.amount"
+        v-validate="{
+          required: true,
+          max_value: max,
+        }"
+        name="amount"
         class="input-amount"
         :label="$t('pages.invite.top-up-with')"
-        no-token
-        @error="(val) => error = val"
+        :message="errors.first('amount')"
+        ae-only
       />
       <div class="centered-buttons">
         <BtnMain
           variant="muted"
+          :text="$t('pages.invite.collapse')"
           @click="resetTopUpChanges"
-        >
-          {{ $t('pages.invite.collapse') }}
-        </BtnMain>
+        />
         <BtnMain
-          :disabled="error"
+          :disabled="false"
+          :text="$t('pages.invite.top-up')"
           @click="sendTopUp"
-        >
-          {{ $t('pages.invite.top-up') }}
-        </BtnMain>
+        />
       </div>
     </template>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  getCurrentScope,
+  nextTick,
+  ref,
+  watch,
+} from '@vue/composition-api';
 import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
-import { APP_LINK_WEB, watchUntilTruthy, formatDate } from '../utils';
+import { APP_LINK_WEB, formatDate } from '../utils';
+import { ROUTE_INVITE_CLAIM } from '../router/routeNames';
+import {
+  IFormModel,
+  useBalances,
+  useMaxAmount,
+  useSdk,
+} from '../../composables';
+
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
 import CopyText from './CopyText.vue';
 
-export default {
+export default defineComponent({
   components: {
     TokenAmount,
     BtnMain,
@@ -82,85 +98,119 @@ export default {
     secretKey: { type: String, required: true },
     createdAt: { type: Number, required: true },
   },
-  data: () => ({
-    topUp: false,
-    topUpAmount: '',
-    inviteLinkBalance: 0,
-    error: false,
-  }),
-  computed: {
-    ...mapGetters('sdkPlugin', ['sdk']),
-    link() {
+  setup(props, { emit, root }) {
+    const { $validator } = (getCurrentScope() as any).vm;
+
+    const { getSdk } = useSdk({ store: root.$store });
+    const { aeternityCoin } = useBalances({ store: root.$store });
+
+    const formModel = ref<IFormModel>({
+      amount: '',
+      selectedAsset: aeternityCoin.value,
+    });
+    const { max } = useMaxAmount({ formModel, store: root.$store });
+
+    const topUp = ref(false);
+    const inviteLinkBalance = ref(0);
+
+    const link = computed(() => {
       // sg_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (TxBuilderHelper.encode(Buffer.from(this.secretKey, 'hex'), 'sg')).slice(3);
+      const secretKey = (TxBuilderHelper.encode(Buffer.from(props.secretKey, 'hex'), 'sg')).slice(3);
       return new URL(
-        this.$router
-          .resolve({ name: 'invite-claim', params: { secretKey } })
+        root.$router
+          .resolve({ name: ROUTE_INVITE_CLAIM, params: { secretKey } })
           .href.replace(/^#/, ''),
         APP_LINK_WEB,
       );
-    },
-    address() {
-      return Crypto.getAddressFromPriv(this.secretKey);
-    },
-  },
-  watch: {
-    secretKey: {
-      async handler() {
-        await this.updateBalance();
-      },
-      immediate: true,
-    },
-  },
-  methods: {
-    formatDate,
-    deleteItem() {
-      this.$store.commit('invites/delete', this.secretKey);
-    },
-    async updateBalance() {
-      await watchUntilTruthy(() => this.sdk);
-      this.inviteLinkBalance = parseFloat(
-        await this.sdk
-          .balance(this.address, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
-          .catch(() => 0),
+    });
+
+    const address = computed(() => Crypto.getAddressFromPriv(props.secretKey));
+
+    function deleteItem() {
+      root.$store.commit('invites/delete', props.secretKey);
+    }
+
+    async function updateBalance() {
+      const sdk = await getSdk();
+      inviteLinkBalance.value = parseFloat(
+        (await sdk
+          .balance(address.value, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
+          .catch(() => 0)
+        )
+          .toString(),
       );
-    },
-    async claim() {
-      this.$emit('loading', true);
+    }
+
+    async function claim() {
+      emit('loading', true);
       try {
-        await this.$store.dispatch('invites/claim', this.secretKey);
-        await this.updateBalance();
+        await root.$store.dispatch('invites/claim', props.secretKey);
+        await updateBalance();
       } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) return;
-        throw error;
-      } finally {
-        this.$emit('loading', false);
-      }
-    },
-    resetTopUpChanges() {
-      this.topUpAmount = 0;
-      this.topUp = false;
-    },
-    async sendTopUp() {
-      this.$emit('loading', true);
-      try {
-        if (this.topUpAmount > 0) {
-          await this.sdk.spend(this.topUpAmount, this.address, {
-            payload: 'referral',
-            denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-          });
-          await this.updateBalance();
+        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+          return;
         }
-      } catch (error) {
-        if (await this.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
-        this.$emit('loading', false);
+        emit('loading', false);
       }
-      this.resetTopUpChanges();
-    },
+    }
+
+    /**
+     * Close the top up form and reset validator
+     * to avoid VeeValidate missing field errors.
+     */
+    async function resetTopUpChanges() {
+      formModel.value.amount = '';
+      $validator.pause();
+      await nextTick();
+      topUp.value = false;
+      $validator.reset();
+      $validator.resume();
+    }
+
+    async function sendTopUp() {
+      if (!(await $validator.validateAll())) {
+        return;
+      }
+      emit('loading', true);
+      const sdk = await getSdk();
+      try {
+        await sdk.spend(formModel.value.amount, address.value, {
+          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+        });
+        await updateBalance();
+        resetTopUpChanges();
+      } catch (error: any) {
+        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) {
+          return;
+        }
+        throw error;
+      } finally {
+        emit('loading', false);
+      }
+    }
+
+    watch(
+      () => props.secretKey,
+      () => updateBalance(),
+      { immediate: true },
+    );
+
+    return {
+      formModel,
+      max,
+      topUp,
+      inviteLinkBalance,
+      link,
+      formatDate,
+      resetTopUpChanges,
+      deleteItem,
+      sendTopUp,
+      claim,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

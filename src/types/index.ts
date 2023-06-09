@@ -499,7 +499,7 @@ export interface ISdk {
   aensPreclaim: (name: string) => Promise<any>;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
-  balance: (address: string) => Promise<number>;
+  balance: (address: string, options?: any) => Promise<number>;
   compilerApi: Record<string, (...args: any[]) => Promise<any>>;
   getAccount: (publicKey: any) => Promise<any>
   gaAttachTx: (options: {

@@ -1,29 +1,62 @@
 <template>
   <InputField
-    v-validate="{
-      required: true,
-      min_value_exclusive: 0,
-      enough_ae: fee.toString(),
-      max_value: (max > 0) ? max : undefined,
-    }"
     v-bind="$attrs"
-    name="amount"
     class="input-amount"
     type="number"
     placeholder="0.00"
     :value="value"
+    :label="label"
     :message="$attrs['message'] || errors.first('amount')"
-    :label="$attrs.label || $t('common.amount')"
     @input="$emit('input', $event)"
   >
-    <template #after>
-      <span class="token">{{ AETERNITY_SYMBOL }}</span>
-      <span
-        class="amount"
-        data-cy="amount-currency"
+    <template
+      v-for="(index, name) in $slots"
+      #[name]
+    >
+      <slot :name="name" />
+    </template>
+    <template #after="{ focused }">
+      <InputSelectAsset
+        v-if="!aeOnly"
+        v-bind="$attrs"
+        data-cy="select-asset"
+        :value="currentAsset"
+        :focused="focused"
+        :show-tokens-with-balance="showTokensWithBalance"
+        @input="handleAssetSelected($event)"
+      />
+      <div
+        v-else
+        class="ae-symbol"
+        v-text="AETERNITY_SYMBOL"
+      />
+    </template>
+
+    <template #under="{ focused }">
+      <div
+        class="input-amount-desc"
+        :class="{ focused }"
       >
-        ({{ currencyAmount }})
-      </span>
+        <span
+          v-if="currentAssetFiatPrice && !hasError"
+          class="input-amount-desc-total"
+          data-cy="total-amount-currency"
+        >
+          <span v-if="value">&thickapprox;</span>
+          {{ totalAmountFormatted }}
+        </span>
+
+        <span
+          v-if="currentAssetFiatPrice"
+          class="input-amount-desc-at"
+        >
+          @{{
+            (currentAssetFiatPrice)
+              ? currentAssetFiatPriceFormatted
+              : $t('common.priceNotAvailable')
+          }}
+        </span>
+      </div>
     </template>
   </InputField>
 </template>
@@ -33,46 +66,68 @@ import {
   computed,
   defineComponent,
   onMounted,
-  ref,
+  PropType,
   watch,
 } from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
-import { AETERNITY_SYMBOL, calculateFee } from '../utils';
-import { useBalances, useCurrencies, useSdk } from '../../composables';
+import { useBalances, useCurrencies } from '../../composables';
+import type { IAsset } from '../../types';
+import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
 import InputField from './InputField.vue';
+import InputSelectAsset from './InputSelectAsset.vue';
 
 export default defineComponent({
   components: {
+    InputSelectAsset,
     InputField,
   },
   props: {
     value: { type: [String, Number], default: '' },
-    noToken: Boolean,
+    label: { type: String, default: null },
+    selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
+    aeOnly: Boolean,
+    showTokensWithBalance: Boolean,
   },
-  setup(props, { emit, root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
-    const { getFormattedFiat } = useCurrencies();
+  setup(props, { root, emit }) {
+    const { aeternityCoin } = useBalances({ store: root.$store });
+    const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
-    const fee = ref(new BigNumber(0));
-
+    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
     const hasError = computed(() => (root as any).$validator.errors.has('amount'));
-    const max = computed(() => balance.value.minus(fee.value).toNumber());
-    const currencyAmount = computed(() => getFormattedFiat(+props.value || 0));
+    const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
+    const currentAssetFiatPrice = computed(
+      () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
+    );
+    const currentAssetFiatPriceFormatted = computed(
+      () => formatCurrency(currentAssetFiatPrice.value),
+    );
+    const totalAmountFormatted = computed(() => formatCurrency(
+      (currentAssetFiatPrice.value)
+        ? (+props.value || 0) * currentAssetFiatPrice.value
+        : 0,
+    ));
 
-    onMounted(async () => {
-      const sdk = await getSdk();
-      fee.value = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
-    });
+    function handleAssetSelected(asset: IAsset) {
+      emit('asset-selected', asset);
+    }
 
     watch(hasError, (val) => emit('error', val));
 
+    onMounted(() => {
+      if (!props.selectedAsset) {
+        handleAssetSelected(aeternityCoin.value);
+      }
+    });
+
     return {
+      currentCurrencyRate,
       AETERNITY_SYMBOL,
-      fee,
-      max,
-      currencyAmount,
+      totalAmountFormatted,
+      currentAssetFiatPrice,
+      currentAssetFiatPriceFormatted,
+      currentAsset,
+      hasError,
+      formatCurrency,
+      handleAssetSelected,
     };
   },
 });
@@ -81,18 +136,37 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables';
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .input-amount {
-  white-space: nowrap;
+  &-desc {
+    @include mixins.flex(space-between, center);
 
-  .token {
-    margin-right: 2px;
-    font-weight: 500;
-    color: variables.$color-primary;
+    user-select: none;
+
+    &-total {
+      word-break: break-word;
+
+      .focused & {
+        color: rgba(variables.$color-white, 0.75);
+      }
+    }
+
+    &-at {
+      margin-left: auto;
+    }
   }
 
-  .amount {
-    color: variables.$color-grey-dark;
+  &-asset {
+    margin-right: -2px; // Compensate visually the roundness of the input
+  }
+
+  .ae-symbol {
+    @extend %face-sans-15-medium;
+
+    white-space: nowrap;
+    color: variables.$color-primary;
+    user-select: none;
   }
 }
 </style>

@@ -54,7 +54,7 @@ import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 import { useState } from '../../composables/vuex';
 import { useBalances, useSdk, useMaxAmount } from '../../composables';
 import { TransferFormModel } from '../components/Modals/TransferSend.vue';
-import InputAmount from '../components/InputAmountV2.vue';
+import InputAmount from '../components/InputAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
 import Invite from '../../icons/invite.svg?vue-component';

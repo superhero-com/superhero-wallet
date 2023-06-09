@@ -102,7 +102,7 @@ import {
   AETERNITY_CONTRACT_ID,
 } from '../../utils';
 
-import InputAmount from '../InputAmountV2.vue';
+import InputAmount from '../InputAmount.vue';
 import QrCode from '../QrCode.vue';
 import Scrollable from '../Scrollable.vue';
 import Modal from '../Modal.vue';

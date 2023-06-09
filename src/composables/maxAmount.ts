@@ -12,7 +12,6 @@ import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import type {
   IAsset,
   IDefaultComposableOptions,
-  IToken,
 } from '../types';
 import {
   AETERNITY_COIN_PRECISION,
@@ -30,7 +29,7 @@ import { useAccounts } from './accounts';
 
 export interface IFormModel {
   amount?: string;
-  selectedAsset?: IToken | IAsset;
+  selectedAsset?: IAsset;
   address?: string;
   payload?: string;
 }

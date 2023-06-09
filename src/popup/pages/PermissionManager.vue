@@ -137,7 +137,7 @@ import { useState } from '../../composables/vuex';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 import SwitchButton from '../components/SwitchButton.vue';
-import InputAmount from '../components/InputAmountV2.vue';
+import InputAmount from '../components/InputAmount.vue';
 import InputField from '../components/InputField.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
