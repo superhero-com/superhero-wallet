@@ -465,6 +465,8 @@ export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
 export const DEX_SWAP = 'swap';
 export const DEX_ALLOW_TOKEN = 'allow_token';
 
+export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
+
 export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   add_liquidity: DEX_PROVIDE_LIQUIDITY,
   add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,

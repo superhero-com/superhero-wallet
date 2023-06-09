@@ -13,7 +13,7 @@ import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 import { useMiddleware } from '../../composables';
 
 export default (store) => {
-  const { fetchFromMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store });
+  const { fetchFromMiddleware } = useMiddleware({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -41,8 +41,10 @@ export default (store) => {
     },
     actions: {
       async loadAvailableTokens({ commit }) {
-        const response = await fetchFromMiddleware('/aex9/by_name')
-          .catch(handleUnknownError);
+        const response = await fetchAllPages(
+          () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
+          fetchFromMiddleware,
+        );
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
@@ -62,7 +64,7 @@ export default (store) => {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
               () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
-              fetchFromMiddlewareCamelCased,
+              fetchFromMiddleware,
             );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;

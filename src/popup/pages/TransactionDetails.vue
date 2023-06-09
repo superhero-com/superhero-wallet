@@ -386,7 +386,7 @@ export default defineComponent({
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();
         try {
-          rawTransaction = await middleware.getTxByHash(props.hash);
+          rawTransaction = await middleware.getTx(props.hash);
         } catch (e) {
           root.$router.push({ name: ROUTE_NOT_FOUND });
         }

@@ -24,7 +24,7 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
-  const { fetchFromMiddleware } = useMiddleware({ store });
+  const { getMiddleware } = useMiddleware({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
@@ -176,7 +176,10 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   async function fetchLatestMultisigAccountTransaction() {
     try {
       const contractId = activeMultisigAccount.value?.contractId;
-      const { data: [latestTransaction] } = await fetchFromMiddleware(`/txs/backward?limit=1&contract=${contractId}`);
+      const middleware = await getMiddleware();
+      const { data: [latestTransaction] } = await middleware.getTxs({
+        direction: 'backward', limit: 1, contract: contractId,
+      });
       latestMultisigAccountTransaction.value = latestTransaction;
     } catch (error) {
       handleUnknownError(error);

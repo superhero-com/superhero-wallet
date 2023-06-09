@@ -198,7 +198,7 @@ export default defineComponent({
     onMounted(async () => {
       const middleware = await getMiddleware();
       if (innerTx.value.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.getNameById(innerTx.value.recipientId)).name;
+        name.value = (await middleware.getName(innerTx.value.recipientId)).name;
       }
       let transactionOwnerAddress;
       if (innerTx.value.function === TX_FUNCTIONS.claim) {

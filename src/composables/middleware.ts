@@ -1,5 +1,6 @@
 import { computed, ref } from '@vue/composition-api';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
+import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';
 import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
 import { genSwaggerClient } from '@aeternity/aepp-sdk';
@@ -37,48 +38,8 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
   async function initMiddleware() {
     const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
 
-    const swagUrl = `${middlewareUrl}/swagger/swagger.json`;
-
-    const spec = await fetchJson(swagUrl);
-    spec.paths = {
-      ...spec.paths,
-      '/txs/backward': {
-        get: {
-          operationId: 'getTxByAccount',
-          parameters: [
-            {
-              in: 'query',
-              name: 'account',
-              required: true,
-              type: 'string',
-            },
-            {
-              in: 'query',
-              name: 'limit',
-              required: true,
-              type: 'integer',
-            },
-            {
-              in: 'query',
-              name: 'page',
-              required: true,
-              type: 'integer',
-            },
-          ],
-        },
-      },
-    };
-    spec.basePath = '/mdw/';
-
-    // Force the middleware to use https.
-    // TODO Not applicable when we move to newer version of the MDW.
-    delete spec.schemes;
-
-    // Old swagger.json file is not maintained anymore so we need to tweak this
-    // entry to align with the current v1 middleware.
-    // TODO Not applicable when we move to newer version of the MDW.
-    spec.paths['/name/pointees/{id}'] = spec.paths['/names/pointees/{id}'];
-    delete spec.paths['/names/pointees/{id}'];
+    const swagger = await fetch(`${middlewareUrl}/swagger/swagger_v2.yaml`).then((response) => response.text());
+    const spec = load(swagger);
 
     middleware.value = mapObject(
       (await genSwaggerClient(middlewareUrl, { spec })).api,

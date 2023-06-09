@@ -3,6 +3,7 @@ import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
 import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
+  AEX9_TRANSFER_EVENT,
   fetchJson,
   postJson,
   handleUnknownError,
@@ -118,15 +119,15 @@ export default {
     const lastTransaction = txs[0]?.[txs[0].length - 1];
     // DEX transaction is represented in 3 objects, only last one should be used
     // this condition checking edge case when not all 3 objects in one chunk
-    if (lastTransaction?.type === 'Aex9TransferEvent') {
+    if (lastTransaction?.type === AEX9_TRANSFER_EVENT) {
       const middleware = await getMiddleware();
-      txs[0][txs[0].length - 1] = await middleware.getTxByHash(lastTransaction.payload.txHash);
+      txs[0][txs[0].length - 1] = await middleware.getTx(lastTransaction.payload.txHash);
     }
 
     txs = [...txs[1], ...txs[0]].filter(({ type }) => !type?.startsWith('Internal')).map((tx) => ({
       ...(tx.payload ? tx.payload : tx),
       transactionOwner: address,
-      ...(tx.type === 'Aex9TransferEvent'
+      ...(tx.type === AEX9_TRANSFER_EVENT
         ? {
           tx: {
             ...tx.payload,
