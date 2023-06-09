@@ -7,14 +7,10 @@ import {
   sortTransactionsByDateCallback,
   handleUnknownError,
 } from '../popup/utils';
-import { useMiddleware } from './middleware';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
-
-type TransactionFetchCallbackFunction = (address: string)
-  => Promise<ITransaction[] | { data: ITransaction[]}>;
 
 const isTransactionListLoading = ref(false);
 const transactionList = ref<ITransaction[]>([]);
@@ -27,40 +23,24 @@ const { onNetworkChange } = createNetworkWatcher();
  * that wants to use this data.
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { getMiddleware } = useMiddleware({ store });
   const { accounts } = useAccounts({ store });
   const { balancesTotal } = useBalances({ store });
+
   const tokens = computed(() => store.state.fungibleTokens.tokens);
 
-  async function fetchTxByAccountAddress(address: string) {
-    const middleware = await getMiddleware();
-    return middleware.getTxByAccount(address, DASHBOARD_TRANSACTION_LIMIT, 1);
-  }
+  async function updateTransactionListData() {
+    if (isTransactionListLoading.value) {
+      return;
+    }
 
-  function fetchPendingTransactionsByAddress(address: string) {
-    return store.dispatch('fetchPendingTransactions', address);
-  }
+    isTransactionListLoading.value = true;
 
-  function fetchTokensHistoryByAddress(address: string) {
-    return store.dispatch('fungibleTokens/getTokensHistory', {
-      address, multipleAccounts: true,
-    });
-  }
-
-  function fetchTipWithdrawnTransactionsByAddress(address: string) {
-    return store.dispatch('fetchTipWithdrawnTransactions', {
-      address, multipleAccounts: true, recent: true, limit: DASHBOARD_TRANSACTION_LIMIT,
-    });
-  }
-
-  /**
-   * TODO actually each of the functions we pass here returns different structure than ITransaction
-   */
-  function fetchForAllAccounts(func: TransactionFetchCallbackFunction): Promise<ITransaction[]>[] {
-    return accounts.value.map(async ({ address }) => {
+    const allTransactions = await Promise.all(accounts.value.map(async ({ address }) => {
       try {
-        const res = await func(address);
-        return (Array.isArray(res) ? res : res?.data).map(
+        return (await store.dispatch('fetchTransactions',
+          {
+            limit: DASHBOARD_TRANSACTION_LIMIT, address, recent: true, multipleAccounts: true,
+          })).map(
           (transaction: ITransaction) => {
             const {
               direction,
@@ -71,7 +51,6 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
             });
             return {
               ...transaction,
-              transactionOwner: address,
               direction: direction.value,
             };
           },
@@ -80,28 +59,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
         handleUnknownError(e);
         return [];
       }
-    });
-  }
-
-  /**
-   * This action is really heavy as we are fetching four lists for each of the accounts.
-   * TODO: Replace this with WebSockets and leave only the initial call.
-   */
-  async function updateTransactionListData() {
-    if (isTransactionListLoading.value) {
-      return;
-    }
-
-    isTransactionListLoading.value = true;
-
-    const allTransactionsPromises = [
-      ...fetchForAllAccounts(fetchTxByAccountAddress),
-      ...fetchForAllAccounts(fetchPendingTransactionsByAddress),
-      ...fetchForAllAccounts(fetchTokensHistoryByAddress),
-      ...fetchForAllAccounts(fetchTipWithdrawnTransactionsByAddress),
-    ];
-
-    const allTransactions = await Promise.all(allTransactionsPromises);
+    }));
 
     transactionList.value = uniqWith(allTransactions.flat(), (a, b) => (
       a.hash === b.hash && a.transactionOwner === b.transactionOwner

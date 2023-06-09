@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { isEmpty, uniqBy } from 'lodash-es';
+import { isEmpty } from 'lodash-es';
 import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
 import {
   convertToken,
@@ -20,7 +20,6 @@ export default (store) => {
     state: {
       availableTokens: {},
       tokens: {},
-      transactions: {},
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
@@ -29,9 +28,6 @@ export default (store) => {
       ) => getTokenBalance(address),
     },
     mutations: {
-      setTransactions(state, { address, transactions }) {
-        Vue.set(state.transactions, address, transactions);
-      },
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
@@ -188,72 +184,6 @@ export default (store) => {
         return tokenContract.methods.burn_trigger_pos(
           amount.toFixed(), posAddress, invoiceId, option,
         );
-      },
-      async getTokensHistory(
-        {
-          state: { transactions },
-          rootGetters: { getDexContracts }, commit,
-        }, { recent, address, multipleAccounts },
-      ) {
-        if (!address) {
-          return [];
-        }
-        if (transactions[address]?.length && !recent) {
-          return transactions[address];
-        }
-
-        let rawTransactions = [];
-        const lastTransaction = transactions[address]?.[0];
-        if (recent) {
-          let nextPageUrl;
-          let isAllNewTransactionsLoaded = false;
-          while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
-            // eslint-disable-next-line no-await-in-loop
-            const { data, next } = await fetchFromMiddleware(nextPageUrl
-              ? `/${nextPageUrl}`
-              : `/v2/aex9/transfers/to/${address}`);
-            if (data?.length) rawTransactions.push(...data);
-            if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
-            || !transactions[address]?.length) {
-              isAllNewTransactionsLoaded = true;
-            }
-            nextPageUrl = next || null;
-          }
-          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) {
-            return transactions[address].slice(0, 10);
-          }
-        } else {
-          rawTransactions = await fetchFromMiddleware(`/aex9/transfers/to/${address}`);
-        }
-
-        const newTransactions = rawTransactions
-          .filter((tx) => !getDexContracts.router.includes(tx.contract_id))
-          .map((tx) => ({
-            ...tx,
-            tx: {
-              amount: tx.amount,
-              contractId: tx.contract_id,
-              senderId: tx.sender,
-              recipientId: tx.recipient,
-              callerId: tx.sender,
-              type: 'ContractCallTx',
-            },
-            recipient: tx.recipient,
-            incomplete: true,
-            microTime: tx.micro_time,
-            hash: tx.tx_hash,
-          }));
-
-        if (!multipleAccounts) {
-          if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
-            commit('setTransactions', {
-              address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
-            });
-          } else {
-            commit('setTransactions', { address, transactions: newTransactions.reverse() });
-          }
-        }
-        return newTransactions;
       },
     },
   });
