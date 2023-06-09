@@ -7,7 +7,7 @@
         v-model="amount"
         :error="!!amountError"
         :message="amountError"
-        @error="(val) => error = val"
+        ae-only
       />
       <div class="tx-details">
         <DetailsItem :label="$t('transaction.fee')">
@@ -28,7 +28,7 @@
       </div>
 
       <BtnMain
-        :disabled="!!amountError || error || !amount"
+        :disabled="!!amountError || !amount"
         class="button"
         extend
         @click="bid"
@@ -76,7 +76,6 @@ export default defineComponent({
 
     const loading = ref(false);
     const amount = ref('');
-    const error = ref(false);
 
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
@@ -100,8 +99,8 @@ export default defineComponent({
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
         root.$router.push({ name: 'auction-history', params: { name: props.name } });
-      } catch (e: any) {
-        let msg = e.message;
+      } catch (error: any) {
+        let msg = error.message;
         if (msg.includes('is not enough to execute')) {
           msg = root.$t('pages.names.balance-error');
         }
@@ -116,7 +115,6 @@ export default defineComponent({
       amount,
       amountTotal,
       amountError,
-      error,
       txFee,
       bid,
     };

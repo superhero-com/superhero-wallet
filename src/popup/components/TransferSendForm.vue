@@ -211,7 +211,7 @@ import {
 import { useState } from '../../composables/vuex';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
-import InputAmount from './InputAmountV2.vue';
+import InputAmount from './InputAmount.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
 import BtnText from './buttons/BtnText.vue';

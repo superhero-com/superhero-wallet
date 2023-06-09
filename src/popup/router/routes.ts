@@ -26,6 +26,7 @@ import {
   ROUTE_TOKEN_DETAILS,
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
+  ROUTE_INVITE_CLAIM,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -671,7 +672,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'invite-claim',
+    name: ROUTE_INVITE_CLAIM,
     path: '/invite/:secretKey',
     component: InviteClaim,
     props: true,

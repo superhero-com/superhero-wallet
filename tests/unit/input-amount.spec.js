@@ -91,7 +91,8 @@ describe('InputAmount', () => {
 
     store._vm.$validator.extend('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
-    expect(wrapper.find('.token').text()).toBe(AETERNITY_SYMBOL);
+    expect(wrapper.find('[data-cy=select-asset]').text()).toBe(AETERNITY_SYMBOL);
+
     // expect(wrapper.find('[data-cy=amount-currency]').text())
     //   .toBe(`($${test.currency.toFixed(2)})`);
 

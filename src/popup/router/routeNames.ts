@@ -25,3 +25,4 @@ export const ROUTE_NETWORK_SETTINGS = 'network-settings';
 export const ROUTE_NETWORK_ADD = 'network-add';
 export const ROUTE_NETWORK_EDIT = 'network-edit';
 export const ROUTE_WEB_IFRAME_POPUP = 'web-iframe-popup';
+export const ROUTE_INVITE_CLAIM = 'invite-claim';

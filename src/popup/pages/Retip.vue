@@ -79,7 +79,7 @@ import {
   useAccounts,
 } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
-import InputAmount from '../components/InputAmountV2.vue';
+import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
