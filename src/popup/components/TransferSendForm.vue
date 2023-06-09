@@ -11,7 +11,7 @@
               v-if="multisigVaultOwnedByManyAccounts"
               :options="accountsAllowedToProposeTxSelectOptions"
               :default-text="$t('modals.multisigTxProposal.signingAccount')"
-              :value="account.address"
+              :value="activeAccount.address"
               class="account-selector"
               persistent-default-text
               unstyled
@@ -371,7 +371,11 @@ export default defineComponent({
       payload,
       token,
     }: Dictionary) {
-      formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+      if (token) {
+        formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+      } else if (!formModel.value.selectedAsset) {
+        formModel.value.selectedAsset = aeternityCoin.value;
+      }
 
       if (account) {
         formModel.value.address = account;
