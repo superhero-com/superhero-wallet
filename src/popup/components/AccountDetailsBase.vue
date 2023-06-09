@@ -60,7 +60,7 @@ import {
   useTransactionAndTokenFilter,
   useUi,
 } from '../../composables';
-import { IS_CORDOVA } from '../../lib/environment';
+import { IS_IONIC } from '../../lib/environment';
 
 import BtnClose from './buttons/BtnClose.vue';
 import TransactionAndTokenFilter from './TransactionAndTokenFilter.vue';
@@ -126,8 +126,8 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#191919');
+      if (IS_IONIC) {
+        window.StatusBar.setBackgroundColor('#191919');
       }
       if (accountDetailsElem.value && appInnerElem.value) {
         resizeObserver.observe(accountDetailsElem.value);
@@ -140,8 +140,8 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#141414');
+      if (IS_IONIC) {
+        window.StatusBar.setBackgroundColor('#141414');
       }
 
       resizeObserver.disconnect();

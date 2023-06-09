@@ -59,7 +59,7 @@ import type {
   IWallet,
   IRequestInitBodyParsed,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
+import { IS_IONIC, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 import runMigrations from '../../store/migrations';
 
 /**
