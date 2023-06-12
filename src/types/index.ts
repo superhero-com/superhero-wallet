@@ -4,9 +4,9 @@
     no-unused-vars,
 */
 
-import Vue, { ComponentOptions } from 'vue';
+import { Component, ComponentOptions } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
-import { LocaleMessages, TranslateResult } from 'vue-i18n';
+import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
@@ -50,7 +50,7 @@ type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
 export type ResolveRejectCallback = (...args: any) => void;
 
-export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
+export type VueAnyComponent = Component | ComponentOptions | {
   functional: boolean;
   render: any;
 }

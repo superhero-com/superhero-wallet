@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import { Contract } from '@aeternity/aepp-sdk-13';
 
 import TippingV1ACI from '../lib/contracts/TippingV1ACI.json';

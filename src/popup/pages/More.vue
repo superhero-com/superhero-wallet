@@ -114,7 +114,7 @@ export default defineComponent({
     ClaimTips,
     FaucetIcon,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
 
     const { activeAccountFaucetUrl } = useAccounts({ store });

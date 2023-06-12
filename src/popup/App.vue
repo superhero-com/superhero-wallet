@@ -158,7 +158,7 @@ export default defineComponent({
     }
 
     async function fetchAndSetChainNames() {
-      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+      store.commit('setChainNames', await store.dispatch('getCacheChainNames'));
     }
 
     watch(isLoggedIn, (val) => {

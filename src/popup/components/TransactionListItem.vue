@@ -1,22 +1,43 @@
 <template>
-  <ListItemWrapper class="transaction-item" :to="redirectRoute">
+  <ListItemWrapper
+    class="transaction-item"
+    :to="redirectRoute"
+  >
     <div class="body">
-      <TransactionTokenRows :ext-tokens="tokens" :error="isErrorTransaction" icon-size="md" />
+      <TransactionTokenRows
+        :ext-tokens="tokens"
+        :error="isErrorTransaction"
+        icon-size="md"
+      />
       <div class="footer">
-        <div v-if="!!multisigTransaction && !hasConsensus" class="consensus">
-          <ConsensusApprovedLabel :confirmations-required="multisigTransaction.confirmationsRequired"
+        <div
+          v-if="!!multisigTransaction && !hasConsensus"
+          class="consensus"
+        >
+          <ConsensusApprovedLabel
+            :confirmations-required="multisigTransaction.confirmationsRequired"
             :has-pending-transaction="multisigTransaction.hasPendingTransaction"
-            :confirmed-by="multisigTransaction.confirmedBy" :signers="multisigTransaction.signers" />
+            :confirmed-by="multisigTransaction.confirmedBy"
+            :signers="multisigTransaction.signers"
+          />
         </div>
 
-        <TransactionLabel v-else :transaction="currentTransaction" :transaction-date="transactionDate"
-          :show-transaction-owner="showTransactionOwner" dense />
+        <TransactionLabel
+          v-else
+          :transaction="currentTransaction"
+          :transaction-date="transactionDate"
+          :show-transaction-owner="showTransactionOwner"
+          dense
+        />
 
         <template v-if="!multisigTransaction">
           <span v-if="fiatAmount && !showTransactionOwner">
             {{ fiatAmount }}
           </span>
-          <span v-else-if="showTransactionOwner" class="date">
+          <span
+            v-else-if="showTransactionOwner"
+            class="date"
+          >
             {{ transactionDate }}
           </span>
         </template>
@@ -34,7 +55,7 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { Location } from 'vue-router';
+import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
 import { useStore } from 'vuex';
 import {
@@ -113,7 +134,7 @@ export default defineComponent({
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
-    const redirectRoute = computed((): Location => {
+    const redirectRoute = computed((): Partial<RouteLocation> => {
       if (props.multisigTransaction) {
         return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }

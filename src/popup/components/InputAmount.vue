@@ -6,7 +6,7 @@
     placeholder="0.00"
     :model-value="modelValue"
     :label="label"
-    :message="$attrs['message'] || errorMessage"
+    :message="$attrs['message']"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template
@@ -23,7 +23,7 @@
         :value="currentAsset"
         :focused="focused"
         :show-tokens-with-balance="showTokensWithBalance"
-        @input="handleAssetSelected($event)"
+        @select-asset="handleAssetSelected($event)"
       />
       <div
         v-else
@@ -38,7 +38,7 @@
         :class="{ focused }"
       >
         <span
-          v-if="currentAssetFiatPrice && !hasError"
+          v-if="currentAssetFiatPrice"
           class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
@@ -67,13 +67,11 @@ import {
   defineComponent,
   onMounted,
   PropType,
-  watch,
 } from 'vue';
+import { useStore } from 'vuex';
 import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
-import { useStore } from 'vuex';
-import { useField } from 'vee-validate';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -89,17 +87,14 @@ export default defineComponent({
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
-  emits: ['update:modelValue', 'error', 'asset-selected'],
+  emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {
     const store = useStore();
-    const { errorMessage } = useField('amount');
-    
-    
+
     const { aeternityCoin } = useBalances({ store });
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const hasError = computed(() => !!errorMessage.value);
     const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
       () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
@@ -112,13 +107,10 @@ export default defineComponent({
         ? (+props.modelValue || 0) * currentAssetFiatPrice.value
         : 0,
     ));
-    
 
     function handleAssetSelected(asset: IAsset) {
       emit('asset-selected', asset);
     }
-
-    watch(hasError, (val) => emit('error', val));
 
     onMounted(() => {
       if (!props.selectedAsset) {
@@ -133,8 +125,6 @@ export default defineComponent({
       currentAssetFiatPrice,
       currentAssetFiatPriceFormatted,
       currentAsset,
-      hasError,
-      errorMessage,
       formatCurrency,
       handleAssetSelected,
     };
