@@ -171,9 +171,6 @@ export default {
   async cacheInvalidateTips({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
   },
-  async cacheInvalidateFT({ getters: { activeNetwork } }, contract) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/token/${contract}`);
-  },
   async donateError({ getters: { activeNetwork } }, error) {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
   },

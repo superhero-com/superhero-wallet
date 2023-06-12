@@ -140,10 +140,15 @@ export default defineComponent({
       }
     }
 
-    function setNotificationSettings() {
+    async function setNotificationSettings() {
+      await watchUntilTruthy(isRestored);
       if (root.$store.state.notificationSettings.length === 0) {
         root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
       }
+    }
+
+    async function fetchAndSetChainNames() {
+      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     }
 
     watch(isLoggedIn, (val) => {
@@ -173,11 +178,13 @@ export default defineComponent({
 
       watchConnectionStatus();
 
-      await watchUntilTruthy(() => isRestored.value);
-      setNotificationSettings();
-
-      loadAeternityData();
-      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+      if (!RUNNING_IN_POPUP) {
+        Promise.allSettled([
+          loadAeternityData(),
+          fetchAndSetChainNames(),
+          setNotificationSettings(),
+        ]);
+      }
     });
 
     return {

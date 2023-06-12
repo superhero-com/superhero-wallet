@@ -27,7 +27,7 @@ export async function getLoginState({
     account,
     mnemonic,
     backedUpSeed,
-    current: { network: network || 'Testnet', token: 0 },
+    current: { network: network || 'Testnet' },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
     ...(pendingTransaction
