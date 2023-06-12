@@ -65,11 +65,6 @@ import { useStore } from 'vuex';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
 
-import 'swiper/swiper.scss';
-import 'swiper/components/navigation/navigation.scss';
-import 'swiper/components/pagination/pagination.scss';
-import 'swiper/components/scrollbar/scrollbar.scss';
-
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
 import BulletSwitcher from './BulletSwitcher.vue';
@@ -146,6 +141,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss">
+@use 'swiper/swiper.scss';
+</style>
 
 <style lang="scss" scoped>
 @use '../../styles/mixins';

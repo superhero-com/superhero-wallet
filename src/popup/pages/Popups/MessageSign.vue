@@ -49,7 +49,7 @@
 import { computed, defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import type { IAccountLabeled, IAccountOverView } from '../../../types';
+import type { IAccountLabeled } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
 import { useGetter } from '../../../composables/vuex';
 import { useAccounts, usePopupProps } from '../../../composables';
@@ -71,7 +71,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
-    const { popupProps, setPopupProps } = usePopupProps();
+    const { popupProps, sender, setPopupProps } = usePopupProps();
     const { t } = useI18n();
 
     const getExplorerPath = useGetter('getExplorerPath');
@@ -80,11 +80,6 @@ export default defineComponent({
       ...activeAccount.value,
       label: t('transaction.overview.accountAddress'),
       url: getExplorerPath.value(activeAccount.value.address),
-    }));
-    const sender = computed((): IAccountOverView => ({
-      name: popupProps.value?.app?.name,
-      address: popupProps.value?.app?.host,
-      url: popupProps.value?.app?.url,
     }));
 
     function cancel() {

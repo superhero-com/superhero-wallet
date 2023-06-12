@@ -1,11 +1,11 @@
-import { Ref, ref } from 'vue';
-import { IPopupConfig } from '../types';
+import { Ref, computed, ref } from 'vue';
+import { IAccountOverView, IPopupConfig } from '../types';
 
 type IPopupProps = Partial<IPopupConfig>;
 
 interface IPopupPropsState {
   popupProps: Ref<IPopupProps | null>
-  // eslint-disable-next-line no-unused-vars
+  sender: Ref<IAccountOverView>
   setPopupProps: (props: IPopupProps | null) => void
 }
 
@@ -20,7 +20,14 @@ export function usePopupProps(): IPopupPropsState {
     popupProps.value = props;
   }
 
+  const sender = computed((): IAccountOverView => ({
+    name: popupProps.value?.app?.name,
+    address: popupProps.value?.app?.host,
+    url: popupProps.value?.app?.url,
+  }));
+
   return {
+    sender,
     popupProps,
     setPopupProps,
   };

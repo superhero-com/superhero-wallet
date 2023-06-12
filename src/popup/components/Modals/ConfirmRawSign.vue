@@ -61,7 +61,7 @@ import { computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { IAccountLabeled, IAccountOverView } from '../../../types';
+import { IAccountLabeled } from '../../../types';
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -81,7 +81,7 @@ export default {
     CopyText,
   },
   setup() {
-    const { popupProps, setPopupProps } = usePopupProps();
+    const { popupProps, sender, setPopupProps } = usePopupProps();
     const { t } = useI18n();
     const store = useStore();
 
@@ -89,11 +89,6 @@ export default {
       if (typeof popupProps.value?.data === 'string') return popupProps.value?.data;
       return Buffer.from(popupProps.value?.data as any).toString('hex');
     });
-    const sender = computed((): IAccountOverView => ({
-      name: popupProps.value?.app?.name,
-      address: popupProps.value?.app?.host,
-      url: popupProps.value?.app?.url,
-    }));
 
     const getExplorerPath = useGetter('fungibleTokens/getTokenBalance');
     const account: IAccountLabeled = {

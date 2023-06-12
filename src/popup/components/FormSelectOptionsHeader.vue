@@ -6,7 +6,7 @@
       :value="value"
       :placeholder="searchPlaceholder || $t('common.search')"
       class="search-field"
-      @input="filterOptions"
+      @update:modelValue="filterOptions"
     />
   </div>
 </template>
@@ -28,7 +28,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     function filterOptions(searchPhrase: string) {
-      emit('input', searchPhrase ? searchPhrase.toLowerCase() : '');
+      emit('update:modelValue', searchPhrase ? searchPhrase.toLowerCase() : '');
     }
 
     return {

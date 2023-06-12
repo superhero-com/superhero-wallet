@@ -3,9 +3,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, onMounted, onUpdated,
-} from 'vue';
+import { defineComponent, onMounted, onUpdated } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useUi } from '../../composables';

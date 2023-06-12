@@ -176,7 +176,7 @@ export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
-    // @ts-ignore
+    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
     text: i18n.global.t('pages.notification-settings.wallet'),
     checked: true,
     type: NOTIFICATION_TYPE_WALLET,

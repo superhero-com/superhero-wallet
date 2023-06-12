@@ -30,7 +30,7 @@
           :label="$t('modals.multisigTxProposal.multisigVault')"
         >
           <template #value>
-            <AccountItem :address="multisigVaultAddress" />
+            <AccountItem :address="multisigVaultAddress!" />
           </template>
         </DetailsItem>
       </div>
@@ -45,8 +45,10 @@
         />
       </div>
     </template>
+
     <Field
       v-slot="{ field }"
+      v-model.trim="formModel.address"
       name="address"
       :rules="{
         required: true,
@@ -58,7 +60,7 @@
     >
       <InputField
         v-bind="field"
-        v-model.trim="formModel.address"
+        :model-value="formModel.address"
         name="address"
         data-cy="address"
         show-help
@@ -87,9 +89,11 @@
         :status="urlStatus"
       />
     </div>
+
     <Field
       v-slot="{ field }"
       ref="amountField"
+      v-model="formModel.amount"
       name="amount"
       :rules="{
         required: true,
@@ -104,7 +108,7 @@
     >
       <InputAmount
         v-bind="field"
-        v-model="formModel.amount"
+        :model-value="formModel.amount"
         name="amount"
         data-cy="amount"
         class="amount-input"

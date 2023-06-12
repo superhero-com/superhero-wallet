@@ -16,8 +16,8 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 
-const iFrameComponent = (component: Component | VNode) => {
-  const unloadHandler = () => window.popupProps.reject(new RejectedByUserError());
+const createIframeComponent = (component: Component | VNode) => {
+  const unloadHandler = () => window.popupProps?.reject(new RejectedByUserError());
   window.addEventListener('beforeunload', unloadHandler);
   const closingWrapper = (f: any) => (...args: any) => {
     f(...args);
@@ -27,8 +27,8 @@ const iFrameComponent = (component: Component | VNode) => {
 
   const wrappedPopupProps = {
     ...window.popupProps,
-    resolve: closingWrapper(window.popupProps.resolve),
-    reject: closingWrapper(window.popupProps.reject),
+    resolve: closingWrapper(window.popupProps?.resolve),
+    reject: closingWrapper(window.popupProps?.reject),
   };
 
   const { setPopupProps } = usePopupProps();
@@ -52,7 +52,7 @@ const webIframePopups: WalletAppRouteConfig[] = (IS_WEB && IN_POPUP)
   ].map(({ name, component }): WalletAppRouteConfig => ({
     name: `${ROUTE_WEB_IFRAME_POPUP}-${name}`,
     path: `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
-    component: iFrameComponent(component),
+    component: createIframeComponent(component),
     meta: {
       notPersist: true,
       hideHeader: true,

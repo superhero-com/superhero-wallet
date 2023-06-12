@@ -206,9 +206,9 @@ export default defineComponent({
     }
 
     async function savePermission() {
-      const isValid = (await validate()).valid;
-      if (!isValid) return;
-
+      if (!(await validate()).valid) {
+        return;
+      }
       const hostValue = permission.value.host.toLowerCase();
       const { host } = (new URL(
         `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,

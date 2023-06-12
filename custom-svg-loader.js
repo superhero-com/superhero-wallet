@@ -3,6 +3,11 @@
 const { optimize } = require('svgo');
 const { getOptions } = require('loader-utils');
 
+/**
+ *  This loader is used inside vue.config.js to load SVG files as Vue components.
+ *  It replaces the previously used vue-svg-loader
+ *  since it is not compatible with Vue 3.
+ */
 module.exports = function vueSvgLoader(svg) {
   const { svgo: svgoConfig } = getOptions(this) || {};
 

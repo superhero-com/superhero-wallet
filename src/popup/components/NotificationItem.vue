@@ -60,9 +60,7 @@
 </template>
 
 <script lang="ts">
-import {
-  PropType, computed, defineComponent,
-} from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -86,10 +84,6 @@ import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 import DefaultWalletNotificationIcon from '../../icons/default-wallet-notification.svg?vue-component';
 import BackupSeedNotificationIcon from '../../icons/backup-seed-notification.svg?vue-component';
 
-interface IProps {
-  notification: INotification,
-}
-
 export default defineComponent({
   components: {
     BtnMain,
@@ -101,7 +95,7 @@ export default defineComponent({
     BackupSeedNotificationIcon,
   },
   props: {
-    notification: { type: Object as PropType<IProps['notification']>, required: true },
+    notification: { type: Object as PropType<INotification>, required: true },
   },
   setup(props) {
     const router = useRouter();

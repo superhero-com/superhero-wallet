@@ -26,7 +26,7 @@ export const useTransactionAndTokenFilter = () => {
   );
 
   const filtersConfig = ref<IFilters<ObjectValues<typeof FILTER_MODE>>>({
-    // @ts-ignore
+    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
     all: { name: i18n.global.t('common.all') },
     in: { name: i18n.global.t('filters.in') },
     out: { name: i18n.global.t('filters.out') },

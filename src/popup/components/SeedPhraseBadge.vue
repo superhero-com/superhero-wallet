@@ -2,7 +2,7 @@
   <BtnPlain
     :class="['seed-phrase-badge', { selected, editable }]"
     v-bind="$attrs"
-    @click="$emit('click')"
+    @click="$emit('click', $event)"
   >
     <div>{{ text }}</div>
     <CloseIcon

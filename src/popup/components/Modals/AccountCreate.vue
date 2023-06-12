@@ -43,9 +43,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, PropType, ref,
-} from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
 import { useConnection, useModals } from '../../../composables';

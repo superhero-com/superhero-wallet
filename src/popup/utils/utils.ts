@@ -104,10 +104,7 @@ export function setLocalStorageItem(keys: string[], value: any): void {
   );
 }
 
-export function convertToken(
-  balance: number | string,
-  precision: number,
-): BigNumberPublic {
+export function convertToken(balance: number | string, precision: number): BigNumberPublic {
   return new BigNumber(balance).shiftedBy(precision);
 }
 
@@ -286,9 +283,7 @@ export function buildSimplexLink(address: string) {
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
  */
-export function watchUntilTruthy<T>(
-  getter: WatchSource<T>,
-): Promise<NonNullable<T>> {
+export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>> {
   return new Promise((resolve) => {
     const unwatch = watch(
       getter,
@@ -319,12 +314,10 @@ export function calculateFee(
 ): BigNumber {
   const minFee = TxBuilder.calculateMinFee(type, {
     params: {
-      ...(type === 'spendTx'
-        ? {
-          senderId: STUB_ADDRESS,
-          recipientId: STUB_ADDRESS,
-        }
-        : {}),
+      ...type === 'spendTx' ? {
+        senderId: STUB_ADDRESS,
+        recipientId: STUB_ADDRESS,
+      } : {},
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,
@@ -337,21 +330,21 @@ export function calculateFee(
       gas: 0,
       ...params,
     },
-    ...(type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {}),
+    ...(type === 'nameClaimTx') ? { vsn: SCHEMA.VSN_2 } : {},
   });
   return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
 }
 
-export const calculateNameClaimFee = (
-  name: string,
-): BigNumber => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
+export function calculateNameClaimFee(name: string): BigNumber {
+  return calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+    accountId: STUB_ADDRESS,
+    name,
+    nameSalt: Crypto.salt(),
+    nameFee: TxBuilderHelper.getMinimumNameFee(name),
+    nonce: STUB_NONCE,
+    ttl: SCHEMA.NAME_TTL,
+  });
+}
 
 export async function fetchJson<T = any>(
   url: string,
@@ -411,7 +404,7 @@ export async function fetchRespondChallenge(
 }
 
 export function getPayload(transaction: ITransaction) {
-  return transaction.tx?.payload
+  return (transaction.tx?.payload)
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;
 }
@@ -434,9 +427,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
   url?: string
   note?: string
 } | null {
-  if (
-    !compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)
-  ) {
+  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
@@ -482,7 +473,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return (
-    // @ts-ignore
+    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
     acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
   );
 }
@@ -567,7 +558,8 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
   return (
     transaction.tipUrl
     || transaction.url
-    || (!transaction.pending
+    || (
+      !transaction.pending
       && !transaction.claim
       && transaction.tx.log?.[0]
       && transaction.tx?.function
@@ -670,18 +662,16 @@ export function calculateFontSize(amountValue: BigNumber | number) {
 }
 
 export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
-  let txObject;
+  let txToUnpack: string | Uint8Array = encodedTx;
   try {
     if (isTxBase64) {
-      const decodedTx = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
-      txObject = TxBuilder.unpackTx(decodedTx, true).tx;
-    } else {
-      txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+      txToUnpack = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
     }
+    const txObject = TxBuilder.unpackTx(txToUnpack, true).tx;
+    return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
   } catch (e) {
     return false;
   }
-  return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
 export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {

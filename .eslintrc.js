@@ -9,8 +9,6 @@ module.exports = {
   extends: [
     'plugin:@intlify/vue-i18n/recommended',
     'plugin:vue/recommended',
-    // '@vue/airbnb',
-    // '@vue/typescript',
     '@vue/eslint-config-airbnb',
     '@vue/eslint-config-typescript',
   ],

@@ -13,6 +13,7 @@
           unstyled
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
+          @update:modelValue="$emit('update:modelValue', $event)"
           v-on="$listeners"
         >
           <template #current-text="{ text }">

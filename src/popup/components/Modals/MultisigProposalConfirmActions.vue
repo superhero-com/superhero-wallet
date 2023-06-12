@@ -147,8 +147,7 @@ export default defineComponent({
     });
 
     const actionHasError = computed(() => {
-      const confirmActionText = confirmActionContent.value as unknown as
-        Record<string, TranslateResult>;
+      const confirmActionText = confirmActionContent.value;
       if (!pendingMultisigTxSigners.value.includes(activeAccount.value.address)) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }

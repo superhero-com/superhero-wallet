@@ -27,9 +27,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, PropType,
-} from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useConnection } from '../../composables';

@@ -26,9 +26,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, watch,
-} from 'vue';
+import { computed, defineComponent, watch } from 'vue';
 
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

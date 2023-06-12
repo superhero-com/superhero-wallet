@@ -394,7 +394,9 @@
       "propose": "Propose Tx",
       "revoke": "Revoke Tx",
       "refuse": "Disapprove Tx",
-      "confirm": "Approve Tx"
+      "confirm": "Approve Tx",
+      "tip_token": "tip_token",
+      "retip_token": "retip_token"
     },
     "listType": {
       "sentTx": "Sent",

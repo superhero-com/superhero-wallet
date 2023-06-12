@@ -41,9 +41,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, ref,
-} from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

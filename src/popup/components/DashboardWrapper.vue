@@ -29,9 +29,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-} from 'vue';
+import { defineComponent } from 'vue';
 import { useState } from '../../composables/vuex';
 
 import DashboardCard from './DashboardCard.vue';

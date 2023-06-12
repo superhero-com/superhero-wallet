@@ -27,7 +27,7 @@
         class="main"
       >
         <Transition name="page-transition">
-          <component :is="Component" />
+          <Component :is="Component" />
         </Transition>
       </RouterView>
 
@@ -158,7 +158,7 @@ export default defineComponent({
     }
 
     async function fetchAndSetChainNames() {
-      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+      store.commit('setChainNames', await store.dispatch('getCacheChainNames'));
     }
 
     watch(isLoggedIn, (val) => {

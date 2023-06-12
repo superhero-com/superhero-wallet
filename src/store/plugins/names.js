@@ -183,7 +183,7 @@ export default (store) => {
         await Promise.all(accounts.map(async ({ address }) => {
           const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
-          ).catch(() => { });
+          ).catch(() => {});
           commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
@@ -220,7 +220,7 @@ export default (store) => {
         rootGetters: { activeNetwork },
         commit,
       }, address) {
-        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => { });
+        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
         if (response?.preferredChainName) {
           commit('setPreferred', { address, name: response?.preferredChainName });
         } else {
@@ -234,7 +234,7 @@ export default (store) => {
     if (isMiddlewareReady.value) {
       const [sdk] = await Promise.all([
         getSdk(),
-        store.dispatch('names/fetchOwned').catch(() => { }),
+        store.dispatch('names/fetchOwned').catch(() => {}),
         store.dispatch('names/setDefaults'),
       ]);
 
@@ -253,7 +253,7 @@ export default (store) => {
     async () => {
       if (isMiddlewareReady.value) {
         await Promise.all([
-          store.dispatch('names/fetchOwned').catch(() => { }),
+          store.dispatch('names/fetchOwned').catch(() => {}),
           store.dispatch('names/setDefaults'),
         ]);
       }

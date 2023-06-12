@@ -90,9 +90,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, onMounted, ref,
-} from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import type { IMiddlewareStatus, INetwork } from '../../types';
 import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';

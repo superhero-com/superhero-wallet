@@ -14,9 +14,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, PropType,
-} from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -50,7 +48,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t, tm } = useI18n();
+    const { t, te } = useI18n();
     const {
       direction,
       txType,
@@ -85,8 +83,7 @@ export default defineComponent({
         externalLabels.push(t('transaction.type.payingForTx'));
       }
 
-      const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
-      const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
+      const txTransactionType = txType.value ? t(`transaction.type.${txType.value}`) : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
       if (!txTransactionType) {
@@ -156,7 +153,7 @@ export default defineComponent({
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [
-          transactionTypes[props.transaction.tx.function] ?? props.transaction.tx.function,
+          te(`transaction.type.${props.transaction.tx.function}`) ? t(`transaction.type.${props.transaction.tx.function}`) : props.transaction.tx.function,
           txTransactionType,
         ];
       } else {

@@ -50,8 +50,7 @@ import { validateMnemonic } from '@aeternity/bip39';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { ResolveRejectCallback } from '../../../types';
-import { validateSeedLength } from '../../utils';
-import { useSdk } from '../../../composables';
+import { validateSeedLength, watchUntilTruthy } from '../../utils';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -71,7 +70,6 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
-    const { getSdk } = useSdk({ store });
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -99,8 +97,9 @@ export default defineComponent({
       store.commit('setBackedUpSeed');
       props.resolve();
       setTimeout(async () => {
-        await getSdk();
-        store.dispatch('accounts/hdWallet/discover');
+        watchUntilTruthy(() => store.state.sdkPlugin.ready).then(
+          () => { store.dispatch('accounts/hdWallet/discover'); },
+        );
       }, 100);
       router.push(store.state.loginTargetLocation);
     }

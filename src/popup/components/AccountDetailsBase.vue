@@ -33,7 +33,7 @@
             name="fade-transition"
             mode="out-in"
           >
-            <component :is="Component" />
+            <Component :is="Component" />
           </transition>
         </RouterView>
       </div>
@@ -51,7 +51,6 @@ import {
   watch,
 } from 'vue';
 import { debounce } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import {
   EXTENSION_HEIGHT,
@@ -72,7 +71,6 @@ export default defineComponent({
     BtnClose,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
 
     const ACCOUNT_INFO_HEIGHT = 120;

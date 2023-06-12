@@ -148,7 +148,12 @@ export default defineComponent({
       default: null,
     },
   },
-  emits: ['update:modelValue', 'focus-change', 'click', 'help'],
+  emits: [
+    'update:modelValue',
+    'focus-change',
+    'click',
+    'help',
+  ],
   setup(props, { emit }) {
     const uid = getCurrentInstance()?.uid;
     const inputId = `input-${uid}`;

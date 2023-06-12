@@ -33,6 +33,7 @@
         <Field
           v-else
           v-slot="{ field, errorMessage }"
+          v-model.trim="signer.address"
           :name="`signer-address-${index}`"
           :rules="{
             required: true,
@@ -41,7 +42,7 @@
         >
           <FormTextarea
             v-bind="field"
-            v-model.trim="signer.address"
+            :model-value="signer.address"
             auto-height
             :label="getSignerLabel(index)"
             :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
