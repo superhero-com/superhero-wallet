@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import BigNumber from 'bignumber.js';
 import type {
   CurrencyCode,
   CurrencyRates,
@@ -13,7 +14,6 @@ import {
   setLocalStorageItem,
   AETERNITY_COIN_ID,
 } from '../popup/utils';
-import BigNumber from 'bignumber.js';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { CoinGecko } from '../lib/CoinGecko';

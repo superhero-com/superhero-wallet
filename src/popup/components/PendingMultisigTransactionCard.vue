@@ -20,8 +20,8 @@ import { usePendingMultisigTransaction } from '../../composables';
 import TransactionListItem from './TransactionListItem.vue';
 
 export default defineComponent({
-  components: { 
-    TransactionListItem
+  components: {
+    TransactionListItem,
   },
   setup() {
     const store = useStore();

@@ -26,7 +26,7 @@ const fetchAndSetLocale = async (languageCode) => {
     const messages = (await languages[languageCode].getMessages()).default;
     i18n.global.setLocaleMessage(languageCode, messages);
   }
-  i18n.global.locale = languageCode;
+  i18n.global.locale.value = languageCode;
 };
 
 const preferredLocale = (() => {

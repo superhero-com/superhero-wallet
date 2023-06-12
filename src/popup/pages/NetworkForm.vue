@@ -22,6 +22,7 @@
         :key="input.key"
         :name="input.key"
         :rules="validatorRules(input.key)"
+        :validate-on-mount="fieldsToCheckOnMount!.includes(input.key)"
       >
         <InputField
           v-bind="field"
@@ -67,11 +68,9 @@
 import {
   computed,
   defineComponent,
-  getCurrentScope,
   nextTick,
   onMounted,
   ref,
-  set,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -119,8 +118,6 @@ export default defineComponent({
 
     const isEdit = route.name === ROUTE_NETWORK_EDIT;
 
-    const { $validator } = (getCurrentScope() as any).vm;
-
     const networks = useGetter('networks');
     const selectNetwork = useDispatch('selectNetwork');
 
@@ -128,6 +125,7 @@ export default defineComponent({
       ...NETWORK_PROPS,
     });
     const isNetworkPrefilled = ref(false);
+    const fieldsToCheckOnMount = ref<string[] | null>(null);
 
     const formConfig: IFormConfig[] = [
       {
@@ -176,6 +174,7 @@ export default defineComponent({
 
     function validatorRules(key: keyof INetworkBase) {
       return key === 'name' ? {
+        required: true,
         network_name: true,
         network_exists: [newNetwork.value?.index, networks.value],
         max: NETWORK_NAME_MAX_LENGTH,
@@ -186,21 +185,20 @@ export default defineComponent({
     }
 
     async function addOrUpdateNetwork() {
-      if (await $validator.validateAll()) {
-        store.commit('setUserNetwork', {
-          ...newNetwork.value,
-          index: newNetwork.value.index,
-        });
-        await selectNetwork(newNetwork.value.name);
-        goBack();
-      }
+      store.commit('setUserNetwork', {
+        ...newNetwork.value,
+        index: newNetwork.value.index,
+      });
+      await selectNetwork(newNetwork.value.name);
+      goBack();
     }
 
     onMounted(async () => {
       const { params, query } = route;
+      fieldsToCheckOnMount.value = Object.keys(query);
 
       if (isEdit) {
-        newNetwork.value = { ...networks.value[params.name] };
+        newNetwork.value = { ...networks.value[params.name.toString()] };
       } else if (Object.keys(query).length) {
         // Fields that values are allowed to be passed from the URL query to the form model
         const keys: (keyof INetworkBase)[] = ['name', 'url', 'middlewareUrl', 'compilerUrl'];
@@ -208,13 +206,13 @@ export default defineComponent({
           const val = query[key];
 
           if (val && typeof val === 'string') {
+            // @ts-expect-error key is a valid key of INetworkBase
             newNetwork.value[key] = val;
             isNetworkPrefilled.value = true;
           }
         });
 
         await nextTick();
-        $validator.validateAll();
       }
     });
 
@@ -226,6 +224,7 @@ export default defineComponent({
       buttonDisabled,
       isEdit,
       formConfig,
+      fieldsToCheckOnMount,
       selectNetwork,
       addOrUpdateNetwork,
       validatorRules,

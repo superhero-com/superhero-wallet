@@ -13,7 +13,7 @@ import {
   isValidURL,
 } from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies } from '../../composables';
+import { useBalances, useCurrencies, useSdk } from '../../composables';
 
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
@@ -24,6 +24,7 @@ defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualT
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
 defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
 defineRule('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
+defineRule('max', (value, [maxLength]) => value && value.length <= maxLength);
 
 configure({
   generateMessage: localize('en', {
@@ -41,6 +42,7 @@ configure({
       min_value_exclusive: ({ rule }) => i18n.global.t('validation.minValueExclusive', [rule.params[0]]),
       max_value: ({ rule }) => i18n.global.t('validation.maxValue', [rule.params[0]]),
       max_value_vault: ({ rule }) => i18n.global.t('validation.maxValueVault', [rule.params[0]]),
+      max: ({ rule }) => i18n.global.t('validation.maxLength', [rule.params[0]]),
       enough_ae: () => i18n.global.t('validation.enoughAe'),
       enough_ae_signer: () => i18n.global.t('validation.enoughAeSigner'),
       not_token: () => i18n.global.t('validation.notToken'),
@@ -56,6 +58,7 @@ configure({
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
   const { minTipAmount } = useCurrencies({ withoutPolling: true });
+  const { getSdk } = useSdk({ store });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
@@ -67,7 +70,8 @@ export default (store) => {
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
-        const nameEntry = await store.getters['sdkPlugin/sdk'].api.getNameEntryByName(name);
+        const sdk = await getSdk();
+        const nameEntry = await sdk.api.getNameEntryByName(name);
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,
@@ -76,8 +80,9 @@ export default (store) => {
           [NAME_STATES.NOT_SAME]: comparedAddress !== address,
         }[expectedNameState]));
       } catch (error) {
-        if (!isNotFoundError(error)) reject(error);
-        else {
+        if (!isNotFoundError(error)) {
+          reject(error);
+        } else {
           resolve(
             expectedNameState === NAME_STATES.UNREGISTERED
             || expectedNameState === NAME_STATES.NOT_SAME,
