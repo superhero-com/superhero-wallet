@@ -160,9 +160,9 @@ export default defineComponent({
     });
 
     const isCoin: boolean = !!route.matched.find(
-      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),
+      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = route.params.id;
+    const contractId = route.params.id as string;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
