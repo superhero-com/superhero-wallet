@@ -300,7 +300,7 @@ export interface ICurrency {
 export type CurrencyRates = Record<CurrencyCode, number>;
 
 export interface ITxArguments {
-  type: 'tuple' | 'list'
+  type: 'tuple' | 'list' | 'address'
   value: any // TODO find type, this was not correct: (string | number | any[])
 }
 

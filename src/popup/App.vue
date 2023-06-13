@@ -51,7 +51,6 @@ import {
   computed,
   defineComponent,
   onMounted,
-  onUnmounted,
   ref,
   watch,
 } from 'vue';
@@ -189,7 +188,9 @@ export default defineComponent({
     });
 
     watch(activeNetwork, (network) => {
+      stopListeningForIncomingTransactions();
       WebSocketClient.connect(network.websocketUrl);
+      startListeningForIncomingTransactions();
     }, { immediate: true });
 
     initVisibilityListeners();
@@ -200,7 +201,6 @@ export default defineComponent({
       initViewport(innerElement.value);
 
       watchConnectionStatus();
-      startListeningForIncomingTransactions();
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([
@@ -209,10 +209,6 @@ export default defineComponent({
           setNotificationSettings(),
         ]);
       }
-    });
-
-    onUnmounted(() => {
-      stopListeningForIncomingTransactions();
     });
 
     return {

@@ -1,5 +1,5 @@
 import { useRouter } from 'vue-router';
-import { roundAmountToPrecision } from '../popup/utils';
+import { TX_FUNCTIONS, TX_TYPE_MDW, roundAmountToPrecision } from '../popup/utils';
 import { i18n } from '../store/plugins/languages';
 import { IDefaultComposableOptions, ITransaction } from '../types';
 import { useAccounts } from './accounts';
@@ -28,7 +28,18 @@ export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
         account.address,
         (transaction: ITransaction) => {
           if (!transaction?.tx) return;
-          const { hash, tx: { senderId, recipientId } } = transaction;
+          const { hash, tx } = transaction;
+          let { senderId, recipientId } = tx;
+
+          if (
+            TX_TYPE_MDW[tx.type] === TX_TYPE_MDW.ContractCallTx
+            && tx.function === TX_FUNCTIONS.transfer
+          ) {
+            senderId = tx.callerId;
+            recipientId = tx.arguments.find((arg) => arg.type === 'address')?.value;
+          } else if (TX_TYPE_MDW[tx.type] !== TX_TYPE_MDW.SpendTx) {
+            return;
+          }
 
           if (
             recipientId
