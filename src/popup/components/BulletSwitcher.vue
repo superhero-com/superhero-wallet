@@ -47,6 +47,8 @@ const BULLET_SIZE = 16;
 // Which bullet stays visible if user navigates right
 const SCROLLING_THRESHOLD = 3;
 
+const RESIZE_THRESHOLD = 5;
+
 export default defineComponent({
   components: {
     PlusCircleIcon,
@@ -66,9 +68,11 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const isResizing = computed(() => props.optionsSize > RESIZE_THRESHOLD);
+
     const translateXValue = computed(() => {
       let bulletsToMoveLeft: number;
-      if (props.currentIdx < SCROLLING_THRESHOLD) {
+      if (props.currentIdx < SCROLLING_THRESHOLD || !isResizing.value) {
         bulletsToMoveLeft = 0;
       } else if (props.currentIdx >= props.optionsSize - 1) {
         bulletsToMoveLeft = props.optionsSize - 5;
@@ -83,10 +87,16 @@ export default defineComponent({
     }
 
     function isMedium(idx: number) {
+      if (!isResizing.value) {
+        return false;
+      }
       return calculateIdxDistance(idx) === 2;
     }
 
     function isSmall(idx: number) {
+      if (!isResizing.value) {
+        return false;
+      }
       return calculateIdxDistance(idx) > 2;
     }
 
