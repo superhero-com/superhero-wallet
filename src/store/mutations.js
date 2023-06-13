@@ -50,10 +50,6 @@ export default {
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
   },
-  setTipping(state, [tippingV1, tippingV2]) {
-    state.tippingV1 = tippingV1 || null;
-    state.tippingV2 = tippingV2 || null;
-  },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
   },

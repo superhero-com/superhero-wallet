@@ -1,6 +1,4 @@
 import { uniqBy, orderBy } from 'lodash-es';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AEX9_TRANSFER_EVENT,
@@ -192,30 +190,6 @@ export default {
   },
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
-  },
-  async initTippingContractInstances({
-    getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
-    commit,
-  }) {
-    if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-
-    const [
-      contractInstanceV1,
-      contractInstanceV2,
-    ] = await Promise.all([
-      sdk.getContractInstance({
-        source: TIPPING_V1_INTERFACE,
-        contractAddress: activeNetwork.tipContractV1,
-      }),
-      activeNetwork.tipContractV2
-        ? sdk.getContractInstance({
-          source: TIPPING_V2_INTERFACE,
-          contractAddress: activeNetwork.tipContractV2,
-        })
-        : null,
-    ]);
-
-    commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
   async share(_, options) {
     await (process.env.IS_CORDOVA

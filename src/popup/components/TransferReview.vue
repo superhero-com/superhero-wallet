@@ -135,6 +135,7 @@ import {
   useMultisigAccounts,
   useMultisigTransactions,
   useSdk13,
+  useTippingContracts,
 } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
@@ -186,16 +187,14 @@ export default defineComponent({
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
     } = useMultisigAccounts({ store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store: root.$store });
 
     const loading = ref<boolean>(false);
-    const tippingV1 = computed(() => root.$store.state.tippingV1);
-    const tippingV2 = computed(() => root.$store.state.tippingV2);
     const { getSdk } = useSdk13({ store: root.$store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
-    const tippingContract = computed(() => tippingV2.value || tippingV1.value);
     const isSelectedAssetAex9 = computed(() => (
       !!props.transferData.selectedAsset
       && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
@@ -290,6 +289,8 @@ export default defineComponent({
       loading.value = true;
       try {
         let txResult = null;
+        const { tippingV1, tippingV2 } = await getTippingContracts();
+        const tippingContract = computed(() => tippingV2.value || tippingV1.value);
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
           await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
             selectedAsset.contractId,

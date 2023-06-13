@@ -69,7 +69,7 @@ import {
   ISdk,
 } from '../../types';
 import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken, watchUntilTruthy } from '../utils';
+import { convertToken } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
@@ -77,8 +77,9 @@ import {
   useBalances,
   useModals,
   useAccounts,
+  useTippingContracts,
 } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -102,6 +103,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
     const { balance, aeternityCoin } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store: root.$store });
 
     const tipId = root.$route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -111,22 +113,15 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const tippingV1 = useState('tippingV1');
-    const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
-    const tippingContract = computed(
-      () => tipId.includes('_v2') || tipId.includes('_v3')
-        ? tippingV2.value
-        : tippingV1.value,
-    );
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     const validationStatus = computed<{
       error: boolean, msg?: string | VueI18n.TranslateResult
     }>(() => {
-      if (!sdk.value || !tippingContract.value) {
+      if (!sdk.value || !tippingSupported.value) {
         return { error: true };
       }
       return { error: false };
@@ -140,8 +135,13 @@ export default defineComponent({
           : AETERNITY_COIN_PRECISION,
       ).toNumber();
       loading.value = true;
-      await watchUntilTruthy(() => tippingV1.value);
       try {
+        const { tippingV1, tippingV2 } = await getTippingContracts();
+        const tippingContract = computed(
+          () => (tipId.includes('_v2') || tipId.includes('_v3'))
+            ? tippingV2.value
+            : tippingV1.value,
+        );
         let retipResponse = null;
         if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
           await root.$store.dispatch(
