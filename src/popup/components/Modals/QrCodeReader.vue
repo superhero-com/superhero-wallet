@@ -52,6 +52,7 @@
 
 <script>
 import { mapMutations } from 'vuex';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { IS_EXTENSION, IS_IONIC } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
@@ -123,7 +124,7 @@ export default {
   async mounted() {
     if (this.mobile) {
       try {
-        await new Promise((resolve, reject) => window.QRScanner.prepare((error, status) => (
+        await new Promise((resolve, reject) => BarcodeScanner.prepare((error, status) => (
           !error && status.authorized
             ? resolve() : reject(error || new Error('Denied to use the camera'))
         )));
@@ -165,9 +166,9 @@ export default {
         ? new Promise((resolve, reject) => {
           this.setQrScanner(true);
           window.plugins.webviewcolor.change('#00FFFFFF');
-
-          window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
-          window.QRScanner.show();
+          BarcodeScanner.startScan((error, text) => (!error && text ? resolve(text)
+            : reject(error)));
+          BarcodeScanner.show();
           ['body', '#app', '.app-wrapper'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
           });
@@ -185,10 +186,10 @@ export default {
         ['body', '#app', '.app-wrapper'].forEach((s) => {
           document.querySelector(s).style = 'background: #141414';
         });
-        await window.QRScanner.pausePreview();
+        BarcodeScanner.showBackground();
         window.plugins.webviewcolor.change('#141414');
         this.setQrScanner(false);
-        window.QRScanner.destroy();
+        BarcodeScanner.stopScan();
       } else this.browserReader.reset();
     },
     cancelReading() {
@@ -196,7 +197,7 @@ export default {
       this.reject(new RejectedByUserError());
     },
     openSettings() {
-      window.QRScanner.openSettings();
+      BarcodeScanner.openAppSettings();
     },
   },
 };
