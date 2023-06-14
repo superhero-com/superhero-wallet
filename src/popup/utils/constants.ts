@@ -1,4 +1,5 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,
@@ -111,7 +112,7 @@ export const NETWORK_MAINNET: INetwork = {
   explorerUrl: 'https://explorer.aeternity.io',
   compilerUrl: 'https://compiler.aepps.com',
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
-  tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
+  tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z' as Encoded.ContractAddress,
   multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
   name: 'Mainnet',
 };
@@ -123,8 +124,8 @@ export const NETWORK_TESTNET: INetwork = {
   explorerUrl: 'https://explorer.testnet.aeternity.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
   backendUrl: 'https://testnet.superhero.aeternity.art',
-  tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
-  tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
+  tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd' as Encoded.ContractAddress,
+  tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu' as Encoded.ContractAddress,
   multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
   name: 'Testnet',
 };

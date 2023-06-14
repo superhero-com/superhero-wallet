@@ -137,33 +137,41 @@ export default defineComponent({
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
-        const tippingContract = computed(
-          () => (tipId.includes('_v2') || tipId.includes('_v3'))
-            ? tippingV2.value
-            : tippingV1.value,
-        );
+        const tippingContract = tipId.includes('_v2') || tipId.includes('_v3')
+          ? tippingV2
+          : tippingV1;
+        if (!tippingContract) {
+          throw Error('failed to initialize tipping contract');
+        }
         let retipResponse = null;
-        if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
+        if (
+          tippingV2
+          && formModel.value.selectedAsset?.contractId
+          && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+        ) {
           await root.$store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
             [
-              formModel.value.selectedAsset?.contractId,
+              formModel.value.selectedAsset.contractId,
               formModel.value.amount],
           );
 
-          retipResponse = await tippingV2.value.methods.retip_token(
+          retipResponse = await tippingV2.retip_token(
             +tip.value.id.split('_')[0],
-            formModel.value.selectedAsset?.contractId,
+            formModel.value.selectedAsset.contractId as any,
             amount,
             {
               waitMined: false,
             },
           );
         } else {
-          retipResponse = await tippingContract.value.methods.retip(+tip.value.id.split('_')[0], {
-            amount,
-            waitMined: false,
-          });
+          retipResponse = await tippingContract.retip(
+            +tip.value.id.split('_')[0],
+            {
+              ...{ amount } as any,
+              waitMined: false,
+            },
+          );
         }
         const transaction: IPendingTransaction = {
           hash: retipResponse.hash,
@@ -172,7 +180,7 @@ export default defineComponent({
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.value.deployInfo.address,
+            contractId: tippingContract.$options.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,

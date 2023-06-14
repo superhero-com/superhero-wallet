@@ -290,26 +290,26 @@ export default defineComponent({
       try {
         let txResult = null;
         const { tippingV1, tippingV2 } = await getTippingContracts();
-        const tippingContract = computed(() => tippingV2.value || tippingV1.value);
-        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+        const tippingContract = tippingV2 || tippingV1;
+        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID && tippingV2) {
           await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
             selectedAsset.contractId,
             props.amount,
           ]);
-          txResult = await tippingV2.value.methods.tip_token(
+          txResult = await tippingV2.tip_token(
             recipient,
             escapeSpecialChars(note),
             selectedAsset.contractId,
             amount,
           );
         } else {
-          txResult = await tippingContract.value.call(
-            'tip',
-            [recipient, escapeSpecialChars(note)],
+          txResult = await tippingContract.tip(
+            recipient,
+            escapeSpecialChars(note),
             {
               amount,
               waitMined: false,
-              modal: false,
+              ...{ modal: false } as any, // TODO: `modal` is not a part of sdk types
             },
           );
         }
@@ -320,7 +320,7 @@ export default defineComponent({
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.value.deployInfo.address,
+            contractId: tippingContract.$options.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
             selectedTokenContractId: selectedAsset.contractId,

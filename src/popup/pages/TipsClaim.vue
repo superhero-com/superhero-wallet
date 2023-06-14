@@ -45,7 +45,10 @@
 
 <script lang="ts">
 import {
-  defineComponent, computed, ref, onMounted,
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
 } from '@vue/composition-api';
 import {
   BLOG_CLAIM_TIP_URL,
@@ -78,19 +81,19 @@ export default defineComponent({
     const loading = ref(false);
     const tippingSupported = computed(() => root.$store.getters.tippingSupported);
 
-    const normalizedUrl = computed(() => (
-      validateTipUrl(tipUrl.value)) ? toURL(tipUrl.value).toString() : '');
+    const normalizedUrl = computed(
+      () => validateTipUrl(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
+    );
 
     async function claimTips() {
       const url = normalizedUrl.value;
       loading.value = true;
-      const { tippingV1 } = await getTippingContracts();
       try {
+        const { tippingV1 } = await getTippingContracts();
         const claimAmount = parseFloat(
           aettosToAe(
-            await tippingV1.value.methods
-              .unclaimed_for_url(url)
-              .then((r: any) => r.decodedResult)
+            await tippingV1.unclaimed_for_url(url)
+              .then((r) => r.decodedResult)
               .catch(() => 1),
           ),
         );
