@@ -101,8 +101,10 @@ export default defineComponent({
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
         await root.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
-        await root.$store.dispatch('cacheInvalidateOracle');
-        await root.$store.dispatch('cacheInvalidateTips');
+        await Promise.all([
+          root.$store.dispatch('cacheInvalidateOracle'),
+          root.$store.dispatch('cacheInvalidateTips'),
+        ]);
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
 
