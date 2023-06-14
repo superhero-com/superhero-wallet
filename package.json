@@ -17,7 +17,7 @@
     "build:web": "cross-env PLATFORM=web vue-cli-service build",
     "build-zip": "node scripts/build-zip.js",
     "serve": "cross-env PLATFORM=web vue-cli-service serve",
-    "watch": "npm run build:extension -- --watch",
+    "watch": "npm run build:extension -- --watch --mode production",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true vue-cli-service test:e2e",
     "test": "npm run test:unit && npm run test:e2e -- --headless",
