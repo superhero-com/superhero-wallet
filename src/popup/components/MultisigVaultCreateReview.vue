@@ -210,11 +210,12 @@ export default defineComponent({
   .creator-error-message {
     @extend %face-sans-14-regular;
 
+    letter-spacing: normal;
     color: $color-danger;
     line-height: 22px;
 
     span {
-      @extend %face-sans-14-medium;
+      font-weight: 500;
     }
   }
 
