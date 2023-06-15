@@ -1,8 +1,8 @@
 import { computed, ref } from '@vue/composition-api';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
 import { Contract } from '@aeternity/aepp-sdk-13';
 
+import TippingV1ACI from '../lib/contracts/TippingV1ACI.json';
+import TippingV2ACI from '../lib/contracts/TippingV2ACI.json';
 import { RUNNING_IN_TESTS } from '../lib/environment';
 import { useSdk13 } from './sdk13';
 import { watchUntilTruthy } from '../popup/utils';
@@ -39,12 +39,12 @@ export function useTippingContracts({ store }: IDefaultComposableOptions) {
       tippingV2,
     ] = await Promise.all([
       sdk.initializeContract<TippingV1ContractApi>({
-        sourceCode: TIPPING_V1_INTERFACE,
+        aci: TippingV1ACI,
         address: activeNetwork.value.tipContractV1,
       }),
       activeNetwork.value.tipContractV2
         ? sdk.initializeContract<TippingV2ContractApi>({
-          sourceCode: TIPPING_V2_INTERFACE,
+          aci: TippingV2ACI,
           address: activeNetwork.value.tipContractV2,
         })
         : undefined,
