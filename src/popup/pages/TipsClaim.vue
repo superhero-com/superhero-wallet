@@ -121,7 +121,7 @@ export default defineComponent({
           || error.message.includes('NO_ZERO_AMOUNT_PAYOUT')
         ) {
           msg = root.$t('pages.claim.noZeroClaim');
-        } else if (errorMessage.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) {
+        } else if (errorMessage.includes('ORACLE_SERVICE_CHECK_CLAIM_FAILED')) {
           msg = root.$t('pages.claim.oracleFailed');
         } else if (errorMessage) {
           msg = errorMessage;
