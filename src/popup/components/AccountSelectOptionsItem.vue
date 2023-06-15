@@ -89,7 +89,7 @@ export default defineComponent({
     @include mixins.flex(space-between, flex-start, row);
 
     position: relative;
-    padding: 8px;
+    padding: 6px 8px;
     border-radius: 10px;
     width: 100%;
 
@@ -120,7 +120,7 @@ export default defineComponent({
       transition: background-color 0.12s ease-in-out;
 
       &::before {
-        --border-offset: calc(var(--border-width) - 1px);
+        --border-offset: calc(var(--border-width) - 2px);
 
         opacity: 0.4;
         border-color: transparent;
