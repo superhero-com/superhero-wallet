@@ -71,10 +71,13 @@ export default defineComponent({
     });
 
     function getTransactionParty(address: string) {
+      const preferredName = getPreferred.value(address);
+
       return {
         address,
-        label: root.$t('transaction.overview.accountAddress'),
+        label: preferredName || root.$t('transaction.overview.accountAddress'),
         url: getExplorerPath.value(address),
+        name: preferredName,
       };
     }
 
