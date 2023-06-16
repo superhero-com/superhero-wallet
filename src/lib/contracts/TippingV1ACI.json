@@ -1,0 +1,433 @@
+[
+  {
+      "namespace": {
+          "name": "ListInternal",
+          "typedefs": []
+      }
+  },
+  {
+      "contract": {
+          "functions": [
+              {
+                  "arguments": [
+                      {
+                          "name": "_1",
+                          "type": "string"
+                      },
+                      {
+                          "name": "_2",
+                          "type": "address"
+                      },
+                      {
+                          "name": "_3",
+                          "type": "bool"
+                      }
+                  ],
+                  "name": "check_persist_claim",
+                  "payable": false,
+                  "returns": "OracleService.success_claim",
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "_1",
+                          "type": "string"
+                      },
+                      {
+                          "name": "_2",
+                          "type": "address"
+                      }
+                  ],
+                  "name": "query_oracle",
+                  "payable": true,
+                  "returns": "unit",
+                  "stateful": true
+              }
+          ],
+          "kind": "contract_interface",
+          "name": "OracleService",
+          "payable": false,
+          "typedefs": [
+              {
+                  "name": "success_claim",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "success",
+                              "type": "bool"
+                          },
+                          {
+                              "name": "caller",
+                              "type": "address"
+                          },
+                          {
+                              "name": "percentage",
+                              "type": "int"
+                          }
+                      ]
+                  },
+                  "vars": []
+              }
+          ]
+      }
+  },
+  {
+      "contract": {
+          "event": {
+              "variant": [
+                  {
+                      "TipReceived": [
+                          "address",
+                          "int",
+                          "Tipping.url"
+                      ]
+                  },
+                  {
+                      "ReTipReceived": [
+                          "address",
+                          "int",
+                          "Tipping.url"
+                      ]
+                  },
+                  {
+                      "TipWithdrawn": [
+                          "address",
+                          "int",
+                          "Tipping.url"
+                      ]
+                  }
+              ]
+          },
+          "functions": [
+              {
+                  "arguments": [
+                      {
+                          "name": "oracle_service",
+                          "type": "OracleService"
+                      },
+                      {
+                          "name": "owner",
+                          "type": "address"
+                      }
+                  ],
+                  "name": "init",
+                  "payable": false,
+                  "returns": "Tipping.state",
+                  "stateful": false
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "oracle_service",
+                          "type": "OracleService"
+                      }
+                  ],
+                  "name": "change_oracle_service",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      },
+                      {
+                          "name": "title",
+                          "type": "string"
+                      }
+                  ],
+                  "name": "tip",
+                  "payable": true,
+                  "returns": "unit",
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tip_id",
+                          "type": "Tipping.tip_id"
+                      }
+                  ],
+                  "name": "retip",
+                  "payable": true,
+                  "returns": "unit",
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      },
+                      {
+                          "name": "expected_account",
+                          "type": "address"
+                      }
+                  ],
+                  "name": "pre_claim",
+                  "payable": true,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      },
+                      {
+                          "name": "account",
+                          "type": "address"
+                      },
+                      {
+                          "name": "recheck",
+                          "type": "bool"
+                      }
+                  ],
+                  "name": "claim",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "new_contract",
+                          "type": "address"
+                      }
+                  ],
+                  "name": "migrate_balance",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [],
+                  "name": "get_state",
+                  "payable": false,
+                  "returns": "Tipping.state",
+                  "stateful": false
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      }
+                  ],
+                  "name": "tips_for_url",
+                  "payable": false,
+                  "returns": {
+                      "list": [
+                          "Tipping.tip"
+                      ]
+                  },
+                  "stateful": false
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tip_id",
+                          "type": "Tipping.tip_id"
+                      }
+                  ],
+                  "name": "retips_for_tip",
+                  "payable": false,
+                  "returns": {
+                      "list": [
+                          "Tipping.retip"
+                      ]
+                  },
+                  "stateful": false
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      }
+                  ],
+                  "name": "unclaimed_for_url",
+                  "payable": false,
+                  "returns": "int",
+                  "stateful": false
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "url",
+                          "type": "string"
+                      },
+                      {
+                          "name": "expected_account",
+                          "type": "address"
+                      }
+                  ],
+                  "name": "check_claim",
+                  "payable": false,
+                  "returns": "OracleService.success_claim",
+                  "stateful": false
+              }
+          ],
+          "kind": "contract_main",
+          "name": "Tipping",
+          "payable": false,
+          "state": {
+              "record": [
+                  {
+                      "name": "urls",
+                      "type": {
+                          "map": [
+                              "Tipping.url",
+                              "Tipping.url_id"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "claims",
+                      "type": {
+                          "map": [
+                              "Tipping.url_id",
+                              {
+                                  "tuple": [
+                                      "Tipping.claim_gen",
+                                      "int"
+                                  ]
+                              }
+                          ]
+                      }
+                  },
+                  {
+                      "name": "url_index",
+                      "type": {
+                          "map": [
+                              "Tipping.url_id",
+                              "Tipping.url"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "tips",
+                      "type": {
+                          "map": [
+                              "Tipping.tip_id",
+                              "Tipping.tip"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "retips",
+                      "type": {
+                          "map": [
+                              "Tipping.retip_id",
+                              "Tipping.retip"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "owner",
+                      "type": "address"
+                  },
+                  {
+                      "name": "oracle_service",
+                      "type": "OracleService"
+                  }
+              ]
+          },
+          "typedefs": [
+              {
+                  "name": "tip_id",
+                  "typedef": "int",
+                  "vars": []
+              },
+              {
+                  "name": "url_id",
+                  "typedef": "int",
+                  "vars": []
+              },
+              {
+                  "name": "retip_id",
+                  "typedef": "int",
+                  "vars": []
+              },
+              {
+                  "name": "url",
+                  "typedef": "string",
+                  "vars": []
+              },
+              {
+                  "name": "claim_gen",
+                  "typedef": "int",
+                  "vars": []
+              },
+              {
+                  "name": "tip",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "sender",
+                              "type": "address"
+                          },
+                          {
+                              "name": "title",
+                              "type": "string"
+                          },
+                          {
+                              "name": "claim_gen",
+                              "type": "Tipping.claim_gen"
+                          },
+                          {
+                              "name": "timestamp",
+                              "type": "int"
+                          },
+                          {
+                              "name": "url_id",
+                              "type": "Tipping.url_id"
+                          },
+                          {
+                              "name": "amount",
+                              "type": "int"
+                          }
+                      ]
+                  },
+                  "vars": []
+              },
+              {
+                  "name": "retip",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "sender",
+                              "type": "address"
+                          },
+                          {
+                              "name": "amount",
+                              "type": "int"
+                          },
+                          {
+                              "name": "claim_gen",
+                              "type": "Tipping.claim_gen"
+                          },
+                          {
+                              "name": "tip_id",
+                              "type": "Tipping.tip_id"
+                          }
+                      ]
+                  },
+                  "vars": []
+              }
+          ]
+      }
+  }
+]

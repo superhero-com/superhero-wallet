@@ -9,6 +9,7 @@ import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
+import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,
@@ -215,8 +216,8 @@ export interface INetworkBase {
 
 export interface INetwork extends INetworkBase {
   explorerUrl: string
-  tipContractV1: string
-  tipContractV2?: string
+  tipContractV1: Encoded.ContractAddress
+  tipContractV2?: Encoded.ContractAddress
   multisigBackendUrl: string
 }
 
@@ -674,3 +675,23 @@ export interface IDefaultComposableOptions {
 }
 
 export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
+
+export interface TippingV1ContractApi extends ContractMethodsBase {
+  unclaimed_for_url: (url: string) => string;
+  tip: (recipientId: Encoded.AccountAddress, note: string) => void;
+  retip: (tipId: number) => void;
+}
+
+export interface TippingV2ContractApi extends TippingV1ContractApi {
+  tip_token: (
+    recipientId: Encoded.AccountAddress,
+    note: string,
+    contacttId: Encoded.ContractAddress,
+    amount: string
+  ) => Encoded.TxHash;
+  retip_token: (
+    id: number,
+    contactId: Encoded.ContractAddress,
+    amount: number
+  ) => Encoded.TxHash;
+}

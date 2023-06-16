@@ -121,8 +121,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
 
     connectFrames(sdk);
 
-    store.dispatch('initTippingContractInstances');
-
     sdkBlocked = false;
   }
 

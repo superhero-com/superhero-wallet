@@ -56,7 +56,6 @@
     "lodash-es": "^4.17.21",
     "qr-code-styling": "github:aeternity/qr-code-styling",
     "swiper": "^5.4.5",
-    "tipping-contract": "github:aeternity/tipping-contract#v3.1.0-alpha2",
     "ts-jest": "26.5.6",
     "uuid": "^8.3.2",
     "validator": "^13.7.0",
