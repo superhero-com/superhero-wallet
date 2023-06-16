@@ -20,6 +20,7 @@ import {
 } from '../popup/utils';
 
 export * from './cordova';
+export * from './networks';
 export * from './router';
 export * from './filter';
 export * from './forms';
@@ -201,23 +202,6 @@ export interface IRawMultisigAccount {
   multisigAccountCreationEncodedCallData?: string;
   signedAttachTx?: string;
   rawTx?: string;
-}
-
-export interface INetworkBase {
-  url: string
-  name: string
-  middlewareUrl: string
-  networkId: string
-  compilerUrl: string
-  backendUrl: string
-  index?: number
-}
-
-export interface INetwork extends INetworkBase {
-  explorerUrl: string
-  tipContractV1: string
-  tipContractV2?: string
-  multisigBackendUrl: string
 }
 
 export interface IPermission {

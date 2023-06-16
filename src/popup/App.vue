@@ -21,8 +21,50 @@
     >
       <Header v-if="showHeader" />
 
+      <!--
+        Start: POC DEMO CODE
+        This is a temporary code for testing purposes.
+      -->
+      <div>
+        <ul>
+          <li>
+            <a
+              :class="{ 'color-warning': currentNetworkIdx === 0 }"
+              @click.prevent="changeNetwork(0)"
+            >Switch to AE 1</a>
+          </li>
+          <li>
+            <a
+              :class="{ 'color-warning': currentNetworkIdx === 1 }"
+              @click.prevent="changeNetwork(1)"
+            >Switch to AE 2</a>
+          </li>
+          <li>
+            <a
+              :class="{ 'color-warning': currentNetworkIdx === 2 }"
+              @click.prevent="changeNetwork(2)"
+            >Switch to Bitcoin</a>
+          </li>
+        </ul>
+        <hr>
+
+        Network IDX: {{ currentNetworkIdx }}<br>
+        Ready: {{ isReady }}<br>
+        Account: {{ activeAccount }}<br>
+        <hr>
+
+        <ul>
+          <li><a @click.prevent="testMethodAvailable()">Test method</a></li>
+          <li><a @click.prevent="testMethodNotAvailable()">Not available method</a></li>
+        </ul>
+      </div>
+      <!--
+        End: POC DEMO CODE
+      -->
+
       <Transition name="page-transition">
         <RouterView
+          v-if="false"
           :class="{ 'show-header': showHeader }"
           class="main"
         />
@@ -49,6 +91,7 @@ import {
   defineComponent,
   onMounted,
   ref,
+  toRefs,
   watch,
 } from '@vue/composition-api';
 import type { WalletRouteMeta } from '../types';
@@ -68,6 +111,7 @@ import {
   IS_FIREFOX,
   RUNNING_IN_POPUP,
 } from '../lib/environment';
+import { Network } from '../lib/networks/Network';
 import {
   useAccounts,
   useConnection,
@@ -97,6 +141,9 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications({ store: root.$store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
+
+    const { isReady, activeAccount } = toRefs(Network.current.state);
+    const currentNetworkIdx = computed(() => Network.current.idx.value);
 
     const innerElement = ref<HTMLDivElement>();
 
@@ -151,6 +198,19 @@ export default defineComponent({
       root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
     }
 
+    function changeNetwork(idx: number) {
+      Network.change(idx);
+    }
+
+    function testMethodAvailable() {
+      Network.current.methods.testMethod(23);
+    }
+
+    function testMethodNotAvailable() {
+      // TS detects that `notWorking` method is not available
+      (Network.current.methods as any).notWorking(67);
+    }
+
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         addWalletNotification({
@@ -196,6 +256,12 @@ export default defineComponent({
       showHeader,
       showScrollbar,
       innerElement,
+      isReady,
+      activeAccount,
+      currentNetworkIdx,
+      changeNetwork,
+      testMethodAvailable,
+      testMethodNotAvailable,
     };
   },
 });
