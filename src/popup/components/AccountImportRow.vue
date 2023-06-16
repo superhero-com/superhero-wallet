@@ -1,18 +1,10 @@
 <template>
-  <div class="account-import-row">
-    <AccountInfo
-      :address="account.address"
-      :name="account.name"
-      :idx="account.idx"
-      :is-air-gap="isAirGapAccount"
-    />
-
-    <TokenAmount
-      :amount="+numericBalance"
-      fiat-below
-      fiat-right
-    />
-  </div>
+  <AccountInfoCard
+    :address="account.address"
+    :name="account.name"
+    :idx="account.idx"
+    :is-air-gap="isAirGapAccount"
+  />
 </template>
 
 <script lang="ts">
@@ -25,18 +17,15 @@ import {
   PropType,
 } from '@vue/composition-api';
 
-import AccountInfo from './AccountInfo.vue';
-import TokenAmount from './TokenAmount.vue';
-
 import type { IAccount } from '../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 import { useSdk } from '../../composables';
 import { ACCOUNT_AIR_GAP_WALLET, aettosToAe } from '../utils';
+import AccountInfoCard from './AccountInfoCard.vue';
 
 export default defineComponent({
   components: {
-    AccountInfo,
-    TokenAmount,
+    AccountInfoCard,
   },
   props: {
     account: { type: Object as PropType<IAccount>, required: true },
@@ -47,6 +36,7 @@ export default defineComponent({
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
     const isAirGapAccount = computed((): boolean => props.account.type === ACCOUNT_AIR_GAP_WALLET);
+
     onMounted(async () => {
       const sdk = await getSdk();
       const fetchedBalance = await sdk.balance(props.account.address);
@@ -61,11 +51,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/mixins';
-
-.account-import-row {
-  @include mixins.flex(space-between, center, row);
-}
-</style>
