@@ -55,6 +55,11 @@ export default defineComponent({
 
     line-height: 16px;
 
+    .digit {
+      display: inline-block;
+      margin-right: 4px;
+    }
+
     .wording {
       opacity: 0.85;
     }
