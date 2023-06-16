@@ -11,6 +11,7 @@
     >
       <AccountInfo
         :account="account"
+        :is-air-gap="isAirGapAccount"
         class="account-info"
         avatar-size="rg"
         avatar-borderless
@@ -22,6 +23,7 @@
         :symbol="tokenSymbol"
         :protocol="account.protocol"
         class="token-amount"
+        fiat-below
         vertical
         small
       />
@@ -58,6 +60,7 @@ export default defineComponent({
       default: () => ({}),
     },
     selected: Boolean,
+    isAirGapAccount: Boolean,
   },
   setup(props) {
     const { getAccountBalance } = useBalances();

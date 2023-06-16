@@ -1,18 +1,10 @@
 <template>
-  <div class="account-import-row">
-    <AccountInfo
-      :address="account.address"
-      :name="account.name"
-      :idx="account.idx"
-      :is-air-gap="isAirGapAccount"
-    />
-
-    <TokenAmount
-      :amount="+numericBalance"
-      fiat-below
-      fiat-right
-    />
-  </div>
+  <AccountSelectOptionsItem
+    :address="account.address"
+    :name="account.name"
+    :idx="account.idx"
+    :is-air-gap="isAirGapAccount"
+  />
 </template>
 
 <script lang="ts">
@@ -23,33 +15,34 @@ import {
   onMounted,
   ref,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
 
-import AccountInfo from './AccountInfo.vue';
-import TokenAmount from './TokenAmount.vue';
+import type { IAccount } from '@/types';
+import { ACCOUNT_AIR_GAP_WALLET } from '@/constants';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
+import { useAeSdk } from '@/composables';
+import { ROUTE_ACCOUNT_DETAILS } from '@/popup/router/routeNames';
 
-import type { IAccount } from '../../types';
-import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
-import { useSdk } from '../../composables';
-import { ACCOUNT_AIR_GAP_WALLET, aettosToAe } from '../utils';
+import AccountSelectOptionsItem from './AccountSelectOptionsItem.vue';
 
 export default defineComponent({
   components: {
-    AccountInfo,
-    TokenAmount,
+    AccountSelectOptionsItem,
   },
   props: {
     account: { type: Object as PropType<IAccount>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const { getAeSdk } = useAeSdk();
     const balance = ref(new BigNumber(0));
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
     const isAirGapAccount = computed((): boolean => props.account.type === ACCOUNT_AIR_GAP_WALLET);
+
     onMounted(async () => {
-      const sdk = await getSdk();
-      const fetchedBalance = await sdk.balance(props.account.address);
+      const sdk = await getAeSdk();
+      const fetchedBalance = await sdk.getBalance(props.account.address as Encoded.AccountAddress);
       balance.value = new BigNumber(aettosToAe(fetchedBalance));
     });
 
@@ -61,11 +54,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '../../styles/mixins';
-
-.account-import-row {
-  @include mixins.flex(space-between, center, row);
-}
-</style>
