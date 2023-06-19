@@ -16,7 +16,7 @@
       <div class="account-row">
         <AccountItem
           :address="activeAccountAddress"
-          :name="isMultisig ? null : activeAccount.name"
+          :name="isMultisig ? undefined : activeAccount.name"
         />
       </div>
 
@@ -47,6 +47,7 @@
       <div class="request-specific-amount">
         <Field
           v-slot="{ field, errorMessage }"
+          v-model="amount"
           name="amount"
           :rules="{
             min_value_exclusive: 0,
@@ -54,7 +55,7 @@
         >
           <InputAmount
             v-bind="field"
-            v-model="amount"
+            :model-value="amount"
             name="amount"
             :label="$t('modals.receive.requestAmount')"
             :message="errorMessage"
@@ -147,7 +148,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { copied, copy } = useCopy();
 
-    const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
+    const amount = ref<number | ''>(props.defaultAmount ? Number(props.defaultAmount) : '');
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
     const activeAccountAddress = computed(() => props.isMultisig
