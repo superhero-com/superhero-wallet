@@ -41,6 +41,8 @@ import AccountImport from '../components/Modals/AccountImport.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
+import ConfirmConnect from '../pages/Popups/Connect.vue';
+
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -96,6 +98,7 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
+    component: ConfirmConnect,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
