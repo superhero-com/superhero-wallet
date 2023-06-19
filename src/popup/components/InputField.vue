@@ -327,11 +327,13 @@ export default defineComponent({
   }
 
   .message {
-    @extend %face-sans-12-regular;
+    @extend %face-sans-14-regular;
 
+    min-height: 24px;
+    line-height: 20px;
     display: flex;
     align-items: center;
-    margin-top: 9px;
+    margin-top: 4px;
     text-align: left;
     color: var(--color-message);
 
