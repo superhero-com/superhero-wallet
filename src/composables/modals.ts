@@ -6,6 +6,7 @@ import { ResolveRejectCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
 import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
+import { usePopupProps } from './popupProps';
 
 interface IModalSettings {
   component?: Component;
@@ -89,6 +90,17 @@ export function useModals() {
           ...props, resolve, reject, show: true,
         },
       });
+
+      /**
+       * These modals use the `usePopupProps` composable instead of props
+       * even if they are not opened in a popup
+      */
+      if (modalSettings.showInPopupIfWebFrame && !inPopup) {
+        const { setPopupProps } = usePopupProps();
+        setPopupProps({
+          ...props, resolve, reject,
+        });
+      }
 
       if (inPopup) {
         if (popupWindow) {
