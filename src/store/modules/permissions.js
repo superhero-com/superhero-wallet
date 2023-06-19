@@ -78,7 +78,7 @@ export default {
       const permissionsMethods = {
         'connection.open': 'address',
         'address.subscribe': 'address',
-        messageSign: 'messageSign',
+        'message.sign': 'messageSign',
       };
       return state[host]?.[permissionsMethods[method]];
     },
