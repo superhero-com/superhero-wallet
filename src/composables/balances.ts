@@ -1,5 +1,5 @@
 import { computed } from '@vue/composition-api';
-import { mapValues } from 'lodash-es';
+import { isEmpty, mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
   Balance,
@@ -88,7 +88,11 @@ export function useBalances({ store }: IDefaultComposableOptions) {
     );
   }
 
-  onNetworkChange(store, () => updateBalances());
+  onNetworkChange(store, () => {
+    if (isEmpty(balances.value)) {
+      updateBalances();
+    }
+  });
 
   initPollingWatcher(() => updateBalances());
 
