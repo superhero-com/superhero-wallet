@@ -62,6 +62,7 @@ export async function init() {
   });
   await getSdk();
 
+  await getSdk();
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
 }
@@ -70,15 +71,15 @@ export async function disconnect() {
   const { getSdk } = useSdk13({ store });
   const sdk = await getSdk();
 
-  Object.values(sdk._clients).forEach((aepp) => {
-    if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
-      aepp.sendMessage(
+  sdk._clients.forEach((aepp, aeppId) => {
+    if (aepp.status && aepp.status !== 'DISCONNECTED') {
+      aepp.rpc.connection.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
         true,
       );
-      aepp.disconnect();
-      browser.tabs.reload(aepp.connection.port.sender.tab.id);
+      aepp.rpc.connection.disconnect();
+      browser.tabs.reload(aepp.rpc.connection.port.sender.tab.id);
     }
-    sdk.removeRpcClient(aepp.id);
+    sdk.removeRpcClient(aeppId);
   });
 }
