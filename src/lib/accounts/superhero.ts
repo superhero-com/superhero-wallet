@@ -5,13 +5,13 @@ import {
   RpcRejectedByUserError,
   unpackTx,
   Encoded,
+  METHODS,
 } from '@aeternity/aepp-sdk-13';
 import { Store } from 'vuex';
 import { useAccounts } from '../../composables/accounts';
 import { IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../environment';
 import { POPUP_TYPE_MESSAGE_SIGN, POPUP_TYPE_SIGN, POPUP_TYPE_TX_SIGN } from '../../popup/utils';
 import { showPopup } from '../../background/popupHandler';
-import type { IPopupType } from '../../types';
 
 export class AccountSuperhero extends AccountBase {
   address: Encoded.AccountAddress;
@@ -45,7 +45,7 @@ export class AccountSuperhero extends AccountBase {
     }
     if (IS_EXTENSION_BACKGROUND) {
       return this.bgPermissionCheckAndSign(
-        POPUP_TYPE_MESSAGE_SIGN,
+        METHODS.signMessage,
         message,
         { ...opt, origin: opt.aeppOrigin },
       );
@@ -82,7 +82,7 @@ export class AccountSuperhero extends AccountBase {
     }
   }
 
-  async bgPermissionCheckAndSign(method: IPopupType, payload: any, opt: Record<string, any>) {
+  async bgPermissionCheckAndSign(method: METHODS, payload: any, opt: Record<string, any>) {
     const isTxSigning = method === POPUP_TYPE_TX_SIGN;
     if (
       (await this.store.dispatch('permissions/checkPermissions', {
@@ -109,7 +109,7 @@ export class AccountSuperhero extends AccountBase {
         () => false,
       ))
     ) {
-      if (method === POPUP_TYPE_MESSAGE_SIGN) {
+      if (method === METHODS.signMessage) {
         return this.store.dispatch('accounts/sign', messageToHash(payload));
       }
       return this.store.dispatch('accounts/signTransaction', {

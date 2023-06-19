@@ -1,5 +1,4 @@
-import { Universal, Crypto, Node } from '@aeternity/aepp-sdk';
-import { isEqual } from 'lodash-es';
+import { Universal, Crypto } from '@aeternity/aepp-sdk';
 import { App } from '../modules/permissions';
 import { watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
@@ -61,14 +60,4 @@ export default (store) => {
       },
     },
   });
-
-  store.watch(
-    (state, getters) => getters.activeNetwork,
-    async (network, oldNetwork) => {
-      if (isEqual(network, oldNetwork)) return;
-      await watchUntilTruthy(() => store.getters['sdkPlugin/sdk']);
-      sdk.pool.delete(network.name);
-      sdk.addNode(network.name, await Node({ url: network.url }), true);
-    },
-  );
 };

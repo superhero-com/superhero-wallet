@@ -62,7 +62,6 @@ export async function init() {
   });
   await getSdk();
 
-  await getSdk();
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
 }

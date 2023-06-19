@@ -33,14 +33,10 @@ export class ShSdkWallet extends AeSdkWallet {
   }
 
   getAccounts() {
-    const { activeAccount, accounts } = useAccounts({ store: this.store });
+    const { activeAccount } = useAccounts({ store: this.store });
     return ({
       current: { [activeAccount.value.address]: {} },
       connected: {
-        ...accounts.value
-          .reduce((acc, { address }) => ({
-            ...acc, ...address !== activeAccount.value.address ? { [address]: {} } : {},
-          })),
       },
     });
   }

@@ -1,4 +1,5 @@
 import { isEqual } from 'lodash-es';
+import { METHODS } from '@aeternity/aepp-sdk-13';
 import {
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
