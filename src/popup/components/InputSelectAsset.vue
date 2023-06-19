@@ -31,6 +31,7 @@ export default defineComponent({
     focused: Boolean,
     showTokensWithBalance: Boolean,
   },
+  emits: ['select-asset'],
   setup(props, { emit }) {
     const { openModal } = useModals();
 
@@ -43,7 +44,7 @@ export default defineComponent({
     });
 
     function handleChange(token: IToken) {
-      emit('input', token);
+      emit('select-asset', token);
     }
 
     function openAssetSelector() {
@@ -53,7 +54,8 @@ export default defineComponent({
           showTokensWithBalance: props.showTokensWithBalance,
           resolve: (token) => token,
         })
-          .then((token) => handleChange(token));
+          .then((token) => handleChange(token))
+          .catch(() => {}); // closing the modal rejects the promise
       }
     }
 

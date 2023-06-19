@@ -22,7 +22,7 @@
         :value="currentAsset"
         :focused="focused"
         :show-tokens-with-balance="showTokensWithBalance"
-        @input="handleAssetSelected($event)"
+        @select-asset="handleAssetSelected($event)"
       />
       <div
         v-else
