@@ -20,6 +20,7 @@ import {
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
 import {
+  postJson,
   TX_DIRECTION,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
@@ -53,6 +54,7 @@ export default defineComponent({
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
 
     const getExplorerPath = useGetter('getExplorerPath');
+    const activeNetwork = useGetter('activeNetwork');
     const getPreferred = useGetter('names/getPreferred');
 
     const { getSdk } = useSdk({ store: root.$store });
@@ -186,10 +188,11 @@ export default defineComponent({
 
       const sdk = await getSdk();
       const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
-      const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
-        bytecode,
-        calldata,
-      });
+      // TODO: use sdk method on sdk 13 update
+      const txParams: ITx = await postJson(
+        `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+        { body: { bytecode, calldata } },
+      );
       if (!txParams) return '';
 
       return txParams.arguments?.find((param: any) => param.type === 'address')?.value;

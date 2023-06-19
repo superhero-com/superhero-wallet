@@ -1,15 +1,16 @@
 import Vue from 'vue';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
-import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
+
+import FungibleTokenFullInterfaceACI from '../../lib/contracts/FungibleTokenFullInterfaceACI.json';
+import AedexV2PairACI from '../../lib/contracts/AedexV2PairACI.json';
+import ZeitTokenACI from '../../lib/contracts/FungibleTokenFullACI.json';
 import {
   convertToken,
   handleUnknownError,
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 import { useMiddleware } from '../../composables';
 
 export default (store) => {
@@ -99,7 +100,7 @@ export default (store) => {
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
+          aci: FungibleTokenFullInterfaceACI,
           contractAddress: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
@@ -122,7 +123,7 @@ export default (store) => {
       ) {
         try {
           const tokenContract = await sdk.getContractInstance({
-            source: pairInterface,
+            aci: AedexV2PairACI,
             contractAddress,
           });
 
@@ -170,7 +171,7 @@ export default (store) => {
         [contractId, toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
+          aci: FungibleTokenFullInterfaceACI,
           contractAddress: contractId,
         });
         return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
@@ -180,7 +181,7 @@ export default (store) => {
         [contractId, amount, posAddress, invoiceId, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
-          source: ZEIT_TOKEN_INTERFACE,
+          aci: ZeitTokenACI,
           contractAddress: contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
