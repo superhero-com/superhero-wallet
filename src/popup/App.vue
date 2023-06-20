@@ -23,13 +23,9 @@
         <Header v-if="showHeader" />
 
         <ion-router-outlet
-          v-slot="{ Component }"
-
-          class="ion-padding main"
           :class="{ 'show-header': showHeader }"
-        >
-          <Component :is="Component" />
-        </ion-router-outlet>
+          class="main"
+        />
         <NodeConnectionStatus
           v-if="!modalsOpen.length"
           class="connection-status"
