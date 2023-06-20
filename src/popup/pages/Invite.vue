@@ -6,7 +6,8 @@
         {{ $t('pages.invite.generate-link') }}
       </p>
       <Field
-        v-slot="{ field, errors }"
+        v-slot="{ field, errorMessage }"
+        v-model="formModel.amount"
         name="amount"
         :rules="{
           min_value_exclusive: 0,
@@ -16,18 +17,18 @@
       >
         <InputAmount
           v-bind="field"
-          v-model="formModel.amount"
+          :model-value="formModel.amount"
           class="amount"
           name="amount"
           :label="$t('pages.invite.tip-attached')"
-          :message="errors[0]"
+          :message="errorMessage"
           ae-only
           :selected-asset="formModel.selectedAsset"
           @asset-selected="(val) => formModel.selectedAsset = val"
         />
         <BtnMain
           extend
-          :disabled="!formModel.amount || !!errors[0]"
+          :disabled="!formModel.amount || !!errorMessage"
           @click="generate"
         >
           {{ $t('pages.invite.generate') }}

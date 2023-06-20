@@ -262,7 +262,7 @@ export default defineComponent({
     }
   }
 
-  .input-amount {
+  :deep(.input-amount) {
     margin-bottom: var(--gap);
   }
 
