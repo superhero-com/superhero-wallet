@@ -30,16 +30,10 @@ import '../styles/ionic.scss';
 
 registerModals();
 const app = createApp(App);
-app.use(IonicVue, {
-  mode: 'ios',
-});
+app.use(IonicVue, { mode: 'md' });
 app.use(i18n);
 app.use(store);
 app.use(router);
 app.component('Loader', LoaderComponent);
-// app.mount('#app');
-
-router.isReady().then(() => {
-  app.mount('#app');
-});
+app.mount('#app');
 Logger.init({ app });
