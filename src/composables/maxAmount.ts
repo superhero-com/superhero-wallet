@@ -7,8 +7,9 @@ import {
   Ref,
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+
+import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type {
   IAsset,
   IDefaultComposableOptions,
@@ -74,7 +75,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId
         ) {
           tokenInstance.value = await sdk.getContractInstance({
-            source: FUNGIBLE_TOKEN_CONTRACT,
+            aci: FungibleTokenFullInterfaceACI,
             contractAddress: val.selectedAsset.contractId,
           });
         }

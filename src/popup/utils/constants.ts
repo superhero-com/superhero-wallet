@@ -382,13 +382,6 @@ export const FUNCTION_TYPE_MULTISIG: Record<string, string> = {
   revoke: 'revoke',
 } as const;
 
-export const ZEIT_TOKEN_INTERFACE = `@compiler >= 6
-contract interface PoS =
-  stateful entrypoint set_paid : (int, int) => unit
-main contract FungibleTokenFull =
-  stateful entrypoint burn_trigger_pos : (int, PoS, int) => unit
-  entrypoint balance : (address) => option(int)`;
-
 export const APP_LINK_WEB = 'https://wallet.superhero.com';
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';

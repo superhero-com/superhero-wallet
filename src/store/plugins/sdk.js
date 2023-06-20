@@ -140,7 +140,6 @@ export default (store) => {
           },
         })({
           nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
-          compilerUrl: activeNetwork.compilerUrl,
           name: 'Superhero',
           onConnection: cbAccept,
           onDisconnect(_, client) {
