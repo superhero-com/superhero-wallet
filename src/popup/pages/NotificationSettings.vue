@@ -1,33 +1,42 @@
 <template>
-  <div class="notification-settings">
-    <p class="text-description">
-      {{ $t('pages.notification-settings.description') }}
-    </p>
-    <p class="text-description">
-      {{ $t('pages.notification-settings.description2') }}
-    </p>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="notification-settings">
+        <p class="text-description">
+          {{ $t('pages.notification-settings.description') }}
+        </p>
+        <p class="text-description">
+          {{ $t('pages.notification-settings.description2') }}
+        </p>
 
-    <div class="switches">
-      <SwitchButton
-        v-for="setting in notificationSettings"
-        :key="setting.type"
-        :class="{ unchecked: !setting.checked }"
-        :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
-        :model-value="setting.checked"
-        :label="setting.text"
-        @update:modelValue="toggleNotificationSetting(setting.type)"
-      />
-    </div>
-  </div>
+        <div class="switches">
+          <SwitchButton
+            v-for="setting in notificationSettings"
+            :key="setting.type"
+            :class="{ unchecked: !setting.checked }"
+            :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
+            :model-value="setting.checked"
+            :label="setting.text"
+            @update:modelValue="toggleNotificationSetting(setting.type)"
+          />
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script>
+import { IonPage, IonContent } from '@ionic/vue';
 import { mapMutations, mapState } from 'vuex';
 import { NOTIFICATION_TYPE_WALLET } from '../utils/constants';
 import SwitchButton from '../components/SwitchButton.vue';
 
 export default {
-  components: { SwitchButton },
+  components: {
+    SwitchButton,
+    IonPage,
+    IonContent,
+  },
   data: () => ({
     NOTIFICATION_TYPE_WALLET,
   }),
