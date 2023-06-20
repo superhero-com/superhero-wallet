@@ -783,7 +783,8 @@ export function connectFrames(sdk: ISdk | AeSdkWallet) {
  * the DOM ready event is not fired.
  */
 export function checkImageAvailability(url: string): Promise<boolean> {
-  return fetch(url, { method: 'HEAD' })
+  // TODO: use  { method: 'HEAD'} when backend will introduce a proper response in such case
+  return fetch(url)
     .then((response) => !!response.ok)
     .catch(() => false);
 }
