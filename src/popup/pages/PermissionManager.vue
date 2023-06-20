@@ -1,152 +1,158 @@
 <template>
-  <div class="permission-manager">
-    <div
-      v-if="!editView"
-      class="text-description"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      {{ $t('pages.permissions.add-description') }}
-    </div>
-
-    <div class="inputs">
-      <div class="permission-row">
-        <Field
-          v-slot="{ field, errorMessage }"
-          name="name"
-          rules="required"
+      <div class="permission-manager">
+        <div
+          v-if="!editView"
+          class="text-description"
         >
-          <InputField
-            v-bind="field"
-            v-model="permission.name"
-            name="name"
-            :label="$t('pages.permissions.custom-name')"
-            :placeholder="$t('pages.permissions.enter-custom-name')"
-            :text-limit="32"
-            :message="errorMessage"
-          />
-        </Field>
-      </div>
+          {{ $t('pages.permissions.add-description') }}
+        </div>
 
-      <div class="permission-row">
-        <Field
-          v-slot="{ field, errorMessage }"
-          name="url"
-          :rules="{
-            required: true,
-            url: permissionHostValidation
-          }"
-        >
-          <InputField
-            v-bind="field"
-            v-model="permission.host"
-            type="url"
-            name="url"
-            :label="$t('pages.permissions.permissions-for-url')"
-            :placeholder="$t('pages.permissions.enter-url')"
-            :message="errorMessage"
-          />
-        </Field>
-      </div>
-    </div>
-    <div class="permission-row switch">
-      <SwitchButton
-        v-model="permission.address"
-        :label="$t('pages.permissions.login')"
-      />
-    </div>
+        <div class="inputs">
+          <div class="permission-row">
+            <Field
+              v-slot="{ field, errorMessage }"
+              name="name"
+              rules="required"
+            >
+              <InputField
+                v-bind="field"
+                v-model="permission.name"
+                name="name"
+                :label="$t('pages.permissions.custom-name')"
+                :placeholder="$t('pages.permissions.enter-custom-name')"
+                :text-limit="32"
+                :message="errorMessage"
+              />
+            </Field>
+          </div>
 
-    <div class="permission-row switch">
-      <SwitchButton
-        v-model="permission.addressList"
-        :label="$t('pages.permissions.addressList')"
-      />
-    </div>
-
-    <div class="permission-row switch">
-      <SwitchButton
-        v-model="permission.messageSign"
-        :label="$t('pages.permissions.message-sign')"
-      />
-    </div>
-
-    <div class="permission-row switch">
-      <SwitchButton
-        v-model="permission.dailySpendLimit"
-        :label="$t('pages.permissions.daily-spending-limit')"
-      />
-    </div>
-
-    <transition
-      name="fade-transition"
-      mode="out-in"
-    >
-      <div
-        v-if="permission.dailySpendLimit"
-        class="transaction-sign-limit"
-      >
-        <Field
-          v-slot="{ field }"
-          name="transactionSignLimit"
-          :rules="{
-            min_value_exclusive: 0,
-          }"
-        >
-          <InputAmount
-            v-bind="field"
-            v-model="permission.transactionSignLimit"
-            class="transaction-limit-input"
-            name="transactionSignLimit"
-            label=" "
-            :selected-asset="selectedAsset"
-            readonly
-          />
-        </Field>
-
-        <div class="limit-info">
-          <TokenAmount
-            :label="$t('pages.permissions.spent-today')"
-            :amount="permission.transactionSignLimitLeft"
+          <div class="permission-row">
+            <Field
+              v-slot="{ field, errorMessage }"
+              name="url"
+              :rules="{
+                required: true,
+                url: permissionHostValidation
+              }"
+            >
+              <InputField
+                v-bind="field"
+                v-model="permission.host"
+                type="url"
+                name="url"
+                :label="$t('pages.permissions.permissions-for-url')"
+                :placeholder="$t('pages.permissions.enter-url')"
+                :message="errorMessage"
+              />
+            </Field>
+          </div>
+        </div>
+        <div class="permission-row switch">
+          <SwitchButton
+            v-model="permission.address"
+            :label="$t('pages.permissions.login')"
           />
         </div>
-        <div class="limit-info">
-          <TokenAmount
-            :label="$t('pages.permissions.left-today')"
-            :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
-          />
-        </div>
-        <div class="limit-info">
-          <TokenAmount
-            :label="$t('pages.account.balance')"
-            :amount="+balance"
-          />
-        </div>
-      </div>
-    </transition>
 
-    <div class="bottom">
-      <div class="actions">
-        <BtnMain
-          variant="muted"
-          :text="$t('common.cancel')"
-          :to="{ name: 'permissions-settings' }"
-        />
-        <BtnMain
-          class="confirm"
-          extra-padded
-          :text="$t('common.confirm')"
-          :disabled="!permissionChanged"
-          @click="savePermission"
-        />
+        <div class="permission-row switch">
+          <SwitchButton
+            v-model="permission.addressList"
+            :label="$t('pages.permissions.addressList')"
+          />
+        </div>
+
+        <div class="permission-row switch">
+          <SwitchButton
+            v-model="permission.messageSign"
+            :label="$t('pages.permissions.message-sign')"
+          />
+        </div>
+
+        <div class="permission-row switch">
+          <SwitchButton
+            v-model="permission.dailySpendLimit"
+            :label="$t('pages.permissions.daily-spending-limit')"
+          />
+        </div>
+
+        <transition
+          name="fade-transition"
+          mode="out-in"
+        >
+          <div
+            v-if="permission.dailySpendLimit"
+            class="transaction-sign-limit"
+          >
+            <Field
+              v-slot="{ field }"
+              name="transactionSignLimit"
+              :rules="{
+                min_value_exclusive: 0,
+              }"
+            >
+              <InputAmount
+                v-bind="field"
+                v-model="permission.transactionSignLimit"
+                class="transaction-limit-input"
+                name="transactionSignLimit"
+                label=" "
+                :selected-asset="selectedAsset"
+                readonly
+              />
+            </Field>
+
+            <div class="limit-info">
+              <TokenAmount
+                :label="$t('pages.permissions.spent-today')"
+                :amount="permission.transactionSignLimitLeft"
+              />
+            </div>
+            <div class="limit-info">
+              <TokenAmount
+                :label="$t('pages.permissions.left-today')"
+                :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
+              />
+            </div>
+            <div class="limit-info">
+              <TokenAmount
+                :label="$t('pages.account.balance')"
+                :amount="+balance"
+              />
+            </div>
+          </div>
+        </transition>
+
+        <div class="bottom">
+          <div class="actions">
+            <BtnMain
+              variant="muted"
+              :text="$t('common.cancel')"
+              :to="{ name: 'permissions-settings' }"
+            />
+            <BtnMain
+              class="confirm"
+              extra-padded
+              :text="$t('common.confirm')"
+              :disabled="!permissionChanged"
+              @click="savePermission"
+            />
+          </div>
+          <BtnMain
+            v-if="editView"
+            extend
+            variant="muted"
+            :text="$t('pages.permissions.delete')"
+            :icon="DeleteIcon"
+            @click="removePermission"
+          />
+        </div>
       </div>
-      <BtnMain
-        v-if="editView"
-        extend
-        variant="muted"
-        :text="$t('pages.permissions.delete')"
-        :icon="DeleteIcon"
-        @click="removePermission"
-      />
-    </div>
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -159,6 +165,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
+import { IonPage, IonContent } from '@ionic/vue';
 
 import type { IPermission } from '@/types';
 import {
@@ -185,6 +192,8 @@ export default defineComponent({
     TokenAmount,
     BtnMain,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
