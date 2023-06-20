@@ -1,88 +1,95 @@
 <template>
-  <div class="more">
-    <PanelItem
-      :to="{ name: 'settings' }"
-      :title="$t('pages.titles.settings')"
-      data-cy="settings"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <template #icon>
-        <Settings />
-      </template>
-    </PanelItem>
+      <div class="more">
+        <PanelItem
+          :to="{ name: 'settings' }"
+          :title="$t('pages.titles.settings')"
+          data-cy="settings"
+        >
+          <template #icon>
+            <Settings />
+          </template>
+        </PanelItem>
 
-    <template v-if="isNodeMainnet || isNodeTestnet">
-      <PanelItem
-        :to="{ name: 'tips-claim' }"
-        :title="$t('pages.titles.claim-tips')"
-        data-cy="tips-claim"
-      >
-        <template #icon>
-          <ClaimTips />
+        <template v-if="isNodeMainnet || isNodeTestnet">
+          <PanelItem
+            :to="{ name: 'tips-claim' }"
+            :title="$t('pages.titles.claim-tips')"
+            data-cy="tips-claim"
+          >
+            <template #icon>
+              <ClaimTips />
+            </template>
+          </PanelItem>
+          <PanelItem
+            :to="{ name: 'invite' }"
+            :title="$t('pages.titles.invite')"
+            data-cy="invite"
+          >
+            <template #icon>
+              <Invites />
+            </template>
+          </PanelItem>
         </template>
-      </PanelItem>
-      <PanelItem
-        :to="{ name: 'invite' }"
-        :title="$t('pages.titles.invite')"
-        data-cy="invite"
-      >
-        <template #icon>
-          <Invites />
-        </template>
-      </PanelItem>
-    </template>
 
-    <PanelItem
-      :href="BUG_REPORT_URL"
-      :title="$t('pages.about.reportBug')"
-    >
-      <template #icon>
-        <BugReport />
-      </template>
-    </PanelItem>
+        <PanelItem
+          :href="BUG_REPORT_URL"
+          :title="$t('pages.about.reportBug')"
+        >
+          <template #icon>
+            <BugReport />
+          </template>
+        </PanelItem>
 
-    <PanelItem
-      v-if="isNodeMainnet && !IS_IOS"
-      :href="SIMPLEX_URL"
-      :title="$t('pages.fungible-tokens.buyAe')"
-    >
-      <template #icon>
-        <BuyIcon />
-      </template>
-    </PanelItem>
-    <PanelItem
-      v-else-if="isNodeTestnet"
-      :href="activeAccountFaucetUrl"
-      :title="$t('common.faucet')"
-    >
-      <template #icon>
-        <FaucetIcon />
-      </template>
-    </PanelItem>
+        <PanelItem
+          v-if="isNodeMainnet && !IS_IOS"
+          :href="SIMPLEX_URL"
+          :title="$t('pages.fungible-tokens.buyAe')"
+        >
+          <template #icon>
+            <BuyIcon />
+          </template>
+        </PanelItem>
+        <PanelItem
+          v-else-if="isNodeTestnet"
+          :href="activeAccountFaucetUrl"
+          :title="$t('common.faucet')"
+        >
+          <template #icon>
+            <FaucetIcon />
+          </template>
+        </PanelItem>
 
-    <PanelItem
-      :href="DEX_URL"
-      :title="$t('pages.more.dex')"
-    >
-      <template #icon>
-        <Dex />
-      </template>
-    </PanelItem>
+        <PanelItem
+          :href="DEX_URL"
+          :title="$t('pages.more.dex')"
+        >
+          <template #icon>
+            <Dex />
+          </template>
+        </PanelItem>
 
-    <PanelItem
-      :to="{ name: 'about' }"
-      :title="$t('pages.titles.about')"
-      data-cy="about"
-    >
-      <template #icon>
-        <About />
-      </template>
-    </PanelItem>
-  </div>
+        <PanelItem
+          :to="{ name: 'about' }"
+          :title="$t('pages.titles.about')"
+          data-cy="about"
+        >
+          <template #icon>
+            <About />
+          </template>
+        </PanelItem>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 import { IS_IOS } from '../../lib/environment';
 import {
   BUG_REPORT_URL,
@@ -113,6 +120,8 @@ export default defineComponent({
     BugReport,
     ClaimTips,
     FaucetIcon,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

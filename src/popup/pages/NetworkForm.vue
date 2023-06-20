@@ -1,66 +1,72 @@
 <template>
-  <Form v-slot="{ errors }">
-    <div
-      class="network-form"
-      data-cy="network-form"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <p
-        v-if="isNetworkPrefilled"
-        class="text-description color-warning"
-      >
-        {{ $t('pages.network.thirdPartyDetails') }}
-      </p>
-      <p
-        v-else
-        class="text-description"
-      >
-        {{ $t('pages.network.formLabel') }}
-      </p>
-      <Field
-        v-for="input in formConfig"
-        v-slot="{ field, errorMessage }"
-        :key="input.key"
-        :name="input.key"
-        :rules="validatorRules(input.key)"
-        :validate-on-mount="fieldsToCheckOnMount!.includes(input.key)"
-      >
-        <InputField
-          v-bind="field"
-          v-model="newNetwork[input.key]"
-          :name="input.key"
-          :placeholder="input.placeholder"
-          :label="input.label"
-          :data-cy="input.dataCy"
-          :message="errorMessage"
-          :text-limit="input.textLimit"
-        />
-      </Field>
-      <div class="button-wrapper">
-        <BtnMain
-          data-cy="cancel"
-          variant="muted"
-          class="cancel-button"
-          extra-padded
-          :text="$t('common.cancel')"
-          @click="goBack"
-        />
-        <BtnMain
-          :disabled="buttonDisabled || (errors && Object.keys(errors).length > 0)"
-          :icon="isEdit ? PlusCircleIcon : null"
-          data-cy="connect"
-          class="add-button"
-          @click="addOrUpdateNetwork"
+      <Form v-slot="{ errors }">
+        <div
+          class="network-form"
+          data-cy="network-form"
         >
-          <template v-if="isEdit">
-            {{ $t('pages.network.apply') }}
-          </template>
-          <template v-else>
-            {{ $t('pages.network.addNetwork') }}
-          </template>
-        </BtnMain>
-      </div>
-    </div>
-  </Form>
+          <p
+            v-if="isNetworkPrefilled"
+            class="text-description color-warning"
+          >
+            {{ $t('pages.network.thirdPartyDetails') }}
+          </p>
+          <p
+            v-else
+            class="text-description"
+          >
+            {{ $t('pages.network.formLabel') }}
+          </p>
+          <Field
+            v-for="input in formConfig"
+            v-slot="{ field, errorMessage }"
+            :key="input.key"
+            :name="input.key"
+            :rules="validatorRules(input.key)"
+            :validate-on-mount="fieldsToCheckOnMount!.includes(input.key)"
+          >
+            <InputField
+              v-bind="field"
+              v-model="newNetwork[input.key]"
+              :name="input.key"
+              :placeholder="input.placeholder"
+              :label="input.label"
+              :data-cy="input.dataCy"
+              :message="errorMessage"
+              :text-limit="input.textLimit"
+            />
+          </Field>
+          <div class="button-wrapper">
+            <BtnMain
+              data-cy="cancel"
+              variant="muted"
+              class="cancel-button"
+              extra-padded
+              :text="$t('common.cancel')"
+              @click="goBack"
+            />
+            <BtnMain
+              :disabled="buttonDisabled || (errors && Object.keys(errors).length > 0)"
+              :icon="isEdit ? PlusCircleIcon : null"
+              data-cy="connect"
+              class="add-button"
+              @click="addOrUpdateNetwork"
+            >
+              <template v-if="isEdit">
+                {{ $t('pages.network.apply') }}
+              </template>
+              <template v-else>
+                {{ $t('pages.network.addNetwork') }}
+              </template>
+            </BtnMain>
+          </div>
+        </div>
+      </Form>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -75,6 +81,7 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { Field, Form } from 'vee-validate';
+import { IonContent, IonPage } from '@ionic/vue';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 import { NETWORK_DEFAULT } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
@@ -108,6 +115,8 @@ export default defineComponent({
     InputField,
     Field,
     Form,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

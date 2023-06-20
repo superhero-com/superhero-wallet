@@ -1,43 +1,50 @@
 <template>
-  <div class="permissions-settings">
-    <i18n-t
-      keypath="pages.permissions.description"
-      tag="div"
-      class="text-description"
-      scope="global"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <a
-        href="https://superhero.com/"
-        target="_blank"
-      >
-        superhero.com
-      </a>
-    </i18n-t>
+      <div class="permissions-settings">
+        <i18n-t
+          keypath="pages.permissions.description"
+          tag="div"
+          class="text-description"
+          scope="global"
+        >
+          <a
+            href="https://superhero.com/"
+            target="_blank"
+          >
+            superhero.com
+          </a>
+        </i18n-t>
 
-    <div class="hosts">
-      <PanelItem
-        v-for="permission in permissions"
-        :key="permission.host"
-        class="host"
-        :to="{ name: 'permissions-details', params: { host: permission.host } }"
-        :title="permission.name"
-      />
-    </div>
+        <div class="hosts">
+          <PanelItem
+            v-for="permission in permissions"
+            :key="permission.host"
+            class="host"
+            :to="{ name: 'permissions-details', params: { host: permission.host } }"
+            :title="permission.name"
+          />
+        </div>
 
-    <BtnMain
-      extend
-      variant="muted"
-      :text="$t('pages.permissions.add')"
-      :to="{ name: 'permissions-add' }"
-      :icon="PlusIcon"
-    />
-  </div>
+        <BtnMain
+          extend
+          variant="muted"
+          :text="$t('pages.permissions.add')"
+          :to="{ name: 'permissions-add' }"
+          :icon="PlusIcon"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script>
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 
+import { IonPage, IonContent } from '@ionic/vue';
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
@@ -46,6 +53,8 @@ export default {
   components: {
     PanelItem,
     BtnMain,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
