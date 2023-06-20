@@ -1,70 +1,77 @@
 <template>
-  <div class="seed-phrase-details">
-    <div class="text-heading-1">
-      {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
-    </div>
-
-    <div class="mnemonics">
-      <p class="mnemonics-text">
-        {{ mnemonic }}
-      </p>
-      <BtnMain
-        variant="dark"
-        class="copy-btn"
-        big-icon
-        :icon="copied ? CheckSuccessCircle : CopyOutlined"
-        @click="copy(mnemonic)"
-      >
-        <template v-if="!copied">
-          {{ $t('pages.seed-phrase-settings.copy') }}
-        </template>
-
-        <template v-else>
-          {{ $t('common.addressCopied') }}
-        </template>
-      </BtnMain>
-    </div>
-
-    <i18n-t
-      keypath="pages.seedPhrase.backUpYourSeedPhrase"
-      tag="p"
-      class="text-description"
-      scope="global"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
-    </i18n-t>
-    <i18n-t
-      keypath="pages.seedPhrase.toBeSureYouGotItRight"
-      tag="p"
-      class="text-description"
-      scope="global"
-    >
-      <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
-    </i18n-t>
+      <div class="seed-phrase-details">
+        <div class="text-heading-1">
+          {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
+        </div>
 
-    <div class="buttons">
-      <BtnMain
-        class="button"
-        extend
-        :to="{ name: 'settings-seed-phrase-verify' }"
-      >
-        {{ $t('pages.seedPhrase.verifySeed') }}
-      </BtnMain>
-      <BtnMain
-        variant="muted"
-        extend
-        @click="setBackedUpSeed"
-      >
-        {{ $t('pages.seedPhrase.doneThis') }}
-      </BtnMain>
-    </div>
-  </div>
+        <div class="mnemonics">
+          <p class="mnemonics-text">
+            {{ mnemonic }}
+          </p>
+          <BtnMain
+            variant="dark"
+            class="copy-btn"
+            big-icon
+            :icon="copied ? CheckSuccessCircle : CopyOutlined"
+            @click="copy(mnemonic)"
+          >
+            <template v-if="!copied">
+              {{ $t('pages.seed-phrase-settings.copy') }}
+            </template>
+
+            <template v-else>
+              {{ $t('common.addressCopied') }}
+            </template>
+          </BtnMain>
+        </div>
+
+        <i18n-t
+          keypath="pages.seedPhrase.backUpYourSeedPhrase"
+          tag="p"
+          class="text-description"
+          scope="global"
+        >
+          <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
+        </i18n-t>
+        <i18n-t
+          keypath="pages.seedPhrase.toBeSureYouGotItRight"
+          tag="p"
+          class="text-description"
+          scope="global"
+        >
+          <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
+        </i18n-t>
+
+        <div class="buttons">
+          <BtnMain
+            class="button"
+            extend
+            :to="{ name: 'settings-seed-phrase-verify' }"
+          >
+            {{ $t('pages.seedPhrase.verifySeed') }}
+          </BtnMain>
+          <BtnMain
+            variant="muted"
+            extend
+            @click="setBackedUpSeed"
+          >
+            {{ $t('pages.seedPhrase.doneThis') }}
+          </BtnMain>
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { IonPage, IonContent } from '@ionic/vue';
 import { useCopy } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -75,6 +82,8 @@ export default defineComponent({
   name: 'SeedPhraseDetailsSettings',
   components: {
     BtnMain,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

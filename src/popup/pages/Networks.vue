@@ -1,34 +1,41 @@
 <template>
-  <div
-    data-cy="networks"
-    class="networks"
-  >
-    <p class="text-description">
-      {{ $t('pages.network.listLabel') }}
-    </p>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div
+        data-cy="networks"
+        class="networks"
+      >
+        <p class="text-description">
+          {{ $t('pages.network.listLabel') }}
+        </p>
 
-    <div class="networks-list">
-      <NetworkRow
-        v-for="network in networks"
-        :key="network.name"
-        :network="network"
-        @selectNetwork="switchNetwork"
-      />
-    </div>
+        <div class="networks-list">
+          <NetworkRow
+            v-for="network in networks"
+            :key="network.name"
+            :network="network"
+            @selectNetwork="switchNetwork"
+          />
+        </div>
 
-    <BtnMain
-      extend
-      variant="muted"
-      class="add-custom-network"
-      data-cy="to-add"
-      :text="$t('pages.network.addCustomNetwork')"
-      :icon="PlusCircleIcon"
-      :to="{ name: ROUTE_NETWORK_ADD }"
-    />
-  </div>
+        <BtnMain
+          extend
+          variant="muted"
+          class="add-custom-network"
+          data-cy="to-add"
+          :text="$t('pages.network.addCustomNetwork')"
+          :icon="PlusCircleIcon"
+          :to="{ name: ROUTE_NETWORK_ADD }"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useDispatch, useGetter } from '../../composables/vuex';
 import { ROUTE_NETWORK_ADD } from '../router/routeNames';
@@ -41,6 +48,8 @@ export default defineComponent({
   components: {
     BtnMain,
     NetworkRow,
+    IonPage,
+    IonContent,
   },
   setup() {
     const networks = useGetter('networks');
@@ -51,6 +60,8 @@ export default defineComponent({
       switchNetwork,
       PlusCircleIcon,
       ROUTE_NETWORK_ADD,
+      IonPage,
+      IonContent,
     };
   },
 });

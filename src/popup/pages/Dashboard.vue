@@ -1,44 +1,51 @@
 <template>
-  <DashboardWrapper class="dashboard">
-    <template #header>
-      <DashboardHeader />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <DashboardWrapper class="dashboard">
+        <template #header>
+          <DashboardHeader />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton is-big />
-      <OpenTransferSendModalButton is-big />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton is-big />
+          <OpenTransferSendModalButton is-big />
+        </template>
 
-    <template #cards>
-      <LatestTransactionsCard />
+        <template #cards>
+          <LatestTransactionsCard />
 
-      <DashboardCard
-        v-if="isNodeMainnet && !IS_IOS"
-        :title="$t('dashboard.buyCard.title')"
-        :description="$t('dashboard.buyCard.description')"
-        :btn-text="$t('dashboard.buyCard.button')"
-        :background="buyBackground"
-        :icon="CardIcon"
-        :href="activeAccountSimplexLink"
-        :card-id="DASHBOARD_CARD_ID.buyAe"
-      />
+          <DashboardCard
+            v-if="isNodeMainnet && !IS_IOS"
+            :title="$t('dashboard.buyCard.title')"
+            :description="$t('dashboard.buyCard.description')"
+            :btn-text="$t('dashboard.buyCard.button')"
+            :background="buyBackground"
+            :icon="CardIcon"
+            :href="activeAccountSimplexLink"
+            :card-id="DASHBOARD_CARD_ID.buyAe"
+          />
 
-      <DashboardCard
-        v-if="isNodeMainnet || isNodeTestnet"
-        :title="$t('dashboard.nameCard.title')"
-        :description="$t('dashboard.nameCard.description')"
-        :btn-text="$t('dashboard.nameCard.button')"
-        :background="chainNameBackground"
-        :icon="MenuCardIcon"
-        :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
-        :card-id="DASHBOARD_CARD_ID.claimName"
-        variant="purple"
-      />
-    </template>
-  </DashboardWrapper>
+          <DashboardCard
+            v-if="isNodeMainnet || isNodeTestnet"
+            :title="$t('dashboard.nameCard.title')"
+            :description="$t('dashboard.nameCard.description')"
+            :btn-text="$t('dashboard.nameCard.button')"
+            :background="chainNameBackground"
+            :icon="MenuCardIcon"
+            :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
+            :card-id="DASHBOARD_CARD_ID.claimName"
+            variant="purple"
+          />
+        </template>
+      </DashboardWrapper>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
@@ -71,6 +78,8 @@ export default defineComponent({
     OpenTransferSendModalButton,
     DashboardHeader,
     DashboardWrapper,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
