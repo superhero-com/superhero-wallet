@@ -1,32 +1,37 @@
 <template>
-  <div class="reset-wallet-settings">
-    <p class="text-description">
-      {{ $t('pages.reset-wallet.description') }}
-    </p>
-    <i18n-t
-      keypath="pages.reset-wallet.description2"
-      tag="p"
-      class="text-description"
-      scope="global"
-    >
-      <RouterLink :to="{ name: 'settings-seed-phrase' }">
-        seed phrase
-      </RouterLink>
-    </i18n-t>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="reset-wallet-settings">
+        <p class="text-description">
+          {{ $t('pages.reset-wallet.description') }}
+        </p>
+        <i18n-t
+          keypath="pages.reset-wallet.description2"
+          tag="p"
+          class="text-description"
+          scope="global"
+        >
+          <RouterLink :to="{ name: 'settings-seed-phrase' }">
+            seed phrase
+          </RouterLink>
+        </i18n-t>
 
-    <BtnMain
-      variant="danger"
-      class="reset-wallet-button"
-      extend
-      :text="$t('pages.titles.reset-wallet')"
-      :icon="ResetWalletIcon"
-      @click="onResetWallet"
-    />
-  </div>
+        <BtnMain
+          variant="danger"
+          class="reset-wallet-button"
+          extend
+          :text="$t('pages.titles.reset-wallet')"
+          :icon="ResetWalletIcon"
+          @click="onResetWallet"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import { MODAL_RESET_WALLET } from '../utils/constants';
 import { useModals } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -34,7 +39,7 @@ import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
 
 export default defineComponent({
   components: {
-    BtnMain,
+    BtnMain, IonPage, IonContent,
   },
   setup() {
     const { openModal } = useModals();
