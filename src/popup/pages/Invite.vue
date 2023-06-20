@@ -1,60 +1,65 @@
 <template>
-  <div class="invite-page">
-    <div class="top">
-      <p class="section-title">
-        <NewInviteLink class="section-title-icon" />
-        {{ $t('pages.invite.generate-link') }}
-      </p>
-      <Field
-        v-slot="{ field, errorMessage }"
-        v-model="formModel.amount"
-        name="amount"
-        :rules="{
-          min_value_exclusive: 0,
-          ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-          enough_coin: fee.toString(),
-        }"
-      >
-        <InputAmount
-          v-bind="field"
-          :model-value="formModel.amount"
-          class="amount"
-          name="amount"
-          :label="$t('pages.invite.tip-attached')"
-          :message="errorMessage"
-          readonly
-          :selected-asset="formModel.selectedAsset"
-          @asset-selected="(val) => formModel.selectedAsset = val"
-        />
-        <BtnMain
-          extend
-          :disabled="!formModel.amount || !!errorMessage"
-          @click="generate"
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="invite-page">
+        <div class="top">
+          <p class="section-title">
+            <NewInviteLink class="section-title-icon" />
+            {{ $t('pages.invite.generate-link') }}
+          </p>
+          <Field
+            v-slot="{ field, errorMessage }"
+            v-model="formModel.amount"
+            name="amount"
+            :rules="{
+              min_value_exclusive: 0,
+              ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+              enough_coin: fee.toString(),
+            }"
+          >
+            <InputAmount
+              v-bind="field"
+              :model-value="formModel.amount"
+              class="amount"
+              name="amount"
+              :label="$t('pages.invite.tip-attached')"
+              :message="errorMessage"
+              readonly
+              :selected-asset="formModel.selectedAsset"
+              @asset-selected="(val) => formModel.selectedAsset = val"
+            />
+            <BtnMain
+              extend
+              :disabled="!formModel.amount || !!errorMessage"
+              @click="generate"
+            >
+              {{ $t('pages.invite.generate') }}
+            </BtnMain>
+          </Field>
+        </div>
+        <div
+          v-if="invites.length > 0"
+          class="generated-links"
         >
-          {{ $t('pages.invite.generate') }}
-        </BtnMain>
-      </Field>
-    </div>
-    <div
-      v-if="invites.length > 0"
-      class="generated-links"
-    >
-      <p class="section-title">
-        <InviteIcon class="section-title-icon" />
-        {{ $t('pages.invite.created-links') }}
-      </p>
-      <InviteItem
-        v-for="link in invites"
-        v-bind="link ?? null"
-        :key="link.secretKey"
-        @loading="(val) => (loading = val)"
-      />
-    </div>
-    <Loader v-if="loading" />
-  </div>
+          <p class="section-title">
+            <InviteIcon class="section-title-icon" />
+            {{ $t('pages.invite.created-links') }}
+          </p>
+          <InviteItem
+            v-for="link in invites"
+            v-bind="link ?? null"
+            :key="link.secretKey"
+            @loading="(val) => (loading = val)"
+          />
+        </div>
+        <Loader v-if="loading" />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
 import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
@@ -85,6 +90,8 @@ export default defineComponent({
     InviteIcon,
     NewInviteLink,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
