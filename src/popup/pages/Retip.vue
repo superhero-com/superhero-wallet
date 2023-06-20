@@ -1,71 +1,76 @@
 <template>
-  <div class="retip">
-    <BalanceInfo
-      :balance="numericBalance"
-      :protocol="PROTOCOL_AETERNITY"
-    />
-    <div class="section-title">
-      {{ $t('pages.tipPage.url') }}
-    </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="retip">
+        <BalanceInfo
+          :balance="numericBalance"
+          :protocol="PROTOCOL_AETERNITY"
+        />
+        <div class="section-title">
+          {{ $t('pages.tipPage.url') }}
+        </div>
 
-    <div
-      v-if="urlStatus"
-      class="url-bar"
-    >
-      <UrlStatus :status="urlStatus" />
-      <a>{{ tip.url }}</a>
-    </div>
+        <div
+          v-if="urlStatus"
+          class="url-bar"
+        >
+          <UrlStatus :status="urlStatus" />
+          <a>{{ tip.url }}</a>
+        </div>
 
-    <Field
-      v-slot="{ field, errorMessage}"
-      name="amount"
-      :rules="{
-        required: true,
-        min_value_exclusive: 0,
-        ae_min_tip_amount: true,
-        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_coin: fee.toString(),
-      }"
-    >
-      <InputAmount
-        v-bind="field"
-        v-model="formModel.amount"
-        name="amount"
-        class="amount-input"
-        readonly
-        :message="errorMessage"
-        :protocol="PROTOCOL_AETERNITY"
-      />
-    </Field>
+        <Field
+          v-slot="{ field, errorMessage}"
+          name="amount"
+          :rules="{
+            required: true,
+            min_value_exclusive: 0,
+            ae_min_tip_amount: true,
+            ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+            enough_coin: fee.toString(),
+          }"
+        >
+          <InputAmount
+            v-bind="field"
+            v-model="formModel.amount"
+            name="amount"
+            class="amount-input"
+            readonly
+            :message="errorMessage"
+            :protocol="PROTOCOL_AETERNITY"
+          />
+        </Field>
 
-    <div
-      v-if="tip.title"
-      class="tip-note-preview"
-    >
-      {{ tip.title }}
-    </div>
+        <div
+          v-if="tip.title"
+          class="tip-note-preview"
+        >
+          {{ tip.title }}
+        </div>
 
-    <BtnMain
-      class="bottom-btn"
-      extend
-      :disabled="!isTippingSupported || errorAmount"
-      @click="sendTip"
-    >
-      {{ $t('common.confirm') }}
-    </BtnMain>
-    <BtnMain
-      class="bottom-btn"
-      extend
-      @click="openCallbackOrGoHome(false)"
-    >
-      {{ $t('common.cancel') }}
-    </BtnMain>
+        <BtnMain
+          class="bottom-btn"
+          extend
+          :disabled="!isTippingSupported || errorAmount"
+          @click="sendTip"
+        >
+          {{ $t('common.confirm') }}
+        </BtnMain>
+        <BtnMain
+          class="bottom-btn"
+          extend
+          @click="openCallbackOrGoHome(false)"
+        >
+          {{ $t('common.cancel') }}
+        </BtnMain>
 
-    <Loader v-if="loading" />
-  </div>
+        <Loader v-if="loading" />
+      </div>
+    </ioncontent>
+  </ionpage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onMounted,
@@ -113,6 +118,8 @@ export default defineComponent({
     BtnMain,
     BalanceInfo,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

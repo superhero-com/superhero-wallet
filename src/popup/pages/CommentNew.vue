@@ -1,36 +1,41 @@
 <template>
-  <div class="comment-new">
-    <AccountSelector
-      v-model="creatorAddress"
-      :options="aeAccountsSelectOptions"
-      @select="setActiveAccountByAddress"
-    />
-    <div class="comment-text">
-      {{ text }}
-    </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="comment-new">
+        <AccountSelector
+          v-model="creatorAddress"
+          :options="aeAccountsSelectOptions"
+          @select="setActiveAccountByAddress"
+        />
+        <div class="comment-text">
+          {{ text }}
+        </div>
 
-    <FixedScreenFooter>
-      <BtnMain
-        variant="muted"
-        extra-padded
-        class="cancel-button"
-        @click="openCallbackOrGoHome(false)"
-      >
-        {{ $t('common.cancel') }}
-      </BtnMain>
-      <BtnMain
-        :disabled="!isTippingSupported"
-        @click="sendComment"
-      >
-        {{ $t('common.confirm') }}
-      </BtnMain>
-    </FixedScreenFooter>
+        <FixedScreenFooter>
+          <BtnMain
+            variant="muted"
+            extra-padded
+            class="cancel-button"
+            @click="openCallbackOrGoHome(false)"
+          >
+            {{ $t('common.cancel') }}
+          </BtnMain>
+          <BtnMain
+            :disabled="!isTippingSupported"
+            @click="sendComment"
+          >
+            {{ $t('common.confirm') }}
+          </BtnMain>
+        </FixedScreenFooter>
 
-    <Loader v-if="loading" />
-  </div>
+        <Loader v-if="loading" />
+      </div>
+    </ioncontent>
+  </ionpage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   ref,
@@ -60,6 +65,8 @@ export default defineComponent({
     AccountSelector,
     BtnMain,
     FixedScreenFooter,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

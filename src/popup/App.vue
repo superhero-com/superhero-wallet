@@ -1,53 +1,53 @@
 <template>
-  <div
-    class="app-wrapper"
-    :class="{
-      'show-header': showHeader,
-      'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
-      'is-extension': IS_EXTENSION,
-    }"
-  >
-    <button
-      v-if="qrScannerOpen"
-      class="camera-close-button"
-    >
-      <Close />
-    </button>
+  <IonApp class="ionic-wrapper">
     <div
-      v-show="!qrScannerOpen"
-      ref="innerElement"
-      class="app-inner"
-      :class="{ 'styled-scrollbar': showScrollbar }"
+      class="app-wrapper"
+      :class="{
+        'show-header': showHeader,
+        'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
+        'is-extension': IS_EXTENSION,
+      }"
     >
-      <Header v-if="showHeader" />
-
-      <RouterView
-        v-slot="{ Component }"
-        :class="{ 'show-header': showHeader }"
-        class="main"
+      <button
+        v-if="qrScannerOpen"
+        class="camera-close-button"
       >
-        <Transition name="page-transition">
-          <Component :is="Component" />
-        </Transition>
-      </RouterView>
+        <Close />
+      </button>
+      <div
+        v-show="!qrScannerOpen"
+        ref="innerElement"
+        class="app-inner"
+        :class="{ 'styled-scrollbar': showScrollbar }"
+      >
+        <Header v-if="showHeader" />
 
-      <NodeConnectionStatus
-        v-if="!modalsOpen.length"
-        class="connection-status"
-      />
+        <ion-router-outlet
+          :animated="!RUNNING_IN_TESTS"
+          :class="{ 'show-header': showHeader }"
+          class="main"
+        />
+        <NodeConnectionStatus
+          v-if="!modalsOpen.length"
+          class="connection-status"
+        />
 
-      <Component
-        v-bind="props"
-        :is="component"
-        v-for="({ component, key, props, viewComponentName }) in modalsOpen"
-        :key="key"
-        :view-component-name="viewComponentName"
-      />
+        <Component
+          v-bind="props"
+          :is="component"
+          v-for="({ component, key, props, viewComponentName }) in modalsOpen"
+          :key="key"
+          :view-component-name="viewComponentName"
+        />
+      </div>
     </div>
-  </div>
+  </IonApp>
 </template>
 
 <script lang="ts">
+import {
+  IonRouterOutlet, IonApp,
+} from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -72,6 +72,7 @@ import {
   IS_FIREFOX,
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
+  RUNNING_IN_TESTS,
 } from '@/constants';
 import {
   useAccounts,
@@ -93,6 +94,8 @@ export default defineComponent({
     Header,
     NodeConnectionStatus,
     Close,
+    IonApp,
+    IonRouterOutlet,
   },
   setup() {
     const store = useStore();
@@ -208,6 +211,7 @@ export default defineComponent({
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
+      RUNNING_IN_TESTS,
       modalsOpen,
       qrScannerOpen,
       showHeader,
@@ -224,6 +228,14 @@ export default defineComponent({
 @use '../styles/variables';
 @use '../styles/typography';
 @use '../styles/mixins';
+
+.ionic-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
 
 .app-wrapper {
   --screen-padding-x: 16px;
@@ -260,6 +272,7 @@ export default defineComponent({
   }
 
   .main {
+    margin-top: var(--header-height);
     padding-bottom: 0;
     padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);

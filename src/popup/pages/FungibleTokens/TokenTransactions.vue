@@ -1,17 +1,31 @@
 <template>
-  <TransactionList
-    :transactions="filteredTransactions"
-    :is-multisig="isMultisig"
-    :loading="loading"
-    @load-more="loadMore()"
-  />
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <TransactionList
+        :transactions="filteredTransactions"
+        :is-multisig="isMultisig"
+        :loading="loading"
+        @load-more="loadMore()"
+      />
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import {
-  computed, defineComponent, ref, onMounted,
+  computed,
+  defineComponent,
+  ref,
+  onMounted,
 } from 'vue';
+import {
+  IonContent,
+  IonPage,
+} from '@ionic/vue';
 import { useStore } from 'vuex';
+import TransactionList from '@/popup/components/TransactionList.vue';
 import type { ICommonTransaction, ITokenList, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
 import { useAccounts, useMultisigAccounts, useTransactionList } from '@/composables';
@@ -19,12 +33,12 @@ import { useState } from '@/composables/vuex';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
 
-import TransactionList from '@/popup/components/TransactionList.vue';
-
 export default defineComponent({
   name: 'TokenTransactions',
   components: {
     TransactionList,
+    IonPage,
+    IonContent,
   },
   props: {
     contractId: { type: String, default: null },

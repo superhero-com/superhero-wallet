@@ -1,54 +1,60 @@
 <template>
-  <div class="transaction-details">
-    <Loader v-if="!transaction || transaction.incomplete" />
-    <template v-else>
-      <TransactionDetailsBase
-        :transaction="transaction"
-        :coin-symbol="AE_SYMBOL"
-        :transaction-fee="+aettosToAe(transactionFee)"
-        :is-swap="isSwap"
-        :is-pool="isPool"
-        :token-symbol="getTxSymbol(transaction)"
-        :total-amount="getTxAmountTotal(transaction, direction)"
-        :is-error-transaction="isErrorTransaction"
-        :is-dex-allowance="isDexAllowance"
-        :is-dex="isDex"
-        :is-transaction-aex9="isTransactionAex9(transaction)"
-        :payload="getTransactionPayload(transaction)"
-        :is-multisig="isMultisig"
-        :direction="direction"
-        :explorer-url="explorerUrl || ''"
-        :is-local-account-address="isLocalAccountAddress"
-        :gas-price="gasPrice ? +aettosToAe(gasPrice) : 0"
-        :gas-used="gasUsed"
-        :contract-id="contractId"
-        :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
-        :multisig-contract-id="multisigContractId"
-        :hash="hash"
-        :protocol="PROTOCOL_AETERNITY"
-      >
-        <template #tip-url>
-          <DetailsItem
-            v-if="tipUrl"
-            :label="$t('pages.transactionDetails.tipUrl')"
-            class="tip-url"
-            data-cy="tip-url"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="transaction-details">
+        <Loader v-if="!transaction || transaction.incomplete" />
+        <template v-else>
+          <TransactionDetailsBase
+            :transaction="transaction"
+            :coin-symbol="AE_SYMBOL"
+            :transaction-fee="+aettosToAe(transactionFee)"
+            :is-swap="isSwap"
+            :is-pool="isPool"
+            :token-symbol="getTxSymbol(transaction)"
+            :total-amount="getTxAmountTotal(transaction, direction)"
+            :is-error-transaction="isErrorTransaction"
+            :is-dex-allowance="isDexAllowance"
+            :is-dex="isDex"
+            :is-transaction-aex9="isTransactionAex9(transaction)"
+            :payload="getTransactionPayload(transaction)"
+            :is-multisig="isMultisig"
+            :direction="direction"
+            :explorer-url="explorerUrl || ''"
+            :is-local-account-address="isLocalAccountAddress"
+            :gas-price="gasPrice ? +aettosToAe(gasPrice) : 0"
+            :gas-used="gasUsed"
+            :contract-id="contractId"
+            :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
+            :multisig-contract-id="multisigContractId"
+            :hash="hash"
+            :protocol="PROTOCOL_AETERNITY"
           >
-            <template #value>
-              <CopyText :value="tipUrl">
-                <LinkButton :to="tipLink">
-                  <Truncate
-                    :str="tipUrl"
-                    fixed
-                  />
-                </LinkButton>
-              </CopyText>
+            <template #tip-url>
+              <DetailsItem
+                v-if="tipUrl"
+                :label="$t('pages.transactionDetails.tipUrl')"
+                class="tip-url"
+                data-cy="tip-url"
+              >
+                <template #value>
+                  <CopyText :value="tipUrl">
+                    <LinkButton :to="tipLink">
+                      <Truncate
+                        :str="tipUrl"
+                        fixed
+                      />
+                    </LinkButton>
+                  </CopyText>
+                </template>
+              </DetailsItem>
             </template>
-          </DetailsItem>
+          </TransactionDetailsBase>
         </template>
-      </TransactionDetailsBase>
-    </template>
-  </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -61,6 +67,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import { IonContent, IonPage } from '@ionic/vue';
 import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
   useAccounts,
@@ -102,6 +109,8 @@ export default defineComponent({
     CopyText,
     LinkButton,
     Truncate,
+    IonContent,
+    IonPage,
   },
   props: {
     multisigDashboard: { type: Boolean },

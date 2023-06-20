@@ -1,88 +1,83 @@
 <template>
-  <div class="token-container">
-    <Loader v-if="loading" />
-
-    <div class="top">
-      <Tokens
-        :tokens="tokens"
-        :symbol-length="22"
-        vertical
-      />
-
-      <TokenAmount
-        class="token-amount"
-        no-symbol
-        fiat-below
-        large
-        :protocol="PROTOCOL_AETERNITY"
-        :amount="convertedBalance"
-        :aex9="!isAe"
-      />
-    </div>
-
-    <div class="token-actions">
-      <OpenTransferReceiveModalButton
-        :is-multisig="isMultisig"
-        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
-      />
-      <OpenTransferSendModalButton
-        :is-multisig="isMultisig"
-        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
-      />
-      <BtnBox
-        v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
-        :text="$t('common.buy')"
-        :icon="BuyIcon"
-        :href="activeAccountSimplexLink"
-      />
-      <BtnBox
-        v-else-if="isAe && isNodeTestnet"
-        :text="$t('common.faucet')"
-        :icon="FaucetIcon"
-        :href="activeAccountFaucetUrl"
-      />
-      <BtnBox
-        v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
-        :text="$t('common.swap')"
-        :icon="SwapIcon"
-        :href="AE_DEX_URL"
-      />
-    </div>
-
-    <div class="sticky-tabs-wrapper">
-      <Tabs>
-        <Tab
-          v-for="tab in tabs"
-          :key="tab.routeName"
-          :exact-path="tab.exact"
-          :to="{ name: tab.routeName }"
-          :text="tab.text"
-        />
-      </Tabs>
-      <TransactionAndTokenFilter
-        :key="routeName"
-        :show-filters="showFilterBar"
-      />
-    </div>
-    <RouterView
-      v-slot="{ Component }"
-      :contract-id="contractId"
-      :token-pairs="tokenPairs"
-      :token-data="tokenData"
-      :tokens="tokens"
-      :is-multisig="isMultisig"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <transition
-        name="fade-transition"
-        mode="out-in"
-      >
-        <Component :is="Component" />
-      </transition>
-    </RouterView>
-  </div>
+      <div class="token-container">
+        <Loader v-if="loading" />
+
+        <div class="top">
+          <Tokens
+            :tokens="tokens"
+            :symbol-length="22"
+            vertical
+          />
+
+          <TokenAmount
+            class="token-amount"
+            no-symbol
+            fiat-below
+            large
+            :protocol="PROTOCOL_AETERNITY"
+            :amount="convertedBalance"
+            :aex9="!isAe"
+          />
+        </div>
+
+        <div class="token-actions">
+          <OpenTransferReceiveModalButton
+            :is-multisig="isMultisig"
+            :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+          />
+          <OpenTransferSendModalButton
+            :is-multisig="isMultisig"
+            :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+          />
+          <BtnBox
+            v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
+            :text="$t('common.buy')"
+            :icon="BuyIcon"
+            :href="activeAccountSimplexLink"
+          />
+          <BtnBox
+            v-else-if="isAe && isNodeTestnet"
+            :text="$t('common.faucet')"
+            :icon="FaucetIcon"
+            :href="activeAccountFaucetUrl"
+          />
+          <BtnBox
+            v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
+            :text="$t('common.swap')"
+            :icon="SwapIcon"
+            :href="AE_DEX_URL"
+          />
+        </div>
+
+        <div class="sticky-tabs-wrapper">
+          <Tabs>
+            <Tab
+              v-for="tab in tabs"
+              :key="tab.routeName"
+              :exact-path="tab.exact"
+              :to="{ name: tab.routeName }"
+              :text="tab.text"
+            />
+          </Tabs>
+          <TransactionAndTokenFilter
+            :key="routeName"
+            :show-filters="showFilterBar"
+          />
+        </div>
+        <ion-router-outlet
+          class="token-router"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent, IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -141,6 +136,9 @@ export default defineComponent({
     Tab,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
+    IonPage,
+    IonContent,
+    IonRouterOutlet,
   },
   setup() {
     const store = useStore();
@@ -278,6 +276,11 @@ export default defineComponent({
     justify-content: center;
     gap: var(--gap);
     margin-bottom: var(--gap);
+  }
+
+  .token-router {
+    position: inherit;
+    height: 100vh;
   }
 
   .sticky-tabs-wrapper {

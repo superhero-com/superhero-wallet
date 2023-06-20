@@ -1,43 +1,50 @@
 <template>
-  <AccountDetailsBase
-    v-if="activeMultisigAccount"
-    without-default-buttons
-  >
-    <template #account-info>
-      <AccountInfo
-        :address="activeMultisigAccount.gaAccountId"
-        :protocol="PROTOCOL_AETERNITY"
-        is-multisig
-        with-protocol-icon
-        can-copy-address
-      />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <AccountDetailsBase
+        v-if="activeMultisigAccount"
+        without-default-buttons
+      >
+        <template #account-info>
+          <AccountInfo
+            :address="activeMultisigAccount.gaAccountId"
+            :protocol="PROTOCOL_AETERNITY"
+            is-multisig
+            with-protocol-icon
+            can-copy-address
+          />
+        </template>
 
-    <template #balance>
-      <BalanceInfo
-        :balance="+(activeMultisigAccount.balance || 0)"
-        :protocol="PROTOCOL_AETERNITY"
-      />
-    </template>
+        <template #balance>
+          <BalanceInfo
+            :balance="+(activeMultisigAccount.balance || 0)"
+            :protocol="PROTOCOL_AETERNITY"
+          />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton is-multisig />
-      <OpenTransferSendModalButton is-multisig />
-      <BtnBox
-        v-if="UNFINISHED_FEATURES"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="simplexLink"
-      />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton is-multisig />
+          <OpenTransferSendModalButton is-multisig />
+          <BtnBox
+            v-if="UNFINISHED_FEATURES"
+            :icon="CreditCardIcon"
+            :text="$t('common.buy')"
+            :href="simplexLink"
+          />
+        </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation is-multisig />
-    </template>
-  </AccountDetailsBase>
+        <template #navigation>
+          <AccountDetailsNavigation is-multisig />
+        </template>
+      </AccountDetailsBase>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
@@ -63,6 +70,8 @@ export default defineComponent({
     BalanceInfo,
     AccountInfo,
     AccountDetailsBase,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

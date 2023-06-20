@@ -1,36 +1,41 @@
 <template>
-  <div class="auction-history">
-    <span class="title">
-      {{ $t('pages.names.auctions.bids-on') }}
-      <span class="name">{{ name }}</span>
-    </span>
-    <div class="item">
-      <AccountItem
-        :address="highestBid.accountId"
-        :name="getPreferred(highestBid.accountId)"
-        :protocol="PROTOCOL_AETERNITY"
-      />
-      <AuctionOverview :name="name" />
-    </div>
-    <div
-      v-for="(bid, index) in previousBids"
-      :key="index"
-      class="item"
-    >
-      <TokenAmount
-        :amount="+bid.nameFee"
-        :protocol="PROTOCOL_AETERNITY"
-      />
-      <AccountItem
-        :protocol="PROTOCOL_AETERNITY"
-        :address="bid.accountId"
-        :name="getPreferred(bid.accountId)"
-      />
-    </div>
-  </div>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="auction-history">
+        <span class="title">
+          {{ $t('pages.names.auctions.bids-on') }}
+          <span class="name">{{ name }}</span>
+        </span>
+        <div class="item">
+          <AccountItem
+            :address="highestBid.accountId"
+            :name="getPreferred(highestBid.accountId)"
+            :protocol="PROTOCOL_AETERNITY"
+          />
+          <AuctionOverview :name="name" />
+        </div>
+        <div
+          v-for="(bid, index) in previousBids"
+          :key="index"
+          class="item"
+        >
+          <TokenAmount
+            :amount="+bid.nameFee"
+            :protocol="PROTOCOL_AETERNITY"
+          />
+          <AccountItem
+            :protocol="PROTOCOL_AETERNITY"
+            :address="bid.accountId"
+            :name="getPreferred(bid.accountId)"
+          />
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
 import type { IAuctionBid } from '@/types';
 import { useGetter } from '@/composables/vuex';
@@ -40,7 +45,13 @@ import AuctionOverview from '../../components/AuctionOverview.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 
 export default defineComponent({
-  components: { AccountItem, AuctionOverview, TokenAmount },
+  components: {
+    AccountItem,
+    AuctionOverview,
+    TokenAmount,
+    IonPage,
+    IonContent,
+  },
   props: {
     name: { type: String, required: true },
   },

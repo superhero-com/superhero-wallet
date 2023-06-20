@@ -19,6 +19,30 @@ html.is-extension {
   height: $extension-height;
 }
 
+ion-content {
+  /** hide scrollbar **/
+  --offset-bottom: auto !important;
+  --overflow: hidden;
+
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /** remove left-right padding **/
+  &::part(scroll) {
+    --padding-end: 0;
+    --padding-start: 0;
+    --padding-top: 0;
+  }
+}
+
+/** temporary solution for adding background-color to pages **/
+.ion-padding {
+  background-color: $color-bg-app;
+}
+
 html,
 body,
 #app {

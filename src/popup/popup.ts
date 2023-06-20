@@ -20,26 +20,14 @@ import '@ionic/vue/css/normalize.css';
 import '@ionic/vue/css/structure.css';
 import '@ionic/vue/css/typography.css';
 
-/* Optional CSS utils that can be commented out */
-import '@ionic/vue/css/padding.css';
-import '@ionic/vue/css/text-alignment.css';
-import '@ionic/vue/css/text-transformation.css';
-import '@ionic/vue/css/flex-utils.css';
-import '@ionic/vue/css/display.css';
 import '../styles/ionic.scss';
 
 registerModals();
 const app = createApp(App);
-app.use(IonicVue, {
-  mode: 'ios',
-});
+app.use(IonicVue);
 app.use(i18n);
 app.use(store);
 app.use(router);
 app.component('Loader', LoaderComponent);
-// app.mount('#app');
-
-router.isReady().then(() => {
-  app.mount('#app');
-});
+app.mount('#app');
 Logger.init({ app });
