@@ -1,45 +1,52 @@
 <template>
-  <div class="settings">
-    <PanelItem
-      :to="{ name: 'settings-seed-phrase' }"
-      :title="$t('pages.index.seedPhrase')"
-    />
-    <PanelItem
-      :to="{ name: ROUTE_NETWORK_SETTINGS }"
-      :title="$t('pages.titles.networks')"
-      :info="activeNetwork.name"
-      data-cy="networks"
-    />
-    <PanelItem
-      :to="{ name: 'permissions-settings' }"
-      :title="$t('pages.titles.permissionsSettings')"
-    />
-    <PanelItem
-      :to="{ name: 'notification-settings' }"
-      :title="$t('pages.titles.notifications')"
-    />
-    <PanelItem
-      :to="{ name: 'settings-language' }"
-      :title="$t('pages.titles.language')"
-    />
-    <PanelItem
-      :to="{ name: 'settings-currency' }"
-      :title="$t('pages.titles.currency')"
-      :info="activeCurrency"
-    />
-    <PanelItem
-      :to="{ name: 'settings-errors-log' }"
-      :title="$t('pages.titles.saveErrorsLog')"
-      :info="saveErrorLog ? 'On' : 'Off'"
-    />
-    <PanelItem
-      :to="{ name: 'settings-reset-wallet' }"
-      :title="$t('pages.titles.resetWallet')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="settings">
+        <PanelItem
+          :to="{ name: 'settings-seed-phrase' }"
+          :title="$t('pages.index.seedPhrase')"
+        />
+        <PanelItem
+          :to="{ name: ROUTE_NETWORK_SETTINGS }"
+          :title="$t('pages.titles.networks')"
+          :info="activeNetwork.name"
+          data-cy="networks"
+        />
+        <PanelItem
+          :to="{ name: 'permissions-settings' }"
+          :title="$t('pages.titles.permissionsSettings')"
+        />
+        <PanelItem
+          :to="{ name: 'notification-settings' }"
+          :title="$t('pages.titles.notifications')"
+        />
+        <PanelItem
+          :to="{ name: 'settings-language' }"
+          :title="$t('pages.titles.language')"
+        />
+        <PanelItem
+          :to="{ name: 'settings-currency' }"
+          :title="$t('pages.titles.currency')"
+          :info="activeCurrency"
+        />
+        <PanelItem
+          :to="{ name: 'settings-errors-log' }"
+          :title="$t('pages.titles.saveErrorsLog')"
+          :info="saveErrorLog ? 'On' : 'Off'"
+        />
+        <PanelItem
+          :to="{ name: 'settings-reset-wallet' }"
+          :title="$t('pages.titles.resetWallet')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useState } from '@/composables/vuex';
@@ -52,6 +59,8 @@ export default defineComponent({
   name: 'Settings',
   components: {
     PanelItem,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
