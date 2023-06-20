@@ -1,39 +1,50 @@
 <template>
-  <InputField
-    v-bind="$attrs"
-    name="amount"
-    class="input-amount"
-    type="number"
-    placeholder="0.00"
+  <Field
+    v-slot="{ field, errors }"
     :model-value="modelValue"
-    :message="$attrs['message'] || errors[0]"
-    :label="$attrs.label as string || $t('common.amount')"
-    @update:modelValue="$emit('update:modelValue', $event)"
+    :rules="{
+      required: true,
+      min_value_exclusive: 0,
+      enough_ae: fee.toString(),
+      max_value: (max > 0) ? max : undefined,
+    }"
+    name="amount"
   >
-    <template #after>
-      <span class="token">{{ AETERNITY_SYMBOL }}</span>
-      <span
-        class="amount"
-        data-cy="amount-currency"
-      >
-        ({{ currencyAmount }})
-      </span>
-    </template>
-  </InputField>
+    <InputField
+      v-bind="field"
+      class="input-amount"
+      type="number"
+      placeholder="0.00"
+      :model-value="modelValue"
+      :message="$attrs['message'] || errors[0]"
+      :label="$attrs.label as string || $t('common.amount')"
+      @update:modelValue="(value)=> handleUpdateModelValue(value, !!errors[0])"
+    >
+      <template #after>
+        <span class="token">{{ AETERNITY_SYMBOL }}</span>
+        <span
+          class="amount"
+          data-cy="amount-currency"
+        >
+          ({{ currencyAmount }})
+        </span>
+      </template>
+    </InputField>
+  </Field>
 </template>
 
 <script lang="ts">
 import {
   computed,
   defineComponent,
+  nextTick,
   onMounted,
   ref,
-  watch,
 } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Field } from 'vee-validate';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
-import { useField } from 'vee-validate';
 import { AETERNITY_SYMBOL, calculateFee } from '../utils';
 import { useBalances, useCurrencies, useSdk } from '../../composables';
 import InputField from './InputField.vue';
@@ -41,6 +52,7 @@ import InputField from './InputField.vue';
 export default defineComponent({
   components: {
     InputField,
+    Field,
   },
   props: {
     modelValue: { type: [String, Number], default: '' },
@@ -57,14 +69,6 @@ export default defineComponent({
 
     const max = computed(() => balance.value.minus(fee.value).toNumber());
 
-    const { errors } = useField('amount', {
-      required: true,
-      min_value_exclusive: 0,
-      enough_ae: fee.toString(),
-      max_value: (max.value > 0) ? max : undefined,
-    });
-
-    const hasError = computed(() => errors.value.length > 0);
     const currencyAmount = computed(() => getFormattedFiat(+props.modelValue || 0));
 
     onMounted(async () => {
@@ -72,14 +76,19 @@ export default defineComponent({
       fee.value = calculateFee(SCHEMA.TX_TYPE.spend, sdk.Ae.defaults);
     });
 
-    watch(hasError, (val) => emit('error', val));
+    async function handleUpdateModelValue(value: string, hasError: boolean) {
+      nextTick(() => {
+        emit('update:modelValue', value);
+        emit('error', hasError);
+      });
+    }
 
     return {
       AETERNITY_SYMBOL,
       fee,
       max,
       currencyAmount,
-      errors,
+      handleUpdateModelValue,
     };
   },
 });

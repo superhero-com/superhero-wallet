@@ -31,7 +31,8 @@ config.global = {
 describe('InputAmount', () => {
   it('should render', async () => {
     const wrapper = mount(InputAmount);
-    expect(wrapper.classes()).toContain('input-amount');
+    const inputAmount = wrapper.find('.input-amount');
+    expect(inputAmount.exists()).toBeTruthy();
   });
 
   [

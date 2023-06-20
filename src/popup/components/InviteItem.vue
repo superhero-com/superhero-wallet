@@ -208,7 +208,7 @@ export default {
     }
   }
 
-  .input-amount {
+  :deep(.input-amount) {
     margin-bottom: var(--gap);
   }
 
