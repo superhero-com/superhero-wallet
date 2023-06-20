@@ -1,53 +1,58 @@
 <template>
-  <div
-    class="app-wrapper"
-    :class="{
-      'show-header': showHeader,
-      'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
-      'is-extension': IS_EXTENSION,
-    }"
-  >
-    <button
-      v-if="qrScannerOpen"
-      class="camera-close-button"
-    >
-      <Close />
-    </button>
+  <IonApp>
     <div
-      v-show="!qrScannerOpen"
-      ref="innerElement"
-      class="app-inner"
-      :class="{ 'styled-scrollbar': showScrollbar }"
+      class="app-wrapper"
+      :class="{
+        'show-header': showHeader,
+        'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
+        'is-extension': IS_EXTENSION,
+      }"
     >
-      <Header v-if="showHeader" />
-
-      <RouterView
-        v-slot="{ Component }"
-        :class="{ 'show-header': showHeader }"
-        class="main"
+      <button
+        v-if="qrScannerOpen"
+        class="camera-close-button"
       >
-        <Transition name="page-transition">
+        <Close />
+      </button>
+      <div
+        v-show="!qrScannerOpen"
+        ref="innerElement"
+        class="app-inner"
+        :class="{ 'styled-scrollbar': showScrollbar }"
+      >
+        <Header v-if="showHeader" />
+
+        <ion-router-outlet
+          v-slot="{ Component }"
+
+          class="ion-padding main"
+          style="padding-top: 3em;"
+          :class="{ 'show-header': showHeader }"
+        >
           <Component :is="Component" />
-        </Transition>
-      </RouterView>
+        </ion-router-outlet>
 
-      <NodeConnectionStatus
-        v-if="!modalsOpen.length"
-        class="connection-status"
-      />
+        <NodeConnectionStatus
+          v-if="!modalsOpen.length"
+          class="connection-status"
+        />
 
-      <Component
-        v-bind="props"
-        :is="component"
-        v-for="({ component, key, props, viewComponentName }) in modalsOpen"
-        :key="key"
-        :view-component-name="viewComponentName"
-      />
+        <Component
+          v-bind="props"
+          :is="component"
+          v-for="({ component, key, props, viewComponentName }) in modalsOpen"
+          :key="key"
+          :view-component-name="viewComponentName"
+        />
+      </div>
     </div>
-  </div>
+  </IonApp>
 </template>
 
 <script lang="ts">
+import {
+  IonRouterOutlet, IonApp,
+} from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -93,6 +98,8 @@ export default defineComponent({
     Header,
     NodeConnectionStatus,
     Close,
+    IonApp,
+    IonRouterOutlet,
   },
   setup() {
     const store = useStore();
