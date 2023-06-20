@@ -1,39 +1,44 @@
 <template>
-  <div class="language-settings">
-    <p class="text-description">
-      {{ $t('pages.languageSettings.chooseLanguage') }}
-    </p>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="language-settings">
+        <p class="text-description">
+          {{ $t('pages.languageSettings.chooseLanguage') }}
+        </p>
 
-    <div class="languages">
-      <RadioButton
-        v-for="{ code, name } in list"
-        :key="code"
-        :value="active && active.name == name"
-        :disabled="false"
-        :class="['language', {active: active && active.name == name}]"
-        @input="switchLanguage(code)"
-      >
-        <div
-          class="row"
-          @click="switchLanguage(code)"
-        >
-          <div>
-            {{ name }}
-            <span>({{ code }})</span>
-          </div>
+        <div class="languages">
+          <RadioButton
+            v-for="{ code, name } in list"
+            :key="code"
+            :value="active && active.name == name"
+            :disabled="false"
+            :class="['language', {active: active && active.name == name}]"
+            @input="switchLanguage(code)"
+          >
+            <div
+              class="row"
+              @click="switchLanguage(code)"
+            >
+              <div>
+                {{ name }}
+                <span>({{ code }})</span>
+              </div>
+            </div>
+          </RadioButton>
         </div>
-      </RadioButton>
-    </div>
-  </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script>
 /* eslint-disable global-require */
 import { mapGetters } from 'vuex';
+import { IonPage, IonContent } from '@ionic/vue';
 import RadioButton from '../components/RadioButton.vue';
 
 export default {
-  components: { RadioButton },
+  components: { RadioButton, IonPage, IonContent },
   computed: mapGetters('languages', ['list', 'active']),
   methods: {
     async switchLanguage(code) {
