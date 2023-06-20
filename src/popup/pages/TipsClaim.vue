@@ -43,8 +43,12 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapState, useStore } from 'vuex';
+<script lang="ts">
+import { useStore } from 'vuex';
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+
 import {
   BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
@@ -54,8 +58,11 @@ import {
   watchUntilTruthy,
 } from '../utils';
 import { IS_EXTENSION } from '../../lib/environment';
-import { useAccounts, useModals } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
+
+import { useAccounts, useModals } from '../../composables';
+import { useGetter, useState } from '../../composables/vuex';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -70,82 +77,89 @@ export default {
   },
   setup() {
     const store = useStore();
+    const { t } = useI18n();
+    const router = useRouter();
+
     const { activeAccount } = useAccounts({ store });
+    const { openModal, openDefaultModal } = useModals();
 
-    return {
-      activeAccount,
-    };
-  },
-  data: () => ({
-    url: '',
-    loading: false,
-    BLOG_CLAIM_TIP_URL,
-  }),
-  computed: {
-    ...mapState(['tippingV1']),
-    ...mapGetters('sdkPlugin', ['sdk']),
-    ...mapGetters(['tippingSupported']),
-    normalizedUrl() {
-      if (!validateTipUrl(this.url)) return '';
-      return toURL(this.url).toString();
-    },
-  },
-  async mounted() {
-    if (IS_EXTENSION) {
-      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-      if (tab && validateTipUrl(tab.url)) {
-        this.url = tab.url;
+    const url = ref('');
+    const loading = ref(false);
+
+    const tippingV1 = useState('tippingV1');
+    const sdk = useGetter('sdkPlugin/sdk');
+    const tippingSupported = useGetter('tippingSupported');
+
+    const normalizedUrl = computed(() => {
+      if (!validateTipUrl(url.value)) {
+        return '';
       }
-    }
-  },
-  methods: {
-    async claimTips() {
-      const { openModal, openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store });
+      return toURL(url.value).toString();
+    });
 
-      const url = this.normalizedUrl;
-      this.loading = true;
-      await watchUntilTruthy(() => this.sdk && this.tippingV1);
+    async function claimTips() {
+      const _url = normalizedUrl;
+      loading.value = true;
+      await watchUntilTruthy(() => sdk && tippingV1.value);
       try {
         const claimAmount = parseFloat(
           aettosToAe(
-            await this.tippingV1.methods
-              .unclaimed_for_url(url)
-              .then((r) => r.decodedResult)
+            await tippingV1.value.methods
+              .unclaimed_for_url(_url)
+              .then((r: any) => r.decodedResult)
               .catch(() => 1),
           ),
         );
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await store.dispatch('claimTips', { url: _url.value, address: activeAccount.value.address });
         await store.dispatch('cacheInvalidateOracle');
         await store.dispatch('cacheInvalidateTips');
 
-        openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
+        openModal(MODAL_CLAIM_SUCCESS, { url: _url, claimAmount });
 
-        this.$router.push({ name: ROUTE_ACCOUNT });
-      } catch (e) {
+        router.push({ name: ROUTE_ACCOUNT });
+      } catch (e: any) {
         const { error = '' } = e.response ? e.response.data : {};
         let msg;
-        if (error.includes('MORE_ORACLES_NEEDED')) msg = this.$t('pages.claim.moreOracles');
-        else if (error.includes('URL_NOT_EXISTING')) msg = this.$t('pages.claim.urlNotExisting');
+        if (error.includes('MORE_ORACLES_NEEDED')) msg = t('pages.claim.moreOracles');
+        else if (error.includes('URL_NOT_EXISTING')) msg = t('pages.claim.urlNotExisting');
         else if (
           error.includes('NO_ZERO_AMOUNT_PAYOUT')
           || e.message.includes('NO_ZERO_AMOUNT_PAYOUT')
-        ) msg = this.$t('pages.claim.noZeroClaim');
-        else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) msg = this.$t('pages.claim.oracleFailed');
+        ) msg = t('pages.claim.noZeroClaim');
+        else if (error.includes('ORACLE_SEVICE_CHECK_CLAIM_FAILED')) msg = t('pages.claim.oracleFailed');
         else if (error) msg = error;
         if (msg) {
           openDefaultModal({ msg });
         } else {
-          e.payload = { url };
+          e.payload = { url: _url };
           throw e;
         }
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    },
+    }
+
+    onMounted(async () => {
+      if (IS_EXTENSION) {
+        const [tab] = await browser?.tabs.query({ active: true, currentWindow: true });
+        if (tab && validateTipUrl(tab.url)) {
+          url.value = tab.url;
+        }
+      }
+    });
+
+    return {
+      BLOG_CLAIM_TIP_URL,
+      tippingSupported,
+      normalizedUrl,
+      activeAccount,
+      loading,
+      url,
+      claimTips,
+    };
   },
 };
 </script>
