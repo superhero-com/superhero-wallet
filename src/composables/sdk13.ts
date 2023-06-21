@@ -1,10 +1,12 @@
 import { computed, ref } from 'vue';
 import {
+  AeSdk,
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
   CompilerHttp,
 } from '@aeternity/aepp-sdk-13';
+
 import { ShSdkWallet } from '../lib/shSdkWallet';
 import type {
   IDefaultComposableOptions,
@@ -24,12 +26,14 @@ import { useAccounts } from './accounts';
 import { FramesConnection } from '../lib/FramesConnection';
 
 let sdk: ShSdkWallet;
+let drySdk: AeSdk;
 let sdkBlocked = false;
 let sdkCurrentNetwork: INetwork;
 const isNodeConnecting = ref<boolean>(false);
 const isNodeReady = ref<boolean>(false);
 const isNodeError = ref<boolean>(false);
 const aeppInfo: Record<string, any> = {};
+const nodeNetworkId = ref<string>();
 
 /**
  * Composable that will replace the Vuex SDK plugin.
@@ -51,10 +55,11 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     try {
       // TODO: remove ignore version once HTTP compiler dependency is removed
       nodeInstance = new Node(url, { ignoreVersion: true });
-      await nodeInstance.getStatus();
+      nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
       isNodeReady.value = true;
     } catch (error) {
       isNodeError.value = true;
+      nodeNetworkId.value = undefined;
       return null;
     } finally {
       isNodeConnecting.value = false;
@@ -150,6 +155,30 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     return sdk;
   }
 
+  /**
+   * drySdk is the sdk instance with no accounts attached.
+   * To use for multisig operations.
+   */
+  async function getDrySdk(): Promise<AeSdk> {
+    if (!drySdk) {
+      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+      drySdk = new AeSdk({
+        nodes: [{
+          name: activeNetwork.value.name,
+          instance: nodeInstance!,
+        }],
+      });
+      return drySdk;
+    }
+    const networkId = await drySdk.api.getNetworkId();
+    if (activeNetwork.value.networkId !== networkId) {
+      drySdk.pool.delete(sdkCurrentNetwork.name);
+      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+      drySdk.addNode(activeNetwork.value.name, nodeInstance!, true);
+    }
+    return drySdk;
+  }
+
   async function fetchRespondChallenge(
     responseChallenge: IResponseChallenge,
   ): Promise<IRespondChallenge> {
@@ -169,7 +198,9 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     isNodeConnecting,
     isNodeError,
     isSdkReady,
+    nodeNetworkId,
     getSdk,
+    getDrySdk,
     fetchRespondChallenge,
   };
 }

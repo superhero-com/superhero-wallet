@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
-import { Universal, Node } from '@aeternity/aepp-sdk';
-import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
+import { Node } from '@aeternity/aepp-sdk';
+import type { IDefaultComposableOptions, ISdk } from '../types';
 import {
   DEX_CONTRACTS,
   NETWORK_ID_MAINNET,
@@ -13,7 +13,6 @@ import {
 import { RUNNING_IN_TESTS } from '../lib/environment';
 
 const nodeNetworkId = ref<string>();
-let drySdk: ISdk;
 
 /**
  * Composable that will replace the Vuex SDK plugin.
@@ -24,7 +23,6 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   const isSdkReady = computed(() => !!sdk.value);
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
   const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
@@ -60,27 +58,6 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     return watchUntilTruthy(() => sdk.value);
   }
 
-  /**
-   * drySdk is the sdk instance with no accounts attached.
-   * To use for multisig operations.
-   */
-  async function getDrySdk(): Promise<ISdk> {
-    if (!drySdk) {
-      const { compilerUrl, name, url } = activeNetwork.value;
-      drySdk = await Universal({
-        nodes: [{
-          name,
-          instance: await Node({ url }),
-        }],
-        compilerUrl,
-      });
-    } else if (activeNetwork.value.url !== drySdk.selectedNode.instance.url) {
-      drySdk.pool.delete(activeNetwork.value.name);
-      drySdk.addNode(activeNetwork.value.name, await Node({ url: activeNetwork.value.url }), true);
-    }
-    return drySdk;
-  }
-
   return {
     nodeNetworkId,
     isNodeReady,
@@ -94,6 +71,5 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     dexContracts,
     createNewNodeInstance,
     getSdk,
-    getDrySdk,
   };
 }

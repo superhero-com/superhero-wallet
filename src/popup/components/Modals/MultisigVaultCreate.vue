@@ -181,6 +181,8 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Field, Form, useFormErrors } from 'vee-validate';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -270,7 +272,7 @@ export default defineComponent({
 
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
-    const currentMultisigAccountId = ref<string>('');
+    const currentMultisigAccountId = ref<Encoded.AccountAddress>();
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       return (
@@ -297,9 +299,7 @@ export default defineComponent({
     );
 
     function addNewSigner() {
-      signers.value.push({
-        address: '',
-      });
+      signers.value.push({ address: undefined });
     }
 
     function removeSigner(index: number) {
@@ -359,7 +359,7 @@ export default defineComponent({
     async function openReviewStep() {
       currentMultisigAccountId.value = await prepareVaultCreationAttachTx(
         confirmationsRequired.value,
-        signers.value.map(({ address }) => address),
+        signers.value.map(({ address }) => address!),
       );
       currentStep.value = STEPS.review;
     }
@@ -367,10 +367,13 @@ export default defineComponent({
     async function createMultisigAccount() {
       currentStep.value = STEPS.processing;
       try {
+        if (!currentMultisigAccountId.value) {
+          throw Error(String(t('multisig.multisigVaultCreationFailed')));
+        }
         await deployMultisigAccount(
           currentMultisigAccountId.value,
           confirmationsRequired.value,
-          signers.value.map(({ address }) => address),
+          signers.value.map(({ address }) => address!),
         );
       } catch (error) {
         handleUnknownError(error);

@@ -7,6 +7,7 @@ import {
   Ref,
 } from 'vue';
 import BigNumber from 'bignumber.js';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 
 import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
@@ -31,7 +32,7 @@ import { useAccounts } from './accounts';
 export interface IFormModel {
   amount?: string;
   selectedAsset?: IAsset;
-  address?: string;
+  address?: Encoded.AccountAddress;
   payload?: string;
 }
 export interface MaxAmountOptions extends IDefaultComposableOptions {

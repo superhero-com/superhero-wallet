@@ -92,6 +92,8 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import {
   IAccountFetched,
   ICreateMultisigAccount,
@@ -106,7 +108,7 @@ import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
-  useSdk,
+  useSdk13,
 } from '../../composables';
 
 import AccountSelector from './AccountSelector.vue';
@@ -134,7 +136,7 @@ export default defineComponent({
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     signers: { type: Array as PropType<ICreateMultisigAccount[]>, required: true },
     confirmationsRequired: { type: Number, required: true },
-    accountId: { type: String, required: true },
+    accountId: { type: String as PropType<Encoded.AccountAddress>, required: true },
   },
   setup(props) {
     const store = useStore();
@@ -147,11 +149,13 @@ export default defineComponent({
     } = useMultisigAccountCreate({ store });
     const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk({ store });
+    const { getSdk } = useSdk13({ store });
 
     const { openModal } = useModals();
 
-    const creatorAddress = ref<string>(props.signers[0].address || accounts.value[0].address);
+    const creatorAddress = ref<Encoded.AccountAddress>(
+      props.signers[0].address || accounts.value[0].address,
+    );
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
       () => accounts.value.find(({ address }) => address === creatorAddress.value),
@@ -167,7 +171,11 @@ export default defineComponent({
         creatorAccountFetched.value = undefined;
         const sdk = await getSdk();
         try {
-          creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+          const rawAccount = await sdk.api.getAccountByPubkey(val);
+          creatorAccountFetched.value = {
+            ...rawAccount,
+            balance: rawAccount.balance.toString(),
+          };
         } catch (error) {
           handleUnknownError(error);
           creatorAccountFetched.value = {

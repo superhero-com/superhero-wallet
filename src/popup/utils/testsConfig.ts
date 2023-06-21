@@ -1,4 +1,5 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import type { IPopupConfig } from '../../types';
 import {
   AETERNITY_CONTRACT_ID,
@@ -66,7 +67,7 @@ export const popupProps: Record<string, IPopupConfig> = {
       host: 'localhost',
     },
     tx: {
-      tag: '12',
+      tag: Tag.SpendTx,
       VSN: '1',
       senderId: testAccount.address,
       recipientId,

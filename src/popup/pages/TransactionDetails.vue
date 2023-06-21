@@ -246,9 +246,12 @@ import {
   defineComponent,
   ref,
   onMounted,
+  PropType,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import {
   AETERNITY_SYMBOL,
   FUNCTION_TYPE_DEX,
@@ -315,7 +318,7 @@ export default defineComponent({
   props: {
     hash: { type: String, required: true },
     multisigDashboard: { type: Boolean },
-    transactionOwner: { type: String, default: '' },
+    transactionOwner: { type: String as PropType<Encoded.AccountAddress>, default: '' },
   },
   setup(props) {
     const store = useStore();
@@ -324,7 +327,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount } = useAccounts({ store });
 
-    const externalAddress = computed((): string => (
+    const externalAddress = computed((): Encoded.AccountAddress => (
       props.transactionOwner
       || (
         props.multisigDashboard

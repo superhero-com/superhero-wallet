@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import {
   computed,
   defineComponent,
@@ -184,11 +185,11 @@ export default defineComponent({
       }
     });
 
-    async function decodeClaimTransactionAccount(): Promise<string> {
+    async function decodeClaimTransactionAccount(): Promise<Encoded.AccountAddress | undefined> {
       // eslint-disable-next-line camelcase
       const calldata = innerTx.value.callData || innerTx.value.call_data;
 
-      if (!(innerTx.value.contractId && calldata)) return '';
+      if (!(innerTx.value.contractId && calldata)) return undefined;
 
       const sdk = await getSdk();
       const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
@@ -197,7 +198,7 @@ export default defineComponent({
         `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
         { body: { bytecode, calldata } },
       );
-      if (!txParams) return '';
+      if (!txParams) return undefined;
 
       return txParams.arguments?.find((param: any) => param.type === 'address')?.value;
     }

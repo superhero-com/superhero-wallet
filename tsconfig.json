@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "baseUrl": ".",
     "jsx": "preserve",
@@ -10,9 +11,14 @@
     "paths": {
       // "@/*": ["src/*"] // TODO - Uncomment when short paths will be enabled again
     },
+    "strict": true,
+    "strictFunctionTypes": false,
     "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/@aeternity/aepp-sdk-13/src/typings"
+    ],
     "outDir": "dist",
   },
   "include": [
