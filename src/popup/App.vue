@@ -1,5 +1,5 @@
 <template>
-  <IonApp>
+  <IonApp class="ionic-wrapper">
     <div
       class="app-wrapper"
       :class="{
@@ -226,6 +226,14 @@ export default defineComponent({
 @use '../styles/variables';
 @use '../styles/typography';
 @use '../styles/mixins';
+
+.ionic-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+};
 
 .app-wrapper {
   --screen-padding-x: 16px;
