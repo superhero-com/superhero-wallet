@@ -26,7 +26,6 @@
           v-slot="{ Component }"
 
           class="ion-padding main"
-          style="padding-top: 3em;"
           :class="{ 'show-header': showHeader }"
         >
           <Component :is="Component" />
@@ -270,6 +269,7 @@ export default defineComponent({
   }
 
   .main {
+    margin-top: var(--header-height);
     padding-bottom: 0;
     padding-bottom: env(safe-area-inset-bottom);
     padding-top: env(safe-area-inset-top);
