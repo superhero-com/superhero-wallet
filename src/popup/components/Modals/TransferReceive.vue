@@ -146,17 +146,18 @@ export default defineComponent({
       () => root.$store.state.fungibleTokens.availableTokens,
     );
 
-    function getTokenInfoQuery(): Record<string, string> {
+    function getTokenInfoQuery(account?: string): Record<string, string> {
       if (!amount.value || amount.value <= 0) return {};
       const token = (selectedAsset.value?.contractId === AETERNITY_CONTRACT_ID)
         ? AETERNITY_SYMBOL
         : selectedAsset.value?.contractId || AETERNITY_SYMBOL;
-      return { token, amount: amount.value.toString() };
+      const tokenResult = { token, amount: amount.value.toString() };
+      return account ? { ...tokenResult, account } : tokenResult;
     }
 
-    function getAccountLink(value: string | undefined) {
-      return value
-        ? RouteQueryActionsController.createUrl('/account', 'transferSend', getTokenInfoQuery())
+    function getAccountLink(address: string | undefined) {
+      return address
+        ? RouteQueryActionsController.createUrl('/account', 'transferSend', getTokenInfoQuery(address))
         : '';
     }
 

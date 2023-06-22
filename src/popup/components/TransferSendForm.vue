@@ -365,7 +365,7 @@ export default defineComponent({
       return nextTick();
     }
 
-    async function updateFormModelValues({
+    function updateFormModelValues({
       account,
       amount,
       payload,
