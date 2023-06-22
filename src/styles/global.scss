@@ -31,7 +31,13 @@ ion-content {
   &::part(scroll) {
     --padding-end: 0px;
     --padding-start: 0px;
+    --padding-top: 0px;
   }
+}
+
+/** temporary solution for adding background-color to pages **/
+.ion-padding {
+  background-color: $color-bg-app;
 }
 
 html,
