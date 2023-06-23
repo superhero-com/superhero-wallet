@@ -1,27 +1,34 @@
 <template>
-  <DashboardWrapper>
-    <template #header>
-      <DashboardHeaderMultisig />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <DashboardWrapper>
+        <template #header>
+          <DashboardHeaderMultisig />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton
-        is-multisig
-        is-big
-      />
-      <OpenTransferSendModalButton
-        is-multisig
-        is-big
-      />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton
+            is-multisig
+            is-big
+          />
+          <OpenTransferSendModalButton
+            is-multisig
+            is-big
+          />
+        </template>
 
-    <template #widgets>
-      <PendingMultisigTransactionCard />
-    </template>
-  </DashboardWrapper>
+        <template #widgets>
+          <PendingMultisigTransactionCard />
+        </template>
+      </DashboardWrapper>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 
 import { MODAL_TRANSFER_SEND } from '../utils';
@@ -43,6 +50,8 @@ export default defineComponent({
     DashboardHeaderMultisig,
     DashboardWrapper,
     PendingMultisigTransactionCard,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { openModal } = useModals();

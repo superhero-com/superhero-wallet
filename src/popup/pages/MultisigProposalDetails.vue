@@ -1,260 +1,266 @@
 <template>
-  <div class="multisig-proposal-details">
-    <AnimatedSpinner
-      v-if="!activeMultisigAccount || !multisigTx"
-      class="spinner"
-    />
-    <template v-else>
-      <div
-        class="header"
-      >
-        <TransactionTokens
-          v-if="multisigTx"
-          :transaction="{ tx: multisigTx }"
-          icon-size="md"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="multisig-proposal-details">
+        <AnimatedSpinner
+          v-if="!activeMultisigAccount || !multisigTx"
+          class="spinner"
         />
-      </div>
-      <div class="content">
-        <TransactionInfo
-          v-if="multisigTx"
-          class="transaction-overview"
-          :sender="{
-            label: $t('multisig.multisigVault'),
-            address: activeMultisigAccount.gaAccountId
-          }"
-          :recipient="{
-            label: $t('common.smartContract'),
-            address: activeMultisigAccount.contractId
-          }"
-          :transaction="{ tx: multisigTx }"
-        />
-        <div class="explorer">
-          <LinkButton
-            :to="getExplorerPath(activeMultisigAccount.contractId)"
-            variant="muted"
-            underlined
+        <template v-else>
+          <div
+            class="header"
           >
-            {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
-          </LinkButton>
-        </div>
-        <div class="data-grid">
-          <DetailsItem
-            v-if="multisigTx && multisigTx.recipientId"
-            :label="$t('pages.proposalDetails.receivingAddress')"
-            small
-          >
-            <template #value>
-              <div class="receiving-address">
-                <Avatar
-                  :address="multisigTx.recipientId"
-                  size="sm"
-                />
-                <CopyText
-                  hide-icon
-                  :value="multisigTx.recipientId"
-                  :copied-text="$t('common.addressCopied')"
-                >
-                  <span class="text-address">{{ splitAddress(multisigTx.recipientId) }}</span>
-                </CopyText>
-              </div>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="activeMultisigAccount.proposedBy"
-            :label="$t('pages.proposalDetails.proposedBy')"
-            small
-          >
-            <template #value>
-              <div class="row">
-                <AccountItem :address="activeMultisigAccount.proposedBy" />
-                <DialogBox
-                  v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
-                  dense
-                >
-                  {{ $t('common.you') }}
-                </DialogBox>
-              </div>
-            </template>
-          </DetailsItem>
-
-          <MultisigProposalConsensus :proposal-completed="proposalCompleted" />
-
-          <DetailsItem
-            v-if="transaction"
-            :label="$t('pages.transactionDetails.hash')"
-            data-cy="hash"
-            small
-          >
-            <template #value>
-              <CopyText
-                hide-icon
-                :value="transaction.hash"
-                :copied-text="$t('common.hashCopied')"
+            <TransactionTokens
+              v-if="multisigTx"
+              :transaction="{ tx: multisigTx }"
+              icon-size="md"
+            />
+          </div>
+          <div class="content">
+            <TransactionInfo
+              v-if="multisigTx"
+              class="transaction-overview"
+              :sender="{
+                label: $t('multisig.multisigVault'),
+                address: activeMultisigAccount.gaAccountId
+              }"
+              :recipient="{
+                label: $t('common.smartContract'),
+                address: activeMultisigAccount.contractId
+              }"
+              :transaction="{ tx: multisigTx }"
+            />
+            <div class="explorer">
+              <LinkButton
+                :to="getExplorerPath(activeMultisigAccount.contractId)"
+                variant="muted"
+                underlined
               >
-                <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
-              </CopyText>
-            </template>
-          </DetailsItem>
+                {{ $t('pages.transactionDetails.explorer') }}
+                <ExternalLink />
+              </LinkButton>
+            </div>
+            <div class="data-grid">
+              <DetailsItem
+                v-if="multisigTx && multisigTx.recipientId"
+                :label="$t('pages.proposalDetails.receivingAddress')"
+                small
+              >
+                <template #value>
+                  <div class="receiving-address">
+                    <Avatar
+                      :address="multisigTx.recipientId"
+                      size="sm"
+                    />
+                    <CopyText
+                      hide-icon
+                      :value="multisigTx.recipientId"
+                      :copied-text="$t('common.addressCopied')"
+                    >
+                      <span class="text-address">{{ splitAddress(multisigTx.recipientId) }}</span>
+                    </CopyText>
+                  </div>
+                </template>
+              </DetailsItem>
 
-          <PayloadDetails
-            v-if="multisigTx"
-            :payload="getPayload(multisigTx)"
-          />
+              <DetailsItem
+                v-if="activeMultisigAccount.proposedBy"
+                :label="$t('pages.proposalDetails.proposedBy')"
+                small
+              >
+                <template #value>
+                  <div class="row">
+                    <AccountItem :address="activeMultisigAccount.proposedBy" />
+                    <DialogBox
+                      v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
+                      dense
+                    >
+                      {{ $t('common.you') }}
+                    </DialogBox>
+                  </div>
+                </template>
+              </DetailsItem>
 
-          <div class="span-3-columns">
-            <DetailsItem
-              v-if="activeMultisigAccount.expirationHeight"
-              :value="activeMultisigAccount.expirationHeight"
-              :label="$t('pages.proposalDetails.expiresAt')"
-              :secondary="expirationHeightToRelativeTime"
-            />
-            <DetailsItem
-              v-else-if="transaction"
-              :value="transaction.blockHeight"
-              :label="$t('pages.transactionDetails.blockHeight')"
-            />
-            <DetailsItem
-              v-if="activeMultisigAccount.nonce"
-              :value="activeMultisigAccount.nonce"
-              :label="$t('pages.transactionDetails.nonce')"
-              data-cy="nonce"
-            />
+              <MultisigProposalConsensus :proposal-completed="proposalCompleted" />
+
+              <DetailsItem
+                v-if="transaction"
+                :label="$t('pages.transactionDetails.hash')"
+                data-cy="hash"
+                small
+              >
+                <template #value>
+                  <CopyText
+                    hide-icon
+                    :value="transaction.hash"
+                    :copied-text="$t('common.hashCopied')"
+                  >
+                    <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
+                  </CopyText>
+                </template>
+              </DetailsItem>
+
+              <PayloadDetails
+                v-if="multisigTx"
+                :payload="getPayload(multisigTx)"
+              />
+
+              <div class="span-3-columns">
+                <DetailsItem
+                  v-if="activeMultisigAccount.expirationHeight"
+                  :value="activeMultisigAccount.expirationHeight"
+                  :label="$t('pages.proposalDetails.expiresAt')"
+                  :secondary="expirationHeightToRelativeTime"
+                />
+                <DetailsItem
+                  v-else-if="transaction"
+                  :value="transaction.blockHeight"
+                  :label="$t('pages.transactionDetails.blockHeight')"
+                />
+                <DetailsItem
+                  v-if="activeMultisigAccount.nonce"
+                  :value="activeMultisigAccount.nonce"
+                  :label="$t('pages.transactionDetails.nonce')"
+                  data-cy="nonce"
+                />
+              </div>
+              <DetailsItem
+                v-if="multisigTx.gasPrice"
+                :label="$t('pages.transactionDetails.gasPrice')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+(aettosToAe(multisigTx.gasPrice))"
+                    symbol="AE"
+                    hide-fiat
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="transaction && transaction.tx"
+                :label="$t('pages.transactionDetails.gasPrice')"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(transaction.tx.gasPrice)"
+                    :symbol="AETERNITY_SYMBOL"
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="transaction && transaction.tx"
+                :value="transaction.tx.gas"
+                :label="$t('pages.transactionDetails.gasUsed')"
+              />
+
+              <DetailsItem
+                v-if="multisigTx"
+                :label="$t('modals.multisigTxProposal.fee')"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(multisigTx.fee)"
+                    :symbol="AETERNITY_SYMBOL"
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="transaction"
+                :label="$t('transaction.fee')"
+                data-cy="fee"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(transaction.tx.fee)"
+                    :symbol="AETERNITY_SYMBOL"
+                  />
+                </template>
+              </DetailsItem>
+
+              <DetailsItem
+                v-if="totalSpent"
+                :label="$t('common.total')"
+                data-cy="amount"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(totalSpent)"
+                    :symbol="AETERNITY_SYMBOL"
+                    high-precision
+                  />
+                </template>
+              </DetailsItem>
+            </div>
+            <div
+              v-if="!proposalCompleted && activeMultisigAccount.txHash"
+              class="bottom-buttons"
+            >
+              <div class="row">
+                <BtnMain
+                  variant="muted"
+                  nowrap
+                  extra-padded
+                  :disabled="processingAction"
+                  @click="dispatchProposalAction(
+                    FUNCTION_TYPE_MULTISIG.refuse,
+                    $t('pages.proposalDetails.refuse')
+                  )"
+                >
+                  {{ $t('pages.proposalDetails.refuse') }}
+                </BtnMain>
+
+                <BtnMain
+                  v-if="pendingMultisigTxCanBeSent"
+                  extend
+                  nowrap
+                  extra-padded
+                  :disabled="processingAction || pendingMultisigTxExpired"
+                  @click="processProposal()"
+                >
+                  {{ $t('common.send') }}
+                </BtnMain>
+                <BtnMain
+                  v-else
+                  extend
+                  nowrap
+                  extra-padded
+                  :disabled="
+                    processingAction
+                      || pendingMultisigTxConfirmedByLocalSigners
+                      || pendingMultisigTxExpired
+                  "
+                  @click="dispatchProposalAction(
+                    FUNCTION_TYPE_MULTISIG.confirm,
+                    $t('pages.proposalDetails.sign')
+                  )"
+                >
+                  {{ $t('pages.proposalDetails.sign') }}
+                </BtnMain>
+              </div>
+              <BtnMain
+                v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
+                variant="muted"
+                extend
+                nowrap
+                extra-padded
+                :disabled="processingAction"
+                @click="dispatchProposalAction(
+                  FUNCTION_TYPE_MULTISIG.revoke,
+                  $t('pages.proposalDetails.revoke')
+                )"
+              >
+                {{ $t('pages.proposalDetails.revokeTransaction') }}
+              </BtnMain>
+            </div>
           </div>
-          <DetailsItem
-            v-if="multisigTx.gasPrice"
-            :label="$t('pages.transactionDetails.gasPrice')"
-            data-cy="gas-price"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+(aettosToAe(multisigTx.gasPrice))"
-                symbol="AE"
-                hide-fiat
-              />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="transaction && transaction.tx"
-            :label="$t('pages.transactionDetails.gasPrice')"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(transaction.tx.gasPrice)"
-                :symbol="AETERNITY_SYMBOL"
-              />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="transaction && transaction.tx"
-            :value="transaction.tx.gas"
-            :label="$t('pages.transactionDetails.gasUsed')"
-          />
-
-          <DetailsItem
-            v-if="multisigTx"
-            :label="$t('modals.multisigTxProposal.fee')"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(multisigTx.fee)"
-                :symbol="AETERNITY_SYMBOL"
-              />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="transaction"
-            :label="$t('transaction.fee')"
-            data-cy="fee"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(transaction.tx.fee)"
-                :symbol="AETERNITY_SYMBOL"
-              />
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="totalSpent"
-            :label="$t('common.total')"
-            data-cy="amount"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(totalSpent)"
-                :symbol="AETERNITY_SYMBOL"
-                high-precision
-              />
-            </template>
-          </DetailsItem>
-        </div>
-        <div
-          v-if="!proposalCompleted && activeMultisigAccount.txHash"
-          class="bottom-buttons"
-        >
-          <div class="row">
-            <BtnMain
-              variant="muted"
-              nowrap
-              extra-padded
-              :disabled="processingAction"
-              @click="dispatchProposalAction(
-                FUNCTION_TYPE_MULTISIG.refuse,
-                $t('pages.proposalDetails.refuse')
-              )"
-            >
-              {{ $t('pages.proposalDetails.refuse') }}
-            </BtnMain>
-
-            <BtnMain
-              v-if="pendingMultisigTxCanBeSent"
-              extend
-              nowrap
-              extra-padded
-              :disabled="processingAction || pendingMultisigTxExpired"
-              @click="processProposal()"
-            >
-              {{ $t('common.send') }}
-            </BtnMain>
-            <BtnMain
-              v-else
-              extend
-              nowrap
-              extra-padded
-              :disabled="
-                processingAction
-                  || pendingMultisigTxConfirmedByLocalSigners
-                  || pendingMultisigTxExpired
-              "
-              @click="dispatchProposalAction(
-                FUNCTION_TYPE_MULTISIG.confirm,
-                $t('pages.proposalDetails.sign')
-              )"
-            >
-              {{ $t('pages.proposalDetails.sign') }}
-            </BtnMain>
-          </div>
-          <BtnMain
-            v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
-            variant="muted"
-            extend
-            nowrap
-            extra-padded
-            :disabled="processingAction"
-            @click="dispatchProposalAction(
-              FUNCTION_TYPE_MULTISIG.revoke,
-              $t('pages.proposalDetails.revoke')
-            )"
-          >
-            {{ $t('pages.proposalDetails.revokeTransaction') }}
-          </BtnMain>
-        </div>
+          <Loader v-if="processingAction" />
+        </template>
       </div>
-      <Loader v-if="processingAction" />
-    </template>
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -271,6 +277,7 @@ import { isEqual } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
+import { IonContent, IonPage } from '@ionic/vue';
 
 import {
   formatDate,
@@ -333,6 +340,8 @@ export default defineComponent({
     CopyText,
     AnimatedSpinner,
     ExternalLink,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { openDefaultModal, openModal } = useModals();
