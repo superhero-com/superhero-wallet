@@ -1,17 +1,23 @@
 <template>
-  <div class="account-details-transactions">
-    <TransactionList
-      v-if="isOnline"
-      :transactions="transactions"
-      :loading="loading"
-      @load-more="loadMoreTransactions()"
-    />
-    <MessageOffline
-      v-else
-      class="offline-message"
-      :text="$t('modals.accountDetails.transactionsNotAvailable')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="account-details-transactions">
+        <TransactionList
+          v-if="isOnline"
+          :transactions="transactions"
+          :loading="loading"
+          @load-more="loadMoreTransactions()"
+        />
+        <MessageOffline
+          v-else
+          class="offline-message"
+          :text="$t('modals.accountDetails.transactionsNotAvailable')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -23,6 +29,7 @@ import {
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITransaction } from '@/types';
 import { PROTOCOL_BITCOIN } from '@/constants';
@@ -38,6 +45,8 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   setup() {
     let pollingInterval: NodeJS.Timer;

@@ -1,158 +1,164 @@
 <template>
-  <div class="token-details">
-    <DetailsRow
-      v-if="tokenData.symbol"
-      :label="isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
-      :text="tokenData.symbol"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <template #text>
-        <Tokens
-          v-if="tokens"
-          class="token-details-tokens"
-          :tokens="tokens"
+      <div class="token-details">
+        <DetailsRow
+          v-if="tokenData.symbol"
+          :label="isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
+          :text="tokenData.symbol"
+        >
+          <template #text>
+            <Tokens
+              v-if="tokens"
+              class="token-details-tokens"
+              :tokens="tokens"
+            />
+          </template>
+        </DetailsRow>
+        <DetailsRow
+          v-if="tokenData.decimals"
+          :label="$t('pages.token-details.decimals')"
+          :text="tokenData.decimals"
         />
-      </template>
-    </DetailsRow>
-    <DetailsRow
-      v-if="tokenData.decimals"
-      :label="$t('pages.token-details.decimals')"
-      :text="tokenData.decimals"
-    />
-    <DetailsRow
-      v-if="tokenData.contractId && !isAe"
-      :label="$t('common.smartContract')"
-    >
-      <template #text>
-        <AddressTruncated
-          show-explorer-link
-          :address="tokenData.contractId"
+        <DetailsRow
+          v-if="tokenData.contractId && !isAe"
+          :label="$t('common.smartContract')"
+        >
+          <template #text>
+            <AddressTruncated
+              show-explorer-link
+              :address="tokenData.contractId"
+            />
+          </template>
+        </DetailsRow>
+        <DetailsRow
+          v-if="tokenData.circulatingSupply"
+          :label="$t('pages.token-details.max-supply')"
+          :text="formatNumber(tokenData.circulatingSupply)"
         />
-      </template>
-    </DetailsRow>
-    <DetailsRow
-      v-if="tokenData.circulatingSupply"
-      :label="$t('pages.token-details.max-supply')"
-      :text="formatNumber(tokenData.circulatingSupply)"
-    />
-    <DetailsRow
-      v-if="tokenData.totalSupply"
-      :label="$t('pages.token-details.total-supply')"
-      :text="formatNumber(tokenData.totalSupply)"
-    />
-    <DetailsRow
-      v-if="tokenData.marketCap"
-      :label="$t('pages.token-details.market-cap')"
-      class="price"
-      :text="formatCurrency(tokenData.marketCap)"
-    />
-    <DetailsRow
-      v-if="tokenPairs.balances"
-      :label="$t('pages.token-details.holders')"
-      :text="tokenPairs.balances.size"
-    />
-    <DetailsRow
-      v-if="tokenPairs.token0 && tokenPairs.token0.amount > 0"
-      :text="getPooledTokenAmount(tokenPairs.token0)"
-    >
-      <template #label>
-        {{ $t('pages.token-details.pooled') }}
-        <span class="white">{{ tokenPairs.token0.symbol }}</span>
-      </template>
-    </DetailsRow>
-
-    <DetailsRow
-      v-if="tokenPairs.token1 && tokenPairs.token1.amount > 0"
-      :text="getPooledTokenAmount(tokenPairs.token1)"
-    >
-      <template #label>
-        {{ $t('pages.token-details.pooled') }}
-        <span class="white">{{ tokenPairs.token1.symbol }}</span>
-      </template>
-    </DetailsRow>
-
-    <DetailsRow
-      v-if="poolShare"
-      :label="$t('pages.token-details.poolShare')"
-      :text="poolShare"
-    />
-    <DetailsRow
-      v-if="!isAe && UNFINISHED_FEATURES"
-      :label="$t('pages.token-details.transactions')"
-    />
-
-    <DetailsRow
-      v-if="tokenData.totalVolume"
-      :label="$t('pages.token-details.volume')"
-      :text="formatCurrency(tokenData.totalVolume)"
-    />
-    <DetailsRow
-      v-if="tokenData.marketCapChange24h"
-      class="price"
-      :label="$t('pages.token-details.volumeDaily')"
-    >
-      <template #text>
-        <span
-          :class="{
-            green: tokenData.marketCapChangePercentage24h > 0,
-            red: tokenData.marketCapChangePercentage24h < 0,
-          }"
+        <DetailsRow
+          v-if="tokenData.totalSupply"
+          :label="$t('pages.token-details.total-supply')"
+          :text="formatNumber(tokenData.totalSupply)"
+        />
+        <DetailsRow
+          v-if="tokenData.marketCap"
+          :label="$t('pages.token-details.market-cap')"
+          class="price"
+          :text="formatCurrency(tokenData.marketCap)"
+        />
+        <DetailsRow
+          v-if="tokenPairs.balances"
+          :label="$t('pages.token-details.holders')"
+          :text="tokenPairs.balances.size"
+        />
+        <DetailsRow
+          v-if="tokenPairs.token0 && tokenPairs.token0.amount > 0"
+          :text="getPooledTokenAmount(tokenPairs.token0)"
         >
-          {{ Number(tokenData.marketCapChangePercentage24h).toFixed(2) }}%
-        </span>
-        {{ formatCurrency(tokenData.marketCapChange24h) }}
-      </template>
-    </DetailsRow>
-    <DetailsRow
-      v-if="!isAe && UNFINISHED_FEATURES"
-      :label="$t('pages.token-details.feeDaily')"
-    />
+          <template #label>
+            {{ $t('pages.token-details.pooled') }}
+            <span class="white">{{ tokenPairs.token0.symbol }}</span>
+          </template>
+        </DetailsRow>
 
-    <DetailsRow
-      v-if="!isAe"
-      class="link"
-      :label="$t('pages.token-details.chart')"
-    >
-      <template #text>
-        <LinkButton
-          :to="AE_DEX_URL"
+        <DetailsRow
+          v-if="tokenPairs.token1 && tokenPairs.token1.amount > 0"
+          :text="getPooledTokenAmount(tokenPairs.token1)"
         >
-          {{ displayDexUrl }}
-          <ExternalLink />
-        </LinkButton>
-      </template>
-    </DetailsRow>
-    <DetailsRow
-      v-if="!isAe && UNFINISHED_FEATURES"
-      :label="$t('pages.token-details.price-ae')"
-    />
-    <DetailsRow
-      v-if="tokenData.currentPrice"
-      class="price"
-      :label="$t('pages.token-details.price')"
-    >
-      <template #text>
-        <span
-          :class="{
-            green: tokenData.priceChangePercentage24h > 0,
-            red: tokenData.priceChangePercentage24h < 0,
-          }"
+          <template #label>
+            {{ $t('pages.token-details.pooled') }}
+            <span class="white">{{ tokenPairs.token1.symbol }}</span>
+          </template>
+        </DetailsRow>
+
+        <DetailsRow
+          v-if="poolShare"
+          :label="$t('pages.token-details.poolShare')"
+          :text="poolShare"
+        />
+        <DetailsRow
+          v-if="!isAe && UNFINISHED_FEATURES"
+          :label="$t('pages.token-details.transactions')"
+        />
+
+        <DetailsRow
+          v-if="tokenData.totalVolume"
+          :label="$t('pages.token-details.volume')"
+          :text="formatCurrency(tokenData.totalVolume)"
+        />
+        <DetailsRow
+          v-if="tokenData.marketCapChange24h"
+          class="price"
+          :label="$t('pages.token-details.volumeDaily')"
         >
-          {{ Number(tokenData.priceChangePercentage24h).toFixed(2) }}%
-        </span>
-        {{ formatCurrency(tokenData.currentPrice) }}
-      </template>
-    </DetailsRow>
-    <DetailsRow
-      v-if="tokenData.ath"
-      :label="$t('pages.token-details.ath-change')"
-      :text="formatCurrency(tokenData.ath)"
-    />
-    <DetailsRow
-      v-if="tokenData.atl"
-      :label="$t('pages.token-details.atl-change')"
-      :text="formatCurrency(tokenData.atl)"
-    />
-  </div>
+          <template #text>
+            <span
+              :class="{
+                green: tokenData.marketCapChangePercentage24h > 0,
+                red: tokenData.marketCapChangePercentage24h < 0,
+              }"
+            >
+              {{ Number(tokenData.marketCapChangePercentage24h).toFixed(2) }}%
+            </span>
+            {{ formatCurrency(tokenData.marketCapChange24h) }}
+          </template>
+        </DetailsRow>
+        <DetailsRow
+          v-if="!isAe && UNFINISHED_FEATURES"
+          :label="$t('pages.token-details.feeDaily')"
+        />
+
+        <DetailsRow
+          v-if="!isAe"
+          class="link"
+          :label="$t('pages.token-details.chart')"
+        >
+          <template #text>
+            <LinkButton
+              :to="AE_DEX_URL"
+            >
+              {{ displayDexUrl }}
+              <ExternalLink />
+            </LinkButton>
+          </template>
+        </DetailsRow>
+        <DetailsRow
+          v-if="!isAe && UNFINISHED_FEATURES"
+          :label="$t('pages.token-details.price-ae')"
+        />
+        <DetailsRow
+          v-if="tokenData.currentPrice"
+          class="price"
+          :label="$t('pages.token-details.price')"
+        >
+          <template #text>
+            <span
+              :class="{
+                green: tokenData.priceChangePercentage24h > 0,
+                red: tokenData.priceChangePercentage24h < 0,
+              }"
+            >
+              {{ Number(tokenData.priceChangePercentage24h).toFixed(2) }}%
+            </span>
+            {{ formatCurrency(tokenData.currentPrice) }}
+          </template>
+        </DetailsRow>
+        <DetailsRow
+          v-if="tokenData.ath"
+          :label="$t('pages.token-details.ath-change')"
+          :text="formatCurrency(tokenData.ath)"
+        />
+        <DetailsRow
+          v-if="tokenData.atl"
+          :label="$t('pages.token-details.atl-change')"
+          :text="formatCurrency(tokenData.atl)"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -163,6 +169,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
+import { IonContent, IonPage } from '@ionic/vue';
 import type { IAsset, IToken } from '@/types';
 import { UNFINISHED_FEATURES } from '@/constants';
 import {
@@ -187,6 +194,8 @@ export default defineComponent({
     Tokens,
     ExternalLink,
     LinkButton,
+    IonPage,
+    IonContent,
   },
   props: {
     contractId: { type: String, default: null },
