@@ -1,243 +1,249 @@
 <template>
-  <div class="transaction-details">
-    <AnimatedSpinner
-      v-if="!transaction || transaction.incomplete"
-      class="spinner"
-    />
-    <template v-else>
-      <div
-        v-if="!isAllowance || isErrorTransaction"
-        class="header"
-      >
-        <TransactionErrorStatus
-          v-if="isErrorTransaction"
-          :return-type="transaction.tx.returnType"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="transaction-details">
+        <AnimatedSpinner
+          v-if="!transaction || transaction.incomplete"
+          class="spinner"
         />
-        <TransactionTokens
-          :transaction="transaction"
-          :direction="direction"
-          :is-allowance="isAllowance"
-          :error="isErrorTransaction"
-          :class="{ reverse: isPool }"
-          icon-size="md"
-        />
-      </div>
-      <div class="content">
-        <TransactionOverview :transaction="transaction" />
-        <div class="explorer">
-          <LinkButton :to="explorerPath">
-            {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
-          </LinkButton>
-        </div>
-        <div class="data-grid">
-          <template v-if="isSwap && !isErrorTransaction">
-            <SwapRates :transaction="transaction" />
-            <SwapRoute :transaction="transaction" />
-          </template>
-          <DetailsItem
-            v-if="isErrorTransaction"
-            :label="$t('pages.transactionDetails.reason')"
-            :value="transaction.tx.return"
-            class="reason"
-            data-cy="reason"
-          />
-          <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance)"
-            :transaction="transaction"
-            :direction="direction"
-            :tx-function="transaction.tx.function"
-            :is-allowance="isAllowance"
-            :class="{ reverse: isPool }"
-          />
-
-          <DetailsItem
-            v-if="tipUrl"
-            :label="$t('pages.transactionDetails.tipUrl')"
-            class="tip-url"
-            data-cy="tip-url"
+        <template v-else>
+          <div
+            v-if="!isAllowance || isErrorTransaction"
+            class="header"
           >
-            <template #value>
-              <CopyText :value="tipUrl">
-                <LinkButton :to="tipLink">
-                  <Truncate
-                    :str="tipUrl"
-                    fixed
-                  />
-                </LinkButton>
-              </CopyText>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="contractId"
-            :label="$t('common.smartContract')"
-            small
-          >
-            <template #value>
-              <CopyText
-                hide-icon
-                :value="hash"
-                :copied-text="$t('common.hashCopied')"
-              >
-                <span class="text-address">{{ splitAddress(contractId) }}</span>
-              </CopyText>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            :label="$t('pages.transactionDetails.hash')"
-            data-cy="hash"
-            small
-          >
-            <template #value>
-              <CopyText
-                hide-icon
-                :value="hash"
-                :copied-text="$t('common.hashCopied')"
-              >
-                <span class="text-address">{{ splitAddress(hash) }}</span>
-              </CopyText>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="multisigTransactionFeePaidBy"
-            :label="$t('pages.transactionDetails.feePaidBy')"
-            small
-          >
-            <div class="row payer-id">
-              <Avatar
-                :address="multisigTransactionFeePaidBy"
-                size="sm"
-              />
-              <div>
-                <DialogBox
-                  v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
-                  class="dialog-box"
-                  dense
-                  position="bottom"
-                >
-                  {{ $t('common.you') }}
-                </DialogBox>
-                <CopyText
-                  hide-icon
-                  :value="multisigTransactionFeePaidBy"
-                  :copied-text="$t('common.addressCopied')"
-                >
-                  <span class="text-address">
-                    {{ splitAddress(multisigTransactionFeePaidBy) }}
-                  </span>
-                </CopyText>
-              </div>
-            </div>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="multisigContractId"
-            :label="$t('pages.transactionDetails.vaultContractId')"
-            small
-          >
-            <div class="row">
-              <Avatar
-                :address="multisigContractId"
-                size="sm"
-              />
-              <CopyText
-                hide-icon
-                :value="multisigContractId"
-                :copied-text="$t('common.addressCopied')"
-              >
-                <span class="text-address">
-                  {{ splitAddress(multisigContractId) }}
-                </span>
-              </CopyText>
-            </div>
-          </DetailsItem>
-
-          <PayloadDetails :payload="getPayload(transaction)" />
-
-          <div class="span-3-columns">
-            <DetailsItem
-              v-if="transaction.microTime && !transaction.pending"
-              :value="formatDate(transaction.microTime)"
-              :secondary="formatTime(transaction.microTime)"
-              :label="$t('pages.transactionDetails.timestamp')"
-              data-cy="timestamp"
+            <TransactionErrorStatus
+              v-if="isErrorTransaction"
+              :return-type="transaction.tx.returnType"
             />
-            <DetailsItem
-              v-else-if="transaction.pending"
-              :label="$t('pages.transactionDetails.timestamp')"
-              data-cy="timestamp"
-            >
-              <template #value>
-                <AnimatedPending
-                  class="pending-icon"
-                />
-                {{ $t('common.pending') }}...
-              </template>
-            </DetailsItem>
-            <DetailsItem
-              v-if="transaction.blockHeight && transaction.blockHeight > 0"
-              :value="transaction.blockHeight"
-              :label="$t('pages.transactionDetails.blockHeight')"
-              data-cy="block-height"
-            />
-            <DetailsItem
-              v-if="transaction.tx.nonce"
-              :value="transaction.tx.nonce"
-              :label="$t('pages.transactionDetails.nonce')"
-              data-cy="nonce"
+            <TransactionTokens
+              :transaction="transaction"
+              :direction="direction"
+              :is-allowance="isAllowance"
+              :error="isErrorTransaction"
+              :class="{ reverse: isPool }"
+              icon-size="md"
             />
           </div>
-          <DetailsItem
-            v-if="!(isDex || isAllowance || isMultisig)"
-            :label="$t('common.amount')"
-            data-cy="amount"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="getTxAmountTotal(transaction, direction)"
-                :symbol="getTxSymbol(transaction)"
-                :hide-fiat="isTransactionAex9(transaction)"
+          <div class="content">
+            <TransactionOverview :transaction="transaction" />
+            <div class="explorer">
+              <LinkButton :to="explorerPath">
+                {{ $t('pages.transactionDetails.explorer') }}
+                <ExternalLink />
+              </LinkButton>
+            </div>
+            <div class="data-grid">
+              <template v-if="isSwap && !isErrorTransaction">
+                <SwapRates :transaction="transaction" />
+                <SwapRoute :transaction="transaction" />
+              </template>
+              <DetailsItem
+                v-if="isErrorTransaction"
+                :label="$t('pages.transactionDetails.reason')"
+                :value="transaction.tx.return"
+                class="reason"
+                data-cy="reason"
               />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="gasPrice"
-            :label="$t('pages.transactionDetails.gasPrice')"
-            data-cy="gas-price"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+(aettosToAe(gasPrice))"
-                symbol="AE"
-                hide-fiat
+              <TransactionDetailsPoolTokens
+                v-if="(isPool || isAllowance)"
+                :transaction="transaction"
+                :direction="direction"
+                :tx-function="transaction.tx.function"
+                :is-allowance="isAllowance"
+                :class="{ reverse: isPool }"
               />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="gasUsed"
-            :value="gasUsed"
-            :label="$t('pages.transactionDetails.gasUsed')"
-            data-cy="gas"
-          />
-          <DetailsItem
-            v-if="transactionFee"
-            :label="$t('transaction.fee')"
-            data-cy="fee"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(transactionFee)"
-                :symbol="AETERNITY_SYMBOL"
+
+              <DetailsItem
+                v-if="tipUrl"
+                :label="$t('pages.transactionDetails.tipUrl')"
+                class="tip-url"
+                data-cy="tip-url"
+              >
+                <template #value>
+                  <CopyText :value="tipUrl">
+                    <LinkButton :to="tipLink">
+                      <Truncate
+                        :str="tipUrl"
+                        fixed
+                      />
+                    </LinkButton>
+                  </CopyText>
+                </template>
+              </DetailsItem>
+
+              <DetailsItem
+                v-if="contractId"
+                :label="$t('common.smartContract')"
+                small
+              >
+                <template #value>
+                  <CopyText
+                    hide-icon
+                    :value="hash"
+                    :copied-text="$t('common.hashCopied')"
+                  >
+                    <span class="text-address">{{ splitAddress(contractId) }}</span>
+                  </CopyText>
+                </template>
+              </DetailsItem>
+
+              <DetailsItem
+                :label="$t('pages.transactionDetails.hash')"
+                data-cy="hash"
+                small
+              >
+                <template #value>
+                  <CopyText
+                    hide-icon
+                    :value="hash"
+                    :copied-text="$t('common.hashCopied')"
+                  >
+                    <span class="text-address">{{ splitAddress(hash) }}</span>
+                  </CopyText>
+                </template>
+              </DetailsItem>
+
+              <DetailsItem
+                v-if="multisigTransactionFeePaidBy"
+                :label="$t('pages.transactionDetails.feePaidBy')"
+                small
+              >
+                <div class="row payer-id">
+                  <Avatar
+                    :address="multisigTransactionFeePaidBy"
+                    size="sm"
+                  />
+                  <div>
+                    <DialogBox
+                      v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                      class="dialog-box"
+                      dense
+                      position="bottom"
+                    >
+                      {{ $t('common.you') }}
+                    </DialogBox>
+                    <CopyText
+                      hide-icon
+                      :value="multisigTransactionFeePaidBy"
+                      :copied-text="$t('common.addressCopied')"
+                    >
+                      <span class="text-address">
+                        {{ splitAddress(multisigTransactionFeePaidBy) }}
+                      </span>
+                    </CopyText>
+                  </div>
+                </div>
+              </DetailsItem>
+
+              <DetailsItem
+                v-if="multisigContractId"
+                :label="$t('pages.transactionDetails.vaultContractId')"
+                small
+              >
+                <div class="row">
+                  <Avatar
+                    :address="multisigContractId"
+                    size="sm"
+                  />
+                  <CopyText
+                    hide-icon
+                    :value="multisigContractId"
+                    :copied-text="$t('common.addressCopied')"
+                  >
+                    <span class="text-address">
+                      {{ splitAddress(multisigContractId) }}
+                    </span>
+                  </CopyText>
+                </div>
+              </DetailsItem>
+
+              <PayloadDetails :payload="getPayload(transaction)" />
+
+              <div class="span-3-columns">
+                <DetailsItem
+                  v-if="transaction.microTime && !transaction.pending"
+                  :value="formatDate(transaction.microTime)"
+                  :secondary="formatTime(transaction.microTime)"
+                  :label="$t('pages.transactionDetails.timestamp')"
+                  data-cy="timestamp"
+                />
+                <DetailsItem
+                  v-else-if="transaction.pending"
+                  :label="$t('pages.transactionDetails.timestamp')"
+                  data-cy="timestamp"
+                >
+                  <template #value>
+                    <AnimatedPending
+                      class="pending-icon"
+                    />
+                    {{ $t('common.pending') }}...
+                  </template>
+                </DetailsItem>
+                <DetailsItem
+                  v-if="transaction.blockHeight && transaction.blockHeight > 0"
+                  :value="transaction.blockHeight"
+                  :label="$t('pages.transactionDetails.blockHeight')"
+                  data-cy="block-height"
+                />
+                <DetailsItem
+                  v-if="transaction.tx.nonce"
+                  :value="transaction.tx.nonce"
+                  :label="$t('pages.transactionDetails.nonce')"
+                  data-cy="nonce"
+                />
+              </div>
+              <DetailsItem
+                v-if="!(isDex || isAllowance || isMultisig)"
+                :label="$t('common.amount')"
+                data-cy="amount"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="getTxAmountTotal(transaction, direction)"
+                    :symbol="getTxSymbol(transaction)"
+                    :hide-fiat="isTransactionAex9(transaction)"
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="gasPrice"
+                :label="$t('pages.transactionDetails.gasPrice')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+(aettosToAe(gasPrice))"
+                    symbol="AE"
+                    hide-fiat
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="gasUsed"
+                :value="gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
               />
-            </template>
-          </DetailsItem>
-        </div>
+              <DetailsItem
+                v-if="transactionFee"
+                :label="$t('transaction.fee')"
+                data-cy="fee"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="+aettosToAe(transactionFee)"
+                    :symbol="AETERNITY_SYMBOL"
+                  />
+                </template>
+              </DetailsItem>
+            </div>
+          </div>
+        </template>
       </div>
-    </template>
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -248,6 +254,7 @@ import {
   onMounted,
   PropType,
 } from 'vue';
+import { IonContent, IonPage } from '@ionic/vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk-13';
@@ -314,6 +321,8 @@ export default defineComponent({
     ExternalLink,
     Avatar,
     DialogBox,
+    IonContent,
+    IonPage,
   },
   props: {
     hash: { type: String, required: true },

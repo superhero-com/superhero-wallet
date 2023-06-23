@@ -1,16 +1,23 @@
 <template>
-  <div class="transaction-list-wrapper">
-    <TransactionList
-      v-if="isOnline"
-      is-multisig
-    />
-    <MessageOffline
-      v-else
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="transaction-list-wrapper">
+        <TransactionList
+          v-if="isOnline"
+          is-multisig
+        />
+        <MessageOffline
+          v-else
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
@@ -20,6 +27,8 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   props: {
     showFilters: Boolean,

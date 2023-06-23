@@ -1,69 +1,76 @@
 <template>
-  <div class="claim">
-    <Field
-      v-slot="{ field, errorMessage }"
-      name="name"
-      :rules="'required|name|name_unregistered'"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <InputField
-        v-bind="field"
-        v-model="name"
-        name="name"
-        class="chain-name"
-        :label="$t('pages.names.claim.register-name')"
-        :message="errorMessage"
-        :placeholder="$t('pages.names.claim.name-placeholder')"
-      >
-        <template #label-after>
-          <span class="chain-name-counter">
-            {{ name.length }}/{{ maxNameLength }}
-          </span>
-        </template>
-        <template #after>
-          <span class="aens-domain">{{ AENS_DOMAIN }}</span>
-        </template>
-      </InputField>
-    </Field>
+      <div class="claim">
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="name"
+          :rules="'required|name|name_unregistered'"
+        >
+          <InputField
+            v-bind="field"
+            v-model="name"
+            name="name"
+            class="chain-name"
+            :label="$t('pages.names.claim.register-name')"
+            :message="errorMessage"
+            :placeholder="$t('pages.names.claim.name-placeholder')"
+          >
+            <template #label-after>
+              <span class="chain-name-counter">
+                {{ name.length }}/{{ maxNameLength }}
+              </span>
+            </template>
+            <template #after>
+              <span class="aens-domain">{{ AENS_DOMAIN }}</span>
+            </template>
+          </InputField>
+        </Field>
 
-    <CheckBox v-model="autoExtend">
-      <div class="auto-extend-label">
-        {{ $t('pages.names.claim.auto-extend') }}
-        <BtnHelp
-          :title="$t('modals.autoextend-help.title')"
-          :msg="$t('modals.autoextend-help.msg')"
-          :class="{ active: autoExtend }"
-        />
+        <CheckBox v-model="autoExtend">
+          <div class="auto-extend-label">
+            {{ $t('pages.names.claim.auto-extend') }}
+            <BtnHelp
+              :title="$t('modals.autoextend-help.title')"
+              :msg="$t('modals.autoextend-help.msg')"
+              :class="{ active: autoExtend }"
+            />
+          </div>
+        </CheckBox>
+
+        <Loader v-if="loading" />
+
+        <i18n-t
+          keypath="pages.names.claim.short-names.message"
+          tag="p"
+          class="text-description explanation"
+          scope="global"
+        >
+          <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
+        </i18n-t>
+
+        <BtnMain
+          class="btn-register"
+          extend
+          :disabled="!isSdkReady || !name || errorName"
+          @click="claim"
+        >
+          {{
+            isNameValid
+              ? $t('pages.names.claim.button-price', [nameFee])
+              : $t('pages.names.claim.button')
+          }}
+        </BtnMain>
       </div>
-    </CheckBox>
-
-    <Loader v-if="loading" />
-
-    <i18n-t
-      keypath="pages.names.claim.short-names.message"
-      tag="p"
-      class="text-description explanation"
-      scope="global"
-    >
-      <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
-    </i18n-t>
-
-    <BtnMain
-      class="btn-register"
-      extend
-      :disabled="!isSdkReady || !name || errorName"
-      @click="claim"
-    >
-      {{
-        isNameValid
-          ? $t('pages.names.claim.button-price', [nameFee])
-          : $t('pages.names.claim.button')
-      }}
-    </BtnMain>
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -92,6 +99,8 @@ export default defineComponent({
     BtnMain,
     BtnHelp,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const router = useRouter();
@@ -192,6 +201,7 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .claim {
+  padding: 0 var(--screen-padding-x);
   .chain-name {
     margin-bottom: 6px;
 

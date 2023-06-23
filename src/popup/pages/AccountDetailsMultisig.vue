@@ -1,35 +1,42 @@
 <template>
-  <AccountDetailsBase v-if="activeMultisigAccount">
-    <template #account-info>
-      <AccountInfo
-        :address="activeMultisigAccount.gaAccountId"
-        is-multisig
-        can-copy-address
-      />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <AccountDetailsBase v-if="activeMultisigAccount">
+        <template #account-info>
+          <AccountInfo
+            :address="activeMultisigAccount.gaAccountId"
+            is-multisig
+            can-copy-address
+          />
+        </template>
 
-    <template #balance>
-      <BalanceInfo :balance="+(activeMultisigAccount.balance || 0)" />
-    </template>
+        <template #balance>
+          <BalanceInfo :balance="+(activeMultisigAccount.balance || 0)" />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton is-multisig />
-      <OpenTransferSendModalButton is-multisig />
-      <BtnBox
-        v-if="!IS_IOS"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="simplexLink"
-      />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton is-multisig />
+          <OpenTransferSendModalButton is-multisig />
+          <BtnBox
+            v-if="!IS_IOS"
+            :icon="CreditCardIcon"
+            :text="$t('common.buy')"
+            :href="simplexLink"
+          />
+        </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation is-multisig />
-    </template>
-  </AccountDetailsBase>
+        <template #navigation>
+          <AccountDetailsNavigation is-multisig />
+        </template>
+      </AccountDetailsBase>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useMultisigAccounts } from '../../composables';
@@ -55,6 +62,8 @@ export default defineComponent({
     BalanceInfo,
     AccountInfo,
     AccountDetailsBase,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

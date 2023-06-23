@@ -1,17 +1,24 @@
 <template>
-  <div class="transaction-list-wrapper">
-    <TransactionList
-      v-if="isOnline"
-    />
-    <MessageOffline
-      v-else
-      class="offline-message"
-      :text="$t('modals.accountDetails.transactionsNotAvailable')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="transaction-list-wrapper">
+        <TransactionList
+          v-if="isOnline"
+        />
+        <MessageOffline
+          v-else
+          class="offline-message"
+          :text="$t('modals.accountDetails.transactionsNotAvailable')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
@@ -21,6 +28,8 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { isOnline } = useConnection();
