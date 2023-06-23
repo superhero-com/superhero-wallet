@@ -8,6 +8,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
 } from '../popup/utils';
 
+// @ts-ignore
 declare const browser: Browser;
 
 const popups: Dictionary = {};
@@ -18,6 +19,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
   const id = uuid();
   const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
   const tabs = await browser.tabs.query({ active: true });
+  // @ts-ignore
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL as string);
     if (
