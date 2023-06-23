@@ -75,12 +75,14 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const loading = ref(false);
-    const formModel = ref<IFormModel>({
-      amount: '',
-    });
 
     const { getSdk } = useSdk({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
+    const { balance, aeternityCoin } = useBalances({ store: root.$store });
+
+    const formModel = ref<IFormModel>({
+      amount: '', selectedAsset: aeternityCoin.value,
+    });
+
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
 
     const invites = useState('invites', 'invites');
