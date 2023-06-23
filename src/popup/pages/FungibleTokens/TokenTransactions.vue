@@ -1,13 +1,23 @@
 <template>
-  <TransactionList
-    :transactions="filteredTransactions"
-    :is-multisig="isMultisig"
-    :loading="loading"
-    @load-more="loadMore()"
-  />
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <TransactionList
+        :transactions="filteredTransactions"
+        :is-multisig="isMultisig"
+        :loading="loading"
+        @load-more="loadMore()"
+      />
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import {
+  IonContent,
+  IonPage,
+} from '@ionic/vue';
 import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 import type { ICommonTransaction, ITokenList, ITx } from '@/types';
@@ -23,6 +33,8 @@ export default defineComponent({
   name: 'TokenTransactions',
   components: {
     TransactionList,
+    IonPage,
+    IonContent,
   },
   props: {
     contractId: { type: String, default: null },

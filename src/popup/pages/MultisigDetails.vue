@@ -1,90 +1,97 @@
 <template>
-  <div
-    v-if="activeMultisigAccount"
-    class="multisig-details"
-  >
-    <DetailsItem
-      :label="$t('multisig.address')"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <template #value>
-        <div class="address-row">
-          <Avatar
-            class="avatar"
-            :address="activeMultisigAccount.gaAccountId"
+      <div
+        v-if="activeMultisigAccount"
+        class="multisig-details"
+      >
+        <DetailsItem
+          :label="$t('multisig.address')"
+        >
+          <template #value>
+            <div class="address-row">
+              <Avatar
+                class="avatar"
+                :address="activeMultisigAccount.gaAccountId"
+              />
+              <AddressFormatted
+                :address="activeMultisigAccount.gaAccountId"
+                :column-count="9"
+                class="text-address"
+              />
+            </div>
+          </template>
+        </DetailsItem>
+
+        <DetailsItem
+          :label="$t('common.contractId')"
+        >
+          <template #value>
+            <div class="address-row">
+              <Avatar
+                class="avatar"
+                :address="activeMultisigAccount.contractId"
+              />
+              <AddressFormatted
+                :address="activeMultisigAccount.contractId"
+                :column-count="9"
+                class="text-address"
+              />
+            </div>
+          </template>
+        </DetailsItem>
+
+        <LinkButton
+          class="explorer-link"
+          :to="activeMultisigAccountExplorerUrl"
+        >
+          {{ $t('multisig.explorerLink') }}
+          <template #icon>
+            <ExternalLinkIcon class="external-icon" />
+          </template>
+        </LinkButton>
+
+        <div class="row">
+          <DetailsItem
+            class="details-item"
+            :label="$t('multisig.version')"
+            :value="activeMultisigAccount.version"
           />
-          <AddressFormatted
-            :address="activeMultisigAccount.gaAccountId"
-            :column-count="9"
-            class="text-address"
+          <DetailsItem
+            class="details-item"
+            :label="$t('multisig.currentNonce')"
+            :value="activeMultisigAccount.nonce"
           />
         </div>
-      </template>
-    </DetailsItem>
 
-    <DetailsItem
-      :label="$t('common.contractId')"
-    >
-      <template #value>
-        <div class="address-row">
-          <Avatar
-            class="avatar"
-            :address="activeMultisigAccount.contractId"
-          />
-          <AddressFormatted
-            :address="activeMultisigAccount.contractId"
-            :column-count="9"
-            class="text-address"
-          />
-        </div>
-      </template>
-    </DetailsItem>
-
-    <LinkButton
-      class="explorer-link"
-      :to="activeMultisigAccountExplorerUrl"
-    >
-      {{ $t('multisig.explorerLink') }}
-      <template #icon>
-        <ExternalLinkIcon class="external-icon" />
-      </template>
-    </LinkButton>
-
-    <div class="row">
-      <DetailsItem
-        class="details-item"
-        :label="$t('multisig.version')"
-        :value="activeMultisigAccount.version"
-      />
-      <DetailsItem
-        class="details-item"
-        :label="$t('multisig.currentNonce')"
-        :value="activeMultisigAccount.nonce"
-      />
-    </div>
-
-    <DetailsItem
-      class="details-item"
-      :label="$t('multisig.consensus')"
-    >
-      <template #label>
-        <BtnHelp @help="openConsensusInfoModal" />
-      </template>
-      <template #value>
-        <ConsensusLabel
-          :confirmations-required="activeMultisigAccount.confirmationsRequired"
-          :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
-          :confirmed-by="activeMultisigAccount.confirmedBy"
-          :signers="activeMultisigAccount.signers"
+        <DetailsItem
+          class="details-item"
+          :label="$t('multisig.consensus')"
+        >
+          <template #label>
+            <BtnHelp @help="openConsensusInfoModal" />
+          </template>
+          <template #value>
+            <ConsensusLabel
+              :confirmations-required="activeMultisigAccount.confirmationsRequired"
+              :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+              :confirmed-by="activeMultisigAccount.confirmedBy"
+              :signers="activeMultisigAccount.signers"
+            />
+          </template>
+        </DetailsItem>
+        <AuthorizedAccounts
+          :address-list="activeMultisigAccount.signers"
         />
-      </template>
-    </DetailsItem>
-    <AuthorizedAccounts
-      :address-list="activeMultisigAccount.signers"
-    />
-  </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
@@ -115,6 +122,8 @@ export default defineComponent({
     AddressFormatted,
     DetailsItem,
     ExternalLinkIcon,
+    IonContent,
+    IonPage,
   },
   setup() {
     const store = useStore();
