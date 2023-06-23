@@ -1,26 +1,33 @@
 <template>
-  <div class="names-list">
-    <template v-if="namesForAccount.length">
-      <NameItem
-        v-for="({ name, owner, autoExtend }, index) in namesForAccount"
-        :key="index"
-        :name="name"
-        :address="owner"
-        :auto-extend="autoExtend"
-      />
-    </template>
-    <AnimatedSpinner
-      v-else-if="areNamesFetching"
-      class="spinner"
-    />
-    <RegisterName
-      v-else
-      :msg="$t('pages.names.list.no-names')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="names-list">
+        <template v-if="namesForAccount.length">
+          <NameItem
+            v-for="({ name, owner, autoExtend }, index) in namesForAccount"
+            :key="index"
+            :name="name"
+            :address="owner"
+            :auto-extend="autoExtend"
+          />
+        </template>
+        <AnimatedSpinner
+          v-else-if="areNamesFetching"
+          class="spinner"
+        />
+        <RegisterName
+          v-else
+          :msg="$t('pages.names.list.no-names')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import type { IName } from '../../../types';
@@ -38,6 +45,8 @@ export default defineComponent({
     NameItem,
     AnimatedSpinner,
     RegisterName,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

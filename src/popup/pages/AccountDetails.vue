@@ -1,53 +1,60 @@
 <template>
-  <AccountDetailsBase class="account-details">
-    <template #account-info>
-      <AccountInfo
-        :address="activeAccount.address"
-        :name="activeAccount.name"
-        :idx="activeAccount.idx"
-        can-copy-address
-      />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <AccountDetailsBase class="account-details">
+        <template #account-info>
+          <AccountInfo
+            :address="activeAccount.address"
+            :name="activeAccount.name"
+            :idx="activeAccount.idx"
+            can-copy-address
+          />
+        </template>
 
-    <template #balance>
-      <BalanceInfo
-        :balance="balanceNumeric"
-        horizontal-offline-message
-      />
-    </template>
+        <template #balance>
+          <BalanceInfo
+            :balance="balanceNumeric"
+            horizontal-offline-message
+          />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton />
-      <OpenTransferSendModalButton />
-      <BtnBox
-        v-if="isNodeMainnet && !IS_IOS"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="activeAccountSimplexLink"
-        :disabled="!isOnline"
-      />
-      <BtnBox
-        v-if="isNodeTestnet"
-        :icon="FaucetIcon"
-        :text="$t('common.faucet')"
-        :href="activeAccountFaucetUrl"
-      />
-      <BtnBox
-        v-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
-        :icon="SwapIcon"
-        :text="$t('common.swap')"
-        :href="DEX_URL"
-        :disabled="!isOnline"
-      />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton />
+          <OpenTransferSendModalButton />
+          <BtnBox
+            v-if="isNodeMainnet && !IS_IOS"
+            :icon="CreditCardIcon"
+            :text="$t('common.buy')"
+            :href="activeAccountSimplexLink"
+            :disabled="!isOnline"
+          />
+          <BtnBox
+            v-if="isNodeTestnet"
+            :icon="FaucetIcon"
+            :text="$t('common.faucet')"
+            :href="activeAccountFaucetUrl"
+          />
+          <BtnBox
+            v-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
+            :icon="SwapIcon"
+            :text="$t('common.swap')"
+            :href="DEX_URL"
+            :disabled="!isOnline"
+          />
+        </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation />
-    </template>
-  </AccountDetailsBase>
+        <template #navigation>
+          <AccountDetailsNavigation />
+        </template>
+      </AccountDetailsBase>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { IS_IOS } from '../../lib/environment';
@@ -81,6 +88,8 @@ export default defineComponent({
     BalanceInfo,
     AccountInfo,
     AccountDetailsBase,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

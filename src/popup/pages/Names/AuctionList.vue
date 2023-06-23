@@ -1,46 +1,53 @@
 <template>
-  <div class="auction-list">
-    <Filters
-      v-if="activeAuctions.length || auctions.length || loading"
-      v-model="displayMode"
-      :filters="filters"
-      sticky
-    />
-    <ul
-      v-if="activeAuctions.length || auctions.length"
-      class="list"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-      <NameRow
-        v-for="({ name, expiration, lastBid }, key) in auctions"
-        :key="key"
-        :to="{ name: 'auction-bid', params: { name } }"
-        :name="name"
-        :address="lastBid.accountId"
-      >
-        <div class="name-wrapper">
-          <div class="name">
-            {{ name }}
-            <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
-          </div>
-          <div class="expiration">
-            {{ $t('pages.names.auctions.expires') }}
-            in ≈{{ blocksToRelativeTime(expiration - topBlockHeight) }}
-          </div>
-        </div>
-      </NameRow>
-    </ul>
-    <AnimatedSpinner
-      v-else-if="loading"
-      class="spinner"
-    />
-    <RegisterName
-      v-else
-      :msg="$t('pages.names.auctions.no-auctions')"
-    />
-  </div>
+      <div class="auction-list">
+        <Filters
+          v-if="activeAuctions.length || auctions.length || loading"
+          v-model="displayMode"
+          :filters="filters"
+          sticky
+        />
+        <ul
+          v-if="activeAuctions.length || auctions.length"
+          class="list"
+        >
+          <NameRow
+            v-for="({ name, expiration, lastBid }, key) in auctions"
+            :key="key"
+            :to="{ name: 'auction-bid', params: { name } }"
+            :name="name"
+            :address="lastBid.accountId"
+          >
+            <div class="name-wrapper">
+              <div class="name">
+                {{ name }}
+                <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
+              </div>
+              <div class="expiration">
+                {{ $t('pages.names.auctions.expires') }}
+                in ≈{{ blocksToRelativeTime(expiration - topBlockHeight) }}
+              </div>
+            </div>
+          </NameRow>
+        </ul>
+        <AnimatedSpinner
+          v-else-if="loading"
+          class="spinner"
+        />
+        <RegisterName
+          v-else
+          :msg="$t('pages.names.auctions.no-auctions')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -84,6 +91,8 @@ export default defineComponent({
     TokenAmount,
     AnimatedSpinner,
     RegisterName,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
@@ -180,7 +189,9 @@ export default defineComponent({
 
   :deep(.filters) {
     position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+    top: env(safe-area-inset-top);
+    margin-left: 0px;
+    margin-right: 0px;
   }
 }
 </style>

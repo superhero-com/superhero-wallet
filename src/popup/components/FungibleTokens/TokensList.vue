@@ -38,9 +38,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.tokens-list {
-  margin-inline: calc(-1 * var(--screen-padding-x));
-}
-</style>

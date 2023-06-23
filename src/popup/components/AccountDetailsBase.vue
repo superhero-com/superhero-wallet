@@ -28,20 +28,14 @@
       </div>
 
       <div class="tabs-content">
-        <RouterView v-slot="{ Component }">
-          <transition
-            name="fade-transition"
-            mode="out-in"
-          >
-            <Component :is="Component" />
-          </transition>
-        </RouterView>
+        <ion-router-outlet />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -69,6 +63,7 @@ export default defineComponent({
   components: {
     TransactionAndTokenFilter,
     BtnClose,
+    IonRouterOutlet,
   },
   setup() {
     const route = useRoute();
@@ -168,6 +163,7 @@ export default defineComponent({
 
   border-radius: variables.$border-radius-app;
   min-height: 100%;
+  height:100%;
   font-weight: 500;
   color: variables.$color-white;
   box-shadow: 0 0 0 1px variables.$color-border, 0 0 50px rgba(variables.$color-black, 0.6);
@@ -231,6 +227,8 @@ export default defineComponent({
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
+    // TODO fix this hack
+    height: 300px;
   }
 
   .close-button {

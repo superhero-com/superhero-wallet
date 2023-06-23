@@ -1,19 +1,26 @@
 <template>
-  <div class="account-details-tokens">
-    <TokensList
-      v-if="isOnline"
-      class="tokens-list"
-      :search-term="searchPhrase"
-    />
-    <MessageOffline
-      v-else
-      class="offline-message"
-      :text="$t('modals.accountDetails.assetsNotAvailable')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="account-details-tokens">
+        <TokensList
+          v-if="isOnline"
+          class="tokens-list"
+          :search-term="searchPhrase"
+        />
+        <MessageOffline
+          v-else
+          class="offline-message"
+          :text="$t('modals.accountDetails.assetsNotAvailable')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useConnection, useTransactionAndTokenFilter } from '../../composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
@@ -23,6 +30,8 @@ export default defineComponent({
   components: {
     TokensList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   props: {
     showFilters: Boolean,
