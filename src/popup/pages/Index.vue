@@ -1,83 +1,91 @@
 <template>
-  <div
-    class="index"
-    :class="{ 'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE }"
-  >
-    <img
-      v-if="IN_FRAME"
-      class="iframe-image"
-      src="../../icons/iframe/sendAndReceive.svg"
+  <ion-page>
+    <ion-content
+      class="ion-padding"
     >
-    <div
-      v-else
-      class="not-iframe"
-    >
-      <SuperheroLogoIcon class="superhero-logo" />
-      <div class="heading">
-        <i18n-t
-          keypath="pages.index.heading.message"
-          tag="span"
-          class="tag"
-          scope="global"
-        >
-          <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
-          <span class="store">{{ $t('pages.index.heading.store') }}</span>
-          <span class="send">{{ $t('pages.index.heading.send') }}</span>
-          <span class="aeternity-name">{{ $t('pages.index.heading.aeternityBlockchain') }}</span>
-        </i18n-t>
-      </div>
-
-      <Platforms v-if="IS_WEB">
-        <template #header>
-          {{ $t('pages.index.platforms.heading') }}
-        </template>
-        <template #footer>
-          {{ $t('pages.index.webVersion') }}
-        </template>
-      </Platforms>
-    </div>
-
-    <div :class="['terms-agreement', { mobile: !IS_WEB }]">
-      <CheckBox
-        v-model="termsAgreed"
-        data-cy="checkbox"
-      >
-        <span>
-          {{ $t('pages.index.term1') }}
-        </span>
-      </CheckBox>
-      <RouterLink
-        :to="{ name: 'about-terms' }"
-        data-cy="terms"
-        class="terms-of-use"
-        :class="{ agreed: termsAgreed }"
-      >
-        {{ $t('pages.index.termsAndConditions') }}
-      </RouterLink>
-    </div>
-
-    <transition name="fade-transition">
       <div
-        v-if="termsAgreed"
-        class="wallet-button-box"
+        class="index"
+        :class="{ 'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE }"
       >
-        <BtnSubheader
-          data-cy="generate-wallet"
-          :subheader="$t('pages.index.getStartedWithWallet')"
-          :header="$t('pages.index.generateWallet')"
-          :icon="PlusCircleIcon"
-          @click="createWallet"
-        />
-        <BtnSubheader
-          data-cy="import-wallet"
-          :subheader="$t('pages.index.enterSeed')"
-          :header="$t('pages.index.importWallet')"
-          :icon="CheckCircleIcon"
-          @click="importWallet"
-        />
+        <img
+          v-if="IN_FRAME"
+          class="iframe-image"
+          src="../../icons/iframe/sendAndReceive.svg"
+        >
+        <div
+          v-else
+          class="not-iframe"
+        >
+          <SuperheroLogoIcon class="superhero-logo" />
+          <div class="heading">
+            <i18n-t
+              keypath="pages.index.heading.message"
+              tag="span"
+              class="tag"
+              scope="global"
+            >
+              <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
+              <span class="store">{{ $t('pages.index.heading.store') }}</span>
+              <span class="send">{{ $t('pages.index.heading.send') }}</span>
+              <span class="aeternity-name">
+                {{ $t('pages.index.heading.aeternityBlockchain') }}
+              </span>
+            </i18n-t>
+          </div>
+
+          <Platforms v-if="IS_WEB">
+            <template #header>
+              {{ $t('pages.index.platforms.heading') }}
+            </template>
+            <template #footer>
+              {{ $t('pages.index.webVersion') }}
+            </template>
+          </Platforms>
+        </div>
+
+        <div :class="['terms-agreement', { mobile: !IS_WEB }]">
+          <CheckBox
+            v-model="termsAgreed"
+            data-cy="checkbox"
+          >
+            <span>
+              {{ $t('pages.index.term1') }}
+            </span>
+          </CheckBox>
+          <RouterLink
+            :to="{ name: 'about-terms' }"
+            data-cy="terms"
+            class="terms-of-use"
+            :class="{ agreed: termsAgreed }"
+          >
+            {{ $t('pages.index.termsAndConditions') }}
+          </RouterLink>
+        </div>
+
+        <transition name="fade-transition">
+          <div
+            v-if="termsAgreed"
+            class="wallet-button-box"
+          >
+            <BtnSubheader
+              data-cy="generate-wallet"
+              :subheader="$t('pages.index.getStartedWithWallet')"
+              :header="$t('pages.index.generateWallet')"
+              :icon="PlusCircleIcon"
+              @click="createWallet"
+            />
+            <BtnSubheader
+              data-cy="import-wallet"
+              :subheader="$t('pages.index.enterSeed')"
+              :header="$t('pages.index.importWallet')"
+              :icon="CheckCircleIcon"
+              @click="importWallet"
+            />
+          </div>
+        </transition>
       </div>
-    </transition>
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -85,6 +93,7 @@ import { defineComponent, ref } from 'vue';
 import { generateMnemonic } from '@aeternity/bip39';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   IN_FRAME,
   IS_MOBILE_DEVICE,
@@ -106,6 +115,8 @@ export default defineComponent({
     CheckBox,
     BtnSubheader,
     Platforms,
+    IonContent,
+    IonPage,
   },
   setup() {
     const store = useStore();

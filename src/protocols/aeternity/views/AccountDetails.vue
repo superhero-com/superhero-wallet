@@ -1,36 +1,43 @@
 <template>
-  <AccountDetailsBase class="account-details">
-    <template #buttons>
-      <BtnBox
-        v-if="isNodeMainnet && UNFINISHED_FEATURES"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="activeAccountSimplexLink"
-        :disabled="!isOnline"
-      />
-      <BtnBox
-        v-if="isNodeTestnet"
-        :icon="FaucetIcon"
-        :text="$t('common.faucet')"
-        :href="activeAccountFaucetUrl"
-      />
-      <BtnBox
-        v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
-        :icon="GlobeSmallIcon"
-        :text="$t('common.browser')"
-        :to="{ name: ROUTE_APPS_BROWSER }"
-      />
-    </template>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <AccountDetailsBase class="account-details">
+        <template #buttons>
+          <BtnBox
+            v-if="isNodeMainnet && UNFINISHED_FEATURES"
+            :icon="CreditCardIcon"
+            :text="$t('common.buy')"
+            :href="activeAccountSimplexLink"
+            :disabled="!isOnline"
+          />
+          <BtnBox
+            v-if="isNodeTestnet"
+            :icon="FaucetIcon"
+            :text="$t('common.faucet')"
+            :href="activeAccountFaucetUrl"
+          />
+          <BtnBox
+            v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
+            :icon="GlobeSmallIcon"
+            :text="$t('common.browser')"
+            :to="{ name: ROUTE_APPS_BROWSER }"
+          />
+        </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation />
-    </template>
-  </AccountDetailsBase>
+        <template #navigation>
+          <AccountDetailsNavigation />
+        </template>
+      </AccountDetailsBase>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 import {
   IS_MOBILE_APP,
   IS_IOS,
@@ -60,6 +67,8 @@ export default defineComponent({
     BtnBox,
     AccountDetailsNavigation,
     AccountDetailsBase,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

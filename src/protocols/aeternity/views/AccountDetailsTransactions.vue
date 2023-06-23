@@ -1,17 +1,23 @@
 <template>
-  <div class="account-details-transactions">
-    <TransactionList
-      v-if="isOnline"
-      :loading="loading"
-      :transactions="loadedTransactionList"
-      @load-more="loadMore()"
-    />
-    <MessageOffline
-      v-else
-      class="offline-message"
-      :text="$t('modals.accountDetails.transactionsNotAvailable')"
-    />
-  </div>
+  <ion-page>
+    <ion-content
+      class="ion-padding"
+    >
+      <div class="account-details-transactions">
+        <TransactionList
+          v-if="isOnline"
+          :loading="loading"
+          :transactions="loadedTransactionList"
+          @load-more="loadMore()"
+        />
+        <MessageOffline
+          v-else
+          class="offline-message"
+          :text="$t('modals.accountDetails.transactionsNotAvailable')"
+        />
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -24,6 +30,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
@@ -43,6 +50,8 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   setup() {
     /**
