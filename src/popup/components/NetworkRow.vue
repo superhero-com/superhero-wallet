@@ -22,14 +22,14 @@
         >
           <BtnIcon
             size="sm"
-            data-cy="edit"
+            data-cy="network-edit"
             dimmed
             :to="{ name: ROUTE_NETWORK_EDIT, params: { name: network.name } }"
             :icon="PencilIcon"
           />
           <BtnIcon
             size="sm"
-            data-cy="delete"
+            data-cy="network-delete"
             icon-variant="danger"
             dimmed
             :icon="TrashIcon"
@@ -61,7 +61,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { defaultNetwork } from '../utils';
+import { NETWORK_DEFAULT } from '../utils';
 import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
 import { useGetter } from '../../composables/vuex';
 
@@ -88,7 +88,7 @@ export default defineComponent({
 
     async function deleteNetwork(networkIndex: number) {
       if (networkIndex === activeNetwork.value.index) {
-        emit('selectNetwork', defaultNetwork.name);
+        emit('selectNetwork', NETWORK_DEFAULT.name);
       }
       root.$store.commit('deleteUserNetwork', networkIndex);
     }
@@ -134,6 +134,7 @@ export default defineComponent({
 
       margin-right: 4px;
       opacity: 0.6;
+      user-select: none;
     }
   }
 

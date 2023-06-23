@@ -37,8 +37,7 @@
       />
       <BtnMain
         data-cy="accept"
-        :text="$t('pages.signTransaction.confirm')"
-        :disabled="!isConnected"
+        :text="$t('common.confirm')"
         @click="resolve()"
       />
     </template>
@@ -47,8 +46,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type { IAccount, IAccountLabeled, IAppData } from '../../../types';
+import type { IAccountLabeled, IAppData } from '../../../types';
+import { RejectedByUserError } from '../../../lib/errors';
 import { useGetter } from '../../../composables/vuex';
+import { useAccounts } from '../../../composables';
+
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import TransactionInfo from '../../components/TransactionInfo.vue';
@@ -67,25 +69,23 @@ export default defineComponent({
     message: { type: String, required: true },
     app: { type: Object as PropType<IAppData>, required: true },
     resolve: { type: Function as PropType<() => void>, required: true },
-    // eslint-disable-next-line no-unused-vars
     reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
   setup(props, { root }) {
-    const isConnected = useGetter('isConnected');
+    const { activeAccount } = useAccounts({ store: root.$store });
+
     const getExplorerPath = useGetter('getExplorerPath');
-    const account = useGetter<IAccount>('account');
     const accountExtended = computed((): IAccountLabeled => ({
-      ...account.value,
+      ...activeAccount.value,
       label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(account.value.address),
+      url: getExplorerPath.value(activeAccount.value.address),
     }));
 
     function cancel() {
-      props.reject(new Error('Rejected by user'));
+      props.reject(new RejectedByUserError());
     }
 
     return {
-      isConnected,
       accountExtended,
       cancel,
     };

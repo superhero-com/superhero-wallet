@@ -1,8 +1,6 @@
 <template>
   <TransactionList
-    :token="contractId"
-    show-filters
-    :scroll-top-threshold="213"
+    :token-contract-id="contractId"
     :is-multisig="isMultisig"
   />
 </template>

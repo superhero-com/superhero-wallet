@@ -1,6 +1,7 @@
 import {
   Universal, MemoryAccount, Crypto, Node,
 } from '@aeternity/aepp-sdk';
+import { useModals } from '../../composables';
 import { i18n } from '../plugins/languages';
 
 export default {
@@ -23,19 +24,16 @@ export default {
       });
       await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
     },
-    async handleNotEnoughFoundsError({ dispatch }, { error: { message }, isInviteError = false }) {
+    async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
       if (isInviteError && !message.includes('Transaction build error')) return false;
-      await dispatch(
-        'modals/open',
-        {
-          name: 'default',
-          msg: isInviteError
-            ? i18n.t('pages.invite.insufficient-invite-balance')
-            : i18n.t('pages.invite.insufficient-balance'),
-        },
-        { root: true },
-      );
+
+      const { openDefaultModal } = useModals();
+      await openDefaultModal({
+        msg: isInviteError
+          ? i18n.t('pages.invite.insufficient-invite-balance')
+          : i18n.t('pages.invite.insufficient-balance'),
+      });
       return true;
     },
   },

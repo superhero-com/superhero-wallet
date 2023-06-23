@@ -1,26 +1,26 @@
 import Vue from 'vue';
-import FUNGIBLE_TOKEN_CONTRACT from 'aeternity-fungible-token/FungibleTokenFullInterface.aes';
 import BigNumber from 'bignumber.js';
-import { isEmpty, uniqBy } from 'lodash-es';
-import pairInterface from 'dex-contracts-v2/build/IAedexV2Pair.aes';
+import { isEmpty } from 'lodash-es';
+
+import FungibleTokenFullInterfaceACI from '../../lib/contracts/FungibleTokenFullInterfaceACI.json';
+import AedexV2PairACI from '../../lib/contracts/AedexV2PairACI.json';
+import ZeitTokenACI from '../../lib/contracts/FungibleTokenFullACI.json';
 import {
   convertToken,
   handleUnknownError,
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { ZEIT_TOKEN_INTERFACE } from '../../popup/utils/constants';
 import { useMiddleware } from '../../composables';
 
 export default (store) => {
-  const { fetchFromMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store });
+  const { fetchFromMiddleware } = useMiddleware({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
     state: {
       availableTokens: {},
       tokens: {},
-      transactions: {},
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
@@ -29,9 +29,6 @@ export default (store) => {
       ) => getTokenBalance(address),
     },
     mutations: {
-      setTransactions(state, { address, transactions }) {
-        Vue.set(state.transactions, address, transactions);
-      },
       setAvailableTokens(state, payload) {
         state.availableTokens = payload;
       },
@@ -45,8 +42,10 @@ export default (store) => {
     },
     actions: {
       async loadAvailableTokens({ commit }) {
-        const response = await fetchFromMiddleware('/aex9/by_name')
-          .catch(handleUnknownError);
+        const response = await fetchAllPages(
+          () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
+          fetchFromMiddleware,
+        );
 
         if (isEmpty(response) || typeof response !== 'object') return commit('setAvailableTokens', {});
 
@@ -66,7 +65,7 @@ export default (store) => {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
               () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
-              fetchFromMiddlewareCamelCased,
+              fetchFromMiddleware,
             );
 
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
@@ -101,7 +100,7 @@ export default (store) => {
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
+          aci: FungibleTokenFullInterfaceACI,
           contractAddress: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.methods.allowance({
@@ -124,7 +123,7 @@ export default (store) => {
       ) {
         try {
           const tokenContract = await sdk.getContractInstance({
-            source: pairInterface,
+            aci: AedexV2PairACI,
             contractAddress,
           });
 
@@ -172,7 +171,7 @@ export default (store) => {
         [contractId, toAccount, amount, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
-          source: FUNGIBLE_TOKEN_CONTRACT,
+          aci: FungibleTokenFullInterfaceACI,
           contractAddress: contractId,
         });
         return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
@@ -182,78 +181,12 @@ export default (store) => {
         [contractId, amount, posAddress, invoiceId, option],
       ) {
         const tokenContract = await sdk.getContractInstance({
-          source: ZEIT_TOKEN_INTERFACE,
+          aci: ZeitTokenACI,
           contractAddress: contractId,
         });
         return tokenContract.methods.burn_trigger_pos(
           amount.toFixed(), posAddress, invoiceId, option,
         );
-      },
-      async getTokensHistory(
-        {
-          state: { transactions },
-          rootGetters: { getDexContracts }, commit,
-        }, { recent, address, multipleAccounts },
-      ) {
-        if (!address) {
-          return [];
-        }
-        if (transactions[address]?.length && !recent) {
-          return transactions[address];
-        }
-
-        let rawTransactions = [];
-        const lastTransaction = transactions[address]?.[0];
-        if (recent) {
-          let nextPageUrl;
-          let isAllNewTransactionsLoaded = false;
-          while (nextPageUrl !== null && !isAllNewTransactionsLoaded) {
-            // eslint-disable-next-line no-await-in-loop
-            const { data, next } = await fetchFromMiddleware(nextPageUrl
-              ? `/${nextPageUrl}`
-              : `/v2/aex9/transfers/to/${address}`);
-            if (data?.length) rawTransactions.push(...data);
-            if (data?.some((t) => t?.tx_hash === lastTransaction?.hash)
-            || !transactions[address]?.length) {
-              isAllNewTransactionsLoaded = true;
-            }
-            nextPageUrl = next || null;
-          }
-          if (rawTransactions?.[0]?.tx_hash === lastTransaction?.hash) {
-            return transactions[address].slice(0, 10);
-          }
-        } else {
-          rawTransactions = await fetchFromMiddleware(`/aex9/transfers/to/${address}`);
-        }
-
-        const newTransactions = rawTransactions
-          .filter((tx) => !getDexContracts.router.includes(tx.contract_id))
-          .map((tx) => ({
-            ...tx,
-            tx: {
-              amount: tx.amount,
-              contractId: tx.contract_id,
-              senderId: tx.sender,
-              recipientId: tx.recipient,
-              callerId: tx.sender,
-              type: 'ContractCallTx',
-            },
-            recipient: tx.recipient,
-            incomplete: true,
-            microTime: tx.micro_time,
-            hash: tx.tx_hash,
-          }));
-
-        if (!multipleAccounts) {
-          if (newTransactions?.[0]?.hash !== lastTransaction?.hash && recent) {
-            commit('setTransactions', {
-              address, transactions: uniqBy([...newTransactions, ...(transactions[address] || [])], 'hash'),
-            });
-          } else {
-            commit('setTransactions', { address, transactions: newTransactions.reverse() });
-          }
-        }
-        return newTransactions;
       },
     },
   });

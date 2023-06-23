@@ -7,7 +7,7 @@
         v-model="amount"
         :error="!!amountError"
         :message="amountError"
-        @error="(val) => error = val"
+        ae-only
       />
       <div class="tx-details">
         <DetailsItem :label="$t('transaction.fee')">
@@ -18,7 +18,7 @@
             />
           </template>
         </DetailsItem>
-        <DetailsItem :label="$t('total')">
+        <DetailsItem :label="$t('common.total')">
           <template #value>
             <TokenAmount
               :amount="+amountTotal"
@@ -28,7 +28,7 @@
       </div>
 
       <BtnMain
-        :disabled="!!amountError || error || !amount"
+        :disabled="!!amountError || !amount"
         class="button"
         extend
         @click="bid"
@@ -44,11 +44,10 @@
 import { computed, defineComponent, ref } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { IAuctionBid } from '../../../types';
-import { useSdk } from '../../../composables';
+import { useModals, useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 import {
   AENS_BID_MIN_RATIO,
-  MODAL_DEFAULT,
   aeToAettos,
   calculateNameClaimFee,
 } from '../../utils';
@@ -73,12 +72,11 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getSdk } = useSdk({ store: root.$store });
+    const { openDefaultModal } = useModals();
 
     const loading = ref(false);
     const amount = ref('');
-    const error = ref(false);
 
-    // eslint-disable-next-line no-unused-vars
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
     const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
@@ -97,17 +95,16 @@ export default defineComponent({
       try {
         loading.value = true;
         await sdk.aensBid(props.name, aeToAettos(amount.value));
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
         });
         root.$router.push({ name: 'auction-history', params: { name: props.name } });
-      } catch (e: any) {
-        let msg = e.message;
+      } catch (error: any) {
+        let msg = error.message;
         if (msg.includes('is not enough to execute')) {
           msg = root.$t('pages.names.balance-error');
         }
-        root.$store.dispatch('modals/open', { name: MODAL_DEFAULT, msg });
+        openDefaultModal({ msg });
       } finally {
         loading.value = false;
       }
@@ -118,7 +115,6 @@ export default defineComponent({
       amount,
       amountTotal,
       amountError,
-      error,
       txFee,
       bid,
     };

@@ -3,13 +3,14 @@
 import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import Ae from '@aeternity/ledger-app-api';
 import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { MODAL_DEFAULT, ACCOUNT_LEDEGR_WALLET } from '../../../popup/utils';
+import { ACCOUNT_LEDGER_WALLET, MODAL_CONFIRM } from '../../../popup/utils';
+import { useModals } from '../../../composables';
 
 export default {
   namespaced: true,
 
   account: {
-    type: ACCOUNT_LEDEGR_WALLET,
+    type: ACCOUNT_LEDGER_WALLET,
   },
 
   getters: {
@@ -20,16 +21,17 @@ export default {
   },
 
   actions: {
-    async request({ dispatch }, { name, args }) {
+    async request(_, { name, args }) {
       let result;
       let error;
       const transport = await TransportWebUSB.create();
       const ledgerAppApi = new Ae(transport);
+      const { openModal } = useModals();
       try {
         do {
           if (error) {
             // eslint-disable-next-line no-await-in-loop
-            await dispatch('modals/open', { name: 'confirm', title: 'Try again' }, { root: true });
+            await openModal(MODAL_CONFIRM, { title: 'Try again' });
           }
           try {
             // eslint-disable-next-line no-await-in-loop
@@ -46,20 +48,22 @@ export default {
     },
 
     async create({ getters: { nextIdx }, commit, dispatch }) {
+      const { openDefaultModal } = useModals();
       let address;
       try {
         address = await dispatch('request', { name: 'getAddress', args: [nextIdx, true] });
-        commit('accounts/add', { address, type: ACCOUNT_LEDEGR_WALLET, idx: nextIdx }, { root: true });
+        commit('accounts/add', { address, type: ACCOUNT_LEDGER_WALLET, idx: nextIdx }, { root: true });
       } catch (error) {
-        dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'address not confirmed' }, { root: true });
+        openDefaultModal({ icon: 'alert', title: 'address not confirmed' });
       }
     },
 
     async ensureCurrentAccountAvailable({ rootGetters: { account }, dispatch }) {
+      const { openDefaultModal } = useModals();
       const address = await dispatch('request', { name: 'getAddress', args: [account.idx] });
       if (account.address !== address) {
         if (!process.env.IS_EXTENSION) {
-          dispatch('modals/open', { name: MODAL_DEFAULT, icon: 'alert', title: 'account not found' }, { root: true });
+          openDefaultModal({ icon: 'alert', title: 'account not found' });
         }
         throw new Error('Account not found');
       }

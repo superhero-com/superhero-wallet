@@ -1,6 +1,6 @@
 <template>
   <BtnBox
-    :text="$t('dashboard.receiveCard.title')"
+    :text="$t('common.receive')"
     :subtitle="subtitle"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
@@ -11,6 +11,7 @@
 <script lang="ts">
 import { defineComponent, computed } from '@vue/composition-api';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
+import { useModals } from '../../composables';
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 
@@ -22,9 +23,10 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup(props, { root }) {
+    const { openModal } = useModals();
+
     function openTransferReceiveModal() {
-      root.$store.dispatch('modals/open', {
-        name: MODAL_TRANSFER_RECEIVE,
+      openModal(MODAL_TRANSFER_RECEIVE, {
         isMultisig: props.isMultisig,
         tokenContractId: props.tokenContractId,
       });

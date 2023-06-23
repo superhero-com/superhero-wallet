@@ -3,29 +3,23 @@
     class="tokens"
     :class="[iconSize, { vertical, bright }]"
   >
-    <span class="icons">
+    <span
+      v-if="!noIcons"
+      class="icons"
+    >
       <img
-        v-if="toToken && !noIcons"
-        :src="toToken.img"
-        :class="['to-token', { border: toToken.imgBorder }]"
-        :title="toToken.symbol"
-      >
-      <img
-        v-if="!noIcons"
-        :src="fromToken.img"
-        :class="{
-          border: fromToken.imgBorder,
-          pair: !!toToken,
-        }"
-        :title="fromToken.symbol"
+        :src="imgToken.image || getTokenPlaceholderUrl(imgToken)"
+        :class="{ 'with-border': !imgToken.image }"
+        :title="imgToken.symbol"
       >
     </span>
+
     <span class="symbols">
       <span
         v-if="fromToken"
         class="symbol"
       >
-        {{ shrinkString(fromToken.symbol) }}
+        {{ truncateString(fromToken.symbol) }}
       </span>
       <span
         v-if="fromToken && toToken"
@@ -37,37 +31,41 @@
         v-if="toToken"
         class="symbol"
       >
-        {{ shrinkString(toToken.symbol) }}
+        {{ truncateString(toToken.symbol) }}
       </span>
     </span>
   </span>
 </template>
 
-<script>
-import { computed, defineComponent } from '@vue/composition-api';
-import AeIcon from '../../icons/tokens/ae.svg';
+<script lang="ts">
+import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { ITokenResolved } from '../../types';
 import {
   AETERNITY_COIN_NAME,
   AETERNITY_COIN_SYMBOL,
   AETERNITY_CONTRACT_ID,
   AETERNITY_SYMBOL,
-  shrinkString as shrinkStringFactory,
+  AVATAR_URL,
+  truncateString as truncateStringFactory,
 } from '../utils';
+import AeIcon from '../../icons/tokens/ae.svg';
 
-const SIZES = ['rg', 'md', 'lg', 'xl'];
+const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
+
+export type AllowedTokenIconSize = typeof SIZES[number];
 
 export default defineComponent({
   props: {
     /**
      * transactionTokenInfoResolvers []
      */
-    tokens: { type: Array, required: true },
+    tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
     iconSize: {
       type: String,
       default: 'rg',
-      validator: (val) => SIZES.includes(val),
+      validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
     },
     vertical: Boolean,
     noIcons: Boolean,
@@ -76,27 +74,30 @@ export default defineComponent({
   },
   setup(props) {
     function getAvailableCharLength() {
-      if (props.tokens?.length < 2) return props.symbolLength;
-      const shorterNameLength = [props.tokens[0].symbol.length, props.tokens[1].symbol.length]
+      if (props.tokens?.length < 2) {
+        return props.symbolLength;
+      }
+      const shorterNameLength = props.tokens
+        .map(({ symbol }) => symbol.length)
         .find((length) => length < props.doubleSymbolLength);
       return shorterNameLength ? props.symbolLength - shorterNameLength : props.doubleSymbolLength;
     }
 
-    function shrinkString(text) {
+    function truncateString(text: string) {
       const maxLength = getAvailableCharLength();
-      return shrinkStringFactory(text, maxLength);
+      return truncateStringFactory(text, maxLength);
     }
 
-    function mapToken(token) {
-      let img = `https://avatars.z52da5wt.xyz/${token.contractId}`;
-      let imgBorder = true;
+    function getTokenPlaceholderUrl(token: ITokenResolved) {
+      return `${AVATAR_URL}${token.contractId}`;
+    }
 
-      let { symbol } = token;
+    function mapToken(token: ITokenResolved): ITokenResolved {
+      let { image, symbol } = token;
       let name = token.symbol;
 
       if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
-        img = AeIcon;
-        imgBorder = false;
+        image = AeIcon;
         symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
         name = AETERNITY_COIN_NAME;
       }
@@ -105,18 +106,24 @@ export default defineComponent({
         ...token,
         symbol,
         name,
-        img,
-        imgBorder,
+        image,
       };
     }
 
     const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
     const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
+    const imgToken = computed(() => (
+        props.tokens?.[2]
+          ? mapToken(props.tokens[2])
+          : fromToken.value
+    ));
 
     return {
       fromToken,
       toToken,
-      shrinkString,
+      imgToken,
+      getTokenPlaceholderUrl,
+      truncateString,
     };
   },
 });
@@ -129,9 +136,10 @@ export default defineComponent({
 .tokens {
   --icon-size: 16px;
 
-  @extend %face-sans-15-medium;
+  @extend %face-sans-16-semi-bold;
 
   color: rgba(variables.$color-white, 0.75);
+  letter-spacing: -2%;
 
   &.bright {
     color: variables.$color-white;
@@ -145,8 +153,12 @@ export default defineComponent({
     align-self: center;
   }
 
+  .icons {
+    user-select: none;
+  }
+
   .symbol {
-    @extend %face-sans-16-medium;
+    @extend %face-sans-16-regular;
 
     vertical-align: middle;
     white-space: nowrap;
@@ -178,16 +190,7 @@ export default defineComponent({
     vertical-align: middle;
     margin-right: 4px;
 
-    &.to-token {
-      margin-left: 10px;
-    }
-
-    &.pair {
-      margin-right: 16px;
-      margin-left: -30px;
-    }
-
-    &.border {
+    &.with-border {
       border: 0.25px solid rgba(variables.$color-white, 0.75);
     }
   }
@@ -211,10 +214,6 @@ export default defineComponent({
         height: 44px;
         margin: 0;
         border-radius: 22px;
-
-        &.pair {
-          margin-left: -80px;
-        }
       }
     }
   }

@@ -17,7 +17,7 @@
         :title="$t('dashboard.backUpCard.title')"
         :description="$t('dashboard.backUpCard.description')"
         :btn-text="$t('dashboard.backUpCard.button')"
-        :icon="SubtractIcon"
+        :icon="WarningTriangleIcon"
         :to="{ name: 'settings-seed-phrase' }"
         data-cy="backup-seed-phrase"
         variant="danger"
@@ -29,36 +29,24 @@
 </template>
 
 <script lang="ts">
-import { isEmpty } from 'lodash-es';
-import {
-  defineComponent,
-  watch,
-} from '@vue/composition-api';
-import { MODAL_TRANSFER_SEND } from '../utils';
-import { useDispatch, useState } from '../../composables/vuex';
+import { defineComponent } from '@vue/composition-api';
+import { useState } from '../../composables/vuex';
 
 import DashboardCard from './DashboardCard.vue';
 
-import SubtractIcon from '../../icons/subtract.svg?vue-component';
+import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardWrapper',
   components: {
     DashboardCard,
   },
-  setup(props, { root }) {
+  setup() {
     const backedUpSeed = useState('backedUpSeed');
-    const openModal = useDispatch('modals/open');
-
-    watch(() => root.$route.query, () => {
-      if (!isEmpty(root.$route.query)) {
-        openModal({ name: MODAL_TRANSFER_SEND });
-      }
-    }, { immediate: true });
 
     return {
       backedUpSeed,
-      SubtractIcon,
+      WarningTriangleIcon,
     };
   },
 });

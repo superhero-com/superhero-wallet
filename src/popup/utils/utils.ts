@@ -3,9 +3,9 @@ import VueCompositionApi, {
   watch,
   WatchSource,
 } from '@vue/composition-api';
-import { isFQDN } from 'validator';
+import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
-import { defer } from 'lodash-es';
+import { defer, times } from 'lodash-es';
 import {
   SCHEMA,
   AmountFormatter,
@@ -13,17 +13,23 @@ import {
   TxBuilder,
   TxBuilderHelper,
   InvalidTxError,
+  BrowserWindowMessageConnection,
 } from '@aeternity/aepp-sdk';
+import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
+import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
+  AENS_NAME_MAX_LENGTH,
+  AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
+  TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
-  MAGNITUDE,
   MAX_UINT256,
+  SEED_LENGTH,
   SIMPLEX_URL,
   SUPPORTED_TX_TYPES,
   STUB_ADDRESS,
@@ -31,6 +37,8 @@ import {
   STUB_NONCE,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
+  FUNCTION_TYPE_DEX,
+  TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -46,7 +54,16 @@ import type {
   IPendingTransaction,
   IPageableResponse,
   IDashboardTransaction,
+  INameEntryFetched,
+  IWallet,
+  IRequestInitBodyParsed,
+  IActiveMultisigTransaction,
+  IDexContracts,
+  TxFunctionRaw,
+  ICommonTransaction,
+  Truthy,
 } from '../../types';
+import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
 
 Vue.use(VueCompositionApi);
 
@@ -56,6 +73,18 @@ Vue.use(VueCompositionApi);
  */
 export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
   return arr.includes(elem as any);
+}
+
+export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
+  return (data: T) => fns.reduce((currData, func) => func(currData), data);
+}
+
+/**
+ * Following function exists mostly to satisfy TypeScript engine and is a replacement for:
+ * `.filter(Boolean)` => `.filter(excludeFalsy)`
+ */
+export function excludeFalsy<T>(value: T): value is Truthy<T> {
+  return !!value;
 }
 
 export function isNumbersEqual(a: number, b: number) {
@@ -78,10 +107,23 @@ export function convertToken(balance: number | string, precision: number): BigNu
   return new BigNumber(balance).shiftedBy(precision);
 }
 
-export const executeAndSetInterval = (handler: () => any, timeout: number) => {
+export function executeAndSetInterval(handler: () => any, timeout: number) {
   handler();
   return setInterval(handler, timeout);
-};
+}
+
+export function handleUnknownError(error: any) {
+  // eslint-disable-next-line no-console
+  return console.warn('Unknown rejection', error);
+}
+
+export function isNotFoundError(error: any) {
+  return error?.statusCode === 404;
+}
+
+export function isAccountNotFoundError(error: any) {
+  return isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
+}
 
 // TODO: Use the current language from i18n module
 export function formatDate(time: number) {
@@ -112,15 +154,6 @@ export function toURL(url: string): URL {
   return new URL(url.includes('://') ? url : `https://${url}`);
 }
 
-export function validateTipUrl(urlAsString: string): boolean {
-  try {
-    const url = toURL(urlAsString);
-    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
-  } catch (e) {
-    return false;
-  }
-}
-
 export function truncateAddress(address: string): [string, string] {
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
@@ -131,7 +164,29 @@ export function truncateAddress(address: string): [string, string] {
   ];
 }
 
-export const validateHash = (fullHash?: string) => {
+export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+  return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+}
+
+export function isValidURL(url: string): boolean {
+  const pattern = new RegExp(/((http(s)?:\/\/)?(localhost|127.0.0.1)((:)?[\0-9]{4})?\/?)/, 'i');
+  return isURL(url) || !!pattern.test(url);
+}
+
+export function validateTipUrl(urlAsString: string): boolean {
+  try {
+    const url = toURL(urlAsString);
+    return ['http:', 'https:'].includes(url.protocol) && isFQDN(url.hostname);
+  } catch (e) {
+    return false;
+  }
+}
+
+export function validateSeedLength(seed: string) {
+  return seed && seed.split(' ').length >= SEED_LENGTH;
+}
+
+export function validateHash(fullHash?: string) {
   const isName = !!fullHash?.endsWith(AENS_DOMAIN);
   let valid = false;
   let prefix = null;
@@ -145,7 +200,7 @@ export const validateHash = (fullHash?: string) => {
   return {
     valid, isName, prefix, hash,
   };
-};
+}
 
 export function getMdwEndpointPrefixForHash(fullHash: string) {
   const { valid, isName, prefix } = validateHash(fullHash);
@@ -170,6 +225,25 @@ export function isAensName(fullHash: string) {
   return (valid && prefix === HASH_PREFIX_NAME);
 }
 
+export function checkAddress(value: string) {
+  return (
+    Crypto.isAddressValid(value, 'ak')
+    || Crypto.isAddressValid(value, 'ct')
+    || Crypto.isAddressValid(value, 'ok')
+  );
+}
+
+export function checkAddressOrChannel(value: string) {
+  return checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+}
+
+export function checkAensName(value: string) {
+  return (
+    value.length <= AENS_NAME_MAX_LENGTH
+    && /^[\p{L}\d]+\.chain$/gu.test(value)
+  );
+}
+
 export function escapeSpecialChars(str = '') {
   return str.replace(/(\r\n|\n|\r|\n\r)/gm, ' ').replace(/"/g, '');
 }
@@ -180,15 +254,15 @@ export function secondsToRelativeTime(seconds: number) {
   const secondsPerDay = secondsPerHour * 24;
 
   if (seconds < secondsPerMinute) {
-    return i18n.tc('seconds', Math.round(seconds));
+    return i18n.tc('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.tc('minutes', Math.round(seconds / secondsPerMinute));
+    return i18n.tc('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.tc('hours', Math.round(seconds / secondsPerHour));
+    return i18n.tc('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.tc('days', Math.round(seconds / secondsPerDay));
+  return i18n.tc('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {
@@ -245,7 +319,7 @@ export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): 
     },
     ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
   });
-  return new BigNumber(minFee).shiftedBy(-MAGNITUDE);
+  return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
 }
 
 export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
@@ -259,9 +333,28 @@ export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
   },
 );
 
+export async function fetchJson<T = any>(
+  url: string,
+  options?: RequestInit,
+): Promise<T | null> {
+  const response = await fetch(url, options);
+  if (response.status === 204) {
+    return null;
+  }
+  return response.json();
+}
+
+export function postJson(url: string, options?: IRequestInitBodyParsed) {
+  return fetchJson(url, {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+    body: options?.body && JSON.stringify(options.body),
+  });
+}
+
 export async function fetchAllPages<T = any>(
   getFunction: () => Promise<IPageableResponse<T>>,
-  // eslint-disable-next-line no-unused-vars
   getNextPage: (url: string) => Promise<IPageableResponse<T>>,
 ) {
   const result = [];
@@ -308,6 +401,13 @@ export function compareCaseInsensitive(
   str2?: string,
 ) {
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
+}
+
+export function includesCaseInsensitive(
+  baseString: string,
+  searchString: string,
+) {
+  return baseString?.toLocaleLowerCase().includes(searchString?.toLocaleLowerCase());
 }
 
 export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
@@ -365,11 +465,16 @@ export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return acc?.name || `${i18n.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
 }
 
-export function defaultTransactionSortingCallback(
-  a: ITransaction,
-  b: ITransaction,
+export function sortTransactionsByDateCallback(
+  a: ICommonTransaction,
+  b: ICommonTransaction,
 ) {
-  const [aMicroTime, bMicroTime] = [a, b].map((tr) => (new Date(tr.microTime)).getTime());
+  const [aMicroTime, bMicroTime] = [a, b].map(
+    (transaction) => (
+      new Date(transaction.microTime!).getTime()
+    ),
+  );
+
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
   const compareMicroTime = () => {
     const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
@@ -384,8 +489,8 @@ export function defaultTransactionSortingCallback(
     const sortDirection = bMicroTime - aMicroTime;
     // Workaround to display received transaction after send (they have the same time)
     if (sortDirection === 0) {
-      const { direction = 'received' } = a as IDashboardTransaction;
-      return direction === 'received' ? -1 : 1;
+      const { direction = TX_DIRECTION.received } = a as IDashboardTransaction;
+      return direction === TX_DIRECTION.received ? -1 : 1;
     }
 
     return sortDirection;
@@ -393,7 +498,7 @@ export function defaultTransactionSortingCallback(
   return pending || compareMicroTime();
 }
 
-export function shrinkString(text: string, maxLength: number) {
+export function truncateString(text: string, maxLength: number) {
   return (text?.length)
     ? `${String(text).substring(0, maxLength)}${text.length > maxLength ? '...' : ''}`
     : '';
@@ -431,8 +536,12 @@ export function isContainingNestedTx(tx: ITx): boolean {
   ].includes(getTxType(tx));
 }
 
-export function getInnerTransaction(tx: ITx): any {
-  return tx && isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+export function getInnerTransaction(tx?: ITx): any {
+  if (!tx) {
+    return null;
+  }
+
+  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
 export function getTransactionTipUrl(transaction: ITransaction): string {
@@ -476,21 +585,70 @@ export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
 }
 
+export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
+  if (!balance || !totalSupply || !reserve) {
+    return null;
+  }
+  const share = new BigNumber(balance).times(100).div(totalSupply);
+  const amount = new BigNumber(reserve).times(share).div(100);
+  return amount.toFixed(0);
+}
+
 export function openInNewWindow(url: string) {
   window.open(url, '_blank');
 }
 
+export async function readValueFromClipboard(): Promise<string | undefined> {
+  if (!process.env.UNFINISHED_FEATURES) {
+    return undefined;
+  }
+  let value = '';
+
+  if (IS_CORDOVA) {
+    value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+  } else if (IS_EXTENSION) {
+    value = await browser!.runtime.sendMessage({ method: 'paste' });
+  } else {
+    try {
+      value = await navigator.clipboard.readText();
+    } catch (e: any) {
+      if (!e.message.includes('Read permission denied.')) {
+        handleUnknownError(e);
+      }
+    }
+  }
+  return value;
+}
+
+export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  return {
+    ...keyPair,
+    idx: accountIdx,
+    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+  };
+}
+
+export function getTwitterAccountUrl(url: string) {
+  const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
+  return match ? match[0] : false;
+}
+
 export function calculateFontSize(amountValue: BigNumber | number) {
-  const amount = new BigNumber(amountValue);
-  if (amount.isLessThanOrEqualTo(999999)) {
+  const amountLength = amountRounded(amountValue).replace(/\D/g, '').length;
+
+  if (amountLength <= 8) {
     return '18px';
   }
-  if (amount.isLessThanOrEqualTo(999999999)) {
+
+  if (amountLength <= 11) {
     return '16px';
   }
-  if (amount.isLessThanOrEqualTo(999999999999)) {
+
+  if (amountLength <= 14) {
     return '14px';
   }
+
   return '12px';
 }
 
@@ -508,6 +666,39 @@ export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
   return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
+export function isTxDex(tx: ITx, dexContracts: IDexContracts) {
+  const { wae = [], router = [] } = dexContracts;
+
+  return !!(
+    tx.contractId
+    && tx.function
+    && (
+      Object.values(FUNCTION_TYPE_DEX).flat()
+        .includes(tx.function as TxFunctionRaw)
+    )
+    && [...wae, ...router].includes(tx.contractId)
+  );
+}
+
+export function getTxOwnerAddress(innerTx?: ITx) {
+  return innerTx?.accountId || innerTx?.callerId;
+}
+
+export function getOwnershipStatus(
+  activeAccount: IAccount,
+  accounts: IAccount[],
+  innerTx?: ITx,
+) {
+  const txOwnerAddress = getTxOwnerAddress(innerTx);
+  if (activeAccount.address === txOwnerAddress) {
+    return TRANSACTION_OWNERSHIP_STATUS.current;
+  }
+  if (accounts.find(({ address }) => address === txOwnerAddress)) {
+    return TRANSACTION_OWNERSHIP_STATUS.subAccount;
+  }
+  return TRANSACTION_OWNERSHIP_STATUS.other;
+}
+
 export function errorHasValidationKey(error: any, expectedKey: string) {
   return (
     error.validation
@@ -520,4 +711,80 @@ export function isInsufficientBalanceError(error: any) {
     error instanceof InvalidTxError
     && errorHasValidationKey(error, 'InsufficientBalance')
   );
+}
+
+export function getTransaction(transaction: ICommonTransaction): ITransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? undefined
+    : transaction as ITransaction;
+}
+
+export function getMultisigTransaction(
+  transaction: ICommonTransaction,
+): IActiveMultisigTransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? transaction as IActiveMultisigTransaction
+    : undefined;
+}
+
+export function connectFrames(sdk: ISdk | AeSdkWallet) {
+  if (!IN_FRAME) {
+    return;
+  }
+
+  try {
+    const getArrayOfAvailableFrames = (): Window[] => [
+      window.parent,
+      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
+    ];
+
+    const connectedFrames = new Set();
+
+    executeAndSetInterval(
+      () => getArrayOfAvailableFrames()
+        .filter((frame) => frame !== window)
+        .forEach((target) => {
+          if (connectedFrames.has(target)) {
+            return;
+          }
+          connectedFrames.add(target);
+          const connection = BrowserWindowMessageConnection({ target });
+          const originalConnect = connection.connect;
+          let intervalId: NodeJS.Timer;
+
+          connection.connect = function connect(onMessage: any) {
+            originalConnect.call(this, (data: any, origin: any, source: any) => {
+              if (source !== target) {
+                return;
+              }
+              clearInterval(intervalId);
+              onMessage(data, origin, source);
+            });
+          };
+          sdk.addRpcClient(connection);
+          intervalId = executeAndSetInterval(() => {
+            if (!getArrayOfAvailableFrames().includes(target)) {
+              clearInterval(intervalId);
+              return;
+            }
+            sdk.shareWalletInfo(connection.sendMessage.bind(connection));
+          }, 3000);
+        }),
+      3000,
+    );
+  } catch (error: any) {
+    handleUnknownError(error);
+  }
+}
+
+/**
+ * Check if the image is available by making a HEAD request.
+ * Needed for Cordova because when using <img /> tag and the image is not available
+ * the DOM ready event is not fired.
+ */
+export function checkImageAvailability(url: string): Promise<boolean> {
+  // TODO: use  { method: 'HEAD'} when backend will introduce a proper response in such case
+  return fetch(url)
+    .then((response) => !!response.ok)
+    .catch(() => false);
 }

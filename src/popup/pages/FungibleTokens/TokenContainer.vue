@@ -29,14 +29,20 @@
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
-        v-if="isAe && !IS_IOS"
-        :text="$t('pages.fungible-tokens.buy')"
+        v-if="isAe && isNodeMainnet && !IS_IOS"
+        :text="$t('common.buy')"
         :icon="BuyIcon"
-        :href="simplexLink"
+        :href="activeAccountSimplexLink"
       />
       <BtnBox
-        v-else
-        :text="$t('pages.fungible-tokens.swap')"
+        v-else-if="isAe && isNodeTestnet"
+        :text="$t('common.faucet')"
+        :icon="FaucetIcon"
+        :href="activeAccountFaucetUrl"
+      />
+      <BtnBox
+        v-else-if="isNodeMainnet || isNodeTestnet"
+        :text="$t('common.swap')"
         :icon="SwapIcon"
         :href="DEX_URL"
       />
@@ -79,11 +85,10 @@ import {
   onMounted,
   ref,
 } from '@vue/composition-api';
+import type { IToken, ITokenList } from '../../../types';
 import {
-  DEX_URL,
   AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
-  buildSimplexLink,
+  DEX_URL,
   isContract,
 } from '../../utils';
 import {
@@ -94,8 +99,13 @@ import {
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
 } from '../../router/routeNames';
-import { useSdk, useTokensList, useCurrencies } from '../../../composables';
-import { useGetter } from '../../../composables/vuex';
+import {
+  useAccounts,
+  useCurrencies,
+  useSdk,
+  useTokensList,
+} from '../../../composables';
+import { useState, useGetter } from '../../../composables/vuex';
 import { IS_IOS } from '../../../lib/environment';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -105,11 +115,12 @@ import OpenTransferReceiveModalButton from '../../components/OpenTransferReceive
 import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
 import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
-import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 import Tab from '../../components/tabs/Tab.vue';
+import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
 
 import SwapIcon from '../../../icons/swap.svg?vue-component';
 import BuyIcon from '../../../icons/credit-card.svg?vue-component';
+import FaucetIcon from '../../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
   name: 'TokenContainer',
@@ -125,16 +136,22 @@ export default defineComponent({
     OpenTransferSendModalButton,
   },
   setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
-    const currentCurrencyRate = computed(() => root.$store.getters.currentCurrencyRate || 0);
     const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+
+    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store: root.$store });
+    const {
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store: root.$store });
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
       store: root.$store,
       isMultisig: isMultisig.value,
     });
 
-    const isCoin: boolean = !!root.$route.matched.find(({ name }) => name === ROUTE_COIN);
+    const isCoin: boolean = !!root.$route.matched.find(
+      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),
+    );
     const contractId = root.$route.params.id;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
@@ -159,37 +176,31 @@ export default defineComponent({
       },
     ];
     const loading = ref<boolean>(true);
-    const tokenPairs = ref({ token0: null, token1: null });
-    const account = useGetter('account');
-    const tokenBalances = useGetter<any[]>('fungibleTokens/tokenBalances');
-    const availableTokens = computed(() => root.$store.state.fungibleTokens.availableTokens);
+    const tokenPairs = ref<Record<string, IToken | null>>({ token0: null, token1: null });
+    const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
+    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => root.$route.name);
-    const simplexLink = computed(() => buildSimplexLink(account.value.address));
     const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
 
-    const tokenData = computed(() => {
-      const defaultData = {
-        decimals: 18,
-        symbol: AETERNITY_SYMBOL,
-        convertedBalance: aeTokenBalance.value,
-        balanceCurrency: aeTokenBalance.value.toNumber() * currentCurrencyRate.value,
-        contractId: '',
-        description: '',
-        isAe: true,
-      };
+    const tokenData = computed((): IToken => {
+      if (isAe) {
+        return {
+          ...aeternityData.value!,
+          convertedBalance: aeTokenBalance.value.toNumber(),
+        };
+      }
+      return tokenBalances.value.find(
+        (token) => token.contractId === contractId,
+      ) || { ...fungibleToken.value, contractId };
+    });
 
-      return contractId === AETERNITY_CONTRACT_ID
-        ? { ...defaultData, ...aeternityData.value }
-        : tokenBalances.value.find(
-          (token) => token.contractId === contractId,
-        ) || { ...fungibleToken.value, contractId };
-    });
-    const tokens = computed(() => {
+    const tokens = computed((): IToken[] => {
       const [token0, token1] = [tokenPairs.value.token0, tokenPairs.value.token1];
-      return token0 && token1 ? [token0, token1] : [tokenData.value];
+      return (token0 && token1) ? [token0!, token1!, tokenData.value] : [tokenData.value];
     });
-    const convertedBalance = computed(() => +tokenData.value.convertedBalance || 0);
+
+    const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
@@ -202,13 +213,17 @@ export default defineComponent({
     return {
       BuyIcon,
       SwapIcon,
+      FaucetIcon,
       DEX_URL,
       AETERNITY_CONTRACT_ID,
       fungibleToken,
       contractId,
       isAe,
+      isNodeMainnet,
+      isNodeTestnet,
       loading,
-      simplexLink,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
       tabs,
       tokenData,
       tokenPairs,

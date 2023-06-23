@@ -6,15 +6,15 @@
     <div
       v-for="token in filteredTokens"
       :key="token.symbol"
-      :class="[
-        'token-row',
-        token.isReceived ? TX_FUNCTIONS.received : TX_FUNCTIONS.sent,
-        { error }
-      ]"
+      class="token-row"
+      :class="{
+        error,
+        received: token.isReceived
+      }"
       :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
     >
       <Tokens
-        :tokens="token.isPool ? [filteredTokens[0], filteredTokens[1]] : [token]"
+        :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
         full-ae-symbol
       />
@@ -22,7 +22,7 @@
         {{ token.isReceived ? '' : '−' }}
         {{ amountRounded(tokenAmount(token)) }}
         <span class="token-name">
-          {{ shrinkString(getTokenName(token), 5) }}
+          {{ truncateString(getTokenName(token), 5) }}
         </span>
       </span>
     </div>
@@ -36,10 +36,10 @@ import {
 import {
   amountRounded,
   convertToken,
-  shrinkString,
+  truncateString,
   calculateFontSize,
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
+  TX_DIRECTION,
 } from '../utils';
 import { useTransactionTokens } from '../../composables';
 import type { ITokenResolved, ITransaction } from '../../types';
@@ -47,6 +47,7 @@ import type { ITokenResolved, ITransaction } from '../../types';
 import Tokens from './Tokens.vue';
 
 export default defineComponent({
+  name: 'TransactionTokenRows',
   components: { Tokens },
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
@@ -88,11 +89,11 @@ export default defineComponent({
     return {
       filteredTokens,
       tokenAmount,
-      shrinkString,
+      truncateString,
       getTokenName,
       amountRounded,
       calculateFontSize,
-      TX_FUNCTIONS,
+      TX_DIRECTION,
     };
   },
 });
@@ -118,6 +119,7 @@ export default defineComponent({
     .amount {
       color: variables.$color-white;
       font-weight: 500;
+      white-space: nowrap;
     }
 
     &.received .amount {
@@ -130,6 +132,8 @@ export default defineComponent({
 
     .token-name {
       @extend %face-sans-16-regular;
+
+      letter-spacing: -2%;
     }
   }
 }

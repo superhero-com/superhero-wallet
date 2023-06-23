@@ -24,7 +24,9 @@ import {
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_COIN_DETAILS,
   ROUTE_TOKEN_DETAILS,
+  ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
+  ROUTE_INVITE_CLAIM,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -55,7 +57,7 @@ import AuctionHistory from '../pages/Names/AuctionHistory.vue';
 import AuctionList from '../pages/Names/AuctionList.vue';
 import More from '../pages/More.vue';
 import NameClaim from '../pages/Names/Claim.vue';
-import NamesList from '../pages/Names/List.vue';
+import NamesList from '../pages/Names/NamesList.vue';
 import NotFound from '../pages/NotFound.vue';
 import Notifications from '../pages/Notifications.vue';
 import NotificationSettings from '../pages/NotificationSettings.vue';
@@ -398,7 +400,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     path: '/more/settings/networks/add',
-    name: 'network-add',
+    name: ROUTE_NETWORK_ADD,
     component: NetworkForm,
     props: true,
     meta: {
@@ -471,6 +473,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'about-privacy',
     meta: {
       title: 'privacy',
+      ifNotAuth: true,
       showHeaderNavigation: true,
       showScrollbar: true,
     },
@@ -669,7 +672,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'invite-claim',
+    name: ROUTE_INVITE_CLAIM,
     path: '/invite/:secretKey',
     component: InviteClaim,
     props: true,
@@ -692,8 +695,10 @@ export const routes: WalletAppRouteConfig[] = [
     name: ROUTE_NOT_FOUND,
     path: '*',
     component: NotFound,
+    props: true,
     meta: {
       ifNotAuth: true,
+      notPersist: true,
       showHeaderNavigation: true,
       title: 'not-found',
     },

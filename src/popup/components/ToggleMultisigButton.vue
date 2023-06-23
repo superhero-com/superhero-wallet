@@ -18,7 +18,7 @@
         <PendingIcon
           class="animated-pending-icon"
         />
-        <span class="tx-text">{{ $t('tx') }}</span>
+        <span class="tx-text">{{ $t('common.tx') }}</span>
       </div>
       <span class="text">{{ $t('multisig.showMultisigVaults') }}</span>
     </template>
@@ -78,7 +78,6 @@ export default defineComponent({
   @include mixins.flex(center, center, row);
 
   padding: 4px 8px;
-  margin-right: var(--screen-padding-x);
   background: $color-bg-app;
   border-radius: 12px;
 

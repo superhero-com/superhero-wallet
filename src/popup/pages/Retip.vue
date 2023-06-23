@@ -40,14 +40,14 @@
       :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
       @click="sendTip"
     >
-      {{ $t('pages.tipPage.confirm') }}
+      {{ $t('common.confirm') }}
     </BtnMain>
     <BtnMain
       class="bottom-btn"
       extend
       @click="openCallbackOrGoHome(false)"
     >
-      {{ $t('pages.tipPage.cancel') }}
+      {{ $t('common.cancel') }}
     </BtnMain>
 
     <Loader v-if="loading" />
@@ -64,21 +64,23 @@ import {
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import VueI18n from 'vue-i18n';
 import {
-  IAccount,
   IToken,
   IPendingTransaction,
   ISdk,
 } from '../../types';
-import { MAGNITUDE, AETERNITY_CONTRACT_ID, MODAL_DEFAULT } from '../utils/constants';
-import { convertToken, watchUntilTruthy } from '../utils';
+import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
+import { convertToken } from '../utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
   IFormModel,
   useBalances,
+  useModals,
+  useAccounts,
+  useTippingContracts,
 } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
-import InputAmount from '../components/InputAmountV2.vue';
+import { useGetter } from '../../composables/vuex';
+import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -96,9 +98,12 @@ export default defineComponent({
       amount: '',
     });
 
+    const { openDefaultModal } = useModals();
+    const { activeAccount } = useAccounts({ store: root.$store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, aeternityToken } = useBalances({ store: root.$store });
+    const { balance, aeternityCoin } = useBalances({ store: root.$store });
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store: root.$store });
 
     const tipId = root.$route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -108,23 +113,15 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
     const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const account = useGetter<IAccount>('account');
-    const tippingV1 = useState('tippingV1');
-    const tippingV2 = useState('tippingV2');
     const tippingSupported = useGetter('tippingSupported');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
-    const tippingContract = computed(
-      () => tipId.includes('_v2') || tipId.includes('_v3')
-        ? tippingV2.value
-        : tippingV1.value,
-    );
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     const validationStatus = computed<{
       error: boolean, msg?: string | VueI18n.TranslateResult
     }>(() => {
-      if (!sdk.value || !tippingContract.value) {
+      if (!sdk.value || !tippingSupported.value) {
         return { error: true };
       }
       return { error: false };
@@ -135,33 +132,46 @@ export default defineComponent({
         +(formModel.value.amount || 0),
         formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
-          : MAGNITUDE,
+          : AETERNITY_COIN_PRECISION,
       ).toNumber();
       loading.value = true;
-      await watchUntilTruthy(() => tippingV1.value);
       try {
+        const { tippingV1, tippingV2 } = await getTippingContracts();
+        const tippingContract = tipId.includes('_v2') || tipId.includes('_v3')
+          ? tippingV2
+          : tippingV1;
+        if (!tippingContract) {
+          throw Error('failed to initialize tipping contract');
+        }
         let retipResponse = null;
-        if (formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID) {
+        if (
+          tippingV2
+          && formModel.value.selectedAsset?.contractId
+          && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+        ) {
           await root.$store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
             [
-              formModel.value.selectedAsset?.contractId,
+              formModel.value.selectedAsset.contractId,
               formModel.value.amount],
           );
 
-          retipResponse = await tippingV2.value.methods.retip_token(
+          retipResponse = await tippingV2.retip_token(
             +tip.value.id.split('_')[0],
-            formModel.value.selectedAsset?.contractId,
+            formModel.value.selectedAsset.contractId as any,
             amount,
             {
               waitMined: false,
             },
           );
         } else {
-          retipResponse = await tippingContract.value.methods.retip(+tip.value.id.split('_')[0], {
-            amount,
-            waitMined: false,
-          });
+          retipResponse = await tippingContract.retip(
+            +tip.value.id.split('_')[0],
+            {
+              ...{ amount } as any,
+              waitMined: false,
+            },
+          );
         }
         const transaction: IPendingTransaction = {
           hash: retipResponse.hash,
@@ -169,8 +179,8 @@ export default defineComponent({
           pending: true,
           tx: {
             amount,
-            callerId: account.value.address,
-            contractId: tippingContract.value.deployInfo.address,
+            callerId: activeAccount.value.address,
+            contractId: tippingContract.$options.address,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
@@ -179,8 +189,7 @@ export default defineComponent({
         root.$store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
-        root.$store.dispatch('modals/open', {
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           title: root.$t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
@@ -193,7 +202,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = aeternityToken.value;
+      formModel.value.selectedAsset = aeternityCoin.value;
 
       if (!tipId) throw new Error('"id" param is missing');
 

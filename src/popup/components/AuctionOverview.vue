@@ -35,10 +35,9 @@ export default defineComponent({
   setup(props, { root }) {
     const { topBlockHeight } = useTopHeaderData({ store: root.$store });
 
-    // eslint-disable-next-line no-unused-vars
     const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
-
     const getAuction = useGetter('names/getAuction');
+
     const auction = computed<IAuction>(() => getAuction.value(props.name));
     const blocksToExpiry = computed<number>(() => auction.value.expiration - topBlockHeight.value);
     const amount = computed(() => +getHighestBid.value(props.name).nameFee);

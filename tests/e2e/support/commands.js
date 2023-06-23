@@ -1,14 +1,47 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
+import { mnemonicToSeed } from '@aeternity/bip39';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { STUB_CURRENCY } from '../../../src/popup/utils/testsConfig';
+import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig';
 import {
   formatDate,
   formatTime,
-  getLoginState,
-  CURRENCY_URL,
-  CURRENCIES_URL,
 } from '../../../src/popup/utils';
+import { CoinGecko } from '../../../src/lib/CoinGecko';
+import runMigrations from '../../../src/store/migrations';
+
+export async function getLoginState({
+  backedUpSeed,
+  balance,
+  name,
+  pendingTransaction,
+  network,
+}) {
+  const { mnemonic, address } = testAccount;
+  const account = {
+    address,
+    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
+  };
+  return {
+    ...(await runMigrations()),
+    account,
+    mnemonic,
+    backedUpSeed,
+    current: { network: network || 'Testnet' },
+    balance,
+    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
+    ...(pendingTransaction
+        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+  };
+}
+
+Cypress.Commands.add('getByTestId', (testId) => {
+  cy.get(`[data-cy=${testId}]`);
+});
+
+Cypress.Commands.add('getInputByTestId', (testId) => {
+  cy.getByTestId(testId).find('input');
+});
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
   cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
@@ -49,8 +82,8 @@ Cypress.Commands.add('shouldHasErrorMessage', (el) => {
 });
 
 Cypress.Commands.add('mockExternalRequests', () => {
-  cy.intercept('GET', CURRENCY_URL, STUB_CURRENCY);
-  cy.intercept('GET', CURRENCIES_URL, { aeternity: { usd: 0.05 } });
+  cy.stub(CoinGecko, 'fetchCoinMarketData', STUB_CURRENCY);
+  cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
 });
 
 Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
@@ -204,13 +237,13 @@ Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler)
 Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
   cy.get('[data-cy=to-add]')
     .click()
-    .get('[data-cy=connect]')
+    .getByTestId('connect')
     .should('be.visible')
     .buttonShouldBeDisabled('[data-cy=connect]')
     .enterNetworkDetails(network, url, middleware, compiler)
-    .get('[data-cy=connect]')
+    .getByTestId('connect')
     .click()
-    .get('[data-cy=networks]')
+    .getByTestId('networks')
     .should('be.visible')
     .get('[data-cy=network-name]')
     .should('contain', network)

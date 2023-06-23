@@ -1,7 +1,7 @@
 <template>
   <span
     class="token-amount"
-    :class="[direction, { large, 'has-label': !!label }]"
+    :class="[{ large, 'has-label': !!label, small }]"
   >
     <span>
       <span
@@ -41,7 +41,6 @@ import { computed, defineComponent } from '@vue/composition-api';
 import { useCurrencies } from '../../composables';
 import {
   AETERNITY_SYMBOL,
-  TX_FUNCTIONS,
   calculateFontSize,
 } from '../utils';
 
@@ -53,19 +52,12 @@ export default defineComponent({
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
     hideFiat: Boolean,
-    direction: {
-      type: String,
-      validator: (value: any) => [
-        TX_FUNCTIONS.sent,
-        TX_FUNCTIONS.received,
-      ].includes(value),
-      default: undefined,
-    },
     large: Boolean,
     row: Boolean,
     noSymbol: Boolean,
     highPrecision: Boolean,
     dynamicSizing: Boolean,
+    small: Boolean,
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -109,6 +101,7 @@ export default defineComponent({
   .amount {
     font-size: var(--font-size);
     line-height: 20px;
+    white-space: nowrap;
   }
 
   .symbol {
@@ -125,6 +118,7 @@ export default defineComponent({
       display: block;
       margin-left: 0;
       padding-top: 4px;
+      white-space: nowrap;
     }
   }
 
@@ -133,23 +127,6 @@ export default defineComponent({
     align-items: flex-start;
     justify-content: space-between;
     width: 100%;
-  }
-
-  &.sent {
-    color: variables.$color-danger;
-
-    &::before {
-      font-weight: 600;
-      content: '−';
-    }
-  }
-
-  &.received {
-    color: variables.$color-success-hover;
-
-    &::before {
-      content: '+';
-    }
   }
 
   &.large {
@@ -165,6 +142,12 @@ export default defineComponent({
 
     .fiat {
       @extend %face-sans-18-regular;
+    }
+  }
+
+  &.small {
+    .fiat {
+      @extend %face-sans-12-regular;
     }
   }
 }

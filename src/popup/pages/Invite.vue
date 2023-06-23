@@ -33,7 +33,7 @@
       class="generated-links"
     >
       <p class="section-title">
-        <Invite class="section-title-icon" />
+        <InviteIcon class="section-title-icon" />
         {{ $t('pages.invite.created-links') }}
       </p>
       <InviteItem
@@ -52,12 +52,17 @@ import { defineComponent, ref } from '@vue/composition-api';
 import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
 
 import { useState } from '../../composables/vuex';
-import { useBalances, useSdk, useMaxAmount } from '../../composables';
-import { TransferFormModel } from '../components/Modals/TransferSend.vue';
-import InputAmount from '../components/InputAmountV2.vue';
+import {
+  useBalances,
+  useSdk,
+  useMaxAmount,
+  IFormModel,
+} from '../../composables';
+
+import InputAmount from '../components/InputAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InviteItem from '../components/InviteItem.vue';
-import Invite from '../../icons/invite.svg?vue-component';
+import InviteIcon from '../../icons/invite.svg?vue-component';
 import NewInviteLink from '../../icons/new-invite-link.svg?vue-component';
 
 export default defineComponent({
@@ -65,17 +70,19 @@ export default defineComponent({
     InputAmount,
     BtnMain,
     InviteItem,
-    Invite,
+    InviteIcon,
     NewInviteLink,
   },
   setup(props, { root }) {
     const loading = ref(false);
-    const formModel = ref<TransferFormModel>({
-      address: '', amount: '', selectedAsset: undefined, payload: '',
-    });
 
     const { getSdk } = useSdk({ store: root.$store });
-    const { balance } = useBalances({ store: root.$store });
+    const { balance, aeternityCoin } = useBalances({ store: root.$store });
+
+    const formModel = ref<IFormModel>({
+      amount: '', selectedAsset: aeternityCoin.value,
+    });
+
     const { max, fee } = useMaxAmount({ formModel, store: root.$store });
 
     const invites = useState('invites', 'invites');
@@ -87,7 +94,6 @@ export default defineComponent({
       try {
         const sdk = await getSdk();
         await sdk.spend(formModel.value.amount, publicKey, {
-          payload: 'referral',
           denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
         });
       } catch (error) {

@@ -100,13 +100,13 @@
       <div class="actions">
         <BtnMain
           variant="muted"
-          :text="$t('pages.permissions.cancel')"
+          :text="$t('common.cancel')"
           :to="{ name: 'permissions-settings' }"
         />
         <BtnMain
           class="confirm"
           extra-padded
-          :text="$t('pages.permissions.confirm')"
+          :text="$t('common.confirm')"
           :disabled="!permissionChanged"
           @click="savePermission"
         />
@@ -137,7 +137,7 @@ import { useState } from '../../composables/vuex';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 import SwitchButton from '../components/SwitchButton.vue';
-import InputAmount from '../components/InputAmountV2.vue';
+import InputAmount from '../components/InputAmount.vue';
 import InputField from '../components/InputField.vue';
 import TokenAmount from '../components/TokenAmount.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -167,7 +167,7 @@ export default defineComponent({
     const selectedAsset = computed(() => ({
       contractId: AETERNITY_CONTRACT_ID,
       symbol: AETERNITY_SYMBOL,
-      current_price: currentCurrencyRate.value,
+      currentPrice: currentCurrencyRate.value,
     }));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));

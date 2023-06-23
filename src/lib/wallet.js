@@ -78,10 +78,7 @@ export default async function initSdk() {
       );
     }
 
-    await Promise.all([
-      store.dispatch('initTippingContractInstances'),
-      getMiddleware(),
-    ]);
+    await getMiddleware();
     store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
 
     store.watch(

@@ -1,7 +1,8 @@
 import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
-import { detectConnectionType, watchUntilTruthy } from '../popup/utils';
+import { watchUntilTruthy } from '../popup/utils';
 import { removePopup, getPopup } from './popupHandler';
+import { detectConnectionType } from './utils';
 import store from './store';
 
 window.browser = require('webextension-polyfill');
@@ -26,14 +27,16 @@ export async function init() {
     switch (detectConnectionType(port)) {
       case CONNECTION_TYPES.POPUP: {
         const id = new URL(port.sender.url).searchParams.get('id');
-        const { actions, props } = getPopup(id);
+        const popup = getPopup(id);
 
         port.onMessage.addListener((msg) => {
           if (msg.type === 'getProps') {
-            port.postMessage({ uuid: msg.uuid, res: props });
+            port.postMessage({ uuid: msg.uuid, res: popup?.props });
             return;
           }
-          actions[msg.type]();
+          if (popup?.actions) {
+            popup.actions[msg.type]();
+          }
         });
 
         port.onDisconnect.addListener(() => removePopup(id));

@@ -39,6 +39,9 @@
       </DetailsItem>
 
       <DetailsItem :label="$t('multisig.consensus')">
+        <template #label>
+          <BtnHelp @help="openConsensusInfoModal" />
+        </template>
         <ConsensusLabel
           :confirmations-required="confirmationsRequired"
           :signers="signers"
@@ -92,8 +95,17 @@ import {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '../../types';
-import { AETERNITY_SYMBOL, handleUnknownError } from '../utils';
-import { useAccounts, useMultisigAccountCreate, useSdk } from '../../composables';
+import {
+  AETERNITY_SYMBOL,
+  handleUnknownError,
+  MODAL_CONSENSUS_INFO,
+} from '../utils';
+import {
+  useAccounts,
+  useModals,
+  useMultisigAccountCreate,
+  useSdk,
+} from '../../composables';
 
 import AccountSelector from './AccountSelector.vue';
 import AccountItem from './AccountItem.vue';
@@ -101,11 +113,13 @@ import DetailsItem from './DetailsItem.vue';
 import DialogBox from './DialogBox.vue';
 import TokenAmount from './TokenAmount.vue';
 import ConsensusLabel from './ConsensusLabel.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 
 import LoadingIcon from '../../icons/animated-spinner.svg?skip-optimize';
 
 export default defineComponent({
   components: {
+    BtnHelp,
     AccountSelector,
     ConsensusLabel,
     DetailsItem,
@@ -131,6 +145,8 @@ export default defineComponent({
     const { isLocalAccountAddress } = useAccounts({ store: root.$store });
 
     const { getSdk } = useSdk({ store: root.$store });
+
+    const { openModal } = useModals();
 
     const creatorAddress = ref<string>(props.signers[0].address || accounts.value[0].address);
     const creatorAccountFetched = ref<IAccountFetched>();
@@ -163,6 +179,10 @@ export default defineComponent({
       }
     }, { immediate: true });
 
+    function openConsensusInfoModal() {
+      openModal(MODAL_CONSENSUS_INFO);
+    }
+
     return {
       AETERNITY_SYMBOL,
       creatorAddress,
@@ -172,6 +192,7 @@ export default defineComponent({
       fee,
       callData,
       notEnoughBalanceToCreateMultisig,
+      openConsensusInfoModal,
     };
   },
 });
@@ -189,11 +210,12 @@ export default defineComponent({
   .creator-error-message {
     @extend %face-sans-14-regular;
 
+    letter-spacing: normal;
     color: $color-danger;
     line-height: 22px;
 
     span {
-      @extend %face-sans-14-medium;
+      font-weight: 500;
     }
   }
 

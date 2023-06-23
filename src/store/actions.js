@@ -1,23 +1,16 @@
-import {
-  flatten, orderBy, uniq,
-} from 'lodash-es';
-import TIPPING_V1_INTERFACE from 'tipping-contract/Tipping_v1_Interface.aes';
-import TIPPING_V2_INTERFACE from 'tipping-contract/Tipping_v2_Interface.aes';
+import { uniqBy, orderBy } from 'lodash-es';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import camelcaseKeysDeep from 'camelcase-keys-deep';
-import { postMessageToContent } from '../popup/utils/connection';
 import {
+  AEX9_TRANSFER_EVENT,
   fetchJson,
-  getAddressByNameEntry,
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
   watchUntilTruthy,
   fetchRespondChallenge,
-  MODAL_DEFAULT,
 } from '../popup/utils';
 import { i18n } from './plugins/languages';
-import { useMiddleware } from '../composables';
+import { useMiddleware, useModals } from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
@@ -27,12 +20,13 @@ export default {
 
   async selectNetwork({ dispatch, getters }, network) {
     await dispatch('switchNetwork', network);
-    if (getters.tippingSupported) return;
-    await dispatch('modals/open', {
-      name: MODAL_DEFAULT,
-      title: i18n.t('modals.tip-mainnet-warning.title'),
-      msg: i18n.t('modals.tip-mainnet-warning.msg'),
-    });
+    if (!getters.tippingSupported) {
+      const { openDefaultModal } = useModals();
+      await openDefaultModal({
+        title: i18n.t('modals.tip-mainnet-warning.title'),
+        msg: i18n.t('modals.tip-mainnet-warning.msg'),
+      });
+    }
   },
   addPendingTransaction({ getters: { activeNetwork }, commit }, transaction) {
     commit('addPendingTransaction', {
@@ -92,72 +86,79 @@ export default {
     }
     return tipWithdrawnTransactions;
   },
-  async fetchTransactions(context, { limit, recent, address }) {
+  async fetchTransactions(context, {
+    limit, recent, address, multipleAccounts = false,
+  }) {
     const {
       state, getters, dispatch, commit,
     } = context;
     if (state.transactions.nextPageUrl === null && !recent) {
-      return;
+      return null;
     }
 
-    const { getMiddleware, fetchFromMiddleware } = useMiddleware({ store: context });
-    const middleware = await getMiddleware();
+    const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
 
     let txs = await Promise.all([
-      (recent || state.transactions.nextPageUrl === ''
-        ? middleware.getTxByAccount(address, limit, 1)
-        : fetchFromMiddleware(state.transactions.nextPageUrl))
+      fetchFromMiddlewareCamelCased(
+        recent || state.transactions.nextPageUrl === ''
+          ? `/v2/accounts/${address}/activities?limit=${limit}`
+          : state.transactions.nextPageUrl,
+      )
         .then(({ data, next }) => {
-          const result = recent || state.transactions.nextPageUrl === '' ? data : camelcaseKeysDeep(data);
           if (!recent) commit('setTransactionsNextPage', next);
-          return result;
+          return data;
         })
         .catch(() => []),
       dispatch('fetchPendingTransactions', address),
+      dispatch('fetchTipWithdrawnTransactions', { recent, address, multipleAccounts }),
     ]);
+    const tipWithdrawnTransactions = txs[2];
 
-    const minMicroTime = Math.min.apply(null, flatten(txs).map((tx) => tx.microTime));
-    const amountOfTx = flatten(txs).length;
-    flatten(await Promise.all([dispatch('fungibleTokens/getTokensHistory', { recent, address }),
-      dispatch('fetchTipWithdrawnTransactions', { recent, address })]))
-      .forEach((f) => {
-        if (minMicroTime < f.microTime || (amountOfTx === 0 && minMicroTime > f.microTime)) {
-          txs[0].push(f);
+    const lastTransaction = txs[0]?.[txs[0].length - 1];
+    // DEX transaction is represented in 3 objects, only last one should be used
+    // this condition checking edge case when not all 3 objects in one chunk
+    if (lastTransaction?.type === AEX9_TRANSFER_EVENT) {
+      const middleware = await getMiddleware();
+      txs[0][txs[0].length - 1] = await middleware.getTx(lastTransaction.payload.txHash);
+    }
+
+    txs = [...txs[1], ...txs[0]].filter(({ type }) => !type?.startsWith('Internal')).map((tx) => ({
+      ...(tx.payload ? tx.payload : tx),
+      transactionOwner: address,
+      ...(tx.type === AEX9_TRANSFER_EVENT
+        ? {
+          tx: {
+            ...tx.payload,
+            callerId: tx.payload.senderId,
+            type: 'ContractCallTx',
+          },
+          hash: tx.payload.txHash,
+          incomplete: true,
         }
-      });
-    txs = orderBy(flatten(txs), ['microTime'], ['desc']);
-    txs = txs.map((tx) => ({ ...tx, transactionOwner: address }));
+        : {}),
+    }));
+
+    txs = uniqBy(txs.reverse(), 'hash').reverse();
+    const minMicroTime = Math.min.apply(null, txs.map((tx) => tx.microTime));
+    tipWithdrawnTransactions.forEach((f) => {
+      if (minMicroTime < f.microTime || (txs.length === 0 && minMicroTime > f.microTime)) {
+        txs.push({ ...f, transactionOwner: address });
+      }
+    });
+    txs = orderBy(txs, ['microTime'], ['desc']);
     const network = getters.activeNetwork.networkId;
-    if (state.transactions.pending[network]) {
+    if (state.transactions.pending[network] && !multipleAccounts) {
       state.transactions.pending[network].forEach(({ hash }) => {
         if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
           commit('removePendingTransactionByHash', { hash, network });
         }
       });
     }
-
+    if (multipleAccounts) {
+      return recent ? txs.slice(0, limit) : txs;
+    }
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
-  },
-  async getWebPageAddresses({ state: { sdk } }) {
-    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    const { address, chainName } = await postMessageToContent(
-      { method: 'getAddresses' },
-      tab.id,
-    ).catch(() => ({ address: [], chainName: [] }));
-    let addresses = Array.isArray(address) ? address : [address];
-    const chainNames = Array.isArray(chainName) ? chainName : [chainName];
-    const chainNamesAddresses = await Promise.all(
-      chainNames.map(async (n) => {
-        try {
-          return getAddressByNameEntry(await sdk.api.getNameEntryByName(n));
-        } catch (e) {
-          return null;
-        }
-      }),
-    );
-    addresses = [...addresses, ...chainNamesAddresses];
-
-    return { addresses: uniq(addresses).filter((a) => a), tab };
+    return null;
   },
   async claimTips({ getters: { activeNetwork } }, { url, address }) {
     return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
@@ -167,9 +168,6 @@ export default {
   },
   async cacheInvalidateTips({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
-  },
-  async cacheInvalidateFT({ getters: { activeNetwork } }, contract) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/token/${contract}`);
   },
   async donateError({ getters: { activeNetwork } }, error) {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
@@ -192,30 +190,6 @@ export default {
   },
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
-  },
-  async initTippingContractInstances({
-    getters: { 'sdkPlugin/sdk': sdk, activeNetwork, tippingSupported },
-    commit,
-  }) {
-    if (!tippingSupported && !process.env.RUNNING_IN_TESTS) return;
-
-    const [
-      contractInstanceV1,
-      contractInstanceV2,
-    ] = await Promise.all([
-      sdk.getContractInstance({
-        source: TIPPING_V1_INTERFACE,
-        contractAddress: activeNetwork.tipContractV1,
-      }),
-      activeNetwork.tipContractV2
-        ? sdk.getContractInstance({
-          source: TIPPING_V2_INTERFACE,
-          contractAddress: activeNetwork.tipContractV2,
-        })
-        : null,
-    ]);
-
-    commit('setTipping', [contractInstanceV1, contractInstanceV2]);
   },
   async share(_, options) {
     await (process.env.IS_CORDOVA

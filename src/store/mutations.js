@@ -2,8 +2,7 @@
 import Vue from 'vue';
 import { uniqBy } from 'lodash-es';
 import {
-  TX_FUNCTIONS,
-  defaultNetwork,
+  TX_DIRECTION,
 } from '../popup/utils';
 
 export default {
@@ -39,18 +38,17 @@ export default {
   },
   setPendingTransactionSentByHash(state, { network, hash }) {
     const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
-    Vue.set(state.transactions.pending[network][index], TX_FUNCTIONS.sent, true);
+    Vue.set(state.transactions.pending[network][index], TX_DIRECTION.sent, true);
   },
   setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) Vue.set(state.userNetworks, index, network);
-    else state.userNetworks.push({ ...defaultNetwork, ...network });
+    if (index !== undefined) {
+      Vue.set(state.userNetworks, index, network);
+    } else {
+      state.userNetworks.push(network);
+    }
   },
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
-  },
-  setTipping(state, [tippingV1, tippingV2]) {
-    state.tippingV1 = tippingV1 || null;
-    state.tippingV2 = tippingV2 || null;
   },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;

@@ -1,4 +1,4 @@
-import { checkAensName } from '../../../src/popup/utils/helper';
+import { checkAensName } from '../../../src/popup/utils';
 
 const testErrors = [
   { name: undefined },

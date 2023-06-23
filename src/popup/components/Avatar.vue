@@ -1,18 +1,22 @@
 <template>
   <img
     class="avatar"
-    :src="error ? avatar : profileImage"
+    :src="hasProfileImage ? profileImage : avatar"
     :class="[size, { borderless }]"
     :style="avatarStyle"
-    @error="error = true"
   >
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from '@vue/composition-api';
 import type { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
-import { AVATAR_URL, isContract } from '../utils';
+import { AVATAR_URL, checkImageAvailability, isContract } from '../utils';
 import { getAddressColor } from '../utils/avatar';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
@@ -30,13 +34,21 @@ export default defineComponent({
   },
   setup(props) {
     const error = ref(false);
+    const hasProfileImage = ref(false);
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const avatar = computed(() => `${AVATAR_URL}${props.name || props.address}`);
     const color = computed(() => props.address ? getAddressColor(props.address) : null);
     const profileImage = computed(() => (isContract(props.address) || props.address === '')
-      ? ''
+      ? null
       : `${activeNetwork.value.backendUrl}/profile/image/${props.address}`);
     const avatarStyle = computed(() => !props.borderless ? { 'border-color': color.value } : null);
+
+    onMounted(async () => {
+      hasProfileImage.value = (
+        !!profileImage.value
+        && await checkImageAvailability(profileImage.value)
+      );
+    });
 
     return {
       error,
@@ -44,6 +56,7 @@ export default defineComponent({
       color,
       profileImage,
       avatarStyle,
+      hasProfileImage,
     };
   },
 });

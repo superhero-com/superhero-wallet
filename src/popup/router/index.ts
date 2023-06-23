@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { ICordova } from '../../types';
+import { Dictionary } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
+  ROUTE_NOT_FOUND,
 } from './routeNames';
 import { routes } from './routes';
-import { i18n } from '../../store/plugins/languages';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
@@ -16,8 +16,8 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  MODAL_DEFAULT,
   watchUntilTruthy,
+  POPUP_TYPE_TX_SIGN,
 } from '../utils';
 import {
   RUNNING_IN_POPUP,
@@ -25,6 +25,8 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
+import { useAccounts } from '../../composables';
+import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 Vue.use(VueRouter);
 
@@ -36,19 +38,25 @@ const router = new VueRouter({
 
 const lastRouteKey = 'last-path';
 
+const { isLoggedIn } = useAccounts({ store });
+
+RouteQueryActionsController.init(router);
+
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
   next(
-    (to.name === ROUTE_INDEX && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey])
+    (
+      !RUNNING_IN_POPUP
+      && to.name === ROUTE_INDEX
+      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey]
+    )
     || undefined,
   );
   unbind();
 });
 
 router.beforeEach(async (to, from, next) => {
-  const { isLoggedIn } = store.getters;
-
-  if (!isLoggedIn) {
+  if (!isLoggedIn.value) {
     if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
       next();
     } else {
@@ -58,29 +66,38 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (!store.getters['sdkPlugin/sdk']) initSdk();
+  if (!store.getters['sdkPlugin/sdk'] && !RUNNING_IN_POPUP) initSdk();
 
-  if (RUNNING_IN_POPUP) {
+  if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
       [POPUP_TYPE_CONNECT]: 'connect',
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
       [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
       [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
+      [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
+    let params: Dictionary = {};
+
+    if (!Object.keys(to.params).length) {
+      params = await getPopupProps();
+      if (!params?.app) {
+        next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
+        return;
+      }
+    }
+
     if (name !== to.name) {
-      next({ name, params: await getPopupProps() });
+      next({ name, params });
       return;
     }
   }
-  // TODO: rethink this approach
-  // @ts-ignore
-  document.querySelector('.app-inner').scroll(0, 0);
 
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 
 router.afterEach(async (to) => {
+  if (RUNNING_IN_POPUP) return;
   if (to.meta?.notPersist) {
     await browser?.storage.local.remove(lastRouteKey);
   } else {
@@ -99,7 +116,6 @@ const routerReadyPromise = new Promise((resolve) => {
 
 if (IS_CORDOVA) {
   (async () => {
-    const cordova = window.cordova as ICordova;
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {
       const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => url.startsWith(p));
@@ -108,16 +124,6 @@ if (IS_CORDOVA) {
         window.location.href = `#/${url.slice(prefix.length)}`;
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
-      }
-    });
-
-    cordova.openwith.init();
-    cordova.openwith.addHandler((intent: any) => {
-      const url = intent.items.find(({ type }: any) => type.includes('url'))?.data;
-      if (url) {
-        router.push({ name: ROUTE_ACCOUNT, query: { url } });
-      } else {
-        store.dispatch('modals/open', { name: MODAL_DEFAULT, ...i18n.t('modals.mobile-share-error') as any });
       }
     });
 

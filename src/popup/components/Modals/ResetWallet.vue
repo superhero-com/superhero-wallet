@@ -7,7 +7,7 @@
     @close="resolve"
   >
     <div class="icon-wrapper">
-      <ResetWallet />
+      <IconBoxed :icon="ResetWalletIcon" />
     </div>
     <div class="info">
       <h3 class="title">
@@ -23,7 +23,7 @@
         variant="muted"
         @click="reject"
       >
-        {{ $t('pages.reset-wallet.cancel') }}
+        {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
         variant="danger"
@@ -39,17 +39,23 @@
 import { mapActions } from 'vuex';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import ResetWallet from '../../../icons/reset-wallet.svg?vue-component';
+import IconBoxed from '../IconBoxed.vue';
+import ResetWalletIcon from '../../../icons/reset-wallet.svg?vue-component';
 
 export default {
   components: {
     Modal,
     BtnMain,
-    ResetWallet,
+    IconBoxed,
   },
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
+  },
+  setup() {
+    return {
+      ResetWalletIcon,
+    };
   },
   methods: {
     ...mapActions(['reset']),
@@ -69,20 +75,7 @@ export default {
 .reset-wallet {
   .icon-wrapper {
     margin: 8px auto 18px;
-    width: 64px;
-    height: 64px;
-    background-color: variables.$color-bg-1;
-    border: 4px solid rgba(variables.$color-white, 0.05);
-    border-radius: 32px;
-    display: inline-flex;
-    justify-content: space-around;
-    align-items: center;
-
-    .reset-wallet {
-      width: 48px;
-      height: 48px;
-      color: variables.$color-danger;
-    }
+    color: variables.$color-danger;
   }
 
   .info {

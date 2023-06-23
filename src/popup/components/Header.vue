@@ -62,13 +62,14 @@
 
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
 import { WalletRouteMeta } from '../../types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '../router/routeNames';
+import { useAccounts, useUi } from '../../composables';
+
 import Logo from '../../icons/logo-small.svg?vue-component';
 import BackIcon from '../../icons/back.svg?vue-component';
 import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
@@ -78,7 +79,6 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
-import { useUi } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -91,9 +91,8 @@ export default defineComponent({
     BtnIcon,
   },
   setup(props, { root }) {
-    const { homeRouteName } = useUi({ store: root.$store });
-
-    const isLoggedIn = useGetter('isLoggedIn');
+    const { homeRouteName } = useUi();
+    const { isLoggedIn } = useAccounts({ store: root.$store });
 
     const currentHomeRouteName = computed(
       () => isLoggedIn.value

@@ -63,7 +63,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function, required: true },
     reject: { type: Function, required: true },
-    selectedToken: { type: Object as PropType<IToken>, default: null },
+    selectedToken: { type: Object as PropType<IToken | null>, default: null },
     showTokensWithBalance: Boolean,
   },
   setup(props, { root }) {
@@ -78,10 +78,7 @@ export default defineComponent({
     });
 
     function isTokenSelected(token: IToken): boolean {
-      if (!props.selectedToken) return false;
-      return (token.contractId)
-        ? props.selectedToken.contractId === token.contractId
-        : props.selectedToken.id === token.id;
+      return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
     }
 
     /**

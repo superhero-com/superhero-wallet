@@ -70,12 +70,13 @@ export default {
 
   &:hover {
     .icon {
-      color: $color-white;
+      opacity: 1;
     }
   }
 
   .icon {
-    color: rgba($color-white, 0.75);
+    color: $color-white;
+    opacity: 0.75;
   }
 
   .subtitle {

@@ -11,6 +11,7 @@
           :options="options || accountsSelectOptions"
           unstyled
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
+          account-select
           v-on="$listeners"
         >
           <template #current-text="{ text }">

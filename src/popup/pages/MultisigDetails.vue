@@ -68,6 +68,9 @@
         class="details-item"
         :label="$t('multisig.consensus')"
       >
+        <template #label>
+          <BtnHelp @help="openConsensusInfoModal" />
+        </template>
         <template #value>
           <ConsensusLabel
             :confirmations-required="activeMultisigAccount.confirmationsRequired"
@@ -82,22 +85,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onBeforeUnmount } from '@vue/composition-api';
+import {
+  defineComponent,
+  onMounted,
+  onBeforeUnmount,
+} from '@vue/composition-api';
 import { useGetter } from '../../composables/vuex';
-import { useMultisigAccounts } from '../../composables';
+import { MODAL_CONSENSUS_INFO } from '../utils';
+import { useModals, useMultisigAccounts } from '../../composables';
 
 import DetailsItem from '../components/DetailsItem.vue';
 import AddressFormatted from '../components/AddressFormatted.vue';
 import Avatar from '../components/Avatar.vue';
 import AuthorizedAccounts from '../components/AuthorizedAccounts.vue';
 import LinkButton from '../components/LinkButton.vue';
-import ConsensusLabel from '../components/ConsensusLabel.vue';
 
+import ConsensusLabel from '../components/ConsensusLabel.vue';
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
+import BtnHelp from '../components/buttons/BtnHelp.vue';
 
 export default defineComponent({
   name: 'MultisigDetails',
   components: {
+    BtnHelp,
     ConsensusLabel,
     LinkButton,
     AuthorizedAccounts,
@@ -108,12 +118,16 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const getExplorerPath = useGetter('getExplorerPath');
-
+    const { openModal } = useModals();
     const {
       activeMultisigAccount,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts({ store: root.$store });
+
+    function openConsensusInfoModal() {
+      openModal(MODAL_CONSENSUS_INFO);
+    }
 
     onMounted(fetchAdditionalInfo);
 
@@ -122,6 +136,7 @@ export default defineComponent({
     return {
       activeMultisigAccount,
       getExplorerPath,
+      openConsensusInfoModal,
     };
   },
 });

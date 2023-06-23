@@ -32,6 +32,7 @@
           <LinkButton
             :to="getExplorerPath(activeMultisigAccount.contractId)"
             variant="muted"
+            underlined
           >
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
@@ -52,7 +53,7 @@
                 <CopyText
                   hide-icon
                   :value="multisigTx.recipientId"
-                  :copied-text="$t('addressCopied')"
+                  :copied-text="$t('common.addressCopied')"
                 >
                   <span class="text-address">{{ splitAddress(multisigTx.recipientId) }}</span>
                 </CopyText>
@@ -90,7 +91,7 @@
               <CopyText
                 hide-icon
                 :value="transaction.hash"
-                :copied-text="$t('hashCopied')"
+                :copied-text="$t('common.hashCopied')"
               >
                 <span class="text-address">{{ splitAddress(transaction.hash) }}</span>
               </CopyText>
@@ -177,7 +178,7 @@
 
           <DetailsItem
             v-if="totalSpent"
-            :label="$t('total')"
+            :label="$t('common.total')"
             data-cy="amount"
           >
             <template #value>
@@ -215,7 +216,7 @@
               :disabled="processingAction || pendingMultisigTxExpired"
               @click="processProposal()"
             >
-              {{ $t('pages.proposalDetails.send') }}
+              {{ $t('common.send') }}
             </BtnMain>
             <BtnMain
               v-else
@@ -273,7 +274,6 @@ import {
   aettosToAe,
   splitAddress,
   AETERNITY_SYMBOL,
-  MODAL_DEFAULT,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   FUNCTION_TYPE_MULTISIG,
   getPayload,
@@ -291,8 +291,9 @@ import {
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
+  useModals,
 } from '../../composables';
-import { useGetter, useDispatch } from '../../composables/vuex';
+import { useGetter } from '../../composables/vuex';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -330,6 +331,8 @@ export default defineComponent({
     ExternalLink,
   },
   setup(props, { root }) {
+    const { openDefaultModal, openModal } = useModals();
+
     const {
       activeMultisigAccount,
       updateMultisigAccounts,
@@ -362,8 +365,6 @@ export default defineComponent({
 
     const getExplorerPath = useGetter('getExplorerPath');
     const getTxSymbol = useGetter('getTxSymbol');
-
-    const openModal = useDispatch('modals/open');
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
@@ -420,8 +421,7 @@ export default defineComponent({
             ? root.$t('modals.vaultLowBalance.title')
             : root.$t('modals.accountLowBalance.title');
         }
-        openModal({
-          name: MODAL_DEFAULT,
+        openDefaultModal({
           icon: 'warning',
           title,
           msg: message,
@@ -443,8 +443,7 @@ export default defineComponent({
 
       processingAction.value = true;
       try {
-        await root.$store.dispatch('modals/open', {
-          name: MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+        await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
           action,
           signers: pendingMultisigTxLocalSigners.value,
         });

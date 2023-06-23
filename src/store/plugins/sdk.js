@@ -1,11 +1,13 @@
 import { RpcWallet, Crypto, Node } from '@aeternity/aepp-sdk';
-import { isEmpty, isEqual } from 'lodash-es';
+import { isEqual } from 'lodash-es';
 import { App } from '../modules/permissions';
 import { getAeppUrl, showPopup } from '../../background/popupHandler';
-import { MODAL_CONFIRM_CONNECT, watchUntilTruthy } from '../../popup/utils';
+import { MODAL_CONFIRM_CONNECT, MODAL_MESSAGE_SIGN, watchUntilTruthy } from '../../popup/utils';
 import { IS_EXTENSION_BACKGROUND } from '../../lib/environment';
+import { useAccounts, useModals } from '../../composables';
 
 export default (store) => {
+  const { openModal } = useModals();
   let sdk;
 
   store.registerModule('sdkPlugin', {
@@ -24,8 +26,9 @@ export default (store) => {
     actions: {
       async initialize({ commit }) {
         if (sdk) return;
+        const { activeAccount, isLoggedIn } = useAccounts({ store });
         await watchUntilTruthy(
-          () => store.state.isRestored && !isEmpty(store.getters.account),
+          () => store.state.isRestored && isLoggedIn.value,
         );
 
         const { activeNetwork } = store.getters;
@@ -48,8 +51,7 @@ export default (store) => {
             };
             if (method === 'message.sign') {
               if (!permission) {
-                await store.dispatch('modals/open', {
-                  name: 'confirm-message-sign',
+                await openModal(MODAL_MESSAGE_SIGN, {
                   message: params.message,
                   app: aeppUrl,
                 });
@@ -104,7 +106,7 @@ export default (store) => {
               return new App(aeppUrl);
             },
             async address(...args) {
-              const { address } = store.getters.account;
+              const { address } = activeAccount.value;
               const app = args.pop();
               if (
                 app instanceof App
@@ -114,8 +116,7 @@ export default (store) => {
                   address,
                   connectionPopupCb: async () => (IS_EXTENSION_BACKGROUND
                     ? showPopup(app.host.href, 'connectConfirm')
-                    : store.dispatch('modals/open', {
-                      name: MODAL_CONFIRM_CONNECT,
+                    : openModal(MODAL_CONFIRM_CONNECT, {
                       app: {
                         name: app.host.hostname,
                         icons: [],
@@ -129,7 +130,7 @@ export default (store) => {
               return address;
             },
             sign: (data) => (IS_EXTENSION_BACKGROUND
-              ? Crypto.sign(data, store.getters.account.secretKey)
+              ? Crypto.sign(data, activeAccount.value.secretKey)
               : store.dispatch('accounts/sign', data)),
             ...(IS_EXTENSION_BACKGROUND ? {} : {
               signTransaction: (txBase64, opt) => (opt.onAccount
@@ -139,28 +140,27 @@ export default (store) => {
           },
         })({
           nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
-          compilerUrl: activeNetwork.compilerUrl,
           name: 'Superhero',
           onConnection: cbAccept,
           onDisconnect(_, client) {
             client.disconnect();
           },
           async onSubscription(aepp, { accept, deny }, origin) {
-            let activeAccount;
+            let activeAccountAddress;
             try {
               const url = IS_EXTENSION_BACKGROUND ? getAeppUrl(aepp) : new URL(origin);
-              activeAccount = await this.address(this.getApp(url));
+              activeAccountAddress = await this.address(this.getApp(url));
             } catch (e) {
               deny();
               return;
             }
             accept({
               accounts: {
-                current: { [activeAccount]: {} },
+                current: { [activeAccountAddress]: {} },
                 connected: {
                   ...store.getters.accounts
                     .reduce((p, { address }) => ({
-                      ...p, ...address !== activeAccount ? { [address]: {} } : {},
+                      ...p, ...address !== activeAccountAddress ? { [address]: {} } : {},
                     }), {}),
                 },
               },
@@ -193,11 +193,11 @@ export default (store) => {
       Object.values(sdk.rpcClients)
         .filter((client) => client.isConnected() && client.isSubscribed())
         .forEach((client) => client.setAccounts({
-          current: { [store.getters.account.address]: {} },
+          current: { [activeAccount.value.address]: {} },
           connected: {
             ...store.getters.accounts
               .reduce((p, { address }) => ({
-                ...p, ...address !== store.getters.account.address ? { [address]: {} } : {},
+                ...p, ...address !== activeAccount.value.address ? { [address]: {} } : {},
               }), {}),
           },
         }));

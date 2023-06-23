@@ -37,7 +37,7 @@ export function useNotifications({
   store,
 }: UseNotificationsOptions) {
   const { getSdk } = useSdk({ store });
-  const { account } = useAccounts({ store });
+  const { activeAccount } = useAccounts({ store });
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
@@ -75,7 +75,7 @@ export function useNotifications({
   );
 
   async function fetchAllNotifications(): Promise<INotification[]> {
-    const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${account.value.address}`;
+    const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
     const [responseChallenge, sdk] = await Promise.all([
       fetchJson(fetchUrl),
       getSdk(),
@@ -83,7 +83,7 @@ export function useNotifications({
     const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
     const url = new URL(fetchUrl);
     Object.entries(respondChallenge).forEach(([key, value]) => url.searchParams.append(key, value));
-    return fetchJson(url.toString());
+    return await fetchJson(url.toString()) || [];
   }
 
   async function modifyNotifications(
@@ -93,7 +93,7 @@ export function useNotifications({
     if (!ids.length) return;
     const backendMethod = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/notification`, { body });
     const [responseChallenge, sdk] = await Promise.all([
-      backendMethod({ ids, status, author: account.value.address }),
+      backendMethod({ ids, status, author: activeAccount.value.address }),
       getSdk(),
     ]);
     const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);

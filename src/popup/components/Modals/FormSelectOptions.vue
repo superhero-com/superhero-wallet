@@ -7,33 +7,20 @@
     @close="reject()"
   >
     <template #header>
-      <div class="header">
-        <span class="text-heading-3 title">{{ title }}</span>
-        <InputSearch
-          v-if="options.length > 3"
-          v-model="searchTerm"
-          class="search-field"
-          :placeholder="$t('search')"
-        />
-      </div>
+      <FormSelectOptionsHeader
+        v-model="searchPhrase"
+        :title="title"
+        :options-length="options.length"
+      />
     </template>
 
     <div>
-      <ListItemWrapper
+      <FormSelectOptionsItem
         v-for="(option, index) in optionsFiltered"
         :key="index"
-        :selected="(option.value === value)"
-        @click.prevent="resolve(option.value)"
-      >
-        <div class="option-wrapper">
-          <Avatar
-            v-if="option.address"
-            :address="option.address"
-            size="sm"
-          />
-          {{ option.text }}
-        </div>
-      </ListItemWrapper>
+        :option="option"
+        @click="resolve(option.value)"
+      />
     </div>
   </Modal>
 </template>
@@ -45,70 +32,39 @@ import {
   PropType,
   ref,
 } from '@vue/composition-api';
-import type { IFormSelectOption } from '../../../types';
+import type { IFormSelectOption, ResolveRejectCallback } from '../../../types';
 
-import InputSearch from '../InputSearch.vue';
 import Modal from '../Modal.vue';
-import ListItemWrapper from '../ListItemWrapper.vue';
-import Avatar from '../Avatar.vue';
+import FormSelectOptionsItem from '../FormSelectOptionsItem.vue';
+import FormSelectOptionsHeader from '../FormSelectOptionsHeader.vue';
 
 export default defineComponent({
   components: {
+    FormSelectOptionsHeader,
+    FormSelectOptionsItem,
     Modal,
-    ListItemWrapper,
-    InputSearch,
-    Avatar,
   },
   props: {
-    // eslint-disable-next-line no-unused-vars
-    resolve: { type: Function as PropType<(o: any) => any>, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as ResolveRejectCallback, required: true },
+    reject: { type: Function as ResolveRejectCallback, required: true },
     title: { type: String, default: null },
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
   },
   setup(props) {
-    const searchTerm = ref('');
-    const optionsFiltered = computed((): IFormSelectOption[] => {
-      if (searchTerm.value) {
-        const searchTermLower = searchTerm.value.toLowerCase();
-        return props.options.filter(({ text, value }) => (
-          text.toLowerCase().includes(searchTermLower)
-          || value.toString().includes(searchTermLower)
-        ));
-      }
-      return props.options;
-    });
+    const searchPhrase = ref('');
+
+    const optionsFiltered = computed(() => (
+      props.options.filter(({ text, value }) => (
+        text.toLowerCase().includes(searchPhrase.value)
+        || value.toString().includes(searchPhrase.value)
+      ))
+    ));
 
     return {
-      searchTerm,
+      searchPhrase,
       optionsFiltered,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.form-select-options {
-  .header {
-    margin-inline: var(--screen-padding-x);
-    text-align: left;
-  }
-
-  .title {
-    padding-left: 12px;
-    line-height: 48px;
-  }
-
-  .search-field {
-    margin-bottom: var(--gap);
-  }
-
-  .option-wrapper {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding-block: 4px;
-  }
-}
-</style>

@@ -29,10 +29,12 @@ import {
 } from '@vue/composition-api';
 import BigNumber from 'bignumber.js';
 import { aettosToAe, executeAndSetInterval } from '../../utils';
-import { useMiddleware } from '../../../composables';
+import { useMiddleware, useUi } from '../../../composables';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
+
+const POLLING_INTERVAL = 3000;
 
 export default defineComponent({
   name: 'Auction',
@@ -45,16 +47,17 @@ export default defineComponent({
   },
   setup(props, { root }) {
     const { getMiddleware } = useMiddleware({ store: root.$store });
+    const { isAppActive } = useUi();
 
     const loading = ref(true);
 
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
       try {
-        const res = await middleware.getNameById(props.name);
-        const { auctionEnd, bids } = res.info;
+        const res = await middleware.getName(props.name);
+        const { auctionEnd, bids } = res.auction ?? res.info;
         const loadedBids = await Promise.all(bids.map(async (txId: number) => {
-          const { tx } = await middleware.getTxByIndex(txId);
+          const { tx } = await middleware.getTx(txId.toString());
           return {
             nameFee: new BigNumber(aettosToAe(tx.nameFee)),
             accountId: tx.accountId,
@@ -71,7 +74,11 @@ export default defineComponent({
       loading.value = false;
     }
 
-    const intervalId = executeAndSetInterval(() => updateAuctionEntry(), 3000);
+    const intervalId = executeAndSetInterval(() => {
+      if (isAppActive.value) {
+        updateAuctionEntry();
+      }
+    }, POLLING_INTERVAL);
 
     onBeforeUnmount(() => {
       clearInterval(intervalId);

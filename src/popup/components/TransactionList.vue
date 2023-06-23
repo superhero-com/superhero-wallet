@@ -6,11 +6,11 @@
       is-more-data
       @loadMore="loadMore"
     >
-      <TransactionItem
+      <TransactionListItem
         v-for="transaction in filteredTransactions"
         :key="transaction.hash"
-        :transaction="!transaction.isMultisigTransaction ? transaction : null"
-        :multisig-transaction="transaction.isMultisigTransaction ? transaction : null"
+        :transaction="getTransaction(transaction)"
+        :multisig-transaction="getMultisigTransaction(transaction)"
         :is-multisig="isMultisig"
         :data-cy="transaction.pending && 'pending-txs'"
       />
@@ -28,16 +28,6 @@
         {{ $t('pages.recentTransactions.noTransactionsFound') }}
       </p>
     </div>
-    <RouterLink
-      v-if="maxLength && transactions.loaded.length > maxLength"
-      to="/transactions"
-      class="view-more"
-    >
-      <Visible class="icon" />
-      <span class="text">
-        {{ $t('pages.recentTransactions.viewMore') }}
-      </span>
-    </RouterLink>
   </div>
 </template>
 
@@ -50,57 +40,68 @@ import {
   ref,
   watch,
 } from '@vue/composition-api';
-import type {
-  IAccount,
-  INetwork,
-  ITokenList,
-  ITx,
-} from '../../types';
 import {
-  TX_FUNCTIONS,
+  getTransaction,
+  getMultisigTransaction,
+  getInnerTransaction,
+  getOwnershipStatus,
+  getTxOwnerAddress,
+  isTxDex,
+  sortTransactionsByDateCallback,
+  pipe,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
-  MOBILE_WIDTH,
-  defaultTransactionSortingCallback,
-  getInnerTransaction,
+  TX_DIRECTION,
+  TRANSACTION_OWNERSHIP_STATUS, includesCaseInsensitive,
 } from '../utils';
-import { useGetter, useState } from '../../composables/vuex';
+import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import {
   useMultisigAccounts,
-  usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
-  useTransactionTx,
+  useViewport,
+  useAccounts,
+  usePendingMultisigTransaction,
+  useUi,
 } from '../../composables';
 
-import TransactionItem from './TransactionItem.vue';
+import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import Visible from '../../icons/visible.svg?vue-component';
 import InfiniteScroll from './InfiniteScroll.vue';
+import {
+  IDexContracts,
+  ITokenList,
+  ITransaction,
+  ICommonTransaction,
+  ITransactionsState,
+  ITx,
+} from '../../types';
+import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
     InfiniteScroll,
-    TransactionItem,
+    TransactionListItem,
     AnimatedSpinner,
-    Visible,
   },
   props: {
-    token: { type: String, default: '' },
-    maxLength: { type: Number, default: null },
-    scrollTopThreshold: { type: Number, default: undefined },
-    showFilters: Boolean,
-    showSearch: Boolean,
+    tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
   },
   setup(props, { root }) {
-    const loading = ref(false);
-    const isDestroyed = ref(false);
+    const {
+      activeAccount,
+      accounts,
+    } = useAccounts({ store: root.$store });
 
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { isAppActive } = useUi();
+
+    const {
+      viewportElement,
+    } = useViewport();
 
     const {
       searchPhrase,
@@ -108,107 +109,145 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+
+    const loading = ref(false);
+    const isDestroyed = ref(false);
+
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-    const transactions = useState('transactions');
-    const account = useGetter<IAccount>('account');
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const getAccountPendingTransactions = useGetter('getAccountPendingTransactions');
+
+    const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
+    const getTxDirection = useGetter('getTxDirection');
+    const getDexContracts = useGetter<IDexContracts>('getDexContracts');
+    const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
+    const fetchTransactions = useDispatch('fetchTransactions');
+
+    const canLoadMore = computed(() => !!transactions.value.nextPageUrl);
+
+    const currentAddress = computed(() => props.isMultisig
+      ? activeMultisigAccount.value?.gaAccountId
+      : activeAccount.value.address);
+
+    const loadedTransactionList = computed((): ICommonTransaction[] => [
+      ...getAccountPendingTransactions.value,
+      ...transactions.value.loaded,
+      ...((props.isMultisig && pendingMultisigTransaction.value?.tx)
+        ? [pendingMultisigTransaction.value]
+        : []
+      ),
+    ]);
 
     function isFungibleTokenTx(tx: ITx) {
       return Object.keys(availableTokens.value).includes(tx.contractId);
     }
 
-    const currentAddress = computed(() => props.isMultisig
-      ? activeMultisigAccount.value?.gaAccountId
-      : account.value.address);
+    function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
+      if (props.tokenContractId) {
+        return transactionList.filter((transaction) => {
+          const innerTx = getInnerTransaction(transaction.tx);
+
+          if (props.tokenContractId !== AETERNITY_CONTRACT_ID) {
+            return innerTx?.contractId === props.tokenContractId;
+          }
+
+          return !innerTx.contractId || !isFungibleTokenTx(innerTx);
+        });
+      }
+      return transactionList;
+    }
+
+    function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
+      return transactionList.filter((transaction) => {
+        const outerTx = transaction.tx!;
+        const innerTx = transaction.tx ? getInnerTransaction(transaction.tx) : null;
+
+        const txOwnerAddress = getTxOwnerAddress(innerTx);
+
+        const direction = getTxDirection.value(
+          outerTx.payerId ? outerTx : innerTx,
+          (transaction as ITransaction).transactionOwner
+          || ((
+            getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
+            !== TRANSACTION_OWNERSHIP_STATUS.current
+          ) && txOwnerAddress
+          ),
+        );
+
+        const isDex = isTxDex(innerTx, getDexContracts.value);
+
+        switch (displayMode.value.key) {
+          case FILTER_MODE.all:
+            return true;
+          case FILTER_MODE.dex:
+            return isDex;
+          case FILTER_MODE.out:
+            return direction === TX_DIRECTION.sent && !isDex;
+          case FILTER_MODE.in:
+            return direction === TX_DIRECTION.received;
+          default:
+            throw new Error(`${i18n.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+        }
+      });
+    }
+
+    function filterTransactionsBySearchPhrase(transactionList: ICommonTransaction[]) {
+      return transactionList.filter(
+        (transaction) => (
+          !searchPhrase.value
+          || includesCaseInsensitive(
+            getTxSymbol.value(transaction),
+            searchPhrase.value.toLocaleLowerCase(),
+          )
+        ),
+      );
+    }
+
+    function sortTransactionListByDate(transactionList: ICommonTransaction[]) {
+      return transactionList.sort(sortTransactionsByDateCallback);
+    }
 
     const filteredTransactions = computed(
-      () => {
-        const transactionListLocal = [
-          ...getAccountPendingTransactions.value,
-          ...transactions.value.loaded,
-        ];
-
-        if (props.isMultisig && pendingMultisigTransaction.value?.tx) {
-          transactionListLocal.push(pendingMultisigTransaction.value);
-        }
-
-        return transactionListLocal
-          .filter((tr) => {
-            const innerTx = getInnerTransaction(tr.tx);
-            return !props.token
-              || (
-                props.token !== AETERNITY_CONTRACT_ID
-                  ? innerTx?.contractId === props.token
-                  : (!innerTx.contractId || !isFungibleTokenTx(innerTx))
-              );
-          })
-          .filter((tr) => {
-            const { direction, isDex } = useTransactionTx({
-              store: root.$store,
-              tx: tr.tx,
-              externalAddress: tr.transactionOwner,
-            });
-            switch (displayMode.value.key) {
-              case FILTER_MODE.all:
-                return true;
-              case FILTER_MODE.dex:
-                return isDex.value;
-              case FILTER_MODE.out:
-                return direction.value === TX_FUNCTIONS.sent && !isDex.value;
-              case FILTER_MODE.in:
-                return direction.value === TX_FUNCTIONS.received;
-              default:
-                throw new Error(`${root.$t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
-            }
-          })
-          .filter(
-            (tr) => !searchPhrase.value || getTxSymbol.value(tr)
-              .toLocaleLowerCase()
-              .includes(searchPhrase.value.toLocaleLowerCase()),
-          )
-          .sort(defaultTransactionSortingCallback)
-          .slice(0, props.maxLength || Infinity);
-      },
+      () => pipe<ICommonTransaction[]>([
+        narrowTransactionsToDefinedToken,
+        filterTransactionsByDisplayMode,
+        filterTransactionsBySearchPhrase,
+        sortTransactionListByDate,
+      ])(loadedTransactionList.value),
     );
 
-    const showSearchAndFilters = computed(() => (
-      props.showFilters
-      || displayMode.value.key !== FILTER_MODE.all
-      || searchPhrase.value
-    ));
-
-    function checkLoadMore() {
-      if (isDestroyed.value || !transactions.value.nextPageUrl) return;
-      // TODO - use viewport.ts composable after rewriting component to Vue 3
-      const isDesktop = document.documentElement.clientWidth > MOBILE_WIDTH
-          || process.env.IS_EXTENSION;
-      const { scrollHeight, scrollTop, clientHeight } = (isDesktop
-        ? document.querySelector('.app-inner') : document.documentElement)!;
-      if (props.maxLength && filteredTransactions.value.length >= props.maxLength) return;
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        // eslint-disable-next-line no-use-before-define
-        loadMore();
+    async function fetchTransactionList(recent?: boolean) {
+      loading.value = true;
+      try {
+        await fetchTransactions({
+          limit: TXS_PER_PAGE,
+          recent,
+          address: currentAddress.value,
+        });
+      } finally {
+        loading.value = false;
       }
     }
 
     async function loadMore() {
-      if (loading.value) return;
-      loading.value = true;
-      try {
-        await root.$store.dispatch('fetchTransactions', { limit: TXS_PER_PAGE, address: currentAddress.value });
-      } finally {
-        loading.value = false;
+      if (!loading.value) {
+        await fetchTransactionList();
       }
-      checkLoadMore();
     }
 
-    async function getLatest() {
-      try {
-        await root.$store.dispatch('fetchTransactions', { limit: 10, recent: true, address: currentAddress.value });
-      } finally {
-        loading.value = false;
+    async function checkLoadMore() {
+      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
+        return;
+      }
+
+      const {
+        scrollHeight,
+        scrollTop,
+        clientHeight,
+      } = viewportElement.value!;
+
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+        await loadMore();
       }
     }
 
@@ -216,11 +255,21 @@ export default defineComponent({
       checkLoadMore();
     });
 
+    watch(loading, async (val) => {
+      if (!val) {
+        await checkLoadMore();
+      }
+    });
+
     let polling: NodeJS.Timer | null = null;
 
     onMounted(() => {
       loadMore();
-      polling = setInterval(() => getLatest(), 10000);
+      polling = setInterval(() => {
+        if (isAppActive.value) {
+          fetchTransactionList(true);
+        }
+      }, 10000);
     });
 
     onUnmounted(() => {
@@ -232,17 +281,10 @@ export default defineComponent({
 
     return {
       loading,
-      isDestroyed,
-      displayMode,
-      availableTokens,
-      transactions,
-      account,
-      activeNetwork,
-      getAccountPendingTransactions,
-      getTxSymbol,
       filteredTransactions,
-      showSearchAndFilters,
       loadMore,
+      getMultisigTransaction,
+      getTransaction,
     };
   },
 });
@@ -255,6 +297,7 @@ export default defineComponent({
 .transaction-list {
   display: flex;
   flex-direction: column;
+  margin: 0 calc(-1 * var(--screen-padding-x));
 
   .list {
     padding: 0;
@@ -267,72 +310,22 @@ export default defineComponent({
     display: flex;
     justify-content: center;
     align-items: center;
-    padding-bottom: 48px;
   }
 
-  .message > p {
-    padding: 48px 64px 0;
-
+  .message {
     @extend %face-sans-15-medium;
 
     color: variables.$color-grey-light;
     text-align: center;
+    padding: 48px 64px 0;
   }
 
   .spinner {
     width: 56px;
     min-height: 56px;
     margin: 0 auto;
+    padding-bottom: 48px;
     color: variables.$color-white;
-  }
-
-  .view-more {
-    padding: 12px 16px;
-    border-radius: 4px;
-    background: variables.$color-bg-1;
-    display: flex;
-    align-items: center;
-
-    .text {
-      @extend %face-sans-14-medium;
-
-      color: variables.$color-success;
-      padding-left: 4px;
-    }
-
-    .icon {
-      width: 24px;
-      height: 24px;
-      opacity: 0.7;
-    }
-
-    &:hover {
-      background: variables.$color-bg-2;
-
-      .text {
-        color: variables.$color-success-hover;
-      }
-
-      .icon {
-        opacity: 1;
-
-        path {
-          fill: variables.$color-success;
-        }
-      }
-    }
-
-    &:active {
-      background: variables.$color-bg-1;
-
-      .text {
-        opacity: 0.7;
-      }
-
-      .icon {
-        opacity: 0.44;
-      }
-    }
   }
 }
 </style>

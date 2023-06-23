@@ -5,9 +5,6 @@
     :sender="preparedTransaction.sender"
     :recipient="preparedTransaction.recipient"
     :transaction-function="preparedTransaction.function"
-    :is-incomplete="transaction.incomplete"
-    :is-pending="transaction.pending"
-    :is-claim="transaction.claim"
     :transaction="transaction"
   />
 </template>
@@ -23,6 +20,8 @@ import {
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
 import {
+  postJson,
+  TX_DIRECTION,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
 } from '../utils';
@@ -55,6 +54,7 @@ export default defineComponent({
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
 
     const getExplorerPath = useGetter('getExplorerPath');
+    const activeNetwork = useGetter('activeNetwork');
     const getPreferred = useGetter('names/getPreferred');
 
     const { getSdk } = useSdk({ store: root.$store });
@@ -72,10 +72,23 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
+    function getTransactionParty(address: string) {
+      return {
+        address,
+        label: root.$t('transaction.overview.accountAddress'),
+        url: getExplorerPath.value(address),
+      };
+    }
+
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
 
-      const { senderId, recipientId, contractId } = innerTx.value;
+      const {
+        senderId,
+        recipientId,
+        contractId,
+        callerId,
+      } = innerTx.value;
 
       switch (txType.value) {
         case SCHEMA.TX_TYPE.spend:
@@ -102,22 +115,29 @@ export default defineComponent({
           };
 
           let transactionOwner;
+          let transactionReceiver = contract;
 
           if (props.transaction.transactionOwner) {
-            transactionOwner = {
-              address: props.transaction.transactionOwner,
-              label: root.$t('transaction.overview.accountAddress'),
-              url: getExplorerPath.value(props.transaction.transactionOwner),
-            };
+            transactionOwner = getTransactionParty(props.transaction.transactionOwner);
+          }
+
+          if (innerTx.value.function === TX_FUNCTIONS.transfer) {
+            const sentRecipientId = recipientId || innerTx.value.arguments?.[0].value;
+
+            transactionReceiver = getTransactionParty(
+              direction.value === TX_DIRECTION.received
+                ? callerId
+                : sentRecipientId,
+            );
           }
 
           return {
-            sender: direction.value === TX_FUNCTIONS.sent
+            sender: direction.value === TX_DIRECTION.sent
               ? ownershipAccount.value
-              : contract,
-            recipient: direction.value === TX_FUNCTIONS.received
+              : transactionReceiver,
+            recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? ownershipAccount.value
-              : contract,
+              : transactionReceiver,
             title: root.$t('transaction.type.contractCallTx'),
             function: innerTx.value.function,
           };
@@ -168,10 +188,11 @@ export default defineComponent({
 
       const sdk = await getSdk();
       const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
-      const txParams: ITx = await sdk.compilerApi.decodeCalldataBytecode({
-        bytecode,
-        calldata,
-      });
+      // TODO: use sdk method on sdk 13 update
+      const txParams: ITx = await postJson(
+        `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+        { body: { bytecode, calldata } },
+      );
       if (!txParams) return '';
 
       return txParams.arguments?.find((param: any) => param.type === 'address')?.value;
@@ -180,7 +201,7 @@ export default defineComponent({
     onMounted(async () => {
       const middleware = await getMiddleware();
       if (innerTx.value.recipientId?.startsWith('nm_')) {
-        name.value = (await middleware.getNameById(innerTx.value.recipientId)).name;
+        name.value = (await middleware.getName(innerTx.value.recipientId)).name;
       }
       let transactionOwnerAddress;
       if (innerTx.value.function === TX_FUNCTIONS.claim) {

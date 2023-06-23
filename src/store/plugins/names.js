@@ -2,16 +2,17 @@ import Vue from 'vue';
 import { watch } from '@vue/composition-api';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
-  MODAL_DEFAULT,
   fetchJson,
   postJson,
   checkAddress,
   checkAensName,
   fetchAllPages,
   fetchRespondChallenge,
+  isInsufficientBalanceError,
+  handleUnknownError,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware, useSdk } from '../../composables';
+import { useMiddleware, useModals, useSdk } from '../../composables';
 
 export default (store) => {
   const {
@@ -24,6 +25,8 @@ export default (store) => {
     getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
   } = useMiddleware({ store });
+
+  const { openDefaultModal } = useModals();
 
   store.registerModule('names', {
     namespaced: true,
@@ -103,19 +106,21 @@ export default (store) => {
         const names = await Promise.all(
           accounts.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
-            middleware.getNamesOwnedBy(address)
-              .then(({ active }) => active.map(({ info, name, hash }) => ({
-                createdAtHeight: info.activeFrom,
-                expiresAt: info.expireHeight,
-                owner: info.ownership.current,
-                pointers: info.pointers,
-                autoExtend: !!(
-                  owned.find((n) => n.name === name)?.autoExtend
-                  || pendingAutoExtendNames?.includes(name)
-                ),
-                name,
-                hash,
-              }))),
+            fetchAllPages(
+              () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
+              fetchFromMiddlewareCamelCased,
+            ).then((data) => data.map(({ info, name, hash }) => ({
+              createdAtHeight: info.activeFrom,
+              expiresAt: info.expireHeight,
+              owner: info.ownership.current,
+              pointers: info.pointers,
+              autoExtend: !!(
+                owned.find((n) => n.name === name)?.autoExtend
+                || pendingAutoExtendNames?.includes(name)
+              ),
+              name,
+              hash,
+            }))),
           ])),
         ).then((arr) => arr.flat(2));
 
@@ -128,7 +133,7 @@ export default (store) => {
         // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/superhero-wallet/issues/1400
         return (
           await fetchAllPages(
-            () => middleware.getAllAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
+            () => middleware.getNamesAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
             fetchFromMiddlewareCamelCased,
           )
         ).map(({ name, info }) => ({
@@ -138,7 +143,7 @@ export default (store) => {
         }));
       },
       async updatePointer(
-        { dispatch },
+        _,
         { name, address, type = 'update' },
       ) {
         const sdk = await getSdk();
@@ -149,13 +154,19 @@ export default (store) => {
           } else if (type === 'update') {
             await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
-          dispatch(
-            'modals/open',
-            { name: MODAL_DEFAULT, msg: i18n.t('pages.names.pointer-added', { type }) },
-            { root: true },
-          );
+          openDefaultModal({
+            msg: i18n.t('pages.names.pointer-added', { type }),
+          });
         } catch (e) {
-          dispatch('modals/open', { name: MODAL_DEFAULT, msg: e.message }, { root: true });
+          if (e.message.includes('Account not found')) {
+            handleUnknownError(e);
+          } else {
+            openDefaultModal({
+              msg: isInsufficientBalanceError(e)
+                ? i18n.t('modals.insufficient-balance.msg')
+                : e.message,
+            });
+          }
         }
       },
       async setDefaults(
@@ -192,7 +203,7 @@ export default (store) => {
         if (checkAddress(id)) return id;
         if (checkAensName(id)) {
           const middleware = await getMiddleware();
-          const { info: nameEntry } = await middleware.getNameById(id);
+          const { info: nameEntry } = await middleware.getName(id);
           return nameEntry.pointers?.accountPubkey;
         }
         return '';

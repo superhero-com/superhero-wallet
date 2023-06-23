@@ -30,8 +30,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { MODAL_FORM_SELECT_OPTIONS } from '../../utils';
+import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '../../utils';
 import type { IFormSelectOption } from '../../../types';
+import { useModals } from '../../../composables';
 
 import BtnPlain from '../buttons/BtnPlain.vue';
 import InputField from '../InputField.vue';
@@ -51,8 +52,9 @@ export default defineComponent({
   props: {
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
-    defaultText: { type: String, required: true },
     itemTitle: { type: String as PropType<keyof IFormSelectOption>, default: 'text' },
+    defaultText: { type: String, required: true },
+    accountSelect: Boolean,
     /**
      * Force to always display the text provided by the `defaultText` prop.
      */
@@ -62,26 +64,19 @@ export default defineComponent({
      */
     unstyled: Boolean,
   },
-  setup(props, { emit, root }) {
-    const currentText = computed(() => {
-      if (props.persistentDefaultText) {
-        return props.defaultText;
-      }
-      return (props.value)
-        ? props.options.find(({ value }) => value === props.value)?.[props.itemTitle]
-        : props.defaultText;
-    });
+  setup(props, { emit }) {
+    const { openModal } = useModals();
+
+    const currentText = computed(() => props.persistentDefaultText || !props.value
+      ? props.defaultText
+      : props.options.find(({ value }) => value === props.value)?.[props.itemTitle]);
 
     function openOptionsModal() {
-      root.$store.dispatch(
-        'modals/open',
-        {
-          name: MODAL_FORM_SELECT_OPTIONS,
-          value: props.value,
-          options: props.options,
-          title: props.defaultText,
-        },
-      )
+      openModal(props.accountSelect ? MODAL_ACCOUNT_SELECT_OPTIONS : MODAL_FORM_SELECT_OPTIONS, {
+        value: props.value,
+        options: props.options,
+        title: props.defaultText,
+      })
         .then((val) => emit('select', val))
         .catch(() => null); // Closing the modal does nothing
     }

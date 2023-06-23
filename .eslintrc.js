@@ -5,7 +5,6 @@ module.exports = {
   },
   env: {
     browser: true,
-    webextensions: true,
   },
   extends: [
     'plugin:vue-i18n/recommended',
@@ -16,7 +15,7 @@ module.exports = {
   // check if imports actually resolve
   settings: {
     'vue-i18n': {
-      localeDir: './src/locales/*.json',
+      localeDir: './src/popup/locales/*.json',
     },
   },
   // add your custom rules here
@@ -31,19 +30,20 @@ module.exports = {
     }],
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-unused-vars': 'error',
+    'no-unused-vars': 'off',
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
     'import/prefer-default-export': 'off',
-    'vue-i18n/no-dynamic-keys': 'error',
+    'vue-i18n/no-dynamic-keys': 'warn',
     'vue-i18n/no-unused-keys': 'error',
+    'vue-i18n/no-missing-keys': 'off',
     'vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
   overrides: [
     {
       files: [
-        '**/__tests__/*.{j,t}s?(x)',
         '**/tests/unit/**/*.spec.{j,t}s?(x)',
       ],
       env: {

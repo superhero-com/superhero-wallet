@@ -1,6 +1,8 @@
 import { computed } from '@vue/composition-api';
 import { Universal, Node } from '@aeternity/aepp-sdk';
 import {
+  NETWORK_ID_MAINNET,
+  NETWORK_ID_TESTNET,
   NODE_STATUS_CONNECTED,
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
@@ -19,10 +21,14 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   const isSdkReady = computed(() => !!sdk.value);
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+
   const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
   const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
   const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+  const isNodeMainnet = computed(() => activeNetwork.value.networkId === NETWORK_ID_MAINNET);
+  const isNodeTestnet = computed(() => activeNetwork.value.networkId === NETWORK_ID_TESTNET);
+  const isCustomNodeNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
 
   /**
    * Get the SDK instance. For now the SDK state is asynchronous.
@@ -58,6 +64,9 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     isNodeConnecting,
     isNodeError,
     isSdkReady,
+    isNodeMainnet,
+    isNodeTestnet,
+    isCustomNodeNetwork,
     getSdk,
     getDrySdk,
   };

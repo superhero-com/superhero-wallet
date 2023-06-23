@@ -1,18 +1,43 @@
 {
-  "ok": "OK",
-  "ae": "AE",
-  "mainAccount": "Main account",
-  "fellowSuperhero": "Fellow Superhero",
   "common": {
-    "you": "You",
-    "of": "of",
-    "by": "by",
-    "edit": "Edit",
-    "nonce": "Nonce",
-    "callData": "Call data",
-    "contractId": "Contract ID",
+    "address": "Address",
+    "addressCopied": "Copied",
+    "ae": "AE",
+    "all": "All",
+    "amount": "Amount",
     "balanceUnavailable": "Unable to load balance.",
-    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet."
+    "buy": "Buy",
+    "by": "by",
+    "callData": "Call data",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "contractId": "Contract ID",
+    "copy": "Copy",
+    "days": "{n} days | {n} day | {n} days",
+    "edit": "Edit",
+    "faucet": "Faucet",
+    "fellowSuperhero": "Fellow Superhero",
+    "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet.",
+    "hashCopied": "Hash copied",
+    "hours": "{n} hours | {n} hour | {n} hours",
+    "minutes": "{n} minutes | {n} minute | {n} minutes",
+    "next": "Next",
+    "nonce": "Nonce",
+    "of": "of",
+    "ok": "OK",
+    "pending": "Pending",
+    "priceNotAvailable": "price: n/a",
+    "receive": "Receive",
+    "search": "Search",
+    "seconds": "{n} seconds | {n} second | {n} seconds",
+    "send": "Send",
+    "smartContract": "Smart contract",
+    "swap": "Swap",
+    "total": "Total",
+    "totalMultisig": "Total in multisig vaults",
+    "tx": "Tx",
+    "you": "You",
+    "max": "MAX"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -31,12 +56,10 @@
   },
   "dashboard": {
     "receiveCard": {
-      "title": "Receive",
       "description": "from existing wallet",
       "descriptionMultisig": "to multisig vault"
     },
     "sendCard": {
-      "title": "Send",
       "description": "assets to others"
     },
     "proposeCard": {
@@ -81,7 +104,9 @@
     "consensusPending": "Consensus pending",
     "multisigVaultCreationFailed": "Multisig creation failed",
     "needForApproval": "Needed for approval",
-    "creatingAccount": "Creating account (pays for the transaction)"
+    "creatingAccount": "Creating account (pays for the transaction)",
+    "approved": "Approved",
+    "waitingToBeSent": "Waiting to be sent..."
   },
   "modals": {
     "transaction-failed": {
@@ -98,8 +123,7 @@
       "title": "Add payload (optional)",
       "desc": "Send a public message with your transaction for approx. 0.00000002 AE per character.",
       "label": "Payload message",
-      "doneBtn": "Done",
-      "cancelBtn": "Cancel"
+      "doneBtn": "Done"
     },
     "only-chars": {
       "msg": "Only letters and numbers are allowed."
@@ -128,16 +152,15 @@
       "msg": "You don’t have enough AE on your signing account to {action} this transaction."
     },
     "createAccount": {
-      "title": "Add account",
       "titleMultisig": "Add multisig vault",
       "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "btnText": "Add account",
       "btnSubtitle": "Derive another account from your seed"
     },
     "createMultisigAccount": {
       "title": "Create new multisig vault",
       "btnText": "Create multisig vault",
+      "btnTextShort": "Create vault",
       "btnSubtitle": "Manage funds with multiple accounts",
       "signer": "Signer",
       "signerInputPlaceholder": "Signer's account address",
@@ -166,6 +189,14 @@
       "syncingVault": "Syncing multisig vault",
       "takingLong": "This step may take a few moments.",
       "syncing": "Syncing..."
+    },
+    "consensusInfo": {
+      "title": "Multisig consensus",
+      "subtitle": " X/Y of Z",
+      "firstPoint": "<strong>X =</strong> accounts that have already signed the transaction;",
+      "secondPoint": "<strong>Y =</strong> number of signatures required to approve the transaction;",
+      "thirdPoint": "<strong>Z =</strong> number of authorized signers.",
+      "description": "If <strong>X=Y</strong> the multisig consensus has been reached. The transaction proposal has been approved and the transaction can be sent by any of the authorized signers."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
@@ -214,10 +245,6 @@
       "title": "Not secure URL",
       "msg": "Superhero Wallet is marking HTTP sites as \"Not secure\" - please, use URLs with HTTPS, only. The S in HTTPS stands for \"secure.\" The TLS (or SSL) certificate proves that the server is actually the legitimate host of the website. Website using HTTPS are more trustworthy and secure, for both users and website owners."
     },
-    "switcherAccsLimit": {
-      "title": "Unable to show this account.",
-      "msg": "You've reached the limit of showed accounts, uncheck other account, if you want to show this one."
-    },
     "error-log": {
       "title": "Something went wrong",
       "sub-title": "Be a Superhero!",
@@ -265,36 +292,6 @@
         "content": "Transaction data is either broken or Superhero wallet doesn’t support this type of transactions yet. Signing it may cause unexpected results including loss of your funds or other malicious effects.{0}{0}Be careful and sign the data only if you trust the aepp and its owner."
       }
     },
-    "add-token": {
-      "title": "Token added",
-      "msg": "Token added successfully"
-    },
-    "deploy-token": {
-      "title": "Token deployed",
-      "msg": "Token deployed successfully at address: {address}"
-    },
-    "mint/burn-token": {
-      "title": "Token {type} ",
-      "msg": "Token {type} successfully"
-    },
-    "allowances": {
-      "create": {
-        "title": "Allowance created",
-        "msg": "Allowance created successfully"
-      },
-      "transfer": {
-        "title": "Allowance transferred",
-        "msg": "Allowance transferred successfully"
-      },
-      "change": {
-        "title": "Allowance changed",
-        "msg": "Allowance changed successfully"
-      },
-      "balance": {
-        "title": "something went wrong",
-        "msg": "Insufficient balance"
-      }
-    },
     "qrCodeReader": {
       "grantPermission": "Grant permission",
       "scanQr": "Scan QR",
@@ -302,12 +299,6 @@
       "cameraNotAllowedFirst": "You need to grant your device camera access permission to scan QR code.",
       "cameraNotAllowedSecond": "Please allow camera access in your browser settings and try again.",
       "settings": "Settings"
-    },
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "mobile-share-error": {
-      "title": "Only URLs can be tipped at the moment!",
-      "msg": "More options are currently being developed - coming to you soon!"
     },
     "name-pointers-help": {
       "title": "Name pointers",
@@ -324,7 +315,6 @@
     "receive": {
       "title": "Receive funds to public address",
       "requestAmount": "Request specific amount (optional)",
-      "copy": "Copy",
       "copied": "Copied!",
       "share": "Share",
       "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
@@ -340,8 +330,6 @@
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
-      "edit": "Edit",
-      "next": "Next",
       "payload": "Payload"
     },
     "multisigTxProposal": {
@@ -370,7 +358,6 @@
     }
   },
   "filters": {
-    "all": "All",
     "out": "Out",
     "in": "In",
     "dex": "DEX",
@@ -403,7 +390,6 @@
       "payingForTx": "Pay For Tx",
       "gaMetaTx": "GA Meta Tx",
       "gaAttachTx": "GA Attach Tx",
-      "pending": "Pending",
       "multisigProposal": "Multisig Proposal",
       "sentTx": "Sending",
       "receivedTx": "Receiving",
@@ -430,18 +416,12 @@
     "dexType": {
       "provideLiquidity": "Liquidity provided",
       "removeLiquidity": "Liquidity removed",
-      "swap": "Swap",
       "allowToken": "Allow token",
       "changeAllowance": "Allow token",
       "transferAllowance": "Allow token",
       "deposit": "Deposit",
       "withdraw": "Withdraw",
       "pool": "Pool"
-    },
-    "multisigType": {
-      "send": "Send",
-      "sing": "Approved",
-      "revoke": "Revoked"
     },
     "spendType": {
       "out": "out",
@@ -470,7 +450,6 @@
       "language": "Language",
       "security": "Security",
       "about": "About",
-      "send": "Send",
       "send-tip": "Send tip",
       "claim-tips": "Claim tips",
       "scanQr": "Scan QR",
@@ -478,7 +457,6 @@
       "privacy": "Privacy Policy",
       "importAccount": "Retrieve Existing Account",
       "transactions": "Transaction History",
-      "receive": "Receive",
       "currency": "Currency",
       "notifications": "Notifications",
       "notification-settings": "Notification Preference",
@@ -487,7 +465,6 @@
       "name-auctions": "Name auctions",
       "register-name": "Register name",
       "more": "More",
-      "buy": "Buy AE Tokens",
       "networks": "Network",
       "permissionsSettings": "Permissions",
       "permissionsEdit": "Edit permissions",
@@ -496,9 +473,6 @@
       "home": "Home",
       "donate-error": "Donate Data",
       "address": "Send Address",
-      "deploy-token": "Deploy token",
-      "add-token": "Add token",
-      "mint-burn-token": "Mint/Burn token",
       "allowances": "Allowances",
       "sign-message": "Sign Message",
       "sign-transaction": "Sign Transaction",
@@ -519,7 +493,6 @@
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
     },
     "about": {
-      "heading": "About",
       "systemName": "Superhero",
       "terms": "Terms",
       "privacyPolicy": "Privacy",
@@ -535,7 +508,6 @@
       "heading": "Account",
       "accountName": "Account name",
       "claim": "Claim Tip",
-      "receive": "Receive",
       "latestTransactions": "Latest transactions",
       "noTransactionsFound": "No transactions found!",
       "balance": "Balance",
@@ -550,6 +522,7 @@
     },
     "accounts": {
       "addAccount": "Add account",
+      "searchAccountsPlaceholder": "Search for account",
       "addAccountDescription": "Add an account to your wallet to manage funds separately."
     },
     "vaults": {
@@ -581,14 +554,6 @@
       "backToHome": "Return home",
       "reportBug": "Report a bug"
     },
-    "accountPassword": {
-      "heading": "",
-      "passwordSymbolsError": "Required minimum symbols - ",
-      "weakPasswordError": "Password is too weak.",
-      "incorrectPasswordError": "Incorrect password.",
-      "passwordDoesntMatchError": "Passwords do not match.",
-      "securingAccount": "Securing your account"
-    },
     "recentTransactions": {
       "title": "Recent transactions",
       "viewMore": "View full transaction history",
@@ -596,28 +561,15 @@
       "searchPlaceholder": "Search transactions by asset name",
       "unknownMode": "Unknown display mode type:"
     },
-    "add-fungible-token": {
-      "heading": "Fungible Tokens",
-      "add": "Add token",
-      "contract-label": "Token Contract Address",
-      "symbol-label": "Token Symbol",
-      "decimals-label": "Decimals of Precision",
-      "next": "Next",
-      "token": "Token",
-      "balance": "Balance"
-    },
     "advancedSettings": {
       "heading": "Advanced",
-      "backToSettings": "Settings",
       "exportKeypair": "Export keypair",
       "exportKeystore": "Export keystore"
     },
     "airGapSetup": {
-      "backToAccount": "Back to account",
       "heading": "AirGap Setup",
       "step1heading": "Install AirGap on your phone",
       "step1info": "Search for AirGap.it in the store or scan this QR code",
-      "step1buttonNext": "Next",
       "setupSteps1heading": "Open AirGap on the 2nd device",
       "setupSteps2heading": "Create secret key",
       "setupSteps3heading": "Write it down in the right order",
@@ -630,35 +582,11 @@
       "setupSteps5": "Finish by linking your vault to your aeternity address",
       "linkVault": "Link Vault"
     },
-    "allowances": {
-      "heading": "Allowances",
-      "backToUtilities": "Back to utilities",
-      "create-allowance": "Create allowance",
-      "create-allowance-info": "This allows you to create an allowance with your new fungible tokens for anyone you want",
-      "transfer-allowance": "Transfer allowance",
-      "transfer-allowance-info": "This allows you to take your whole allowance or part of it from someone",
-      "all-allowances": "All allowances",
-      "all-allowances-info": "See all your allowances and take them",
-      "from": "From",
-      "get-allowance": "Get allowance",
-      "no-allowances-found": "No allowances found",
-      "select-token": "Select token"
-    },
-    "manage-allowances": {
-      "allowance-exist": "Allowance exist",
-      "here": "here",
-      "create": "Create allowance",
-      "transfer": "Transfer allowance",
-      "change": "Change allowance",
-      "address": "Address",
-      "amount": "Amount"
-    },
     "auctionBid": {
       "backToAuctions": "Back to auctions",
       "bidding": "Bidding",
       "bidOn": "Bid on",
       "requiredField": "This field is required",
-      "next": "Next",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time",
       "ending-height": "Ending height"
@@ -669,7 +597,6 @@
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
-      "addressLabel": "Address",
       "transactionLabel": "Transaction",
       "addressRequest": "This aepp is requesting access to view your current account address.",
       "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
@@ -678,21 +605,6 @@
       "addressesRequest": "This aepp is requesting access to view your account addresses",
       "connecting": "Connecting"
     },
-    "fungibleTokens": {
-      "backToAccount": "Back to account",
-      "addHeading": "Fungible Tokens",
-      "addToken": "Add token",
-      "tokenContractLabel": "Token Contract Address",
-      "tokenSymbolLabel": "Token Symbol",
-      "initialSupply": "Initial Supply",
-      "tokenPrecision": "Decimals of Precision",
-      "next": "Next",
-      "validContractAddressError": "Valid token contract address",
-      "symbolBetween1and12": "Symbol between 1 and 12 characters",
-      "numberBetween0and36": "Number between 0 and 36",
-      "token": "Token",
-      "balance": "Balance"
-    },
     "fungible-tokens": {
       "add": "Add Fungible Token",
       "add-info": "This allows you to add token from given deployed fungible token contract",
@@ -700,30 +612,22 @@
       "deploy-info": "This allows you to deploy your own fungible token contract",
       "allowances": "Allowances",
       "allowances-info": "Give or take an allowance",
-      "mint": "Mint/Burn token",
       "mint-info": "This allows you to mint or burn token amount",
       "tokens": "Tokens",
       "searchPlaceholder": "Search by token name or contract address",
       "searchAssetsPlaceholder": "Search for assets",
-      "all": "All",
       "myTokens": "My Tokens",
       "mcap": "MCap",
       "price": "Price",
       "not-available": "N/A",
       "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "buy": "Buy",
-      "swap": "Swap",
       "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
     "token-details": {
       "details": "Token Details",
-      "send": "Send",
       "proposeTx": "Propose Tx",
-      "receive": "Receive",
-      "buy": "Buy",
-      "swap": "Swap",
       "tip": "Tip",
       "token-details": "Token details",
       "coin-details": "Coin details",
@@ -751,24 +655,6 @@
       "transactions": "Transactions",
       "pooled": "Pooled"
     },
-    "deploy-token": {
-      "name": "Token name",
-      "symbol": "Token symbol",
-      "initial-supply": "Token initial supply",
-      "decimals": "Token decimals",
-      "registry-fee": "Include token in global TokenRegistry (tx fees apply)",
-      "extensions": "Token extensions",
-      "deploy": "Deploy",
-      "require-burnable": "Attention! Swappable requires burnable!",
-      "advanced": "Advanced"
-    },
-    "mint-token": {
-      "mint": "Mint/Burn token",
-      "amount": "Amount",
-      "address": "Address",
-      "type": "Select type",
-      "token": "Select token"
-    },
     "more": {
       "get-ae": "Get AE",
       "dex": "Superhero DEX"
@@ -777,7 +663,6 @@
       "default": "Default",
       "balance-error": "Your account balance is not enough to execute this transaction.",
       "pointer-added": "Name {type} successful!",
-      "pending-claim": "Pending",
       "auto-extend": "Auto-extend",
       "tabs": {
         "my-names": "My names",
@@ -833,7 +718,6 @@
       }
     },
     "languageSettings": {
-      "heading": "Language",
       "chooseLanguage": "Choose Superhero wallet UI language."
     },
     "currencySettings": {
@@ -866,7 +750,6 @@
       "importWallet": "Restore existing wallet",
       "enterSeed": "Enter seed phrase",
       "passwordError": "Password must be at lest 4 symbols.",
-      "incorrectPasswordError": "Incorrect password.",
       "loginButton": "Login",
       "seedPhrase": "Seed phrase",
       "enterSeedPhrase": "Please enter the 12 words or more of your seed phrase (separated by spaces) in the correct order to restore your Superhero wallet.",
@@ -885,27 +768,7 @@
       "ledgerLedger": "Open the aeternity app on your Ledger",
       "ledgerAccountCreate": "Create a first account by pressing the button bellow"
     },
-    "manageAccounts": {
-      "backToAccount": "Back to account",
-      "manageAccounts": "Manage accounts",
-      "allAccounts": "All accounts",
-      "account": "Account",
-      "add": "Add",
-      "enterName": "Enter name"
-    },
-    "manageNetworks": {
-      "backToAccount": "Back to account",
-      "manageNetworks": "Manage networks",
-      "networks": "Networks",
-      "addNewNetwork": "Add new node",
-      "networkName": "Node name",
-      "networkURL": "Node URL",
-      "addnetworkName": "Add Node name",
-      "addnetworkURL": "Add Node URL",
-      "add": "Add"
-    },
     "notifications": {
-      "all": "All",
       "wallet": "Wallet",
       "superhero": "Superhero.com",
       "commentOnComment": "replied to your comment.",
@@ -930,7 +793,6 @@
       "claimOfRetip": "Someone claimed your retip."
     },
     "privacyPolicy": {
-      "backButton": "Back",
       "heading": "Privacy Policy",
       "content": "Your privacy is important to us. It is Superhero's policy to respect your privacy regarding any information we may collect from you across our website and other sites we own and operate. We don't ask for personal information to provide a service to you. We don't collect and retain any information for providing your requested service. We don’t share any personally identifying information publicly or with third-parties. Our website and browser extension may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies. Your            continued use of our website will be regarded as acceptance of our practices around privacy and personal information. If you have any questions about how we handle user data and personal information, feel free to contact us. This policy is effective as of 31 January 2020."
     },
@@ -992,18 +854,14 @@
     "send": {
       "title": "Transaction has been submitted",
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
-      "send": "Send",
       "success": "Success",
       "viewInExplorer": "View in explorer",
       "scan": "Scan QR",
-      "cancel": "Cancel",
       "review": "Review and send",
       "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
-      "amount": "Amount",
-      "editTxDetails": "Edit",
       "successAlert": "has been successfully sent to",
       "receivingUrl": "Receiving URL",
       "sending": "Sending",
@@ -1012,56 +870,18 @@
       "sendingCryptoToUrl": "Sending tip to URL",
       "tipInfo": "Your transaction will be publicly displayed as URL tip on {0}",
       "to": "To",
-      "from": "From",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
       "scanAddress": "Scan aeternity address",
       "error": "Invalid AE address or AENS name",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
-    "settings": {
-      "backToAccount": "Back to account",
-      "heading": "Settings",
-      "tabGeneral": "Language",
-      "tabGeneralsmall": "Change your language",
-      "tabAdvanced": "Advanced",
-      "tabAdvancedsmall": "Download your keystore or keypair",
-      "tabSecurity": "Security & Privacy",
-      "tabSecuritysmall": "Privacy data, Reveal private key",
-      "tabAbout": "About",
-      "tabAboutsmall": "Version, support center, and contact info",
-      "tabNetworks": "Manage networks",
-      "tabPermissionsSettingsSmall": "Manage popups appearance for various requests",
-      "tabRemoveAccount": "Reset wallet",
-      "tabSaveErrorLog": "Save error log",
-      "tabSaveErrorLogSmall": "This will help us identify what's causing the errors."
-    },
-    "signAndVerifyMsg": {
-      "backToSignVerifyMsg": "Back to Sign/Verify Message",
-      "backToUtilities": "Back to utilities",
-      "signatureTitle": "Signature",
-      "password": "Password",
-      "signedMessage": "Signed message:",
-      "copyBtn": "COPY",
-      "cancelBtn": "Cancel",
-      "enterPassword": "Enter your password",
-      "signMessage": "Sign message",
-      "signAndVerify": "Sign and verify messages",
-      "signMessageinfo": "This allows you to sign messages with your private key",
-      "signBtn": "Sign",
-      "verifyMessage": "Verify message",
-      "verifyMessageinfo": "This allows you to verify signed messages",
-      "verifyBtn": "Verify",
-      "message": "Message"
-    },
     "signTransaction": {
       "unknownAccount": "Unknown",
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "total": "Total",
       "reject": "Reject",
-      "confirm": "Confirm",
       "contractCall": "Contract call",
       "contractCalling": "Calling contract method. Please do not close the window",
       "insufficientBalance": "Insufficient Balance",
@@ -1082,14 +902,7 @@
       "poolTokenSpent": "Pool token spent",
       "minimumWithdrawn": "Minimum withdrawn"
     },
-    "signTransactionByQrCode": {
-      "backToAccount": "Back to account",
-      "backToScan": "Back to scan transaction",
-      "heading": "Scan with AirGap Vault to sign the transaction",
-      "doneBtn": "Done"
-    },
     "termsOfService": {
-      "backButton": "Back",
       "terms-of-use": "Terms of use",
       "terms-with-quotes": "(„TERMS“)",
       "terms": "terms",
@@ -1130,74 +943,23 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
-      "header": "This tip will be public on {0}",
-      "back": "Back",
-      "noImage": "No Image",
-      "domainVerified": "Verified",
-      "domainNotVerified": "Not verified",
-      "sendHeading": "Send a tip",
-      "check": "Check",
-      "selectAmount": "Select amount",
-      "amountToTip": "Amount to tip",
-      "balance": "Balance",
-      "sendTipBtn": "Send tip",
-      "tipDetails": "Details",
-      "tipWebsite": "Website",
-      "heading": "Send",
-      "headingSending": "Sending",
-      "selectTip": "Select amount to tip",
-      "tipDomain": "Tip domain",
-      "claim": "Claim Tips",
-      "tipsForDomain": "Tips",
-      "tips": "Tips",
-      "noTips": "There are no tips for this url",
-      "claimInfo": "If you've added your wallet address to your URL, you can instantly claim tips by clicking the Claim button below",
-      "title": "Title",
-      "titlePlaceholder": "Send a message of #support along with your donation...",
-      "account": "Account",
-      "next": "Next",
       "url": "Send Tip to",
-      "to": "to",
-      "amountLabel": "Amount",
-      "insufficientAmountError": "This field must be more than 0",
-      "empty": "Empty",
-      "availableLabel": "Available",
-      "sendToAddress": "Send address to",
-      "confirm": "Confirm",
-      "cancel": "Cancel",
-      "edit": "Edit",
-      "whatIsVerifieddUrl": "What is \"Verified\" URL?",
-      "whatIsNotVerifiedUrl": "What is \"Not verified\" URL?",
-      "enterUrl": "Type the URL you want to tip",
-      "notClaimableUrlInfo": "Third party issues prevent us from enabling direct delivery of tips to the URL owner. You are sending this tip at your own risk.",
-      "notVerifiedUrlInfo": "This URL has not yet been verified. The owner of the URL has to create account to claim their tokens.",
-      "verifiedUrlInfo": "If a URL is marked as verified, it means the owner of this URL is already a fellow Superhero — and that is awesome! An AE address has been included in the URL and tips can be claimed.",
-      "minAmountError": "Tips should be over 0.01 USD in tokens.",
-      "insufficientBalance": "The token balance should be greater than the tip token value.",
-      "v1FungibleTokenTipError": "This post could only be tipped with AE tokens.",
+      "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
-      "blacklistedUrl": "This URL is not public and the funds could not be claimed.",
-      "requiredAmountError": "Please enter a tip amount.",
-      "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page."
+      "minAmountError": "Tips should be over 0.01 USD in tokens."
     },
     "transactionDetails": {
       "poolFee": "pool fee",
       "heading": "Transactions Details",
       "type": "Type",
-      "amount": "Amount",
-      "total": "Total",
-      "txFrom": "From",
-      "txTo": "To",
       "txHash": "Tx hash",
       "transactions": "Transactions",
       "backToTransactions": "Back to Transactions",
       "explorer": "View transaction in blockchain explorer",
       "txName": "Name",
-      "txAccount": "Account",
       "name": "Name",
       "nameSalt": "Name Salt",
       "nameId": "Name Id",
-      "contractId": "Contract Id",
       "advancedMode": "Advanced Mode",
       "blockHeight": "Block height",
       "signatures": "Signatures",
@@ -1217,7 +979,6 @@
       "moreInfo": "More Info",
       "hash": "Hash",
       "status": "Status",
-      "pending": "Pending",
       "revert": "Reverted",
       "revertInfo": "Transaction has been reverted. All states returned to the state before the transaction.",
       "failed": "Failed",
@@ -1241,7 +1002,6 @@
       "revokeTransaction": "Revoke transaction proposal",
       "refuse": "Disapprove",
       "sign": "Approve",
-      "send": "Send",
       "expiresAt": "Expires at height",
       "infoBox": {
         "signatures": "signatures",
@@ -1280,7 +1040,6 @@
       }
     },
     "transactions": {
-      "backToAccount": "Back to account",
       "heading": "Transaction history",
       "filters": "Filters",
       "loadMore": "Load More",
@@ -1288,7 +1047,6 @@
       "newTransactions": "new transactions",
       "noTransactions": "No transactions found",
       "type": "Type",
-      "all": "All",
       "incoming": "Incoming",
       "outgoing": "Outgoing",
       "spendType": "Spend Type",
@@ -1301,42 +1059,7 @@
       "apply": "Apply filter",
       "sent": "Sent",
       "received": "Received",
-      "pending": "Pending",
       "search": "Search by token"
-    },
-    "utilities": {
-      "heading": "Utilities",
-      "backToAccount": "Back to account",
-      "tipWebsite": "Tip website",
-      "namingSystem": "Naming System",
-      "namingSystemInfo": "Register a name so it can be used as your public wallet address",
-      "allowances": "Allowances",
-      "fungibleTokens": "Fungible Tokens",
-      "signAndVerifyMsg": "Sign / Verify message",
-      "tipWebsiteInfo": "Make a donation to any public website",
-      "allowancesInfo": "Give or take an allowance",
-      "fungibleTokensInfo": "Add new token, or deploy token contract",
-      "signAndVerifyMsgInfo": "Sign a message with your private key or verify a signed message",
-      "tokenMigration": "Token Migration",
-      "prepareTokenMigration": "Prepare for Token Migration"
-    },
-    "tokenMigration": {
-      "heading": "Token Migration",
-      "addressLabel": "Your aeternity address",
-      "continue": "Continue",
-      "checkContinue": "I am certain my address and identicon are correct",
-      "ethPrivateKey": "Ethereum Private Key",
-      "migrateToken": "Migrate Token",
-      "migrations": "Migrations",
-      "seeMigrations": "See Migrations",
-      "migrationsInfo": "are in migration now. They will be available after the next hardfork. ",
-      "migrateTokenInfo": "The amount of tokens you choose to migrate, will be available on this address in the next scheduled hardfork release.",
-      "backToTokenMigration": "Back to token migration info",
-      "backendServiceUrl": "Backend Service Url"
-    },
-    "welcome": {
-      "send": "Send",
-      "across": "across the Globe"
     },
     "popupMessageSign": {
       "title": "Sign message",
@@ -1346,12 +1069,11 @@
     "network": {
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
+      "thirdPartyDetails": "Network details below have been provided by a third party. Make sure you trust the network provider to avoid malicious behavior resulting in lose of funds.",
       "url": "URL",
-      "edit": "Edit",
       "delete": "Delete",
       "middleware": "Middleware",
       "allNetworks": "Your networks",
-      "cancel": "Cancel",
       "addCustomNetwork": "Add custom network",
       "addNetwork": "Add network",
       "apply": "Apply",
@@ -1380,7 +1102,6 @@
       "data-collected": "Data Collected",
       "browser": "Browser version",
       "details": "Technical details:",
-      "cancel": "Cancel",
       "donate": "Donate Data"
     },
     "invite": {
@@ -1403,10 +1124,8 @@
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
       "left-today": "Left today",
-      "delete": "Remove permissions",
-      "add": "Add permissions",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
+      "delete": "Remove permission",
+      "add": "Add permission",
       "add-description": "Use this feature with caution and only for platforms you trust.",
       "empty": "You aren't connected to any aepps",
       "description": "Manage confirmation popups and daily spending limits. For security reasons use this feature with caution only for trusted platforms such as {0} and your localhost environment.",
@@ -1421,7 +1140,6 @@
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
-      "cancel": "Cancel",
       "reset": "Reset"
     }
   },
@@ -1430,7 +1148,7 @@
     "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
-    "nameRegisteredAddress": "This name isn't registered or pointed to address",
+    "nameRegisteredAddress": "Invalid address or .chain name",
     "nameUnregistered": "This name has already been registered.",
     "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
@@ -1438,24 +1156,11 @@
     "minValueExclusive": "This field must be more than {0}",
     "enoughAe": "Not enough AE balance",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
+    "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
     "invalidAddress": "Invalid account address"
-  },
-  "redirecting": "Redirecting",
-  "seconds": "{n} seconds | {n} second | {n} seconds",
-  "minutes": "{n} minutes | {n} minute | {n} minutes",
-  "hours": "{n} hours | {n} hour | {n} hours",
-  "days": "{n} days | {n} day | {n} days",
-  "addressCopied": "Copied",
-  "hashCopied": "Hash copied",
-  "copy": "Copy",
-  "total": "Total",
-  "totalMultisig": "Total in multisig vaults",
-  "priceNotAvailable": "price: n/a",
-  "search": "Search",
-  "tx": "Tx",
-  "smartContract": "Smart contract"
+  }
 }

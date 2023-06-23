@@ -4,22 +4,30 @@
     no-unused-vars,
 */
 
+import Vue, { ComponentOptions } from 'vue';
 import { RawLocation } from 'vue-router';
 import { LocaleMessages, TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
+import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
+import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
   FUNCTION_TYPE_MULTISIG,
+  ALLOWED_ICON_STATUSES,
 } from '../popup/utils';
 
 export * from './cordova';
 export * from './router';
 export * from './filter';
 export * from './forms';
+
+export type Dictionary<T = any> = Record<string, T>;
+
+export type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T;
 
 /**
  * Convert `key: val` objects into union of values.
@@ -31,7 +39,21 @@ export type ObjectValues<T> = T[keyof T];
  */
 type PublicPart<T> = {[K in keyof T]: T[K]};
 
+/**
+ * Allowed options that can be passed to our fetch utility functions
+ */
+export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
+  body?: object;
+}
+
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
+
+export type ResolveRejectCallback = (...args: any) => void;
+
+export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
+  functional: boolean;
+  render: any;
+}
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
@@ -54,6 +76,11 @@ export interface IAppData {
   protocol?: string;
 }
 
+export interface IWallet {
+  privateKey: any;
+  chainCode: any;
+}
+
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
 
 /**
@@ -67,57 +94,46 @@ export interface IInputMessage {
 
 export type IInputMessageRaw = string | IInputMessage;
 
+/**
+ * Fungible tokens that are available in currently used network.
+ */
 export interface IToken {
-  contractId: string
-  convertedBalance?: number
-  decimals: number
-  id?: string // Only for the Aeternity coin
-  name: string
-  symbol: string,
-  extension?: string[]
+  contractId: string;
+  contract_txi?: number;
+  convertedBalance?: number; // Amount of the token that is owned
+  decimals: number;
+  event_supply?: number;
+  extensions?: string[];
+  holders?: number;
+  image?: string;
+  initial_supply?: number;
+  name: string;
+  symbol: string;
+  text?: string; // TODO determine if we can remove this
+  value?: string; // TODO copy of the contractId, maybe we should remove it
 }
 
 export interface ITokenResolved extends Partial<IToken> {
-  amount?: number
-  isAe?: boolean
-  isPool?: boolean
-  isReceived?: boolean
+  amount?: number;
+  isAe?: boolean;
+  isPool?: boolean;
+  isReceived?: boolean;
+  symbol: string; // Ensure its present in the current interface
 }
 
 export type ITokenList = Record<string, IToken>
 
-export interface IAsset {
-  ath: number
-  ath_change_percentage: number
-  ath_date: string
-  atl: number
-  atl_change_percentage: number
-  atl_date: string
-  balanceCurrency: number
-  circulating_supply: number
-  contractId: string
-  convertedBalance: Balance;
-  current_price: number
-  decimals: number
-  fully_diluted_valuation: any
-  high_24h: number
-  id: string
-  image: string
-  last_updated: string
-  low_24h: number
-  market_cap: number
-  market_cap_change_24h: number
-  market_cap_change_percentage_24h: number
-  market_cap_rank: number
-  max_supply: any
-  name: string
-  price_change_24h: number
-  price_change_percentage_24h: number
-  roi: object
-  symbol: string
-  total_supply: number
-  total_volume: number
-}
+/**
+ * Coins are specific to the network user can connect to. We assume each network
+ * can have only one coin and many tokens.
+ * TODO: Put the CoinGecko data in a separate property.
+ */
+export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
+
+/**
+ * In general the "Asset" is any form of coin or fungible token we use in the app.
+ */
+export type IAsset = ICoin | IToken;
 
 export type AccountKind = 'basic'; // TODO establish other possible values
 
@@ -192,6 +208,7 @@ export interface INetworkBase {
   url: string
   name: string
   middlewareUrl: string
+  networkId: string
   compilerUrl: string
   backendUrl: string
   index?: number
@@ -199,9 +216,8 @@ export interface INetworkBase {
 
 export interface INetwork extends INetworkBase {
   explorerUrl: string
-  networkId: string
-  tipContractV1: string
-  tipContractV2?: string
+  tipContractV1: Encoded.ContractAddress
+  tipContractV2?: Encoded.ContractAddress
   multisigBackendUrl: string
 }
 
@@ -253,6 +269,8 @@ export interface ICurrency {
   code: CurrencyCode;
   symbol: string;
 }
+
+export type CurrencyRates = Record<CurrencyCode, number>;
 
 export interface ITxArguments {
   type: 'tuple' | 'list'
@@ -372,6 +390,11 @@ export interface ITransaction {
   url?: string;
 }
 
+export interface IStoreTransactions {
+  loaded: ITransaction[];
+  nextPageUrl?: string;
+}
+
 export interface IDashboardTransaction extends ITransaction {
   direction?: 'received' | 'send'
 }
@@ -396,6 +419,14 @@ export interface IAccountOverView extends Partial<IAccount> {
   label: TranslateResult;
 }
 
+export interface IActiveMultisigTransaction extends IMultisigAccount {
+  totalConfirmations: number;
+  hash?: string;
+  tx?: ITx;
+  isMultisigTransaction: boolean;
+  microTime?: number;
+}
+
 export interface ITransactionOverview {
   sender: IAccountOverView | IAccount;
   recipient: IAccountOverView | IAccount;
@@ -406,6 +437,15 @@ export interface ITransactionOverview {
 export interface IDexContracts {
   router: string[];
   wae: string[];
+}
+
+export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
+
+export type ITransactionsState = {
+  loaded: ITransaction[];
+  nextPageUrl?: string;
+  pending: ITransaction[];
+  tipWithdrawnTransactions: ITransaction[];
 }
 
 /**
@@ -428,16 +468,39 @@ export interface ITopHeader {
 
 export type ISignMessage = (m: any) => Promise<any>
 
+export interface IName {
+  autoExtend: boolean;
+  createdAtHeight: number;
+  expiresAt: number;
+  hash: string;
+  name: string;
+  owner: string;
+  pointers: Dictionary;
+}
+
+/**
+ * Data fetched with the use of `sdk.api.getNameEntryByName` method.
+ */
+export interface INameEntryFetched {
+  id: string;
+  owner: string;
+  pointers: { id: string; key: string }[];
+  ttl: number;
+}
+
 /**
  * Temporary typing for the SDK used in the app.
  * TODO remove after migrating to SDK v12
  */
 export interface ISdk {
   addNode: (name: string, node: any, select: boolean) => void;
-  Ae: Record<string, any>;
+  addRpcClient: (connection: any) => any;
+  Ae: Dictionary;
+  aensClaim: (name: string, salt: string, options?: any) => Promise<any>;
+  aensPreclaim: (name: string) => Promise<any>;
   aensQuery: (name: string) => Promise<any>;
   api: Record<string, GenericApiMethod>;
-  balance: (address: string) => Promise<number>;
+  balance: (address: string, options?: any) => Promise<number>;
   compilerApi: Record<string, (...args: any[]) => Promise<any>>;
   getAccount: (publicKey: any) => Promise<any>
   gaAttachTx: (options: {
@@ -460,8 +523,9 @@ export interface ISdk {
     }
   ) => Promise<{ hash: string, rawTx: string }>;
   payingForTx(arg0: any): any;
-  poll: (txHash: string, options: any) => any;
+  poll: (txHash: string, options?: any) => any;
   pool: Map<string, any>;
+  shareWalletInfo: (c: any) => any;
   signTransaction: (t: any, o: any) => Promise<any>
   signMessage: ISignMessage
   send: (
@@ -495,15 +559,15 @@ export interface IMiddleware {
   getBlocks: GenericApiMethod;
   getCurrentTxCount: GenericApiMethod;
   getInactiveOracles: GenericApiMethod;
-  getNameById: GenericApiMethod;
+  getName: GenericApiMethod;
   getNamePointees: GenericApiMethod;
   getNamePointers: GenericApiMethod;
-  getNamesOwnedBy: (address: string) => Promise<any>;
+  getNames: (address: string) => Promise<any>;
   getOracle: GenericApiMethod;
   getOracles: GenericApiMethod;
   getStatus: GenericApiMethod;
-  getTxByAccount: GenericApiMethod;
-  getTxByHash: (hash: string) => Promise<any>;
+  getTxs: GenericApiMethod;
+  getTx: (hash: string) => Promise<any>;
   getTxByIndex: GenericApiMethod;
   getTxCountById: GenericApiMethod;
   getTxsByDirection: GenericApiMethod;
@@ -526,14 +590,15 @@ export interface IMiddlewareStatus {
   nodeVersion: string
 }
 
-export interface IName {
-  autoExtend: boolean
-  createdAtHeight: number
-  expiresAt: number
-  hash: string
-  name: string
-  owner: string
-  pointers: Record<string, any>
+export interface IPopupConfig {
+  type: string;
+  app: IAppData;
+  action?: any;
+  data?: string;
+  message?: string;
+  transaction?: Partial<ITx>;
+  resolve?: any;
+  reject?: any;
 }
 
 export interface IResponseChallenge {
@@ -583,13 +648,6 @@ export interface ICreateMultisigAccount {
   address: string;
 }
 
-export interface IActiveMultisigTx extends IMultisigAccount {
-  totalConfirmations: number;
-  hash?: string;
-  tx?: ITx;
-  isMultisigTransaction: boolean;
-}
-
 export interface IRawMultisigTx {
   id: number
   hash: string
@@ -614,4 +672,26 @@ export interface IDefaultComposableOptions {
    * TODO: Temporary solution to avoid dependency circle
    */
   store: Store<any>
+}
+
+export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
+
+export interface TippingV1ContractApi extends ContractMethodsBase {
+  unclaimed_for_url: (url: string) => string;
+  tip: (recipientId: Encoded.AccountAddress, note: string) => void;
+  retip: (tipId: number) => void;
+}
+
+export interface TippingV2ContractApi extends TippingV1ContractApi {
+  tip_token: (
+    recipientId: Encoded.AccountAddress,
+    note: string,
+    contacttId: Encoded.ContractAddress,
+    amount: string
+  ) => Encoded.TxHash;
+  retip_token: (
+    id: number,
+    contactId: Encoded.ContractAddress,
+    amount: number
+  ) => Encoded.TxHash;
 }

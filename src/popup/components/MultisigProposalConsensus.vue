@@ -2,9 +2,16 @@
   <div class="transaction-multisig-consensus">
     <div
       v-if="!isPendingMultisigTxCompleted"
-      class="label"
+      class="consensus-label"
     >
-      <span> {{ $t('multisig.consensus') }} </span>
+      <div class="label">
+        <span>{{ $t('multisig.consensus') }} </span>
+        <BtnHelp
+          class="btn-help"
+          @help="openConsensusInfoModal"
+        />
+      </div>
+
       <span class="confirmations-count">
         <ConsensusLabel
           :confirmations-required="activeMultisigAccount.confirmationsRequired"
@@ -57,18 +64,26 @@
 <script lang="ts">
 import { computed, defineComponent } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
-import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../composables';
+import {
+  useAccounts,
+  useModals,
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+} from '../../composables';
+import { MODAL_CONSENSUS_INFO } from '../utils';
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
-import InfoBox, { InfoBoxType, INFO_BOX_TYPES } from './InfoBox.vue';
 
+import InfoBox, { InfoBoxType, INFO_BOX_TYPES } from './InfoBox.vue';
 import CheckCircle from '../../icons/circle-check-outlined.svg?vue-component';
 import CloseCircle from '../../icons/circle-close.svg?vue-component';
 import ConsensusLabel from './ConsensusLabel.vue';
+import BtnHelp from './buttons/BtnHelp.vue';
 
 export default defineComponent({
   name: 'TransactionMultisigConsensus',
   components: {
+    BtnHelp,
     ConsensusLabel,
     AccountItem,
     CheckCircle,
@@ -80,6 +95,7 @@ export default defineComponent({
     proposalCompleted: Boolean,
   },
   setup(props, { root }) {
+    const { openModal } = useModals();
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store: root.$store });
@@ -164,6 +180,10 @@ export default defineComponent({
       };
     });
 
+    function openConsensusInfoModal() {
+      openModal(MODAL_CONSENSUS_INFO);
+    }
+
     return {
       activeMultisigAccount,
       getExplorerPath,
@@ -174,6 +194,7 @@ export default defineComponent({
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
       isPendingMultisigTxCompleted,
+      openConsensusInfoModal,
     };
   },
 });
@@ -187,18 +208,26 @@ export default defineComponent({
 .transaction-multisig-consensus {
   width: 100%;
 
-  .label {
-    @extend %face-sans-15-medium;
+  .consensus-label {
+    margin-bottom: 20px;
 
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
-    line-height: 16px;
-    color: rgba(variables.$color-white, 0.5);
+    .label {
+      @extend %face-sans-15-medium;
 
-    .confirmations-count {
-      padding-left: 4px;
-      color: rgba(variables.$color-white, 0.75);
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+      line-height: 16px;
+      color: rgba(variables.$color-white, 0.5);
+
+      .confirmations-count {
+        padding-left: 4px;
+        color: rgba(variables.$color-white, 0.75);
+      }
+    }
+
+    .btn-help {
+      margin-left: 4px;
     }
   }
 

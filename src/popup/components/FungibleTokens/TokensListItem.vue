@@ -67,9 +67,9 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { getFormattedFiat, formatCurrency, aeternityData } = useCurrencies();
+    const { currentCurrencyRate, getFormattedFiat, formatCurrency } = useCurrencies();
 
-    const price = computed(() => formatCurrency(aeternityData.value?.current_price || 0));
+    const price = computed(() => formatCurrency(currentCurrencyRate.value));
 
     const balanceFormatted = computed(
       () => getFormattedFiat(props.tokenData.convertedBalance || 0),

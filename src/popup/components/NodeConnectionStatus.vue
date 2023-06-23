@@ -21,8 +21,7 @@ import {
   watch,
 } from '@vue/composition-api';
 import { TranslateResult } from 'vue-i18n';
-import { useConnection, useSdk } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import { useAccounts, useConnection, useSdk } from '../../composables';
 
 const CONNECTED_DISPLAY_TIME = 2000;
 
@@ -30,10 +29,9 @@ export default defineComponent({
   setup(props, { root }) {
     const { isOnline } = useConnection();
     const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store: root.$store });
+    const { isLoggedIn } = useAccounts({ store: root.$store });
 
     const justBeenConnected = ref(false);
-
-    const isLoggedIn = useGetter<boolean>('isLoggedIn');
 
     const isError = computed(() => !isOnline.value || isNodeError.value);
 

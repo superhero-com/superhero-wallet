@@ -42,12 +42,12 @@
         variant="muted"
         third
         extra-padded
-        :text="$t('modals.cancel')"
+        :text="$t('common.cancel')"
         @click="cancel"
       />
       <BtnMain
         third
-        :text="$t('modals.confirm')"
+        :text="$t('common.confirm')"
         @click="confirm"
       />
     </template>
@@ -56,6 +56,7 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { RejectedByUserError } from '../../../lib/errors';
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -99,7 +100,7 @@ export default {
       this.resolve();
     },
     cancel() {
-      this.reject(new Error('Rejected by user'));
+      this.reject(new RejectedByUserError());
     },
   },
 };
