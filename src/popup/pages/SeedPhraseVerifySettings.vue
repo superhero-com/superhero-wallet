@@ -71,7 +71,6 @@ import {
   defineComponent,
   ref,
   computed,
-  watch,
 } from 'vue';
 import { shuffle } from 'lodash-es';
 import { useStore } from 'vuex';
@@ -124,11 +123,6 @@ export default defineComponent({
         selectedWordIds.value.push(index);
       }
     }
-
-    watch(() => selectedWordIds.value, () => {
-      showNotification.value = false;
-      hasError.value = false;
-    }, { deep: true });
 
     return {
       selectedWordIds,
