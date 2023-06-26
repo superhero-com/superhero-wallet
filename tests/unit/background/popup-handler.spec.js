@@ -35,7 +35,7 @@ const testCases = [{
   },
   type: POPUP_TYPE_SIGN,
   resultType: POPUP_TYPE_SIGN,
-  propsField: 'transaction',
+  propsField: 'tx',
 }, {
   name: 'supported transaction with a connected aepp',
   params: {
@@ -47,7 +47,7 @@ const testCases = [{
   },
   type: POPUP_TYPE_SIGN,
   resultType: POPUP_TYPE_SIGN,
-  propsField: 'transaction',
+  propsField: 'tx',
   connectedAepp: {
     connection: {
       port: {
