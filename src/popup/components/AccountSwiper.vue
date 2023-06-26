@@ -142,9 +142,12 @@ export default defineComponent({
 });
 </script>
 
+<style lang="scss">
+@use 'swiper/swiper.scss';
+</style>
+
 <style lang="scss" scoped>
 @use '../../styles/mixins';
-@use 'swiper/swiper.scss';
 
 .account-swiper {
   .account-swiper-bottom {
