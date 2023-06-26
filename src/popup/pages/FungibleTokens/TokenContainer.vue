@@ -41,7 +41,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-else-if="isNodeMainnet || isNodeTestnet"
+        v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
         :text="$t('common.swap')"
         :icon="SwapIcon"
         :href="DEX_URL"
