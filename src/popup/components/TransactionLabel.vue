@@ -87,7 +87,6 @@ import {
   ILabel,
   TxFunction,
   TxFunctionRaw,
-  TxType,
 } from '../../types';
 import {
   ABORT_TX_TYPE,
@@ -117,7 +116,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { accounts, activeAccount } = useAccounts({ store });
-    const { tm, t } = useI18n();
+    const { t } = useI18n();
 
     const {
       outerTxType,
@@ -134,9 +133,6 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
-      const transactionTypes = tm('transaction.type') as unknown as Record<TxType, TranslateResult>;
-      const transactionListTypes = tm('transaction.listType') as unknown as Record<TxType, TranslateResult>;
-
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         const isSent = getTxDirection.value(
           innerTx.value,
@@ -207,7 +203,7 @@ export default defineComponent({
         };
       }
 
-      const translation = transactionListTypes[txType.value!] || transactionTypes[txType.value!];
+      const translation = !t(`transaction.listType.${txType.value!}`).includes('listType') ? t(`transaction.listType.${txType.value!}`) : t(`transaction.type.${txType.value!}`);
 
       if (txType.value && txType.value?.includes('name')) {
         return labelWrapper(translation);

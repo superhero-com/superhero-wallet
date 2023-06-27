@@ -50,7 +50,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t, tm } = useI18n();
+    const { t } = useI18n();
     const {
       direction,
       txType,
@@ -85,8 +85,7 @@ export default defineComponent({
         externalLabels.push(t('transaction.type.payingForTx'));
       }
 
-      const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
-      const txTransactionType = txType.value ? transactionTypes[txType.value] : undefined;
+      const txTransactionType = txType.value ? t(`transaction.type.${txType.value}`) : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
       if (!txTransactionType) {
@@ -156,7 +155,7 @@ export default defineComponent({
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [
-          transactionTypes[props.transaction.tx.function] ?? props.transaction.tx.function,
+          t(`transaction.type.${props.transaction.tx.function}`) ?? props.transaction.tx.function,
           txTransactionType,
         ];
       } else {
