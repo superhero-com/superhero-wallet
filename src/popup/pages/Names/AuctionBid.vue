@@ -41,18 +41,24 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  ref,
+  PropType,
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { getMinimumNameFee, AensName } from '@aeternity/aepp-sdk-13';
+
 import { IAuctionBid } from '../../../types';
 import { useModals, useSdk } from '../../../composables';
 import { useGetter } from '../../../composables/vuex';
 import {
   AENS_BID_MIN_RATIO,
   aeToAettos,
-  calculateNameClaimFee,
 } from '../../utils';
 
 import AuctionCard from '../../components/AuctionCard.vue';
@@ -71,7 +77,7 @@ export default defineComponent({
     BtnMain,
   },
   props: {
-    name: { type: String, required: true },
+    name: { type: String as PropType<AensName>, required: true },
   },
   setup(props) {
     const store = useStore();
@@ -87,7 +93,7 @@ export default defineComponent({
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
     const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
-    const txFee = computed<BigNumber>(() => calculateNameClaimFee(props.name));
+    const txFee = computed<BigNumber>(() => getMinimumNameFee(props.name));
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
       const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
