@@ -1,5 +1,29 @@
-{
-  "encodedAci": {
+[
+  {
+    "namespace": {
+      "name": "Option",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "ListInternal",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "List",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "String",
+      "typedefs": []
+    }
+  },
+  {
     "contract": {
       "functions": [
         {
@@ -10,22 +34,125 @@
             },
             {
               "name": "_2",
-              "type": "PoS"
-            },
-            {
-              "name": "_3",
               "type": "int"
             }
           ],
-          "name": "burn_trigger_pos",
+          "name": "set_paid",
           "payable": false,
           "returns": "unit",
           "stateful": true
+        }
+      ],
+      "kind": "contract_interface",
+      "name": "PoS",
+      "payable": false,
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "event": {
+        "variant": [
+          {
+            "Transfer": [
+              "address",
+              "address",
+              "int"
+            ]
+          },
+          {
+            "Allowance": [
+              "address",
+              "address",
+              "int"
+            ]
+          },
+          {
+            "Burn": [
+              "address",
+              "int"
+            ]
+          },
+          {
+            "Swap": [
+              "address",
+              "int"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "arguments": [],
+          "name": "aex9_extensions",
+          "payable": false,
+          "returns": {
+            "list": [
+              "string"
+            ]
+          },
+          "stateful": false
         },
         {
           "arguments": [
             {
-              "name": "_1",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "decimals",
+              "type": "int"
+            },
+            {
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "name": "initial_owner_balance",
+              "type": {
+                "option": [
+                  "int"
+                ]
+              }
+            }
+          ],
+          "name": "init",
+          "payable": false,
+          "returns": "FungibleTokenFull.state",
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "meta_info",
+          "payable": false,
+          "returns": "FungibleTokenFull.meta_info",
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "total_supply",
+          "payable": false,
+          "returns": "int",
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "owner",
+          "payable": false,
+          "returns": "address",
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "balances",
+          "payable": false,
+          "returns": "FungibleTokenFull.balances",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "account",
               "type": "address"
             }
           ],
@@ -37,41 +164,300 @@
             ]
           },
           "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "swapped",
+          "payable": false,
+          "returns": {
+            "map": [
+              "address",
+              "int"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "allowances",
+          "payable": false,
+          "returns": "FungibleTokenFull.allowances",
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "allowance_accounts",
+              "type": "FungibleTokenFull.allowance_accounts"
+            }
+          ],
+          "name": "allowance",
+          "payable": false,
+          "returns": {
+            "option": [
+              "int"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "from_account",
+              "type": "address"
+            }
+          ],
+          "name": "allowance_for_caller",
+          "payable": false,
+          "returns": {
+            "option": [
+              "int"
+            ]
+          },
+          "stateful": false
+        },
+        {
+          "arguments": [
+            {
+              "name": "from_account",
+              "type": "address"
+            },
+            {
+              "name": "to_account",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "name": "transfer_allowance",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "for_account",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "name": "create_allowance",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "for_account",
+              "type": "address"
+            },
+            {
+              "name": "value_change",
+              "type": "int"
+            }
+          ],
+          "name": "change_allowance",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "for_account",
+              "type": "address"
+            }
+          ],
+          "name": "reset_allowance",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "to_account",
+              "type": "address"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "name": "transfer",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "name": "burn",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [],
+          "name": "swap",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "check_swap",
+          "payable": false,
+          "returns": "int",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "value",
+              "type": "int"
+            },
+            {
+              "name": "pos",
+              "type": "PoS"
+            },
+            {
+              "name": "id",
+              "type": "int"
+            }
+          ],
+          "name": "burn_trigger_pos",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
         }
       ],
       "kind": "contract_main",
       "name": "FungibleTokenFull",
       "payable": false,
-      "type_defs": []
-    }
-  },
-  "externalEncodedAci": [
-    {
-      "contract": {
-        "functions": [
+      "state": {
+        "record": [
           {
-            "arguments": [
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "name": "total_supply",
+            "type": "int"
+          },
+          {
+            "name": "balances",
+            "type": "FungibleTokenFull.balances"
+          },
+          {
+            "name": "meta_info",
+            "type": "FungibleTokenFull.meta_info"
+          },
+          {
+            "name": "allowances",
+            "type": "FungibleTokenFull.allowances"
+          },
+          {
+            "name": "swapped",
+            "type": {
+              "map": [
+                "address",
+                "int"
+              ]
+            }
+          }
+        ]
+      },
+      "typedefs": [
+        {
+          "name": "meta_info",
+          "typedef": {
+            "record": [
               {
-                "name": "_1",
-                "type": "int"
+                "name": "name",
+                "type": "string"
               },
               {
-                "name": "_2",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "name": "decimals",
                 "type": "int"
               }
-            ],
-            "name": "set_paid",
-            "payable": false,
-            "returns": "unit",
-            "stateful": true
-          }
-        ],
-        "kind": "contract_interface",
-        "name": "PoS",
-        "payable": false,
-        "type_defs": []
-      }
+            ]
+          },
+          "vars": []
+        },
+        {
+          "name": "allowance_accounts",
+          "typedef": {
+            "record": [
+              {
+                "name": "from_account",
+                "type": "address"
+              },
+              {
+                "name": "for_account",
+                "type": "address"
+              }
+            ]
+          },
+          "vars": []
+        },
+        {
+          "name": "balances",
+          "typedef": {
+            "map": [
+              "address",
+              "int"
+            ]
+          },
+          "vars": []
+        },
+        {
+          "name": "allowances",
+          "typedef": {
+            "map": [
+              "FungibleTokenFull.allowance_accounts",
+              "int"
+            ]
+          },
+          "vars": []
+        }
+      ]
     }
-  ],
-  "interface": "contract interface PoS =\n  stateful entrypoint set_paid : (int, int) => unit\n\nmain contract FungibleTokenFull =\n  stateful entrypoint burn_trigger_pos : (int, PoS, int) => unit\n  entrypoint balance : (address) => option(int)\n"
-}
+  }
+]

@@ -26,6 +26,7 @@ import {
   handleUnknownError,
 } from '../popup/utils';
 import { useSdk } from './sdk';
+import { useSdk13 } from './sdk13';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
@@ -45,6 +46,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  */
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const { getSdk } = useSdk({ store });
+  const { getSdk: getSdk13 } = useSdk13({ store });
   const { balance } = useBalances({ store });
   const { activeAccount } = useAccounts({ store });
 
@@ -52,7 +54,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   let updateNonceInterval: NodeJS.Timer;
   const fee = ref<BigNumber>(new BigNumber(0));
   const selectedTokenBalance = ref(new BigNumber(0));
-  const tokenInstance = ref<any>(null);
+  let tokenInstance: any;
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
@@ -69,15 +71,16 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
     async (val) => {
       if (!val?.selectedAsset) return;
       const sdk = await getSdk();
+      const sdk13 = await getSdk13();
 
       if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
         if (
-          !tokenInstance.value
-          || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId
+          !tokenInstance
+          || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
-          tokenInstance.value = await sdk.getContractInstance({
+          tokenInstance = await sdk13.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
-            contractAddress: val.selectedAsset.contractId,
+            address: val.selectedAsset.contractId as any,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
@@ -109,9 +112,9 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
 
       if (
         val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
-        && tokenInstance.value
+        && tokenInstance
       ) {
-        tokenInstance.value = null;
+        tokenInstance = null;
       }
 
       const minFee: BigNumber = new BigNumber(TxBuilder.calculateMinFee('spendTx', {
@@ -136,10 +139,10 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
 
   onMounted(() => {
     updateTokenBalanceInterval = executeAndSetInterval(async () => {
-      if (!tokenInstance.value) return;
+      if (!tokenInstance) return;
       await getSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.value.methods.balance(activeAccount.value.address)).decodedResult ?? 0,
+        (await tokenInstance.balance(activeAccount.value.address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
