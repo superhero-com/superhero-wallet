@@ -37,7 +37,6 @@
 import {
   computed,
   defineComponent,
-  getCurrentInstance,
   onMounted,
   ref, watch,
 } from 'vue';
@@ -59,9 +58,8 @@ export default defineComponent({
     showFilters: Boolean,
   },
   setup(props) {
-    const instance = getCurrentInstance();
     const route = useRoute();
-
+    const transactionFilter = ref();
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
@@ -100,12 +98,13 @@ export default defineComponent({
 
     onMounted(() => {
       if (showFilterBar.value) {
-        maxHeight.value = (instance?.refs?.transactionFilter as HTMLDivElement)?.clientHeight;
+        maxHeight.value = (transactionFilter?.value as HTMLDivElement)?.clientHeight;
         firstRender.value = false;
       }
     });
 
     return {
+      transactionFilter,
       searchPhrase,
       filtersConfig,
       openHeight,

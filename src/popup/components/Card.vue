@@ -80,9 +80,10 @@ export default {
     }));
 
     const isVisible = computed(
-      () => !props.cardId
-      || !hiddenCards.value
-      || !hiddenCards.value.includes(props.cardId),
+      () => !(
+        props.cardId
+        && hiddenCards.value.includes(props.cardId)
+      ),
     );
 
     return {

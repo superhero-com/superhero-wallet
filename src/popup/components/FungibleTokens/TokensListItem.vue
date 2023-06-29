@@ -11,7 +11,6 @@
     }"
     :extend="preventNavigation"
     :selected="selected"
-    @click="$emit('click', $event)"
   >
     <div class="row">
       <Tokens

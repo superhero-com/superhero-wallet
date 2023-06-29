@@ -205,8 +205,7 @@ export default defineComponent({
           const val = query[key];
 
           if (val && typeof val === 'string') {
-            // @ts-expect-error key is a valid key of INetworkBase
-            newNetwork.value[key] = val;
+            (newNetwork.value[key as keyof INetworkBase] as string) = val;
             isNetworkPrefilled.value = true;
           }
         });

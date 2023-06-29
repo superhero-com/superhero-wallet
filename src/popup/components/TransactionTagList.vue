@@ -14,9 +14,7 @@
 </template>
 
 <script lang="ts">
-import {
-  computed, defineComponent, PropType,
-} from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';

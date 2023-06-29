@@ -2,7 +2,7 @@
   <transition
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
-    @after-enter="$emit('opened')"
+    @after-enter="$emit('open')"
   >
     <div
       v-if="show"
@@ -101,7 +101,7 @@ export default defineComponent({
     bodyWithoutPaddingBottom: Boolean,
     header: { type: String, default: null },
   },
-  emits: ['close', 'opened'],
+  emits: ['close', 'open'],
   setup(props, { slots, emit }) {
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 

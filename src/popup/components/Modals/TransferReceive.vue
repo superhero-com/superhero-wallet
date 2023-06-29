@@ -148,7 +148,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { copied, copy } = useCopy();
 
-    const amount = ref<number | ''>(props.defaultAmount ? Number(props.defaultAmount) : '');
+    const amount = ref<number | string>(props.defaultAmount ? Number(props.defaultAmount) : '');
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
     const activeAccountAddress = computed(() => props.isMultisig

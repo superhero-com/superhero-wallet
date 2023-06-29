@@ -1,5 +1,8 @@
 import {
-  createRouter, RouteRecordRaw, createWebHashHistory, createWebHistory,
+  createRouter,
+  RouteRecordRaw,
+  createWebHashHistory,
+  createWebHistory,
 } from 'vue-router';
 import { Dictionary } from '../../types';
 import {

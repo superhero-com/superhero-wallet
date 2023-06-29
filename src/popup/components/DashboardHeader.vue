@@ -22,9 +22,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-} from 'vue';
+import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 import { useAccounts, useBalances } from '../../composables';

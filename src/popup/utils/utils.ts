@@ -104,10 +104,7 @@ export function setLocalStorageItem(keys: string[], value: any): void {
   );
 }
 
-export function convertToken(
-  balance: number | string,
-  precision: number,
-): BigNumberPublic {
+export function convertToken(balance: number | string, precision: number): BigNumberPublic {
   return new BigNumber(balance).shiftedBy(precision);
 }
 
@@ -286,9 +283,7 @@ export function buildSimplexLink(address: string) {
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
  */
-export function watchUntilTruthy<T>(
-  getter: WatchSource<T>,
-): Promise<NonNullable<T>> {
+export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable<T>> {
   return new Promise((resolve) => {
     const unwatch = watch(
       getter,
@@ -319,12 +314,10 @@ export function calculateFee(
 ): BigNumber {
   const minFee = TxBuilder.calculateMinFee(type, {
     params: {
-      ...(type === 'spendTx'
-        ? {
-          senderId: STUB_ADDRESS,
-          recipientId: STUB_ADDRESS,
-        }
-        : {}),
+      ...(type === 'spendTx' ? {
+        senderId: STUB_ADDRESS,
+        recipientId: STUB_ADDRESS,
+      } : {}),
       amount: MAX_UINT256,
       ttl: MAX_UINT256,
       nonce: MAX_UINT256,
@@ -337,21 +330,21 @@ export function calculateFee(
       gas: 0,
       ...params,
     },
-    ...(type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {}),
+    ...(type === 'nameClaimTx') ? { vsn: SCHEMA.VSN_2 } : {},
   });
   return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
 }
 
-export const calculateNameClaimFee = (
-  name: string,
-): BigNumber => calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-  accountId: STUB_ADDRESS,
-  name,
-  nameSalt: Crypto.salt(),
-  nameFee: TxBuilderHelper.getMinimumNameFee(name),
-  nonce: STUB_NONCE,
-  ttl: SCHEMA.NAME_TTL,
-});
+export function calculateNameClaimFee(name: string): BigNumber {
+  return calculateFee(SCHEMA.TX_TYPE.nameClaim, {
+    accountId: STUB_ADDRESS,
+    name,
+    nameSalt: Crypto.salt(),
+    nameFee: TxBuilderHelper.getMinimumNameFee(name),
+    nonce: STUB_NONCE,
+    ttl: SCHEMA.NAME_TTL,
+  });
+}
 
 export async function fetchJson<T = any>(
   url: string,
@@ -411,7 +404,7 @@ export async function fetchRespondChallenge(
 }
 
 export function getPayload(transaction: ITransaction) {
-  return transaction.tx?.payload
+  return (transaction.tx?.payload)
     ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
     : null;
 }
@@ -434,9 +427,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
   url?: string
   note?: string
 } | null {
-  if (
-    !compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)
-  ) {
+  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
@@ -550,7 +541,10 @@ export function isTransactionAex9(transaction: ITransaction): boolean {
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {
-  return [TX_TYPE_MDW.GAMetaTx, TX_TYPE_MDW.PayingForTx].includes(
+  return [
+    TX_TYPE_MDW.GAMetaTx,
+    TX_TYPE_MDW.PayingForTx,
+  ].includes(
     getTxType(tx),
   );
 }
@@ -567,7 +561,8 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
   return (
     transaction.tipUrl
     || transaction.url
-    || (!transaction.pending
+    || (
+      !transaction.pending
       && !transaction.claim
       && transaction.tx.log?.[0]
       && transaction.tx?.function

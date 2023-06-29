@@ -4,12 +4,12 @@
       v-if="isOnline"
       v-slot="{ Component }"
     >
-      <transition
+      <Transition
         name="fade-transition"
         mode="out-in"
       >
         <component :is="Component" />
-      </transition>
+      </Transition>
     </RouterView>
     <MessageOffline
       v-else

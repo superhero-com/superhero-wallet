@@ -63,9 +63,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent, ref, computed,
-} from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
