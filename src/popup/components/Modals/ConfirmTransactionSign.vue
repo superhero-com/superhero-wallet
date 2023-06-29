@@ -313,9 +313,16 @@ export default defineComponent({
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
-          const { bytecode } = await fetchJson(
-            `${activeNetwork.value.url}/v3/contracts/${props.transaction.contractId}/code`,
-          );
+
+          const [
+            { bytecode },
+          ] = await Promise.all([
+            fetchJson(`${activeNetwork.value.url}/v3/contracts/${props.transaction.contractId}/code`),
+            // SDK is needed to establish the `networkId` and the dex contracts for the network
+            // TODO replace with `getSdk` after migration to SDK13
+            root.$store.dispatch('sdkPlugin/initialize'),
+          ]);
+
           const txParams: ITx = await postJson(
             `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
             { body: { bytecode, calldata: props.transaction.callData } },

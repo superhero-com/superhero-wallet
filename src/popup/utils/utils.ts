@@ -669,8 +669,6 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
 
   return !!(
     tx
-    && wae.length
-    && router.length
     && tx.contractId
     && tx.function
     && Object.values(FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
