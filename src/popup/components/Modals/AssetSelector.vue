@@ -6,7 +6,7 @@
     no-padding
     class="asset-selector"
     @close="reject()"
-    @opened="onModalOpen"
+    @open="onModalOpen"
   >
     <template #header>
       <span class="text-heading-3 title">{{ $t('pages.fungible-tokens.select-asset') }}</span>

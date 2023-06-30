@@ -203,7 +203,10 @@ export default defineComponent({
         };
       }
 
-      const translation = !t(`transaction.listType.${txType.value!}`).includes('listType') ? t(`transaction.listType.${txType.value!}`) : t(`transaction.type.${txType.value!}`);
+      // TODO refactor from dynamic translation keys to map of translations
+      const translation = !t(`transaction.listType.${txType.value!}`).includes('listType')
+        ? t(`transaction.listType.${txType.value!}`)
+        : t(`transaction.type.${txType.value!}`);
 
       if (txType.value && txType.value?.includes('name')) {
         return labelWrapper(translation);

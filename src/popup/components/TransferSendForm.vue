@@ -45,6 +45,7 @@
         />
       </div>
     </template>
+
     <Field
       v-slot="{ field }"
       v-model.trim="formModel.address"
@@ -88,6 +89,7 @@
         :status="urlStatus"
       />
     </div>
+
     <Field
       v-slot="{ field }"
       ref="amountField"
