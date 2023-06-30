@@ -217,7 +217,7 @@ export const routes: WalletAppRouteConfig[] = [
       },
 
       {
-        path: 'details/transactions/:hash',
+        path: 'details/transactions/:hash/:transactionOwner',
         name: ROUTE_MULTISIG_TX_DETAILS,
         component: {
           functional: true,
@@ -501,7 +501,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/account-details/transactions/:hash',
+    path: '/account-details/transactions/:hash/:transactionOwner',
     name: ROUTE_TX_DETAILS,
     component: TransactionDetails,
     props: true,

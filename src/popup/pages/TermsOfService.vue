@@ -937,7 +937,7 @@
 </template>
 
 <script>
-import { useI18n } from 'vue-i18n';
+import { i18n } from '../../store/plugins/languages';
 import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
 import {
   APP_LINK_WEB,
@@ -951,11 +951,10 @@ import {
 export default {
   components: { ChevronDownIcon },
   setup() {
-    const { t } = useI18n();
     const translations = [];
 
     for (let i = 1; i < 12; i += 1) {
-      translations.push(t(`pages.termsOfService.section${i}Title`));
+      translations.push(i18n.global.t(`pages.termsOfService.section${i}Title`));
     }
 
     return {
@@ -964,7 +963,7 @@ export default {
   },
   data() {
     return {
-      details: Object.entries(this.translations)
+      details: Object.entries(this.translations ?? [])
         .map(([, title]) => ({ title, open: false })),
       APP_LINK_WEB,
       APP_LINK_CHROME,
