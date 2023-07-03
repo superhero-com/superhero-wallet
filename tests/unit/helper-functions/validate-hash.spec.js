@@ -28,7 +28,7 @@ const testHashes = [
   },
   {
     hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
-    endpoint: 'account/transactions',
+    endpoint: 'accounts',
   },
   {
     hash: 'nm_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',

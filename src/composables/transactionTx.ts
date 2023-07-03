@@ -42,8 +42,6 @@ export function useTransactionTx({
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
-
-
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );

@@ -80,7 +80,8 @@ import { useStore } from 'vuex';
 import type {
   IFormSelectOption,
   IMultisigFunctionTypes,
-  ResolveRejectCallback,
+  RejectCallback,
+  ResolveCallback,
   StatusIconType,
 } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
@@ -105,8 +106,8 @@ export default defineComponent({
   props: {
     signers: { type: Array as PropType<string[]>, required: true },
     action: { type: String as PropType<IMultisigFunctionTypes>, required: true },
-    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
-    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
     const store = useStore();

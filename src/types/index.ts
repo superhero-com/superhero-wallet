@@ -54,9 +54,8 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
-export type ResolveCallback = () => void;
+export type ResolveCallback = (...args: any) => void;
 export type RejectCallback = (error?: RejectedByUserError) => void;
-export type ResolveRejectCallback = ResolveCallback | RejectCallback;
 
 export type VueAnyComponent = Component | ComponentOptions | {
   functional: boolean;
