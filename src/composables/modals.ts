@@ -1,8 +1,11 @@
 import {
-  Component, computed, nextTick, ref,
+  Component,
+  computed,
+  nextTick,
+  ref,
 } from 'vue';
 import { TranslateResult } from 'vue-i18n';
-import { ResolveRejectCallback, StatusIconType } from '../types';
+import { RejectCallback, ResolveCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
 import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
@@ -15,8 +18,8 @@ interface IModalSettings {
 
 interface IModalProps {
   [key: string]: any; // Props defined on the component's level
-  resolve?: ResolveRejectCallback;
-  reject?: ResolveRejectCallback;
+  resolve?: ResolveCallback;
+  reject?: RejectCallback;
   show?: boolean;
 }
 

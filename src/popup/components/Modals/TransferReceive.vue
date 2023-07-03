@@ -101,7 +101,7 @@ import type {
   IAsset,
   IToken,
   ITokenList,
-  ResolveRejectCallback,
+  ResolveCallback,
 } from '../../../types';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
@@ -135,7 +135,7 @@ export default defineComponent({
     Field,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
+    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
     isMultisig: Boolean,

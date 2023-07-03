@@ -54,8 +54,7 @@ import {
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk-13';
-
-import { ObjectValues, ResolveRejectCallback, ITokenList } from '../../../types';
+import type { ITokenList, ObjectValues, ResolveCallback } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, validateTipUrl } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
@@ -90,7 +89,7 @@ export default defineComponent({
     BtnMain,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
+    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
     address: { type: String as PropType<Encoded.AccountAddress>, default: null },
     isMultisig: Boolean,
