@@ -5,8 +5,15 @@
     </template>
 
     <template #buttons>
-      <OpenTransferReceiveModalButton is-big />
-      <OpenTransferSendModalButton is-big />
+      <OpenTransferReceiveModalButton
+        is-big
+        :show-subtitle="false"
+      />
+      <OpenAppsBrowserButton is-big />
+      <OpenTransferSendModalButton
+        is-big
+        :show-subtitle="false"
+      />
     </template>
 
     <template #cards>
@@ -51,6 +58,7 @@ import DashboardWrapper from '../components/DashboardWrapper.vue';
 import DashboardHeader from '../components/DashboardHeader.vue';
 import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
+import OpenAppsBrowserButton from '../components/OpenAppsBrowserButton.vue';
 import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
 
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
@@ -68,6 +76,7 @@ export default defineComponent({
     LatestTransactionsCard,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
+    OpenAppsBrowserButton,
     DashboardHeader,
     DashboardWrapper,
   },

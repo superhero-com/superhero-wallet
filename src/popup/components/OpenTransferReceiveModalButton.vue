@@ -1,7 +1,7 @@
 <template>
   <BtnBox
     :text="$t('common.receive')"
-    :subtitle="subtitle"
+    :subtitle="showSubtitle ? subtitle : null"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
     @click="openTransferReceiveModal()"
@@ -21,6 +21,7 @@ export default defineComponent({
     isBig: Boolean,
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
+    showSubtitle: { type: Boolean, default: true },
   },
   setup(props, { root }) {
     const { openModal } = useModals();

@@ -85,6 +85,7 @@ import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
 import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
+import AppsBrowser from '../pages/AppsBrowser.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -669,6 +670,16 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'sign-transaction',
       notPersist: true,
+    },
+  },
+  {
+    name: 'apps-browser',
+    path: '/apps-browser',
+    component: AppsBrowser,
+    meta: {
+      title: 'apps-browser',
+      notPersist: true,
+      showHeaderNavigation: true,
     },
   },
   {

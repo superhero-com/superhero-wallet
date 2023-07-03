@@ -1,7 +1,7 @@
 <template>
   <BtnBox
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('common.send')"
-    :subtitle="subtitle"
+    :subtitle="showSubtitle ? subtitle : null"
     :icon="ArrowSendIcon"
     :disabled="!isOnline || !isConnected || (!!pendingMultisigTransaction && isMultisig)"
     data-cy="send"
@@ -25,6 +25,7 @@ export default defineComponent({
     isBig: Boolean,
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
+    showSubtitle: { type: Boolean, default: true },
   },
   setup(props, { root }) {
     const { isOnline } = useConnection();

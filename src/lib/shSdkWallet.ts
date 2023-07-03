@@ -4,6 +4,7 @@ import {
   sendTransaction,
   spend,
 } from '@aeternity/aepp-sdk-13';
+
 import { Encoded } from '@aeternity/aepp-sdk-13/src/utils/encoder';
 import { Store } from 'vuex';
 import { useAccounts } from '../composables/accounts';
@@ -52,5 +53,20 @@ export class ShSdkWallet extends AeSdkWallet {
     options: ISpendOptions,
   ): ReturnType<typeof sendTransaction> {
     return super.spend(amount, recipientId, options as any); // TODO: remove type casting once https://github.com/aeternity/aepp-sdk-js/issues/1791 is resolved
+  }
+
+  /**
+   * Get Wallet info object
+   * @returns Object with wallet information
+   */
+  async getWalletInfo(): Promise<any> {
+    // async getWalletInfo(): Promise<WalletInfo> {
+    return {
+      id: this.id,
+      name: this.name,
+      networkId: await this.api.getNetworkId(),
+      origin: undefined as any,
+      type: this._type as any,
+    } as any;
   }
 }
