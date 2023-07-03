@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { RejectCallback } from '../../../types';
+import type { RejectCallback, ResolveCallback } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -39,7 +39,7 @@ export default defineComponent({
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     msg: { type: String, default: '' },
   },
