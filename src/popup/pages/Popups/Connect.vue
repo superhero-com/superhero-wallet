@@ -56,12 +56,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted } from 'vue';
+import {
+  computed, defineComponent, onMounted, onUnmounted,
+} from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import type {
   IAccountLabeled,
-  IAccountOverView,
   IPermission,
 } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
@@ -99,7 +100,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { activeAccount } = useAccounts({ store });
-    const { popupProps, setPopupProps } = usePopupProps();
+    const { popupProps, sender, setPopupProps } = usePopupProps();
 
     const getExplorerPath = useGetter('getExplorerPath');
 
@@ -110,11 +111,6 @@ export default defineComponent({
       ...activeAccount.value,
       label: t('transaction.overview.accountAddress'),
       url: getExplorerPath.value(activeAccount.value.address),
-    }));
-    const sender = computed((): IAccountOverView => ({
-      name: appName.value,
-      address: popupProps.value?.app?.host,
-      url: popupProps.value?.app?.url,
     }));
 
     function confirm() {
@@ -129,6 +125,10 @@ export default defineComponent({
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
     }
+
+    onMounted(() => {
+      sender.value.name = appName.value;
+    });
 
     onUnmounted(() => {
       setPopupProps(null);
