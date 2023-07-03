@@ -85,11 +85,21 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const HASH_PREFIX_CONTRACT = 'ct';
 export const HASH_PREFIX_ACCOUNT = 'ak';
+export const HASH_PREFIX_CHANNEL = 'ch';
+export const HASH_PREFIX_CONTRACT = 'ct';
 export const HASH_PREFIX_NAME = 'nm';
 export const HASH_PREFIX_ORACLE = 'ok';
 export const HASH_PREFIX_TRANSACTION = 'th';
+
+export const HASH_PREFIXES_ALLOWED = [
+  HASH_PREFIX_ACCOUNT,
+  HASH_PREFIX_CHANNEL,
+  HASH_PREFIX_CONTRACT,
+  HASH_PREFIX_NAME,
+  HASH_PREFIX_ORACLE,
+  HASH_PREFIX_TRANSACTION,
+] as const;
 
 export const ABORT_TX_TYPE = 'abort';
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
@@ -113,7 +123,7 @@ export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
   networkId: NETWORK_ID_MAINNET,
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-  explorerUrl: 'https://explorer.aeternity.io',
+  explorerUrl: 'https://aescan.io',
   compilerUrl: 'https://compiler.aepps.com',
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z' as Encoded.ContractAddress,
@@ -125,7 +135,7 @@ export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
   networkId: NETWORK_ID_TESTNET,
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
-  explorerUrl: 'https://explorer.testnet.aeternity.io',
+  explorerUrl: 'https://testnet.aescan.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
   backendUrl: 'https://testnet.superhero.aeternity.art',
   tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd' as Encoded.ContractAddress,
@@ -500,14 +510,6 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 } as const;
 
 export const RETURN_TYPE_OK = 'ok';
-
-export const ADDRESS_TYPES: Record<string, string> = {
-  [HASH_PREFIX_ACCOUNT]: 'account/transactions',
-  [HASH_PREFIX_CONTRACT]: 'contracts/transactions',
-  [HASH_PREFIX_NAME]: 'names',
-  [HASH_PREFIX_ORACLE]: 'oracles/queries',
-  [HASH_PREFIX_TRANSACTION]: 'transactions',
-};
 
 export const SUPPORTED_TX_TYPES = [
   SCHEMA.TX_TYPE.spend,

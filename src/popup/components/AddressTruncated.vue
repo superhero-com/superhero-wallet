@@ -21,6 +21,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { AeScan } from '../../lib/AeScan';
 import { truncateAddress } from '../utils';
 import { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
@@ -38,11 +39,13 @@ export default defineComponent({
     showExplorerLink: Boolean,
   },
   setup(props) {
-    const truncatedAddress = computed(() => truncateAddress(props.address));
     const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const explorerUrl = computed(
-      () => `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`,
-    );
+
+    const truncatedAddress = computed(() => truncateAddress(props.address));
+    const explorerUrl = computed(() => {
+      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
+      return aeScan.prepareUrlForAccount(props.address);
+    });
 
     return {
       truncatedAddress,
@@ -90,5 +93,4 @@ export default defineComponent({
     }
   }
 }
-
 </style>

@@ -33,6 +33,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import type { INetwork } from '../../types';
+import { AeScan } from '../../lib/AeScan';
 import { useGetter } from '../../composables/vuex';
 
 import AddressTruncated from './AddressTruncated.vue';
@@ -65,11 +66,11 @@ export default defineComponent({
   },
   setup(props) {
     const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const explorerUrl = computed(
-      () => (props.address)
-        ? `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`
-        : null,
-    );
+
+    const explorerUrl = computed(() => {
+      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
+      return aeScan.prepareUrlForAccount(props.address);
+    });
 
     return {
       explorerUrl,

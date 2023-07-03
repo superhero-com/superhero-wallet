@@ -9,12 +9,10 @@ import {
   NODE_STATUS_CONNECTED,
   ACCOUNT_HD_WALLET,
   TX_DIRECTION,
-  validateHash,
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
-  getMdwEndpointPrefixForHash,
   getTxType,
 } from '../popup/utils';
 import { useSdk } from '../composables';
@@ -53,14 +51,6 @@ export default {
   },
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;
-  },
-  getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
-    const { valid } = validateHash(hash);
-    if (!valid) {
-      return null;
-    }
-    const endpoint = getMdwEndpointPrefixForHash(hash);
-    return `${explorerUrl}/${endpoint}/${hash}`;
   },
   getTx: (state, getters) => (hash) => {
     const { nodeNetworkId } = useSdk({ store: { state, getters } });

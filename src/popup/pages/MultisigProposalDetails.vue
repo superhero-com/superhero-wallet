@@ -30,7 +30,7 @@
         />
         <div class="explorer">
           <LinkButton
-            :to="getExplorerPath(activeMultisigAccount.contractId)"
+            :to="activeMultisigAccountExplorerUrl"
             variant="muted"
             underlined
           >
@@ -298,6 +298,7 @@ import {
   useModals,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
+import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -315,7 +316,6 @@ import TransactionTokens from '../components/TransactionTokenRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   components: {
@@ -342,6 +342,7 @@ export default defineComponent({
 
     const {
       activeMultisigAccount,
+      activeMultisigAccountExplorerUrl,
       updateMultisigAccounts,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
@@ -370,7 +371,6 @@ export default defineComponent({
       store,
     });
 
-    const getExplorerPath = useGetter('getExplorerPath');
     const getTxSymbol = useGetter('getTxSymbol');
 
     const processingAction = ref<boolean>(false);
@@ -516,6 +516,7 @@ export default defineComponent({
     return {
       AETERNITY_SYMBOL,
       activeMultisigAccount,
+      activeMultisigAccountExplorerUrl,
       multisigTx,
       transaction,
       totalSpent,
@@ -525,7 +526,6 @@ export default defineComponent({
       aettosToAe,
       formatDate,
       formatTime,
-      getExplorerPath,
       isLocalAccountAddress,
       pendingMultisigTxCanBeSent,
       pendingMultisigTxExpired,

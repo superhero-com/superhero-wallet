@@ -2,13 +2,12 @@ import { computed, ref } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk-13';
 
 import type {
-  IAccountLabeled,
+  IAccountOverview,
   ITokenList,
   TxFunctionRaw,
   ITx,
   IDefaultComposableOptions,
 } from '../types';
-import { i18n } from '../store/plugins/languages';
 import {
   FUNCTION_TYPE_DEX,
   FUNCTION_TYPE_MULTISIG,
@@ -27,8 +26,8 @@ import { useAccounts } from './accounts';
 import { useSdk } from './sdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
-  tx?: ITx
-  externalAddress?: Encoded.AccountAddress
+  tx?: ITx;
+  externalAddress?: Encoded.AccountAddress;
 }
 
 export function useTransactionTx({
@@ -37,28 +36,20 @@ export function useTransactionTx({
   externalAddress,
 }: UseTransactionOptions) {
   const { dexContracts } = useSdk({ store });
-  const { accounts, activeAccount } = useAccounts({ store });
+  const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
-  function setTransactionTx(newTx: ITx) {
-    outerTx.value = newTx;
-    innerTx.value = getInnerTransaction(newTx);
-  }
 
-  function setExternalAddress(address: Encoded.AccountAddress) {
-    ownerAddress.value = address;
-  }
 
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
 
   const getTxDirection = computed(() => store.getters.getTxDirection);
-  const getExplorerPath = computed(() => store.getters.getExplorerPath);
-  const getPreferred = computed(() => store.getters['names/getPreferred']);
+  const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
 
@@ -110,17 +101,19 @@ export function useTransactionTx({
       ),
     ));
 
-  function getOwnershipAccount(
-    externalOwnerAddress: Encoded.AccountAddress | undefined,
-  ): IAccountLabeled {
+  function setTransactionTx(newTx: ITx) {
+    outerTx.value = newTx;
+    innerTx.value = getInnerTransaction(newTx);
+  }
+
+  function setExternalAddress(address: Encoded.AccountAddress) {
+    ownerAddress.value = address;
+  }
+
+  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
     switch (ownershipStatus.value) {
       case TRANSACTION_OWNERSHIP_STATUS.current:
-        return {
-          ...activeAccount.value,
-          // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
-          label: i18n.global.t('transaction.overview.accountAddress'),
-          url: getExplorerPath.value(activeAccount.value.address),
-        };
+        return activeAccountExtended.value;
       case TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};
 
@@ -130,7 +123,7 @@ export function useTransactionTx({
         const address = externalOwnerAddress || txOwnerAddress.value;
 
         return {
-          name: getPreferred.value(address) || '',
+          name: getPreferredName.value(address) || '',
           address,
         };
       }

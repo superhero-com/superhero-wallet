@@ -72,14 +72,15 @@ import {
   usePendingMultisigTransaction,
 } from '../../composables';
 import { MODAL_CONSENSUS_INFO } from '../utils';
+
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';
-
 import InfoBox, { InfoBoxType, INFO_BOX_TYPES } from './InfoBox.vue';
-import CheckCircle from '../../icons/circle-check-outlined.svg?vue-component';
-import CloseCircle from '../../icons/circle-close.svg?vue-component';
 import ConsensusLabel from './ConsensusLabel.vue';
 import BtnHelp from './buttons/BtnHelp.vue';
+
+import CheckCircle from '../../icons/circle-check-outlined.svg?vue-component';
+import CloseCircle from '../../icons/circle-close.svg?vue-component';
 
 export default defineComponent({
   name: 'TransactionMultisigConsensus',
@@ -125,7 +126,6 @@ export default defineComponent({
     } = usePendingMultisigTransaction({
       store,
     });
-    const getExplorerPath = computed(() => store.getters.getExplorerPath);
 
     const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
       if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {
@@ -190,7 +190,6 @@ export default defineComponent({
 
     return {
       activeMultisigAccount,
-      getExplorerPath,
       accounts,
       isLocalAccountAddress,
       infoBox,

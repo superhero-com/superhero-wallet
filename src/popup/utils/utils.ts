@@ -17,7 +17,6 @@ import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { useI18n } from 'vue-i18n';
 
 import {
-  ADDRESS_TYPES,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AETERNITY_COIN_PRECISION,
@@ -38,6 +37,10 @@ import {
   TX_TYPE_MDW,
   FUNCTION_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
+  HASH_PREFIXES_ALLOWED,
+  HASH_PREFIX_ORACLE,
+  HASH_PREFIX_ACCOUNT,
+  HASH_PREFIX_CHANNEL,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -190,14 +193,15 @@ export function validateSeedLength(seed: string) {
 }
 
 export function validateHash(fullHash?: string) {
+  type HashPrefix = typeof HASH_PREFIXES_ALLOWED[number];
   const isName = !!fullHash?.endsWith(AENS_DOMAIN);
   let valid = false;
-  let prefix = null;
+  let prefix: HashPrefix | null = null;
   let hash = null;
 
   if (fullHash) {
-    [prefix, hash] = fullHash.split('_');
-    valid = (ADDRESS_TYPES[prefix] && HASH_REGEX.test(hash)) || isName;
+    [prefix, hash] = fullHash.split('_') as [HashPrefix, string];
+    valid = (HASH_PREFIXES_ALLOWED.includes(prefix) && HASH_REGEX.test(hash)) || isName;
   }
 
   return {
@@ -206,19 +210,6 @@ export function validateHash(fullHash?: string) {
     prefix,
     hash,
   };
-}
-
-export function getMdwEndpointPrefixForHash(fullHash: string) {
-  const { valid, isName, prefix } = validateHash(fullHash);
-
-  if (!valid || !prefix) {
-    return null;
-  }
-
-  if (isName) {
-    return ADDRESS_TYPES.nm;
-  }
-  return ADDRESS_TYPES[prefix];
 }
 
 export function isContract(fullHash: string) {
@@ -233,14 +224,14 @@ export function isAensName(fullHash: string) {
 
 export function checkAddress(value: string) {
   return (
-    Crypto.isAddressValid(value, 'ak')
-    || Crypto.isAddressValid(value, 'ct')
-    || Crypto.isAddressValid(value, 'ok')
+    Crypto.isAddressValid(value, HASH_PREFIX_ACCOUNT)
+    || Crypto.isAddressValid(value, HASH_PREFIX_CONTRACT)
+    || Crypto.isAddressValid(value, HASH_PREFIX_ORACLE)
   );
 }
 
 export function checkAddressOrChannel(value: string) {
-  return checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+  return checkAddress(value) || Crypto.isAddressValid(value, HASH_PREFIX_CHANNEL);
 }
 
 export function checkAensName(value: string) {

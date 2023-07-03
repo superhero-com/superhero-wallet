@@ -54,11 +54,13 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { AeScan } from '../../lib/AeScan';
+import { useGetter } from '../../composables/vuex';
+
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import { useGetter } from '../../composables/vuex';
 
 export default defineComponent({
   components: {
@@ -80,7 +82,9 @@ export default defineComponent({
   setup(props) {
     const activeNetwork = useGetter('activeNetwork');
 
-    const explorerUrl = computed(() => `${activeNetwork.value.explorerUrl}/account/transactions/${props.address}`);
+    const explorerUrl = computed(
+      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlForAccount(props.address),
+    );
 
     return {
       explorerUrl,

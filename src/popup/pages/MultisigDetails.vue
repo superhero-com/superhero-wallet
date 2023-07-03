@@ -41,7 +41,7 @@
 
     <LinkButton
       class="explorer-link"
-      :to="getExplorerPath(activeMultisigAccount.contractId)"
+      :to="activeMultisigAccountExplorerUrl"
     >
       {{ $t('multisig.explorerLink') }}
       <ExternalLinkIcon class="external-icon" />
@@ -87,11 +87,10 @@
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
   onBeforeUnmount,
+  onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useGetter } from '../../composables/vuex';
 import { MODAL_CONSENSUS_INFO } from '../utils';
 import { useModals, useMultisigAccounts } from '../../composables';
 
@@ -119,11 +118,10 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-
-    const getExplorerPath = useGetter('getExplorerPath');
     const { openModal } = useModals();
     const {
       activeMultisigAccount,
+      activeMultisigAccountExplorerUrl,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts({ store });
@@ -138,7 +136,7 @@ export default defineComponent({
 
     return {
       activeMultisigAccount,
-      getExplorerPath,
+      activeMultisigAccountExplorerUrl,
       openConsensusInfoModal,
     };
   },

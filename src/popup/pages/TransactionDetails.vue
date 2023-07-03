@@ -25,7 +25,7 @@
       <div class="content">
         <TransactionOverview :transaction="transaction" />
         <div class="explorer">
-          <LinkButton :to="explorerPath">
+          <LinkButton :to="explorerUrl">
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
           </LinkButton>
@@ -269,6 +269,7 @@ import {
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
+import { AeScan } from '../../lib/AeScan';
 import {
   useAccounts,
   useTransactionTx,
@@ -357,7 +358,6 @@ export default defineComponent({
     const multisigContractId = ref<string>();
 
     const getTx = computed(() => store.getters.getTx);
-    const getExplorerPath = computed(() => store.getters.getExplorerPath);
     const getTxSymbol = computed(() => store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
     const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
@@ -371,7 +371,9 @@ export default defineComponent({
       () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerPath = computed(() => getExplorerPath.value(props.hash));
+    const explorerUrl = computed(
+      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.hash),
+    );
 
     const contractId = computed(() => transaction.value?.tx.contractId);
 
@@ -463,7 +465,7 @@ export default defineComponent({
       tipUrl,
       tipLink,
       direction,
-      explorerPath,
+      explorerUrl,
       getPayload,
       splitAddress,
       aettosToAe,

@@ -52,7 +52,7 @@
         nowrap
         extra-padded
         :text="$t('pages.send.viewInExplorer')"
-        :href="getExplorerPath(transaction.hash)"
+        :href="transactionExplorerUrl"
         :icon="ExternalLink"
       />
       <BtnMain
@@ -68,7 +68,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { getPayload, AETERNITY_SYMBOL } from '../../utils';
+import { AeScan } from '../../../lib/AeScan';
 import { useMiddleware } from '../../../composables';
+import { useGetter } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
 import TokenAmount from '../TokenAmount.vue';
@@ -95,15 +97,26 @@ export default {
     resolve: { type: Function, required: true },
     transaction: { type: Object, required: true },
   },
+  setup() {
+    const activeNetwork = useGetter('activeNetwork');
+
+    const transactionExplorerUrl = computed(
+      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.transaction.hash),
+    );
+
+    return {
+      PendingIcon,
+      ExternalLink,
+      transactionExplorerUrl,
+    };
+  },
   data: () => ({
-    PendingIcon,
-    ExternalLink,
     hideAvatar: false,
     nameRecipient: null,
   }),
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['getTxAmountTotal', 'getTxSymbol', 'getExplorerPath']),
+    ...mapGetters(['getTxAmountTotal', 'getTxSymbol']),
     ...mapGetters('names', ['getPreferred']),
     isAe() {
       return !(this.transaction.tx.contractId

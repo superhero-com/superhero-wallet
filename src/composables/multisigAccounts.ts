@@ -22,6 +22,7 @@ import type {
   IMultisigAccountResponse,
 } from '../types';
 import { useSdk13 } from './sdk13';
+import { AeScan } from '../lib/AeScan';
 import { useAccounts } from './accounts';
 
 const POLLING_INTERVAL = 7000;
@@ -71,6 +72,13 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
   const activeMultisigAccount = computed<IMultisigAccount | undefined>(
     () => allMultisigAccounts.value
       .find((account) => account.gaAccountId === activeMultisigAccountId.value),
+  );
+
+  const activeMultisigAccountExplorerUrl = computed(
+    () => (activeMultisigAccount.value)
+      ? (new AeScan(activeNetwork.value.explorerUrl))
+        .prepareUrlByHash(activeMultisigAccount.value.contractId)
+      : null,
   );
 
   // Get initial data for currently used network
@@ -306,6 +314,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
     isAdditionalInfoNeeded,
     activeMultisigAccountId,
     activeMultisigAccount,
+    activeMultisigAccountExplorerUrl,
     addTransactionToPendingMultisigAccount,
     fetchAdditionalInfo,
     setActiveMultisigAccountId,
