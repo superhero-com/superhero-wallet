@@ -48,7 +48,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t } = useI18n();
+    const { t, te } = useI18n();
     const {
       direction,
       txType,
@@ -153,7 +153,7 @@ export default defineComponent({
         return [];
       } else if (props.transaction.tx.function) {
         innerLabels = [
-          t(`transaction.type.${props.transaction.tx.function}`) ?? props.transaction.tx.function,
+          te(`transaction.type.${props.transaction.tx.function}`) ? t(`transaction.type.${props.transaction.tx.function}`) : props.transaction.tx.function,
           txTransactionType,
         ];
       } else {
