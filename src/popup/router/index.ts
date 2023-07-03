@@ -17,6 +17,7 @@ import {
   POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -27,9 +28,16 @@ import { useAccounts, usePopupProps, useAeSdk } from '@/composables';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
+  ROUTE_APPS_BROWSER,
   ROUTE_INDEX,
   ROUTE_NOT_FOUND,
 } from './routeNames';
+import { routes } from './routes';
+import getPopupProps from '../utils/getPopupProps';
+import store from '../../store';
+import initSdk from '../../lib/wallet';
+import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
+import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
@@ -39,7 +47,7 @@ const router = createRouter({
 
 const lastRouteKey = 'last-path';
 
-const { isLoggedIn } = useAccounts({ store });
+const { isLoggedIn, activeAccount } = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router, isLoggedIn);
@@ -65,6 +73,11 @@ router.beforeEach(async (to, from, next) => {
       store.commit('setLoginTargetLocation', to);
       next({ name: ROUTE_INDEX });
     }
+    return;
+  }
+
+  if (to.name === ROUTE_APPS_BROWSER && activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+    next({ name: ROUTE_ACCOUNT });
     return;
   }
 

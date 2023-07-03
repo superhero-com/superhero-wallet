@@ -32,6 +32,7 @@ import {
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
+  ROUTE_APPS_BROWSER,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -89,6 +90,7 @@ import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
+import AppsBrowser from '../pages/AppsBrowser.vue';
 
 import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 
@@ -682,6 +684,16 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'signTransaction',
       notPersist: true,
+    },
+  },
+  {
+    name: ROUTE_APPS_BROWSER,
+    path: '/apps-browser',
+    component: AppsBrowser,
+    meta: {
+      title: 'apps-browser',
+      notPersist: true,
+      showHeaderNavigation: true,
     },
   },
   {
