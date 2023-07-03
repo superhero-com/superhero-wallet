@@ -68,7 +68,7 @@ export function useTransactionTx({
   const isAllowance = computed((): boolean => (
     !!innerTx.value?.function
     && FUNCTION_TYPE_DEX.allowance.includes(innerTx.value.function as TxFunctionRaw)
-    && !!availableTokens.value[innerTx.value.contractId]
+    && !!availableTokens.value[innerTx.value.contractId as keyof ITokenList]
   ));
 
   const isMultisig = computed((): boolean => (

@@ -91,6 +91,8 @@ import {
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import type { IToken, ITokenList } from '../../../types';
 import {
   AETERNITY_CONTRACT_ID,
@@ -162,7 +164,7 @@ export default defineComponent({
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = route.params.id as string;
+    const contractId = route.params.id as Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;

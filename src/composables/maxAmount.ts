@@ -84,7 +84,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
         ) {
           tokenInstance = await sdk.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
-            address: val.selectedAsset.contractId as any,
+            address: val.selectedAsset.contractId,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;

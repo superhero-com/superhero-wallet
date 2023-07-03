@@ -23,6 +23,7 @@ import {
   TX_FUNCTIONS,
   FUNCTION_TYPE_MULTISIG,
   ALLOWED_ICON_STATUSES,
+  AETERNITY_COIN_ID,
 } from '../popup/utils';
 
 export * from './cordova';
@@ -103,7 +104,7 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: string;
+  contractId: Encoded.ContractAddress | typeof AETERNITY_COIN_ID;
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -328,7 +329,7 @@ export type TxType =
   | 'GAMetaTx';
 
 export interface IGAAttachTx {
-  contractId: string;
+  contractId: Encoded.ContractAddress;
   fee: number;
   gas: number;
   gasPrice: number;
@@ -360,7 +361,7 @@ export interface ITx {
   callerId: Encoded.AccountAddress
   code: string
   commitmentId: any
-  contractId: string
+  contractId: Encoded.ContractAddress
   fee: number
   function?: TxFunction
   gaId?: string; // Generalized Account ID
@@ -453,8 +454,8 @@ export interface ITransactionOverview {
 }
 
 export interface IDexContracts {
-  router: string[];
-  wae: string[];
+  router: Encoded.ContractAddress[];
+  wae: Encoded.ContractAddress[];
 }
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
@@ -530,7 +531,7 @@ export interface ISdk {
     options: { innerTx: boolean }
   }) => Promise<any>
   getContractInstance: (o: any) => Promise<any>
-  getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
+  getContractByteCode: (contractId: Encoded.ContractAddress) => Promise<{ bytecode: any }>
   getNetworkId: () => string
   payForTransaction: (
     rawTx: string,
