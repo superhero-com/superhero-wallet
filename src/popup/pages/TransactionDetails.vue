@@ -363,6 +363,7 @@ export default defineComponent({
     const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
+    const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(
       () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
@@ -374,8 +375,6 @@ export default defineComponent({
     const explorerUrl = computed(
       () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.hash),
     );
-
-    const contractId = computed(() => transaction.value?.tx.contractId);
 
     const gasPrice = computed(() => {
       if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
