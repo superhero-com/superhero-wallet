@@ -5,7 +5,7 @@ export { };
 
 declare global {
   interface Window {
-    popupProps?: Partical<IPopupConfig>
+    popupProps?: Partial<IPopupConfig>
     cordova?: ICordova
     StatusBar?: any // cordova-plugin-statusbar
     IonicDeeplink?: any

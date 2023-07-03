@@ -8,7 +8,7 @@
         name="fade-transition"
         mode="out-in"
       >
-        <component :is="Component" />
+        <Component :is="Component" />
       </Transition>
     </RouterView>
     <MessageOffline

@@ -665,18 +665,16 @@ export function calculateFontSize(amountValue: BigNumber | number) {
 }
 
 export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
-  let txObject;
+  let txToUnpack: string | Uint8Array = encodedTx;
   try {
     if (isTxBase64) {
-      const decodedTx = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
-      txObject = TxBuilder.unpackTx(decodedTx, true).tx;
-    } else {
-      txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+      txToUnpack = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
     }
+    const txObject = TxBuilder.unpackTx(txToUnpack, true).tx;
+    return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
   } catch (e) {
     return false;
   }
-  return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
 export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {

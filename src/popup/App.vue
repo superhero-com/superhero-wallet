@@ -27,7 +27,7 @@
         class="main"
       >
         <Transition name="page-transition">
-          <component :is="Component" />
+          <Component :is="Component" />
         </Transition>
       </RouterView>
 

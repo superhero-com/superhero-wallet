@@ -620,6 +620,7 @@ export interface IPopupConfig {
   tx?: Partial<ITx>;
   resolve?: any;
   reject?: any;
+  show?: boolean;
 }
 
 export interface IResponseChallenge {

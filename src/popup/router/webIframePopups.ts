@@ -17,7 +17,7 @@ import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.
 import MessageSign from '../pages/Popups/MessageSign.vue';
 
 const createIframeComponent = (component: Component | VNode) => {
-  const unloadHandler = () => window.popupProps.reject(new RejectedByUserError());
+  const unloadHandler = () => window.popupProps?.reject(new RejectedByUserError());
   window.addEventListener('beforeunload', unloadHandler);
   const closingWrapper = (f: any) => (...args: any) => {
     f(...args);
@@ -27,8 +27,8 @@ const createIframeComponent = (component: Component | VNode) => {
 
   const wrappedPopupProps = {
     ...window.popupProps,
-    resolve: closingWrapper(window.popupProps.resolve),
-    reject: closingWrapper(window.popupProps.reject),
+    resolve: closingWrapper(window.popupProps?.resolve),
+    reject: closingWrapper(window.popupProps?.reject),
   };
 
   const { setPopupProps } = usePopupProps();

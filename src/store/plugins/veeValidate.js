@@ -114,7 +114,9 @@ export default (store) => {
   };
 
   defineRule('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
+
   defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
+
   defineRule('name_registered_address', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value)));
@@ -125,21 +127,26 @@ export default (store) => {
       || (checkAensName(value) && !isToken)
     ),
     { params: ['isToken'] });
+
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
+
   defineRule('enough_ae', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
+
   defineRule('enough_ae_signer', async (_, [arg]) => {
     await updateBalances();
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
+
   defineRule('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
     : Crypto.isAddressValid(value) || validateTipUrl(value)));
+
   defineRule('invalid_hostname', (value) => {
     try {
       const _url = new URL(value);
@@ -148,6 +155,7 @@ export default (store) => {
       return false;
     }
   });
+
   defineRule('network_name', (value) => ({
     valid: !!value,
     data: {
@@ -156,6 +164,7 @@ export default (store) => {
   }), {
     computesRequired: true,
   });
+
   defineRule('network_exists', (name, [index, networks]) => {
     const networkWithSameName = networks[name];
     return (

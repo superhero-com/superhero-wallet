@@ -191,7 +191,6 @@ export default defineComponent({
           case FILTER_MODE.in:
             return direction === TX_DIRECTION.received;
           default:
-            // @ts-ignore
             throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });

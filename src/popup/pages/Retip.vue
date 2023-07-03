@@ -12,6 +12,7 @@
       <UrlStatus :status="urlStatus" />
       <a>{{ tip.url }}</a>
     </div>
+
     <Field
       v-slot="{ field, errorMessage}"
       name="amount"

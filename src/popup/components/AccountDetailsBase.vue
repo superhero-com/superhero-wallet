@@ -33,7 +33,7 @@
             name="fade-transition"
             mode="out-in"
           >
-            <component :is="Component" />
+            <Component :is="Component" />
           </transition>
         </RouterView>
       </div>
