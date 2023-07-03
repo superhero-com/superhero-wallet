@@ -473,7 +473,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
   return (
-    // @ts-ignore
+    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
     acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
   );
 }

@@ -115,7 +115,7 @@ export function useTransactionTx({
       case TRANSACTION_OWNERSHIP_STATUS.current:
         return {
           ...activeAccount.value,
-          // @ts-ignore
+          // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
           label: i18n.global.t('transaction.overview.accountAddress'),
           url: getExplorerPath.value(activeAccount.value.address),
         };
