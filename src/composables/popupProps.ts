@@ -1,18 +1,18 @@
 import { Ref, computed, ref } from 'vue';
-import { IAccountOverView, IPopupConfig } from '../types';
+import { IAccountOverview, IPopupConfig } from '../types';
 
 type IPopupProps = Partial<IPopupConfig>;
 
 interface IPopupPropsState {
   popupProps: Ref<IPopupProps | null>
-  sender: Ref<IAccountOverView>
+  sender: Ref<IAccountOverview>
   setPopupProps: (props: IPopupProps | null) => void
 }
 
 const popupProps = ref<IPopupProps | null>(null);
 
 /**
- *  Data comming from a dapp that will be passed to the popup component
+ *  Data coming from a dapp that will be passed to the popup component
  *  when so that the user can accept or reject some action.
  */
 export function usePopupProps(): IPopupPropsState {
@@ -20,7 +20,7 @@ export function usePopupProps(): IPopupPropsState {
     popupProps.value = props;
   }
 
-  const sender = computed((): IAccountOverView => ({
+  const sender = computed((): IAccountOverview => ({
     name: popupProps.value?.app?.name,
     address: popupProps.value?.app?.host,
     url: popupProps.value?.app?.url,

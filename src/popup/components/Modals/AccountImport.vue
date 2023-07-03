@@ -49,7 +49,7 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import type { ResolveRejectCallback } from '../../../types';
+import type { RejectCallback, ResolveCallback } from '../../../types';
 import { validateSeedLength, watchUntilTruthy } from '../../utils';
 
 import Modal from '../Modal.vue';
@@ -63,8 +63,8 @@ export default defineComponent({
     FormTextarea,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
-    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
     const store = useStore();

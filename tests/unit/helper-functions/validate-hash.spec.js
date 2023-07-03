@@ -1,36 +1,40 @@
-import {
-  validateHash,
-  getMdwEndpointPrefixForHash,
-} from '../../../src/popup/utils';
+import { validateHash } from '../../../src/popup/utils';
+import { AeScan } from '../../../src/lib/AeScan';
 
-const testHashes = [{
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcek0',
-  error: true,
-}, {
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekI',
-  error: true,
-}, {
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekO',
-  error: true,
-}, {
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekl',
-  error: true,
-}, {
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekl',
-  error: true,
-}, {
-  hash: 'th_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
-  endpoint: 'transactions',
-}, {
-  hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
-  endpoint: 'account/transactions',
-}, {
-  hash: 'nm_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
-  endpoint: 'names',
-}, {
-  hash: 'testName0.chain',
-  endpoint: 'names',
-}];
+const testHashes = [
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcek0',
+    error: true,
+  },
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekI',
+    error: true,
+  },
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekO',
+    error: true,
+  },
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekl',
+    error: true,
+  },
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekl',
+    error: true,
+  },
+  {
+    hash: 'th_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
+    endpoint: 'transactions',
+  },
+  {
+    hash: 'ak_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
+    endpoint: 'account/transactions',
+  },
+  {
+    hash: 'nm_USd42orxJjEedPzUvFizdtEmURTGdVoiubu6LJoNmxAbcekK',
+    endpoint: 'names',
+  },
+];
 
 describe('validateHash', () => {
   testHashes.forEach((test) => it('should be invalid if hash has improper length, contains invalid characters (0, J, O, l or symbols) or does not have ".chain" ending', () => {
@@ -41,7 +45,7 @@ describe('validateHash', () => {
     if (test.error) {
       expect(validateHash(test.hash).valid).toBe(false);
     } else {
-      expect(getMdwEndpointPrefixForHash(test.hash)).toBe(test.endpoint);
+      expect(AeScan.getEndpointByHash(test.hash)).toBe(test.endpoint);
     }
   }));
 });

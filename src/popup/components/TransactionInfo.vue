@@ -53,9 +53,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type {
-  IAccountOverView,
-} from '../../types';
+import type { IAccountOverview } from '../../types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -75,8 +73,8 @@ export default defineComponent({
     Avatar,
   },
   props: {
-    sender: { type: Object as PropType<IAccountOverView>, required: true },
-    recipient: { type: Object as PropType<IAccountOverView>, required: true },
+    sender: { type: Object as PropType<IAccountOverview>, required: true },
+    recipient: { type: Object as PropType<IAccountOverview>, required: true },
   },
 });
 </script>

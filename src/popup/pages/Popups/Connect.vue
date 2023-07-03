@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('pages.connectConfirm.title')"
       :sender="sender"
-      :recipient="accountExtended"
+      :recipient="activeAccountExtended"
     />
 
     <div
@@ -63,18 +63,14 @@ import {
   onUnmounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useI18n } from 'vue-i18n';
-import type {
-  IAccountLabeled,
-  IPermission,
-} from '../../../types';
+import type { IPermission } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useState } from '../../../composables/vuex';
 import { useAccounts, usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
@@ -100,21 +96,13 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { t } = useI18n();
 
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccountExtended } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
-
-    const getExplorerPath = useGetter('getExplorerPath');
 
     const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
 
     const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
-    const accountExtended = computed((): IAccountLabeled => ({
-      ...activeAccount.value,
-      label: t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(activeAccount.value.address),
-    }));
 
     function confirm() {
       store.commit('permissions/addPermission', {
@@ -140,8 +128,8 @@ export default defineComponent({
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+      activeAccountExtended,
       sender,
-      accountExtended,
       confirm,
       cancel,
     };

@@ -116,7 +116,6 @@ function mountComponent({ hasError = false } = {}) {
       getTransactionTipUrl: () => () => '',
       getTxAmountTotal: () => () => 1,
       getTxDirection: () => () => 'sent',
-      getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTransactionAex9: () => () => true,
       account: () => testAccount,
       accounts: () => [testAccount],

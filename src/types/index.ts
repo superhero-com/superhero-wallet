@@ -24,6 +24,7 @@ import {
   FUNCTION_TYPE_MULTISIG,
   ALLOWED_ICON_STATUSES,
 } from '../popup/utils';
+import { RejectedByUserError } from '../lib/errors';
 
 export * from './cordova';
 export * from './router';
@@ -53,7 +54,9 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
-export type ResolveRejectCallback = (...args: any) => void;
+export type ResolveCallback = () => void;
+export type RejectCallback = (error?: RejectedByUserError) => void;
+export type ResolveRejectCallback = ResolveCallback | RejectCallback;
 
 export type VueAnyComponent = Component | ComponentOptions | {
   functional: boolean;
@@ -165,9 +168,13 @@ export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'
   balance: string;
 }
 
-export interface IAccountLabeled extends Partial<IAccount> {
-  url?: string
-  label?: TranslateResult
+export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
+  // TODO: use a proper type for an address since it can be a url
+  address?: Encoded.AccountAddress | string;
+  url?: string;
+  contractCreate?: boolean;
+  aens?: boolean;
+  label?: TranslateResult;
 }
 
 export interface IMultisigConsensus {
@@ -428,15 +435,6 @@ export interface IPendingTransaction {
   tx: Partial<ITx>;
 }
 
-export interface IAccountOverView extends Partial<Omit<IAccount, 'address'>> {
-  // TODO: use a proper type for a address since it can be a url
-  address?: Encoded.AccountAddress | string,
-  url?: string;
-  contractCreate?: boolean;
-  aens?: boolean;
-  label?: TranslateResult;
-}
-
 export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
   hash?: string;
@@ -446,8 +444,8 @@ export interface IActiveMultisigTransaction extends IMultisigAccount {
 }
 
 export interface ITransactionOverview {
-  sender: IAccountOverView | IAccount;
-  recipient: IAccountOverView | IAccount;
+  sender: IAccountOverview | IAccount;
+  recipient: IAccountOverview | IAccount;
   title: TranslateResult;
   function?: any;
 }

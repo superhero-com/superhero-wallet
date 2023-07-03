@@ -1,10 +1,19 @@
 import { computed } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk-13';
-
-import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
+import { useI18n } from 'vue-i18n';
+import type {
+  IAccount,
+  IAccountOverview,
+  IDefaultComposableOptions,
+  IFormSelectOption,
+  INetwork,
+} from '../types';
 import { FAUCET_URL, buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
+import { AeScan } from '../lib/AeScan';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
+  const { t } = useI18n();
+
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accounts = computed((): IAccount[] => store.getters.accounts || []);
@@ -13,6 +22,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const isLoggedIn = computed(
     () => activeAccount.value && Object.keys(activeAccount.value).length > 0,
   );
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   /**
    * Accounts data formatted as the form select options
@@ -26,6 +36,13 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       idx: acc.idx,
     }));
   }
+
+  const activeAccountExtended = computed((): IAccountOverview => ({
+    ...activeAccount.value,
+    label: t('transaction.overview.accountAddress'),
+    url: (new AeScan(activeNetwork.value.explorerUrl))
+      .prepareUrlForAccount(activeAccount.value.address),
+  }));
 
   const accountsSelectOptions = computed(() => prepareAccountSelectOptions(accounts.value));
 
@@ -60,6 +77,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accountsAddressList,
     accountsSelectOptions,
     activeAccount,
+    activeAccountExtended,
     activeAccountSimplexLink,
     activeAccountFaucetUrl,
     activeIdx,

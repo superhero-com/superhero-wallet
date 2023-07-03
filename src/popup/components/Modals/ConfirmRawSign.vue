@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('modals.confirm-raw-sign.title')"
       :sender="sender"
-      :recipient="account"
+      :recipient="activeAccountExtended"
     />
 
     <div
@@ -57,21 +57,19 @@
 </template>
 
 <script lang="ts">
-import { computed, onUnmounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed, defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { IAccountLabeled } from '../../../types';
+import { useAccounts, usePopupProps } from '../../../composables';
+
 import Modal from '../Modal.vue';
 import TransactionInfo from '../TransactionInfo.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import DetailsItem from '../DetailsItem.vue';
 import Warning from '../../../icons/warning.svg?vue-component';
 import CopyText from '../CopyText.vue';
-import { usePopupProps } from '../../../composables';
-import { useGetter } from '../../../composables/vuex';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     TransactionInfo,
@@ -82,20 +80,14 @@ export default {
   },
   setup() {
     const { popupProps, sender, setPopupProps } = usePopupProps();
-    const { t } = useI18n();
     const store = useStore();
+    const { activeAccountExtended } = useAccounts({ store });
 
-    const dataAsString = computed(() => {
-      if (typeof popupProps.value?.data === 'string') return popupProps.value?.data;
-      return Buffer.from(popupProps.value?.data as any).toString('hex');
-    });
-
-    const getExplorerPath = useGetter('fungibleTokens/getTokenBalance');
-    const account: IAccountLabeled = {
-      ...store.getters.account,
-      label: t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(store.getters.account.address),
-    };
+    const dataAsString = computed(
+      (): string => (typeof popupProps.value?.data === 'string')
+        ? popupProps.value?.data
+        : Buffer.from(popupProps.value?.data as any).toString('hex'),
+    );
 
     function confirm() {
       popupProps.value?.resolve();
@@ -112,12 +104,12 @@ export default {
     return {
       confirm,
       cancel,
-      account,
+      activeAccountExtended,
       dataAsString,
       sender,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

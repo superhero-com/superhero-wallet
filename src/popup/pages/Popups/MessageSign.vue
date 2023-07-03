@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('pages.popupMessageSign.title')"
       :sender="sender"
-      :recipient="accountExtended"
+      :recipient="activeAccountExtended"
     />
 
     <div
@@ -46,12 +46,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onUnmounted } from 'vue';
+import { defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
-import { useI18n } from 'vue-i18n';
-import type { IAccountLabeled } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
-import { useGetter } from '../../../composables/vuex';
 import { useAccounts, usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
@@ -70,17 +67,8 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccountExtended } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
-    const { t } = useI18n();
-
-    const getExplorerPath = useGetter('getExplorerPath');
-
-    const accountExtended = computed((): IAccountLabeled => ({
-      ...activeAccount.value,
-      label: t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(activeAccount.value.address),
-    }));
 
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
@@ -91,7 +79,7 @@ export default defineComponent({
     });
 
     return {
-      accountExtended,
+      activeAccountExtended,
       popupProps,
       sender,
       cancel,
