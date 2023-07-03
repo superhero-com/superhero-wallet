@@ -456,7 +456,8 @@
       "networkAdd": "Add custom network",
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
-      "multisigProposalDetails": "Multisig Tx proposal details"
+      "multisigProposalDetails": "Multisig Tx proposal details",
+      "apps-browser": "Browser"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"

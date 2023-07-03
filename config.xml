@@ -11,6 +11,8 @@
     <plugin name="cordova-plugin-x-socialsharing" spec="^5.6.8" />
     <preference name="orientation" value="portrait" />
     <access origin="*" />
+    <allow-navigation href="http://*" />
+    <allow-navigation href="https://*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -49,6 +51,7 @@
         <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png" />
     </platform>
     <platform name="ios">
+        <preference name="InspectableWebview" value="true" />
         <preference name="webviewbounce" value="false" />
         <preference name="DisallowOverscroll" value="true" />
         <preference name="UseSwiftLanguageVersion" value="4.2" />

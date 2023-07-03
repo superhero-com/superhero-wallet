@@ -27,3 +27,4 @@ export const ROUTE_NETWORK_EDIT = 'network-edit';
 export const ROUTE_WEB_IFRAME_POPUP = 'web-iframe-popup';
 export const ROUTE_INVITE_CLAIM = 'invite-claim';
 export const ROUTE_DONATE_ERROR = 'donate-error';
+export const ROUTE_APPS_BROWSER = 'apps-browser';
