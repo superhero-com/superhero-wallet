@@ -165,8 +165,9 @@ export default {
         ? new Promise((resolve, reject) => {
           this.setQrScanner(true);
           window.plugins.webviewcolor.change('#00FFFFFF');
-          BarcodeScanner.startScan((error, text) => (!error && text ? resolve(text)
-            : reject(error)));
+          BarcodeScanner.startScan((error, text) => (!error && text)
+            ? resolve(text)
+            : reject(error));
           BarcodeScanner.show();
           ['body', '#app', '.app-wrapper'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
