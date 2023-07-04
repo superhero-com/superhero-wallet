@@ -8,7 +8,7 @@
   >
     <slot />
 
-    <template v-if="!IS_IONIC">
+    <template v-if="!IS_MOBILE">
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
@@ -57,7 +57,7 @@ export default defineComponent({
 
     return {
       color,
-      IS_IONIC: process.env.IS_IONIC,
+      IS_MOBILE: process.env.IS_MOBILE,
     };
   },
 });

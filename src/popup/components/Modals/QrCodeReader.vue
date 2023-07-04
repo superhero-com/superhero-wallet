@@ -53,7 +53,7 @@
 <script>
 import { mapMutations } from 'vuex';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { IS_EXTENSION, IS_IONIC } from '@/constants';
+import { IS_EXTENSION, IS_MOBILE } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 
@@ -79,9 +79,9 @@ export default {
     };
   },
   data: () => ({
-    mobile: IS_IONIC,
+    mobile: IS_MOBILE,
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    cameraAllowed: IS_IONIC,
+    cameraAllowed: IS_MOBILE,
     browserReader: null,
     videoInputDevices: [],
     headerText: '',
