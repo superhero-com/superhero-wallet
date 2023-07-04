@@ -228,7 +228,7 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   height: 100%;
-};
+}
 
 .app-wrapper {
   --screen-padding-x: 16px;

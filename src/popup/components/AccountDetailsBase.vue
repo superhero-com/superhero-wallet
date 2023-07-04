@@ -163,7 +163,7 @@ export default defineComponent({
 
   border-radius: variables.$border-radius-app;
   min-height: 100%;
-  height:100%;
+  height: 100%;
   font-weight: 500;
   color: variables.$color-white;
   box-shadow: 0 0 0 1px variables.$color-border, 0 0 50px rgba(variables.$color-black, 0.6);
