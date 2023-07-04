@@ -149,7 +149,7 @@ import { IName } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
-  IS_IONIC,
+  IS_MOBILE_APP,
   MODAL_CONFIRM,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -218,7 +218,7 @@ export default defineComponent({
       }
       let text = '';
 
-      if (IS_IONIC) {
+      if (IS_MOBILE_APP) {
         const { type, value } = await Clipboard.read();
         if (type === 'string') {
           text = value;

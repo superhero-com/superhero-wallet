@@ -80,7 +80,7 @@ import {
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { EXTENSION_HEIGHT, IS_MOBILE } from '@/constants';
+import { EXTENSION_HEIGHT, IS_MOBILE_APP } from '@/constants';
 
 import {
   useAccounts,
@@ -168,7 +168,7 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (IS_MOBILE) {
+      if (IS_MOBILE_APP) {
         window.StatusBar.setBackgroundColor('#191919');
       }
       if (accountDetailsElem.value && appInnerElem.value) {
@@ -182,7 +182,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      if (IS_MOBILE) {
+      if (IS_MOBILE_APP) {
         window.StatusBar.setBackgroundColor('#141414');
       }
 
