@@ -10,6 +10,9 @@
     <div class="top-icon-wrapper">
       <IconBoxed :icon="QrScanIcon" />
     </div>
+    <div v-if="heading" class="heading">
+      {{ heading }}
+    </div>
     <span v-if="cameraAllowed">{{ title }}</span>
     <span v-else>
       {{ $t('modals.qrCodeReader.grantPermission') }}

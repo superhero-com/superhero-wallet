@@ -88,8 +88,8 @@ export default defineComponent({
 
     async function scanSignedTransaction() {
       const scanResult: IACMessageDefinitionObjectV3[] = await openModal(MODAL_READ_QR_CODE, {
-        heading: root.$t('modals.importAirGapAccount.scanTitle'),
-        title: root.$t('modals.importAirGapAccount.scanDescription'),
+        heading: root.$t('modals.scanAirGapTx.heading'),
+        title: root.$t('modals.scanAirGapTx.title'),
         icon: 'critical',
       });
 

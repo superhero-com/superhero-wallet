@@ -34,7 +34,7 @@
     </DetailsItem>
 
     <DetailsItem
-      :label="$t('pages.tipPage.amountLabel')"
+      :label="$t('common.amount')"
       class="details-item"
     >
       <template #value>

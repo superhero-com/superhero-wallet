@@ -327,7 +327,7 @@
       "cameraNotAllowedFirst": "You need to grant your device camera access permission to scan QR code.",
       "cameraNotAllowedSecond": "Please allow camera access in your browser settings and try again.",
       "settings": "Settings",
-      "qrCodeHasMultipleFragments": "This transaction consists for multiple QR codes. Keep your camera on the changing QRs and wait until all codes are scanned:"
+      "qrCodeHasMultipleFragments": "This transaction consists of multiple QR codes. Keep your camera on the changing QRs and wait until all codes are scanned:"
     },
     "name-pointers-help": {
       "title": "Name pointers",
