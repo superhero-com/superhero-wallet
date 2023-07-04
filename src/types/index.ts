@@ -47,6 +47,13 @@ export type ObjectValues<T> = T[keyof T];
 type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
+ * Makes the interface and all the child interfaces to be partial.
+ */
+export type PartialDeep<T> = T extends object ? {
+  [P in keyof T]?: PartialDeep<T[P]>;
+} : T;
+
+/**
  * Allowed options that can be passed to our fetch utility functions
  */
 export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
@@ -71,6 +78,11 @@ export interface IPageableResponse<T> {
   data: T[];
   next: string;
 }
+
+export type IKeyPair = {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+};
 
 export interface IAppData {
   name: string;
@@ -139,18 +151,25 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
 export type IAsset = ICoin | IToken;
 
 export type AccountKind = 'basic'; // TODO establish other possible values
+export type AeternityAccountType = 'hd-wallet';
+
+/**
+ * Simplified account structure stored it in the local storage
+ * or fetched when discovering the accounts.
+ */
+export interface IAeternityAccountRaw {
+  idx: number;
+  showed: boolean;
+  type: AeternityAccountType;
+  isRestored: boolean;
+}
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount {
-  address: Encoded.AccountAddress
-  idx?: number
-  name: string // .chain
-  publicKey: Uint8Array
-  secretKey: Uint8Array
-  showed: boolean
-  type: string
+export interface IAccount extends IKeyPair, IAeternityAccountRaw {
+  address: Encoded.AccountAddress;
+  name: string; // .chain
 }
 
 /**
@@ -293,8 +312,8 @@ export interface ICurrency {
 export type CurrencyRates = Record<CurrencyCode, number>;
 
 export interface TxArguments {
-  type: 'tuple' | 'list'
-  value: any // TODO find type, this was not correct: (string | number | any[])
+  type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
+  value: any; // TODO find type, this was not correct: (string | number | any[])
 }
 
 /**
@@ -325,9 +344,10 @@ export interface IGAAttachTx {
   nonce: number;
   ownerId: string;
   returnType: string;
-  type: string;
+  type: Tag;
   version: number;
 }
+
 export interface IGAMetaTx {
   amount: string;
   fee: number;
@@ -335,7 +355,7 @@ export interface IGAMetaTx {
   payload: string;
   recipientId: string;
   senderId: string;
-  type: string;
+  type: Tag;
   version: number;
 }
 
@@ -598,11 +618,6 @@ export interface IRawMultisigTx {
   tx: Encoded.Transaction;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface IKeyPair {
-  publicKey: Encoded.AccountAddress;
-  secretKey: string;
 }
 
 export interface IDefaultComposableOptions {

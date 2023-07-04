@@ -54,10 +54,10 @@ import {
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
-import type { ITokenList, ObjectValues, ResolveCallback } from '../../../types';
-import { IFormModel } from '../../../composables';
-import { AENS_DOMAIN, validateTipUrl } from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
+import type { ITokenList, ObjectValues, ResolveCallback } from '@/types';
+import { AENS_DOMAIN, validateTipUrl } from '@/popup/utils';
+import { IFormModel } from '@/composables';
+import { useGetter, useState } from '@/composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';

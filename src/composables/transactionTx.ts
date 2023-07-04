@@ -21,6 +21,7 @@ import {
   TX_RETURN_TYPE_OK,
   getInnerTransaction,
   getOwnershipStatus,
+  getTxDirection,
   getTxTag,
   getTxOwnerAddress,
   includes,
@@ -56,7 +57,6 @@ export function useTransactionTx({
     () => (store.state as any).fungibleTokens.availableTokens,
   );
 
-  const getTxDirection = computed(() => store.getters.getTxDirection);
   const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
@@ -155,13 +155,14 @@ export function useTransactionTx({
   const direction = computed(
     (): ObjectValues<typeof TX_DIRECTION> => (innerTx.value?.function === TX_FUNCTIONS.claim)
       ? TX_DIRECTION.received
-      : getTxDirection.value(
+      : getTxDirection(
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress
         || (
           ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
-        ),
+        )
+        || activeAccount.value.address,
       ),
   );
 

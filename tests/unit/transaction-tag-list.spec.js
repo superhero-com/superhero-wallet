@@ -1,20 +1,17 @@
 import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
-import getters from '../../src/store/getters';
 import { i18n, tg } from '../../src/store/plugins/languages';
 import { transactions, testAccount } from '../../src/popup/utils/testsConfig';
 import {
   AENS,
   NETWORK_TESTNET,
-  STUB_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
 } from '../../src/popup/utils';
 
 const store = new Vuex.Store({
   getters: {
     activeNetwork: () => NETWORK_TESTNET,
-    getTxDirection: () => getters.getTxDirection(null, { account: { address: STUB_ADDRESS } }),
   },
   state: {
     fungibleTokens: {
@@ -35,11 +32,24 @@ const transactionLabels = {
     tg('transaction.type.spendTx'),
     tg('transaction.spendType.out'),
   ],
-  claim: [tg('pages.token-details.tip'), tg('transaction.spendType.in')],
-  changeAllowance: [tg('transaction.dexType.allowToken')],
-  nameClaim: [AENS, tg('transaction.type.nameClaimTx')],
-  transfer: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
-  spend: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
+  claim: [
+    tg('pages.token-details.tip'),
+    tg('transaction.spendType.in')],
+  changeAllowance: [
+    tg('transaction.dexType.allowToken'),
+  ],
+  nameClaim: [
+    AENS,
+    tg('transaction.type.nameClaimTx'),
+  ],
+  transfer: [
+    tg('transaction.type.spendTx'),
+    tg('transaction.spendType.out'),
+  ],
+  spend: [
+    tg('transaction.type.spendTx'),
+    tg('transaction.spendType.out'),
+  ],
   nameTransfer: [], // unsupported type
 };
 
@@ -49,22 +59,28 @@ const testCases = [
     labels: value,
   })),
   ...[
-    transactions.pendingSpend, transactions.pendingTransfer,
-    transactions.transfer, transactions.spend,
+    transactions.pendingSpend,
+    transactions.pendingTransfer,
+    transactions.transfer,
+    transactions.spend,
   ].map((t) => ({
     props: { transaction: t },
     labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
   })),
   ...[
-    transactions.pendingSpend, transactions.pendingTransfer,
-    transactions.transfer, transactions.spend,
+    transactions.pendingSpend,
+    transactions.pendingTransfer,
+    transactions.transfer,
+    transactions.spend,
   ].map((t) => ({
     props: { transaction: { ...t, transactionOwner: testAccount.address } },
     labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
   })),
   ...[
-    transactions.pendingTipAe, transactions.pendingTipToken,
-    transactions.tip, transactions.retip,
+    transactions.pendingTipAe,
+    transactions.pendingTipToken,
+    transactions.tip,
+    transactions.retip,
   ].map((t) => ({
     props: { transaction: t },
     labels: [tg('pages.token-details.tip'), tg('transaction.spendType.out')],
@@ -82,12 +98,12 @@ const testCases = [
     labels: [],
   },
   {
-    props: {},
-    labels: [],
-  },
-  {
     props: { customTitle: 'customTitle' },
     labels: ['customTitle'],
+  },
+  {
+    props: {},
+    labels: [],
   },
 ];
 

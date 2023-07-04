@@ -23,6 +23,10 @@ export const MOBILE_WIDTH = 480;
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
 export const SEED_LENGTH = 12;
+
+export const DECIMAL_PLACES_HIGH_PRECISION = 9;
+export const DECIMAL_PLACES_LOW_PRECISION = 2;
+
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_ID = 'aeternity';
@@ -70,6 +74,17 @@ export const TX_FUNCTIONS = {
   transferPayload: 'transfer_payload',
   withdraw: 'withdraw',
   claim: 'claim',
+  spend: 'spend',
+  namePreclaim: 'name_preclaim',
+  nameClaim: 'name_claim',
+  nameTransfer: 'name_transfer',
+  incompleteTransfer: 'incomplete_transfer',
+  pendingSpend: 'pending_spend',
+  pendingTransfer: 'pending_transfer',
+  pendingTipAe: 'pending_tip_ae',
+  pendingTipToken: 'pending_tip_token',
+  payForGaAttach: 'pay_for_ga_attach',
+  gaMetaSpend: 'ga_meta_spend',
 } as const;
 
 /**
@@ -511,7 +526,7 @@ export const DEX_ALLOW_TOKEN = 'allow_token';
 
 export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
 
-export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
+export const DEX_TRANSACTION_TAGS: Partial<Record<TxFunctionRaw, string>> = {
   add_liquidity: DEX_PROVIDE_LIQUIDITY,
   add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
 
@@ -531,16 +546,6 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 
   deposit: DEX_SWAP,
   withdraw: DEX_SWAP,
-
-  // TODO establish transaction tags for the following tx functions:
-  tip: '',
-  retip: '',
-  tip_token: '',
-  retip_token: '',
-  transfer: '',
-  transfer_payload: '',
-  claim: '',
-  propose: '',
 } as const;
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';

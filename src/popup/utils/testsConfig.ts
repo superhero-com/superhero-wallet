@@ -5,20 +5,26 @@ import {
   Encoded,
   AE_AMOUNT_FORMATS,
 } from '@aeternity/aepp-sdk';
-import type { IPopupConfig } from '../../types';
+import type {
+  PartialDeep,
+  IPopupConfig,
+  ITransaction,
+  TxFunctionParsed,
+} from '../../types';
 import {
+  AETERNITY_COIN_ID,
   AETERNITY_CONTRACT_ID,
   MAX_UINT256,
   NETWORK_TESTNET,
+  POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
-  POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   STUB_ADDRESS,
+  STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
-  AETERNITY_COIN_ID,
-  POPUP_TYPE_ACCOUNT_LIST,
 } from './constants';
 import { CoinGeckoMarketResponse } from '../../lib/CoinGecko';
 
@@ -137,9 +143,9 @@ const commonParams = {
   },
   ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
   abiVersion: AbiVersion.Sophia,
-  callData:
-    'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF' as Encoded.ContractBytearray,
+  callData: STUB_CALLDATA,
 };
+
 export const txParams = {
   [Tag[Tag.ContractCreateTx]]: {
     ownerId: testAccount.address,
@@ -159,10 +165,13 @@ export const txParams = {
   },
 };
 
-export const transactions = {
+export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransaction>>> = {
   spend: {
     tx: {
       amount: 10000000000000,
+      arguments: [],
+      callerId: STUB_ADDRESS,
+      contractId: contractCallAddress,
       fee: 16780000000000,
       type: 'SpendTx',
       senderId: STUB_ADDRESS,
@@ -227,7 +236,7 @@ export const transactions = {
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2,
+      contractId: NETWORK_TESTNET.tipContractV2!,
       fee: 183720000000000,
       function: 'tip_token',
       type: 'ContractCallTx',
@@ -251,7 +260,7 @@ export const transactions = {
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2,
+      contractId: NETWORK_TESTNET.tipContractV2!,
       fee: 183000000000000,
       function: 'retip_token',
       type: 'ContractCallTx',
@@ -284,6 +293,7 @@ export const transactions = {
   },
   transfer: {
     tx: {
+      amount: 0,
       arguments: [
         {
           type: 'address',
@@ -391,7 +401,6 @@ export const transactions = {
   },
   pendingTransfer: {
     pending: true,
-    type: 'spendToken',
     tx: {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
@@ -430,17 +439,16 @@ export const transactions = {
       tx: {
         tx: {
           fee: 163660000000000,
-          type: 'GAAttachTx',
+          type: 'GaAttachTx',
         },
       },
       type: 'PayingForTx',
-      version: 1,
     },
   },
   gaMetaSpend: {
     tx: {
       fee: 76440000000000,
-      gaiId: STUB_ADDRESS,
+      gaId: STUB_ADDRESS,
       tx: {
         tx: {
           amount: 2341200000000000,

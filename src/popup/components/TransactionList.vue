@@ -42,19 +42,20 @@ import {
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import {
-  getTransaction,
+  AETERNITY_CONTRACT_ID,
+  TXS_PER_PAGE,
+  TX_DIRECTION,
+  TRANSACTION_OWNERSHIP_STATUS,
   getMultisigTransaction,
   getInnerTransaction,
   getOwnershipStatus,
+  getTransaction,
+  getTxDirection,
   getTxOwnerAddress,
   isTxDex,
   sortTransactionsByDateCallback,
   pipe,
   includesCaseInsensitive,
-  TXS_PER_PAGE,
-  AETERNITY_CONTRACT_ID,
-  TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS,
 } from '../utils';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import {
@@ -124,7 +125,6 @@ export default defineComponent({
 
     const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
-    const getTxDirection = useGetter('getTxDirection');
     const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
     const fetchTransactions = useDispatch('fetchTransactions');
 
@@ -169,14 +169,15 @@ export default defineComponent({
 
         const txOwnerAddress = getTxOwnerAddress(innerTx);
 
-        const direction = getTxDirection.value(
+        const direction = getTxDirection(
           outerTx.payerId ? outerTx : innerTx,
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
             !== TRANSACTION_OWNERSHIP_STATUS.current
           ) && txOwnerAddress
-          ),
+          )
+          || activeAccount.value.address,
         );
 
         const isDex = isTxDex(innerTx, dexContracts.value);
