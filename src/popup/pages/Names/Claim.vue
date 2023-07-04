@@ -237,6 +237,7 @@ export default defineComponent({
 
 .claim {
   padding: 0 var(--screen-padding-x);
+
   .chain-name {
     margin-bottom: 6px;
 

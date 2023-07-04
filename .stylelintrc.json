@@ -6,6 +6,10 @@
     "selector-pseudo-class-no-unknown": [
       true,
       { "ignorePseudoClasses": ["deep"] }
+    ],
+    "selector-type-no-unknown" : [
+      true,
+      {"ignoreTypes": ["/^ion-/"]}
     ]
   }
 }
