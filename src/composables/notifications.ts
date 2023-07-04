@@ -15,6 +15,7 @@ import {
   fetchJson,
   postJson,
   fetchRespondChallenge,
+  ACCOUNT_HD_WALLET,
 } from '../popup/utils';
 import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
@@ -75,6 +76,9 @@ export function useNotifications({
   );
 
   async function fetchAllNotifications(): Promise<INotification[]> {
+    if (activeAccount.value.type !== ACCOUNT_HD_WALLET) {
+      return [];
+    }
     const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
     const [responseChallenge, sdk] = await Promise.all([
       fetchJson(fetchUrl),

@@ -6,6 +6,7 @@
 import {
   defineComponent,
   onMounted,
+  onUnmounted,
   PropType,
   ref,
   watch,
@@ -14,18 +15,19 @@ import QRCodeStyling, { TypeNumber } from 'qr-code-styling';
 import SHLogo from '../../icons/logo-small-blue.png';
 
 export default defineComponent({
-  name: 'QrCode',
+  name: 'MultiFragmentsQrCode',
   props: {
-    value: { type: String, required: true },
+    value: { type: Array as PropType<string[]>, required: true },
     size: { type: Number, required: true },
     typeNumber: { type: Number as PropType<TypeNumber>, default: 10 },
   },
   setup(props) {
     const canvas = ref<HTMLElement>();
     const updateQrCode = ref();
+    const fragmentIndex = ref(0);
 
     const qrCode = new QRCodeStyling({
-      data: props.value,
+      data: props.value[fragmentIndex.value],
       width: props.size,
       height: props.size,
       margin: 0,
@@ -42,16 +44,31 @@ export default defineComponent({
       image: SHLogo,
     });
 
-    watch(() => props.value, (data: string) => {
+    function updateQrCodeData() {
+      if (props.value.length > 1) {
+        updateQrCode.value = setInterval(() => {
+          qrCode.update({ data: props.value[fragmentIndex.value] });
+          fragmentIndex.value = (fragmentIndex.value + 1) % props.value.length;
+        }, 500);
+      } else {
+        qrCode.update({ data: props.value[fragmentIndex.value] });
+      }
+    }
+
+    watch(() => props.value, () => {
       if (updateQrCode.value) {
         clearTimeout(updateQrCode.value);
       }
-
-      updateQrCode.value = setTimeout(() => {
-        qrCode.update({ data });
-      }, 500);
     });
-    onMounted(() => qrCode.append(canvas.value));
+
+    onMounted(() => {
+      qrCode.append(canvas.value);
+      updateQrCodeData();
+    });
+
+    onUnmounted(() => {
+      clearInterval(updateQrCode.value);
+    });
 
     return {
       canvas,

@@ -3,9 +3,10 @@
 import Vue from 'vue';
 import hdWallet from './hdWallet';
 import ledger from './ledger';
+import airgap from './airgap';
 import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
 
-const modules = { hdWallet, ledger };
+const modules = { hdWallet, ledger, airgap };
 
 export default {
   namespaced: true,

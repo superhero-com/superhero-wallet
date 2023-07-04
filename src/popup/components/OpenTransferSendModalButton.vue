@@ -24,6 +24,7 @@ export default defineComponent({
   props: {
     isBig: Boolean,
     isMultisig: Boolean,
+    isAirGap: Boolean,
     tokenContractId: { type: String, default: '' },
   },
   setup(props, { root }) {
@@ -36,6 +37,7 @@ export default defineComponent({
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {
         isMultisig: props.isMultisig,
+        isAirGap: props.isAirGap,
         tokenContractId: props.tokenContractId,
       });
     }

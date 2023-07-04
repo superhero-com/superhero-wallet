@@ -17,11 +17,14 @@
     </template>
 
     <div>
-      <AccountSelectOptionsItem
+      <AccountInfoCard
         v-for="(account, index) in optionsFiltered"
         :key="index"
+        :address="account.address"
+        :idx="account.idx"
+        :name="account.name"
         :account="account"
-        :value="value"
+        :is-selected="account.address === value"
         @click="resolve(account.address)"
       />
     </div>
@@ -38,13 +41,13 @@ import {
 import type { IFormSelectOption, ResolveRejectCallback } from '../../../types';
 
 import Modal from '../Modal.vue';
-import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';
 import FormSelectOptionsHeader from '../FormSelectOptionsHeader.vue';
+import AccountInfoCard from '../AccountInfoCard.vue';
 
 export default defineComponent({
   components: {
+    AccountInfoCard,
     FormSelectOptionsHeader,
-    AccountSelectOptionsItem,
     Modal,
   },
   props: {

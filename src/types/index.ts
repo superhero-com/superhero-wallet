@@ -145,7 +145,8 @@ export interface IAccount {
   idx?: number
   name: string // .chain
   publicKey: Uint8Array
-  secretKey: Uint8Array
+  secretKey?: Uint8Array
+  airGapPublicKey?: string
   showed: boolean
   type: string
 }

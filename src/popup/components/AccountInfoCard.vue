@@ -1,27 +1,28 @@
 <template>
   <BtnPlain
-    class="account-select-options-item"
+    class="account-info-card"
     :style="bgColorStyle"
     @click.prevent="$emit('click')"
   >
     <div
       class="option-wrapper"
-      :class="{ selected: account.address === value }"
+      :class="{ selected: isSelected }"
     >
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
+        class="account-info"
+        :address="address"
+        :name="name"
+        :idx="idx"
+        :is-air-gap="isAirGapAccount"
         avatar-size="rg"
         avatar-borderless
         is-list-name
-        class="account-info"
       />
       <TokenAmount
-        :amount="balance"
+        class="token-amount"
+        :amount="accountBalance"
         :symbol="AETERNITY_SYMBOL"
         fiat-below
-        class="token-amount"
         small
       />
     </div>
@@ -32,16 +33,14 @@
 import {
   computed,
   defineComponent,
-  PropType,
 } from '@vue/composition-api';
-import { useBalances } from '../../composables';
 import { getAddressColor } from '../utils/avatar';
 import { AETERNITY_SYMBOL } from '../utils';
-import { IFormSelectOption } from '../../types';
 
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import TokenAmount from './TokenAmount.vue';
+import { useBalances } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -50,25 +49,25 @@ export default defineComponent({
     BtnPlain,
   },
   props: {
-    account: {
-      type: Object as PropType<IFormSelectOption>,
-      default: () => {},
-    },
-    value: { type: [String, Number], default: null },
+    address: { type: String, required: true },
+    name: { type: String, default: '' },
+    idx: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 },
+    isSelected: Boolean,
+    isAirGapAccount: Boolean,
   },
   setup(props, { root }) {
     const { getAccountBalance } = useBalances({ store: root.$store });
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.address) }));
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.account.address) }));
-
-    const balance = computed(
-      () => (props.account?.address)
-        ? getAccountBalance(props.account.address).toNumber()
+    const accountBalance = computed(
+      () => props.balance || (props.address)
+        ? getAccountBalance(props.address).toNumber()
         : 0,
     );
 
     return {
-      balance,
+      accountBalance,
       bgColorStyle,
       AETERNITY_SYMBOL,
     };
@@ -79,7 +78,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/mixins';
 
-.account-select-options-item {
+.account-info-card {
   --border-width: 3px;
 
   width: 100%;
