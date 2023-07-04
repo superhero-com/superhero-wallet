@@ -47,7 +47,7 @@
         <NetworkButton />
 
         <template v-if="isLoggedIn">
-          <AppsBrowserBtn v-if="IS_CORDOVA || UNFINISHED_FEATURES" />
+          <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
 
           <NotificationsIcon />
 
@@ -67,7 +67,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_CORDOVA, UNFINISHED_FEATURES } from '@/constants';
+import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
@@ -185,7 +185,7 @@ export default defineComponent({
       ThreeDotsIcon,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
-      IS_CORDOVA,
+      IS_MOBILE_APP,
       isLoggedIn,
       showHeaderNavigation,
       isLogoDisabled,

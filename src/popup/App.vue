@@ -66,7 +66,7 @@ import {
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
-  IS_IONIC,
+  IS_MOBILE_APP,
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
@@ -125,7 +125,7 @@ export default defineComponent({
     function setDocumentHeight() {
       document.documentElement.style.setProperty(
         '--height',
-        IS_IONIC && IS_IOS ? '100vh' : '100%',
+        IS_MOBILE_APP && IS_IOS ? '100vh' : '100%',
       );
     }
 
