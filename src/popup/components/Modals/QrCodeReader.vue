@@ -51,9 +51,9 @@
 </template>
 
 <script>
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { mapMutations } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { IS_EXTENSION, IS_MOBILE } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
