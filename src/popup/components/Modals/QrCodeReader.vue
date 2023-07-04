@@ -51,8 +51,8 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { mapMutations } from 'vuex';
 import { IS_EXTENSION, IS_MOBILE } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
