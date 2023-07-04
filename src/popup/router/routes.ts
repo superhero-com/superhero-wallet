@@ -28,6 +28,7 @@ import {
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE_CLAIM,
+  ROUTE_DONATE_ERROR,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -577,7 +578,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'donate-error',
+    name: ROUTE_DONATE_ERROR,
     path: '/donate-error',
     component: DonateError,
     props: true,

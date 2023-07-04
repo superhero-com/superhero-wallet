@@ -46,21 +46,23 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import type { ResolveCallback } from '../../../types';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import TemplateRenderer from '../TemplateRenderer.vue';
 
-export default {
+export default defineComponent({
   components: {
     TemplateRenderer,
     Default,
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     close: { type: Function, default: null },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

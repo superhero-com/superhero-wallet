@@ -70,25 +70,29 @@
   </Default>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import { ResolveCallback } from '../../../types';
+import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 
-export default {
+export default defineComponent({
   components: {
     Default,
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     close: { type: Function, default: null },
   },
-  data: () => ({
-    BLOG_CLAIM_TIP_URL,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
-};
+  setup() {
+    return {
+      BLOG_CLAIM_TIP_URL,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
