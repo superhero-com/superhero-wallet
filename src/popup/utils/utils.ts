@@ -62,7 +62,7 @@ import type {
   ICommonTransaction,
   Truthy,
 } from '../../types';
-import { IS_IONIC, IS_EXTENSION } from '../../lib/environment';
+import { IS_MOBILE, IS_EXTENSION } from '../../lib/environment';
 
 /**
  * Replacement for `Array.includes` which has some TypeScript issues.
@@ -617,7 +617,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   }
   let text = '';
 
-  if (IS_IONIC) {
+  if (IS_MOBILE) {
     const { type, value } = await Clipboard.read();
     if (type === 'string') {
       text = value;

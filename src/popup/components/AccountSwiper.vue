@@ -130,7 +130,7 @@ export default defineComponent({
     });
 
     return {
-      IS_IONIC: process.env.IS_IONIC,
+      IS_MOBILE: process.env.IS_MOBILE,
       currentIdx,
       customSwiper,
       swiper,

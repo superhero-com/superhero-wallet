@@ -12,7 +12,7 @@ const parseBool = (val) => (val ? JSON.parse(val) : false);
 
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
-const IS_IONIC = PLATFORM === 'ionic';
+const IS_MOBILE = PLATFORM === 'ionic';
 
 module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
@@ -100,7 +100,7 @@ module.exports = {
       definitions['process.env.RUNNING_IN_TESTS'] = RUNNING_IN_TESTS;
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
-      definitions['process.env.IS_IONIC'] = IS_IONIC;
+      definitions['process.env.IS_MOBILE'] = IS_MOBILE;
 
       return [definitions];
     }).end();

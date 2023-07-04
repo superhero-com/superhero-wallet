@@ -59,7 +59,7 @@ import {
   useTransactionAndTokenFilter,
   useUi,
 } from '../../composables';
-import { IS_IONIC } from '../../lib/environment';
+import { IS_MOBILE } from '../../lib/environment';
 
 import BtnClose from './buttons/BtnClose.vue';
 import TransactionAndTokenFilter from './TransactionAndTokenFilter.vue';
@@ -124,7 +124,7 @@ export default defineComponent({
     );
 
     onMounted(() => {
-      if (IS_IONIC) {
+      if (IS_MOBILE) {
         window.StatusBar.setBackgroundColor('#191919');
       }
       if (accountDetailsElem.value && appInnerElem.value) {
@@ -138,7 +138,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      if (IS_IONIC) {
+      if (IS_MOBILE) {
         window.StatusBar.setBackgroundColor('#141414');
       }
 
