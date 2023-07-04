@@ -8,7 +8,7 @@
   >
     <slot />
 
-    <template v-if="!IS_MOBILE">
+    <template v-if="!IS_MOBILE_APP">
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
@@ -57,7 +57,7 @@ export default defineComponent({
 
     return {
       color,
-      IS_MOBILE: process.env.IS_MOBILE,
+      IS_MOBILE_APP: process.env.IS_MOBILE_APP,
     };
   },
 });

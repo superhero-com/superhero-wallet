@@ -130,7 +130,7 @@ export default defineComponent({
     });
 
     return {
-      IS_MOBILE: process.env.IS_MOBILE,
+      IS_MOBILE_APP: process.env.IS_MOBILE_APP,
       currentIdx,
       customSwiper,
       swiper,

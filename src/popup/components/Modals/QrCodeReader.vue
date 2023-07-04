@@ -54,7 +54,7 @@
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { mapMutations } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { IS_EXTENSION, IS_MOBILE } from '../../../lib/environment';
+import { IS_EXTENSION, IS_MOBILE_APP } from '../../../lib/environment';
 import { handleUnknownError, openInNewWindow } from '../../utils';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -78,9 +78,9 @@ export default {
     };
   },
   data: () => ({
-    mobile: IS_MOBILE,
+    mobile: IS_MOBILE_APP,
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
-    cameraAllowed: IS_MOBILE,
+    cameraAllowed: IS_MOBILE_APP,
     browserReader: null,
     videoInputDevices: [],
     headerText: '',
