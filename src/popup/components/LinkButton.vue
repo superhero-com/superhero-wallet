@@ -1,7 +1,7 @@
 <template>
   <a
     :class="['link-button', variant, { underlined }]"
-    :href="IS_CORDOVA ? undefined : to"
+    :href="IS_MOBILE ? undefined : to"
     target="_blank"
     @click="onClick"
   >
@@ -20,7 +20,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { IS_CORDOVA } from '@/constants';
+import { IS_MOBILE } from '@/constants';
 
 export const LINK_BUTTON_VARIANT = [
   'default',
@@ -42,7 +42,7 @@ export default defineComponent({
   },
   setup(props) {
     function onClick(event: any) {
-      if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
+      if (IS_MOBILE && window.cordova?.InAppBrowser?.open) {
         window.cordova.InAppBrowser.open(props.to, '_system');
         event.preventDefault();
       }
@@ -50,7 +50,7 @@ export default defineComponent({
 
     return {
       LINK_BUTTON_VARIANT,
-      IS_CORDOVA,
+      IS_MOBILE,
       onClick,
     };
   },
