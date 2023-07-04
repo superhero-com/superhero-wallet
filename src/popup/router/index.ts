@@ -24,7 +24,7 @@ import {
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,
-  IS_MOBILE,
+  IS_MOBILE_APP,
   IS_WEB,
 } from '../../lib/environment';
 import { useAccounts, usePopupProps } from '../../composables';
@@ -117,7 +117,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (IS_MOBILE) {
+if (IS_MOBILE_APP) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {

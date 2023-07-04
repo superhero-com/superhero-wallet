@@ -8,7 +8,7 @@ import {
 } from '@aeternity/aepp-sdk-13';
 import { Store } from 'vuex';
 import { useAccounts } from '../../composables/accounts';
-import { IS_MOBILE, IS_EXTENSION_BACKGROUND } from '../environment';
+import { IS_MOBILE_APP, IS_EXTENSION_BACKGROUND } from '../environment';
 import { POPUP_TYPE_MESSAGE_SIGN, POPUP_TYPE_SIGN, POPUP_TYPE_TX_SIGN } from '../../popup/utils';
 import { showPopup } from '../../background/popupHandler';
 import type { IPopupType } from '../../types';
@@ -28,7 +28,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   signTransaction(txBase64: Encoded.Transaction, opt: any): Promise<Encoded.Transaction> {
-    if (IS_MOBILE) {
+    if (IS_MOBILE_APP) {
       return this.fgPermissionCheckAndSign(txBase64, opt, opt.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -42,7 +42,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   signMessage(message: string, opt: any): Promise<Uint8Array> {
-    if (IS_MOBILE) {
+    if (IS_MOBILE_APP) {
       return this.fgPermissionCheckAndSign(messageToHash(message), opt, opt.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -65,7 +65,7 @@ export class AccountSuperhero extends AccountBase {
   async fgPermissionCheckAndSign(payload: any, opt: any, origin?: string) {
     try {
       const host = origin ? new URL(origin).host : null;
-      const permission = (!host && IS_MOBILE) || await this.store.dispatch('permissions/checkPermissions', {
+      const permission = (!host && IS_MOBILE_APP) || await this.store.dispatch('permissions/checkPermissions', {
         host,
         method: POPUP_TYPE_SIGN,
         params: payload,

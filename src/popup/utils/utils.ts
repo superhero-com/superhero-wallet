@@ -63,7 +63,7 @@ import type {
   ICommonTransaction,
   Truthy,
 } from '../../types';
-import { IS_MOBILE, IS_EXTENSION } from '../../lib/environment';
+import { IS_MOBILE_APP, IS_EXTENSION } from '../../lib/environment';
 
 /**
  * Replacement for `Array.includes` which has some TypeScript issues.
@@ -615,7 +615,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   }
   let text = '';
 
-  if (IS_MOBILE) {
+  if (IS_MOBILE_APP) {
     const { type, value } = await Clipboard.read();
     if (type === 'string') {
       text = value;
