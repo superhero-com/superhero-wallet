@@ -13,7 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
-        v-if="IS_CORDOVA || UNFINISHED_FEATURES"
+        v-if="IS_MOBILE || UNFINISHED_FEATURES"
         :title="$t('dashboard.daeppBrowserCard.title')"
         :description="$t('dashboard.daeppBrowserCard.description')"
         :btn-text="$t('dashboard.daeppBrowserCard.button')"
@@ -54,7 +54,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import {
   DASHBOARD_CARD_ID,
-  IS_CORDOVA,
+  IS_MOBILE,
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -113,7 +113,7 @@ export default defineComponent({
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
-      IS_CORDOVA,
+      IS_MOBILE,
       isNodeMainnet,
       isNodeTestnet,
     };
