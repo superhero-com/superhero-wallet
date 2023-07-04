@@ -190,8 +190,8 @@ export default defineComponent({
   :deep(.filters) {
     position: sticky;
     top: env(safe-area-inset-top);
-    margin-left: 0px;
-    margin-right: 0px;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 </style>

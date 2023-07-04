@@ -44,6 +44,7 @@ export default defineComponent({
 .account-details-names {
   // TODO fix this hack
   height: 300px;
+
   .offline-message {
     margin-top: 40px;
   }
