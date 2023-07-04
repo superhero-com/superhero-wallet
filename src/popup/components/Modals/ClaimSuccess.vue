@@ -17,23 +17,25 @@
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import { ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import CheckIcon from '../../../icons/check-icon.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
     CheckIcon,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     url: { type: String, required: true },
     claimAmount: { type: Number, required: true },
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

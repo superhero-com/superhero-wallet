@@ -46,7 +46,7 @@ import {
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { IToken } from '../../../types';
+import type { IToken, RejectCallback, ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
@@ -62,8 +62,8 @@ export default defineComponent({
     InputSearch,
   },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedToken: { type: Object as PropType<IToken | null>, default: null },
     showTokensWithBalance: Boolean,
   },
