@@ -24,6 +24,8 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AETERNITY_CONTRACT_ID,
+  DECIMAL_PLACES_HIGH_PRECISION,
+  DECIMAL_PLACES_LOW_PRECISION,
   HASH_PREFIXES_ALLOWED,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
@@ -54,6 +56,8 @@ import type {
   TxFunction,
   TxFunctionRaw,
   TxType,
+  IKeyPair,
+  IGAAttachTx,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
 
@@ -444,16 +448,27 @@ export function truncateString(text: string, maxLength: number) {
     : '';
 }
 
+/**
+ * Round the number to calculated amount of decimals.
+ * If the number is between high and low precision
+ * no argument is passed to the `toFixed` method which means there will be no trailing zeros.
+ */
 export function amountRounded(rawAmount: number | BigNumberPublic): string {
-  let amount = rawAmount;
-  if (typeof rawAmount !== 'object') {
-    amount = new BigNumber(rawAmount);
-  }
-
-  if (new BigNumber(amount).lt(0.01) && amount.toString().length < 9 + 2) {
+  const ZERO_AND_COMA_LEN = 2;
+  const amount: BigNumberPublic = (typeof rawAmount === 'object')
+    ? rawAmount
+    : new BigNumber(rawAmount);
+  if (
+    amount.lt(0.01)
+    && amount.toString().length - ZERO_AND_COMA_LEN < DECIMAL_PLACES_HIGH_PRECISION
+  ) {
     return amount.toFixed();
   }
-  return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
+  return amount.toFixed(
+    (amount.lt(0.01))
+      ? DECIMAL_PLACES_HIGH_PRECISION
+      : DECIMAL_PLACES_LOW_PRECISION,
+  );
 }
 
 export function getTxTag(tx: ITx): Tag | null {
@@ -568,11 +583,17 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   return value;
 }
 
-export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
-  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, { ...wallet, secretKey: wallet.privateKey }).secretKey);
+export function getHdWalletAccount(
+  wallet: IWallet,
+  accountIdx = 0,
+): IKeyPair & { address: Encoded.AccountAddress } {
+  const keyTreeNode = derivePathFromKey(
+    `${accountIdx}h/0h/0h`,
+    { ...wallet, secretKey: wallet.privateKey },
+  );
+  const keyPair = getKeyPair(keyTreeNode.secretKey);
   return {
     ...keyPair,
-    idx: accountIdx,
     address: encode(keyPair.publicKey, Encoding.AccountAddress),
   };
 }
@@ -651,6 +672,22 @@ export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
 
 export function getTxOwnerAddress(innerTx?: ITx) {
   return innerTx?.accountId || innerTx?.callerId;
+}
+
+export function getTxDirection(tx?: ITx | IGAAttachTx, address?: Encoded.AccountAddress) {
+  type ICommonTx = ITx & IGAAttachTx; // All possible properties of the tx
+
+  if ((tx as ITx)?.tag === Tag.SpendTx) {
+    return (tx as ITx).senderId === address
+      ? TX_DIRECTION.sent
+      : TX_DIRECTION.received;
+  }
+
+  // Check if any of the properties that has an address-like value is equal to provided address
+  const keysWithHashes: (keyof ICommonTx)[] = ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'];
+  return (keysWithHashes.map((key) => (tx as ICommonTx)?.[key]).includes(address as never))
+    ? TX_DIRECTION.sent
+    : TX_DIRECTION.received;
 }
 
 export function getOwnershipStatus(

@@ -21,8 +21,10 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   async function fetchFromMiddleware<T = any>(path: string): Promise<T | null> {
-    const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
-    return fetchJson(`${middlewareUrl}${path}`);
+    await watchUntilTruthy(activeNetwork);
+    // We can't use the `activeNetwork` in next line as it's not always properly evaluated
+    // TODO replace with `activeNetwork` after removing Vuex.
+    return fetchJson(`${store.getters.activeNetwork.middlewareUrl}${path}`);
   }
 
   async function fetchFromMiddlewareCamelCased(path: string) {

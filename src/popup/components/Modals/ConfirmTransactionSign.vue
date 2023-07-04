@@ -84,7 +84,7 @@
         <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
-          :label="TX_FIELDS_TO_DISPLAY[key]"
+          :label="getTxKeyLabel(key)"
           :value="popupProps?.tx?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
@@ -128,8 +128,15 @@ import BigNumber from 'bignumber.js';
 import { getExecutionCost } from '@aeternity/aepp-sdk';
 import ContractByteArrayEncoder from '@aeternity/aepp-calldata/src/ContractByteArrayEncoder';
 
-import { tg } from '../../../store/plugins/languages';
-import { RejectedByUserError } from '../../../lib/errors';
+import type {
+  ITokenResolved,
+  ITransaction,
+  ITx,
+  TxFunctionParsed,
+  TxFunctionRaw,
+} from '@/types';
+import { tg } from '@/store/plugins/languages';
+import { RejectedByUserError } from '@/lib/errors';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
@@ -147,21 +154,15 @@ import {
   isTxFunctionDexPool,
   isTxFunctionDexMaxSpent,
   isTxFunctionDexMinReceived,
-} from '../../utils';
-import type {
-  ITokenResolved,
-  ITransaction,
-  ITx,
-  TxFunctionParsed,
-  TxFunctionRaw,
-} from '../../../types';
-import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
+} from '@/popup/utils';
+import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import {
   usePopupProps,
   useAeSdk,
   useTransactionTx,
-} from '../../../composables';
-import { useGetter, useState } from '../../../composables/vuex';
+  useAccounts,
+} from '@/composables';
+import { useGetter, useState } from '@/composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -173,19 +174,19 @@ import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
 type ITxKey = keyof ITx;
 
-const TX_FIELDS_TO_DISPLAY: Partial<Record<ITxKey, string>> = {
-  callData: tg('common.callData'),
-  code: tg('pages.transactionDetails.code'),
-  contractId: tg('common.contractId'),
-  commitmentId: tg('modals.confirmTransactionSign.commitmentId'),
-  name: tg('pages.transactionDetails.name'),
-  nameFee: tg('modals.confirmTransactionSign.nameFee'),
-  nameSalt: tg('pages.transactionDetails.nameSalt'),
-  nameId: tg('pages.transactionDetails.nameId'),
-  nonce: tg('pages.transactionDetails.nonce'),
-  payload: tg('pages.transactionDetails.payload'),
-  pointers: tg('modals.confirmTransactionSign.pointers'),
-  recipientId: tg('modals.confirmTransactionSign.recipientId'),
+const TX_FIELDS_TO_DISPLAY: Partial<Record<ITxKey, () => string>> = {
+  callData: () => tg('common.callData'),
+  code: () => tg('pages.transactionDetails.code'),
+  contractId: () => tg('common.contractId'),
+  commitmentId: () => tg('modals.confirmTransactionSign.commitmentId'),
+  name: () => tg('pages.transactionDetails.name'),
+  nameFee: () => tg('modals.confirmTransactionSign.nameFee'),
+  nameSalt: () => tg('pages.transactionDetails.nameSalt'),
+  nameId: () => tg('pages.transactionDetails.nameId'),
+  nonce: () => tg('pages.transactionDetails.nonce'),
+  payload: () => tg('pages.transactionDetails.payload'),
+  pointers: () => tg('modals.confirmTransactionSign.pointers'),
+  recipientId: () => tg('modals.confirmTransactionSign.recipientId'),
 };
 
 export default defineComponent({
@@ -202,6 +203,7 @@ export default defineComponent({
     const store = useStore();
     const { t } = useI18n();
     const { getAeSdk } = useAeSdk({ store });
+    const { activeAccount } = useAccounts({ store });
 
     const { popupProps, setPopupProps } = usePopupProps();
 
@@ -227,7 +229,6 @@ export default defineComponent({
     const getTxSymbol = useGetter('getTxSymbol');
     const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
-    const account = useGetter('account');
 
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
@@ -353,7 +354,7 @@ export default defineComponent({
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(account.value.address).catch((err) => {
+          const balance = await sdk.getBalance(activeAccount.value.address).catch((err) => {
             if (!isNotFoundError(err)) {
               handleUnknownError(err);
             }
@@ -424,6 +425,11 @@ export default defineComponent({
       }
     }
 
+    function getTxKeyLabel(txKey: ITxKey) {
+      const translateFunc = TX_FIELDS_TO_DISPLAY[txKey];
+      return translateFunc ? translateFunc() : '';
+    }
+
     onMounted(async () => {
       if (popupProps.value) {
         await Promise.all([
@@ -469,6 +475,7 @@ export default defineComponent({
       nameAeFee,
       getLabels,
       cancel,
+      getTxKeyLabel,
     };
   },
 });

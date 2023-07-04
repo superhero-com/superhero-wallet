@@ -10,10 +10,12 @@ import {
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { useMiddleware, useAeSdk } from '../../composables';
+import { useAccounts, useAeSdk, useMiddleware } from '../../composables';
 
 export default (store) => {
   const { getAeSdk } = useAeSdk({ store });
+  const { fetchFromMiddleware } = useMiddleware({ store });
+  const { accounts, activeAccount } = useAccounts({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -23,9 +25,7 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      tokenBalances: (
-        state, { getTokenBalance }, rootState, { account: { address } },
-      ) => getTokenBalance(address),
+      tokenBalances: (state, { getTokenBalance }) => getTokenBalance(activeAccount.value.address),
     },
     mutations: {
       setAvailableTokens(state, payload) {
@@ -41,8 +41,6 @@ export default (store) => {
     },
     actions: {
       async loadAvailableTokens({ commit }) {
-        const { fetchFromMiddleware } = useMiddleware({ store });
-
         const response = await fetchAllPages(
           () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
           fetchFromMiddleware,
@@ -56,14 +54,11 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { accounts },
         state: { availableTokens },
         commit,
       }) {
         const newBalances = {};
-        const { fetchFromMiddleware } = useMiddleware({ store });
-
-        await Promise.all(accounts.map(async ({ address }) => {
+        await Promise.all(accounts.value.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
@@ -94,18 +89,19 @@ export default (store) => {
         commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
-        { rootGetters: { activeNetwork, account } },
+        { rootGetters: { activeNetwork } },
         [contractId, amount],
       ) {
         const aeSdk = await getAeSdk();
-        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
+        const selectedToken = store.state.fungibleTokens.tokens?.[activeAccount.value.address]
+          ?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await aeSdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
           address: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.allowance({
-          from_account: account.address,
+          from_account: activeAccount.value.address,
           for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
         });
         const allowanceAmount = decodedResult !== undefined
@@ -119,7 +115,7 @@ export default (store) => {
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
-        { state: { availableTokens }, rootGetters: { account } },
+        { state: { availableTokens } },
         address,
       ) {
         try {
@@ -138,7 +134,7 @@ export default (store) => {
             { decodedResult: totalSupply },
           ] = await Promise.all([
             tokenContract.balances(),
-            tokenContract.balance(account.address),
+            tokenContract.balance(activeAccount.value.address),
             tokenContract.token0(),
             tokenContract.token1(),
             tokenContract.get_reserves(),

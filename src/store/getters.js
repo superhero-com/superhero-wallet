@@ -1,42 +1,22 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { Tag } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  ACCOUNT_HD_WALLET,
   TX_DIRECTION,
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
-  getHdWalletAccount,
 } from '../popup/utils';
-import { useAeSdk } from '../composables';
+import { useAccounts, useAeSdk } from '../composables';
 
 export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
-  },
-  accounts({ accounts: { list } }, getters) {
-    if (!getters.wallet) return [];
-    return list
-      .map(({ idx, type, ...acc }) => ({
-        idx,
-        type,
-        ...acc,
-        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
-      }))
-      .map(({ ...account }) => ({
-        ...account,
-        name: getters['names/getDefault'](account.address),
-      }));
-  },
-  account({ accounts: { activeIdx } }, { accounts }) {
-    return accounts[activeIdx] || {}; // TODO: Return null
   },
   networks({ userNetworks }) {
     return [
@@ -84,30 +64,16 @@ export default {
         .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
-  getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
-    const currentAddress = externalAddress || address;
-
-    if (tx.tag === Tag.SpendTx) {
-      return tx.senderId === currentAddress
-        ? TX_DIRECTION.sent
-        : TX_DIRECTION.received;
-    }
-
-    return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
-      .map((key) => tx?.[key])
-      .includes(currentAddress)
-      ? TX_DIRECTION.sent
-      : TX_DIRECTION.received;
-  },
   getAccountPendingTransactions: (state, getters) => {
-    const { nodeNetworkId } = useAeSdk({ store: { state, getters } });
-    const { address } = getters.account;
+    const store = { state, getters };
+    const { nodeNetworkId } = useAeSdk({ store });
+    const { activeAccount } = useAccounts({ store });
     const pendingTransactions = state.transactions.pending[nodeNetworkId.value];
 
     if (pendingTransactions?.length) {
       return pendingTransactions.filter(({ tx, recipient, recipientId }) => [
         tx.callerId, tx.senderId, tx.recipientId, recipientId, recipient,
-      ].includes(address));
+      ].includes(activeAccount.value.address));
     }
 
     return [];

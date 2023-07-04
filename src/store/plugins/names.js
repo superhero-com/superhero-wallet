@@ -10,7 +10,12 @@ import {
   handleUnknownError,
 } from '../../popup/utils';
 import { tg } from './languages';
-import { useMiddleware, useModals, useAeSdk } from '../../composables';
+import {
+  useAeSdk,
+  useAccounts,
+  useMiddleware,
+  useModals,
+} from '../../composables';
 
 export default (store) => {
   const {
@@ -28,6 +33,8 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
+  const { accounts, activeAccount } = useAccounts({ store });
+
   store.registerModule('names', {
     namespaced: true,
     state: {
@@ -44,10 +51,10 @@ export default (store) => {
         if (!defaults) return '';
         return defaults[`${address}-${nodeNetworkId.value}`];
       },
-      getPreferred: (
-        { preferred }, { getDefault }, _, { account },
-      ) => (address) => {
-        if (account.address === address) return getDefault(address);
+      getPreferred: ({ preferred }, { getDefault }) => (address) => {
+        if (activeAccount.value.address === address) {
+          return getDefault(address);
+        }
         store.dispatch('names/setPreferred', address);
         return preferred[`${address}-${nodeNetworkId.value}`] || '';
       },
@@ -96,7 +103,6 @@ export default (store) => {
     actions: {
       async fetchOwned({
         state: { owned, pendingAutoExtendNames },
-        rootGetters: { accounts },
         commit,
         dispatch,
       }) {
@@ -112,7 +118,7 @@ export default (store) => {
 
         const middleware = await getMiddleware();
         const names = await Promise.all(
-          accounts.map(({ address }) => Promise.all([
+          accounts.value.map(({ address }) => Promise.all([
             getPendingNameClaimTransactions(address),
             fetchAllPages(
               () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
@@ -178,9 +184,9 @@ export default (store) => {
         }
       },
       async setDefaults(
-        { rootGetters: { activeNetwork, accounts }, commit },
+        { rootGetters: { activeNetwork }, commit },
       ) {
-        await Promise.all(accounts.map(async ({ address }) => {
+        await Promise.all(accounts.value.map(async ({ address }) => {
           const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
           ).catch(() => {});

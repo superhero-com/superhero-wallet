@@ -6,7 +6,7 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useModals, useAeSdk } from '../../../composables';
+import { useAccounts, useModals, useAeSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -34,14 +34,12 @@ export default {
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;
       let account;
-      // eslint-disable-next-line no-plusplus
-      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
+      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx += 1) {
         account = getHdWalletAccount(rootGetters.wallet, nextIdx);
         // eslint-disable-next-line no-await-in-loop
         if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
       }
-      // eslint-disable-next-line no-plusplus
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
+      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i += 1) {
         dispatch('create', true);
       }
     },
@@ -53,19 +51,20 @@ export default {
       );
       state.nextAccountIdx += 1;
     },
-    signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, options }) {
-      const { secretKey } = options && options.fromAccount
-        ? accounts.find(({ address }) => address === options.fromAccount)
-        : account;
+    signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
+      const { activeAccount, getAccountByAddress } = useAccounts({
+        store: { state: rootState, getters: rootGetters },
+      });
+      const { secretKey } = (options?.fromAccount)
+        ? getAccountByAddress(options.fromAccount)
+        : activeAccount.value;
       return sign(data, secretKey);
     },
-    async confirmRawDataSigning(context, { data, app }) {
-      const { openModal } = useModals();
-      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app });
-    },
     async confirmTxSigning({ dispatch }, { txBase64, app }) {
+      const { openModal } = useModals();
+
       if (!isTxOfASupportedType(txBase64)) {
-        await dispatch('confirmRawDataSigning', { data: txBase64, app });
+        await openModal(MODAL_CONFIRM_RAW_SIGN, { data: txBase64, app });
         return;
       }
       const txObject = unpackTx(txBase64);
@@ -76,7 +75,6 @@ export default {
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
-        const { openModal } = useModals();
         await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },
