@@ -5,7 +5,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
-  IS_MOBILE,
+  IS_MOBILE_APP,
   IS_WEB,
   POPUP_TYPE,
   POPUP_TYPE_CONNECT,
@@ -76,7 +76,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
-    if (!IS_MOBILE && !UNFINISHED_FEATURES) {
+    if (!IS_MOBILE_APP && !UNFINISHED_FEATURES) {
       next({ name: ROUTE_NOT_FOUND });
       return;
     }
@@ -145,7 +145,7 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (IS_MOBILE) {
+if (IS_MOBILE_APP) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
     window.IonicDeeplink.onDeepLink(({ url }: any) => {

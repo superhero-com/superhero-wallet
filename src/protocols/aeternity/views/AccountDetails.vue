@@ -15,7 +15,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-if="IS_MOBILE && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
+        v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
         :icon="GlobeSmallIcon"
         :text="$t('common.browser')"
         :to="{ name: ROUTE_APPS_BROWSER }"
@@ -32,7 +32,7 @@
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import {
-  IS_MOBILE,
+  IS_MOBILE_APP,
   IS_IOS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   UNFINISHED_FEATURES,
@@ -77,7 +77,7 @@ export default defineComponent({
       UNFINISHED_FEATURES,
       ROUTE_APPS_BROWSER,
       AE_DEX_URL,
-      IS_MOBILE,
+      IS_MOBILE_APP,
       IS_IOS,
       CreditCardIcon,
       SwapIcon,
