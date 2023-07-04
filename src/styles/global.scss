@@ -20,18 +20,20 @@ html.is-extension {
 }
 ion-content {
   /** hide scrollbar **/
-  --offset-bottom: auto!important;
+  --offset-bottom: auto !important;
   --overflow: hidden;
+
   overflow: auto;
+
   &::-webkit-scrollbar {
     display: none;
   }
 
   /** remove left-right padding **/
   &::part(scroll) {
-    --padding-end: 0px;
-    --padding-start: 0px;
-    --padding-top: 0px;
+    --padding-end: 0;
+    --padding-start: 0;
+    --padding-top: 0;
   }
 }
 
