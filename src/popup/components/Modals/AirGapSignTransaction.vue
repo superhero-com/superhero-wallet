@@ -42,16 +42,16 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { IACMessageType } from '@airgap/serializer';
 import type {
   IACMessageDefinitionObjectV3,
   TransactionSignResponse,
 } from '@airgap/serializer';
-import { useGetter } from '../../../composables/vuex';
-import { useAccounts, useModals, useAirGap } from '../../../composables';
-import type { INetwork } from '../../../types';
-import { MODAL_READ_QR_CODE } from '../../utils';
+
+import type { INetwork } from '@/types';
+import { MODAL_READ_QR_CODE } from '@/constants';
+import { useAccounts, useModals, useAirGap } from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -71,10 +71,10 @@ export default defineComponent({
     resolve: { type: Function as PropType<(txRaw: string) => void>, required: true },
     reject: { type: Function as PropType<() => void>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
     const fragments = ref();
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
+    const { activeAccount } = useAccounts();
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const { generateTransactionURDataFragments } = useAirGap();
 
@@ -88,8 +88,8 @@ export default defineComponent({
 
     async function scanSignedTransaction() {
       const scanResult: IACMessageDefinitionObjectV3[] = await openModal(MODAL_READ_QR_CODE, {
-        heading: root.$t('modals.importAirGapAccount.scanTitle'),
-        title: root.$t('modals.importAirGapAccount.scanDescription'),
+        heading: tg('modals.scanAirGapTx.heading'),
+        title: tg('modals.scanAirGapTx.title'),
         icon: 'critical',
       });
 

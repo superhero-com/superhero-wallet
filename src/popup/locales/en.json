@@ -372,7 +372,7 @@
       "noWebcamSubtitle": "Please enable your device camera and check again if it is functioning properly.",
       "subtitle": "Allow Superhero wallet to access your camera in order to scan QR codes.",
       "settings": "Settings",
-      "qrCodeHasMultipleFragments": "This transaction consists for multiple QR codes. Keep your camera on the changing QRs and wait until all codes are scanned:"
+      "qrCodeHasMultipleFragments": "This transaction consists of multiple QR codes. Keep your camera on the changing QRs and wait until all codes are scanned:"
     },
     "name-pointers-help": {
       "title": "Name pointers",
