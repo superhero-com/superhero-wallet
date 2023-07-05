@@ -86,7 +86,7 @@ export default {
     .auction-overview {
       margin-top: 16px;
 
-      ::v-deep .details-item:first-of-type {
+      :deep(.details-item:first-of-type) {
         padding-right: 32px;
       }
     }

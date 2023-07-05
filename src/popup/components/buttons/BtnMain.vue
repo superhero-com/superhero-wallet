@@ -13,7 +13,6 @@
         'has-icon': !!icon,
       },
     ]"
-    v-on="$listeners"
   >
     <Component
       :is="icon"
@@ -27,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import BtnBase from './BtnBase.vue';
 
 export default defineComponent({

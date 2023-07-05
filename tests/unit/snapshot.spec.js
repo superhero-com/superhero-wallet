@@ -1,52 +1,74 @@
-import Vue from 'vue';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
 import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
+import * as environment from '../../src/lib/environment';
 
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
+const OLD_ENV = process.env;
+
+beforeEach(() => {
+  jest.resetModules();
+  process.env = { ...OLD_ENV, npm_package_version: 'version-specific-text' };
 });
 
+afterAll(() => {
+  process.env = OLD_ENV;
+});
+
+jest.mock('../../src/lib/environment', () => ({
+  __esModule: true,
+  IS_WEB: null,
+  IN_FRAME: null,
+  IS_MOBILE_DEVICE: false,
+}));
+jest.mock('../../src/composables', () => ({
+  useMiddleware: jest.fn(() => ({
+    fetchMiddlewareStatus: jest.fn(),
+  })),
+  useModals: jest.fn(() => ({
+    openModal: jest.fn(),
+  })),
+}));
+jest.mock('vuex', () => ({
+  useStore: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
+  Store: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
+}));
+jest.mock('vue-router', () => ({
+  useRouter: jest.fn(() => ({})),
+}));
 jest.mock('detect-browser', () => ({
   detect: () => ({}),
 }));
 
-describe('Pages', () => {
-  [{
+const testCases = [
+  {
     name: 'Index',
     page: Index,
-    options: {
-      stubs: {
-        RouterLink: RouterLinkStub,
-        i18n: {
-          template: '<span />',
-        },
-      },
-    },
-    data: [{
+    data: {
       termsAgreed: true,
       IS_WEB: true,
     },
-    {
+  },
+  {
+    name: 'Index',
+    page: Index,
+    data: {
+      termsAgreed: true,
       IS_WEB: false,
     },
-    {
+  },
+  {
+    name: 'Index',
+    page: Index,
+    data: {
+      termsAgreed: true,
       IN_FRAME: true,
-    }],
+    },
   },
   {
     name: 'About',
     page: About,
-    options: {
-      stubs: {
-        RouterLink: RouterLinkStub,
-      },
-    },
-    data: [{
-      extensionVersion: 'version-specific-text',
-    }],
   },
   {
     name: 'TermsOfService',
@@ -55,20 +77,38 @@ describe('Pages', () => {
   {
     name: 'PrivacyPolicy',
     page: PrivacyPolicy,
-  }].forEach((test) => it(test.name, async () => {
+  },
+];
+
+describe.each(testCases)('Pages', (test) => {
+  it(test.name, async () => {
+    environment.IS_WEB = !!test.data?.IS_WEB;
+    environment.IN_FRAME = !!test.data?.IN_FRAME;
+
     const wrapper = mount(test.page, {
-      mocks: {
-        $store: {
-          getters: { activeNetwork: () => {} },
+      global: {
+        mocks: {
+          $store: { getters: { activeNetwork: () => {} } },
+          $t: () => 'locale-specific-text',
+          $tm: () => 'locale-specific-text',
+        },
+        stubs: {
+          RouterLink: RouterLinkStub,
+          'i18n-t': {
+            template: '<span />',
+          },
         },
       },
-      ...test.options,
     });
-    // eslint-disable-next-line no-restricted-syntax
-    for (const data of test.data ?? [{}]) {
-      // eslint-disable-next-line no-await-in-loop
-      await wrapper.setData(data);
-      expect(wrapper.element).toMatchSnapshot();
+
+    // Cannot change termsAgreed with setData() because it is inside setup()
+    const checkmark = wrapper.find('input[type="checkbox"]');
+    if (checkmark.exists() && test.data?.termsAgreed !== undefined) {
+      await checkmark.setValue(test.data.termsAgreed);
+      expect(checkmark.element.checked).toBe(test.data.termsAgreed);
+      await wrapper.vm.$nextTick();
     }
-  }));
+
+    expect(wrapper.element).toMatchSnapshot();
+  });
 });

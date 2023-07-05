@@ -27,8 +27,9 @@
 import {
   computed,
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
 import { useMultisigAccounts } from '../../composables';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
@@ -42,12 +43,14 @@ export default defineComponent({
     AccountSwiper,
     TotalWalletAmount,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const {
       multisigAccounts,
       activeMultisigAccountId,
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));
 

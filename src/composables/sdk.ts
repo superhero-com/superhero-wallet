@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import { Universal, Node } from '@aeternity/aepp-sdk';
 import type { IDefaultComposableOptions, ISdk, INetwork } from '../types';
 import {

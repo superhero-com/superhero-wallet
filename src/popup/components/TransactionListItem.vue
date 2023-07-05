@@ -54,9 +54,10 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { Location } from 'vue-router';
+} from 'vue';
+import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
+import { useStore } from 'vuex';
 import {
   FUNCTION_TYPE_DEX,
   amountRounded,
@@ -101,7 +102,8 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
@@ -119,20 +121,20 @@ export default defineComponent({
       isAllowance,
       isErrorTransaction,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
-      store: root.$store,
+      store,
       direction: direction.value,
       isAllowance: isAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
-    const redirectRoute = computed((): Location => {
+    const redirectRoute = computed((): Partial<RouteLocation> => {
       if (props.multisigTransaction) {
         return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }

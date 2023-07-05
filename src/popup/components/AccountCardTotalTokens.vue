@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { useConnection } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { IAccount } from '../../types';
@@ -54,6 +54,11 @@ export default defineComponent({
     @extend %face-sans-14-medium;
 
     line-height: 16px;
+
+    .digit {
+      display: inline-block;
+      margin-right: 4px;
+    }
 
     .wording {
       opacity: 0.85;

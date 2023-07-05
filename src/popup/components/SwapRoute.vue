@@ -130,7 +130,7 @@ export default {
     :last-of-type {
       flex: 1;
 
-      .tokens::v-deep {
+      .tokens:deep() {
         width: 100%;
       }
     }
@@ -144,7 +144,7 @@ export default {
     height: 24px;
 
     .divider,
-    .tokens::v-deep {
+    .tokens:deep() {
       background: variables.$color-bg-4;
       z-index: 1;
       padding-right: 4px;

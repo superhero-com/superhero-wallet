@@ -5,12 +5,15 @@
     @click="openAssetSelector"
   >
     {{ displayToken }}
-    <ChevronDown v-if="!disabled" />
+    <ChevronDown
+      v-if="!disabled"
+      class="chevron-down"
+    />
   </BtnPlain>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import { useModals } from '../../composables';
 import { MODAL_ASSET_SELECTOR } from '../utils/constants';
 import type { IToken } from '../../types';
@@ -28,6 +31,7 @@ export default defineComponent({
     focused: Boolean,
     showTokensWithBalance: Boolean,
   },
+  emits: ['select-asset'],
   setup(props, { emit }) {
     const { openModal } = useModals();
 
@@ -40,7 +44,7 @@ export default defineComponent({
     });
 
     function handleChange(token: IToken) {
-      emit('input', token);
+      emit('select-asset', token);
     }
 
     function openAssetSelector() {
@@ -50,7 +54,8 @@ export default defineComponent({
           showTokensWithBalance: props.showTokensWithBalance,
           resolve: (token) => token,
         })
-          .then((token) => handleChange(token));
+          .then((token) => handleChange(token))
+          .catch(() => {}); // closing the modal rejects the promise
       }
     }
 

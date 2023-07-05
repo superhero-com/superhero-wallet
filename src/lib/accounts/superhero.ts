@@ -4,8 +4,8 @@ import {
   messageToHash,
   RpcRejectedByUserError,
   unpackTx,
+  Encoded,
 } from '@aeternity/aepp-sdk-13';
-import { Encoded } from '@aeternity/aepp-sdk-13/src/utils/encoder';
 import { Store } from 'vuex';
 import { useAccounts } from '../../composables/accounts';
 import { IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../environment';
@@ -79,7 +79,7 @@ export class AccountSuperhero extends AccountBase {
           host,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       throw new RpcRejectedByUserError(error.message);
     }
   }

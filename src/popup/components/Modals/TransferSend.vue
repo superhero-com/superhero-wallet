@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <Modal
     class="transfer-send-modal"
@@ -11,7 +12,7 @@
         <component
           :is="currentStepConfig.component"
           ref="currentRenderedComponent"
-          v-model="transferData"
+          v-model:transferData="transferData"
           :is-multisig="isMultisig"
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"
@@ -44,13 +45,16 @@
 
 <script lang="ts">
 import {
+  Component,
   computed,
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
-import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
+import { useI18n } from 'vue-i18n';
+
+import { ObjectValues, ResolveRejectCallback, ITokenList } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, validateTipUrl } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
@@ -90,8 +94,10 @@ export default defineComponent({
     address: { type: String, default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const currentRenderedComponent = ref<Vue.Component>();
+  setup(props) {
+    const { t } = useI18n();
+
+    const currentRenderedComponent = ref<Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
@@ -114,12 +120,12 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('common.next');
+        return t('common.next');
       }
       if (props.isMultisig) {
-        return root.$t('modals.multisigTxProposal.proposeAndApprove');
+        return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('common.send');
+      return t('common.send');
     });
 
     function proceedToNextStep() {
@@ -150,7 +156,7 @@ export default defineComponent({
       currentStep.value = STEPS.form;
     }
 
-    const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
+    const steps: Record<Step, { component: Component, onSuccess: () => void }> = {
       [STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,

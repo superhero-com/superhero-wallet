@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { ITokenResolved } from '../../types';
 import {
   AETERNITY_COIN_NAME,
@@ -113,9 +113,9 @@ export default defineComponent({
     const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
     const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
     const imgToken = computed(() => (
-        props.tokens?.[2]
-          ? mapToken(props.tokens[2])
-          : fromToken.value
+      props.tokens?.[2]
+        ? mapToken(props.tokens[2])
+        : fromToken.value
     ));
 
     return {

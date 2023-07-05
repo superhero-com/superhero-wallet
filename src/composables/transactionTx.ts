@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import type {
   IAccountLabeled,
   ITokenList,
@@ -100,12 +100,12 @@ export function useTransactionTx({
   const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
     ? TX_DIRECTION.received
     : getTxDirection.value(
-        outerTx.value?.payerId ? outerTx.value : innerTx.value,
-        externalAddress
-        || (
-          ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
-          && txOwnerAddress.value
-        ),
+      outerTx.value?.payerId ? outerTx.value : innerTx.value,
+      externalAddress
+      || (
+        ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
+        && txOwnerAddress.value
+      ),
     ));
 
   function getOwnershipAccount(
@@ -115,7 +115,8 @@ export function useTransactionTx({
       case TRANSACTION_OWNERSHIP_STATUS.current:
         return {
           ...activeAccount.value,
-          label: i18n.t('transaction.overview.accountAddress'),
+          // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
+          label: i18n.global.t('transaction.overview.accountAddress'),
           url: getExplorerPath.value(activeAccount.value.address),
         };
       case TRANSACTION_OWNERSHIP_STATUS.subAccount: {

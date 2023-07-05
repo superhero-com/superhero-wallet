@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 import { IAccountOverView } from '../../types';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';

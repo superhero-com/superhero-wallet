@@ -10,12 +10,12 @@ describe('Input field', () => {
     const wrapper = shallowMount(InputField);
     await wrapper.find('input').setValue(value);
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted('input')).toBeTruthy();
-    expect(wrapper.emitted('input')[0]).toEqual([value.toString()]);
+    expect(wrapper.emitted('update:modelValue')).toBeTruthy();
+    expect(wrapper.emitted('update:modelValue')[0]).toEqual([value.toString()]);
   }));
   it('should be disabled', async () => {
     const wrapper = shallowMount(InputField, {
-      propsData: {
+      props: {
         readonly: true,
       },
     });

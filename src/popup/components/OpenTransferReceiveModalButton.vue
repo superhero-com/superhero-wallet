@@ -9,7 +9,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { MODAL_TRANSFER_RECEIVE } from '../utils';
 import { useModals } from '../../composables';
 import BtnBox from './buttons/BtnBox.vue';
@@ -22,8 +23,9 @@ export default defineComponent({
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
   },
-  setup(props, { root }) {
+  setup(props) {
     const { openModal } = useModals();
+    const { t } = useI18n();
 
     function openTransferReceiveModal() {
       openModal(MODAL_TRANSFER_RECEIVE, {
@@ -37,8 +39,8 @@ export default defineComponent({
         return '';
       }
       return props.isMultisig
-        ? root.$t('dashboard.receiveCard.descriptionMultisig')
-        : root.$t('dashboard.receiveCard.description');
+        ? t('dashboard.receiveCard.descriptionMultisig')
+        : t('dashboard.receiveCard.description');
     });
 
     return {

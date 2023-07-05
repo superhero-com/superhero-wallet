@@ -26,8 +26,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch } from '@vue/composition-api';
+import { computed, defineComponent, watch } from 'vue';
 
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useMultisigAccounts } from '../../composables';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
@@ -42,16 +44,19 @@ export default defineComponent({
   props: {
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const { multisigAccounts } = useMultisigAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+
+    const { multisigAccounts } = useMultisigAccounts({ store });
 
     const hasPendingMultisigTransaction = computed(
       () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),
     );
 
     function toggleMultisigDashboard(showMultisigDashboard: false) {
-      root.$store.commit('initTransactions');
-      root.$router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
+      store.commit('initTransactions');
+      router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }
 
     watch(() => multisigAccounts.value, () => {

@@ -3,7 +3,7 @@
     v-bind="$attrs"
     class="textarea"
     :class="[ size, { 'auto-height' : autoHeight } ]"
-    @input="handleInput"
+    @update:modelValue="handleInput"
   >
     <template #default="{ inputId }">
       <textarea
@@ -14,10 +14,10 @@
         :class="{ resizable: resizable && !autoHeight }"
         :style="{ height }"
         :placeholder="placeholder"
-        :value="value"
+        :value="modelValue"
         :rows="1"
         @keydown.enter.prevent="handleEnterClick"
-        @input="handleInput"
+        @input="(payload) => handleInput(payload as InputEvent)"
       />
     </template>
 
@@ -37,7 +37,7 @@ import {
   nextTick,
   watch,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
 import InputField from '../InputField.vue';
 
 const SIZES = ['xs', 'sm', 'rg', 'md'];
@@ -48,7 +48,7 @@ export default defineComponent({
   },
   props: {
     type: { type: String, default: '' },
-    value: { type: String, default: '' },
+    modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
     enterSubmit: Boolean,
     resizable: { type: Boolean, default: true },
@@ -59,12 +59,13 @@ export default defineComponent({
     },
     autoHeight: Boolean,
   },
+  emits: ['update:modelValue', 'submit'],
   setup(props, { emit }) {
     const textarea = ref<HTMLTextAreaElement>();
     const height = ref<string | undefined>();
     function handleInput(event: InputEvent) {
       const { value } = event.target as HTMLInputElement;
-      emit('input', value);
+      emit('update:modelValue', value);
     }
 
     function handleEnterClick() {
@@ -74,7 +75,7 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      watch(() => props.value, () => {
+      watch(() => props.modelValue, () => {
         if (props.autoHeight && textarea.value) {
           height.value = 'auto';
           nextTick(() => {

@@ -1,4 +1,5 @@
 import { merge } from 'lodash-es';
+import { h } from 'vue';
 import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
@@ -216,11 +217,11 @@ export const routes: WalletAppRouteConfig[] = [
       },
 
       {
-        path: 'details/transactions/:hash',
+        path: 'details/transactions/:hash/:transactionOwner',
         name: ROUTE_MULTISIG_TX_DETAILS,
         component: {
           functional: true,
-          render: (h, context) => h(
+          render: (context: any) => h(
             TransactionDetails,
             merge({}, context, { props: { multisigDashboard: true } }),
           ),
@@ -229,6 +230,7 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'tx-details',
           showHeaderNavigation: true,
+          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
         },
       },
       {
@@ -277,8 +279,8 @@ export const routes: WalletAppRouteConfig[] = [
     ],
   },
   {
-    path: '/transfer*',
-    redirect: '/account*',
+    path: '/transfer/:t(.*)',
+    redirect: '/account/:a(.*)',
   },
   {
     name: 'popup-sign-tx',
@@ -488,8 +490,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/tips*',
-    redirect: '/account*',
+    path: '/tips/:tip(.*)',
+    redirect: '/account/:account(.*)',
   },
   {
     path: '/retip',
@@ -500,13 +502,14 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/account-details/transactions/:hash',
+    path: '/account-details/transactions/:hash/:transactionOwner',
     name: ROUTE_TX_DETAILS,
     component: TransactionDetails,
     props: true,
     meta: {
       title: 'tx-details',
       showHeaderNavigation: true,
+      backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
     },
   },
   {
@@ -693,7 +696,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '*',
+    path: '/:pathMatch(.*)',
     component: NotFound,
     props: true,
     meta: {

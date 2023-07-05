@@ -1,12 +1,10 @@
-import Vue from 'vue';
-import VueI18n from 'vue-i18n';
+import { createI18n } from 'vue-i18n';
 import en from '../../popup/locales/en.json';
-
-Vue.use(VueI18n);
 
 const fallbackLocale = 'en';
 
-export const i18n = new VueI18n({
+export const i18n = createI18n({
+  allowComposition: true,
   fallbackLocale,
   locale: fallbackLocale,
   messages: { en },
@@ -24,11 +22,11 @@ const languages = {
 };
 
 const fetchAndSetLocale = async (languageCode) => {
-  if (!i18n.availableLocales.includes(languageCode)) {
+  if (!i18n.global.availableLocales.includes(languageCode)) {
     const messages = (await languages[languageCode].getMessages()).default;
-    i18n.setLocaleMessage(languageCode, messages);
+    i18n.global.setLocaleMessage(languageCode, messages);
   }
-  i18n.locale = languageCode;
+  i18n.global.locale.value = languageCode;
 };
 
 const preferredLocale = (() => {

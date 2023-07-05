@@ -13,20 +13,27 @@
       <a>{{ tip.url }}</a>
     </div>
 
-    <InputAmount
-      v-model="formModel.amount"
-      v-validate="{
+    <Field
+      v-slot="{ field, errorMessage}"
+      name="amount"
+      :rules="{
         required: true,
         min_value_exclusive: 0,
         min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_ae: fee.toString(),
       }"
-      name="amount"
-      class="amount-input"
-      ae-only
-      :message="errors.first('amount')"
-    />
+    >
+      <InputAmount
+        v-bind="field"
+        v-model="formModel.amount"
+        name="amount"
+        class="amount-input"
+        ae-only
+        :message="errorMessage"
+      />
+    </Field>
+
     <div
       v-if="tip.title"
       class="tip-note-preview"
@@ -37,7 +44,7 @@
     <BtnMain
       class="bottom-btn"
       extend
-      :disabled="!isTippingSupported || $validator.errors.has('amount')"
+      :disabled="!isTippingSupported || errorAmount"
       @click="sendTip"
     >
       {{ $t('common.confirm') }}
@@ -60,8 +67,12 @@ import {
   onMounted,
   ref,
   computed,
-} from '@vue/composition-api';
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import { Field, useFieldError } from 'vee-validate';
 import {
   IToken,
   IPendingTransaction,
@@ -91,21 +102,28 @@ export default defineComponent({
     UrlStatus,
     BtnMain,
     BalanceInfo,
+    Field,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { t } = useI18n();
+    const errorAmount = useFieldError();
+
     const formModel = ref<IFormModel>({
       amount: '',
     });
 
-    const { isTippingSupported } = useSdk({ store: root.$store });
+    const { isTippingSupported } = useSdk({ store });
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    const { activeAccount } = useAccounts({ store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { balance, aeternityCoin } = useBalances({ store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { getTippingContracts } = useTippingContracts({ store });
 
-    const tipId = root.$route.query.id;
+    const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
@@ -126,7 +144,7 @@ export default defineComponent({
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
-        const tippingContract = tipId.includes('_v2') || tipId.includes('_v3')
+        const tippingContract = tipId?.includes('_v2') || tipId?.includes('_v3')
           ? tippingV2
           : tippingV1;
         if (!tippingContract) {
@@ -138,7 +156,7 @@ export default defineComponent({
           && formModel.value.selectedAsset?.contractId
           && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
         ) {
-          await root.$store.dispatch(
+          await store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
             [
               formModel.value.selectedAsset.contractId,
@@ -175,11 +193,11 @@ export default defineComponent({
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
           },
         };
-        root.$store.dispatch('addPendingTransaction', transaction);
+        store.dispatch('addPendingTransaction', transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         error.payload = tip.value;
@@ -196,7 +214,7 @@ export default defineComponent({
       if (!tipId) throw new Error('"id" param is missing');
 
       try {
-        tip.value = await root.$store.dispatch('getCacheTip', tipId);
+        tip.value = await store.dispatch('getCacheTip', tipId);
       } catch (error: any) {
         error.payload = tipId;
         throw error;
@@ -216,6 +234,7 @@ export default defineComponent({
       fee,
       balance,
       openCallbackOrGoHome,
+      errorAmount,
     };
   },
 });

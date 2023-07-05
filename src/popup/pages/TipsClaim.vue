@@ -49,7 +49,10 @@ import {
   computed,
   ref,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
@@ -78,11 +81,15 @@ export default defineComponent({
     BtnHelp,
     AccountInfo,
   },
-  setup(props, { root }) {
-    const { isTippingSupported } = useSdk({ store: root.$store });
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const { t } = useI18n();
+    const store = useStore();
+    const router = useRouter();
+
+    const { isTippingSupported } = useSdk({ store });
+    const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store });
 
     const tipUrl = ref('');
     const loading = ref(false);
@@ -106,29 +113,29 @@ export default defineComponent({
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await root.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
         await Promise.all([
-          root.$store.dispatch('cacheInvalidateOracle'),
-          root.$store.dispatch('cacheInvalidateTips'),
+          store.dispatch('cacheInvalidateOracle'),
+          store.dispatch('cacheInvalidateTips'),
         ]);
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
 
-        root.$router.push({ name: ROUTE_ACCOUNT });
+        router.push({ name: ROUTE_ACCOUNT });
       } catch (error: any) {
         const { error: errorMessage = '' } = error.response ? error.response.data : {};
         let msg;
         if (errorMessage.includes('MORE_ORACLES_NEEDED')) {
-          msg = root.$t('pages.claim.moreOracles');
+          msg = t('pages.claim.moreOracles');
         } else if (errorMessage.includes('URL_NOT_EXISTING')) {
-          msg = root.$t('pages.claim.urlNotExisting');
+          msg = t('pages.claim.urlNotExisting');
         } else if (
           errorMessage.includes('NO_ZERO_AMOUNT_PAYOUT')
           || error.message.includes('NO_ZERO_AMOUNT_PAYOUT')
         ) {
-          msg = root.$t('pages.claim.noZeroClaim');
+          msg = t('pages.claim.noZeroClaim');
         } else if (errorMessage.includes('ORACLE_SERVICE_CHECK_CLAIM_FAILED')) {
-          msg = root.$t('pages.claim.oracleFailed');
+          msg = t('pages.claim.oracleFailed');
         } else if (errorMessage) {
           msg = errorMessage;
         }
@@ -179,7 +186,7 @@ export default defineComponent({
     .help-button {
       margin-left: 8px;
 
-      ::v-deep .icon {
+      :deep(.icon) {
         width: 32px;
         height: 32px;
       }

@@ -1,6 +1,5 @@
 import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import Vue from 'vue';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
 import getters from '../../src/store/getters';
 import { i18n } from '../../src/store/plugins/languages';
@@ -11,8 +10,6 @@ import {
   STUB_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
 } from '../../src/popup/utils';
-
-Vue.use(Vuex);
 
 const store = new Vuex.Store({
   getters: {
@@ -30,19 +27,19 @@ const store = new Vuex.Store({
 
 const transactionLabels = {
   payForGaAttach: [
-    i18n.t('transaction.type.payingForTx'),
-    i18n.t('transaction.type.createMultisigVault'),
+    i18n.global.t('transaction.type.payingForTx'),
+    i18n.global.t('transaction.type.createMultisigVault'),
   ],
   gaMetaSpend: [
-    i18n.t('transaction.type.gaMetaTx'),
-    i18n.t('transaction.type.spendTx'),
-    i18n.t('transaction.spendType.out'),
+    i18n.global.t('transaction.type.gaMetaTx'),
+    i18n.global.t('transaction.type.spendTx'),
+    i18n.global.t('transaction.spendType.out'),
   ],
-  claim: [i18n.t('pages.token-details.tip'), i18n.t('transaction.spendType.in')],
-  changeAllowance: [i18n.t('transaction.dexType.allowToken')],
-  nameClaim: [AENS, i18n.t('transaction.type.nameClaimTx')],
-  transfer: [i18n.t('transaction.type.spendTx'), i18n.t('transaction.spendType.out')],
-  spend: [i18n.t('transaction.type.spendTx'), i18n.t('transaction.spendType.out')],
+  claim: [i18n.global.t('pages.token-details.tip'), i18n.global.t('transaction.spendType.in')],
+  changeAllowance: [i18n.global.t('transaction.dexType.allowToken')],
+  nameClaim: [AENS, i18n.global.t('transaction.type.nameClaimTx')],
+  transfer: [i18n.global.t('transaction.type.spendTx'), i18n.global.t('transaction.spendType.out')],
+  spend: [i18n.global.t('transaction.type.spendTx'), i18n.global.t('transaction.spendType.out')],
   nameTransfer: [], // unsupported type
 };
 
@@ -56,29 +53,29 @@ const testCases = [
     transactions.transfer, transactions.spend,
   ].map((t) => ({
     props: { transaction: t },
-    labels: [i18n.t('transaction.type.spendTx'), i18n.t('transaction.spendType.out')],
+    labels: [i18n.global.t('transaction.type.spendTx'), i18n.global.t('transaction.spendType.out')],
   })),
   ...[
     transactions.pendingSpend, transactions.pendingTransfer,
     transactions.transfer, transactions.spend,
   ].map((t) => ({
     props: { transaction: { ...t, transactionOwner: testAccount.address } },
-    labels: [i18n.t('transaction.type.spendTx'), i18n.t('transaction.spendType.in')],
+    labels: [i18n.global.t('transaction.type.spendTx'), i18n.global.t('transaction.spendType.in')],
   })),
   ...[
     transactions.pendingTipAe, transactions.pendingTipToken,
     transactions.tip, transactions.retip,
   ].map((t) => ({
     props: { transaction: t },
-    labels: [i18n.t('pages.token-details.tip'), i18n.t('transaction.spendType.out')],
+    labels: [i18n.global.t('pages.token-details.tip'), i18n.global.t('transaction.spendType.out')],
   })),
   ...[transactions.tipToken, transactions.retipToken].map((t) => ({ // unsupported functions
     props: { transaction: t },
-    labels: [t.tx.function, i18n.t('transaction.type.contractCallTx')],
+    labels: [t.tx.function, i18n.global.t('transaction.type.contractCallTx')],
   })),
   {
     props: { transaction: { tx: { type: 'ContractCreateTx' } } },
-    labels: [i18n.t('transaction.type.contractCreateTx')],
+    labels: [i18n.global.t('transaction.type.contractCreateTx')],
   },
   {
     props: { transaction: { pending: true, tx: { type: 'ContractCreateTx' } } },
@@ -100,13 +97,12 @@ describe('TransactionTagList', () => {
   ${props.transaction?.tx?.type ?? props.customTitle}/${props.transaction?.tx?.function}`,
     () => {
       const wrapper = mount(TransactionTagList, {
-        store,
-        propsData: props,
+        global: { plugins: [i18n, store] },
+        props,
       });
-      wrapper.find('.transaction-tag-list').text()
-        .replaceAll('\n', '').trim()
-        .split('  ')
-        .forEach((el, index) => expect(el).toEqual(labels[index] || ''));
+      wrapper.findAll('.transaction-tag').forEach((el, index) => {
+        expect(el.text()).toEqual(labels[index] || '');
+      });
     },
   ));
 });

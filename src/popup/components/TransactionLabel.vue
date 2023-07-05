@@ -43,7 +43,7 @@
         v-if="isErrorTransaction"
         class="error-type"
       >
-        {{ $t('transaction.returnType')[transaction.tx.returnType] }}
+        {{ $t(`transaction.returnType.${transaction.tx.returnType}`) }}
       </span>
       <span
         v-if="transaction.pending"
@@ -74,9 +74,10 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { TranslateResult } from 'vue-i18n';
+import { TranslateResult, useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useAccounts, useTransactionTx } from '../../composables';
 import { useGetter, useState } from '../../composables/vuex';
 import {
@@ -86,7 +87,6 @@ import {
   ILabel,
   TxFunction,
   TxFunctionRaw,
-  TxType,
 } from '../../types';
 import {
   ABORT_TX_TYPE,
@@ -113,8 +113,11 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     dense: Boolean,
   },
-  setup(props, { root }) {
-    const { accounts, activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { accounts, activeAccount } = useAccounts({ store });
+    const { t } = useI18n();
+
     const {
       outerTxType,
       txType,
@@ -122,7 +125,7 @@ export default defineComponent({
       isDex,
       innerTx,
       isErrorTransaction,
-    } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
+    } = useTransactionTx({ store, tx: props.transaction.tx });
 
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
@@ -130,9 +133,6 @@ export default defineComponent({
     const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
     const label = computed((): ILabel => {
-      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
-      const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
-
       if (txType.value === SCHEMA.TX_TYPE.spend) {
         const isSent = getTxDirection.value(
           innerTx.value,
@@ -140,32 +140,32 @@ export default defineComponent({
         ) === 'sent';
         return {
           text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
+            ? t('transaction.listType.sentTx')
+            : t('transaction.listType.receivedTx'),
           customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
+            ? t('transaction.type.sentTx')
+            : t('transaction.type.receivedTx'),
         };
       }
       if (
         txType.value === TX_TYPE_MDW.GAAttachTx
         && outerTxType.value === TX_TYPE_MDW.PayingForTx
       ) {
-        return labelWrapper(root.$t('transaction.type.multisigVaultCreated'));
+        return labelWrapper(t('transaction.type.multisigVaultCreated'));
       }
       if (isAllowance.value) {
-        return labelWrapper(root.$t('transaction.dexType.allowToken'));
+        return labelWrapper(t('transaction.dexType.allowToken'));
       }
       if (isDex.value) {
         if (FUNCTION_TYPE_DEX.addLiquidity.includes(innerTx.value?.function as TxFunctionRaw)) {
-          return labelWrapper(root.$t('transaction.dexType.provideLiquidity'));
+          return labelWrapper(t('transaction.dexType.provideLiquidity'));
         }
         if (FUNCTION_TYPE_DEX.removeLiquidity.includes(
           innerTx.value?.function as TxFunctionRaw,
         )) {
-          return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
+          return labelWrapper(t('transaction.dexType.removeLiquidity'));
         }
-        return { text: root.$t('common.swap'), hasComma: true };
+        return { text: t('common.swap'), hasComma: true };
       }
       if (
         (
@@ -180,8 +180,8 @@ export default defineComponent({
         || props.transaction.claim
       ) {
         return labelWrapper(props.transaction.claim
-          ? root.$t('transaction.listType.tipReceived')
-          : root.$t('transaction.listType.tipSent'));
+          ? t('transaction.listType.tipReceived')
+          : t('transaction.listType.tipSent'));
       }
       if (
         txType.value === SCHEMA.TX_TYPE.contractCall
@@ -195,15 +195,18 @@ export default defineComponent({
 
         return {
           text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
+            ? t('transaction.listType.sentTx')
+            : t('transaction.listType.receivedTx'),
           customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
+            ? t('transaction.type.sentTx')
+            : t('transaction.type.receivedTx'),
         };
       }
 
-      const translation = transactionListTypes[txType.value!] || transactionTypes[txType.value!];
+      // TODO refactor from dynamic translation keys to map of translations
+      const translation = !t(`transaction.listType.${txType.value!}`).includes('listType')
+        ? t(`transaction.listType.${txType.value!}`)
+        : t(`transaction.type.${txType.value!}`);
 
       if (txType.value && txType.value?.includes('name')) {
         return labelWrapper(translation);

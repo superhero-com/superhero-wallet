@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '../../utils';
 import type { IFormSelectOption } from '../../../types';
 import { useModals } from '../../../composables';
@@ -50,7 +50,7 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },
     itemTitle: { type: String as PropType<keyof IFormSelectOption>, default: 'text' },
     defaultText: { type: String, required: true },
@@ -64,20 +64,24 @@ export default defineComponent({
      */
     unstyled: Boolean,
   },
+  emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
     const { openModal } = useModals();
 
-    const currentText = computed(() => props.persistentDefaultText || !props.value
+    const currentText = computed(() => props.persistentDefaultText || !props.modelValue
       ? props.defaultText
-      : props.options.find(({ value }) => value === props.value)?.[props.itemTitle]);
+      : props.options.find(({ value }) => value === props.modelValue)?.[props.itemTitle]);
 
     function openOptionsModal() {
       openModal(props.accountSelect ? MODAL_ACCOUNT_SELECT_OPTIONS : MODAL_FORM_SELECT_OPTIONS, {
-        value: props.value,
+        value: props.modelValue,
         options: props.options,
         title: props.defaultText,
       })
-        .then((val) => emit('select', val))
+        .then((val) => {
+          emit('select', val);
+          emit('update:modelValue', val);
+        })
         .catch(() => null); // Closing the modal does nothing
     }
 

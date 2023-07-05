@@ -7,14 +7,15 @@
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
         <AccountSelector v-model="creatorAddress" />
-        <i18n
+        <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
-          path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
+          keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
           tag="div"
           class="creator-error-message"
+          scope="global"
         >
           <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
-        </i18n>
+        </i18n-t>
       </template>
     </DetailsItem>
 
@@ -89,7 +90,8 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import {
   IAccountFetched,
   ICreateMultisigAccount,
@@ -134,17 +136,18 @@ export default defineComponent({
     confirmationsRequired: { type: Number, required: true },
     accountId: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { accounts } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { accounts } = useAccounts({ store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
-    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
+    const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk({ store: root.$store });
+    const { getSdk } = useSdk({ store });
 
     const { openModal } = useModals();
 

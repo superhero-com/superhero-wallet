@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts } from '../../composables';
 
 import DetailsItem from './DetailsItem.vue';
@@ -45,8 +46,10 @@ export default defineComponent({
       default: () => [],
     },
   },
-  setup(props, { root }) {
-    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+
+    const { isLocalAccountAddress } = useAccounts({ store });
 
     return {
       isLocalAccountAddress,

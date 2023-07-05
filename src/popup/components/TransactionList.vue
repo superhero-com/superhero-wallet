@@ -39,7 +39,9 @@ import {
   onUnmounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   getTransaction,
   getMultisigTransaction,
@@ -75,7 +77,6 @@ import {
   ITransactionsState,
   ITx,
 } from '../../types';
-import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
@@ -87,15 +88,18 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { t } = useI18n();
+
     const {
       activeAccount,
       accounts,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const { isAppActive } = useUi();
 
@@ -109,9 +113,9 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { dexContracts } = useSdk({ store: root.$store });
+    const { dexContracts } = useSdk({ store });
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const loading = ref(false);
     const isDestroyed = ref(false);
@@ -187,7 +191,7 @@ export default defineComponent({
           case FILTER_MODE.in:
             return direction === TX_DIRECTION.received;
           default:
-            throw new Error(`${i18n.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });
     }

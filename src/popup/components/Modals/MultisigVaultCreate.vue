@@ -9,7 +9,7 @@
     <!--
       Step 1: The form
     -->
-    <form
+    <Form
       v-if="currentStep === STEPS.form"
       class="multisig-vault-create-form"
       @submit.prevent="openReviewStep"
@@ -30,38 +30,48 @@
           :options="accountsSelectOptions"
           account-select
         />
-        <FormTextarea
+        <Field
           v-else
+          v-slot="{ field, errorMessage }"
           v-model.trim="signer.address"
-          v-validate="{
+          :name="`signer-address-${index}`"
+          :rules="{
             required: true,
             account_address: true,
           }"
-          auto-height
-          :label="getSignerLabel(index)"
-          :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
-          :name="`signer-address-${index}`"
-          :message="errors.first(`signer-address-${index}`) || getErrorMessage(signer)"
-          :class="{
-            error: checkIfSignerAddressDuplicated(signer)
-          }"
         >
-          <template #label-after>
-            <a
-              class="scan-button"
-              @click.prevent="openScanQrModal(index)"
-            >
-              <QrScanIcon />
-            </a>
-          </template>
-          <template #after>
-            <PlusCircleIcon
-              v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
-              class="btn-remove-signer"
-              @click="removeSigner(index)"
-            />
-          </template>
-        </FormTextarea>
+          <FormTextarea
+            v-bind="field"
+            :model-value="signer.address"
+            auto-height
+            :label="getSignerLabel(index)"
+            :placeholder="$t('modals.createMultisigAccount.signerInputPlaceholder')"
+            :name="`signer-address-${index}`"
+            :message="errorMessage || getErrorMessage(signer)"
+            :class="{
+              error: checkIfSignerAddressDuplicated(signer)
+            }"
+          >
+            <template #label-after>
+              <a
+                class="scan-button"
+                @click.prevent="openScanQrModal(index)"
+              >
+                <QrScanIcon />
+              </a>
+            </template>
+            <template #after>
+              <a
+                v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+                @click="removeSigner(index)"
+              >
+                <PlusCircleIcon
+                  class="btn-remove-signer"
+                />
+              </a>
+            </template>
+          </FormTextarea>
+        </Field>
       </div>
 
       <div class="signers-add-wrapper">
@@ -88,13 +98,14 @@
             :size="signers.length"
           />
 
-          <i18n
-            path="modals.createMultisigAccount.consensusRequiredContent"
+          <i18n-t
+            keypath="modals.createMultisigAccount.consensusRequiredContent"
             tag="span"
             class="text"
+            scope="global"
           >
             <span class="text-emphasis">{{ signers.length }} </span>
-          </i18n>
+          </i18n-t>
 
           <BtnHelp
             :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
@@ -102,7 +113,7 @@
           />
         </div>
       </div>
-    </form>
+    </Form>
 
     <!--
       Step 2: Review
@@ -165,7 +176,11 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { Field, Form, useFormErrors } from 'vee-validate';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
@@ -219,18 +234,25 @@ export default defineComponent({
     PlusCircleIcon,
     MultisigVaultCreateReview,
     FormSelect,
+    Field,
+    Form,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
     reject: { type: Function, required: true },
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
+
+    const { accountsSelectOptions } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
+    const errors = useFormErrors();
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+    } = useMultisigAccounts({ store, pollOnce: true });
 
     const {
       multisigAccount,
@@ -242,7 +264,7 @@ export default defineComponent({
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
 
     const currentStep = ref<Step>(STEPS.form);
 
@@ -270,7 +292,7 @@ export default defineComponent({
       () => (
         signers.value.length >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS
         && isValidSigners.value
-        && !(root as any).$validator.errors.items?.length
+        && !errors.value?.length
       ),
     );
 
@@ -286,7 +308,7 @@ export default defineComponent({
 
     function getErrorMessage(signer: ICreateMultisigAccount) {
       return checkIfSignerAddressDuplicated(signer)
-        ? root.$t('modals.createMultisigAccount.errorDuplicatingInputMessage')
+        ? t('modals.createMultisigAccount.errorDuplicatingInputMessage')
         : null;
     }
 
@@ -296,7 +318,7 @@ export default defineComponent({
      */
     async function openScanQrModal(signerIndex: number) {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: root.$t('pages.send.scanAddress'),
+        title: t('pages.send.scanAddress'),
         icon: 'critical',
       });
 
@@ -307,7 +329,7 @@ export default defineComponent({
       // Check if the address is valid and it's not a name
       if (!(valid && !isName)) {
         openDefaultModal({
-          title: root.$t('modals.invalid-qr-code.msg'),
+          title: t('modals.invalid-qr-code.msg'),
           icon: 'critical',
         });
         return;
@@ -316,7 +338,7 @@ export default defineComponent({
       // Check if signer address already added
       if (signers.value.find((signer) => signer.address === scanResult)) {
         openDefaultModal({
-          title: root.$t('modals.createMultisigAccount.errorDuplicatingSigner'),
+          title: t('modals.createMultisigAccount.errorDuplicatingSigner'),
           icon: 'critical',
         });
         return;
@@ -327,7 +349,7 @@ export default defineComponent({
     }
 
     function getSignerLabel(index: number) {
-      return `${root.$t('modals.createMultisigAccount.signer')} ${index + 1}`;
+      return `${t('modals.createMultisigAccount.signer')} ${index + 1}`;
     }
 
     function openFormStep() {
@@ -353,7 +375,7 @@ export default defineComponent({
       } catch (error) {
         handleUnknownError(error);
         await openDefaultModal({
-          title: root.$t('multisig.multisigVaultCreationFailed'),
+          title: t('multisig.multisigVaultCreationFailed'),
           icon: 'critical',
         });
         currentStep.value = STEPS.form;
@@ -364,7 +386,7 @@ export default defineComponent({
       if (multisigAccount.value) {
         await props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
-        root.$router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
+        router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
       }
     }
 
@@ -454,6 +476,7 @@ export default defineComponent({
       transform: rotate(45deg);
       cursor: pointer;
       transition: variables.$transition-interactive;
+      color: variables.$color-grey-light;
 
       &:hover {
         opacity: 0.8;

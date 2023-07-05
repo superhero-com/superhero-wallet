@@ -2,10 +2,11 @@
   <div class="review-tip-wrapper">
     <ModalHeader :title="$t('pages.send.sendingCryptoToUrl')">
       <template #subtitle>
-        <i18n
-          path="pages.send.tipInfo"
+        <i18n-t
+          keypath="pages.send.tipInfo"
           tag="span"
           class="subtitle"
+          scope="global"
         >
           <a
             :href="AGGREGATOR_URL"
@@ -14,7 +15,7 @@
           >
             {{ $t('pages.notifications.superhero') }}
           </a>
-        </i18n>
+        </i18n-t>
       </template>
     </ModalHeader>
 
@@ -73,6 +74,8 @@
 </template>
 
 <script>
+import { useStore } from 'vuex';
+
 import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { useAccounts } from '../../composables';
 import ModalHeader from './ModalHeader.vue';
@@ -98,8 +101,9 @@ export default {
   props: {
     transferData: { type: Object, required: true },
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const { activeAccount } = useAccounts({ store });
 
     return {
       activeAccount,
@@ -194,7 +198,7 @@ export default {
     gap: 4px;
     color: rgba(variables.$color-white, 0.75);
 
-    ::v-deep .token-amount {
+    :deep(.token-amount) {
       .symbol {
         font-weight: 500;
       }

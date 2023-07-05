@@ -7,7 +7,7 @@
       v-for="(filterOptions, filterKey) in filters"
       :key="filterKey"
       class="filter"
-      :class="{ active: value.key === filterKey || value.filter === filterKey }"
+      :class="{ active: modelValue.key === filterKey || modelValue.filter === filterKey }"
       @click="handleClick(filterKey)"
     >
       <span>{{ filterOptions.name }}</span>
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from '@vue/composition-api';
+import { defineComponent, PropType, ref } from 'vue';
 import { useViewport } from '../../composables/viewport';
 import FilterArrowIcon from '../../icons/filter-arrow.svg?vue-component';
 import SortIcon from '../../icons/sort.svg?vue-component';
@@ -35,10 +35,11 @@ export default defineComponent({
     BtnPlain,
   },
   props: {
-    value: { type: Object as PropType<IFilterInputPayload>, required: true },
+    modelValue: { type: Object as PropType<IFilterInputPayload>, required: true },
     filters: { type: Object as PropType<IFilters>, required: true },
     scrollTopThreshold: { type: Number, default: 140 },
   },
+  emits: ['update:modelValue'],
   setup(props, { emit }) {
     const { viewportElement } = useViewport();
 
@@ -51,7 +52,7 @@ export default defineComponent({
         viewportElement.value.scrollTo({ top: props.scrollTopThreshold, behavior: 'smooth' });
       }
 
-      if (filterOptions.rotated !== undefined && props.value.key === filterKey) {
+      if (filterOptions.rotated !== undefined && props.modelValue.key === filterKey) {
         filterOptions.rotated = !filterOptions.rotated;
       }
 
@@ -59,7 +60,7 @@ export default defineComponent({
         ...rotatableFilters.value[filterKey],
         key: filterKey,
       };
-      emit('input', inputPayload);
+      emit('update:modelValue', inputPayload);
     }
 
     return {

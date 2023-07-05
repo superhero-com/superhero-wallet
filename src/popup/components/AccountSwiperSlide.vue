@@ -1,39 +1,37 @@
 <template>
-  <swiper-slide class="account-swiper-slide">
-    <Component
-      :is="to ? 'BtnBase' : 'div'"
-      :to="to"
-      :class="['account-swiper-slide-card', { selected }]"
-      :disabled="!selected"
-      :bg-color="color"
-    >
-      <slot />
+  <Component
+    :is="to ? 'BtnBase' : 'div'"
+    :to="to"
+    :class="['account-swiper-slide-card', { selected }]"
+    :disabled="!selected"
+    :bg-color="color"
+  >
+    <slot />
 
-      <template v-if="!IS_CORDOVA">
-        <BtnPlain
-          v-if="idx !== 0"
-          class="swiper-button prev"
-          @click="$emit('slide', idx - 1)"
-        >
-          <ChevronIcon />
-        </BtnPlain>
+    <template v-if="!IS_CORDOVA">
+      <BtnPlain
+        v-if="idx !== 0"
+        class="swiper-button prev"
+        @click.prevent="$emit('slide', idx - 1)"
+      >
+        <ChevronIcon />
+      </BtnPlain>
 
-        <BtnPlain
-          v-if="!hideNext"
-          class="swiper-button next"
-          @click="$emit('slide', idx + 1)"
-        >
-          <ChevronIcon />
-        </BtnPlain>
-      </template>
-    </Component>
-  </swiper-slide>
+      <BtnPlain
+        v-if="!hideNext"
+        class="swiper-button next"
+        @click.prevent="$emit('slide', idx + 1)"
+      >
+        <ChevronIcon />
+      </BtnPlain>
+    </template>
+  </Component>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { Location } from 'vue-router';
-import { SwiperSlide } from 'vue-awesome-swiper';
+import { computed, defineComponent, PropType } from 'vue';
+import { RouteLocation } from 'vue-router';
+
 import { getAddressColor } from '../utils/avatar';
 
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -43,17 +41,17 @@ import ChevronIcon from '../../icons/chevron.svg?vue-component';
 export default defineComponent({
   components: {
     BtnBase,
-    SwiperSlide,
     BtnPlain,
     ChevronIcon,
   },
   props: {
     idx: { type: Number, default: -1 },
     address: { type: String, default: '' },
-    to: { type: Object as PropType<Location>, default: null },
+    to: { type: Object as PropType<RouteLocation>, default: null },
     selected: Boolean,
     hideNext: Boolean,
   },
+  emits: ['slide'],
   setup(props) {
     const color = computed(() => getAddressColor(props.address));
 

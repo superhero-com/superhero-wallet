@@ -1,17 +1,19 @@
 <template>
   <div class="account-selector">
-    <Avatar :address="value" />
+    <Avatar :address="modelValue.toString()" />
     <div>
       <BtnPill
         class="account-select"
         dense
       >
         <FormSelect
-          :value="value"
+          v-bind="$attrs"
+          :model-value="modelValue"
           :options="options || accountsSelectOptions"
           unstyled
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
+          @update:modelValue="$emit('update:modelValue', $event)"
           v-on="$listeners"
         >
           <template #current-text="{ text }">
@@ -26,14 +28,15 @@
       </BtnPill>
       <AddressTruncated
         show-explorer-link
-        :address="value"
+        :address="modelValue.toString()"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts } from '../../composables';
 import type { IFormSelectOption } from '../../types';
 
@@ -55,11 +58,14 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  emits: ['update:modelValue'],
+  setup() {
+    const store = useStore();
+
+    const { accountsSelectOptions } = useAccounts({ store });
 
     return { accountsSelectOptions };
   },

@@ -1,10 +1,11 @@
 <template>
   <Component
+    v-bind="$attrs"
     :is="component"
     :to="to"
     :href="href"
     :target="href ? '_blank' : null"
-    :aria-disabled="disabled"
+    :aria-disabled="disabled ? 'true' : null"
     :style="bgColorStyle"
     :class="[
       `variant-${variant}`,
@@ -14,14 +15,13 @@
       }
     ]"
     class="btn-base"
-    v-on="$listeners"
   >
     <slot />
   </Component>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 
 export const BTN_VARIANT = [
   'primary',

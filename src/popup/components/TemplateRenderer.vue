@@ -1,4 +1,6 @@
 <script>
+import { defineComponent, h } from 'vue';
+
 const renderNodeContent = (createElement, node, option = null) => (!node.childNodes.length
   ? node.textContent
   : Array.from(node.childNodes)
@@ -17,20 +19,16 @@ const renderNodeContent = (createElement, node, option = null) => (!node.childNo
     })
 );
 
-export default {
-  functional: true,
+export default defineComponent({
+  name: 'TemplateRenderer',
   props: {
     str: { type: String, required: true },
     option: { type: Object, default: null },
   },
-  render(createElement, { data, props }) {
-    return createElement(
-      'span',
-      { class: data.class },
-      renderNodeContent(createElement, new DOMParser()
-        .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
-      props.option),
-    );
+  setup(props, { attrs }) {
+    return () => h('span', { class: attrs.class }, renderNodeContent(h, new DOMParser()
+      .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
+    props.option));
   },
-};
+});
 </script>

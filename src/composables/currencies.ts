@@ -1,4 +1,4 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import BigNumber from 'bignumber.js';
 import type {
   CurrencyCode,
@@ -14,6 +14,7 @@ import {
   setLocalStorageItem,
   AETERNITY_COIN_ID,
 } from '../popup/utils';
+
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { CoinGecko } from '../lib/CoinGecko';
 

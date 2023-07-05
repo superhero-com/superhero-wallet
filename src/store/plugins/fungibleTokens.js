@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
 
@@ -14,8 +13,6 @@ import {
 import { useMiddleware } from '../../composables';
 
 export default (store) => {
-  const { fetchFromMiddleware } = useMiddleware({ store });
-
   store.registerModule('fungibleTokens', {
     namespaced: true,
     state: {
@@ -37,11 +34,13 @@ export default (store) => {
         state.transactions = {};
       },
       addTokenBalance(state, tokens) {
-        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
+        state.tokens = { ...state.tokens, ...tokens };
       },
     },
     actions: {
       async loadAvailableTokens({ commit }) {
+        const { fetchFromMiddleware } = useMiddleware({ store });
+
         const response = await fetchAllPages(
           () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
           fetchFromMiddleware,
@@ -60,6 +59,8 @@ export default (store) => {
         commit,
       }) {
         const newBalances = {};
+        const { fetchFromMiddleware } = useMiddleware({ store });
+
         await Promise.all(accounts.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
@@ -67,9 +68,7 @@ export default (store) => {
               () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
               fetchFromMiddleware,
             );
-
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
-
             const balances = tokens.map(({ amount, contract_id: contractId }) => {
               const token = availableTokens[contractId];
               if (!token) return null;
@@ -83,7 +82,6 @@ export default (store) => {
                 balance,
                 convertedBalance,
               };
-
               return objectStructure;
             });
             newBalances[address] = { tokenBalances: balances };
@@ -192,9 +190,13 @@ export default (store) => {
   });
 
   store.watch(
-    (state, { activeNetwork }) => activeNetwork,
+    (state) => state.current.network,
     async (network, oldNetwork) => {
-      if (network?.middlewareUrl === oldNetwork?.middlewareUrl) return;
+      const activeNetwork = store.getters.networks[network];
+      const oldActiveNetwork = store.getters.networks[oldNetwork];
+      if (activeNetwork?.middlewareUrl === oldActiveNetwork?.middlewareUrl) {
+        return;
+      }
       store.commit('fungibleTokens/resetTokensAndTransactions');
 
       await store.dispatch('fungibleTokens/loadAvailableTokens');

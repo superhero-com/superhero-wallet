@@ -17,8 +17,9 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 import {
   postJson,
   TX_DIRECTION,
@@ -49,7 +50,10 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { t, tm } = useI18n();
+
     const name = ref('');
     const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
 
@@ -57,8 +61,8 @@ export default defineComponent({
     const activeNetwork = useGetter('activeNetwork');
     const getPreferred = useGetter('names/getPreferred');
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { getMiddleware } = useMiddleware({ store: root.$store });
+    const { getSdk } = useSdk({ store });
+    const { getMiddleware } = useMiddleware({ store });
 
     const {
       isDex,
@@ -67,7 +71,7 @@ export default defineComponent({
       getOwnershipAccount,
       innerTx,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction.tx,
       externalAddress: props.transaction?.transactionOwner,
     });
@@ -75,13 +79,13 @@ export default defineComponent({
     function getTransactionParty(address: string) {
       return {
         address,
-        label: root.$t('transaction.overview.accountAddress'),
+        label: t('transaction.overview.accountAddress'),
         url: getExplorerPath.value(address),
       };
     }
 
     const preparedTransaction = computed((): TransactionData => {
-      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
+      const transactionTypes = tm('transaction.type') as unknown as Record<TxType, TranslateResult>;
 
       const {
         senderId,
@@ -97,21 +101,21 @@ export default defineComponent({
               address: senderId,
               name: getPreferred.value(senderId),
               url: getExplorerPath.value(senderId),
-              label: root.$t('transaction.overview.accountAddress'),
+              label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
               name: name.value || getPreferred.value(recipientId),
               url: getExplorerPath.value(recipientId),
-              label: root.$t('transaction.overview.accountAddress'),
+              label: t('transaction.overview.accountAddress'),
             },
-            title: root.$t('transaction.type.spendTx'),
+            title: t('transaction.type.spendTx'),
           };
         case SCHEMA.TX_TYPE.contractCall: {
           const contract = {
             address: contractId,
             url: getExplorerPath.value(contractId),
-            label: root.$t(`transaction.overview.${isDex.value ? 'superheroDex' : 'contract'}`),
+            label: t(`transaction.overview.${isDex.value ? 'superheroDex' : 'contract'}`),
           };
 
           let transactionOwner;
@@ -137,8 +141,8 @@ export default defineComponent({
               : transactionReceiver,
             recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? ownershipAccount.value
-              : transactionReceiver,
-            title: root.$t('transaction.type.contractCallTx'),
+              : contract,
+            title: t('transaction.type.contractCallTx'),
             function: innerTx.value.function,
           };
         }
@@ -146,9 +150,9 @@ export default defineComponent({
           return {
             sender: ownershipAccount.value,
             recipient: {
-              label: root.$t('transaction.overview.contractCreate'),
+              label: t('transaction.overview.contractCreate'),
             },
-            title: root.$t('transaction.type.contractCreateTx'),
+            title: t('transaction.type.contractCreateTx'),
           };
         case SCHEMA.TX_TYPE.namePreClaim:
         case SCHEMA.TX_TYPE.nameClaim:
@@ -157,7 +161,7 @@ export default defineComponent({
           return {
             sender: ownershipAccount.value,
             recipient: {
-              label: root.$t('transaction.overview.aens'),
+              label: t('transaction.overview.aens'),
             },
             title: txType.value ? transactionTypes[txType.value] : undefined,
           };
@@ -167,10 +171,10 @@ export default defineComponent({
               address: innerTx.value.ownerId,
               name: getPreferred.value(innerTx.value.ownerId),
               url: getExplorerPath.value(innerTx.value.ownerId),
-              label: root.$t('multisig.multisigVault'),
+              label: t('multisig.multisigVault'),
             },
             recipient: {
-              label: root.$t('transaction.overview.smartContract'),
+              label: t('transaction.overview.smartContract'),
               address: innerTx.value.contractId,
             },
           };

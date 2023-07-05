@@ -13,7 +13,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api/dist/vue-composition-api';
+import { defineComponent, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CheckCircleIcon from '../../icons/check-circle.svg?vue-component';
 import AlertIcon from '../../icons/alert.svg?vue-component';
 
@@ -25,10 +26,12 @@ export default defineComponent({
   props: {
     hasError: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const { t } = useI18n();
+
     const notificationMessage = computed(() => props.hasError
-      ? root.$t('pages.seed-phrase-settings.seed-phrase-incorrect')
-      : root.$t('pages.seed-phrase-settings.seed-phrase-correct'));
+      ? t('pages.seed-phrase-settings.seed-phrase-incorrect')
+      : t('pages.seed-phrase-settings.seed-phrase-correct'));
 
     return {
       notificationMessage,

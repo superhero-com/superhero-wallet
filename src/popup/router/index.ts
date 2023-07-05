@@ -1,5 +1,9 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
+import {
+  createRouter,
+  RouteRecordRaw,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
 import { Dictionary } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -25,20 +29,19 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts } from '../../composables';
+import { useAccounts, usePopupProps } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
-Vue.use(VueRouter);
-
-const router = new VueRouter({
-  routes,
-  mode: IS_WEB ? 'history' : 'hash',
-  scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
+const router = createRouter({
+  routes: routes as RouteRecordRaw[],
+  history: IS_WEB ? createWebHistory() : createWebHashHistory(),
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
 const lastRouteKey = 'last-path';
 
 const { isLoggedIn } = useAccounts({ store });
+const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router);
 
@@ -77,22 +80,24 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
-    let params: Dictionary = {};
+    let popupProps: Dictionary = {};
 
     if (!Object.keys(to.params).length) {
-      params = await getPopupProps();
-      if (!params?.app) {
+      popupProps = await getPopupProps() as Dictionary;
+      if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;
       }
     }
 
     if (name !== to.name) {
-      next({ name, params });
+      setPopupProps(popupProps);
+      next({ name });
       return;
     }
   }
 
+  // @ts-ignore
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 

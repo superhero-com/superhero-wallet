@@ -74,8 +74,9 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
-import type { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 import type {
   IFormSelectOption,
   IMultisigFunctionTypes,
@@ -107,21 +108,24 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
     reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { tm } = useI18n();
+
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
     const {
       activeAccount,
       setActiveAccountByAddress,
       prepareAccountSelectOptions,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
     const {
       pendingMultisigTxSigners,
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
-    } = usePendingMultisigTransaction({ store: root.$store });
+    } = usePendingMultisigTransaction({ store });
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),
@@ -131,19 +135,19 @@ export default defineComponent({
       props.action === FUNCTION_TYPE_MULTISIG.confirm ? 'success' : 'critical'
     ));
 
-    const confirmActionContent = computed((): TranslateResult => {
+    const confirmActionContent = computed((): Record<string, TranslateResult> => {
       switch (props.action) {
         case FUNCTION_TYPE_MULTISIG.confirm:
-          return root.$t('pages.proposalDetails.signDialog');
+          return tm('pages.proposalDetails.signDialog');
         case FUNCTION_TYPE_MULTISIG.revoke:
-          return root.$t('pages.proposalDetails.revokeDialog');
+          return tm('pages.proposalDetails.revokeDialog');
         default:
-          return root.$t('pages.proposalDetails.refuseDialog');
+          return tm('pages.proposalDetails.refuseDialog');
       }
     });
 
     const actionHasError = computed(() => {
-      const confirmActionText = confirmActionContent.value as Record<string, TranslateResult>;
+      const confirmActionText = confirmActionContent.value;
       if (!pendingMultisigTxSigners.value.includes(activeAccount.value.address)) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }

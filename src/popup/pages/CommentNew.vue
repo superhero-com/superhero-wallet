@@ -34,8 +34,10 @@ import {
   defineComponent,
   ref,
   watch,
-} from '@vue/composition-api';
-import { Route } from 'vue-router';
+} from 'vue';
+import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -55,15 +57,20 @@ export default defineComponent({
     BtnMain,
     FixedScreenFooter,
   },
-  setup(props, { root }) {
-    const { isTippingSupported, getSdk } = useSdk({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { t } = useI18n();
+
+    const { isTippingSupported, getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
       activeAccount,
       accountsSelectOptions,
       setActiveAccountByAddress,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
@@ -72,14 +79,14 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     watch(
-      () => root.$route,
-      ({ query }: Route) => {
+      () => route,
+      ({ query }: RouteLocationNormalized) => {
         id.value = query.id as string ?? '';
         parentId.value = query.parentId ? +query.parentId : undefined;
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_ACCOUNT });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -90,7 +97,7 @@ export default defineComponent({
       loading.value = true;
       const sdk = await getSdk();
       try {
-        await root.$store.dispatch('sendTipComment', [
+        await store.dispatch('sendTipComment', [
           id.value,
           text.value,
           await sdk.address(),
@@ -99,7 +106,7 @@ export default defineComponent({
         openCallbackOrGoHome(true);
       } catch (e: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         e.payload = { id, parentId, text };

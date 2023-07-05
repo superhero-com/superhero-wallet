@@ -1,16 +1,16 @@
 <template>
   <div class="number-select">
     <select
-      v-if="value"
-      :value="value"
+      v-if="modelValue"
+      :value="modelValue"
       class="number-select-input"
-      @change="$emit('input', +$event.target.value)"
+      @change="$emit('update:modelValue', +($event?.target as HTMLInputElement).value)"
     >
       <option
         v-for="idx of size"
         :key="idx"
         :value="idx"
-        :selected="idx === value"
+        :selected="idx === modelValue"
       >
         {{ idx }}
       </option>
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 import ChevronDownIcon from '../../../icons/chevron-down.svg?vue-component';
 
@@ -30,8 +30,9 @@ export default defineComponent({
   },
   props: {
     size: { type: Number, required: true },
-    value: { type: Number, required: true },
+    modelValue: { type: Number, required: true },
   },
+  emits: ['update:modelValue'],
 });
 </script>
 

@@ -31,7 +31,7 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import type { IFormSelectOption, ResolveRejectCallback } from '../../../types';
 
 import Modal from '../Modal.vue';

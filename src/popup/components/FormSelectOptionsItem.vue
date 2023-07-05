@@ -19,7 +19,7 @@
 import {
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import type { IFormSelectOption } from '../../types';
 
 import ListItemWrapper from './ListItemWrapper.vue';

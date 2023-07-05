@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import { isEmpty, mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {

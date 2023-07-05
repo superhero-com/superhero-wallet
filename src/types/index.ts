@@ -4,9 +4,9 @@
     no-unused-vars,
 */
 
-import Vue, { ComponentOptions } from 'vue';
-import { RawLocation } from 'vue-router';
-import { LocaleMessages, TranslateResult } from 'vue-i18n';
+import { Component, ComponentOptions } from 'vue';
+import { RouteLocationRaw } from 'vue-router';
+import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
@@ -37,7 +37,7 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = {[K in keyof T]: T[K]};
+type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
  * Allowed options that can be passed to our fetch utility functions
@@ -50,7 +50,7 @@ type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
 export type ResolveRejectCallback = (...args: any) => void;
 
-export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
+export type VueAnyComponent = Component | ComponentOptions | {
   functional: boolean;
   render: any;
 }
@@ -254,7 +254,7 @@ export interface INotification {
   entityId?: string
   entityType?: string
   id?: number
-  path?: RawLocation
+  path?: RouteLocationRaw
   receiver?: string
   sender?: string
   sourceId?: string
@@ -428,7 +428,7 @@ export interface IAccountOverView extends Partial<IAccount> {
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
-  label: TranslateResult;
+  label?: TranslateResult;
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
@@ -617,9 +617,10 @@ export interface IPopupConfig {
   action?: any;
   data?: string;
   message?: string;
-  transaction?: Partial<ITx>;
+  tx?: Partial<ITx>;
   resolve?: any;
   reject?: any;
+  show?: boolean;
 }
 
 export interface IResponseChallenge {
@@ -683,8 +684,8 @@ export interface IKeyPair {
 }
 
 export interface ILabel {
-  text: string | LocaleMessages | TranslateResult,
-  customPending?: string | LocaleMessages | TranslateResult
+  text: string | TranslateResult;
+  customPending?: string | TranslateResult;
   hasComma?: boolean;
 }
 

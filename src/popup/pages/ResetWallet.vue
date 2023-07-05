@@ -3,15 +3,16 @@
     <p class="text-description">
       {{ $t('pages.reset-wallet.description') }}
     </p>
-    <i18n
-      path="pages.reset-wallet.description2"
+    <i18n-t
+      keypath="pages.reset-wallet.description2"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <RouterLink :to="{ name: 'settings-seed-phrase' }">
         seed phrase
       </RouterLink>
-    </i18n>
+    </i18n-t>
 
     <BtnMain
       variant="danger"
@@ -25,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { MODAL_RESET_WALLET } from '../utils/constants';
 import { useModals } from '../../composables';
 import BtnMain from '../components/buttons/BtnMain.vue';

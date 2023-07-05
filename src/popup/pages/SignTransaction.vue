@@ -2,29 +2,37 @@
 import {
   defineComponent,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { RejectedByUserError } from '../../lib/errors';
 import { handleUnknownError } from '../utils';
 import { useDeepLinkApi, useModals, useSdk } from '../../composables';
 
 export default defineComponent({
   name: 'SignTransaction',
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { t } = useI18n();
+
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { nodeNetworkId, getSdk } = useSdk({ store: root.$store });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
+      const { nodeNetworkId, getSdk } = useSdk({ store });
       const { openDefaultModal } = useModals();
 
       try {
         const sdk = await getSdk();
-        const { transaction, networkId, broadcast } = root.$route.query;
+        const { transaction, networkId, broadcast } = route.query;
 
         if (networkId !== nodeNetworkId.value) {
           await openDefaultModal({
             icon: 'warning',
-            title: root.$t('modals.wrongNetwork.title'),
-            msg: root.$t('modals.wrongNetwork.msg', [networkId]),
-            buttonMessage: root.$t('modals.wrongNetwork.button'),
+            title: t('modals.wrongNetwork.title'),
+            msg: t('modals.wrongNetwork.msg', [networkId]),
+            buttonMessage: t('modals.wrongNetwork.button'),
           });
           openCallbackOrGoHome(false);
           return;

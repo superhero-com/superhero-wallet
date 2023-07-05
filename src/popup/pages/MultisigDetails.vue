@@ -89,7 +89,8 @@ import {
   defineComponent,
   onMounted,
   onBeforeUnmount,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { useGetter } from '../../composables/vuex';
 import { MODAL_CONSENSUS_INFO } from '../utils';
 import { useModals, useMultisigAccounts } from '../../composables';
@@ -116,14 +117,16 @@ export default defineComponent({
     DetailsItem,
     ExternalLinkIcon,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const getExplorerPath = useGetter('getExplorerPath');
     const { openModal } = useModals();
     const {
       activeMultisigAccount,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     function openConsensusInfoModal() {
       openModal(MODAL_CONSENSUS_INFO);
@@ -177,6 +180,8 @@ export default defineComponent({
     .external-icon {
       opacity: 1;
       color: rgba(variables.$color-white, 0.75);
+      width: 24px;
+      height: 24px;
     }
 
     &:active,

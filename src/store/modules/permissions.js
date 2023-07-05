@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import { aettosToAe } from '../../popup/utils';
 
 const hostConfig = (addresses, isDefault = false) => ({
@@ -22,35 +21,35 @@ export default {
   mutations: {
 
     setTransactionSignLimit(state, { host, value }) {
-      Vue.set(state, host, {
+      state[host] = {
         ...state[host],
         transactionSignLimit: value,
         transactionSignLimitLeft: value,
         transactionSignFirstAskedOn: new Date(),
-      });
+      };
     },
     setTransactionSignLimitLeft(state, { host, value }) {
-      Vue.set(state, host, {
+      state[host] = {
         ...state[host],
         transactionSignLimitLeft: value,
-      });
+      };
     },
     resetTransactionSignLimitLeft(state, host) {
-      Vue.set(state, host, {
+      state[host] = {
         ...state[host],
         transactionSignLimitLeft: state[host].transactionSignLimit,
         transactionSignFirstAskedOn: new Date(),
-      });
+      };
     },
     addAddressToHost(state, { host, address, name }) {
-      if (!state[host]) Vue.set(state, host, { ...hostConfig([address]), name, host });
+      if (!state[host]) state[host] = { ...hostConfig([address]), name, host };
       else state[host].addresses.push(address);
     },
     addPermission(state, permission) {
-      Vue.set(state, permission.host, permission);
+      state[permission.host] = permission;
     },
     removePermission(state, host) {
-      Vue.delete(state, host);
+      delete state[host];
     },
   },
 

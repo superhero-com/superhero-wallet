@@ -1,26 +1,34 @@
 <template>
   <Connect
-    :app="app"
-    :resolve="onResolve"
-    :reject="onReject"
     :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
   />
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { IAppData } from '../../types';
-import { useAccounts, useDeepLinkApi, useSdk } from '../../composables';
+import {
+  useAccounts,
+  useDeepLinkApi,
+  useSdk,
+  usePopupProps,
+} from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
 import Connect from './Popups/Connect.vue';
 
 export default defineComponent({
   name: 'Address',
   components: { Connect },
-  setup(props, { root }) {
-    const { nodeNetworkId } = useSdk({ store: root.$store });
-    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router: root.$router });
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+
+    const { nodeNetworkId } = useSdk({ store });
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
+    const { activeAccount } = useAccounts({ store });
+    const { setPopupProps } = usePopupProps();
 
     const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
@@ -35,10 +43,13 @@ export default defineComponent({
 
     const onReject = () => openCallbackOrGoHome(false);
 
+    setPopupProps({
+      app: app.value as IAppData,
+      resolve: onResolve,
+      reject: onReject,
+    });
+
     return {
-      onResolve,
-      onReject,
-      app,
       POPUP_CONNECT_ADDRESS_PERMISSION,
     };
   },

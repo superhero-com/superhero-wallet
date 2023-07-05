@@ -21,7 +21,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount } from '@vue/composition-api';
+import { computed, defineComponent, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
 import type { IName } from '../../../types';
 import { executeAndSetInterval } from '../../utils';
 import { useDispatch, useState } from '../../../composables/vuex';
@@ -38,9 +39,11 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const { isAppActive } = useUi();
-    const { activeAccount } = useAccounts({ store: root.$store });
+    const { activeAccount } = useAccounts({ store });
     const areNamesFetching = useState('names', 'areNamesFetching');
     const namesOwned = useState<IName[]>('names', 'owned');
     const fetchOwned = useDispatch('names/fetchOwned');

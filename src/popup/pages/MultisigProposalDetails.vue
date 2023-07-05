@@ -264,10 +264,12 @@ import {
   ref,
   onBeforeUnmount,
   watch,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { SCHEMA } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import {
   formatDate,
   formatTime,
@@ -330,15 +332,18 @@ export default defineComponent({
     AnimatedSpinner,
     ExternalLink,
   },
-  setup(props, { root }) {
+  setup() {
     const { openDefaultModal, openModal } = useModals();
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
 
     const {
       activeMultisigAccount,
       updateMultisigAccounts,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     const {
       pendingMultisigTxExpired,
@@ -346,7 +351,7 @@ export default defineComponent({
       pendingMultisigTxCanBeSent,
       pendingMultisigTxLocalSigners,
       pendingMultisigTxConfirmedByLocalSigners,
-    } = usePendingMultisigTransaction({ store: root.$store });
+    } = usePendingMultisigTransaction({ store });
 
     const {
       fetchActiveMultisigTx,
@@ -354,13 +359,13 @@ export default defineComponent({
       sendTx,
       callContractMethod,
     } = useMultisigTransactions({
-      store: root.$store,
+      store,
     });
 
     const {
       isLocalAccountAddress,
     } = useAccounts({
-      store: root.$store,
+      store,
     });
 
     const getExplorerPath = useGetter('getExplorerPath');
@@ -415,11 +420,11 @@ export default defineComponent({
         let { message } = error;
         if (isInsufficientBalanceError(error)) {
           message = isVault
-            ? root.$t('modals.vaultLowBalance.msg')
-            : root.$t('modals.accountLowBalance.msg', { action });
+            ? t('modals.vaultLowBalance.msg')
+            : t('modals.accountLowBalance.msg', { action });
           title = isVault
-            ? root.$t('modals.vaultLowBalance.title')
-            : root.$t('modals.accountLowBalance.title');
+            ? t('modals.vaultLowBalance.title')
+            : t('modals.accountLowBalance.title');
         }
         openDefaultModal({
           icon: 'warning',
@@ -453,7 +458,7 @@ export default defineComponent({
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
-          root.$router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_ACCOUNT });
         }
       } catch (error: any) {
         handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());
@@ -617,13 +622,13 @@ export default defineComponent({
     }
   }
 
-  .details-item::v-deep {
+  .details-item:deep() {
     .label {
       white-space: nowrap;
     }
   }
 
-  .reason::v-deep {
+  .reason:deep() {
     .value {
       color: variables.$color-warning;
     }

@@ -1,23 +1,29 @@
 <template>
   <div class="claim">
-    <InputField
-      v-model="name"
-      v-validate="'required|name|name_unregistered'"
+    <Field
+      v-slot="{ field, errorMessage }"
       name="name"
-      class="chain-name"
-      :label="$t('pages.names.claim.register-name')"
-      :message="errors.first('name')"
-      :placeholder="$t('pages.names.claim.name-placeholder')"
+      :rules="'required|name|name_unregistered'"
     >
-      <template #label-after>
-        <span class="chain-name-counter">
-          {{ name.length }}/{{ maxNameLength }}
-        </span>
-      </template>
-      <template #after>
-        <span class="aens-domain">{{ AENS_DOMAIN }}</span>
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model="name"
+        name="name"
+        class="chain-name"
+        :label="$t('pages.names.claim.register-name')"
+        :message="errorMessage"
+        :placeholder="$t('pages.names.claim.name-placeholder')"
+      >
+        <template #label-after>
+          <span class="chain-name-counter">
+            {{ name.length }}/{{ maxNameLength }}
+          </span>
+        </template>
+        <template #after>
+          <span class="aens-domain">{{ AENS_DOMAIN }}</span>
+        </template>
+      </InputField>
+    </Field>
 
     <CheckBox v-model="autoExtend">
       <div class="auto-extend-label">
@@ -32,18 +38,19 @@
 
     <Loader v-if="loading" />
 
-    <i18n
-      path="pages.names.claim.short-names.message"
+    <i18n-t
+      keypath="pages.names.claim.short-names.message"
       tag="p"
       class="text-description explanation"
+      scope="global"
     >
       <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
-    </i18n>
+    </i18n-t>
 
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!isSdkReady || !name || errors.any()"
+      :disabled="!isSdkReady || !name || errorName"
       @click="claim"
     >
       {{
@@ -56,8 +63,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from '@vue/composition-api';
+import { defineComponent, ref, computed } from 'vue';
 import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useForm, useFieldError, Field } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
 import {
   AETERNITY_COIN_PRECISION,
   AENS_DOMAIN,
@@ -80,8 +91,15 @@ export default defineComponent({
     CheckBox,
     BtnMain,
     BtnHelp,
+    Field,
   },
-  setup(props, { root }) {
+  setup() {
+    const router = useRouter();
+    const store = useStore();
+    const { validate } = useForm();
+    const errorName = useFieldError('name');
+    const { t } = useI18n();
+
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
@@ -94,13 +112,13 @@ export default defineComponent({
       -AETERNITY_COIN_PRECISION,
     ).toFixed(4));
 
-    const { getSdk, isSdkReady } = useSdk({ store: root.$store });
+    const { getSdk, isSdkReady } = useSdk({ store });
 
     async function claim() {
-      if (!await (root as any).$validator.validateAll()) return;
+      if (!await validate()) return;
 
       const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store: root.$store });
+      const { activeAccount } = useAccounts({ store });
 
       const sdk = await getSdk();
 
@@ -109,7 +127,7 @@ export default defineComponent({
 
       if (nameEntry) {
         openDefaultModal({
-          title: root.$t('modals.name-exist.msg'),
+          title: t('modals.name-exist.msg'),
         });
       } else {
         loading.value = true;
@@ -119,13 +137,13 @@ export default defineComponent({
           const { salt } = await sdk.aensPreclaim(fullName);
           claimTxHash = (await sdk.aensClaim(fullName, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            root.$store.commit('names/setPendingAutoExtendName', fullName);
+            store.commit('names/setPendingAutoExtendName', fullName);
           }
-          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+          router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e: any) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
-            msg = root.$t('pages.names.balance-error');
+            msg = t('pages.names.balance-error');
           }
           openDefaultModal({
             icon: 'critical',
@@ -137,10 +155,10 @@ export default defineComponent({
         }
 
         try {
-          root.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
           await sdk.poll(claimTxHash);
           if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
-            root.$store.dispatch('names/updatePointer', {
+            store.dispatch('names/updatePointer', {
               name: fullName,
               address: activeAccount.value.address,
             });
@@ -148,7 +166,7 @@ export default defineComponent({
         } catch (e: any) {
           openDefaultModal({ msg: e.message });
         } finally {
-          root.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
         }
       }
     }
@@ -160,6 +178,7 @@ export default defineComponent({
       isSdkReady,
       name,
       nameFee,
+      errorName,
       loading,
       maxNameLength,
       claim,

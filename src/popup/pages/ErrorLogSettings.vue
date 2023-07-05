@@ -7,8 +7,8 @@
     <div class="options">
       <SwitchButton
         :label="$t('pages.titles.save-errors-log')"
-        :value="saveErrorLog"
-        @input="setSaveErrorLog"
+        :model-value="saveErrorLog"
+        @update:modelValue="setSaveErrorLog"
       />
     </div>
   </div>

@@ -60,7 +60,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { PropType, computed, defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
@@ -82,10 +84,6 @@ import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 import DefaultWalletNotificationIcon from '../../icons/default-wallet-notification.svg?vue-component';
 import BackupSeedNotificationIcon from '../../icons/backup-seed-notification.svg?vue-component';
 
-interface IProps {
-  notification: INotification,
-}
-
 export default defineComponent({
   components: {
     BtnMain,
@@ -97,23 +95,26 @@ export default defineComponent({
     BackupSeedNotificationIcon,
   },
   props: {
-    notification: { type: Object, required: true },
+    notification: { type: Object as PropType<INotification>, required: true },
   },
-  setup(props: IProps, { root }) {
+  setup(props) {
+    const router = useRouter();
+    const { t } = useI18n();
+
     function getNotificationText(notification: INotification) {
       switch (notification.type) {
         case NOTIFICATION_TYPE_COMMENT_ON_COMMENT:
-          return root.$t('pages.notifications.commentOnComment');
+          return t('pages.notifications.commentOnComment');
         case NOTIFICATION_TYPE_COMMENT_ON_TIP:
-          return root.$t('pages.notifications.commentOnTip');
+          return t('pages.notifications.commentOnTip');
         case NOTIFICATION_TYPE_TIP_ON_COMMENT:
-          return root.$t('pages.notifications.tipOnComment');
+          return t('pages.notifications.tipOnComment');
         case NOTIFICATION_TYPE_RETIP_ON_TIP:
-          return root.$t('pages.notifications.retipOnTip');
+          return t('pages.notifications.retipOnTip');
         case NOTIFICATION_TYPE_CLAIM_OF_TIP:
-          return root.$t('pages.notifications.claimOfTip');
+          return t('pages.notifications.claimOfTip');
         case NOTIFICATION_TYPE_CLAIM_OF_RETIP:
-          return root.$t('pages.notifications.claimOfRetip');
+          return t('pages.notifications.claimOfRetip');
         case NOTIFICATION_TYPE_WALLET:
           return notification.text;
         default:
@@ -129,10 +130,10 @@ export default defineComponent({
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
     const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
-    const redirectInfo = computed(() => !isWallet.value ? root.$t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
+    const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
       ? props.notification.title || ''
-      : chainName.value || address.value || root.$t('common.fellowSuperhero'));
+      : chainName.value || address.value || t('common.fellowSuperhero'));
     const initialStatus = props.notification.status;
     const isUnread = computed(() => (IS_EXTENSION
       ? initialStatus
@@ -143,7 +144,7 @@ export default defineComponent({
         if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
           window.open(props.notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
         } else {
-          root.$router.push(props.notification.path);
+          router.push(props.notification.path);
         }
       }
     }

@@ -4,10 +4,10 @@
     class="input-amount"
     type="number"
     placeholder="0.00"
-    :value="value"
+    :model-value="modelValue"
     :label="label"
-    :message="$attrs['message'] || errors.first('amount')"
-    @input="$emit('input', $event)"
+    :message="$attrs['message']"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template
       v-for="(index, name) in $slots"
@@ -23,7 +23,7 @@
         :value="currentAsset"
         :focused="focused"
         :show-tokens-with-balance="showTokensWithBalance"
-        @input="handleAssetSelected($event)"
+        @select-asset="handleAssetSelected($event)"
       />
       <div
         v-else
@@ -38,11 +38,11 @@
         :class="{ focused }"
       >
         <span
-          v-if="currentAssetFiatPrice && !hasError"
+          v-if="currentAssetFiatPrice"
           class="input-amount-desc-total"
           data-cy="total-amount-currency"
         >
-          <span v-if="value">&thickapprox;</span>
+          <span v-if="modelValue">&thickapprox;</span>
           {{ totalAmountFormatted }}
         </span>
 
@@ -67,8 +67,8 @@ import {
   defineComponent,
   onMounted,
   PropType,
-  watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import { useBalances, useCurrencies } from '../../composables';
 import type { IAsset } from '../../types';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
@@ -81,18 +81,20 @@ export default defineComponent({
     InputField,
   },
   props: {
-    value: { type: [String, Number], default: '' },
+    modelValue: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     aeOnly: Boolean,
     showTokensWithBalance: Boolean,
   },
-  setup(props, { root, emit }) {
-    const { aeternityCoin } = useBalances({ store: root.$store });
+  emits: ['update:modelValue', 'asset-selected'],
+  setup(props, { emit }) {
+    const store = useStore();
+
+    const { aeternityCoin } = useBalances({ store });
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const hasError = computed(() => (root as any).$validator.errors.has('amount'));
     const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
       () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
@@ -102,15 +104,13 @@ export default defineComponent({
     );
     const totalAmountFormatted = computed(() => formatCurrency(
       (currentAssetFiatPrice.value)
-        ? (+props.value || 0) * currentAssetFiatPrice.value
+        ? (+props.modelValue || 0) * currentAssetFiatPrice.value
         : 0,
     ));
 
     function handleAssetSelected(asset: IAsset) {
       emit('asset-selected', asset);
     }
-
-    watch(hasError, (val) => emit('error', val));
 
     onMounted(() => {
       if (!props.selectedAsset) {
@@ -125,7 +125,6 @@ export default defineComponent({
       currentAssetFiatPrice,
       currentAssetFiatPriceFormatted,
       currentAsset,
-      hasError,
       formatCurrency,
       handleAssetSelected,
     };

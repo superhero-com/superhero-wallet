@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
 import TransactionList from '../components/TransactionList.vue';
@@ -38,7 +38,7 @@ export default defineComponent({
 .transaction-list-wrapper {
   --filter-top-offset: 175px;
 
-  ::v-deep .filters {
+  :deep(.filters) {
     position: sticky;
     top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }

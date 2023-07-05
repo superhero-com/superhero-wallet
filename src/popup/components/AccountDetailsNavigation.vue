@@ -16,7 +16,7 @@
     >
       <BtnPill
         v-for="subTab in currentSubTabs"
-        :key="subTab.name"
+        :key="subTab.routeName"
         :to="{ name: subTab.routeName }"
         :text="$t(subTab.text)"
         :exact="subTab.exact"
@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useRoute } from 'vue-router';
 import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
@@ -107,7 +108,9 @@ export default defineComponent({
   props: {
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const route = useRoute();
+
     const { isOnline } = useConnection();
     const currentTabs = computed(() => (
       props.isMultisig ? navigationConfigMultisig : navigationConfigRegular
@@ -116,7 +119,7 @@ export default defineComponent({
     const currentSubTabs = computed(
       () => (currentTabs.value.find(
         ({ children }) => children?.some(
-          ({ routeName }) => routeName === root.$route.name,
+          ({ routeName }) => routeName === route.name,
         ),
       ))?.children || [],
     );

@@ -1,4 +1,4 @@
-import { computed, ref, watch } from '@vue/composition-api';
+import { computed, ref, watch } from 'vue';
 import type {
   IDefaultComposableOptions,
   INetwork,
@@ -160,7 +160,7 @@ export function useNotifications({
   if (requirePolling) {
     watch(() => notificationsFiltered.value, () => {
       loadMoreNotifications();
-    });
+    }, { deep: true });
 
     initPollingWatcher(async () => {
       notificationsSuperhero.value = (await fetchAllNotifications())

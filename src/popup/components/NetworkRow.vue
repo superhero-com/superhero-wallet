@@ -60,7 +60,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { NETWORK_DEFAULT } from '../utils';
 import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
 import { useGetter } from '../../composables/vuex';
@@ -81,7 +82,8 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const store = useStore();
     const activeNetwork = useGetter('activeNetwork');
 
     const isActive = computed(() => props.network.name === activeNetwork.value.name);
@@ -90,7 +92,7 @@ export default defineComponent({
       if (networkIndex === activeNetwork.value.index) {
         emit('selectNetwork', NETWORK_DEFAULT.name);
       }
-      root.$store.commit('deleteUserNetwork', networkIndex);
+      store.commit('deleteUserNetwork', networkIndex);
     }
 
     return {

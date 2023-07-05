@@ -1,13 +1,15 @@
-import Vue, { ComponentOptions } from 'vue';
-import { computed, ref } from '@vue/composition-api';
+import {
+  Component, computed, nextTick, ref,
+} from 'vue';
 import { TranslateResult } from 'vue-i18n';
 import { ResolveRejectCallback, StatusIconType } from '../types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
 import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
+import { usePopupProps } from './popupProps';
 
 interface IModalSettings {
-  component?: typeof Vue | ComponentOptions<Vue>;
+  component?: Component;
   showInPopupIfWebFrame?: boolean;
 }
 
@@ -15,6 +17,7 @@ interface IModalProps {
   [key: string]: any; // Props defined on the component's level
   resolve?: ResolveRejectCallback;
   reject?: ResolveRejectCallback;
+  show?: boolean;
 }
 
 interface IOpenModalParams {
@@ -61,7 +64,10 @@ export function useModals() {
 
   function closeModalByKey(key: number) {
     const idx = modalsOpenRaw.value.findIndex((modal) => modal.key === key);
-    modalsOpenRaw.value.splice(idx, 1);
+    modalsOpenRaw.value[idx].props.show = false;
+    nextTick(() => {
+      modalsOpenRaw.value.splice(idx, 1);
+    });
   }
 
   function openModal(name: string, props: IModalProps = {}): Promise<any> {
@@ -80,8 +86,21 @@ export function useModals() {
         name,
         key,
         inPopup,
-        props: { ...props, resolve, reject },
+        props: {
+          ...props, resolve, reject, show: true,
+        },
       });
+
+      /**
+       * These modals use the `usePopupProps` composable instead of props
+       * even if they are not opened in a popup
+      */
+      if (modalSettings.showInPopupIfWebFrame && !inPopup) {
+        const { setPopupProps } = usePopupProps();
+        setPopupProps({
+          ...props, resolve, reject,
+        });
+      }
 
       if (inPopup) {
         if (popupWindow) {
@@ -89,7 +108,7 @@ export function useModals() {
         }
 
         lastPopupPromise
-          .catch(() => {})
+          .catch(() => { })
           .finally(() => {
             popupWindow = window.open(
               `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
@@ -99,7 +118,9 @@ export function useModals() {
             if (!popupWindow) {
               reject(new Error("Can't show popup window"));
             } else {
-              popupWindow.popupProps = { ...props, resolve, reject };
+              popupWindow.popupProps = {
+                ...props, resolve, reject, show: true,
+              };
             }
           });
       }
