@@ -127,6 +127,9 @@ export default defineComponent({
         '--height',
         IS_IONIC && IS_IOS ? '100vh' : '100%',
       );
+      if (IS_EXTENSION) {
+        document.documentElement.classList.add('is-extension');
+      }
     }
 
     async function checkExtensionUpdates() {
