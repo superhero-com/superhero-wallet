@@ -143,6 +143,7 @@ export const NODE_STATUS_CONNECTED = 'connected';
 export const NODE_STATUS_ERROR = 'error';
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
+export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const TXS_PER_PAGE = 30;
 export const AENS_DOMAIN = '.chain';
