@@ -126,6 +126,9 @@ export default defineComponent({
         '--height',
         IS_MOBILE_APP && IS_IOS ? '100vh' : '100%',
       );
+      if (IS_EXTENSION) {
+        document.documentElement.classList.add('is-extension');
+      }
     }
 
     async function checkExtensionUpdates() {
