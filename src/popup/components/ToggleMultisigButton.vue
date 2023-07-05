@@ -4,22 +4,26 @@
     class="multisig-button"
     @click="toggleMultisigDashboard(!isMultisig)"
   >
-    <span
-      v-if="isMultisig"
-      class="text"
-    >
-      {{ $t('multisig.backToMainAccounts') }}
-    </span>
+    <template v-if="isMultisig">
+      <ArrowBackIcon
+        class="icon-back"
+      />
+      <span class="text">
+        {{ $t('multisig.backToMainAccounts') }}
+      </span>
+    </template>
+
     <template v-else>
       <div
         v-if="hasPendingMultisigTransaction"
-        class="icon-wrapper"
+        class="has-pending"
       >
         <PendingIcon
-          class="animated-pending-icon"
+          class="icon-pending"
         />
-        <span class="tx-text">{{ $t('common.tx') }}</span>
+        <span>{{ $t('common.tx') }}</span>
       </div>
+
       <span class="text">{{ $t('multisig.showMultisigVaults') }}</span>
     </template>
   </BtnPlain>
@@ -35,11 +39,13 @@ import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 import BtnPlain from './buttons/BtnPlain.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
+import ArrowBackIcon from '../../icons/back.svg?vue-component';
 
 export default defineComponent({
   components: {
     BtnPlain,
     PendingIcon,
+    ArrowBackIcon,
   },
   props: {
     isMultisig: Boolean,
@@ -54,7 +60,7 @@ export default defineComponent({
       () => multisigAccounts.value.some((acc) => acc.hasPendingTransaction),
     );
 
-    function toggleMultisigDashboard(showMultisigDashboard: false) {
+    function toggleMultisigDashboard(showMultisigDashboard: boolean) {
       store.commit('initTransactions');
       router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }
@@ -85,6 +91,18 @@ export default defineComponent({
   padding: 4px 8px;
   background: $color-bg-app;
   border-radius: 12px;
+  gap: 1px;
+
+  .icon-back,
+  .icon-pending {
+    width: 16px;
+    height: 16px;
+  }
+
+  .icon-back {
+    color: $color-white;
+    opacity: 75%;
+  }
 
   .text {
     @extend %face-sans-14-medium;
@@ -94,21 +112,16 @@ export default defineComponent({
     transition: $transition-interactive;
   }
 
-  .icon-wrapper {
+  .has-pending {
     @include mixins.flex(flex-start, center, row);
 
-    margin-right: 6px;
+    @extend %face-sans-12-medium;
 
-    .tx-text {
-      @extend %face-sans-12-medium;
+    color: rgba($color-warning, 0.75);
+    line-height: 16px;
+    margin-right: 5px;
 
-      color: rgba($color-warning, 0.75);
-      line-height: 16px;
-    }
-
-    .animated-pending-icon {
-      width: 16px;
-      height: 16px;
+    .icon-pending {
       color: $color-warning;
     }
   }
