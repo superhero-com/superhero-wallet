@@ -2,6 +2,11 @@
   <div class="transfer-send-form">
     <template v-if="isMultisig">
       <ModalHeader :title="$t('modals.multisigTxProposal.title')" />
+      <InfoBox
+        v-if="hasMultisigTokenWarning"
+        :type="INFO_BOX_TYPES.warning"
+        :text="$t('modals.multisigTxProposal.tokenWarning')"
+      />
       <div class="multisig-addresses-row">
         <DetailsItem class="multisig-address-item">
           <template #label>
@@ -212,6 +217,7 @@ import {
   AETERNITY_CONTRACT_ID,
   AGGREGATOR_URL,
   APP_LINK_WEB,
+  AETERNITY_SYMBOL,
   convertToken,
   validateTipUrl,
   checkAensName,
@@ -238,6 +244,7 @@ import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import AccountItem from './AccountItem.vue';
 import FormSelect from './form/FormSelect.vue';
+import InfoBox, { INFO_BOX_TYPES } from './InfoBox.vue';
 
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
 import EditIcon from '../../icons/pencil.svg?vue-component';
@@ -247,6 +254,7 @@ import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 export default defineComponent({
   name: 'TransferSendForm',
   components: {
+    InfoBox,
     BtnText,
     BtnHelp,
     BtnIcon,
@@ -284,6 +292,7 @@ export default defineComponent({
     const error = ref<boolean>(false);
     const isUrlTippingEnabled = ref<boolean>(false);
     const amountField = ref<InstanceType<typeof Field> | null>(null);
+    const hasMultisigTokenWarning = ref(false);
 
     const { max, fee } = useMaxAmount({ formModel, store });
     const { balance, aeternityCoin } = useBalances({ store });
@@ -390,7 +399,12 @@ export default defineComponent({
       token,
     }: Dictionary) {
       if (token) {
-        formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+        if (props.isMultisig && token !== AETERNITY_SYMBOL) {
+          hasMultisigTokenWarning.value = true;
+        } else {
+          formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+          hasMultisigTokenWarning.value = false;
+        }
       } else if (!formModel.value.selectedAsset) {
         formModel.value.selectedAsset = aeternityCoin.value;
       }
@@ -533,6 +547,7 @@ export default defineComponent({
     });
 
     return {
+      INFO_BOX_TYPES,
       EditIcon,
       DeleteIcon,
       PlusCircleIcon,
@@ -556,18 +571,19 @@ export default defineComponent({
       multisigVaultOwnedByManyAccounts,
       activeMultisigAccount,
       isUrlTippingEnabled,
+      hasMultisigTokenWarning,
+      amountField,
+      balance,
+      fee,
+      max,
       openScanQrModal,
       selectAccount,
       setMaxValue,
       showRecipientHelp,
       handleAssetChange,
       submit,
-      balance,
-      fee,
-      max,
       editPayload,
       clearPayload,
-      amountField,
     };
   },
 });

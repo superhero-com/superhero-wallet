@@ -4,12 +4,11 @@
       class="network-form"
       data-cy="network-form"
     >
-      <p
-        v-if="isNetworkPrefilled"
-        class="text-description color-warning"
-      >
-        {{ $t('pages.network.thirdPartyDetails') }}
-      </p>
+      <InfoBox
+          v-if="isNetworkPrefilled"
+          :type="INFO_BOX_TYPES.warning"
+          :text="$t('pages.network.thirdPartyDetails')"
+      />
       <p
         v-else
         class="text-description"
@@ -82,6 +81,7 @@ import type { INetworkBase } from '../../types';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
 import InputField from '../components/InputField.vue';
+import InfoBox, { INFO_BOX_TYPES } from '../components/InfoBox.vue';
 import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
 
 interface IFormConfig {
@@ -104,6 +104,7 @@ const NETWORK_NAME_MAX_LENGTH = 15;
 export default defineComponent({
   name: 'NetworkForm',
   components: {
+    InfoBox,
     BtnMain,
     InputField,
     Field,
@@ -215,6 +216,7 @@ export default defineComponent({
     });
 
     return {
+      INFO_BOX_TYPES,
       newNetwork,
       isNetworkPrefilled,
       error,

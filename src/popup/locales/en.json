@@ -336,7 +336,8 @@
       "signingAddress": "Signing address",
       "signingAccount": "Signing account",
       "fee": "Proposal transaction fee",
-      "proposeAndApprove": "Propose and approve"
+      "proposeAndApprove": "Propose and approve",
+      "tokenWarning": "Multisig transactions currently support AE coin only."
     },
     "wrongNetwork": {
       "title": "Network discrepancy",

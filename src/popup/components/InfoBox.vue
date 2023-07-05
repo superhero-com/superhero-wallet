@@ -3,7 +3,7 @@
     class="info-box"
     :class="[type]"
   >
-    <slot />
+    <slot>{{ text }}</slot>
   </div>
 </template>
 
@@ -25,6 +25,10 @@ export default defineComponent({
       validator: (value: InfoBoxType) => Object.keys(INFO_BOX_TYPES).includes(value),
       default: INFO_BOX_TYPES.default,
     },
+    text: {
+      type: String,
+      default: null,
+    },
   },
 });
 </script>
@@ -34,7 +38,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .info-box {
-  @extend %face-sans-14-regular;
+  @extend %face-sans-15-regular;
 
   align-items: center;
   margin-top: 10px;
