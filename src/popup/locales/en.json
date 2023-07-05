@@ -37,6 +37,7 @@
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "you": "You",
+    "contract": "Contract",
     "max": "MAX"
   },
   "connectionStatus": {
@@ -430,7 +431,6 @@
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
-      "contract": "Contract",
       "accountAddress": "Account address",
       "superheroDex": "Superhero DEX",
       "smartContract": "Smart contract"
@@ -636,7 +636,6 @@
       "token-description": "Token Description",
       "community": "Community",
       "decimals": "Decimals",
-      "contract": "Contract",
       "available-supply": "Available supply",
       "total-supply": "Total supply",
       "max-supply": "Max supply",

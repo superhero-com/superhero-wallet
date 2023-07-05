@@ -70,6 +70,22 @@
           </DetailsItem>
 
           <DetailsItem
+            v-if="contractId"
+            :label="$t('common.contract')"
+            small
+          >
+            <template #value>
+              <CopyText
+                hide-icon
+                :value="hash"
+                :copied-text="$t('common.hashCopied')"
+              >
+                <span class="text-address">{{ splitAddress(contractId) }}</span>
+              </CopyText>
+            </template>
+          </DetailsItem>
+
+          <DetailsItem
             :label="$t('pages.transactionDetails.hash')"
             data-cy="hash"
             small
@@ -350,6 +366,8 @@ export default defineComponent({
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerPath = computed(() => getExplorerPath.value(props.hash));
 
+    const contractId = computed(() => transaction.value?.tx.contractId);
+
     const gasPrice = computed(() => {
       if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
         return transaction.value.tx.tx.tx.gasPrice;
@@ -413,10 +431,10 @@ export default defineComponent({
 
       if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
         try {
-          const { contract_id: contractId = null } = await fetchJson(
+          const { contract_id: contractIdForMultisig = null } = await fetchJson(
             `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
           );
-          multisigContractId.value = contractId;
+          multisigContractId.value = contractIdForMultisig;
         } catch (e) {
           handleUnknownError(e);
         }
@@ -447,6 +465,7 @@ export default defineComponent({
       isLocalAccountAddress,
       gasPrice,
       gasUsed,
+      contractId,
       multisigTransactionFeePaidBy,
       multisigContractId,
       transactionFee,
