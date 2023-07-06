@@ -1,24 +1,27 @@
 <template>
   <ion-page>
-      <div class="auction">
-        <div class="auction-tabs">
-          <Tabs>
-            <Tab
-              :to="{ name: 'auction-bid' }"
-              :text="$t('pages.names.auctions.place-bid')"
-              exact-path
-            />
-            <Tab
-              :to="{ name: 'auction-history' }"
-              :text="$t('pages.names.auctions.bid-history')"
-            />
-          </Tabs>
-        </div>
-
-        <Loader v-if="loading" />
-
-        <IonRouterOutlet class="auction-router" v-else />
+    <div class="auction">
+      <div class="auction-tabs">
+        <Tabs>
+          <Tab
+            :to="{ name: 'auction-bid' }"
+            :text="$t('pages.names.auctions.place-bid')"
+            exact-path
+          />
+          <Tab
+            :to="{ name: 'auction-history' }"
+            :text="$t('pages.names.auctions.bid-history')"
+          />
+        </Tabs>
       </div>
+
+      <Loader v-if="loading" />
+
+      <IonRouterOutlet
+        v-else
+        class="auction-router"
+      />
+    </div>
   </ion-page>
 </template>
 
@@ -114,6 +117,7 @@ export default defineComponent({
   &-tabs {
     padding-inline: var(--screen-padding-x);
   }
+
   &-router {
     top: 8%;
   }

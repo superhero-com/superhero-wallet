@@ -160,7 +160,7 @@ export default defineComponent({
   flex-direction: column;
 
   .list {
-    padding: 0;
+    padding: 0 12px;
     margin-inline: calc(-1 * var(--screen-padding-x));
 
     .name-wrapper {

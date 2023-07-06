@@ -1,37 +1,42 @@
 <template>
-  <div class="not-found">
-    <img
-      class="image"
-      :src="NotFoundImage"
-    >
-    <div class="title">
-      {{ $t('pages.notFound.header') }}
-    </div>
-    <div class="description">
-      {{ $t('pages.notFound.description') }}
-    </div>
-    <div class="button-wrapper">
-      <BtnMain
-        v-if="!hideHomeButton"
-        class="button"
-        :to="{ name: 'index' }"
-      >
-        {{ $t('pages.notFound.backToHome') }}
-      </BtnMain>
-      <BtnMain
-        class="button"
-        :href="BUG_REPORT_URL"
-        variant="muted"
-      >
-        <BugIcon class="icon" />
-        {{ $t('pages.notFound.reportBug') }}
-      </BtnMain>
-    </div>
-  </div>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="not-found">
+        <img
+          class="image"
+          :src="NotFoundImage"
+        >
+        <div class="title">
+          {{ $t('pages.notFound.header') }}
+        </div>
+        <div class="description">
+          {{ $t('pages.notFound.description') }}
+        </div>
+        <div class="button-wrapper">
+          <BtnMain
+            v-if="!hideHomeButton"
+            class="button"
+            :to="{ name: 'index' }"
+          >
+            {{ $t('pages.notFound.backToHome') }}
+          </BtnMain>
+          <BtnMain
+            class="button"
+            :href="BUG_REPORT_URL"
+            variant="muted"
+          >
+            <BugIcon class="icon" />
+            {{ $t('pages.notFound.reportBug') }}
+          </BtnMain>
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { IonContent, IonPage } from '@ionic/vue';
 import { BUG_REPORT_URL } from '@/constants';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -39,7 +44,12 @@ import NotFoundImage from '../../image/not-found.jpg';
 import BugIcon from '../../icons/bug.svg?vue-component';
 
 export default defineComponent({
-  components: { BtnMain, BugIcon },
+  components: {
+    BtnMain,
+    BugIcon,
+    IonPage,
+    IonContent,
+  },
   props: {
     hideHomeButton: Boolean,
   },

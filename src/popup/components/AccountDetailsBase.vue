@@ -204,6 +204,7 @@ export default defineComponent({
 :deep(.ion-padding) {
   background-color: #191919;
 }
+
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
