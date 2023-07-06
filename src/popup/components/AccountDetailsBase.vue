@@ -155,12 +155,16 @@ export default defineComponent({
 @use '../../styles/mixins';
 @use '../../styles/typography';
 
+:deep(.ion-padding) {
+  background-color: #191919;
+}
 .account-details {
   --account-info-height: 120px;
   --screen-padding-x: 12px;
   --screen-bg-color: #{variables.$color-bg-modal};
   --header-height: 64px;
 
+  background-color: #191919;
   border-radius: variables.$border-radius-app;
   min-height: 100%;
   height: 100%;
