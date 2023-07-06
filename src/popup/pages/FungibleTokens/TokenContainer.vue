@@ -1,8 +1,6 @@
 <template>
   <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+
       <div class="token-container">
         <Loader v-if="loading" />
 
@@ -68,6 +66,7 @@
           />
         </div>
         <ion-router-outlet
+          class="token-router"
           :contract-id="contractId"
           :token-pairs="tokenPairs"
           :token-data="tokenData"
@@ -75,12 +74,11 @@
           :is-multisig="isMultisig"
         />
       </div>
-    </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent, IonRouterOutlet } from '@ionic/vue';
+import { IonPage, IonRouterOutlet } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -140,7 +138,6 @@ export default defineComponent({
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
     IonPage,
-    IonContent,
     IonRouterOutlet,
   },
   setup() {
@@ -281,8 +278,9 @@ export default defineComponent({
     margin-bottom: var(--gap);
   }
 
-  .router-outlet {
-    position: relative;
+  .token-router {
+    position: inherit;
+    height: 100vh;
   }
 
   .sticky-tabs-wrapper {

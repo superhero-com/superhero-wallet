@@ -1,26 +1,29 @@
 <template>
-  <div class="auction">
-    <div class="auction-tabs">
-      <Tabs>
-        <Tab
-          :to="{ name: 'auction-bid' }"
-          :text="$t('pages.names.auctions.place-bid')"
-          exact-path
-        />
-        <Tab
-          :to="{ name: 'auction-history' }"
-          :text="$t('pages.names.auctions.bid-history')"
-        />
-      </Tabs>
-    </div>
+  <ion-page>
+      <div class="auction">
+        <div class="auction-tabs">
+          <Tabs>
+            <Tab
+              :to="{ name: 'auction-bid' }"
+              :text="$t('pages.names.auctions.place-bid')"
+              exact-path
+            />
+            <Tab
+              :to="{ name: 'auction-history' }"
+              :text="$t('pages.names.auctions.bid-history')"
+            />
+          </Tabs>
+        </div>
 
-    <Loader v-if="loading" />
+        <Loader v-if="loading" />
 
-    <RouterView v-else />
-  </div>
+        <IonRouterOutlet class="auction-router" v-else />
+      </div>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import {
   defineComponent,
   ref,
@@ -43,6 +46,8 @@ export default defineComponent({
   components: {
     Tabs,
     Tab,
+    IonRouterOutlet,
+    IonPage,
   },
   props: {
     name: { type: String, required: true },
@@ -107,6 +112,9 @@ export default defineComponent({
 .auction {
   &-tabs {
     padding-inline: var(--screen-padding-x);
+  }
+  &-router {
+    top: 8%;
   }
 }
 </style>
