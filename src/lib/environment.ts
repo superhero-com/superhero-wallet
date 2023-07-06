@@ -30,7 +30,7 @@ export const IS_WEB = PLATFORM === 'web';
 /**
  * Running as mobile app
  */
-export const IS_IONIC = PLATFORM === 'ionic';
+export const IS_MOBILE_APP = PLATFORM === 'ionic';
 
 /**
  * Running as a browser extension
