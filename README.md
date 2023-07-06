@@ -18,11 +18,10 @@ $ cd superhero-wallet
 ```
 $ npm install
 $ npm run build
-$ npm run build:cordova # build a Cordova version
 $ npm run build:extension # build an extension
 $ npm run build:web # build a web version
-$ npm run gen:cordova-resources
-$ npx cordova build/run android/ios # to build Cordova application
+$ npm run build:android # to build android application
+$ npm run build:ios # to build ios application
 ```
 > *Note:* `npm install` may fail if it tries to compile `node-canvas`. In case that happens, follow the instructions [here](https://github.com/Automattic/node-canvas#compiling) to install the required dependencies for your OS. 
 
