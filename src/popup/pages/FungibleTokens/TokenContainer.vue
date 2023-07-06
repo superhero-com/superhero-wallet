@@ -67,21 +67,9 @@
             :show-filters="showFilterBar"
           />
         </div>
-        <RouterView
-          v-slot="{ Component }"
-          :contract-id="contractId"
-          :token-pairs="tokenPairs"
-          :token-data="tokenData"
-          :tokens="tokens"
-          :is-multisig="isMultisig"
-        >
-          <transition
-            name="fade-transition"
-            mode="out-in"
-          >
-            <Component :is="Component" />
-          </transition>
-        </RouterView>
+        <ion-router-outlet
+          class="token-router"
+        />
       </div>
     </ion-content>
   </ion-page>
@@ -288,8 +276,9 @@ export default defineComponent({
     margin-bottom: var(--gap);
   }
 
-  .router-outlet {
-    position: relative;
+  .token-router {
+    position: inherit;
+    height: 100vh;
   }
 
   .sticky-tabs-wrapper {
