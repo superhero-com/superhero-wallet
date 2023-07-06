@@ -1,15 +1,15 @@
 <template>
   <ion-page>
-      <div class="account-details-names">
-        <ion-router-outlet
-          v-if="isOnline"
-        />
-        <MessageOffline
-          v-else
-          class="offline-message"
-          :text="$t('modals.accountDetails.namesNotAvailable')"
-        />
-      </div>
+    <div class="account-details-names">
+      <ion-router-outlet
+        v-if="isOnline"
+      />
+      <MessageOffline
+        v-else
+        class="offline-message"
+        :text="$t('modals.accountDetails.namesNotAvailable')"
+      />
+    </div>
   </ion-page>
 </template>
 
@@ -39,6 +39,7 @@ export default defineComponent({
 :deep(.ion-padding) {
   background-color: #191919;
 }
+
 .account-details-names {
   .offline-message {
     margin-top: 40px;
