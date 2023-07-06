@@ -1,38 +1,49 @@
 <template>
-  <div class="auction-history">
-    <span class="title">
-      {{ $t('pages.names.auctions.bids-on') }}
-      <span class="name">{{ name }}</span>
-    </span>
-    <div class="item">
-      <AccountItem
-        :address="highestBid.accountId"
-        :name="getPreferred(highestBid.accountId)"
-      />
-      <AuctionOverview :name="name" />
-    </div>
-    <div
-      v-for="(bid, index) in previousBids"
-      :key="index"
-      class="item"
-    >
-      <TokenAmount :amount="+bid.nameFee" />
-      <AccountItem
-        :address="bid.accountId"
-        :name="getPreferred(bid.accountId)"
-      />
-    </div>
-  </div>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="auction-history">
+        <span class="title">
+          {{ $t('pages.names.auctions.bids-on') }}
+          <span class="name">{{ name }}</span>
+        </span>
+        <div class="item">
+          <AccountItem
+            :address="highestBid.accountId"
+            :name="getPreferred(highestBid.accountId)"
+          />
+          <AuctionOverview :name="name" />
+        </div>
+        <div
+          v-for="(bid, index) in previousBids"
+          :key="index"
+          class="item"
+        >
+          <TokenAmount :amount="+bid.nameFee" />
+          <AccountItem
+            :address="bid.accountId"
+            :name="getPreferred(bid.accountId)"
+          />
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script>
+import { IonPage, IonContent } from '@ionic/vue';
 import { mapGetters } from 'vuex';
 import AccountItem from '../../components/AccountItem.vue';
 import AuctionOverview from '../../components/AuctionOverview.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 
 export default {
-  components: { AccountItem, AuctionOverview, TokenAmount },
+  components: {
+    AccountItem,
+    AuctionOverview,
+    TokenAmount,
+    IonPage,
+    IonContent,
+  },
   props: {
     name: { type: String, required: true },
   },

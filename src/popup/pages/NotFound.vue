@@ -1,36 +1,41 @@
 <template>
-  <div class="not-found">
-    <img
-      class="image"
-      :src="NotFoundImage"
-    >
-    <div class="title">
-      {{ $t('pages.notFound.header') }}
-    </div>
-    <div class="description">
-      {{ $t('pages.notFound.description') }}
-    </div>
-    <div class="button-wrapper">
-      <BtnMain
-        v-if="!hideHomeButton"
-        class="button"
-        :to="{ name: 'index' }"
-      >
-        {{ $t('pages.notFound.backToHome') }}
-      </BtnMain>
-      <BtnMain
-        class="button"
-        :href="BUG_REPORT_URL"
-        variant="muted"
-      >
-        <BugIcon class="icon" />
-        {{ $t('pages.notFound.reportBug') }}
-      </BtnMain>
-    </div>
-  </div>
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="not-found">
+        <img
+          class="image"
+          :src="NotFoundImage"
+        >
+        <div class="title">
+          {{ $t('pages.notFound.header') }}
+        </div>
+        <div class="description">
+          {{ $t('pages.notFound.description') }}
+        </div>
+        <div class="button-wrapper">
+          <BtnMain
+            v-if="!hideHomeButton"
+            class="button"
+            :to="{ name: 'index' }"
+          >
+            {{ $t('pages.notFound.backToHome') }}
+          </BtnMain>
+          <BtnMain
+            class="button"
+            :href="BUG_REPORT_URL"
+            variant="muted"
+          >
+            <BugIcon class="icon" />
+            {{ $t('pages.notFound.reportBug') }}
+          </BtnMain>
+        </div>
+      </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script>
+import { IonContent, IonPage } from '@ionic/vue';
 import {
   defineComponent,
 } from 'vue';
@@ -40,7 +45,12 @@ import BugIcon from '../../icons/bug.svg?vue-component';
 import { BUG_REPORT_URL } from '../utils';
 
 export default defineComponent({
-  components: { BtnMain, BugIcon },
+  components: {
+    BtnMain,
+    BugIcon,
+    IonPage,
+    IonContent,
+  },
   props: {
     hideHomeButton: Boolean,
   },
