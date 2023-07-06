@@ -1,46 +1,51 @@
 <template>
-  <div class="auction-bid">
-    <AuctionCard :name="name" />
+  <ion-page>
+    <ion-content class="ion-padding">
+      <div class="auction-bid">
+        <AuctionCard :name="name" />
 
-    <div class="form">
-      <InputAmount
-        v-model="amount"
-        :error="!!amountError"
-        :message="amountError"
-        ae-only
-      />
-      <div class="tx-details">
-        <DetailsItem :label="$t('transaction.fee')">
-          <template #value>
-            <TokenAmount
-              :amount="+txFee"
-              hide-fiat
-            />
-          </template>
-        </DetailsItem>
-        <DetailsItem :label="$t('common.total')">
-          <template #value>
-            <TokenAmount
-              :amount="+amountTotal"
-            />
-          </template>
-        </DetailsItem>
+        <div class="form">
+          <InputAmount
+            v-model="amount"
+            :error="!!amountError"
+            :message="amountError"
+            ae-only
+          />
+          <div class="tx-details">
+            <DetailsItem :label="$t('transaction.fee')">
+              <template #value>
+                <TokenAmount
+                  :amount="+txFee"
+                  hide-fiat
+                />
+              </template>
+            </DetailsItem>
+            <DetailsItem :label="$t('common.total')">
+              <template #value>
+                <TokenAmount
+                  :amount="+amountTotal"
+                />
+              </template>
+            </DetailsItem>
+          </div>
+
+          <BtnMain
+            :disabled="!!amountError || !amount"
+            class="button"
+            extend
+            @click="bid"
+          >
+            {{ $t('pages.names.auctions.place-bid') }}
+          </BtnMain>
+        </div>
+        <Loader v-if="loading" />
       </div>
-
-      <BtnMain
-        :disabled="!!amountError || !amount"
-        class="button"
-        extend
-        @click="bid"
-      >
-        {{ $t('pages.names.auctions.place-bid') }}
-      </BtnMain>
-    </div>
-    <Loader v-if="loading" />
-  </div>
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent, ref } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
@@ -69,6 +74,8 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     BtnMain,
+    IonPage,
+    IonContent,
   },
   props: {
     name: { type: String, required: true },
