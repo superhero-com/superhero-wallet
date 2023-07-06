@@ -1,8 +1,5 @@
 <template>
   <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
       <div class="account-details-names">
         <ion-router-outlet
           v-if="isOnline"
@@ -13,12 +10,11 @@
           :text="$t('modals.accountDetails.namesNotAvailable')"
         />
       </div>
-    </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts">
-import { IonRouterOutlet, IonPage, IonContent } from '@ionic/vue';
+import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
@@ -26,7 +22,6 @@ import MessageOffline from '../components/MessageOffline.vue';
 export default defineComponent({
   components: {
     IonPage,
-    IonContent,
     IonRouterOutlet,
     MessageOffline,
   },
@@ -41,10 +36,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+:deep(.ion-padding) {
+  background-color: #191919;
+}
 .account-details-names {
-  // TODO fix this hack
-  height: 300px;
-
   .offline-message {
     margin-top: 40px;
   }
