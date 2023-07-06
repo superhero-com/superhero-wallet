@@ -19,7 +19,7 @@ module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
   outputDir: {
     extension: 'dist/extension',
-    cordova: 'www',
+    ionic: 'www',
     web: 'dist/web/root',
   }[PLATFORM],
   productionSourceMap: false,
