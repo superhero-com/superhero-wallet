@@ -199,7 +199,7 @@ export default defineComponent({
     const isNetworkPrefilled = ref(false);
 
     function goBack() {
-      router.push({ name: ROUTE_NETWORK_SETTINGS });
+      router.replace({ name: ROUTE_NETWORK_SETTINGS });
     }
 
     async function addOrUpdateNetwork() {
