@@ -3,6 +3,10 @@ const packagesToTranspile = [
   '@aeternity/aepp-sdk',
   '@aeternity/hd-wallet',
   'vee-validate',
+  '@ionic/core',
+  '@ionic/vue',
+  '@stencil/core',
+  'ionicons',
 ];
 
 module.exports = {

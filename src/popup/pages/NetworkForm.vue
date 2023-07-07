@@ -177,7 +177,7 @@ export default defineComponent({
     );
 
     function goBack() {
-      router.push({ name: ROUTE_NETWORK_SETTINGS });
+      router.replace({ name: ROUTE_NETWORK_SETTINGS });
     }
 
     function validatorRules(key: keyof INetworkBase) {

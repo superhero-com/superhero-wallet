@@ -127,6 +127,7 @@ function mountComponent({ hasError = false } = {}) {
   return shallowMount(TransactionDetails, {
     global: {
       plugins: [store],
+      stubs: { IonPage: false, IonContent: false },
       mocks: {
         $t: () => 'locale-specific-text',
         $te: () => true,
@@ -141,7 +142,7 @@ function mountComponent({ hasError = false } = {}) {
 describe('Transaction Details', () => {
   it('should render', async () => {
     const wrapper = mountComponent();
-    expect(wrapper.classes()).toContain('transaction-details');
+    expect(wrapper.find('.transaction-details').exists()).toBeTruthy();
   });
 
   it('should display all required fields', async () => {
