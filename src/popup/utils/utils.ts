@@ -15,6 +15,7 @@ import {
 } from '@aeternity/aepp-sdk';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { useI18n } from 'vue-i18n';
+
 import {
   ADDRESS_TYPES,
   AENS_DOMAIN,
@@ -90,11 +91,11 @@ export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
 }
 
-export function getLocalStorageItem<T = object>(keys: string[]): T | null {
+export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
   const result = window.localStorage.getItem(
     [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
   );
-  return result ? JSON.parse(result) : null;
+  return result ? JSON.parse(result) : undefined;
 }
 
 export function setLocalStorageItem(keys: string[], value: any): void {

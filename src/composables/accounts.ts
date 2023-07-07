@@ -1,4 +1,6 @@
 import { computed } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import type { IAccount, IDefaultComposableOptions, IFormSelectOption } from '../types';
 import { FAUCET_URL, buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
 
@@ -31,7 +33,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountFaucetUrl = computed(() => `${FAUCET_URL}?address=${activeAccount.value.address}`);
 
-  function getAccountByAddress(address: string): IAccount | undefined {
+  function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
 
@@ -40,7 +42,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     store.commit('accounts/setActiveIdx', +(accounts.value[idx].idx || 0));
   }
 
-  function setActiveAccountByAddress(address?: string) {
+  function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
     if (address) {
       setActiveAccountByIdx(getAccountByAddress(address)?.idx);
     }
@@ -49,7 +51,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   /**
    * Determine if provided address belongs to any of the current user's accounts.
    */
-  function isLocalAccountAddress(address: string): boolean {
+  function isLocalAccountAddress(address: Encoded.AccountAddress): boolean {
     return accountsAddressList.value.includes(address);
   }
 

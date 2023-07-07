@@ -9,7 +9,12 @@ import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
-import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
+import {
+  ContractMethodsBase,
+  Encoded,
+  Node,
+  Tag,
+} from '@aeternity/aepp-sdk-13';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,
@@ -141,7 +146,7 @@ export type AccountKind = 'basic'; // TODO establish other possible values
  * Account stored on the application store.
  */
 export interface IAccount {
-  address: string
+  address: Encoded.AccountAddress
   idx?: number
   name: string // .chain
   publicKey: Uint8Array
@@ -153,12 +158,11 @@ export interface IAccount {
 /**
  * Account fetched from the node with the use of `sdk.api.getAccountByPubkey`
  */
-export interface IAccountFetched {
+type AeternityAccountFetched = Awaited<ReturnType<InstanceType<typeof Node>['getAccountByPubkey']>>;
+
+// TODO: remove this wrapper when all the amount moved to a bigint
+export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'> {
   balance: string;
-  id: string; // ak_* hash
-  kind: AccountKind;
-  nonce: number;
-  payable: boolean;
 }
 
 export interface IAccountLabeled extends Partial<IAccount> {
@@ -168,20 +172,20 @@ export interface IAccountLabeled extends Partial<IAccount> {
 
 export interface IMultisigConsensus {
   confirmationsRequired: number;
-  confirmedBy: string[];
+  confirmedBy: Encoded.AccountAddress[];
   expirationHeight: number;
   expired: boolean;
-  proposedBy: string;
+  proposedBy: Encoded.AccountAddress;
   txHash?: string;
 }
 
 export interface IMultisigAccountResponse {
-  contractId: string;
+  contractId: Encoded.ContractAddress;
   createdAt: string; // Date
-  gaAccountId: string; // Generalized Account used as the Multisig Account
+  gaAccountId: Encoded.AccountAddress; // Generalized Account used as the Multisig Account
   height: number;
   id: number;
-  signerId: string;
+  signerId: Encoded.AccountAddress;
   updatedAt: string; // Date
   version: string; // X.X.X
 }
@@ -191,17 +195,17 @@ export interface IMultisigAccountResponse {
  */
 export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountResponse {
   balance: Balance;
-  refusedBy?: string[];
+  refusedBy?: Encoded.AccountAddress[];
   nonce: number;
-  signers: string[];
+  signers: Encoded.AccountAddress[];
   hasPendingTransaction: boolean;
   pending?: boolean;
 }
 
 export interface IRawMultisigAccount {
-  multisigAccountCreationEncodedCallData?: string;
-  signedAttachTx?: string;
-  rawTx?: string;
+  multisigAccountCreationEncodedCallData?: Encoded.ContractBytearray;
+  signedAttachTx?: Encoded.Transaction;
+  rawTx?: Encoded.Transaction;
 }
 
 export interface INetworkBase {
@@ -348,12 +352,12 @@ export interface IGAMetaTx {
 
 export interface ITx {
   abiVersion: number
-  accountId?: string
+  accountId?: Encoded.AccountAddress
   amount: number
   arguments: ITxArguments[]
   callData?: string // TODO find source
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: string
+  callerId: Encoded.AccountAddress
   code: string
   commitmentId: any
   contractId: string
@@ -378,7 +382,7 @@ export interface ITx {
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
-  tag?: string; // Allows to establish the transaction type
+  tag?: Tag; // Allows to establish the transaction type
   type: TxType; // Custom property we add after unpacking the Tx
   tx?: {
     signatures: string[];
@@ -397,7 +401,7 @@ export interface ITransaction {
   pending: boolean; // There are cases that not only the IPendingTransaction can be pending
   rawTx?: any; // TODO find type
   tipUrl?: string;
-  transactionOwner?: string;
+  transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
   url?: string;
 }
@@ -424,7 +428,9 @@ export interface IPendingTransaction {
   tx: Partial<ITx>;
 }
 
-export interface IAccountOverView extends Partial<IAccount> {
+export interface IAccountOverView extends Partial<Omit<IAccount, 'address'>> {
+  // TODO: use a proper type for a address since it can be a url
+  address?: Encoded.AccountAddress | string,
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
@@ -667,19 +673,19 @@ export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | nul
 export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
 
 export interface ICreateMultisigAccount {
-  address: string;
+  address?: Encoded.AccountAddress;
 }
 
 export interface IRawMultisigTx {
-  id: number
-  hash: string
-  tx: string
-  createdAt: Date
-  updatedAt: Date
+  id: number;
+  hash: Encoded.TxHash;
+  tx: Encoded.Transaction;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IKeyPair {
-  publicKey: string;
+  publicKey: Encoded.AccountAddress;
   secretKey: string;
 }
 
@@ -708,7 +714,7 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
   tip_token: (
     recipientId: Encoded.AccountAddress,
     note: string,
-    contacttId: Encoded.ContractAddress,
+    contractId: Encoded.ContractAddress,
     amount: string
   ) => Encoded.TxHash;
   retip_token: (

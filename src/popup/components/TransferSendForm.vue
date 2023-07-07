@@ -446,7 +446,7 @@ export default defineComponent({
         } catch (e) {
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
-          formModel.value.address = '';
+          formModel.value.address = undefined;
           openDefaultModal({
             title: t('modals.invalid-qr-code.msg'),
             icon: 'critical',
@@ -457,7 +457,7 @@ export default defineComponent({
         const requestedTokenBalance = tokenBalances.value
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
-          formModel.value.address = '';
+          formModel.value.address = undefined;
           openDefaultModal({ msg: t('modals.insufficient-balance.msg') });
           return;
         }
@@ -487,7 +487,7 @@ export default defineComponent({
         ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
         invoiceId.value = null;
       }
-      if (!formModel.value.address) formModel.value.address = '';
+      if (!formModel.value.address) formModel.value.address = undefined;
     }
 
     function editPayload() {

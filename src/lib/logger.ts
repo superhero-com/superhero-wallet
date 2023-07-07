@@ -7,6 +7,9 @@ import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
 import { RejectedByUserError } from './errors';
 
+// @ts-ignore
+declare const browser: Browser;
+
 interface ILoggerOptions {
   background?: boolean;
   app?: App;
@@ -79,7 +82,7 @@ export default class Logger {
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
-    (browser as Browser).storage.local.set({ errorLog: [...errorLog, logEntry] });
+    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
     if (!Logger.background && modal && error.message) {
       const { openErrorModal } = useModals();
       openErrorModal(logEntry);
@@ -87,7 +90,7 @@ export default class Logger {
   }
 
   static async get() {
-    const { errorLog = [] } = await (browser as Browser).storage.local.get('errorLog');
+    const { errorLog = [] } = await browser.storage.local.get('errorLog');
     return errorLog;
   }
 

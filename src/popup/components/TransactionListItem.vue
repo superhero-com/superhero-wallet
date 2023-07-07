@@ -157,7 +157,9 @@ export default defineComponent({
         || isErrorTransaction.value
         || (
           isDex.value
-          && FUNCTION_TYPE_DEX.pool.includes(currentTransaction.value.tx?.function as TxFunctionRaw)
+          && FUNCTION_TYPE_DEX.pool.includes(
+            currentTransaction.value.tx?.function as TxFunctionRaw,
+          )
         )
       ) return 0;
       return getFormattedAndRoundedFiat(

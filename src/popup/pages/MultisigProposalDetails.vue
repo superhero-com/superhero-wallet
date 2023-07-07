@@ -266,10 +266,12 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import { isEqual } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import BigNumber from 'bignumber.js';
+
 import {
   formatDate,
   formatTime,
@@ -385,9 +387,10 @@ export default defineComponent({
       const multisigTransaction = tx.tx?.tx as IGAMetaTx;
       if (!multisigTransaction) return 0;
 
-      return (
-        +(multisigTransaction.amount) + tx.fee + multisigTransaction.fee
-      );
+      return new BigNumber(multisigTransaction.amount)
+        .plus(tx.fee)
+        .plus(multisigTransaction.fee)
+        .toString();
     });
 
     const expirationHeightToRelativeTime = computed(() => (
@@ -405,9 +408,10 @@ export default defineComponent({
 
       multisigTx.value = {
         ...activeMultisigTx.tx,
-        type: SCHEMA.TX_TYPE.gaMeta,
-        tag: SCHEMA.TX_TYPE.gaMeta,
-      } as ITx;
+        type: Tag[Tag.GaMetaTx],
+        tag: Tag.GaMetaTx,
+      } as any;
+      // TODO: remove `any` by adding returned type from `unpackTx` sdk function to `ITx` type
     }
 
     function handleInsufficientBalanceError(
@@ -479,7 +483,10 @@ export default defineComponent({
       try {
         const { gaAccountId, txHash, nonce } = activeMultisigAccount.value;
         const rawTx = await fetchTransactionByHash(txHash as string);
-        transaction.value = await sendTx(gaAccountId, (rawTx as any).tx, nonce);
+        if (!rawTx) {
+          throw Error('failed to load a transaction');
+        }
+        transaction.value = await sendTx(gaAccountId, rawTx.tx, nonce);
 
         await updateMultisigAccounts();
 

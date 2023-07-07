@@ -1,4 +1,6 @@
 import { computed, ref } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk-13';
+
 import type {
   IAccountLabeled,
   ITokenList,
@@ -26,7 +28,7 @@ import { useSdk } from './sdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx
-  externalAddress?: string
+  externalAddress?: Encoded.AccountAddress
 }
 
 export function useTransactionTx({
@@ -39,14 +41,14 @@ export function useTransactionTx({
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
-  const ownerAddress = ref<string | undefined>(externalAddress);
+  const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
   function setTransactionTx(newTx: ITx) {
     outerTx.value = newTx;
     innerTx.value = getInnerTransaction(newTx);
   }
 
-  function setExternalAddress(address: string) {
+  function setExternalAddress(address: Encoded.AccountAddress) {
     ownerAddress.value = address;
   }
 
@@ -109,7 +111,7 @@ export function useTransactionTx({
     ));
 
   function getOwnershipAccount(
-    externalOwnerAddress: string | undefined,
+    externalOwnerAddress: Encoded.AccountAddress | undefined,
   ): IAccountLabeled {
     switch (ownershipStatus.value) {
       case TRANSACTION_OWNERSHIP_STATUS.current:

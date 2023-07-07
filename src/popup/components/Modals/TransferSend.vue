@@ -53,6 +53,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 
 import { ObjectValues, ResolveRejectCallback, ITokenList } from '../../../types';
 import { IFormModel } from '../../../composables';
@@ -91,7 +92,7 @@ export default defineComponent({
   props: {
     resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
-    address: { type: String, default: null },
+    address: { type: String as PropType<Encoded.AccountAddress>, default: null },
     isMultisig: Boolean,
   },
   setup(props) {
@@ -101,7 +102,7 @@ export default defineComponent({
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      address: '', amount: '', selectedAsset: undefined, payload: '',
+      amount: '', selectedAsset: undefined, payload: '',
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');

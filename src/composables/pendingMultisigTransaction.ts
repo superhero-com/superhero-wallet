@@ -3,6 +3,7 @@ import {
   watch,
   computed,
 } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import { isEqual } from 'lodash-es';
 import {
   FUNCTION_TYPE_MULTISIG,
@@ -46,14 +47,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * Current proposal signers.
    */
-  const pendingMultisigTxSigners = computed((): string[] => (
+  const pendingMultisigTxSigners = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.signers ?? []
   ));
 
   /**
    * The Signers who approved the current proposal.
    */
-  const pendingMultisigTxConfirmedBy = computed((): string[] => (
+  const pendingMultisigTxConfirmedBy = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.confirmedBy ?? []
   ));
 
@@ -67,14 +68,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * The Signers who refused the current proposal.
    */
-  const pendingMultisigTxRefusedBy = computed((): string[] => (
+  const pendingMultisigTxRefusedBy = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.refusedBy ?? []
   ));
 
   /**
    * Sorted list of signatories, with confirmed signatories appearing first.
    */
-  const pendingMultisigTxSortedSigners = computed((): string[] => (
+  const pendingMultisigTxSortedSigners = computed((): Encoded.AccountAddress[] => (
     [...pendingMultisigTxSigners.value].sort(
       (a) => activeMultisigAccount.value?.confirmedBy.includes(a) ? -1 : 1,
     )
