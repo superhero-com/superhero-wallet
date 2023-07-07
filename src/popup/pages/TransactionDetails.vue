@@ -71,7 +71,7 @@
 
           <DetailsItem
             v-if="contractId"
-            :label="$t('common.contract')"
+            :label="$t('common.smartContract')"
             small
           >
             <template #value>
