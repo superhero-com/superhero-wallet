@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n';
+import { Store } from 'vuex';
 import en from '../../popup/locales/en.json';
 
 const fallbackLocale = 'en';
@@ -10,7 +11,7 @@ export const i18n = createI18n({
   messages: { en },
 });
 
-const languages = {
+const languages: Record<string, { name: string, getMessages: () => Promise<any> }> = {
   en: {
     name: 'English',
     getMessages: () => import(/* webpackChunkName: "locale-en" */ '../../popup/locales/en.json'),
@@ -21,12 +22,12 @@ const languages = {
   },
 };
 
-const fetchAndSetLocale = async (languageCode) => {
-  if (!i18n.global.availableLocales.includes(languageCode)) {
+const fetchAndSetLocale = async (languageCode: string) => {
+  if (!(i18n.global.availableLocales as string[]).includes(languageCode)) {
     const messages = (await languages[languageCode].getMessages()).default;
     i18n.global.setLocaleMessage(languageCode, messages);
   }
-  i18n.global.locale.value = languageCode;
+  (i18n.global.locale as any).value = languageCode;
 };
 
 const preferredLocale = (() => {
@@ -34,7 +35,7 @@ const preferredLocale = (() => {
   return languages[code] ? code : fallbackLocale;
 })();
 
-export default (store) => {
+export default (store: Store<any>) => {
   store.registerModule('languages', {
     namespaced: true,
     state: {
@@ -44,7 +45,7 @@ export default (store) => {
       list: () => Object.entries(languages)
         .map(([code, { name }]) => ({ code, name }))
         .sort(),
-      active: ({ activeCode }, { list }) => list.find(({ code }) => code === activeCode),
+      active: ({ activeCode }, { list }) => list.find(({ code }: any) => code === activeCode),
     },
     mutations: {
       setActiveCode(state, languageCode) {
