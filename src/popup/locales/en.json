@@ -37,7 +37,6 @@
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "you": "You",
-    "contract": "Contract",
     "max": "MAX"
   },
   "connectionStatus": {
@@ -430,8 +429,7 @@
       "aens": "AENS",
       "contractCreate": "Contract create",
       "accountAddress": "Account address",
-      "superheroDex": "Superhero DEX",
-      "smartContract": "Smart contract"
+      "superheroDex": "Superhero DEX"
     },
     "returnType": {
       "abort": "Failed",

@@ -20,7 +20,7 @@
     />
     <DetailsRow
       v-if="tokenData.contractId && !isAe"
-      :label="$t('common.contract')"
+      :label="$t('common.smartContract')"
     >
       <template #text>
         <AddressTruncated

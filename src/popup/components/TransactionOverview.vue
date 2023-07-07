@@ -116,7 +116,9 @@ export default defineComponent({
           const contract = {
             address: contractId,
             url: getExplorerPath.value(contractId),
-            label: t(`transaction.overview.${isDex.value ? 'superheroDex' : 'contract'}`),
+            label: isDex.value
+              ? t('transaction.overview.superheroDex')
+              : t('common.smartContract'),
           };
 
           let transactionOwner;
@@ -175,7 +177,7 @@ export default defineComponent({
               label: t('multisig.multisigVault'),
             },
             recipient: {
-              label: t('transaction.overview.smartContract'),
+              label: t('common.smartContract'),
               address: innerTx.value.contractId,
             },
           };

@@ -23,7 +23,7 @@
             address: activeMultisigAccount.gaAccountId
           }"
           :recipient="{
-            label: $t('transaction.overview.smartContract'),
+            label: $t('common.smartContract'),
             address: activeMultisigAccount.contractId
           }"
           :transaction="{ tx: multisigTx }"
