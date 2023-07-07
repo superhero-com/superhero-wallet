@@ -23,6 +23,7 @@
         <Header v-if="showHeader" />
 
         <ion-router-outlet
+          :animated="!RUNNING_IN_TESTS"
           :class="{ 'show-header': showHeader }"
           class="main"
         />
@@ -71,6 +72,7 @@ import {
   IS_FIREFOX,
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
+  RUNNING_IN_TESTS,
 } from '@/constants';
 import {
   useAccounts,
@@ -208,6 +210,7 @@ export default defineComponent({
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
+      RUNNING_IN_TESTS,
       modalsOpen,
       qrScannerOpen,
       showHeader,
