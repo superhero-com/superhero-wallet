@@ -147,6 +147,8 @@ function mountComponent() {
       stubs: {
         Loader: false,
         TransactionDetailsBase: false,
+        IonPage: false,
+        IonContent: false,
       },
       components: {
         Loader,
@@ -166,7 +168,7 @@ function mountComponent() {
 describe('Transaction Details', () => {
   it('should render', async () => {
     const wrapper = mountComponent();
-    expect(wrapper.classes()).toContain('transaction-details');
+    expect(wrapper.find('.transaction-details').exists()).toBeTruthy();
   });
 
   it('should display all required fields', async () => {

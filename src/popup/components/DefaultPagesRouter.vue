@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-router-outlet />
+    <ion-router-outlet :animated="!RUNNING_IN_TESTS" />
   </ion-page>
 </template>
 
@@ -9,6 +9,7 @@ import { defineComponent, onMounted, onUpdated } from 'vue';
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import { useUi } from '@/composables';
+import { RUNNING_IN_TESTS } from '../../lib/environment';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -38,6 +39,10 @@ export default defineComponent({
     onMounted(() => {
       setHomeRoute();
     });
+
+    return {
+      RUNNING_IN_TESTS,
+    };
   },
 });
 </script>

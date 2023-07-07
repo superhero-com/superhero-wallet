@@ -137,7 +137,6 @@ export default defineComponent({
       PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
-      swiper,
       getAccountColor,
       onSlideChange,
       setCurrentSlide,

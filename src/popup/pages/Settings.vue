@@ -12,7 +12,7 @@
           :to="{ name: ROUTE_NETWORK_SETTINGS }"
           :title="$t('pages.titles.networks')"
           :info="activeNetwork.name"
-          data-cy="networks"
+          data-cy="networks-settings"
         />
         <PanelItem
           :to="{ name: 'permissions-settings' }"
