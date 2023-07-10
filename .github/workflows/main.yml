@@ -16,6 +16,8 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Ionic
+        run: npm install -g @ionic/cli
       - run: npm ci
       - name: Run Commitlint
         if: github.event_name == 'pull_request'
