@@ -8,65 +8,74 @@ import type {
   WebSocketChannelName,
 } from '../types';
 import {
+  WEB_SOCKET_SOURCE,
   WEB_SOCKET_CHANNELS,
   WEB_SOCKET_SUBSCRIBE,
-  WEB_SOCKET_UN_SUBSCRIBE,
+  WEB_SOCKET_UNSUBSCRIBE,
+  WEB_SOCKET_RECONNECT_TIMEOUT,
   handleUnknownError,
+  NETWORK_MAINNET,
 } from '../popup/utils';
-
-let wsClient: WebSocket;
-let isWsConnected: boolean;
-
-const subscribersQueue: IMiddlewareWebSocketSubscriptionMessage[] = [];
-
-const subscribers: Record<WebSocketChannelName, Record<string, (
-  payload: ITransaction | ITopHeader
-) => void>> = {
-  [WEB_SOCKET_CHANNELS.Transactions]: {},
-  [WEB_SOCKET_CHANNELS.MicroBlocks]: {},
-  [WEB_SOCKET_CHANNELS.KeyBlocks]: {},
-  [WEB_SOCKET_CHANNELS.Object]: {},
-};
 
 class WebSocketClient {
   private static instance: WebSocketClient;
 
-  static getInstance(): WebSocketClient {
-    if (!WebSocketClient.instance) {
-      WebSocketClient.instance = new WebSocketClient();
-    }
-    return WebSocketClient.instance;
-  }
+  wsClient: WebSocket = new WebSocket(NETWORK_MAINNET.websocketUrl);
 
-  private handleWebsocketOpen() {
-    isWsConnected = true;
-    subscribersQueue.forEach((message) => {
-      wsClient.send(JSON.stringify(message));
-    });
+  isWsConnected: boolean = false;
+
+  subscribersQueue: IMiddlewareWebSocketSubscriptionMessage[] = [];
+
+  subscribers: Record<WebSocketChannelName, Record<string, (
+    payload: ITransaction | ITopHeader
+  ) => void>> = {
+    [WEB_SOCKET_CHANNELS.Transactions]: {},
+    [WEB_SOCKET_CHANNELS.MicroBlocks]: {},
+    [WEB_SOCKET_CHANNELS.KeyBlocks]: {},
+    [WEB_SOCKET_CHANNELS.Object]: {},
+  };
+
+  handleWebsocketOpen() {
+    this.isWsConnected = true;
+    try {
+      this.subscribersQueue.forEach((message) => {
+        this.wsClient.send(JSON.stringify(message));
+      });
+    } catch (error) {
+      handleUnknownError(error);
+      setTimeout(() => {
+        this.handleWebsocketOpen();
+      }, WEB_SOCKET_RECONNECT_TIMEOUT);
+    }
   }
 
   private handleWebsocketClose() {
-    isWsConnected = false;
+    this.isWsConnected = false;
   }
 
   isConnected(): boolean {
-    return isWsConnected;
+    return this.isWsConnected;
   }
 
   subscribeForChannel(
     message: IMiddlewareWebSocketSubscriptionMessage,
     callback: (payload: any) => void,
   ) {
-    if (isWsConnected) {
-      wsClient.send(JSON.stringify(message));
+    if (this.isWsConnected) {
+      Object.keys(WEB_SOCKET_SOURCE).forEach((source) => {
+        this.wsClient.send(JSON.stringify({
+          ...message,
+          source,
+        }));
+      });
     }
 
-    subscribersQueue.push(message);
+    this.subscribersQueue.push(message);
 
     const uuid = genUuid();
-    subscribers[message.payload][uuid] = callback;
+    this.subscribers[message.payload][uuid] = callback;
     return () => {
-      delete subscribers[message.payload][uuid];
+      delete this.subscribers[message.payload][uuid];
     };
   }
 
@@ -123,7 +132,7 @@ class WebSocketClient {
       }
 
       // Call all subscribers for the channel
-      Object.values(subscribers[data.subscription as WebSocketChannelName]).forEach(
+      Object.values(this.subscribers[data.subscription as WebSocketChannelName]).forEach(
         (subscriberCb) => subscriberCb(data.payload),
       );
     } catch (error) {
@@ -132,29 +141,37 @@ class WebSocketClient {
   }
 
   disconnect() {
-    subscribersQueue.forEach((message) => {
-      wsClient.send(
-        JSON.stringify({
+    this.subscribersQueue.forEach((message) => {
+      Object.keys(WEB_SOCKET_SOURCE).forEach((source) => {
+        this.wsClient.send(JSON.stringify({
           ...message,
-          op: WEB_SOCKET_UN_SUBSCRIBE,
-        }),
-      );
+          source,
+          op: WEB_SOCKET_UNSUBSCRIBE,
+        }));
+      });
     });
-    wsClient.close();
-    wsClient.removeEventListener('open', this.handleWebsocketOpen);
-    wsClient.removeEventListener('close', this.handleWebsocketClose);
-    wsClient.removeEventListener('message', this.handleWebsocketClose);
+    this.wsClient.close();
+    this.wsClient.removeEventListener('open', this.handleWebsocketOpen);
+    this.wsClient.removeEventListener('close', this.handleWebsocketClose);
+    this.wsClient.removeEventListener('message', this.handleWebsocketClose);
   }
 
   connect(url: string) {
-    if (wsClient) {
+    if (this.wsClient) {
       this.disconnect();
     }
 
-    wsClient = new WebSocket(url);
-    wsClient.addEventListener('open', this.handleWebsocketOpen);
-    wsClient.addEventListener('close', this.handleWebsocketClose);
-    wsClient.addEventListener('message', this.handleWebsocketMessage);
+    this.wsClient = new WebSocket(url);
+    this.wsClient.addEventListener('open', () => this.handleWebsocketOpen());
+    this.wsClient.addEventListener('close', () => this.handleWebsocketClose());
+    this.wsClient.addEventListener('message', (message) => this.handleWebsocketMessage(message));
+  }
+
+  static getInstance(): WebSocketClient {
+    if (!WebSocketClient.instance) {
+      WebSocketClient.instance = new WebSocketClient();
+    }
+    return WebSocketClient.instance;
   }
 }
 

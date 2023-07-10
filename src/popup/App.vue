@@ -51,6 +51,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from 'vue';
@@ -107,7 +108,7 @@ export default defineComponent({
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn, accounts } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
@@ -187,11 +188,22 @@ export default defineComponent({
       }
     });
 
-    watch(activeNetwork, (network) => {
-      stopListeningForIncomingTransactions();
-      WebSocketClient.connect(network.websocketUrl);
-      startListeningForIncomingTransactions();
+    watch(activeNetwork, (network, prevNetwork) => {
+      if (network?.websocketUrl !== prevNetwork?.websocketUrl) {
+        WebSocketClient.connect(network.websocketUrl);
+      }
     }, { immediate: true });
+
+    watch(
+      () => accounts.value.length,
+      () => {
+        stopListeningForIncomingTransactions();
+        if (accounts.value.length > 0) {
+          startListeningForIncomingTransactions();
+        }
+      },
+      { immediate: true },
+    );
 
     initVisibilityListeners();
 
@@ -209,6 +221,10 @@ export default defineComponent({
           setNotificationSettings(),
         ]);
       }
+    });
+
+    onUnmounted(() => {
+      stopListeningForIncomingTransactions();
     });
 
     return {

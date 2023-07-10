@@ -34,8 +34,6 @@ import {
   nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-import NotificationItem from '../components/NotificationItem.vue';
-import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
 import { IS_EXTENSION } from '../../lib/environment';
 
@@ -58,6 +56,8 @@ export default defineComponent({
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
+      displayMode,
+      filtersConfig,
     } = useNotifications({ store, requirePolling: true });
 
     onMounted(async () => {

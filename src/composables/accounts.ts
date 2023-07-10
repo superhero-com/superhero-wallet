@@ -70,25 +70,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     return accountsAddressList.value.includes(address);
   }
 
-  /**
-   * @param {string} address - the address to format.
-   * @returns {string} - returns the account's name if it exists,
-   * otherwise it returns the translated string "Account" + the account's index +1.
-  */
-  function getAccountNameByAddress(address: string): string {
-    const { idx, name } = getAccountByAddress(address) || {};
-
-    if (name) {
-      return name;
-    }
-
-    if (idx) {
-      return `${i18n.t('pages.account.heading')} ${idx + 1}`;
-    }
-
-    return address;
-  }
-
   return {
     accounts,
     accountsAddressList,
@@ -104,6 +85,5 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     getAccountByAddress,
     setActiveAccountByAddress,
     setActiveAccountByIdx,
-    getAccountNameByAddress,
   };
 }

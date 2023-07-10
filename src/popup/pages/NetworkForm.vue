@@ -159,8 +159,8 @@ export default defineComponent({
       },
       {
         key: 'websocketUrl',
-        placeholder: root.$t('pages.network.websocketUrlPlaceholder'),
-        label: root.$t('pages.network.websocketUrlLabel'),
+        placeholder: t('pages.network.websocketUrlPlaceholder'),
+        label: t('pages.network.websocketUrlLabel'),
       },
     ];
 

@@ -606,7 +606,13 @@ export const WEB_SOCKET_CHANNELS = {
   Object: 'Object',
 };
 
+export const WEB_SOCKET_SOURCE = {
+  mdw: 'mdw',
+  node: 'node',
+};
+
 export const WEB_SOCKET_SUBSCRIBE = 'Subscribe';
-export const WEB_SOCKET_UN_SUBSCRIBE = 'Unsubscribe';
+export const WEB_SOCKET_UNSUBSCRIBE = 'Unsubscribe';
+export const WEB_SOCKET_RECONNECT_TIMEOUT = 1000;
 
 export const PUSH_NOTIFICATION_AUTO_CLOSE_TIMEOUT = 10000;

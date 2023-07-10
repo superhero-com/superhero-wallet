@@ -25,6 +25,7 @@ import {
   ALLOWED_ICON_STATUSES,
   AETERNITY_COIN_ID,
   WEB_SOCKET_CHANNELS,
+  WEB_SOCKET_SOURCE,
 } from '../popup/utils';
 import { RejectedByUserError } from '../lib/errors';
 
@@ -266,7 +267,7 @@ export interface INotification {
   createdAt: string
   entityId?: string
   entityType?: string
-  id?: number
+  id?: number | string
   path?: RouteLocationRaw
   receiver?: string
   sender?: string
@@ -279,7 +280,7 @@ export interface INotification {
   isSeedBackup?: boolean
   buttonLabel?: TranslateResult,
   title?: TranslateResult,
-  isIncomingTransaction?: boolean;
+  hasIncomingTransaction?: boolean;
   pushNotification?: boolean;
 }
 
@@ -729,10 +730,12 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
 }
 
 export type WebSocketChannelName = ObjectValues<typeof WEB_SOCKET_CHANNELS>;
+export type WebSocketSourceName = ObjectValues<typeof WEB_SOCKET_SOURCE>;
 
 // https://github.com/aeternity/ae_mdw#websocket-interface
 export interface IMiddlewareWebSocketSubscriptionMessage {
   op: 'Subscribe' | 'Unsubscribe';
-  payload: WebSocketChannelName | 'Object';
+  payload: WebSocketChannelName;
   target?: string;
+  source?: WebSocketSourceName;
 }

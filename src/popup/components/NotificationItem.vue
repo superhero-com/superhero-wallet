@@ -152,11 +152,12 @@ export default defineComponent({
 
     function handleClick() {
       if (props.notification.path) {
+        const route = `${props.notification.path}?directBackRoute=true`;
         // check if path starts with # or protocol
         if (typeof props.notification.path === 'string' && /^(#|\w+:\D+)/.test(props.notification.path)) {
-          window.open(props.notification.path, props.notification.path.startsWith('#') ? '_self' : '_blank');
+          window.open(route, props.notification.path.startsWith('#') ? '_self' : '_blank');
         } else {
-          router.push(props.notification.path);
+          router.push(route);
         }
       }
     }

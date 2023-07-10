@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type {
   IDefaultComposableOptions,
   IFilterInputPayload,
@@ -22,7 +23,6 @@ import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import PushNotification from '../lib/PushNotification';
-import { i18n } from '../store/plugins/languages';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean
@@ -47,6 +47,7 @@ export function useNotifications({
   requirePolling = false,
   store,
 }: UseNotificationsOptions) {
+  const { t } = useI18n();
   const { getSdk } = useSdk({ store });
   const { activeAccount } = useAccounts({ store });
 
@@ -54,9 +55,9 @@ export function useNotifications({
   const fetchedNotificationsOffset = ref(0);
 
   const filtersConfig = ref<IFilters<ObjectValues<typeof NOTIFICATION_FILTER_MODE>>>({
-    all: { name: i18n.t('common.all') },
-    superhero: { name: i18n.t('filters.superhero') },
-    wallet: { name: i18n.t('filters.wallet') },
+    all: { name: t('common.all') },
+    superhero: { name: t('filters.superhero') },
+    wallet: { name: t('filters.wallet') },
   });
   const displayMode = ref<IFilterInputPayload<NotificationsFilterMode>>({
     key: NOTIFICATION_FILTER_MODE.all,

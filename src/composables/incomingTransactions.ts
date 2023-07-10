@@ -1,6 +1,7 @@
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import { TX_FUNCTIONS, TX_TYPE_MDW, roundAmountToPrecision } from '../popup/utils';
-import { i18n } from '../store/plugins/languages';
 import { IDefaultComposableOptions, ITransaction } from '../types';
 import { useAccounts } from './accounts';
 import { useNotifications } from './notifications';
@@ -10,12 +11,32 @@ import WebSocketClient from '../lib/WebSocketClient';
 
 export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
   const router = useRouter();
+  const { t } = useI18n();
 
   const { addWalletNotification } = useNotifications({ store });
-  const { isLocalAccountAddress, getAccountNameByAddress, accounts } = useAccounts({ store });
+  const { isLocalAccountAddress, getAccountByAddress, accounts } = useAccounts({ store });
   const getTxAmountTotal = useGetter<any>('getTxAmountTotal');
   const getTxSymbol = useGetter<any>('getTxSymbol');
   let unWatchAccountsUpdates: (() => void)[] = [];
+
+  /**
+   * @param {Encoded.AccountAddress} address - the address to format.
+   * @returns {string} - returns the account's name if it exists,
+   * otherwise it returns the translated string "Account" + the account's index +1.
+  */
+  function getAccountNameByAddress(address: Encoded.AccountAddress): string {
+    const { idx, name } = getAccountByAddress(address) || {};
+
+    if (name) {
+      return name;
+    }
+
+    if (idx) {
+      return `${t('pages.account.heading')} ${idx + 1}`;
+    }
+
+    return address;
+  }
 
   /**
    * This function starts listening for incoming transactions on the 'Transactions' channel.
@@ -43,20 +64,20 @@ export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
 
           if (
             recipientId
-            && isLocalAccountAddress(recipientId)
+            && isLocalAccountAddress(recipientId as Encoded.AccountAddress)
             && !receivedTransactions.has(hash)
           ) {
             receivedTransactions.add(hash);
 
             const amount = roundAmountToPrecision(getTxAmountTotal.value(transaction));
-            const title = i18n.t('pages.notifications.incomingTransaction');
-            const text = `${getAccountNameByAddress(recipientId)} ${i18n.t('pages.transactions.received')} ${amount} ${getTxSymbol.value(transaction)}`;
+            const title = t('pages.notifications.incomingTransaction');
+            const text = `${getAccountNameByAddress(recipientId as Encoded.AccountAddress)} ${t('pages.transactions.received')} ${amount} ${getTxSymbol.value(transaction)}`;
 
             addWalletNotification({
               id: hash,
               text,
               title,
-              buttonLabel: i18n.t('pages.notifications.viewTransaction'),
+              buttonLabel: t('pages.notifications.viewTransaction'),
               path: router.resolve({ name: ROUTE_TX_DETAILS, params: { hash } }).href,
               sender: senderId,
               receiver: recipientId,
