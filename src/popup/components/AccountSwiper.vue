@@ -68,9 +68,10 @@ import {
 } from 'vue';
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import SwiperCore, { Virtual } from 'swiper';
 import { getAddressColor } from '@/utils';
 import { PROTOCOL_AETERNITY } from '@/constants';
+import SwiperCore from 'swiper';
+import { Virtual } from 'swiper/modules';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -146,7 +147,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@use 'swiper/swiper.scss';
+@use 'swiper/css';
 </style>
 
 <style lang="scss" scoped>
