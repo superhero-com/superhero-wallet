@@ -26,7 +26,7 @@ export interface WalletRouteMeta {
    */
   isEdit?: boolean
   /**
-   * Decide of the route should be saved to browser's local storage
+   * Decide if the route should be saved to browser's local storage
    */
   notPersist?: boolean
   /**

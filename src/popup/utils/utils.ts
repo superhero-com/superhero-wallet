@@ -25,21 +25,21 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AETERNITY_CONTRACT_ID,
-  TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
-  HASH_REGEX,
-  LOCAL_STORAGE_PREFIX,
-  SEED_LENGTH,
-  SIMPLEX_URL,
-  SUPPORTED_TX_TYPES,
-  TX_FUNCTIONS,
-  FUNCTION_TYPE_DEX,
-  TRANSACTION_OWNERSHIP_STATUS,
   HASH_PREFIXES_ALLOWED,
   HASH_PREFIX_ORACLE,
   HASH_PREFIX_ACCOUNT,
   HASH_PREFIX_CHANNEL,
+  HASH_REGEX,
+  LOCAL_STORAGE_PREFIX,
+  SEED_LENGTH,
+  SIMPLEX_URL,
+  TX_DIRECTION,
+  TX_TYPES_SUPPORTED,
+  TX_FUNCTIONS,
+  TX_FUNCTION_TYPE_DEX,
+  TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
@@ -625,7 +625,7 @@ export function calculateFontSize(amountValue: BigNumber | number) {
 export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   try {
     const txObject = unpackTx(encodedTx);
-    return SUPPORTED_TX_TYPES.includes(txObject.tag);
+    return TX_TYPES_SUPPORTED.includes(txObject.tag);
   } catch (e) {
     return false;
   }
@@ -638,7 +638,7 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
     tx
     && tx.contractId
     && tx.function
-    && Object.values(FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
+    && Object.values(TX_FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId)
   );
 }

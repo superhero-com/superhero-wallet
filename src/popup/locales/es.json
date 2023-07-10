@@ -112,22 +112,22 @@
   "transaction": {
     "fee": "Comision de Transacción",
     "type": {
-      "SpendTx": "Gastar",
-      "ContractCreateTx": "Contrato creado",
-      "ContractCallTx": "Llamar contrato",
-      "NamePreclaimTx": "Preclamar nombre",
-      "NameClaimTx": "Reclamar nombre",
-      "NameUpdateTx": "Actualizar nombre",
-      "NameTransferTx": "Transferir nombre",
-      "NameRevokeTx": "Revocar nombre",
-      "OracleRegisterTx": "Registrar oráculo",
-      "OracleExtendTx": "Extender oráculo",
-      "OraclePostQueryTx": "Consulta Post del oráculo",
-      "OracleRespondTx": "Respuesta oráculo",
-      "ChannelCloseSoloTx": "Cierre de canal Solo",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Establecer canal",
-      "ChannelSnapshotSoloTx": "Instantánea (snapchot) del canal Solo"
+      "spendTx": "Gastar",
+      "contractCreateTx": "Contrato creado",
+      "contractCallTx": "Llamar contrato",
+      "namePreclaimTx": "Preclamar nombre",
+      "nameClaimTx": "Reclamar nombre",
+      "nameUpdateTx": "Actualizar nombre",
+      "nameTransferTx": "Transferir nombre",
+      "nameRevokeTx": "Revocar nombre",
+      "oracleRegisterTx": "Registrar oráculo",
+      "oracleExtendTx": "Extender oráculo",
+      "oraclePostQueryTx": "Consulta Post del oráculo",
+      "oracleRespondTx": "Respuesta oráculo",
+      "channelCloseSoloTx": "Cierre de canal Solo",
+      "channelSlashTx": "Slash channel",
+      "channelSettleTx": "Establecer canal",
+      "channelSnapshotSoloTx": "Instantánea (snapchot) del canal Solo"
     }
   },
   "pages": {
@@ -158,8 +158,7 @@
       "language": "Idioma",
       "security": "Securidad",
       "about": "Acerca",
-      "send-tips": "Enviar Propinas",
-      "claim-tips": "Reclamar Propinas",
+      "sendTips": "Enviar Propinas",
       "scanQr": "Scanear QR",
       "terms": "Términos de Uso",
       "privacy": "Política de Privacidad",
@@ -169,12 +168,12 @@
       "notifications": "Notificaciones",
       "names": "Nombres",
       "bidding": "Subastar",
-      "comment-new": "Agregar comentario",
+      "commentNew": "Agregar comentario",
       "home": "Superhero Inicio",
-      "donate-error": "Donar Data",
+      "donateError": "Donar Data",
       "address": "Dirección de Envio",
       "allowances": "Asignaciones",
-      "sign-message": "Firmar Mensaje"
+      "signMessage": "Firmar Mensaje"
     },
     "about": {
       "heading": "Acerca de",
@@ -213,6 +212,7 @@
       "noMobileClaim": "Actualmente los reclamos solo están disponibles en el escritorio (desktop)."
     },
     "claimTips": {
+      "title": "Reclamar Propinas",
       "urlToClaim": "Reclamar propinas para esta URL:"
     },
     "notFound": {

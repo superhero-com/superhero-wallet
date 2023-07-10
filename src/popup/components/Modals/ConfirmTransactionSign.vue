@@ -15,7 +15,7 @@
         :transaction="completeTransaction"
       />
 
-      <template v-if="(isDex || isAllowance) && tokenList.length">
+      <template v-if="(isDex || isDexAllowance) && tokenList.length">
         <TransactionDetailsPoolTokenRow
           v-for="(token, idx) in tokenList"
           :key="token.contractId"
@@ -38,7 +38,7 @@
       <div class="details">
         <DetailsItem
           v-if="isSwap"
-          :label="$t(`pages.signTransaction.${swapDirection}`)"
+          :label="swapDirectionTranslation"
         >
           <TokenAmount
             :amount="tokenAmount"
@@ -115,7 +115,7 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
-  FUNCTION_TYPE_DEX,
+  TX_FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
@@ -182,7 +182,7 @@ export default defineComponent({
 
     const {
       direction,
-      isAllowance,
+      isDexAllowance,
       isDex,
       setTransactionTx,
     } = useTransactionTx({
@@ -205,11 +205,11 @@ export default defineComponent({
     );
 
     const isSwap = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
+      () => txFunction.value && TX_FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
     );
 
     const isPool = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
+      () => txFunction.value && TX_FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
 
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
@@ -217,14 +217,22 @@ export default defineComponent({
 
     const swapDirection = computed(() => {
       if (txFunction.value) {
-        if (FUNCTION_TYPE_DEX.maxSpent.includes(txFunction.value)) {
+        if (TX_FUNCTION_TYPE_DEX.maxSpent.includes(txFunction.value)) {
           return 'maxSpent';
         }
-        if (FUNCTION_TYPE_DEX.minReceived.includes(txFunction.value)) {
+        if (TX_FUNCTION_TYPE_DEX.minReceived.includes(txFunction.value)) {
           return 'minReceived';
         }
       }
       return 'total';
+    });
+
+    const swapDirectionTranslation = computed(() => {
+      switch (swapDirection.value) {
+        case 'maxSpent': return t('pages.signTransaction.maxSpent');
+        case 'minReceived': return t('pages.signTransaction.minReceived');
+        default: return t('pages.signTransaction.total');
+      }
     });
 
     const totalAmount = computed(
@@ -264,7 +272,7 @@ export default defineComponent({
     );
 
     function getTokens(txParams: ITx): ITokenResolved[] {
-      if (!isDex.value && !isAllowance.value) {
+      if (!isDex.value && !isDexAllowance.value) {
         return [singleToken.value];
       }
       const functionName = camelCase(txParams.function) as TxFunctionParsed;
@@ -291,7 +299,7 @@ export default defineComponent({
     }
 
     function getLabels(token: any, idx: number) {
-      if (isAllowance.value) {
+      if (isDexAllowance.value) {
         return t('pages.signTransaction.approveUseOfToken');
       }
       if (isSwap.value) {
@@ -372,9 +380,10 @@ export default defineComponent({
       tokenSymbol,
       totalAmount,
       swapDirection,
-      isAllowance,
+      swapDirectionTranslation,
       isSwap,
       isDex,
+      isDexAllowance,
       isHash,
       isTransactionAex9,
       swapTokenAmountData,

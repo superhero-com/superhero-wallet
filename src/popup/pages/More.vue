@@ -13,7 +13,7 @@
     <template v-if="isNodeMainnet || isNodeTestnet">
       <PanelItem
         :to="{ name: 'tips-claim' }"
-        :title="$t('pages.titles.claim-tips')"
+        :title="$t('pages.claimTips.title')"
         data-cy="tips-claim"
       >
         <template #icon>

@@ -60,7 +60,7 @@ import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
 import { useStore } from 'vuex';
 import {
-  FUNCTION_TYPE_DEX,
+  TX_FUNCTION_TYPE_DEX,
   amountRounded,
   convertToken,
   formatDate,
@@ -119,7 +119,7 @@ export default defineComponent({
     const {
       isDex,
       direction,
-      isAllowance,
+      isDexAllowance,
       isErrorTransaction,
     } = useTransactionTx({
       store,
@@ -130,7 +130,7 @@ export default defineComponent({
     const { tokens } = useTransactionTokens({
       store,
       direction: direction.value,
-      isAllowance: isAllowance.value,
+      isAllowance: isDexAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
@@ -158,7 +158,7 @@ export default defineComponent({
         || isErrorTransaction.value
         || (
           isDex.value
-          && FUNCTION_TYPE_DEX.pool.includes(
+          && TX_FUNCTION_TYPE_DEX.pool.includes(
             currentTransaction.value.tx?.function as TxFunctionRaw,
           )
         )

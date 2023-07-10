@@ -41,7 +41,7 @@
 import { mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
-import { FUNCTION_TYPE_DEX } from '../utils/constants';
+import { TX_FUNCTION_TYPE_DEX } from '../utils/constants';
 
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -58,8 +58,8 @@ export default {
     ...mapState('fungibleTokens', ['availableTokens']),
     isSwapTx() {
       return [
-        ...FUNCTION_TYPE_DEX.swap,
-        ...FUNCTION_TYPE_DEX.pool,
+        ...TX_FUNCTION_TYPE_DEX.swap,
+        ...TX_FUNCTION_TYPE_DEX.pool,
       ].includes(this.transaction.tx.function);
     },
     rates() {

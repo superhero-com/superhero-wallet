@@ -11,11 +11,11 @@
     </div>
     <div class="info">
       <h3 class="title">
-        {{ $t('pages.titles.reset-wallet') }}?
+        {{ $t('pages.resetWallet.title') }}?
       </h3>
       <div class="text">
-        <span>{{ $t('pages.reset-wallet.warning') }}</span>
-        <span>{{ $t('pages.reset-wallet.warningConfirm') }}</span>
+        <span>{{ $t('pages.resetWallet.warning') }}</span>
+        <span>{{ $t('pages.resetWallet.warningConfirm') }}</span>
       </div>
     </div>
     <template #footer>
@@ -29,7 +29,7 @@
         variant="danger"
         @click="onReset"
       >
-        {{ $t('pages.reset-wallet.reset') }}
+        {{ $t('pages.resetWallet.reset') }}
       </BtnMain>
     </template>
   </Modal>

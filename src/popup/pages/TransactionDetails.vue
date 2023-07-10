@@ -6,7 +6,7 @@
     />
     <template v-else>
       <div
-        v-if="!isAllowance || isErrorTransaction"
+        v-if="!isDexAllowance || isErrorTransaction"
         class="header"
       >
         <TransactionErrorStatus
@@ -16,7 +16,7 @@
         <TransactionTokens
           :transaction="transaction"
           :direction="direction"
-          :is-allowance="isAllowance"
+          :is-allowance="isDexAllowance"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
           icon-size="md"
@@ -43,11 +43,11 @@
             data-cy="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance)"
+            v-if="(isPool || isDexAllowance)"
             :transaction="transaction"
             :direction="direction"
             :tx-function="transaction.tx.function"
-            :is-allowance="isAllowance"
+            :is-allowance="isDexAllowance"
             :class="{ reverse: isPool }"
           />
 
@@ -191,7 +191,7 @@
             />
           </div>
           <DetailsItem
-            v-if="!(isDex || isAllowance || isMultisig)"
+            v-if="!(isDex || isDexAllowance || isMultisig)"
             :label="$t('common.amount')"
             data-cy="amount"
           >
@@ -254,7 +254,7 @@ import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import {
   AETERNITY_SYMBOL,
-  FUNCTION_TYPE_DEX,
+  TX_FUNCTION_TYPE_DEX,
   formatDate,
   formatTime,
   aettosToAe,
@@ -340,8 +340,8 @@ export default defineComponent({
       setTransactionTx,
       direction,
       isErrorTransaction,
-      isAllowance,
       isDex,
+      isDexAllowance,
       isMultisig,
       outerTxTag,
     } = useTransactionTx({
@@ -365,10 +365,10 @@ export default defineComponent({
     const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
+      () => txFunction.value && TX_FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
     );
     const isPool = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
+      () => txFunction.value && TX_FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
     );
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerUrl = computed(
@@ -456,7 +456,7 @@ export default defineComponent({
       getTxSymbol,
       getTxAmountTotal,
       isErrorTransaction,
-      isAllowance,
+      isDexAllowance,
       isDex,
       isTransactionAex9,
       isMultisig,

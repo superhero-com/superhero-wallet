@@ -1,10 +1,10 @@
 <template>
   <div class="reset-wallet-settings">
     <p class="text-description">
-      {{ $t('pages.reset-wallet.description') }}
+      {{ $t('pages.resetWallet.description') }}
     </p>
     <i18n-t
-      keypath="pages.reset-wallet.description2"
+      keypath="pages.resetWallet.description2"
       tag="p"
       class="text-description"
       scope="global"
@@ -18,7 +18,7 @@
       variant="danger"
       class="reset-wallet-button"
       extend
-      :text="$t('pages.titles.reset-wallet')"
+      :text="$t('pages.resetWallet.title')"
       :icon="ResetWalletIcon"
       @click="onResetWallet"
     />

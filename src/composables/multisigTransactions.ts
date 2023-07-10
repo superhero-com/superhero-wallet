@@ -25,7 +25,7 @@ import { useTopHeaderData } from './topHeader';
 import type {
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
-  IMultisigFunctionTypes,
+  TxFunctionMultisig,
   INetwork,
   IRawMultisigTx,
 } from '../types';
@@ -124,13 +124,13 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * Used to call contract methods (confirm|refuse|revoke)
    * (revoke): can only be used by the account who proposed this transaction
    * (refuse|confirm): any signer can use this action
-   * @param action IMultisigFunctionTypes
+   * @param action TxFunctionMultisig
    * @param contractId string
    * @param spendTxHash string
    * @returns result
    */
   async function callContractMethod(
-    action: IMultisigFunctionTypes,
+    action: TxFunctionMultisig,
     contractId: Encoded.ContractAddress,
     spendTxHash: string,
   ) {

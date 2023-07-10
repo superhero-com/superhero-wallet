@@ -229,7 +229,7 @@ export const routes: WalletAppRouteConfig[] = [
         },
         props: true,
         meta: {
-          title: 'tx-details',
+          title: 'txDetails',
           showHeaderNavigation: true,
           backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
         },
@@ -255,7 +255,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: TokenTransactions,
             props: true,
             meta: {
-              title: 'coin-details',
+              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS },
               showHeaderNavigation: true,
               showFilterBar: true,
@@ -269,7 +269,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: TokenDetails,
             props: true,
             meta: {
-              title: 'coin-details',
+              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS },
               showHeaderNavigation: true,
               isMultisig: true,
@@ -333,7 +333,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-reset-wallet',
     component: ResetWallet,
     meta: {
-      title: 'reset-wallet',
+      title: 'resetWallet',
       showHeaderNavigation: true,
     },
   },
@@ -342,7 +342,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-errors-log',
     component: ErrorLogSettings,
     meta: {
-      title: 'save-errors-log',
+      title: 'saveErrorsLog',
       showHeaderNavigation: true,
     },
   },
@@ -369,7 +369,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase',
     component: SeedPhraseSettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -378,7 +378,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase-details',
     component: SeedPhraseDetailsSettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -387,7 +387,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase-verify',
     component: SeedPhraseVerifySettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -407,7 +407,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NetworkForm,
     props: true,
     meta: {
-      title: 'network-add',
+      title: 'networkAdd',
       showHeaderNavigation: true,
     },
   },
@@ -417,7 +417,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NetworkForm,
     props: true,
     meta: {
-      title: 'network-edit',
+      title: 'networkEdit',
       showHeaderNavigation: true,
     },
   },
@@ -486,7 +486,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'tips-claim',
     component: TipsClaim,
     meta: {
-      title: 'claim-tips',
+      title: 'claimTips',
       showHeaderNavigation: true,
     },
   },
@@ -498,7 +498,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send-tip',
+      title: 'sendTip',
       notPersist: true,
     },
   },
@@ -572,7 +572,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/comment',
     component: CommentNew,
     meta: {
-      title: 'comment-new',
+      title: 'commentNew',
       notPersist: true,
       showHeaderNavigation: true,
     },
@@ -583,7 +583,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: DonateError,
     props: true,
     meta: {
-      title: 'donate-error',
+      title: 'donateError',
       notPersist: true,
       ifNotAuth: true,
     },
@@ -607,7 +607,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenTransactions,
         props: true,
         meta: {
-          title: 'coin-details',
+          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
           showFilterBar: true,
@@ -620,7 +620,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenDetails,
         props: true,
         meta: {
-          title: 'coin-details',
+          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
@@ -637,7 +637,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenTransactions,
         props: true,
         meta: {
-          title: 'token-details',
+          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
           showFilterBar: true,
@@ -650,7 +650,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenDetails,
         props: true,
         meta: {
-          title: 'token-details',
+          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
@@ -662,7 +662,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-message',
     component: SignMessage,
     meta: {
-      title: 'sign-message',
+      title: 'signMessage',
       notPersist: true,
     },
   },
@@ -671,7 +671,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-transaction',
     component: SignTransaction,
     meta: {
-      title: 'sign-transaction',
+      title: 'signTransaction',
       notPersist: true,
     },
   },
@@ -704,7 +704,7 @@ export const routes: WalletAppRouteConfig[] = [
       ifNotAuth: true,
       notPersist: true,
       showHeaderNavigation: true,
-      title: 'not-found',
+      title: 'notFound',
     },
   },
 ];

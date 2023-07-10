@@ -79,25 +79,7 @@
     }
   },
   "transaction": {
-    "fee": "Transaktionsgebühr",
-    "type": {
-      "SpendTx": "Spend",
-      "ContractCreateTx": "Contract create",
-      "ContractCallTx": "Contract call",
-      "NamePreclaimTx": "Preclaim name",
-      "NameClaimTx": "Claim name",
-      "NameUpdateTx": "Update name",
-      "NameTransferTx": "Transfer name",
-      "NameRevokeTx": "Revoke name",
-      "OracleRegisterTx": "Register oracle",
-      "OracleExtendTx": "Extend oracle",
-      "OraclePostQueryTx": "Post query oracle",
-      "OracleRespondTx": "Respond oracle",
-      "ChannelCloseSoloTx": "Solo close channel",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Settle channel",
-      "ChannelSnapshotSoloTx": "Solo snapshot channel"
-    }
+    "fee": "Transaktionsgebühr"
   },
   "pages": {
     "intro": {
@@ -118,29 +100,6 @@
       "toHome": "Proceed to your Wallet",
       "send": "Send",
       "ever": "Ever."
-    },
-    "titles": {
-      "settings": "Wallet Settings",
-      "language": "Language",
-      "security": "Security",
-      "about": "About",
-      "send": "Send",
-      "send-tips": "Send Tips",
-      "claim-tips": "Claim Tips",
-      "scanQr": "Scan QR",
-      "terms": "Terms of Use",
-      "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
-      "topUp": "Top Up",
-      "notifications": "Notifications",
-      "names": "Names",
-      "bidding": "Bidding",
-      "comment-new": "Add comment",
-      "home": "Superhero Home",
-      "donate-error": "Donate Data",
-      "address": "Send Address",
-      "sign-message": "Sign Message"
     },
     "about": {
       "heading": "Über",
@@ -177,9 +136,6 @@
       "oracleFailed": "Oracle service check claim failed. Please try again later.",
       "unknownError": "Error occured during claim request. Please try again later.",
       "noMobileClaim": "Claiming is currently only available on desktop."
-    },
-    "claimTips": {
-      "urlToClaim": "URL to claim tips for"
     },
     "notFound": {
       "notFound": "Requested page can't be found",
