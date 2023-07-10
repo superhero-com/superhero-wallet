@@ -34,7 +34,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
-import { DEX_CONTRACTS, FUNCTION_TYPE_DEX } from '../utils/constants';
+import { DEX_CONTRACTS, TX_FUNCTION_TYPE_DEX } from '../utils/constants';
 import { useSdk } from '../../composables';
 
 import Tokens from './Tokens.vue';
@@ -52,7 +52,7 @@ export default {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapGetters(['activeNetwork']),
     tokens() {
-      if (!FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) {
+      if (!TX_FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) {
         return [];
       }
       const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];

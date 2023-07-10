@@ -115,22 +115,22 @@
   "transaction": {
     "fee": "交易费",
     "type": {
-      "SpendTx": "花费",
-      "ContractCreateTx": "创建合约",
-      "ContractCallTx": "呼叫合约",
-      "NamePreclaimTx": "名称预申明",
-      "NameClaimTx": "申明名称",
-      "NameUpdateTx": "更新名称",
-      "NameTransferTx": "转移名称",
-      "NameRevokeTx": "撤销名称",
-      "OracleRegisterTx": "注册预言机",
-      "OracleExtendTx": "扩展预言机",
-      "OraclePostQueryTx": "查询预言机",
-      "OracleRespondTx": "响应预言机",
-      "ChannelCloseSoloTx": "单向关闭通道",
-      "ChannelSlashTx": "断开通道",
-      "ChannelSettleTx": "结算通道",
-      "ChannelSnapshotSoloTx": "单方面快照通道"
+      "spendTx": "花费",
+      "contractCreateTx": "创建合约",
+      "contractCallTx": "呼叫合约",
+      "namePreclaimTx": "名称预申明",
+      "nameClaimTx": "申明名称",
+      "nameUpdateTx": "更新名称",
+      "nameTransferTx": "转移名称",
+      "nameRevokeTx": "撤销名称",
+      "oracleRegisterTx": "注册预言机",
+      "oracleExtendTx": "扩展预言机",
+      "oraclePostQueryTx": "查询预言机",
+      "oracleRespondTx": "响应预言机",
+      "channelCloseSoloTx": "单向关闭通道",
+      "channelSlashTx": "断开通道",
+      "channelSettleTx": "结算通道",
+      "channelSnapshotSoloTx": "单方面快照通道"
     }
   },
   "pages": {
@@ -163,8 +163,7 @@
       "language": "语言",
       "security": "安全",
       "about": "关于",
-      "send-tips": "打赏",
-      "claim-tips": "领赏",
+      "sendTips": "打赏",
       "scanQr": "扫描二维码",
       "terms": "使用条款",
       "privacy": "隐私政策",
@@ -174,16 +173,15 @@
       "notifications": "通知",
       "names": "名称",
       "bidding": "出价",
-      "comment-new": "添加注释",
+      "commentNew": "添加注释",
       "home": "超级英雄之家",
-      "donate-error": "捐赠数据",
+      "donateError": "捐赠数据",
       "networks": "网络",
       "address": "发送地址",
       "allowances": "津贴",
-      "sign-message": "签名信息",
+      "signMessage": "签名信息",
       "invite": "邀请",
-      "save-errors-log": "保存错误日志",
-      "reset-wallet": "重置钱包"
+      "saveErrorsLog": "保存错误日志"
     },
     "about": {
       "heading": "关于",
@@ -221,6 +219,7 @@
       "noMobileClaim": "当前领取只能在桌面上进行。"
     },
     "claimTips": {
+      "title": "领赏",
       "urlToClaim": "为这个URL领取小费:"
     },
     "notFound": {
@@ -602,6 +601,9 @@
       "close": "关闭",
       "claim": "拿回来",
       "insufficient-balance": "余额不足"
+    },
+    "resetWallet": {
+      "title": "重置钱包"
     }
   }
 }

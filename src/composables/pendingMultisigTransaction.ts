@@ -6,7 +6,7 @@ import {
 import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import {
-  FUNCTION_TYPE_MULTISIG,
+  TX_FUNCTION_TYPE_MULTISIG,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   handleUnknownError,
 } from '../popup/utils';
@@ -160,7 +160,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.revoke
+    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTION_TYPE_MULTISIG.revoke
   ));
 
   /**
@@ -168,7 +168,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.confirm
+    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTION_TYPE_MULTISIG.confirm
   ));
 
   /**

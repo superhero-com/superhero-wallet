@@ -201,7 +201,7 @@
               extra-padded
               :disabled="processingAction"
               @click="dispatchProposalAction(
-                FUNCTION_TYPE_MULTISIG.refuse,
+                TX_FUNCTION_TYPE_MULTISIG.refuse,
                 $t('pages.proposalDetails.refuse')
               )"
             >
@@ -229,7 +229,7 @@
                   || pendingMultisigTxExpired
               "
               @click="dispatchProposalAction(
-                FUNCTION_TYPE_MULTISIG.confirm,
+                TX_FUNCTION_TYPE_MULTISIG.confirm,
                 $t('pages.proposalDetails.sign')
               )"
             >
@@ -244,7 +244,7 @@
             extra-padded
             :disabled="processingAction"
             @click="dispatchProposalAction(
-              FUNCTION_TYPE_MULTISIG.revoke,
+              TX_FUNCTION_TYPE_MULTISIG.revoke,
               $t('pages.proposalDetails.revoke')
             )"
           >
@@ -279,14 +279,14 @@ import {
   splitAddress,
   AETERNITY_SYMBOL,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  FUNCTION_TYPE_MULTISIG,
+  TX_FUNCTION_TYPE_MULTISIG,
   getPayload,
   blocksToRelativeTime,
   isInsufficientBalanceError,
 } from '../utils';
 import type {
   IGAMetaTx,
-  IMultisigFunctionTypes,
+  TxFunctionMultisig,
   ITransaction,
   ITx,
 } from '../../types';
@@ -443,7 +443,7 @@ export default defineComponent({
      * Utilized to open the confirmation modal for approving, disapproving, or revoking the proposal
      */
     async function dispatchProposalAction(
-      action: IMultisigFunctionTypes,
+      action: TxFunctionMultisig,
       actionName: string | TranslateResult,
     ) {
       if (!activeMultisigAccount.value) {
@@ -536,7 +536,7 @@ export default defineComponent({
       blocksToRelativeTime,
       dispatchProposalAction,
       processProposal,
-      FUNCTION_TYPE_MULTISIG,
+      TX_FUNCTION_TYPE_MULTISIG,
     };
   },
 });

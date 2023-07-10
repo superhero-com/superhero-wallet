@@ -42,6 +42,9 @@ export const TX_DIRECTION = {
   received: 'received',
 } as const;
 
+/**
+ * ITx.function
+ */
 export const TX_FUNCTIONS = {
   tip: 'tip',
   retip: 'retip',
@@ -68,6 +71,69 @@ export const TX_FUNCTIONS = {
   claim: 'claim',
 } as const;
 
+export const TX_FUNCTION_TYPE_MULTISIG = {
+  propose: 'propose',
+  confirm: 'confirm',
+  refuse: 'refuse',
+  revoke: 'revoke',
+} as const;
+
+export const TX_FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
+  pool: [
+    'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
+  ],
+  removeLiquidity: [
+    'remove_liquidity', 'remove_liquidity_ae',
+  ],
+  addLiquidity: [
+    'add_liquidity', 'add_liquidity_ae',
+  ],
+  swap: [
+    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
+    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
+    'swap_ae_for_exact_tokens',
+  ],
+  allowance: [
+    'transfer_allowance', 'change_allowance', 'create_allowance',
+  ],
+  maxSpent: [
+    'swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens',
+  ],
+  minReceived: [
+    'swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae',
+  ],
+};
+
+/**
+ * ITx.type
+ */
+export const TX_TYPES_SUPPORTED = [
+  Tag.SpendTx,
+  Tag.ContractCreateTx,
+  Tag.ContractCallTx,
+  Tag.NamePreclaimTx,
+  Tag.NameClaimTx,
+  Tag.NameUpdateTx,
+  Tag.NameTransferTx,
+];
+
+export const NAME_TAGS = new Set([
+  Tag.NameClaimTx,
+  Tag.NamePreclaimTx,
+  Tag.NameRevokeTx,
+  Tag.NameUpdateTx,
+]);
+
+export const TX_RETURN_TYPE_OK = 'ok';
+export const TX_RETURN_TYPE_ABORT = 'abort';
+export const TX_RETURN_TYPE_REVERT = 'revert';
+
+export const TX_RETURN_TYPES = [
+  TX_RETURN_TYPE_OK,
+  TX_RETURN_TYPE_ABORT,
+  TX_RETURN_TYPE_REVERT,
+] as const;
+
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
   OTHER: 'OTHER',
@@ -91,7 +157,6 @@ export const HASH_PREFIXES_ALLOWED = [
   HASH_PREFIX_TRANSACTION,
 ] as const;
 
-export const ABORT_TX_TYPE = 'abort';
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
@@ -366,27 +431,6 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
-  pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
-  removeLiquidity: ['remove_liquidity', 'remove_liquidity_ae'],
-  addLiquidity: ['add_liquidity', 'add_liquidity_ae'],
-  swap: [
-    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
-    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
-    'swap_ae_for_exact_tokens',
-  ],
-  allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
-  maxSpent: ['swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens'],
-  minReceived: ['swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae'],
-};
-
-export const FUNCTION_TYPE_MULTISIG: Record<string, string> = {
-  propose: 'propose',
-  confirm: 'confirm',
-  refuse: 'refuse',
-  revoke: 'revoke',
-} as const;
-
 export const APP_LINK_WEB = 'https://wallet.superhero.com';
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
@@ -497,17 +541,13 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   propose: '',
 } as const;
 
-export const RETURN_TYPE_OK = 'ok';
-
-export const SUPPORTED_TX_TYPES = [
-  Tag.SpendTx,
-  Tag.ContractCreateTx,
-  Tag.ContractCallTx,
-  Tag.NamePreclaimTx,
-  Tag.NameClaimTx,
-  Tag.NameUpdateTx,
-  Tag.NameTransferTx,
-];
+export const ADDRESS_TYPES: Record<string, string> = {
+  [HASH_PREFIX_ACCOUNT]: 'account/transactions',
+  [HASH_PREFIX_CONTRACT]: 'contracts/transactions',
+  [HASH_PREFIX_NAME]: 'names',
+  [HASH_PREFIX_ORACLE]: 'oracles/queries',
+  [HASH_PREFIX_TRANSACTION]: 'transactions',
+};
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';
@@ -584,10 +624,3 @@ export const ALLOWED_ICON_STATUSES = [
   'success',
   'warning',
 ] as const;
-
-export const NAME_TAGS = new Set([
-  Tag.NameClaimTx,
-  Tag.NamePreclaimTx,
-  Tag.NameRevokeTx,
-  Tag.NameUpdateTx,
-]);

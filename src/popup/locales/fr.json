@@ -79,25 +79,7 @@
     }
   },
   "transaction": {
-    "fee": "Frais de transaction",
-    "type": {
-      "SpendTx": "Spend",
-      "ContractCreateTx": "Contract create",
-      "ContractCallTx": "Contract call",
-      "NamePreclaimTx": "Preclaim name",
-      "NameClaimTx": "Claim name",
-      "NameUpdateTx": "Update name",
-      "NameTransferTx": "Transfer name",
-      "NameRevokeTx": "Revoke name",
-      "OracleRegisterTx": "Register oracle",
-      "OracleExtendTx": "Extend oracle",
-      "OraclePostQueryTx": "Post query oracle",
-      "OracleRespondTx": "Respond oracle",
-      "ChannelCloseSoloTx": "Solo close channel",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Settle channel",
-      "ChannelSnapshotSoloTx": "Solo snapshot channel"
-    }
+    "fee": "Frais de transaction"
   },
   "pages": {
     "intro": {
@@ -120,27 +102,7 @@
       "ever": "Ever."
     },
     "titles": {
-      "settings": "Paramètres du portefeuille",
-      "language": "Language",
-      "security": "Security",
-      "about": "About",
-      "send": "Send",
-      "send-tips": "Send Tips",
-      "claim-tips": "Claim Tips",
-      "scanQr": "Scan QR",
-      "terms": "Terms of Use",
-      "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
-      "topUp": "Top Up",
-      "notifications": "Notifications",
-      "names": "Names",
-      "bidding": "Bidding",
-      "comment-new": "Add comment",
-      "home": "Superhero Home",
-      "donate-error": "Donate Data",
-      "address": "Send Address",
-      "sign-message": "Sign Message"
+      "settings": "Paramètres du portefeuille"
     },
     "about": {
       "heading": "Sur",

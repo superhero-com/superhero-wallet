@@ -6,7 +6,7 @@
         :key="tab.routeName"
         :exact-path="tab.exact"
         :to="{ name: tab.routeName }"
-        :text="$t(tab.text)"
+        :text="tab.text"
         :data-cy="tab.routeName"
       />
     </Tabs>
@@ -18,7 +18,7 @@
         v-for="subTab in currentSubTabs"
         :key="subTab.routeName"
         :to="{ name: subTab.routeName }"
-        :text="$t(subTab.text)"
+        :text="subTab.text"
         :exact="subTab.exact"
       />
     </div>
@@ -28,6 +28,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
@@ -45,58 +46,11 @@ import Tab from './tabs/Tab.vue';
 import Tabs from './tabs/Tabs.vue';
 
 interface NavigationElement {
-  text: string,
-  routeName: string,
-  exact?: boolean,
-  children?: NavigationElement[]
+  text: string;
+  routeName: string;
+  exact?: boolean;
+  children?: NavigationElement[];
 }
-
-const navigationConfigRegular: NavigationElement[] = [
-  {
-    text: 'modals.accountDetails.assets',
-    routeName: ROUTE_ACCOUNT_DETAILS,
-    exact: true,
-  },
-  {
-    text: 'modals.accountDetails.transactions',
-    routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
-  },
-  {
-    text: 'modals.accountDetails.names',
-    routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
-    children: [
-      {
-        text: 'pages.names.tabs.my-names',
-        routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
-        exact: true,
-      },
-      {
-        text: 'pages.names.tabs.auctions',
-        routeName: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
-      },
-      {
-        text: 'pages.names.tabs.register',
-        routeName: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-      },
-    ],
-  },
-];
-
-const navigationConfigMultisig: NavigationElement[] = [
-  {
-    text: 'modals.accountDetails.assets',
-    routeName: ROUTE_MULTISIG_DETAILS,
-    exact: true,
-  },
-  {
-    text: 'modals.accountDetails.transactions',
-    routeName: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
-  },
-  {
-    text: 'modals.accountDetails.details',
-    routeName: ROUTE_MULTISIG_DETAILS_INFO,
-  },
-];
 
 export default defineComponent({
   name: 'AccountDetailsNavigation',
@@ -110,8 +64,56 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-
+    const { t } = useI18n();
     const { isOnline } = useConnection();
+
+    const navigationConfigRegular: NavigationElement[] = [
+      {
+        text: t('modals.accountDetails.assets'),
+        routeName: ROUTE_ACCOUNT_DETAILS,
+        exact: true,
+      },
+      {
+        text: t('modals.accountDetails.transactions'),
+        routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+      },
+      {
+        text: t('modals.accountDetails.names'),
+        routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+        children: [
+          {
+            text: t('pages.names.tabs.my-names'),
+            routeName: ROUTE_ACCOUNT_DETAILS_NAMES,
+            exact: true,
+          },
+          {
+            text: t('pages.names.tabs.auctions'),
+            routeName: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+          },
+          {
+            text: t('pages.names.tabs.register'),
+            routeName: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+          },
+        ],
+      },
+    ];
+
+    const navigationConfigMultisig: NavigationElement[] = [
+      {
+        text: t('modals.accountDetails.assets'),
+        routeName: ROUTE_MULTISIG_DETAILS,
+        exact: true,
+      },
+      {
+        text: t('modals.accountDetails.transactions'),
+        routeName: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+      },
+      {
+        text: t('modals.accountDetails.details'),
+        routeName: ROUTE_MULTISIG_DETAILS_INFO,
+      },
+    ];
+
     const currentTabs = computed(() => (
       props.isMultisig ? navigationConfigMultisig : navigationConfigRegular
     ));
@@ -148,5 +150,4 @@ export default defineComponent({
     background-color: var(--screen-bg-color);
   }
 }
-
 </style>

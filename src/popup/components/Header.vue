@@ -102,6 +102,40 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts({ store });
 
+    const pageTitles: Record<string, () => string> = {
+      settings: () => t('pages.titles.settings'),
+      language: () => t('pages.titles.language'),
+      about: () => t('pages.titles.about'),
+      sendTip: () => t('pages.titles.sendTip'),
+      claimTips: () => t('pages.claimTips.title'),
+      terms: () => t('pages.titles.terms'),
+      privacy: () => t('pages.titles.privacy'),
+      currency: () => t('pages.titles.currency'),
+      notifications: () => t('pages.titles.notifications'),
+      auction: () => t('pages.titles.auction'),
+      more: () => t('pages.titles.more'),
+      networks: () => t('pages.titles.networks'),
+      permissionsSettings: () => t('pages.titles.permissionsSettings'),
+      permissionsEdit: () => t('pages.titles.permissionsEdit'),
+      permissionsAdd: () => t('pages.titles.permissionsAdd'),
+      commentNew: () => t('pages.titles.commentNew'),
+      donateError: () => t('pages.titles.donateError'),
+      address: () => t('pages.titles.address'),
+      signMessage: () => t('pages.titles.signMessage'),
+      signTransaction: () => t('pages.titles.signTransaction'),
+      invite: () => t('pages.titles.invite'),
+      txDetails: () => t('pages.titles.txDetails'),
+      tokenDetails: () => t('pages.titles.tokenDetails'),
+      coinDetails: () => t('pages.titles.coinDetails'),
+      saveErrorsLog: () => t('pages.titles.saveErrorsLog'),
+      resetWallet: () => t('pages.resetWallet.title'),
+      seedPhrase: () => t('pages.titles.seedPhrase'),
+      networkAdd: () => t('pages.titles.networkAdd'),
+      networkEdit: () => t('pages.titles.networkEdit'),
+      notFound: () => t('pages.titles.notFound'),
+      multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
+    };
+
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
         ? homeRouteName.value
@@ -111,7 +145,9 @@ export default defineComponent({
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
     const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
-      () => routeMeta.value?.title ? t(`pages.titles.${routeMeta.value.title}`) : '',
+      () => (routeMeta.value?.title && pageTitles[routeMeta.value.title])
+        ? pageTitles[routeMeta.value.title]()
+        : '',
     );
 
     function back() {

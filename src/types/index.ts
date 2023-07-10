@@ -16,13 +16,14 @@ import {
 } from '@aeternity/aepp-sdk';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
-  POPUP_TYPES,
+  AETERNITY_COIN_ID,
+  ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
+  POPUP_TYPES,
+  TX_FUNCTION_TYPE_MULTISIG,
   TX_FUNCTIONS,
-  FUNCTION_TYPE_MULTISIG,
-  ALLOWED_ICON_STATUSES,
-  AETERNITY_COIN_ID,
+  TX_RETURN_TYPES,
 } from '../popup/utils';
 import { RejectedByUserError } from '../lib/errors';
 
@@ -304,7 +305,11 @@ export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
  */
 export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
-export type TxFunction = TxFunctionRaw | TxFunctionParsed;
+export type TxFunctionMultisig = keyof typeof TX_FUNCTION_TYPE_MULTISIG;
+
+export type TxFunction = TxFunctionRaw | TxFunctionParsed | TxFunctionMultisig;
+
+export type TxType = keyof typeof Tag;
 
 export interface IGAAttachTx {
   contractId: Encoded.ContractAddress;
@@ -354,10 +359,10 @@ export interface ITx {
   nonce?: number
   payerId?: string
   payload?: Encoded.Bytearray;
-  pointers?: any
+  pointers?: any;
   result?: string;
-  return?: ITxArguments
-  returnType?: string
+  return?: ITxArguments;
+  returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
@@ -367,7 +372,7 @@ export interface ITx {
    * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
    * When comparing the `type` it is suggested to do case insensitive comparison.
    */
-  type: keyof typeof Tag | string ;
+  type: TxType | string;
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
@@ -642,8 +647,6 @@ export interface IActiveAuction {
 
 export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | null;
 
-export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
-
 export interface ICreateMultisigAccount {
   address?: Encoded.AccountAddress;
 }
@@ -659,12 +662,6 @@ export interface IRawMultisigTx {
 export interface IKeyPair {
   publicKey: Encoded.AccountAddress;
   secretKey: string;
-}
-
-export interface ILabel {
-  text: string | TranslateResult;
-  customPending?: string | TranslateResult;
-  hasComma?: boolean;
 }
 
 export interface IDefaultComposableOptions {

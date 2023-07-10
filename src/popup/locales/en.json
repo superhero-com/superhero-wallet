@@ -386,13 +386,7 @@
       "sentTx": "Sending",
       "receivedTx": "Receiving",
       "multisigVaultCreated": "Multisig vault created",
-      "createMultisigVault": "Create Multisig Vault",
-      "propose": "Propose Tx",
-      "revoke": "Revoke Tx",
-      "refuse": "Disapprove Tx",
-      "confirm": "Approve Tx",
-      "tip_token": "tip_token",
-      "retip_token": "retip_token"
+      "createMultisigVault": "Create Multisig Vault"
     },
     "listType": {
       "sentTx": "Sent",
@@ -402,8 +396,6 @@
       "nameUpdateTx": "Name updated",
       "nameTransferTx": "Name transferred",
       "nameRevokeTx": "Revoke name",
-      "provide_liquidity": "Liquidity provided",
-      "remove_liquidity": "Liquidity removed",
       "tipSent": "Tip sent",
       "tipReceived": "Tip received"
     },
@@ -421,6 +413,14 @@
       "out": "out",
       "in": "in"
     },
+    "function": {
+      "propose": "Propose Tx",
+      "revoke": "Revoke Tx",
+      "refuse": "Disapprove Tx",
+      "confirm": "Approve Tx",
+      "tip_token": "tip_token",
+      "retip_token": "retip_token"
+    },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
@@ -434,51 +434,35 @@
   },
   "pages": {
     "titles": {
-      "tx-history": "Tx history",
-      "balances": "Balances",
-      "accounts": "Accounts",
-      "tips": "Tips",
       "settings": "Wallet settings",
       "language": "Language",
-      "security": "Security",
       "about": "About",
-      "send-tip": "Send tip",
-      "claim-tips": "Claim tips",
-      "scanQr": "Scan QR",
+      "sendTip": "Send tip",
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "transactions": "Transaction History",
       "currency": "Currency",
       "notifications": "Notifications",
-      "notification-settings": "Notification Preference",
-      "names": "Names",
       "auction": "Bidding",
-      "name-auctions": "Name auctions",
-      "register-name": "Register name",
       "more": "More",
       "networks": "Network",
       "permissionsSettings": "Permissions",
       "permissionsEdit": "Edit permissions",
       "permissionsAdd": "Add permissions",
-      "comment-new": "Add comment",
-      "home": "Home",
-      "donate-error": "Donate Data",
+      "commentNew": "Add comment",
+      "donateError": "Donate Data",
       "address": "Send Address",
-      "allowances": "Allowances",
-      "sign-message": "Sign Message",
-      "sign-transaction": "Sign Transaction",
+      "signMessage": "Sign Message",
+      "signTransaction": "Sign Transaction",
       "invite": "Invite",
-      "tx-details": "Transaction details",
-      "token-details": "Token details",
-      "coin-details": "Coin details",
-      "wallet-home": "Wallet Home",
-      "save-errors-log": "Save error log",
-      "reset-wallet": "Reset wallet",
-      "seed-phrase": "Seed phrase",
-      "network-add": "Add custom network",
-      "network-edit": "Edit network",
-      "not-found": "Feature not found",
+      "txDetails": "Transaction details",
+      "tokenDetails": "Token details",
+      "coinDetails": "Coin details",
+      "saveErrorsLog": "Save error log",
+      "resetWallet": "Reset wallet",
+      "seedPhrase": "Seed phrase",
+      "networkAdd": "Add custom network",
+      "networkEdit": "Edit network",
+      "notFound": "Feature not found",
       "multisigProposalDetails": "Multisig Tx proposal details"
     },
     "errors-log-settings": {
@@ -537,6 +521,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
+      "title": "Claim tips",
       "header": "You need to verify ownership of the URL before you can claim any tips.",
       "urlToClaim": "Claim tips from this URL:"
     },
@@ -1126,7 +1111,8 @@
       "enter-url": "Enter URL",
       "always-ask": "always ask"
     },
-    "reset-wallet": {
+    "resetWallet": {
+      "title": "Reset wallet",
       "description": "This action will remove all accounts from your wallet and delete the extension storage.",
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",

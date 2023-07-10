@@ -15,9 +15,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { TranslateResult, useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
-import { lowerFirst } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useTransactionTx } from '../../composables';
 import {
@@ -29,11 +28,12 @@ import {
 import {
   AENS,
   DEX,
-  TX_DIRECTION,
-  FUNCTION_TYPE_DEX,
-  includes,
   NAME_TAGS,
   TX_FUNCTIONS,
+  TX_DIRECTION,
+  TX_FUNCTION_TYPE_DEX,
+  includes,
+  excludeFalsy,
 } from '../utils';
 
 import TransactionTag from './TransactionTag.vue';
@@ -49,14 +49,16 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { t, te } = useI18n();
+    const { t } = useI18n();
     const {
       direction,
-      innerTxTag,
       innerTx,
-      isAllowance,
-      isDex,
+      innerTxTag,
       outerTxTag,
+      txTypeLabel,
+      txFunctionLabel,
+      isDex,
+      isDexAllowance,
     } = useTransactionTx({
       store,
       tx: props.transaction?.tx,
@@ -68,54 +70,50 @@ export default defineComponent({
       () => store.state.fungibleTokens.availableTokens,
     );
 
-    const labels = computed<(string | TranslateResult)[]>(() => {
-      if (props.customTitle) return [props.customTitle];
-      if (!props.transaction?.tx) {
+    const labels = computed((): string[] => {
+      if (props.customTitle) {
+        return [props.customTitle];
+      }
+      if (
+        !props.transaction?.tx
+        || props.transaction.pending
+        || outerTxTag.value === Tag.NameTransferTx // Unsupported type
+      ) {
         return [];
       }
 
-      const externalLabels = [];
-      let innerLabels = [];
+      const { tipContractV1, tipContractV2 } = activeNetwork.value;
+      const arr: string[] = [];
 
       if (outerTxTag.value === Tag.GaMetaTx) {
-        externalLabels.push(t('transaction.type.gaMetaTx'));
-      }
-      if (outerTxTag.value === Tag.PayingForTx) {
-        externalLabels.push(t('transaction.type.payingForTx'));
+        arr.push(t('transaction.type.gaMetaTx'));
+      } else if (outerTxTag.value === Tag.PayingForTx) {
+        arr.push(t('transaction.type.payingForTx'));
       }
 
-      const txTransactionType = outerTxTag.value ? t(`transaction.type.${lowerFirst(Tag[outerTxTag.value])}`) : undefined;
-      const { tipContractV1, tipContractV2 } = activeNetwork.value;
-
-      if (!txTransactionType) {
-        return [];
-      }
-      if (outerTxTag.value === Tag.NameTransferTx) { // Unsupported type
-        return [];
-      }
       if (NAME_TAGS.has(outerTxTag.value!)) {
-        innerLabels = [AENS, txTransactionType];
+        arr.push(AENS, txTypeLabel.value);
       } else if (innerTxTag.value === Tag.GaMetaTx) {
-        innerLabels = [
+        arr.push(
           t('transaction.type.contractCallTx'),
           t('transaction.type.multisigProposal'),
-        ];
+        );
       } else if (innerTxTag.value === Tag.SpendTx) {
-        innerLabels = [
+        arr.push(
           t('transaction.type.spendTx'),
           direction.value === TX_DIRECTION.received
             ? t('transaction.spendType.in')
             : t('transaction.spendType.out'),
-        ];
-      } else if (isAllowance.value) {
-        innerLabels = [t('transaction.dexType.allowToken')];
+        );
+      } else if (isDexAllowance.value) {
+        arr.push(t('transaction.dexType.allowToken'));
       } else if (isDex.value) {
-        innerLabels = [
+        arr.push(
           DEX,
-          FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
+          TX_FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
             ? t('transaction.dexType.pool')
             : t('common.swap'),
-        ];
+        );
       } else if (
         (
           innerTx.value.contractId
@@ -123,19 +121,17 @@ export default defineComponent({
           && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
         ) || props.transaction.claim
       ) {
-        innerLabels = [
+        arr.push(
           t('pages.token-details.tip'),
           props.transaction.claim
             ? t('transaction.spendType.in')
             : t('transaction.spendType.out'),
-        ];
+        );
       } else if (
         outerTxTag.value === Tag.PayingForTx
         && innerTxTag.value === Tag.GaAttachTx
       ) {
-        innerLabels = [
-          t('transaction.type.createMultisigVault'),
-        ];
+        arr.push(t('transaction.type.createMultisigVault'));
       } else if (
         outerTxTag.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
@@ -144,7 +140,7 @@ export default defineComponent({
           || props.transaction.incomplete
         )
       ) {
-        innerLabels = [
+        arr.push(
           t('transaction.type.spendTx'),
           (
             innerTx.value.callerId === props.transaction.transactionOwner
@@ -152,18 +148,18 @@ export default defineComponent({
           )
             ? t('transaction.spendType.out')
             : t('transaction.spendType.in'),
-        ];
-      } else if (props.transaction.pending) {
-        return [];
+        );
       } else if (props.transaction.tx.function) {
-        innerLabels = [
-          te(`transaction.type.${props.transaction.tx.function}`) ? t(`transaction.type.${props.transaction.tx.function}`) : props.transaction.tx.function,
-          txTransactionType,
-        ];
+        arr.push(
+          txFunctionLabel.value,
+          txTypeLabel.value,
+        );
       } else {
-        innerLabels = [txTransactionType];
+        arr.push(txTypeLabel.value);
       }
-      return [...externalLabels, ...innerLabels];
+
+      // Remove empty strings and other falsy values
+      return arr.filter(excludeFalsy);
     });
 
     return {

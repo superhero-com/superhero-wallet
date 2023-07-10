@@ -6,7 +6,7 @@
       :token="token"
       :tokens="tokens"
       :hide-amount="hideAmount"
-      :label="$t(`pages.transactionDetails.${getLabel(token.isPool)}`)"
+      :label="getLabel(token.isPool)"
     />
   </div>
 </template>
@@ -14,6 +14,8 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import type { ITransaction, TxFunctionRaw } from '../../types';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
@@ -21,10 +23,9 @@ import {
   aettosToAe,
   convertToken,
 } from '../utils';
-import { ITransaction, TxFunctionRaw } from '../../types';
+import { useTransactionTokens } from '../../composables';
 
 import TransactionDetailsPoolTokenRow from './TransactionDetailsPoolTokenRow.vue';
-import { useTransactionTokens } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -48,6 +49,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { t } = useI18n();
 
     const { tokens } = useTransactionTokens({
       store,
@@ -57,12 +59,21 @@ export default defineComponent({
       showDetailedAllowanceInfo: true,
     });
 
-    function getLabel(isPool: boolean) {
+    function getLabel(isPool?: boolean): string {
       const tag = DEX_TRANSACTION_TAGS[props.txFunction];
-      if (tag === DEX_ALLOW_TOKEN) return 'approveTokenUse';
       const provideLiquidity = tag === DEX_PROVIDE_LIQUIDITY;
-      if (isPool) return provideLiquidity ? 'poolTokenReceived' : 'poolTokenSpent';
-      return provideLiquidity ? 'deposited' : 'withdrawn';
+
+      if (tag === DEX_ALLOW_TOKEN) {
+        return t('pages.transactionDetails.approveTokenUse');
+      }
+      if (isPool) {
+        return provideLiquidity
+          ? t('pages.transactionDetails.poolTokenReceived')
+          : t('pages.transactionDetails.poolTokenSpent');
+      }
+      return provideLiquidity
+        ? t('pages.transactionDetails.deposited')
+        : t('pages.transactionDetails.withdrawn');
     }
 
     return {
