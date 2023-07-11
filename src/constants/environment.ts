@@ -41,12 +41,12 @@ export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.ends
 
 export const IS_IOS = (
   (/ipad|iphone|ipod/.test(userAgentLowerCase) && !(window as any).MSStream)
-  || !!window.cordova?.platformId?.toLowerCase()?.includes('ios')
+  || !!window.ionic?.platformId?.toLowerCase()?.includes('ios')
 );
 
 export const IS_ANDROID = !!(
   userAgentLowerCase.includes('android')
-  || window.cordova?.platformId?.toLowerCase()?.includes('android')
+  || window.ionic?.platformId?.toLowerCase()?.includes('android')
 );
 
 export const IS_MOBILE_DEVICE = userAgentLowerCase.includes('mobi');

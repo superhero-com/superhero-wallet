@@ -16,7 +16,7 @@
 .env.local
 .env.*.local
 
-# Cordova files
+# Ionic files
 /www
 /platforms
 /plugins

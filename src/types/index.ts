@@ -27,7 +27,7 @@ import {
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { Protocol } from './protocols';
 
-export * from './cordova';
+export * from './ionic';
 export * from './filter';
 export * from './forms';
 export * from './networks';
