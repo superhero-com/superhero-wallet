@@ -278,8 +278,7 @@ export default defineComponent({
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
-    // TODO fix this hack
-    height: 300px;
+    height: 100vh;
   }
 
   .close-button {
