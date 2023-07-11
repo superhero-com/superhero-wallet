@@ -1,8 +1,6 @@
 <template>
   <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+    <ion-content class="account-ion-content">
       <AccountDetailsBase class="account-details" />
     </ion-content>
   </ion-page>
@@ -37,3 +35,8 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+  .account-ion-content {
+    background-color: #191919;
+  }
+</style>
