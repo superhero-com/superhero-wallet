@@ -1,3 +1,4 @@
+import { isPlatform } from '@ionic/vue';
 import type { IPopupType } from '../types';
 
 const userAgentLowerCase = navigator.userAgent.toLowerCase();
@@ -39,17 +40,11 @@ export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 
-export const IS_IOS = (
-  (/ipad|iphone|ipod/.test(userAgentLowerCase) && !(window as any).MSStream)
-  || !!window.cordova?.platformId?.toLowerCase()?.includes('ios')
-);
+export const IS_IOS = isPlatform('ios');
 
-export const IS_ANDROID = !!(
-  userAgentLowerCase.includes('android')
-  || window.cordova?.platformId?.toLowerCase()?.includes('android')
-);
+export const IS_ANDROID = isPlatform('android');
 
-export const IS_MOBILE_DEVICE = userAgentLowerCase.includes('mobi');
+export const IS_MOBILE_DEVICE = isPlatform('mobile');
 
 /**
  * Chrome, Brave, Safari, Edge...
