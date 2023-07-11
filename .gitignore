@@ -18,7 +18,8 @@
 
 # Ionic files
 /www
-/platforms
+/android
+/ios
 /plugins
 /resources/*/icon
 /resources/*/splash
