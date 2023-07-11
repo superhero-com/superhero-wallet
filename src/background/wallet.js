@@ -1,12 +1,14 @@
+import { isEqual } from 'lodash-es';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk-13';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
-import { useSdk13 } from '../composables';
 import store from './store';
+import { useSdk, useSdk13 } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
+let initSdkRunning = false;
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
@@ -20,7 +22,7 @@ const addAeppConnection = async (port) => {
 };
 
 export async function init() {
-  const { isSdkReady, getSdk } = useSdk13({ store });
+  const { isSdkReady, getSdk, createNodeInstance } = useSdk13({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
@@ -60,10 +62,48 @@ export async function init() {
         throw new Error('Unknown connection type');
     }
   });
+  await store.dispatch('sdkPlugin/initialize');
   await getSdk();
 
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
+
+  store.watch(
+    (state, getters) => getters.activeNetwork,
+    async (network, oldNetwork) => {
+      if (initSdkRunning || isEqual(network, oldNetwork)) {
+        return;
+      }
+      try {
+        const { getSdk: getSdk11, createNewNodeInstance } = useSdk({ store });
+
+        initSdkRunning = true;
+        const [sdk, sdk13] = await Promise.all([
+          getSdk11(),
+          getSdk(),
+        ]);
+        if (oldNetwork) {
+          sdk.pool.delete(oldNetwork.name);
+          sdk13.pool.delete(oldNetwork.name);
+        }
+        sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
+        sdk13.addNode(network.name, await createNodeInstance(network.url), true);
+      } finally {
+        initSdkRunning = false;
+      }
+    },
+  );
+
+  store.watch(
+    (state) => state.accounts?.activeIdx,
+    async (oldVal, newVal) => {
+      const sdk = await getSdk();
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdk._pushAccountsToApps();
+      }
+    },
+    { deep: true },
+  );
 }
 
 export async function disconnect() {

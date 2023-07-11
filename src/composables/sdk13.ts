@@ -1,8 +1,6 @@
 import {
   computed,
   ref,
-  watch,
-  watchEffect,
 } from 'vue';
 import {
   AeSdk,
@@ -11,7 +9,6 @@ import {
   RpcRejectedByUserError,
   CompilerHttp,
 } from '@aeternity/aepp-sdk-13';
-import { isEqual } from 'lodash-es';
 import { ShSdkWallet } from '../lib/shSdkWallet';
 import type {
   IDefaultComposableOptions,
@@ -189,29 +186,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     };
   }
 
-  watch(
-    activeAccount,
-    (oldVal, newVal) => {
-      if (!isEqual(oldVal, newVal) && sdk) {
-        sdk._pushAccountsToApps();
-      }
-    },
-    { deep: true },
-  );
-
-  watchEffect(
-    async () => {
-      if (sdk && activeNetwork.value && sdkCurrentNetwork !== activeNetwork.value) {
-        sdkBlocked = true;
-        sdk.pool.delete(sdkCurrentNetwork.name);
-        const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-        sdk.addNode(activeNetwork.value.name, nodeInstance!, true);
-        sdkCurrentNetwork = activeNetwork.value;
-        sdkBlocked = false;
-      }
-    },
-  );
-
   return {
     isNodeReady,
     isNodeConnecting,
@@ -221,5 +195,6 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     getSdk,
     getDrySdk,
     fetchRespondChallenge,
+    createNodeInstance,
   };
 }

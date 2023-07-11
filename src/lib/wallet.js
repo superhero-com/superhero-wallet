@@ -36,6 +36,8 @@ if (IN_FRAME) {
 
 export default async function initSdk() {
   const { isSdkReady, getSdk, createNewNodeInstance } = useSdk({ store });
+  const { getSdk: getSdk13, createNodeInstance } = useSdk13({ store });
+
   const { getMiddleware } = useMiddleware({ store });
 
   store.watch(
@@ -50,24 +52,28 @@ export default async function initSdk() {
         store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
 
         let sdk;
+        let sdk13;
 
         if (isSdkReady.value) {
-          [sdk] = await Promise.all([
+          [sdk, sdk13] = await Promise.all([
             getSdk(),
+            getSdk13(),
             getMiddleware(),
           ]);
-          sdk.pool.delete(oldNetwork.name);
+          if (oldNetwork) {
+            sdk.pool.delete(oldNetwork.name);
+            sdk13.pool.delete(oldNetwork.name);
+          }
           sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
+          sdk13.addNode(network.name, await createNodeInstance(network.url), true);
         } else {
           await Promise.all([
             store.dispatch('sdkPlugin/initialize'),
             getMiddleware(),
           ]);
-          const { getSdk: getSdk13 } = useSdk13({ store });
-          sdk = await getSdk13();
 
           if (IN_FRAME && !FramesConnection.initialized) {
-            FramesConnection.init(sdk);
+            FramesConnection.init(await getSdk13());
           }
         }
 
@@ -81,5 +87,15 @@ export default async function initSdk() {
       }
     },
     { immediate: true },
+  );
+
+  store.watch(
+    (state) => state.accounts?.activeIdx,
+    async (oldVal, newVal) => {
+      const sdk = await getSdk13();
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdk._pushAccountsToApps();
+      }
+    },
   );
 }
