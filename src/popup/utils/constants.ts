@@ -1,5 +1,5 @@
 import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded, METHODS } from '@aeternity/aepp-sdk-13';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,
@@ -525,7 +525,7 @@ export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
-export const POPUP_TYPE_TX_SIGN = 'transaction.sign';
+export const POPUP_TYPE_TX_SIGN = METHODS.sign;
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,

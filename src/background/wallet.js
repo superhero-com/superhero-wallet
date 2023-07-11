@@ -1,34 +1,29 @@
 import { isEqual } from 'lodash-es';
-import BrowserRuntimeConnection from '@aeternity/aepp-sdk/es/utils/aepp-wallet-communication/connection/browser-runtime';
+import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk-13';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
-import { executeAndSetInterval } from '../popup/utils';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useSdk } from '../composables';
+import { useSdk, useSdk13 } from '../composables';
 
 window.browser = require('webextension-polyfill');
-
-const { isSdkReady, getSdk, createNewNodeInstance } = useSdk({ store });
 
 let initSdkRunning = false;
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
-  const connection = BrowserRuntimeConnection({
-    connectionInfo: { id: port.sender.frameId },
-    port,
-  });
+  const { getSdk } = useSdk13({ store });
   const sdk = await getSdk();
-  sdk.addRpcClient(connection);
-  const shareWalletInfo = executeAndSetInterval(
-    () => sdk.shareWalletInfo(port.postMessage.bind(port)),
-    3000,
-  );
+  const connection = new BrowserRuntimeConnection({ port });
+  const clientId = sdk.addRpcClient(connection);
+  await sdk.shareWalletInfo(clientId);
+  const shareWalletInfo = setInterval(() => sdk.shareWalletInfo(clientId), 3000);
   port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
 };
 
 export async function init() {
+  const { isSdkReady, getSdk, createNodeInstance } = useSdk13({ store });
+
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
 
@@ -60,7 +55,7 @@ export async function init() {
           return;
         }
 
-        addAeppConnection(port);
+        await addAeppConnection(port);
         break;
       }
       default:
@@ -73,7 +68,6 @@ export async function init() {
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
 
-  // TODO remove watcher after migrating to SDK13
   store.watch(
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
@@ -81,28 +75,50 @@ export async function init() {
         return;
       }
       try {
+        const { getSdk: getSdk11, createNewNodeInstance } = useSdk({ store });
+
         initSdkRunning = true;
-        const sdk = await getSdk();
-        sdk.pool.delete(oldNetwork.name);
+        const [sdk, sdk13] = await Promise.all([
+          getSdk11(),
+          getSdk(),
+        ]);
+        if (oldNetwork) {
+          sdk.pool.delete(oldNetwork.name);
+          sdk13.pool.delete(oldNetwork.name);
+        }
         sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
+        sdk13.addNode(network.name, await createNodeInstance(network.url), true);
       } finally {
         initSdkRunning = false;
       }
     },
   );
+
+  store.watch(
+    (state) => state.accounts?.activeIdx,
+    async (oldVal, newVal) => {
+      const sdk = await getSdk();
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdk._pushAccountsToApps();
+      }
+    },
+    { deep: true },
+  );
 }
 
 export async function disconnect() {
+  const { getSdk } = useSdk13({ store });
   const sdk = await getSdk();
-  Object.values(sdk.rpcClients).forEach((aepp) => {
-    if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
-      aepp.sendMessage(
+
+  sdk._clients.forEach((aepp, aeppId) => {
+    if (aepp.status && aepp.status !== 'DISCONNECTED') {
+      aepp.rpc.connection.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
         true,
       );
-      aepp.disconnect();
-      browser.tabs.reload(aepp.connection.port.sender.tab.id);
+      aepp.rpc.connection.disconnect();
+      browser.tabs.reload(aepp.rpc.connection.port.sender.tab.id);
     }
-    sdk.removeRpcClient(aepp.id);
+    sdk.removeRpcClient(aeppId);
   });
 }

@@ -5,20 +5,24 @@ import {
   RpcRejectedByUserError,
   unpackTx,
   Encoded,
+  METHODS,
 } from '@aeternity/aepp-sdk-13';
 import { Store } from 'vuex';
 import { useAccounts } from '../../composables/accounts';
-import { IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../environment';
-import { POPUP_TYPE_MESSAGE_SIGN, POPUP_TYPE_SIGN, POPUP_TYPE_TX_SIGN } from '../../popup/utils';
+import { useModals } from '../../composables/modals';
+import { IN_FRAME, IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../environment';
+import {
+  MODAL_MESSAGE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_TX_SIGN,
+} from '../../popup/utils';
 import { showPopup } from '../../background/popupHandler';
-import type { IPopupType } from '../../types';
 
 export class AccountSuperhero extends AccountBase {
   address: Encoded.AccountAddress;
 
   store: Store<any>;
-
-  aeppInfo: Record<string, any> = {};
 
   constructor(store: Store<any>) {
     super();
@@ -29,7 +33,7 @@ export class AccountSuperhero extends AccountBase {
 
   signTransaction(txBase64: Encoded.Transaction, opt: any): Promise<Encoded.Transaction> {
     if (IS_CORDOVA) {
-      return this.fgPermissionCheckAndSign(txBase64, opt, opt.aeppOrigin);
+      return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, opt, opt.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
       return this.bgPermissionCheckAndSign(
@@ -41,13 +45,13 @@ export class AccountSuperhero extends AccountBase {
     return this.store.dispatch('accounts/signTransaction', { txBase64, opt: { ...opt, onAccount: this.address } });
   }
 
-  signMessage(message: string, opt: any): Promise<Uint8Array> {
-    if (IS_CORDOVA) {
-      return this.fgPermissionCheckAndSign(messageToHash(message), opt, opt.aeppOrigin);
+  async signMessage(message: string, opt: any): Promise<Uint8Array> {
+    if (IS_CORDOVA || IN_FRAME) {
+      return this.fgPermissionCheckAndSign('message.sign', message, opt, opt.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
       return this.bgPermissionCheckAndSign(
-        POPUP_TYPE_MESSAGE_SIGN,
+        METHODS.signMessage,
         message,
         { ...opt, origin: opt.aeppOrigin },
       );
@@ -62,21 +66,37 @@ export class AccountSuperhero extends AccountBase {
       : this.store.dispatch('accounts/sign', data, opt);
   }
 
-  async fgPermissionCheckAndSign(payload: any, opt: any, origin?: string) {
+  async fgPermissionCheckAndSign(method: any, payload: any, opt: any, origin?: string) {
     try {
-      const host = origin ? new URL(origin).host : null;
-      const permission = (!host && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
-        host,
-        method: POPUP_TYPE_SIGN,
+      const app = origin ? new URL(origin) : null;
+      const permission = (!app?.host && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
+        host: app?.host,
+        method,
         params: payload,
       });
+      if (method === 'message.sign') {
+        if (!permission) {
+          const { openModal } = useModals();
+          await openModal(MODAL_MESSAGE_SIGN, {
+            message: payload,
+            app: {
+              name: app?.hostname,
+              icons: [],
+              protocol: app?.protocol,
+              host: app?.host,
+              url: app?.href,
+            },
+          });
+        }
+        return this.sign(messageToHash(payload), opt);
+      }
 
       return this.store.dispatch('accounts/signTransaction', {
-        txBase64: payload,
+        txBase64: messageToHash(payload),
         opt: {
           ...opt,
           modal: !permission,
-          host,
+          host: app?.host,
         },
       });
     } catch (error: any) {
@@ -84,17 +104,16 @@ export class AccountSuperhero extends AccountBase {
     }
   }
 
-  async bgPermissionCheckAndSign(method: IPopupType, payload: any, opt: Record<string, any>) {
-    const aepp = this.aeppInfo[opt.aeppRpcClientId];
+  async bgPermissionCheckAndSign(method: METHODS, payload: any, opt: Record<string, any>) {
     const isTxSigning = method === POPUP_TYPE_TX_SIGN;
     if (
       (await this.store.dispatch('permissions/checkPermissions', {
-        host: new URL(aepp.origin).host,
+        host: new URL(opt.origin).host,
         method,
         params: opt,
       }))
       || (await showPopup(
-        aepp.origin,
+        opt.origin,
         isTxSigning ? POPUP_TYPE_SIGN : POPUP_TYPE_MESSAGE_SIGN,
         {
           ...opt,
@@ -112,7 +131,7 @@ export class AccountSuperhero extends AccountBase {
         () => false,
       ))
     ) {
-      if (method === POPUP_TYPE_MESSAGE_SIGN) {
+      if (method === METHODS.signMessage) {
         return this.store.dispatch('accounts/sign', messageToHash(payload));
       }
       return this.store.dispatch('accounts/signTransaction', {
@@ -120,7 +139,7 @@ export class AccountSuperhero extends AccountBase {
         opt: {
           ...opt,
           modal: false,
-          host: aepp.origin,
+          host: opt.origin,
         },
       });
     }

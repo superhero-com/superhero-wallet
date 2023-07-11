@@ -1,4 +1,5 @@
 import { isEqual } from 'lodash-es';
+import { METHODS } from '@aeternity/aepp-sdk-13';
 import {
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
@@ -8,18 +9,21 @@ import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useSdk } from '../composables';
+import { useMiddleware, useSdk, useSdk13 } from '../composables';
 
 let initSdkRunning = false;
 
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
-      async reset({ rootGetters }) {
-        Object.values(rootGetters['sdkPlugin/sdk'].rpcClients).forEach((aepp) => {
+      async reset() {
+        const { getSdk } = useSdk13({ store });
+        const sdk = await getSdk();
+
+        Object.values(sdk._clients).forEach((aepp) => {
           if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
             aepp.sendMessage(
-              { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
+              { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
               true,
             );
             aepp.disconnect();
@@ -32,6 +36,8 @@ if (IN_FRAME) {
 
 export default async function initSdk() {
   const { isSdkReady, getSdk, createNewNodeInstance } = useSdk({ store });
+  const { getSdk: getSdk13, createNodeInstance } = useSdk13({ store });
+
   const { getMiddleware } = useMiddleware({ store });
 
   store.watch(
@@ -46,23 +52,28 @@ export default async function initSdk() {
         store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
 
         let sdk;
+        let sdk13;
 
         if (isSdkReady.value) {
-          [sdk] = await Promise.all([
+          [sdk, sdk13] = await Promise.all([
             getSdk(),
+            getSdk13(),
             getMiddleware(),
           ]);
-          sdk.pool.delete(oldNetwork.name);
+          if (oldNetwork) {
+            sdk.pool.delete(oldNetwork.name);
+            sdk13.pool.delete(oldNetwork.name);
+          }
           sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
+          sdk13.addNode(network.name, await createNodeInstance(network.url), true);
         } else {
           await Promise.all([
             store.dispatch('sdkPlugin/initialize'),
             getMiddleware(),
           ]);
-          sdk = await getSdk();
 
           if (IN_FRAME && !FramesConnection.initialized) {
-            FramesConnection.init(sdk);
+            FramesConnection.init(await getSdk13());
           }
         }
 
@@ -76,5 +87,15 @@ export default async function initSdk() {
       }
     },
     { immediate: true },
+  );
+
+  store.watch(
+    (state) => state.accounts?.activeIdx,
+    async (oldVal, newVal) => {
+      const sdk = await getSdk13();
+      if (!isEqual(oldVal, newVal) && sdk) {
+        sdk._pushAccountsToApps();
+      }
+    },
   );
 }
