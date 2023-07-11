@@ -19,20 +19,15 @@ import { useI18n } from 'vue-i18n';
 import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
-  AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
   TX_DIRECTION,
   HASH_PREFIX_CONTRACT,
   HASH_PREFIX_NAME,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
-  MAX_UINT256,
   SEED_LENGTH,
   SIMPLEX_URL,
   SUPPORTED_TX_TYPES,
-  STUB_ADDRESS,
-  STUB_CALLDATA,
-  STUB_NONCE,
   TX_FUNCTIONS,
   TX_TYPE_MDW,
   FUNCTION_TYPE_DEX,
@@ -298,44 +293,6 @@ export function splitAddress(address: string | null): string {
 
 export function relativeTimeTo(date: string): string {
   return dayjs().to(dayjs(date));
-}
-
-export function calculateFee(
-  type: typeof SCHEMA.TX_TYPE,
-  params: object = {},
-): BigNumber {
-  const minFee = TxBuilder.calculateMinFee(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: {
-        abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-        vmVersion: SCHEMA.VM_VERSIONS.SOPHIA,
-      },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...(type === 'nameClaimTx') ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
-}
-
-export function calculateNameClaimFee(name: string): BigNumber {
-  return calculateFee(SCHEMA.TX_TYPE.nameClaim, {
-    accountId: STUB_ADDRESS,
-    name,
-    nameSalt: Crypto.salt(),
-    nameFee: TxBuilderHelper.getMinimumNameFee(name),
-    nonce: STUB_NONCE,
-    ttl: SCHEMA.NAME_TTL,
-  });
 }
 
 export async function fetchJson<T = any>(

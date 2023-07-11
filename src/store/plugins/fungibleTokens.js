@@ -10,9 +10,11 @@ import {
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { useMiddleware } from '../../composables';
+import { useMiddleware, useSdk13 } from '../../composables';
 
 export default (store) => {
+  const { getSdk } = useSdk13({ store });
+
   store.registerModule('fungibleTokens', {
     namespaced: true,
     state: {
@@ -92,16 +94,17 @@ export default (store) => {
         commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
-        { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
+        { rootGetters: { activeNetwork, account } },
         [contractId, amount],
       ) {
+        const sdk = await getSdk();
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
-        const tokenContract = await sdk.getContractInstance({
+        const tokenContract = await sdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
-          contractAddress: selectedToken.contractId,
+          address: selectedToken.contractId,
         });
-        const { decodedResult } = await tokenContract.methods.allowance({
+        const { decodedResult } = await tokenContract.allowance({
           from_account: account.address,
           for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
         });
@@ -116,13 +119,14 @@ export default (store) => {
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
-        { state: { availableTokens }, rootGetters: { account, 'sdkPlugin/sdk': sdk } },
-        contractAddress,
+        { state: { availableTokens }, rootGetters: { account } },
+        address,
       ) {
         try {
-          const tokenContract = await sdk.getContractInstance({
+          const sdk = await getSdk();
+          const tokenContract = await sdk.initializeContract({
             aci: AedexV2PairACI,
-            contractAddress,
+            address,
           });
 
           const [
@@ -133,12 +137,12 @@ export default (store) => {
             { decodedResult: reserves },
             { decodedResult: totalSupply },
           ] = await Promise.all([
-            tokenContract.methods.balances(),
-            tokenContract.methods.balance(account.address),
-            tokenContract.methods.token0(),
-            tokenContract.methods.token1(),
-            tokenContract.methods.get_reserves(),
-            tokenContract.methods.total_supply(),
+            tokenContract.balances(),
+            tokenContract.balance(account.address),
+            tokenContract.token0(),
+            tokenContract.token1(),
+            tokenContract.get_reserves(),
+            tokenContract.total_supply(),
           ]);
 
           return {
@@ -164,25 +168,21 @@ export default (store) => {
           return {};
         }
       },
-      async transfer(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
-        [contractId, toAccount, amount, option],
-      ) {
-        const tokenContract = await sdk.getContractInstance({
+      async transfer(_, [address, toAccount, amount, option]) {
+        const sdk = await getSdk();
+        const tokenContract = await sdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
-          contractAddress: contractId,
+          address,
         });
-        return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
+        return tokenContract.transfer(toAccount, amount.toFixed(), option);
       },
-      async burnTriggerPoS(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
-        [contractId, amount, posAddress, invoiceId, option],
-      ) {
-        const tokenContract = await sdk.getContractInstance({
+      async burnTriggerPoS(_, [address, amount, posAddress, invoiceId, option]) {
+        const sdk = await getSdk();
+        const tokenContract = await sdk.initializeContract({
           aci: ZeitTokenACI,
-          contractAddress: contractId,
+          address,
         });
-        return tokenContract.methods.burn_trigger_pos(
+        return tokenContract.burn_trigger_pos(
           amount.toFixed(), posAddress, invoiceId, option,
         );
       },

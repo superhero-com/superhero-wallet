@@ -64,18 +64,18 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { getMinimumNameFee, AensName } from '@aeternity/aepp-sdk-13';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
+
 import {
   AETERNITY_COIN_PRECISION,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
   checkAensName,
-  convertToken,
 } from '../../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
 import { useAccounts, useModals, useSdk } from '../../../composables';
@@ -107,10 +107,11 @@ export default defineComponent({
 
     const isNameValid = computed(() => name.value && checkAensName(`${name.value}${AENS_DOMAIN}`));
 
-    const nameFee = computed(() => convertToken(
-      TxBuilderHelper.getMinimumNameFee(`${name.value}${AENS_DOMAIN}`),
-      -AETERNITY_COIN_PRECISION,
-    ).toFixed(4));
+    const nameFee = computed(() => getMinimumNameFee(
+      `${name.value}${AENS_DOMAIN}` as AensName,
+    )
+      .shiftedBy(-AETERNITY_COIN_PRECISION)
+      .toFixed(4));
 
     const { getSdk, isSdkReady } = useSdk({ store });
 
