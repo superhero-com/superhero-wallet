@@ -565,6 +565,13 @@ export interface IPopupConfig {
   show?: boolean;
   txBase64?: Encoded.Transaction;
 }
+export interface TokenProps {
+  contractId?: string;
+  tokenPairs?: any; // TODO: find and declare types
+  tokenData?: any; // TODO: update types
+  tokens?: IToken[]; // TODO: update types
+  isMultisig?: boolean;
+}
 
 export interface IResponseChallenge {
   challenge: string

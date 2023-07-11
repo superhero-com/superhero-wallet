@@ -5,9 +5,9 @@
     >
       <div class="token-details">
         <DetailsRow
-          v-if="tokenData.symbol"
+          v-if="tokenData?.symbol"
           :label="isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
-          :text="tokenData.symbol"
+          :text="tokenData?.symbol"
         >
           <template #text>
             <Tokens
@@ -18,12 +18,12 @@
           </template>
         </DetailsRow>
         <DetailsRow
-          v-if="tokenData.decimals"
+          v-if="tokenData?.decimals"
           :label="$t('pages.token-details.decimals')"
           :text="tokenData.decimals"
         />
         <DetailsRow
-          v-if="tokenData.contractId && !isAe"
+          v-if="tokenData?.contractId && !isAe"
           :label="$t('common.smartContract')"
         >
           <template #text>
@@ -34,17 +34,17 @@
           </template>
         </DetailsRow>
         <DetailsRow
-          v-if="tokenData.circulatingSupply"
+          v-if="tokenData?.circulatingSupply"
           :label="$t('pages.token-details.max-supply')"
           :text="formatNumber(tokenData.circulatingSupply)"
         />
         <DetailsRow
-          v-if="tokenData.totalSupply"
+          v-if="tokenData?.totalSupply"
           :label="$t('pages.token-details.total-supply')"
           :text="formatNumber(tokenData.totalSupply)"
         />
         <DetailsRow
-          v-if="tokenData.marketCap"
+          v-if="tokenData?.marketCap"
           :label="$t('pages.token-details.market-cap')"
           class="price"
           :text="formatCurrency(tokenData.marketCap)"
@@ -85,25 +85,25 @@
         />
 
         <DetailsRow
-          v-if="tokenData.totalVolume"
+          v-if="tokenData?.totalVolume"
           :label="$t('pages.token-details.volume')"
           :text="formatCurrency(tokenData.totalVolume)"
         />
         <DetailsRow
-          v-if="tokenData.marketCapChange24h"
+          v-if="tokenData?.marketCapChange24h"
           class="price"
           :label="$t('pages.token-details.volumeDaily')"
         >
           <template #text>
             <span
               :class="{
-                green: tokenData.marketCapChangePercentage24h > 0,
-                red: tokenData.marketCapChangePercentage24h < 0,
+                green: tokenData?.marketCapChangePercentage24h > 0,
+                red: tokenData?.marketCapChangePercentage24h < 0,
               }"
             >
               {{ Number(tokenData.marketCapChangePercentage24h).toFixed(2) }}%
             </span>
-            {{ formatCurrency(tokenData.marketCapChange24h) }}
+            {{ formatCurrency(tokenData?.marketCapChange24h) }}
           </template>
         </DetailsRow>
         <DetailsRow
@@ -130,7 +130,7 @@
           :label="$t('pages.token-details.price-ae')"
         />
         <DetailsRow
-          v-if="tokenData.currentPrice"
+          v-if="tokenData?.currentPrice"
           class="price"
           :label="$t('pages.token-details.price')"
         >
@@ -147,12 +147,12 @@
           </template>
         </DetailsRow>
         <DetailsRow
-          v-if="tokenData.ath"
+          v-if="tokenData?.ath"
           :label="$t('pages.token-details.ath-change')"
           :text="formatCurrency(tokenData.ath)"
         />
         <DetailsRow
-          v-if="tokenData.atl"
+          v-if="tokenData?.atl"
           :label="$t('pages.token-details.atl-change')"
           :text="formatCurrency(tokenData.atl)"
         />
@@ -165,19 +165,17 @@
 import {
   computed,
   defineComponent,
-  PropType,
 } from 'vue';
 import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { IAsset, IToken } from '@/types';
 import { UNFINISHED_FEATURES } from '@/constants';
 import {
   amountRounded,
   formatNumber,
   toShiftedBigNumber,
 } from '@/utils';
-import { useCurrencies } from '@/composables';
+import { useCurrencies, useTokenProps } from '@/composables';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
@@ -197,26 +195,27 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
-  props: {
-    contractId: { type: String, default: null },
-    tokenPairs: { type: Object, default: () => ({}) },
-    tokenData: { type: Object as PropType<IAsset>, default: () => ({}) },
-    tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
-  },
-  setup(props) {
+
+  setup() {
     const store = useStore();
+    const { tokenDetails } = useTokenProps();
+    const {
+      tokenData, contractId, tokens, tokenPairs,
+    } = tokenDetails.value;
     const { formatCurrency } = useCurrencies({ store });
 
     const displayDexUrl = AE_DEX_URL.replace('https://', '');
 
-    const isAe = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
+    const isAe = computed(() => tokenData.contractId === AE_CONTRACT_ID);
 
     const poolShare = computed(() => {
-      if (!props.tokenPairs || !props.tokenPairs.balance || !props.tokenPairs.totalSupply) {
+      if (!tokenPairs
+      || !tokenPairs.balance
+      || !tokenPairs.totalSupply) {
         return null;
       }
-      return `${amountRounded((new BigNumber(props.tokenPairs.balance))
-        .times(100).div(props.tokenPairs.totalSupply))}%`;
+      return `${amountRounded((new BigNumber(tokenPairs.balance))
+        .times(100).div(tokenPairs.totalSupply))}%`;
     });
 
     const getPooledTokenAmount = (token: any) => amountRounded(
@@ -232,6 +231,10 @@ export default defineComponent({
       getPooledTokenAmount,
       formatCurrency,
       formatNumber,
+      contractId,
+      tokens,
+      tokenPairs,
+      tokenData,
     };
   },
 });

@@ -76,12 +76,19 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent, IonRouterOutlet } from '@ionic/vue';
+import {
+  IonPage,
+  IonRouterOutlet,
+  IonContent,
+  onIonViewDidLeave,
+  onIonViewDidEnter,
+} from '@ionic/vue';
 import {
   computed,
   defineComponent,
   onMounted,
   ref,
+  unref,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
@@ -103,6 +110,7 @@ import {
   useAeSdk,
   useCurrencies,
   useTokensList,
+  useTokenProps,
 } from '@/composables';
 import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
@@ -143,6 +151,7 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+    const { setTokenProps } = useTokenProps();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
@@ -215,6 +224,20 @@ export default defineComponent({
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
+    });
+
+    onIonViewDidEnter(() => {
+      setTokenProps({
+        contractId: unref(contractId),
+        tokenPairs: unref(tokenPairs),
+        tokenData: unref(tokenData),
+        tokens: unref(tokens),
+        isMultisig: unref(isMultisig),
+      });
+    });
+
+    onIonViewDidLeave(() => {
+      setTokenProps(null);
     });
 
     return {
