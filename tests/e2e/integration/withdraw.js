@@ -71,16 +71,7 @@ describe('Test cases for Withdraw Page', () => {
       .should('contain', recipientAddress)
       .get('[data-cy=next-step-button]')
       .click()
-      .get('[data-cy=spend-success]', { timeout: 10000 })
-      .should('be.visible')
-      .get('[data-cy=btn-close]')
-      .click()
-      .openTransactions();
-
-    /* TODO: Refactor test so it does not fail randomly */
-    // .click()
-    // .openTransactions();
-    // .get('[data-cy=pending-txs]')
-    // .should('be.visible');
+      .get('[data-cy=pending-txs]')
+      .should('be.visible');
   });
 });

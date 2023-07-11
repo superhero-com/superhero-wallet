@@ -138,6 +138,7 @@ import {
   useMultisigAccounts,
   useMultisigTransactions,
   useSdk13,
+  useUi,
   useTippingContracts,
 } from '../../composables';
 import {
@@ -151,7 +152,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IPendingTransaction } from '../../types';
+import { ITransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -185,7 +186,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
-
+    const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const { activeAccount } = useAccounts({ store });
@@ -247,12 +248,11 @@ export default defineComponent({
         }
 
         if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          const transaction: IPendingTransaction = {
-            recipient,
+          const transaction: ITransaction = {
             hash: actionResult.hash,
             pendingTokenTx: true,
             pending: true,
-            type: 'spendToken',
+            transactionOwner: activeAccount.value.address,
             tx: {
               amount,
               callerId: activeAccount.value.address,
@@ -260,26 +260,34 @@ export default defineComponent({
               type: SCHEMA.TX_TYPE.contractCall,
               function: TX_FUNCTIONS.transfer,
               recipientId: recipient,
+              arguments: [],
+              fee: 0,
             },
           };
 
           store.dispatch('addPendingTransaction', transaction);
         } else if (actionResult) {
-          const transaction: IPendingTransaction = {
+          const transaction: ITransaction = {
             hash: actionResult.hash,
             pending: true,
-            type: 'spend',
+            transactionOwner: activeAccount.value.address,
             tx: {
               amount,
+              callerId: activeAccount.value.address,
+              contractId: selectedAsset.contractId,
               senderId: activeAccount.value.address,
               recipientId: recipient,
               type: SCHEMA.TX_TYPE.spend,
+              function: TX_FUNCTIONS.transfer,
+              arguments: [],
+              fee: 0,
             },
           };
 
           store.dispatch('addPendingTransaction', transaction);
         }
         emit('success');
+        return actionResult.hash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
@@ -321,17 +329,20 @@ export default defineComponent({
             },
           );
         }
-        const transaction: IPendingTransaction = {
+        const transaction: ITransaction = {
           hash: txResult.hash,
           pending: true,
           tipUrl: recipient,
+          transactionOwner: activeAccount.value.address,
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.$options.address,
+            contractId: tippingContract.$options.address!, // TODO typing in sdk task
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'tip',
             selectedTokenContractId: selectedAsset.contractId,
+            arguments: [],
+            fee: 0,
           },
         };
         store.dispatch('addPendingTransaction', transaction);
@@ -383,7 +394,7 @@ export default defineComponent({
       }
     }
 
-    function submit(): any {
+    async function submit(): Promise<void> {
       const {
         amount: amountRaw,
         address: recipient,
@@ -392,7 +403,7 @@ export default defineComponent({
       } = props.transferData;
 
       if (!amountRaw || !recipient || !selectedAsset) {
-        return null;
+        return;
       }
 
       const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
@@ -400,21 +411,22 @@ export default defineComponent({
         : convertToken(amountRaw, selectedAsset.decimals);
 
       if (props.isMultisig) {
-        return proposeMultisigTransaction();
-      }
-      if (props.isAddressUrl) {
-        return sendTip({
+        await proposeMultisigTransaction();
+      } else if (props.isAddressUrl) {
+        await sendTip({
           amount,
           recipient,
           selectedAsset,
           note,
         });
+      } else {
+        const hash = await transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+        router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
       }
-      return transfer({
-        amount,
-        recipient,
-        selectedAsset,
-      });
     }
 
     return {

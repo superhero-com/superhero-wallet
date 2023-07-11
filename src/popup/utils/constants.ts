@@ -420,7 +420,6 @@ export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
-export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const MODAL_CONFIRM = 'confirm';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
