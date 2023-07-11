@@ -5,7 +5,7 @@
     >
       <TransactionList
         :transactions="filteredTransactions"
-        :is-multisig="isMultisig"
+        :is-multisig="tokenProps?.isMultisig"
         :loading="loading"
         @load-more="loadMore()"
       />
@@ -28,7 +28,12 @@ import { useStore } from 'vuex';
 import TransactionList from '@/popup/components/TransactionList.vue';
 import type { ICommonTransaction, ITokenList, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
-import { useAccounts, useMultisigAccounts, useTransactionList } from '@/composables';
+import {
+  useAccounts,
+  useMultisigAccounts,
+  useTransactionList,
+  useTokenProps,
+} from '@/composables';
 import { useState } from '@/composables/vuex';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
@@ -40,12 +45,9 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
-  props: {
-    contractId: { type: String, default: null },
-    isMultisig: Boolean,
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
+    const { tokenProps } = useTokenProps();
 
     const { activeAccount } = useAccounts({ store });
     const { activeMultisigAccount } = useMultisigAccounts({ store });
@@ -60,7 +62,7 @@ export default defineComponent({
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
     const currentAddress = computed(
-      () => (props.isMultisig)
+      () => (tokenProps.value?.isMultisig)
         ? activeMultisigAccount.value?.gaAccountId
         : activeAccount.value.address,
     );
@@ -78,12 +80,12 @@ export default defineComponent({
     }
 
     function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
-      if (props.contractId) {
+      if (tokenProps.value?.contractId) {
         return transactionList.filter((transaction) => {
           const innerTx = getInnerTransaction(transaction.tx);
 
-          if (props.contractId !== AE_CONTRACT_ID) {
-            return innerTx?.contractId === props.contractId;
+          if (tokenProps.value?.contractId !== AE_CONTRACT_ID) {
+            return innerTx?.contractId === tokenProps.value?.contractId;
           }
 
           return !innerTx.contractId || !isFungibleTokenTx(innerTx);
@@ -123,6 +125,7 @@ export default defineComponent({
       loading,
       filteredTransactions,
       loadMore,
+      tokenProps,
     };
   },
 });
