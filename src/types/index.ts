@@ -358,34 +358,34 @@ export interface IGAMetaTx {
 }
 
 export interface ITx {
-  abiVersion: number
+  abiVersion?: number
   accountId?: Encoded.AccountAddress
   amount: number
   arguments: ITxArguments[]
   callData?: string // TODO find source
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: Encoded.AccountAddress
-  code: string
-  commitmentId: any
+  code?: string
+  commitmentId?: any
   contractId: Encoded.ContractAddress
   fee: number
   function?: TxFunction
   gaId?: string; // Generalized Account ID
-  gas: number
-  gasPrice: number
-  gasUsed: number
+  gas?: number
+  gasPrice?: number
+  gasUsed?: number
   log?: any[] // TODO find source
-  name: any
-  nameFee: number
-  nameId: any
-  nameSalt: string
-  nonce: number
+  name?: any
+  nameFee?: number
+  nameId?: any
+  nameSalt?: string
+  nonce?: number
   payerId?: string
   payload?: string
-  pointers: any
-  result: string;
-  return: ITxArguments
-  returnType: string
+  pointers?: any
+  result?: string;
+  return?: ITxArguments
+  returnType?: string
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
@@ -395,17 +395,18 @@ export interface ITx {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
   }
-  VSN: string;
+  VSN?: string;
 }
 
 export interface ITransaction {
-  blockHeight: number;
-  claim: any; // TODO find type
+  blockHeight?: number;
+  claim?: any; // TODO find type
   hash: string;
   incomplete?: boolean;
-  microIndex: number;
-  microTime: number;
-  pending: boolean; // There are cases that not only the IPendingTransaction can be pending
+  microIndex?: number;
+  microTime?: number;
+  pending: boolean;
+  pendingTokenTx?: boolean;
   rawTx?: any; // TODO find type
   tipUrl?: string;
   transactionOwner?: Encoded.AccountAddress;
@@ -422,17 +423,13 @@ export interface IDashboardTransaction extends ITransaction {
   direction?: 'received' | 'send'
 }
 
-export type PendingTransactionType = 'spend' | 'spendToken';
-
-export interface IPendingTransaction {
-  hash: string;
-  type?: PendingTransactionType;
-  recipient?: string;
-  incomplete?: boolean;
-  pending: true;
-  pendingTokenTx?: boolean;
-  tipUrl?: string;
-  tx: Partial<ITx>;
+export interface IAccountOverView extends Partial<Omit<IAccount, 'address'>> {
+  // TODO: use a proper type for a address since it can be a url
+  address?: Encoded.AccountAddress | string,
+  url?: string;
+  contractCreate?: boolean;
+  aens?: boolean;
+  label?: TranslateResult;
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
@@ -460,7 +457,7 @@ export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
 export type ITransactionsState = {
   loaded: ITransaction[];
   nextPageUrl?: string;
-  pending: ITransaction[];
+  pending: Record<string, ITransaction[]>;
   tipWithdrawnTransactions: ITransaction[];
 }
 

@@ -48,7 +48,6 @@ import type {
   ITx,
   TxType,
   BigNumberPublic,
-  IPendingTransaction,
   IPageableResponse,
   IDashboardTransaction,
   INameEntryFetched,
@@ -369,7 +368,7 @@ export function includesCaseInsensitive(
   return baseString?.toLocaleLowerCase().includes(searchString?.toLocaleLowerCase());
 }
 
-export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
+export function categorizeContractCallTxObject(transaction: ITransaction): {
   amount?: string | number
   to?: string
   token?: string
@@ -380,7 +379,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
-    const { tx } = transaction as IPendingTransaction;
+    const { tx } = transaction;
     return {
       amount: tx.amount,
       token: tx.selectedTokenContractId ?? tx.contractId,

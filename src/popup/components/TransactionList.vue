@@ -12,7 +12,6 @@
         :transaction="getTransaction(transaction)"
         :multisig-transaction="getMultisigTransaction(transaction)"
         :is-multisig="isMultisig"
-        :data-cy="transaction.pending && 'pending-txs'"
       />
     </InfiniteScroll>
     <AnimatedSpinner

@@ -75,7 +75,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import {
   IToken,
-  IPendingTransaction,
+  ITransaction,
 } from '../../types';
 import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken } from '../utils';
@@ -180,17 +180,20 @@ export default defineComponent({
             },
           );
         }
-        const transaction: IPendingTransaction = {
+        const transaction: ITransaction = {
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
+          transactionOwner: activeAccount.value.address,
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.$options.address,
+            contractId: tippingContract.$options.address!,
             type: SCHEMA.TX_TYPE.contractCall,
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
+            arguments: [],
+            fee: 0,
           },
         };
         store.dispatch('addPendingTransaction', transaction);

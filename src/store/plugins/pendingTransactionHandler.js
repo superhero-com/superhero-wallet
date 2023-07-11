@@ -1,37 +1,14 @@
-import { useModals, useSdk } from '../../composables';
-import { watchUntilTruthy, MODAL_SPEND_SUCCESS } from '../../popup/utils';
+import { useSdk } from '../../composables';
+import { watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
   const { nodeNetworkId } = useSdk({ store });
-  const { openModal } = useModals();
 
   const waitTransactionMined = async ({
-    hash, type, tipUrl, recipient: recipientId, tx, ...otherTx
+    hash,
   }) => {
     try {
-      const transaction = await store.getters['sdkPlugin/sdk'].poll(hash);
-      const showSpendModal = () => openModal(MODAL_SPEND_SUCCESS, {
-        transaction: {
-          tipUrl,
-          ...otherTx,
-          ...transaction,
-          ...(type === 'spendToken')
-            ? { tx: { ...transaction.tx, recipientId, amount: tx.amount } }
-            : {},
-        },
-      });
-
-      switch (type) {
-        case 'tip':
-        case 'spend':
-          showSpendModal();
-          break;
-        case 'spendToken':
-          store.dispatch('fungibleTokens/loadTokenBalances');
-          showSpendModal();
-          break;
-        default:
-      }
+      await store.getters['sdkPlugin/sdk'].poll(hash);
       store.commit('setPendingTransactionSentByHash', { hash, network: nodeNetworkId.value });
     } catch (e) {
       store.commit('removePendingTransactionByHash', { hash, network: nodeNetworkId.value });

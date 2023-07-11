@@ -266,7 +266,7 @@ export default defineComponent({
   }
 
   .icon {
-    width: 16px;
+    min-width: 16px;
     height: 16px;
     color: variables.$color-white;
     margin-left: 1px;

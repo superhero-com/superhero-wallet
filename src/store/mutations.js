@@ -34,8 +34,8 @@ export default {
     ];
   },
   removePendingTransactionByHash(state, { network, hash }) {
-    state.transactions.pending[network] = state.transactions.pending[network]
-      .filter((t) => t.hash !== hash);
+    state.transactions.pending[network] = state.transactions.pending?.[network]
+      ?.filter((t) => t.hash !== hash);
   },
   setPendingTransactionSentByHash(state, { network, hash }) {
     const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
