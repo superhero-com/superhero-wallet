@@ -42,9 +42,12 @@ import {
   useAccounts,
   useDeepLinkApi,
   useModals,
-  useSdk,
+  useSdk13,
 } from '../../composables';
+import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
+import { postJson } from '../utils';
+import { INetwork } from '../../types';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -63,7 +66,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
 
-    const { isTippingSupported, getSdk } = useSdk({ store });
+    const { getSdk, fetchRespondChallenge, isTippingSupported } = useSdk13({ store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
@@ -71,6 +74,7 @@ export default defineComponent({
       accountsSelectOptions,
       setActiveAccountByAddress,
     } = useAccounts({ store });
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
@@ -97,12 +101,18 @@ export default defineComponent({
       loading.value = true;
       const sdk = await getSdk();
       try {
-        await store.dispatch('sendTipComment', [
-          id.value,
-          text.value,
-          await sdk.address(),
-          parentId.value,
-        ]);
+        const postToCommentApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/comment/api/`, { body });
+
+        const responseChallenge = await postToCommentApi({
+          tipId: id.value,
+          text: text.value,
+          author: sdk.address,
+          parentId: parentId.value,
+        });
+        const respondChallenge = await fetchRespondChallenge(responseChallenge);
+
+        postToCommentApi(respondChallenge);
+
         openCallbackOrGoHome(true);
       } catch (e: any) {
         openDefaultModal({

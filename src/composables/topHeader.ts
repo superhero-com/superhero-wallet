@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
-import { useSdk } from './sdk';
+import { useSdk13 } from './sdk13';
 
 import type { ITopHeader, IDefaultComposableOptions } from '../types';
 
@@ -13,7 +13,7 @@ const topHeaderData = ref<ITopHeader>();
  * Composable that provides the information about the last block of the blockchain.
  */
 export function useTopHeaderData({ store }: IDefaultComposableOptions) {
-  const { getSdk } = useSdk({ store });
+  const { getSdk } = useSdk13({ store });
 
   const topBlockHeight = computed(() => topHeaderData.value?.height || 0);
 

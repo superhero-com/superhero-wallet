@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { decode } from '@aeternity/aepp-sdk-13';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { useModals, useSdk } from '../../composables';
+import { useModals, useSdk13 } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -17,7 +17,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const router = useRouter();
-    const { getSdk } = useSdk({ store });
+    const { getSdk } = useSdk13({ store });
     const { openDefaultModal } = useModals();
 
     onMounted(async () => {
@@ -25,7 +25,7 @@ export default defineComponent({
 
       try {
         // sg_ prefix was chosen as a dummy to decode from base58Check
-        await store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${props.secretKey}`, 'sg'));
+        await store.dispatch('invites/claim', decode(`sg_${props.secretKey}`));
         await openDefaultModal({
           msg: 'You have successfully claimed tokens by the invite link',
         });

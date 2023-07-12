@@ -186,9 +186,10 @@ import { Encoded } from '@aeternity/aepp-sdk-13';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  MULTISIG_CREATION_PHASES,
   validateHash,
   handleUnknownError,
-  MULTISIG_CREATION_PHASES,
+  excludeFalsy,
 } from '../../utils';
 import {
   ICreateMultisigAccount,
@@ -273,6 +274,12 @@ export default defineComponent({
     const signers = ref<ICreateMultisigAccount[]>([]);
     const confirmationsRequired = ref<number>(MULTISIG_VAULT_MIN_NUM_OF_SIGNERS);
     const currentMultisigAccountId = ref<Encoded.AccountAddress>();
+
+    const signersAddressList = computed(
+      (): Encoded.AccountAddress[] => (signers.value)
+        .map(({ address }) => address)
+        .filter(excludeFalsy),
+    );
 
     function checkIfSignerAddressDuplicated(signer: ICreateMultisigAccount): boolean {
       return (
@@ -359,7 +366,7 @@ export default defineComponent({
     async function openReviewStep() {
       currentMultisigAccountId.value = await prepareVaultCreationAttachTx(
         confirmationsRequired.value,
-        signers.value.map(({ address }) => address!),
+        signersAddressList.value,
       );
       currentStep.value = STEPS.review;
     }
@@ -373,7 +380,7 @@ export default defineComponent({
         await deployMultisigAccount(
           currentMultisigAccountId.value,
           confirmationsRequired.value,
-          signers.value.map(({ address }) => address!),
+          signersAddressList.value,
         );
       } catch (error) {
         handleUnknownError(error);

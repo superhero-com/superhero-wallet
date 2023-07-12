@@ -50,10 +50,11 @@ import {
   isTxDex,
   sortTransactionsByDateCallback,
   pipe,
+  includesCaseInsensitive,
   TXS_PER_PAGE,
   AETERNITY_CONTRACT_ID,
   TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS, includesCaseInsensitive,
+  TRANSACTION_OWNERSHIP_STATUS,
 } from '../utils';
 import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import {
@@ -63,7 +64,7 @@ import {
   useAccounts,
   usePendingMultisigTransaction,
   useUi,
-  useSdk,
+  useSdk13,
 } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
@@ -112,7 +113,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { dexContracts } = useSdk({ store });
+    const { dexContracts } = useSdk13({ store });
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 

@@ -23,7 +23,7 @@ import {
   getTxOwnerAddress,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
-import { useSdk } from './sdk';
+import { useSdk13 } from './sdk13';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
@@ -35,7 +35,7 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
-  const { dexContracts } = useSdk({ store });
+  const { dexContracts } = useSdk13({ store });
   const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);

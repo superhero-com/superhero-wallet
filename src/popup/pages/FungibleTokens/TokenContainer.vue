@@ -59,7 +59,7 @@
         />
       </Tabs>
       <TransactionAndTokenFilter
-        :key="routeName!"
+        :key="routeName"
         :show-filters="showFilterBar"
       />
     </div>
@@ -110,7 +110,7 @@ import {
 import {
   useAccounts,
   useCurrencies,
-  useSdk,
+  useSdk13,
   useTokensList,
 } from '../../../composables';
 import { useState, useGetter } from '../../../composables/vuex';
@@ -150,7 +150,7 @@ export default defineComponent({
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
-    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store });
+    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk13({ store });
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,

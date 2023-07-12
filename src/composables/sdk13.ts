@@ -17,9 +17,17 @@ import type {
   IRespondChallenge,
 } from '../types';
 import { App } from '../store/modules/permissions';
-import { IN_FRAME, IS_EXTENSION, IS_EXTENSION_BACKGROUND } from '../lib/environment';
 import {
+  IN_FRAME,
+  IS_EXTENSION,
+  IS_EXTENSION_BACKGROUND,
+  RUNNING_IN_TESTS,
+} from '../lib/environment';
+import {
+  DEX_CONTRACTS,
   MODAL_CONFIRM_CONNECT,
+  NETWORK_ID_MAINNET,
+  NETWORK_ID_TESTNET,
   POPUP_TYPE_CONNECT,
   watchUntilTruthy,
 } from '../popup/utils';
@@ -32,11 +40,11 @@ let sdk: ShSdkWallet;
 let drySdk: AeSdk;
 let sdkBlocked = false;
 let sdkCurrentNetwork: INetwork;
+const nodeNetworkId = ref<string>();
 const isNodeConnecting = ref<boolean>(false);
 const isNodeReady = ref<boolean>(false);
 const isNodeError = ref<boolean>(false);
 const aeppInfo: Record<string, any> = {};
-const nodeNetworkId = ref<string>();
 
 /**
  * Composable that will replace the Vuex SDK plugin.
@@ -48,6 +56,15 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
 
   const isSdkReady = computed(() => !!sdk);
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+  const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
+  const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
+  const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
+
+  const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));
+
+  const dexContracts = computed(
+    () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
+  );
 
   /**
    * Create Node instance and get connection status
@@ -190,8 +207,12 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     isNodeReady,
     isNodeConnecting,
     isNodeError,
+    isNodeMainnet,
+    isNodeTestnet,
     isSdkReady,
     nodeNetworkId,
+    isTippingSupported,
+    dexContracts,
     getSdk,
     getDrySdk,
     fetchRespondChallenge,

@@ -7,11 +7,17 @@ jest.mock('vuex', () => ({
     state: {
       loginTargetLocation: null,
     },
+    getters: {
+      accounts: () => [],
+    },
     commit: jest.fn(),
   })),
   Store: jest.fn(() => ({
     state: {
       loginTargetLocation: null,
+    },
+    getters: {
+      accounts: () => [],
     },
     commit: jest.fn(),
   })),

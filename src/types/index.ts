@@ -467,16 +467,16 @@ export type ITransactionsState = {
 export type IPopupType = typeof POPUP_TYPES[number];
 
 export interface ITopHeader {
-  hash: string
-  height: number
-  pofHash: string
-  prevHash: string
-  prevKeyHash: string
-  signature: string
-  stateHash: string
-  time: number
-  txsHash: string
-  version: number
+  hash: string;
+  height: number;
+  pofHash?: string;
+  prevHash: string;
+  prevKeyHash: string;
+  signature?: string;
+  stateHash: string;
+  time: number;
+  txsHash?: string;
+  version: number;
 }
 
 export type ISignMessage = (m: any) => Promise<any>

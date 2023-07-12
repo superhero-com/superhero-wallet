@@ -11,7 +11,6 @@ import {
   TippingV1ContractApi,
   TippingV2ContractApi,
 } from '../types';
-import { useSdk } from './sdk';
 
 interface TippingContracts {
   tippingV1: Contract<TippingV1ContractApi>;
@@ -23,8 +22,7 @@ let tippingV2: Contract<TippingV2ContractApi> | undefined;
 const initializing = ref(false);
 
 export function useTippingContracts({ store }: IDefaultComposableOptions) {
-  const { isTippingSupported } = useSdk({ store });
-  const { getSdk } = useSdk13({ store });
+  const { getSdk, isTippingSupported } = useSdk13({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
