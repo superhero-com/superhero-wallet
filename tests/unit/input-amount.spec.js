@@ -13,6 +13,7 @@ const store = new Vuex.Store({
   plugins: [veeValidate],
   getters: {
     account: () => testAccount,
+    accounts: () => [testAccount],
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
     activeNetwork: () => (NETWORK_TESTNET),

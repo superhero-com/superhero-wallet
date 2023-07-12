@@ -79,7 +79,12 @@ import {
   watch,
 } from 'vue';
 import { Field } from 'vee-validate';
-import { AmountFormatter, TxBuilderHelper, Crypto } from '@aeternity/aepp-sdk';
+import {
+  AE_AMOUNT_FORMATS,
+  encode,
+  getAddressFromPriv,
+  Encoding,
+} from '@aeternity/aepp-sdk-13';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { APP_LINK_WEB, formatDate } from '../utils';
@@ -88,7 +93,7 @@ import {
   IFormModel,
   useBalances,
   useMaxAmount,
-  useSdk,
+  useSdk13,
 } from '../../composables';
 
 import TokenAmount from './TokenAmount.vue';
@@ -112,7 +117,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getSdk } = useSdk({ store });
+    const { getSdk } = useSdk13({ store });
     const { aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
@@ -126,7 +131,7 @@ export default defineComponent({
 
     const link = computed(() => {
       // sg_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (TxBuilderHelper.encode(Buffer.from(props.secretKey, 'hex'), 'sg')).slice(3);
+      const secretKey = (encode(Buffer.from(props.secretKey, 'hex'), Encoding.Signature)).slice(3);
       return new URL(
         router
           .resolve({ name: ROUTE_INVITE_CLAIM, params: { secretKey } })
@@ -135,7 +140,7 @@ export default defineComponent({
       );
     });
 
-    const address = computed(() => Crypto.getAddressFromPriv(props.secretKey));
+    const address = computed(() => getAddressFromPriv(props.secretKey));
 
     function deleteItem() {
       store.commit('invites/delete', props.secretKey);
@@ -145,7 +150,7 @@ export default defineComponent({
       const sdk = await getSdk();
       inviteLinkBalance.value = parseFloat(
         (await sdk
-          .balance(address.value, { format: AmountFormatter.AE_AMOUNT_FORMATS.AE })
+          .getBalance(address.value, { format: AE_AMOUNT_FORMATS.AE })
           .catch(() => 0)
         )
           .toString(),
@@ -180,9 +185,12 @@ export default defineComponent({
       emit('loading', true);
       const sdk = await getSdk();
       try {
-        await sdk.spend(formModel.value.amount, address.value, {
-          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-        });
+        await sdk.spend(
+          formModel.value.amount!, // validateAll method confirms the presence of the amount field
+          address.value,
+          // @ts-ignore
+          { denomination: AE_AMOUNT_FORMATS.AE },
+        );
         await updateBalance();
         resetTopUpChanges();
       } catch (error: any) {

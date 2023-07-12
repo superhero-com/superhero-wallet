@@ -80,7 +80,6 @@ import {
 import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
 import { convertToken } from '../utils';
 import {
-  useSdk,
   useDeepLinkApi,
   useMaxAmount,
   IFormModel,
@@ -88,6 +87,7 @@ import {
   useModals,
   useAccounts,
   useTippingContracts,
+  useSdk13,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
@@ -115,7 +115,7 @@ export default defineComponent({
       amount: '',
     });
 
-    const { isTippingSupported } = useSdk({ store });
+    const { isTippingSupported } = useSdk13({ store });
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });

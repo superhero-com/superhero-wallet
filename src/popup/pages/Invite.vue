@@ -57,13 +57,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
-import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk-13';
 
 import { useStore } from 'vuex';
 import { useState } from '../../composables/vuex';
 import {
   useBalances,
-  useSdk,
+  useSdk13,
   useMaxAmount,
   IFormModel,
 } from '../../composables';
@@ -87,11 +87,12 @@ export default defineComponent({
     const store = useStore();
     const loading = ref(false);
 
-    const { getSdk } = useSdk({ store });
+    const { getSdk } = useSdk13({ store });
     const { balance, aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
-      amount: '', selectedAsset: aeternityCoin.value,
+      amount: '',
+      selectedAsset: aeternityCoin.value,
     });
 
     const { max, fee } = useMaxAmount({ formModel, store });
@@ -100,13 +101,16 @@ export default defineComponent({
 
     async function generate() {
       loading.value = true;
-      const { publicKey, secretKey } = Crypto.generateKeyPair();
+      const { publicKey, secretKey } = generateKeyPair();
 
       try {
         const sdk = await getSdk();
-        await sdk.spend(formModel.value.amount, publicKey, {
-          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-        });
+        await sdk.spend(
+          formModel.value.amount || 0,
+          publicKey,
+          // @ts-ignore
+          { denomination: AE_AMOUNT_FORMATS.AE },
+        );
       } catch (error) {
         if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;

@@ -78,7 +78,7 @@ import {
   checkAensName,
 } from '../../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useSdk } from '../../../composables';
+import { useAccounts, useModals, useSdk13 } from '../../../composables';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -113,7 +113,7 @@ export default defineComponent({
       .shiftedBy(-AETERNITY_COIN_PRECISION)
       .toFixed(4));
 
-    const { getSdk, isSdkReady } = useSdk({ store });
+    const { getSdk, isSdkReady } = useSdk13({ store });
 
     async function claim() {
       if (!await validate()) return;
@@ -123,7 +123,7 @@ export default defineComponent({
 
       const sdk = await getSdk();
 
-      const fullName = `${name.value}${AENS_DOMAIN}`;
+      const fullName: AensName = `${name.value}${AENS_DOMAIN}`;
       const nameEntry = await sdk.api.getNameEntryByName(fullName).catch(() => false);
 
       if (nameEntry) {

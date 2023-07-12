@@ -64,7 +64,7 @@ import { IS_EXTENSION } from '../../lib/environment';
 import {
   useAccounts,
   useModals,
-  useSdk,
+  useSdk13,
   useTippingContracts,
 } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
@@ -86,7 +86,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { isTippingSupported } = useSdk({ store });
+    const { isTippingSupported } = useSdk13({ store });
     const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const { getTippingContracts } = useTippingContracts({ store });

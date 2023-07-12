@@ -22,7 +22,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import type { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
-import { useConnection, useSdk } from '../../composables';
+import { useConnection, useSdk13 } from '../../composables';
 import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
 
 import BtnPill from './buttons/BtnPill.vue';
@@ -34,7 +34,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { isOnline } = useConnection();
-    const { isNodeReady, isNodeError } = useSdk({ store });
+    const { isNodeReady, isNodeError } = useSdk13({ store });
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     return {

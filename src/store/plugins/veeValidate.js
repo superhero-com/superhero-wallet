@@ -3,7 +3,7 @@ import { localize } from '@vee-validate/i18n';
 import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { Crypto } from '@aeternity/aepp-sdk';
+import { Encoding, isAddressValid } from '@aeternity/aepp-sdk-13';
 import { i18n } from './languages';
 import {
   isNotFoundError,
@@ -13,12 +13,12 @@ import {
   isValidURL,
 } from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies, useSdk } from '../../composables';
+import { useBalances, useCurrencies, useSdk13 } from '../../composables';
 
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
 defineRule('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
-defineRule('account_address', (value) => Crypto.isAddressValid(value, 'ak'));
+defineRule('account_address', (value) => Crypto.isAddressValid(value, Encoding.AccountAddress));
 defineRule('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
@@ -58,7 +58,7 @@ configure({
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
   const { minTipAmount } = useCurrencies({ withoutPolling: true });
-  const { getSdk } = useSdk({ store });
+  const { getSdk } = useSdk13({ store });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
@@ -105,7 +105,7 @@ export default (store) => {
 
   const checkNameRegisteredAddress = async (value) => {
     try {
-      return Crypto.isAddressValid(value) || await checkName(NAME_STATES.REGISTERED_ADDRESS)(
+      return isAddressValid(value) || await checkName(NAME_STATES.REGISTERED_ADDRESS)(
         value, [],
       );
     } catch (error) {
@@ -119,7 +119,7 @@ export default (store) => {
 
   defineRule('name_registered_address', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
-    : Crypto.isAddressValid(value)));
+    : isAddressValid(value)));
 
   defineRule('token_to_an_address',
     (value, [isToken]) => (
@@ -145,7 +145,7 @@ export default (store) => {
 
   defineRule('name_registered_address_or_url', (value) => (checkAensName(value)
     ? checkNameRegisteredAddress(value)
-    : Crypto.isAddressValid(value) || validateTipUrl(value)));
+    : isAddressValid(value) || validateTipUrl(value)));
 
   defineRule('invalid_hostname', (value) => {
     try {

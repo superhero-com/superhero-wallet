@@ -45,7 +45,7 @@ import { useStore } from 'vuex';
 import { IS_IOS } from '../../lib/environment';
 import { DASHBOARD_CARD_ID } from '../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
-import { useAccounts, useSdk } from '../../composables';
+import { useAccounts, useSdk13 } from '../../composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -80,7 +80,7 @@ export default defineComponent({
       activeAccountFaucetUrl,
     } = useAccounts({ store });
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk13({ store });
 
     return {
       DASHBOARD_CARD_ID,

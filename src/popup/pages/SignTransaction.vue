@@ -6,9 +6,14 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk-13';
 import { RejectedByUserError } from '../../lib/errors';
 import { handleUnknownError } from '../utils';
-import { useDeepLinkApi, useModals, useSdk } from '../../composables';
+import {
+  useDeepLinkApi,
+  useModals,
+  useSdk13,
+} from '../../composables';
 
 export default defineComponent({
   name: 'SignTransaction',
@@ -20,7 +25,7 @@ export default defineComponent({
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
-      const { nodeNetworkId, getSdk } = useSdk({ store });
+      const { nodeNetworkId, getSdk } = useSdk13({ store });
       const { openDefaultModal } = useModals();
 
       try {
@@ -39,7 +44,11 @@ export default defineComponent({
         }
 
         const signedTransaction = await sdk.signTransaction(
-          transaction, { networkId, app: callbackOrigin.value },
+          transaction as Encoded.Transaction,
+          {
+            networkId,
+            aeppOrigin: callbackOrigin.value?.toString(),
+          },
         );
 
         if (broadcast) {

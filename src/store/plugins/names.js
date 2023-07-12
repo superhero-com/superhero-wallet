@@ -6,18 +6,18 @@ import {
   checkAddress,
   checkAensName,
   fetchAllPages,
-  fetchRespondChallenge,
   isInsufficientBalanceError,
   handleUnknownError,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware, useModals, useSdk } from '../../composables';
+import { useMiddleware, useModals, useSdk13 } from '../../composables';
 
 export default (store) => {
   const {
     nodeNetworkId,
     getSdk,
-  } = useSdk({ store });
+    fetchRespondChallenge,
+  } = useSdk13({ store });
 
   const {
     isMiddlewareReady,
@@ -191,16 +191,13 @@ export default (store) => {
         { commit, rootGetters: { activeNetwork } },
         { name, address },
       ) {
-        const [sdk, response] = await Promise.all([
-          getSdk(),
-          postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
-            body: {
-              preferredChainName: name,
-            },
-          }),
-        ]);
+        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+          body: {
+            preferredChainName: name,
+          },
+        });
 
-        const respondChallenge = await fetchRespondChallenge(sdk, response);
+        const respondChallenge = await fetchRespondChallenge(response);
 
         await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: respondChallenge,
@@ -238,7 +235,7 @@ export default (store) => {
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await sdk.height();
+      const height = await sdk.getHeight();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)

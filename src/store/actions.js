@@ -1,14 +1,17 @@
 import { uniqBy, orderBy } from 'lodash-es';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import {
   AEX9_TRANSFER_EVENT,
   fetchJson,
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
-  fetchRespondChallenge,
 } from '../popup/utils';
-import { useMiddleware, useSdk } from '../composables';
+import {
+  useMiddleware,
+  useSdk,
+  useSdk13,
+} from '../composables';
 
 export default {
   switchNetwork({ commit }, payload) {
@@ -16,7 +19,7 @@ export default {
     commit('initTransactions');
   },
   addPendingTransaction(context, transaction) {
-    const { nodeNetworkId } = useSdk({ store: context });
+    const { nodeNetworkId } = useSdk13({ store: context });
     context.commit('addPendingTransaction', {
       network: nodeNetworkId.value,
       transaction: { ...transaction, microTime: Date.now(), pending: true },
@@ -24,7 +27,8 @@ export default {
   },
   async fetchPendingTransactions(context, address) {
     const { state: { transactions } } = context;
-    const { nodeNetworkId, getSdk } = useSdk({ store: context });
+    const { nodeNetworkId } = useSdk13({ store: context });
+    const { getSdk } = useSdk({ store: context });
     const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
@@ -62,7 +66,7 @@ export default {
         address,
         amount,
         contractId: contract,
-        type: SCHEMA.TX_TYPE.contractCall,
+        type: Tag.ContractCallTx,
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
@@ -84,7 +88,7 @@ export default {
       return null;
     }
 
-    const { nodeNetworkId } = useSdk({ store: context });
+    const { nodeNetworkId } = useSdk13({ store: context });
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
 
     let txs = await Promise.all([
@@ -160,19 +164,6 @@ export default {
   },
   async donateError({ getters: { activeNetwork } }, error) {
     return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
-  },
-  async sendTipComment(
-    { getters: { activeNetwork, 'sdkPlugin/sdk': sdk } },
-    [tipId, text, author, parentId],
-  ) {
-    const sendComment = async (postParam) => postJson(`${activeNetwork.backendUrl}/comment/api/`, { body: postParam });
-
-    const responseChallenge = await sendComment({
-      tipId, text, author, parentId,
-    });
-    const respondChallenge = await fetchRespondChallenge(sdk, responseChallenge);
-
-    return sendComment(respondChallenge);
   },
   async getCacheChainNames({ getters: { activeNetwork } }) {
     return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
