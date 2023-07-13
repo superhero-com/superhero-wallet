@@ -57,7 +57,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { WalletRouteMeta } from '../types';
+import type { WalletRouteMeta, INetwork } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
@@ -83,6 +83,8 @@ import {
   useUi,
   useViewport,
 } from '../composables';
+import { useGetter } from '../composables/vuex';
+import WebSocketClient from '../lib/WebSocketClient';
 
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
@@ -99,6 +101,7 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
@@ -178,6 +181,12 @@ export default defineComponent({
         innerElement.value.scrollTop = 0;
       }
     });
+
+    watch(activeNetwork, (network, prevNetwork) => {
+      if (network?.websocketUrl !== prevNetwork?.websocketUrl) {
+        WebSocketClient.connect(network.websocketUrl);
+      }
+    }, { immediate: true });
 
     initVisibilityListeners();
 
