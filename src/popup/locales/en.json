@@ -361,7 +361,9 @@
     "tips": "Tips",
     "bid": "Bid",
     "soonest": "Ending soon",
-    "length": "Name length"
+    "length": "Name length",
+    "superhero": "Superhero",
+    "wallet": "Wallet"
   },
   "transaction": {
     "fee": "Transaction fee",
@@ -774,7 +776,9 @@
       "claimOfRetip": "claimed your retip.",
       "viewOnSuperhero": "View on Superhero.com",
       "goToStore": "Go to store",
-      "noNotifications": "You do not have any unread notifications."
+      "noNotifications": "There are no unread notifications for you.",
+      "incomingTransaction": "Incoming Transaction",
+      "viewTransaction": "View transaction"
     },
     "notification-settings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
@@ -1082,6 +1086,8 @@
       "networkCompilerLabel": "Network compiler",
       "backendUrlPlaceholder": "Enter tipping Backend URL",
       "backendUrlLabel": "Tipping backend",
+      "websocketUrlPlaceholder": "Enter websocket URL",
+      "websocketUrlLabel": "Websocket URL",
       "showTippingConfig": "Show Tipping Configuration",
       "hideTippingConfig": "Hide Tipping Configuration",
       "save": "Connect",

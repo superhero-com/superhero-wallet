@@ -157,6 +157,11 @@ export default defineComponent({
         placeholder: t('pages.network.backendUrlPlaceholder'),
         label: t('pages.network.backendUrlLabel'),
       },
+      {
+        key: 'websocketUrl',
+        placeholder: t('pages.network.websocketUrlPlaceholder'),
+        label: t('pages.network.websocketUrlLabel'),
+      },
     ];
 
     const error = ref({});

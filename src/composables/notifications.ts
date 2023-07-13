@@ -1,10 +1,13 @@
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type {
   IDefaultComposableOptions,
+  IFilterInputPayload,
+  IFilters,
   INetwork,
   INotification,
-  INotificationSetting,
   NotificationStatus,
+  ObjectValues,
 } from '../types';
 import {
   NOTIFICATION_STATUS_CREATED,
@@ -19,6 +22,7 @@ import {
 import { useSdk } from './sdk';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+import PushNotification from '../lib/PushNotification';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean
@@ -32,28 +36,35 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 const notificationsSuperhero = ref<INotification[]>([]);
 const notificationsWallet = ref<INotification[]>([]);
 
+const NOTIFICATION_FILTER_MODE = {
+  all: 'all',
+  superhero: 'superhero',
+  wallet: 'wallet',
+} as const;
+type NotificationsFilterMode = ObjectValues<typeof NOTIFICATION_FILTER_MODE>;
+
 export function useNotifications({
   requirePolling = false,
   store,
 }: UseNotificationsOptions) {
+  const { t } = useI18n();
   const { getSdk } = useSdk({ store });
   const { activeAccount } = useAccounts({ store });
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
 
+  const filtersConfig = ref<IFilters<ObjectValues<typeof NOTIFICATION_FILTER_MODE>>>({
+    all: { name: t('common.all') },
+    superhero: { name: t('filters.superhero') },
+    wallet: { name: t('filters.wallet') },
+  });
+  const displayMode = ref<IFilterInputPayload<NotificationsFilterMode>>({
+    key: NOTIFICATION_FILTER_MODE.all,
+  });
+
   const activeNetwork = computed((): INetwork => store.getters.activeNetwork);
-  const notificationSettings = computed(
-    (): INotificationSetting[] => store.state.notificationSettings,
-  );
   const chainNames = computed(() => store.state.chainNames);
-
-  const notificationSettingsCheckedTypes = computed<string[]>(
-    () => notificationSettings.value
-      .filter(({ checked }) => checked)
-      .map((s) => s.type),
-  );
-
   const notificationsAll = computed<INotification[]>(
     () => [...notificationsSuperhero.value, ...notificationsWallet.value],
   );
@@ -61,9 +72,15 @@ export function useNotifications({
   const notificationsFiltered = computed<INotification[]>(
     () => notificationsAll.value
       .filter(
-        ({ status, type }) => (
-          status === NOTIFICATION_STATUS_READ
-          || notificationSettingsCheckedTypes.value.includes(type)
+        ({ type }) => (
+          displayMode.value.key === NOTIFICATION_FILTER_MODE.all
+          || (
+            displayMode.value.key === NOTIFICATION_FILTER_MODE.superhero
+            && type !== NOTIFICATION_TYPE_WALLET
+          ) || (
+            displayMode.value.key === NOTIFICATION_FILTER_MODE.wallet
+            && type === NOTIFICATION_TYPE_WALLET
+          )
         ),
       )
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -87,7 +104,7 @@ export function useNotifications({
   }
 
   async function modifyNotifications(
-    ids: number[],
+    ids: (number | string)[],
     status: NotificationStatus,
   ) {
     if (!ids.length) return;
@@ -107,6 +124,10 @@ export function useNotifications({
       status: NOTIFICATION_STATUS_CREATED,
       createdAt: new Date().toISOString(),
     });
+
+    if (payload.pushNotification) {
+      PushNotification.send(payload);
+    }
   }
 
   function setWalletNotificationsStatus(createdAt: string, status: NotificationStatus) {
@@ -196,5 +217,7 @@ export function useNotifications({
     loadMoreNotifications,
     markAsReadAll,
     addWalletNotification,
+    filtersConfig,
+    displayMode,
   };
 }

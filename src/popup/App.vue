@@ -51,13 +51,14 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { WalletRouteMeta } from '../types';
+import type { WalletRouteMeta, INetwork } from '../types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
@@ -83,10 +84,13 @@ import {
   useUi,
   useViewport,
 } from '../composables';
+import { useGetter } from '../composables/vuex';
+import WebSocketClient from '../lib/WebSocketClient';
 
 import Header from './components/Header.vue';
 import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
 import Close from '../icons/close.svg?vue-component';
+import { useIncomingTransactions } from '../composables/incomingTransactions';
 
 export default defineComponent({
   name: 'App',
@@ -99,14 +103,19 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn, accounts } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
+    const {
+      startListeningForIncomingTransactions,
+      stopListeningForIncomingTransactions,
+    } = useIncomingTransactions({ store });
 
     const innerElement = ref<HTMLDivElement>();
 
@@ -179,6 +188,23 @@ export default defineComponent({
       }
     });
 
+    watch(activeNetwork, (network, prevNetwork) => {
+      if (network?.websocketUrl !== prevNetwork?.websocketUrl) {
+        WebSocketClient.connect(network.websocketUrl);
+      }
+    }, { immediate: true });
+
+    watch(
+      () => accounts.value.length,
+      () => {
+        stopListeningForIncomingTransactions();
+        if (accounts.value.length > 0) {
+          startListeningForIncomingTransactions();
+        }
+      },
+      { immediate: true },
+    );
+
     initVisibilityListeners();
 
     onMounted(async () => {
@@ -195,6 +221,10 @@ export default defineComponent({
           setNotificationSettings(),
         ]);
       }
+    });
+
+    onUnmounted(() => {
+      stopListeningForIncomingTransactions();
     });
 
     return {

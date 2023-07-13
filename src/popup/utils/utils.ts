@@ -476,6 +476,18 @@ export function amountRounded(rawAmount: number | BigNumberPublic): string {
   return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
 }
 
+/**
+   * This function rounds a given number to a specified precision.
+   * @param {number} amount - The amount to round
+   * @param {number} precision - The number of decimal places to round to (default 2)
+   * @returns {number} - The rounded amount
+   */
+export function roundAmountToPrecision(amount: number, precision: number = 2): number {
+  return (!amount || Number.isNaN(amount) || Number.isInteger(amount))
+    ? amount
+    : parseFloat(amount.toFixed(precision));
+}
+
 export function getTxType(tx: ITx): TxType {
   return (
     TX_TYPE_MDW[tx.type]

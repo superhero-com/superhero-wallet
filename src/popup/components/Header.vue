@@ -115,12 +115,13 @@ export default defineComponent({
     );
 
     function back() {
-      const { fullPath, meta } = route;
+      const { fullPath, meta, query } = route;
       const { directBackRoute, backRoute } = meta || {};
 
-      if (directBackRoute) {
+      if (directBackRoute || query?.directBackRoute) {
         return router.go(-1);
       }
+
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
         return router.push(backRoute as RouteLocationRaw);

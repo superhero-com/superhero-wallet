@@ -12,8 +12,15 @@
         {{ createdAt }}
       </span>
     </div>
+    <Avatar
+      v-if="hasIncomingTransaction"
+      size="md"
+      :address="notification.receiver"
+      class="notification-avatar"
+      with-border
+    />
     <DefaultWalletNotificationIcon
-      v-if="isWallet && !isSeedBackup"
+      v-else-if="isWallet && !isSeedBackup"
       class="notification-icon"
     />
     <BackupSeedNotificationIcon
@@ -30,7 +37,7 @@
     />
     <div class="content">
       <AddressTruncated
-        v-if="!chainName && address"
+        v-if="!chainName && address && !hasIncomingTransaction"
         :address="address"
         class="address"
       />
@@ -53,7 +60,10 @@
         class="external-link-button"
       >
         {{ redirectInfo }}
-        <ExternalLinkIcon class="external-link-icon" />
+        <ExternalLinkIcon
+          v-if="!hasIncomingTransaction"
+          class="external-link-icon"
+        />
       </div>
     </div>
   </div>
@@ -129,6 +139,7 @@ export default defineComponent({
     );
     const address = computed(() => props.notification.sender || props.notification.receiver);
     const isSeedBackup = computed(() => props.notification.isSeedBackup);
+    const hasIncomingTransaction = computed(() => props.notification.hasIncomingTransaction);
     const isWallet = computed(() => props.notification.type === NOTIFICATION_TYPE_WALLET);
     const redirectInfo = computed(() => !isWallet.value ? t('pages.notifications.viewOnSuperhero') : props.notification.buttonLabel);
     const title = computed(() => isWallet.value
@@ -141,10 +152,12 @@ export default defineComponent({
 
     function handleClick() {
       if (props.notification.path) {
-        if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
-          window.open(props.notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
+        const route = `${props.notification.path}?directBackRoute=true`;
+        // check if path starts with # or protocol
+        if (typeof props.notification.path === 'string' && /^(#|\w+:\D+)/.test(props.notification.path)) {
+          window.open(route, props.notification.path.startsWith('#') ? '_self' : '_blank');
         } else {
-          router.push(props.notification.path);
+          router.push(route);
         }
       }
     }
@@ -159,6 +172,7 @@ export default defineComponent({
       redirectInfo,
       isWallet,
       isSeedBackup,
+      hasIncomingTransaction,
       handleClick,
       IS_MOBILE_DEVICE,
       initialStatus,

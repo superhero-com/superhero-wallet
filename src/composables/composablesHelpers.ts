@@ -17,6 +17,10 @@ import { INetwork } from '../types';
 import { useConnection } from './connection';
 import { useUi } from './ui';
 
+export interface INetworkWatcherOptions {
+  invokeCallbackImmediately?: boolean;
+}
+
 /**
  * Monitor the network state and compare it with stored custom state to know when
  * user changes the network.
@@ -25,15 +29,22 @@ export function createNetworkWatcher() {
   let currentNetwork: INetwork;
 
   return {
-    onNetworkChange: async (store: Store<any>, callback: () => void) => {
+    onNetworkChange: async (
+      store: Store<any>,
+      callback: (activeNetwork: INetwork) => void,
+      options?: INetworkWatcherOptions,
+    ) => {
       await watchUntilTruthy(() => store.state.isRestored);
       const activeNetwork = store.getters.activeNetwork as INetwork;
 
       if (!currentNetwork) {
         currentNetwork = activeNetwork;
+        if (options?.invokeCallbackImmediately) {
+          callback(activeNetwork);
+        }
       } else if (currentNetwork.name !== activeNetwork.name) {
         currentNetwork = activeNetwork;
-        callback();
+        callback(activeNetwork);
       }
     },
   };
