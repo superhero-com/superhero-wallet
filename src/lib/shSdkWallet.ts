@@ -23,8 +23,8 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
 export class ShSdkWallet extends AeSdkWallet {
   store: Store<any>;
 
-  constructor(store: Store<any>, opt: any) {
-    super(opt);
+  constructor(store: Store<any>, options: any) {
+    super(options);
     this.store = store;
   }
 

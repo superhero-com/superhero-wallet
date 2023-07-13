@@ -45,9 +45,9 @@ export default (store) => {
               ? Crypto.sign(data, activeAccount.value.secretKey)
               : store.dispatch('accounts/sign', data)),
             ...(IS_EXTENSION_BACKGROUND ? {} : {
-              signTransaction: (txBase64, opt) => (typeof opt.onAccount === 'object')
-                ? opt.onAccount.sign()
-                : store.dispatch('accounts/signTransaction', { txBase64, opt }),
+              signTransaction: (txBase64, options) => (typeof options.onAccount === 'object')
+                ? options.onAccount.sign()
+                : store.dispatch('accounts/signTransaction', { txBase64, options }),
             }),
           },
         })({
