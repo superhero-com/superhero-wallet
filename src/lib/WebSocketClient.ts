@@ -80,6 +80,21 @@ class WebSocketClient {
     this.subscribers[message.payload][uuid] = callback;
     return () => {
       delete this.subscribers[message.payload][uuid];
+      if (Object.keys(this.subscribers[message.payload]).length === 0) {
+        // should remove the message from the queue if there are no subscribers
+        this.subscribersQueue = this.subscribersQueue.filter(
+          (msg) => msg.payload !== message.payload,
+        );
+
+        // should unsubscribe from the channel if there are no subscribers
+        Object.keys(WEB_SOCKET_SOURCE).forEach((source) => {
+          this.wsClient.send(JSON.stringify({
+            ...message,
+            op: WEB_SOCKET_UNSUBSCRIBE,
+            source,
+          }));
+        });
+      }
     };
   }
 
