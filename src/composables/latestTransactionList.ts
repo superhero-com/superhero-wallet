@@ -26,8 +26,6 @@ const fetchedTransactions = ref<ITransaction[]>([]);
 const pendingTransactions = ref<ITransaction[]>([]);
 const latestTransactions = ref<ITransaction[]>([]);
 
-let initialUpdateDone = false;
-
 const { onNetworkChange } = createNetworkWatcher();
 
 /**
@@ -98,15 +96,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     }))).flat();
 
     isTransactionListLoading.value = false;
-    initialUpdateDone = true;
     buildLatestTransactions();
-  }
-
-  if (
-    !initialUpdateDone
-    && !isTransactionListLoading.value
-  ) {
-    updateTransactionListData();
   }
 
   /**
