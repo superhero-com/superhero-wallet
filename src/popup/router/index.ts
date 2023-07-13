@@ -51,7 +51,7 @@ const unbind = router.beforeEach(async (to, from, next) => {
     (
       !RUNNING_IN_POPUP
       && to.name === ROUTE_INDEX
-      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey]
+      && ((await browser?.storage.local.get(lastRouteKey)) as any)[lastRouteKey]
     )
     || undefined,
   );

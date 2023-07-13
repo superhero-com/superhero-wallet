@@ -130,8 +130,12 @@ export default defineComponent({
     }
 
     async function checkExtensionUpdates() {
-      if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
-        const [update] = await browser.runtime.requestUpdateCheck();
+      // `requestUpdateCheck` does not exists in the `runtime` type
+      // because this feature is available only for selected browsers.
+      const updateCheck = (browser?.runtime as any)?.requestUpdateCheck;
+
+      if (IS_EXTENSION && updateCheck) {
+        const [update] = await updateCheck();
         let path = '';
         if (IS_FIREFOX) {
           path = APP_LINK_FIREFOX;

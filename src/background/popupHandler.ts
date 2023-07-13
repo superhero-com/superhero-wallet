@@ -1,5 +1,4 @@
 import { v4 as uuid } from 'uuid';
-import { Browser } from 'webextension-polyfill';
 import { Dictionary } from '../types';
 import {
   isTxOfASupportedType,
@@ -7,9 +6,6 @@ import {
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_RAW_SIGN,
 } from '../popup/utils';
-
-// @ts-ignore
-declare const browser: Browser;
 
 const popups: Dictionary = {};
 
