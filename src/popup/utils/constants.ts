@@ -110,7 +110,6 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
-export const ACCOUNT_LEDGER_WALLET = 'ledger';
 
 /**
  * Default `networkId` values returned by the Node after establishing the connection.
