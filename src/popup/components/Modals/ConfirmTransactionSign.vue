@@ -115,7 +115,6 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
-  TX_FUNCTION_TYPE_DEX,
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
@@ -126,6 +125,10 @@ import {
   getAeFee,
   fetchJson,
   postJson,
+  isTxFunctionDexSwap,
+  isTxFunctionDexPool,
+  isTxFunctionDexMaxSpent,
+  isTxFunctionDexMinReceived,
 } from '../../utils';
 import type {
   ITokenResolved,
@@ -204,25 +207,19 @@ export default defineComponent({
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
     );
 
-    const isSwap = computed(
-      () => txFunction.value && TX_FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
-    );
-
-    const isPool = computed(
-      () => txFunction.value && TX_FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
-    );
-
+    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
+    const isMaxSpent = computed(() => isTxFunctionDexMaxSpent(txFunction.value));
+    const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
 
     const swapDirection = computed(() => {
-      if (txFunction.value) {
-        if (TX_FUNCTION_TYPE_DEX.maxSpent.includes(txFunction.value)) {
-          return 'maxSpent';
-        }
-        if (TX_FUNCTION_TYPE_DEX.minReceived.includes(txFunction.value)) {
-          return 'minReceived';
-        }
+      if (isMaxSpent.value) {
+        return 'maxSpent';
+      }
+      if (isMinReceived.value) {
+        return 'minReceived';
       }
       return 'total';
     });

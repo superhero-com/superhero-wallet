@@ -13,6 +13,7 @@ import type {
   INotificationSetting,
   IPermission,
   IToken,
+  DexFunctionType,
 } from '../../types';
 import { i18n } from '../../store/plugins/languages';
 
@@ -78,7 +79,7 @@ export const TX_FUNCTION_TYPE_MULTISIG = {
   revoke: 'revoke',
 } as const;
 
-export const TX_FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
+export const TX_FUNCTION_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
   pool: [
     'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
   ],
@@ -105,9 +106,9 @@ export const TX_FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiqui
 };
 
 /**
- * ITx.type
+ * ITx.tag
  */
-export const TX_TYPES_SUPPORTED = [
+export const TX_TAGS_SUPPORTED = [
   Tag.SpendTx,
   Tag.ContractCreateTx,
   Tag.ContractCallTx,
@@ -117,7 +118,7 @@ export const TX_TYPES_SUPPORTED = [
   Tag.NameTransferTx,
 ];
 
-export const NAME_TAGS = new Set([
+export const TX_NAME_TAGS = new Set([
   Tag.NameClaimTx,
   Tag.NamePreclaimTx,
   Tag.NameRevokeTx,
@@ -198,7 +199,9 @@ export const NETWORK_TESTNET: INetwork = {
   name: 'Testnet',
 };
 
-export const NETWORK_DEFAULT = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
+export const NETWORK_DEFAULT = (process.env.NETWORK === 'Testnet')
+  ? NETWORK_TESTNET
+  : NETWORK_MAINNET;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 

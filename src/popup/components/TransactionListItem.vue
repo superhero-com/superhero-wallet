@@ -60,7 +60,6 @@ import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
 import { useStore } from 'vuex';
 import {
-  TX_FUNCTION_TYPE_DEX,
   amountRounded,
   convertToken,
   formatDate,
@@ -76,7 +75,6 @@ import {
 import {
   IActiveMultisigTransaction,
   ITransaction,
-  TxFunctionRaw,
 } from '../../types';
 import {
   useCurrencies,
@@ -117,9 +115,9 @@ export default defineComponent({
     const transactionOwner = computed(() => props.transaction?.transactionOwner);
 
     const {
-      isDex,
       direction,
       isDexAllowance,
+      isDexPool,
       isErrorTransaction,
     } = useTransactionTx({
       store,
@@ -156,12 +154,7 @@ export default defineComponent({
       if (
         !aeToken
         || isErrorTransaction.value
-        || (
-          isDex.value
-          && TX_FUNCTION_TYPE_DEX.pool.includes(
-            currentTransaction.value.tx?.function as TxFunctionRaw,
-          )
-        )
+        || isDexPool.value
       ) return 0;
       return getFormattedAndRoundedFiat(
         +amountRounded((aeToken.decimals

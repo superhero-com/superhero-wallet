@@ -254,7 +254,6 @@ import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import {
   AETERNITY_SYMBOL,
-  TX_FUNCTION_TYPE_DEX,
   formatDate,
   formatTime,
   aettosToAe,
@@ -265,6 +264,8 @@ import {
   fetchJson,
   handleUnknownError,
   isTransactionAex9,
+  isTxFunctionDexSwap,
+  isTxFunctionDexPool,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
@@ -364,12 +365,8 @@ export default defineComponent({
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
-    const isSwap = computed(
-      () => txFunction.value && TX_FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
-    );
-    const isPool = computed(
-      () => txFunction.value && TX_FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
-    );
+    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerUrl = computed(
       () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.hash),
