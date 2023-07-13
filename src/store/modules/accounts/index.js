@@ -57,11 +57,11 @@ export default {
       return dispatch(`${getModule(active).name}/sign`, data);
     },
 
-    signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, opt }) {
-      if (opt && opt.onAccount) {
-        return dispatch(`${getModule(active).name}/signTransactionFromAccount`, { txBase64, opt });
+    signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, options }) {
+      if (options && options.onAccount) {
+        return dispatch(`${getModule(active).name}/signTransactionFromAccount`, { txBase64, options });
       }
-      return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, opt });
+      return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, options });
     },
   },
 };

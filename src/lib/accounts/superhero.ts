@@ -31,42 +31,42 @@ export class AccountSuperhero extends AccountBase {
     this.address = activeAccount.value.address as Encoded.AccountAddress;
   }
 
-  signTransaction(txBase64: Encoded.Transaction, opt: any): Promise<Encoded.Transaction> {
+  signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
     if (IS_CORDOVA) {
-      return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, opt, opt.aeppOrigin);
+      return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
       return this.bgPermissionCheckAndSign(
         POPUP_TYPE_TX_SIGN,
         txBase64,
-        { ...opt, origin: opt.aeppOrigin },
+        { ...options, origin: options.aeppOrigin },
       );
     }
-    return this.store.dispatch('accounts/signTransaction', { txBase64, opt: { ...opt, onAccount: this.address } });
+    return this.store.dispatch('accounts/signTransaction', { txBase64, options: { ...options, onAccount: this.address } });
   }
 
-  async signMessage(message: string, opt: any): Promise<Uint8Array> {
+  async signMessage(message: string, options: any): Promise<Uint8Array> {
     if (IS_CORDOVA || IN_FRAME) {
-      return this.fgPermissionCheckAndSign('message.sign', message, opt, opt.aeppOrigin);
+      return this.fgPermissionCheckAndSign('message.sign', message, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
       return this.bgPermissionCheckAndSign(
         METHODS.signMessage,
         message,
-        { ...opt, origin: opt.aeppOrigin },
+        { ...options, origin: options.aeppOrigin },
       );
     }
-    return this.sign(messageToHash(message), opt);
+    return this.sign(messageToHash(message), options);
   }
 
-  sign(data: string | Uint8Array, opt: any): Promise<Uint8Array> {
+  sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
     const { activeAccount } = useAccounts({ store: this.store });
     return IS_EXTENSION_BACKGROUND
       ? sign(data, activeAccount.value.secretKey) as any
-      : this.store.dispatch('accounts/sign', data, opt);
+      : this.store.dispatch('accounts/sign', data, options);
   }
 
-  async fgPermissionCheckAndSign(method: any, payload: any, opt: any, origin?: string) {
+  async fgPermissionCheckAndSign(method: any, payload: any, options: any, origin?: string) {
     try {
       const app = origin ? new URL(origin) : null;
       const permission = (!app?.host && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
@@ -88,13 +88,13 @@ export class AccountSuperhero extends AccountBase {
             },
           });
         }
-        return this.sign(messageToHash(payload), opt);
+        return this.sign(messageToHash(payload), options);
       }
 
       return this.store.dispatch('accounts/signTransaction', {
         txBase64: messageToHash(payload),
-        opt: {
-          ...opt,
+        options: {
+          ...options,
           modal: !permission,
           host: app?.host,
         },
@@ -104,19 +104,19 @@ export class AccountSuperhero extends AccountBase {
     }
   }
 
-  async bgPermissionCheckAndSign(method: METHODS, payload: any, opt: Record<string, any>) {
+  async bgPermissionCheckAndSign(method: METHODS, payload: any, options: Record<string, any>) {
     const isTxSigning = method === POPUP_TYPE_TX_SIGN;
     if (
       (await this.store.dispatch('permissions/checkPermissions', {
-        host: new URL(opt.origin).host,
+        host: new URL(options.origin).host,
         method,
-        params: opt,
+        params: options,
       }))
       || (await showPopup(
-        opt.origin,
+        options.origin,
         isTxSigning ? POPUP_TYPE_SIGN : POPUP_TYPE_MESSAGE_SIGN,
         {
-          ...opt,
+          ...options,
           ...(isTxSigning)
             ? {
               tx: payload,
@@ -136,10 +136,10 @@ export class AccountSuperhero extends AccountBase {
       }
       return this.store.dispatch('accounts/signTransaction', {
         txBase64: payload,
-        opt: {
-          ...opt,
+        options: {
+          ...options,
           modal: false,
-          host: opt.origin,
+          host: options.origin,
         },
       });
     }
