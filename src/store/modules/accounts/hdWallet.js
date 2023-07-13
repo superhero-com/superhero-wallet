@@ -1,7 +1,10 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
 import { encode, unpackTx } from '@aeternity/aepp-sdk-13';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { useModals } from '../../../composables';
+import {
+  useModals,
+  useSdk13,
+} from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -21,8 +24,10 @@ export default {
     nextAccountIdx: 1,
   },
   actions: {
-    async isAccountUsed({ rootGetters }, address) {
-      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed(context, address) {
+      const { getSdk } = useSdk13({ store: context });
+      const sdk = await getSdk();
+      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;

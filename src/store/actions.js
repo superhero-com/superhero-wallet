@@ -9,7 +9,6 @@ import {
 } from '../popup/utils';
 import {
   useMiddleware,
-  useSdk,
   useSdk13,
 } from '../composables';
 
@@ -27,8 +26,7 @@ export default {
   },
   async fetchPendingTransactions(context, address) {
     const { state: { transactions } } = context;
-    const { nodeNetworkId } = useSdk13({ store: context });
-    const { getSdk } = useSdk({ store: context });
+    const { nodeNetworkId, getSdk } = useSdk13({ store: context });
     const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
