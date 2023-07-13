@@ -78,7 +78,13 @@ export function useIncomingTransactions({ store }: IDefaultComposableOptions) {
               text,
               title,
               buttonLabel: t('pages.notifications.viewTransaction'),
-              path: router.resolve({ name: ROUTE_TX_DETAILS, params: { hash } }).href,
+              path: router.resolve({
+                name: ROUTE_TX_DETAILS,
+                params: {
+                  hash,
+                  transactionOwner: recipientId,
+                },
+              }).href,
               sender: senderId,
               receiver: recipientId,
               hasIncomingTransaction: true,

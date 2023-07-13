@@ -66,6 +66,7 @@
 </template>
 
 <script>
+import { computed } from 'vue';
 import { mapState, mapGetters } from 'vuex';
 import { getPayload, AETERNITY_SYMBOL } from '../../utils';
 import { AeScan } from '../../../lib/AeScan';
