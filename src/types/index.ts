@@ -29,6 +29,8 @@ import {
   TX_FUNCTIONS,
   TX_FUNCTIONS_MULTISIG,
   TX_RETURN_TYPES,
+  WEB_SOCKET_CHANNELS,
+  WEB_SOCKET_SOURCE,
 } from '@/protocols/aeternity/config';
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
@@ -857,4 +859,15 @@ export interface ITransferResponse {
 export interface IAmountDecimalPlaces {
   highPrecision?: boolean;
   amount?: number;
+}
+
+export type WebSocketChannelName = ObjectValues<typeof WEB_SOCKET_CHANNELS>;
+export type WebSocketSourceName = ObjectValues<typeof WEB_SOCKET_SOURCE>;
+
+// https://github.com/aeternity/ae_mdw#websocket-interface
+export interface IMiddlewareWebSocketSubscriptionMessage {
+  op: 'Subscribe' | 'Unsubscribe';
+  payload: WebSocketChannelName;
+  target?: string;
+  source?: WebSocketSourceName;
 }
