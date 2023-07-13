@@ -1,4 +1,3 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import { Encoded, METHODS, Tag } from '@aeternity/aepp-sdk-13';
 import BigNumber from 'bignumber.js';
 import type {
@@ -496,13 +495,13 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 export const RETURN_TYPE_OK = 'ok';
 
 export const SUPPORTED_TX_TYPES = [
-  SCHEMA.TX_TYPE.spend,
-  SCHEMA.TX_TYPE.contractCreate,
-  SCHEMA.TX_TYPE.contractCall,
-  SCHEMA.TX_TYPE.namePreClaim,
-  SCHEMA.TX_TYPE.nameClaim,
-  SCHEMA.TX_TYPE.nameUpdate,
-  SCHEMA.TX_TYPE.nameTransfer,
+  Tag.SpendTx,
+  Tag.ContractCreateTx,
+  Tag.ContractCallTx,
+  Tag.NamePreclaimTx,
+  Tag.NameClaimTx,
+  Tag.NameUpdateTx,
+  Tag.NameTransferTx,
 ];
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';

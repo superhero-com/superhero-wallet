@@ -6,15 +6,19 @@ import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import {
-  SCHEMA,
+  decode,
+  encode,
+  Encoded,
+  Encoding,
+  Tag,
+  unpackTx,
+} from '@aeternity/aepp-sdk-13';
+import {
   AmountFormatter,
   Crypto,
-  TxBuilder,
-  TxBuilderHelper,
   InvalidTxError,
 } from '@aeternity/aepp-sdk';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
-import { Tag } from '@aeternity/aepp-sdk-13';
 import { useI18n } from 'vue-i18n';
 
 import {
@@ -352,7 +356,7 @@ export async function fetchRespondChallenge(
 
 export function getPayload(transaction: ITransaction) {
   return (transaction.tx?.payload)
-    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+    ? decode(transaction.tx?.payload).toString()
     : null;
 }
 
@@ -524,7 +528,7 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
         [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
         transaction.tx.function,
       )
-      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
+      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString())
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
@@ -591,7 +595,7 @@ export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
   return {
     ...keyPair,
     idx: accountIdx,
-    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+    address: encode(keyPair.publicKey, Encoding.AccountAddress),
   };
 }
 
@@ -618,14 +622,10 @@ export function calculateFontSize(amountValue: BigNumber | number) {
   return '12px';
 }
 
-export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
-  let txToUnpack: string | Uint8Array = encodedTx;
+export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   try {
-    if (isTxBase64) {
-      txToUnpack = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
-    }
-    const txObject = TxBuilder.unpackTx(txToUnpack, true).tx;
-    return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
+    const txObject = unpackTx(encodedTx);
+    return SUPPORTED_TX_TYPES.includes(txObject.tag);
   } catch (e) {
     return false;
   }
