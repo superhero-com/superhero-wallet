@@ -6,19 +6,19 @@ import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import {
+  AE_AMOUNT_FORMATS,
   decode,
+  derivePathFromKey,
   encode,
   Encoded,
   Encoding,
+  formatAmount,
+  getKeyPair,
+  InvalidTxError,
+  isAddressValid,
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk-13';
-import {
-  AmountFormatter,
-  Crypto,
-  InvalidTxError,
-} from '@aeternity/aepp-sdk';
-import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
 import { useI18n } from 'vue-i18n';
 
 import {
@@ -221,14 +221,14 @@ export function isAensName(fullHash: string) {
 
 export function checkAddress(value: string) {
   return (
-    Crypto.isAddressValid(value, HASH_PREFIX_ACCOUNT)
-    || Crypto.isAddressValid(value, HASH_PREFIX_CONTRACT)
-    || Crypto.isAddressValid(value, HASH_PREFIX_ORACLE)
+    isAddressValid(value, HASH_PREFIX_ACCOUNT)
+    || isAddressValid(value, HASH_PREFIX_CONTRACT)
+    || isAddressValid(value, HASH_PREFIX_ORACLE)
   );
 }
 
 export function checkAddressOrChannel(value: string) {
-  return checkAddress(value) || Crypto.isAddressValid(value, HASH_PREFIX_CHANNEL);
+  return checkAddress(value) || isAddressValid(value, HASH_PREFIX_CHANNEL);
 }
 
 export function checkAensName(value: string) {
@@ -535,16 +535,16 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
 }
 
 export function aeToAettos(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AE,
+    targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
 }
 
 export function aettosToAe(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AETTOS,
+    targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 }
 
@@ -591,7 +591,7 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
 }
 
 export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
-  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, { ...wallet, secretKey: wallet.privateKey }).secretKey);
   return {
     ...keyPair,
     idx: accountIdx,

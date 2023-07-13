@@ -4,7 +4,7 @@ import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useSdk, useSdk13 } from '../composables';
+import { useSdk13 } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
@@ -62,7 +62,6 @@ export async function init() {
         throw new Error('Unknown connection type');
     }
   });
-  await store.dispatch('sdkPlugin/initialize');
   await getSdk();
 
   connectionsQueue.forEach(addAeppConnection);
@@ -75,19 +74,12 @@ export async function init() {
         return;
       }
       try {
-        const { getSdk: getSdk11, createNewNodeInstance } = useSdk({ store });
-
         initSdkRunning = true;
-        const [sdk, sdk13] = await Promise.all([
-          getSdk11(),
-          getSdk(),
-        ]);
+        const sdk = await getSdk();
         if (oldNetwork) {
           sdk.pool.delete(oldNetwork.name);
-          sdk13.pool.delete(oldNetwork.name);
         }
-        sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
-        sdk13.addNode(network.name, await createNodeInstance(network.url), true);
+        sdk.addNode(network.name, await createNodeInstance(network.url), true);
       } finally {
         initSdkRunning = false;
       }

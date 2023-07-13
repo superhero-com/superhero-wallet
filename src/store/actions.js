@@ -6,6 +6,7 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
+  parseBigIntJson,
 } from '../popup/utils';
 import {
   useMiddleware,
@@ -30,7 +31,7 @@ export default {
     const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-        (r) => r.transactions,
+        (r) => parseBigIntJson(r.transactions),
         (error) => {
           if (!isAccountNotFoundError(error)) {
             handleUnknownError(error);
