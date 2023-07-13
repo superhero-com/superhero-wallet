@@ -1,6 +1,10 @@
 import {
-  Universal, MemoryAccount, Crypto, Node,
-} from '@aeternity/aepp-sdk';
+  AeSdk,
+  encode,
+  Encoding,
+  MemoryAccount,
+  Node,
+} from '@aeternity/aepp-sdk-13';
 import { useModals } from '../../composables';
 import { i18n } from '../plugins/languages';
 
@@ -17,12 +21,11 @@ export default {
   },
   actions: {
     async claim({ rootGetters: { account, activeNetwork } }, secretKey) {
-      const publicKey = Crypto.getAddressFromPriv(secretKey);
-      const s = await Universal({
-        nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
-        accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
+      const sdk = new AeSdk({
+        nodes: [{ name: activeNetwork.name, instance: new Node(activeNetwork.url) }],
+        accounts: [new MemoryAccount(secretKey)],
       });
-      await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
+      await sdk.transferFunds(1, account.address, { payload: encode(Buffer.from('referral'), Encoding.Bytearray), verify: false });
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;

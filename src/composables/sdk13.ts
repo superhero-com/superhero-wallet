@@ -28,6 +28,9 @@ import {
   MODAL_CONFIRM_CONNECT,
   NETWORK_ID_MAINNET,
   NETWORK_ID_TESTNET,
+  NODE_STATUS_CONNECTED,
+  NODE_STATUS_CONNECTING,
+  NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   watchUntilTruthy,
 } from '../popup/utils';
@@ -41,9 +44,6 @@ let drySdk: AeSdk;
 let sdkBlocked = false;
 let sdkCurrentNetwork: INetwork;
 const nodeNetworkId = ref<string>();
-const isNodeConnecting = ref<boolean>(false);
-const isNodeReady = ref<boolean>(false);
-const isNodeError = ref<boolean>(false);
 const aeppInfo: Record<string, any> = {};
 
 /**
@@ -55,6 +55,13 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
   const { openModal } = useModals();
 
   const isSdkReady = computed(() => !!sdk);
+
+  const nodeStatus = computed((): string => store.state.nodeStatus);
+
+  const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
+  const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
+  const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
+
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
   const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
@@ -71,20 +78,16 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
    */
   async function createNodeInstance(url: string) {
     let nodeInstance;
-    isNodeReady.value = false;
-    isNodeError.value = false;
-    isNodeConnecting.value = true;
+    store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
     try {
       // TODO: remove ignore version once HTTP compiler dependency is removed
       nodeInstance = new Node(url, { ignoreVersion: true });
       nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
-      isNodeReady.value = true;
+      store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
     } catch (error) {
-      isNodeError.value = true;
       nodeNetworkId.value = undefined;
+      store.commit('setNodeStatus', NODE_STATUS_ERROR);
       return null;
-    } finally {
-      isNodeConnecting.value = false;
     }
     return nodeInstance;
   }

@@ -9,7 +9,7 @@ import { IN_FRAME } from './environment';
 import store from '../store';
 import Logger from './logger';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useSdk, useSdk13 } from '../composables';
+import { useMiddleware, useSdk13 } from '../composables';
 
 let initSdkRunning = false;
 
@@ -35,8 +35,7 @@ if (IN_FRAME) {
 }
 
 export default async function initSdk() {
-  const { isSdkReady, getSdk, createNewNodeInstance } = useSdk({ store });
-  const { getSdk: getSdk13, createNodeInstance } = useSdk13({ store });
+  const { isSdkReady, getSdk, createNodeInstance } = useSdk13({ store });
 
   const { getMiddleware } = useMiddleware({ store });
 
@@ -51,30 +50,15 @@ export default async function initSdk() {
       try {
         store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
 
-        let sdk;
-        let sdk13;
+        const [sdk] = await Promise.all([getSdk(), getMiddleware()]);
 
         if (isSdkReady.value) {
-          [sdk, sdk13] = await Promise.all([
-            getSdk(),
-            getSdk13(),
-            getMiddleware(),
-          ]);
           if (oldNetwork) {
             sdk.pool.delete(oldNetwork.name);
-            sdk13.pool.delete(oldNetwork.name);
           }
-          sdk.addNode(network.name, await createNewNodeInstance(network.url), true);
-          sdk13.addNode(network.name, await createNodeInstance(network.url), true);
-        } else {
-          await Promise.all([
-            store.dispatch('sdkPlugin/initialize'),
-            getMiddleware(),
-          ]);
-
-          if (IN_FRAME && !FramesConnection.initialized) {
-            FramesConnection.init(await getSdk13());
-          }
+          sdk.addNode(network.name, await createNodeInstance(network.url), true);
+        } else if (IN_FRAME && !FramesConnection.initialized) {
+          FramesConnection.init(await getSdk());
         }
 
         // TODO node status should be kept in the SDK composable separated from the mdw status
@@ -92,7 +76,7 @@ export default async function initSdk() {
   store.watch(
     (state) => state.accounts?.activeIdx,
     async (oldVal, newVal) => {
-      const sdk = await getSdk13();
+      const sdk = await getSdk();
       if (!isEqual(oldVal, newVal) && sdk) {
         sdk._pushAccountsToApps();
       }
