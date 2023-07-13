@@ -5,9 +5,9 @@
       data-cy="network-form"
     >
       <InfoBox
-          v-if="isNetworkPrefilled"
-          :type="INFO_BOX_TYPES.warning"
-          :text="$t('pages.network.thirdPartyDetails')"
+        v-if="isNetworkPrefilled"
+        :type="INFO_BOX_TYPES.warning"
+        :text="$t('pages.network.thirdPartyDetails')"
       />
       <p
         v-else

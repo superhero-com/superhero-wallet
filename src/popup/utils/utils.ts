@@ -20,7 +20,6 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-
 import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
@@ -36,7 +35,7 @@ import {
   SEED_LENGTH,
   SIMPLEX_URL,
   TX_DIRECTION,
-  TX_TYPES_SUPPORTED,
+  TX_TAGS_SUPPORTED,
   TX_FUNCTIONS,
   TX_FUNCTION_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
@@ -44,13 +43,13 @@ import {
 import { i18n } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
 import type {
+  BigNumberPublic,
   IAccount,
   IRespondChallenge,
   IResponseChallenge,
   ISdk,
   ITransaction,
   ITx,
-  BigNumberPublic,
   IPageableResponse,
   IDashboardTransaction,
   INameEntryFetched,
@@ -58,9 +57,11 @@ import type {
   IRequestInitBodyParsed,
   IActiveMultisigTransaction,
   IDexContracts,
-  TxFunctionRaw,
   ICommonTransaction,
   Truthy,
+  TxFunction,
+  TxFunctionRaw,
+  TxType,
 } from '../../types';
 import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
 
@@ -489,7 +490,7 @@ export function getTxTag(tx: ITx): Tag | null {
     return Tag.GaMetaTx;
   }
   if (tx.type in Tag) {
-    return Tag[tx.type as keyof typeof Tag];
+    return Tag[tx.type as TxType];
   }
   return null;
 }
@@ -625,7 +626,7 @@ export function calculateFontSize(amountValue: BigNumber | number) {
 export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   try {
     const txObject = unpackTx(encodedTx);
-    return TX_TYPES_SUPPORTED.includes(txObject.tag);
+    return TX_TAGS_SUPPORTED.includes(txObject.tag);
   } catch (e) {
     return false;
   }
@@ -641,6 +642,34 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
     && Object.values(TX_FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId)
   );
+}
+
+export function isTxFunctionDexAllowance(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.allowance, txFunction);
+}
+
+export function isTxFunctionDexSwap(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.swap, txFunction);
+}
+
+export function isTxFunctionDexPool(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.pool, txFunction);
+}
+
+export function isTxFunctionDexMaxSpent(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.maxSpent, txFunction);
+}
+
+export function isTxFunctionDexMinReceived(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.minReceived, txFunction);
+}
+
+export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.addLiquidity, txFunction);
+}
+
+export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.removeLiquidity, txFunction);
 }
 
 export function getTxOwnerAddress(innerTx?: ITx) {

@@ -1,6 +1,6 @@
 import { v4 as genUuid } from 'uuid';
 import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
-import type { Dictionary, IPopupConfig } from '../../types';
+import type { Dictionary, IPopupConfig, TxType } from '../../types';
 import { txParams, popupProps } from './testsConfig';
 import { CONNECTION_TYPES } from './index';
 import { IS_EXTENSION, POPUP_TYPE, RUNNING_IN_TESTS } from '../../lib/environment';
@@ -18,9 +18,9 @@ interface IPendingRequest {
 
 type PostMessageReturn = Promise<Partial<IPopupConfig> | null>;
 
-export function buildTx(txType: keyof typeof Tag) {
+export function buildTx(txType: TxType) {
   const params = {
-    // TODO: Fix typecasting by defing individual types of each param
+    // TODO: Fix typecasting by defining individual types of each param
     ...txParams[txType] as any,
     tag: Tag[txType],
   };

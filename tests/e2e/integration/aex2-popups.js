@@ -11,7 +11,7 @@ import locale from '../../../src/popup/locales/en.json';
 
 const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
 
-const txTypes = [
+const txTags = [
   Tag.SpendTx,
   Tag.ContractCallTx,
   Tag.ContractCreateTx,
@@ -74,25 +74,25 @@ describe('Tests cases for AEX-2 popups', () => {
     });
   });
 
-  txTypes.forEach((txType) => {
-    it(`Sign Popup display correct ${Tag[txType]} data`, () => {
-      const tx = txParams[Tag[txType]];
+  txTags.forEach((txTag) => {
+    it(`Sign Popup display correct ${Tag[txTag]} data`, () => {
+      const tx = txParams[Tag[txTag]];
       const amount = tx.amount / 10 ** 18;
       const fee = tx.fee / 10 ** 18;
       let receiver;
-      if (txType === Tag.SpendTx) {
+      if (txTag === Tag.SpendTx) {
         receiver = tx.recipientId;
-      } else if (txType === Tag.ContractCallTx) {
+      } else if (txTag === Tag.ContractCallTx) {
         receiver = tx.contractId;
       } else {
         receiver = 'Contract create';
       }
-      cy.openAex2Popup('sign', Tag[txType])
+      cy.openAex2Popup('sign', Tag[txTag])
         .get('[data-cy=label]')
         .should('be.visible')
-        .should('contain', locale.transaction.type[lowerFirst(Tag[txType])]);
+        .should('contain', locale.transaction.type[lowerFirst(Tag[txTag])]);
 
-      if (txType !== Tag.ContractCreateTx) {
+      if (txTag !== Tag.ContractCreateTx) {
         cy.get('[data-cy=recipient] [data-cy=address]')
           .should('be.visible')
           .then((recipient) => {

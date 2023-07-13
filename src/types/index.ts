@@ -290,18 +290,18 @@ export interface ICurrency {
 
 export type CurrencyRates = Record<CurrencyCode, number>;
 
-export interface ITxArguments {
+export interface TxArguments {
   type: 'tuple' | 'list'
   value: any // TODO find type, this was not correct: (string | number | any[])
 }
 
 /**
- * TxFunction names coming directly from the API or ready to be sent.
+ * TxFunction snake_case names coming directly from the API or ready to be sent.
  */
 export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
 
 /**
- * TxFunctions used internally by the app.
+ * TxFunction names parsed from snake_case to camelCase for the internal use.
  */
 export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
@@ -309,6 +309,9 @@ export type TxFunctionMultisig = keyof typeof TX_FUNCTION_TYPE_MULTISIG;
 
 export type TxFunction = TxFunctionRaw | TxFunctionParsed | TxFunctionMultisig;
 
+/**
+ * String representation of the ITx.tag.
+ */
 export type TxType = keyof typeof Tag;
 
 export interface IGAAttachTx {
@@ -338,7 +341,7 @@ export interface ITx {
   abiVersion?: number
   accountId?: Encoded.AccountAddress
   amount: number
-  arguments: ITxArguments[]
+  arguments: TxArguments[]
   callData?: string // TODO find source
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: Encoded.AccountAddress
@@ -361,7 +364,7 @@ export interface ITx {
   payload?: Encoded.Bytearray;
   pointers?: any;
   result?: string;
-  return?: ITxArguments;
+  return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string
   senderId?: string
@@ -407,7 +410,7 @@ export interface IDashboardTransaction extends ITransaction {
 
 export interface IAccountOverView extends Partial<Omit<IAccount, 'address'>> {
   // TODO: use a proper type for a address since it can be a url
-  address?: Encoded.AccountAddress | string,
+  address?: Encoded.AccountAddress | string;
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
@@ -433,6 +436,15 @@ export interface IDexContracts {
   router: Encoded.ContractAddress[];
   wae: Encoded.ContractAddress[];
 }
+
+export type DexFunctionType =
+  | 'pool'
+  | 'addLiquidity'
+  | 'removeLiquidity'
+  | 'swap'
+  | 'allowance'
+  | 'maxSpent'
+  | 'minReceived';
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
 

@@ -23,17 +23,16 @@ import {
   INetwork,
   ITokenList,
   ITransaction,
-  TxFunctionRaw,
 } from '../../types';
 import {
   AENS,
   DEX,
-  NAME_TAGS,
-  TX_FUNCTIONS,
   TX_DIRECTION,
-  TX_FUNCTION_TYPE_DEX,
-  includes,
+  TX_FUNCTIONS,
+  TX_NAME_TAGS,
   excludeFalsy,
+  includes,
+  isTxFunctionDexPool,
 } from '../utils';
 
 import TransactionTag from './TransactionTag.vue';
@@ -91,7 +90,7 @@ export default defineComponent({
         arr.push(t('transaction.type.payingForTx'));
       }
 
-      if (NAME_TAGS.has(outerTxTag.value!)) {
+      if (TX_NAME_TAGS.has(outerTxTag.value!)) {
         arr.push(AENS, txTypeLabel.value);
       } else if (innerTxTag.value === Tag.GaMetaTx) {
         arr.push(
@@ -110,7 +109,7 @@ export default defineComponent({
       } else if (isDex.value) {
         arr.push(
           DEX,
-          TX_FUNCTION_TYPE_DEX.pool.includes(innerTx.value.function as TxFunctionRaw)
+          isTxFunctionDexPool(innerTx.value.function)
             ? t('transaction.dexType.pool')
             : t('common.swap'),
         );
