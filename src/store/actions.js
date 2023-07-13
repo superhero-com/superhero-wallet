@@ -66,7 +66,7 @@ export default {
         address,
         amount,
         contractId: contract,
-        type: Tag.ContractCallTx,
+        type: Tag[Tag.ContractCallTx],
       },
       ...t,
       microTime: new Date(t.createdAt).getTime(),
