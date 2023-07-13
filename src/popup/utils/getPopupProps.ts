@@ -6,9 +6,6 @@ import { CONNECTION_TYPES } from './index';
 import { IS_EXTENSION, POPUP_TYPE, RUNNING_IN_TESTS } from '../../lib/environment';
 import '../../lib/initPolyfills';
 
-// @ts-ignore
-declare const browser: Browser;
-
 interface PopupMessageData {
   type: 'resolve' | 'reject' | 'getProps'
   payload?: any
@@ -64,7 +61,7 @@ const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn =>
       const { txType } = await browser.storage.local.get('txType');
       if (txType) {
         const props = popupProps.base as IPopupConfig;
-        props.tx = unpackTx(buildTx(txType)) as any;
+        props.tx = unpackTx(buildTx(txType as any)) as any;
         return props;
       }
       return POPUP_TYPE ? popupProps[POPUP_TYPE] : {};

@@ -153,7 +153,7 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_EXTENSION && browser) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if (tab && validateTipUrl(tab.url)) {
+        if (tab?.url && validateTipUrl(tab.url)) {
           tipUrl.value = tab.url;
         }
       }

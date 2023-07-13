@@ -1,14 +1,10 @@
 /* eslint-disable no-console */
 import { pick } from 'lodash-es';
-import { Browser } from 'webextension-polyfill';
 import { detect } from 'detect-browser';
 import { App } from 'vue';
 import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
 import { RejectedByUserError } from './errors';
-
-// @ts-ignore
-declare const browser: Browser;
 
 interface ILoggerOptions {
   background?: boolean;
@@ -72,9 +68,9 @@ export default class Logger {
   }
 
   static async write({ modal = process.env.NODE_ENV !== 'production', ...error }) {
-    const { saveErrorLog } = await getState();
+    const { saveErrorLog } = await getState() as any;
     if (!saveErrorLog) return;
-    const errorLog = await Logger.get();
+    const errorLog = await Logger.get() as any;
     const logEntry = {
       error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
