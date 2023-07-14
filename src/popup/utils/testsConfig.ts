@@ -1,5 +1,10 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Tag } from '@aeternity/aepp-sdk-13';
+import {
+  Tag,
+  AbiVersion,
+  VmVersion,
+  Encoded,
+  AE_AMOUNT_FORMATS,
+} from '@aeternity/aepp-sdk-13';
 import type { IPopupConfig } from '../../types';
 import {
   AETERNITY_CONTRACT_ID,
@@ -18,11 +23,11 @@ import { CoinGeckoMarketResponse } from '../../lib/CoinGecko';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
 };
 
-export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
-export const contractCallAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
+export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
+export const contractCallAddress: Encoded.ContractAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
 
 export const STUB_CURRENCY: CoinGeckoMarketResponse = {
   id: AETERNITY_COIN_ID, symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', currentPrice: 0.076783, marketCap: 31487891, marketCapRank: 523, fullyDilutedValuation: null, totalVolume: 217034, high24h: 0.078539, low24h: 0.076793, priceChange24h: -0.001092194951687525, priceChangePercentage24h: -1.4025, marketCapChange24h: -429134.39267925173, marketCapChangePercentage24h: -1.34453, circulatingSupply: 409885828.49932, totalSupply: 536306702.0, maxSupply: null, ath: 5.69, athChangePercentage: -98.65091, athDate: '2018-04-29T03:50:39.593Z', atl: 0.059135, atlChangePercentage: 29.84246, atlDate: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, lastUpdated: '2023-01-17T11:38:23.610Z',
@@ -91,13 +96,13 @@ export const popupProps: Record<string, IPopupConfig> = {
 
 const commonParams = {
   amount: 100000000000000000,
-  ttl: MAX_UINT256,
-  nonce: MAX_UINT256,
+  ttl: MAX_UINT256.toNumber(),
+  nonce: MAX_UINT256.toNumber(),
   fee: 10000000000000000,
   gas: 1579000,
   gasPrice: 1000000000,
   waitMined: true,
-  denomination: 'aettos',
+  denomination: AE_AMOUNT_FORMATS.AETTOS,
   clientTtl: 84600,
   nameTtl: 50000,
   nameFee: 0,
@@ -120,24 +125,24 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-  abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
+  ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
+  abiVersion: AbiVersion.Sophia,
   callData:
-    'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF',
+    'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF' as Encoded.ContractBytearray,
 };
 export const txParams = {
-  [SCHEMA.TX_TYPE.contractCreate]: {
+  [Tag[Tag.ContractCreateTx]]: {
     ownerId: testAccount.address,
     code:
-      'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
+      'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=' as Encoded.ContractBytearray,
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.contractCall]: {
+  [Tag[Tag.ContractCallTx]]: {
     contractId: contractCallAddress,
     callerId: testAccount.address,
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.spend]: {
+  [Tag[Tag.SpendTx]]: {
     senderId: testAccount.address,
     recipientId,
     ...commonParams,
@@ -435,7 +440,7 @@ export const transactions = {
           type: 'SpendTx',
         },
       },
-      type: 'GAMetaTx',
+      type: 'GaMetaTx',
     },
   },
 };

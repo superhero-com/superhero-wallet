@@ -1,6 +1,5 @@
 import { v4 as genUuid } from 'uuid';
-import { Browser } from 'webextension-polyfill';
-import { TxBuilder } from '@aeternity/aepp-sdk';
+import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk-13';
 import type { Dictionary, IPopupConfig } from '../../types';
 import { txParams, popupProps } from './testsConfig';
 import { CONNECTION_TYPES } from './index';
@@ -22,8 +21,13 @@ interface IPendingRequest {
 
 type PostMessageReturn = Promise<Partial<IPopupConfig> | null>;
 
-export function buildTx(txType: any) {
-  return TxBuilder.buildTx({ ...txParams[txType] }, txType);
+export function buildTx(txType: keyof typeof Tag) {
+  const params = {
+    // TODO: Fix typecasting by defing individual types of each param
+    ...txParams[txType] as any,
+    tag: Tag[txType],
+  };
+  return rawBuildTx(params);
 }
 
 const postMessage = (() => {
@@ -60,7 +64,7 @@ const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn =>
       const { txType } = await browser.storage.local.get('txType');
       if (txType) {
         const props = popupProps.base as IPopupConfig;
-        props.tx = buildTx(txType).txObject;
+        props.tx = unpackTx(buildTx(txType)) as any;
         return props;
       }
       return POPUP_TYPE ? popupProps[POPUP_TYPE] : {};

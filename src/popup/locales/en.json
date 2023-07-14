@@ -370,7 +370,7 @@
       "spendTx": "Spend",
       "contractCreateTx": "Contract create",
       "contractCallTx": "Contract call",
-      "namePreClaimTx": "Preclaim name",
+      "namePreclaimTx": "Preclaim name",
       "nameClaimTx": "Claim name",
       "nameUpdateTx": "Update name",
       "nameTransferTx": "Transfer name",
@@ -401,7 +401,7 @@
     "listType": {
       "sentTx": "Sent",
       "receivedTx": "Received",
-      "namePreClaimTx": "Name preclaimed",
+      "namePreclaimTx": "Name preclaimed",
       "nameClaimTx": "Name claimed",
       "nameUpdateTx": "Name updated",
       "nameTransferTx": "Name transferred",

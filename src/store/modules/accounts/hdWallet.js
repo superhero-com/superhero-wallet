@@ -1,4 +1,5 @@
 import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
+import { encode, unpackTx } from '@aeternity/aepp-sdk-13';
 import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
 import { useModals } from '../../../composables';
 import {
@@ -60,7 +61,7 @@ export default {
         await dispatch('confirmRawDataSigning', { data: encodedTx, app });
         return;
       }
-      const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+      const txObject = unpackTx(encode(encodedTx, 'tx'));
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,

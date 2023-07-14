@@ -15,8 +15,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import { TranslateResult, useI18n } from 'vue-i18n';
+import { Tag } from '@aeternity/aepp-sdk-13';
+import { lowerFirst } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useTransactionTx } from '../../composables';
 import {
@@ -31,8 +32,8 @@ import {
   TX_DIRECTION,
   FUNCTION_TYPE_DEX,
   includes,
+  NAME_TAGS,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
 } from '../utils';
 
 import TransactionTag from './TransactionTag.vue';
@@ -51,7 +52,7 @@ export default defineComponent({
     const { t, te } = useI18n();
     const {
       direction,
-      txType,
+      innerTxType,
       innerTx,
       isAllowance,
       isDex,
@@ -76,27 +77,30 @@ export default defineComponent({
       const externalLabels = [];
       let innerLabels = [];
 
-      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxType.value === Tag.GaMetaTx) {
         externalLabels.push(t('transaction.type.gaMetaTx'));
       }
-      if (outerTxType.value === TX_TYPE_MDW.PayingForTx) {
+      if (outerTxType.value === Tag.PayingForTx) {
         externalLabels.push(t('transaction.type.payingForTx'));
       }
 
-      const txTransactionType = txType.value ? t(`transaction.type.${txType.value}`) : undefined;
+      const txTransactionType = outerTxType.value ? t(`transaction.type.${lowerFirst(Tag[outerTxType.value])}`) : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
       if (!txTransactionType) {
         return [];
       }
-      if (txType.value?.startsWith('name')) {
+      if (outerTxType.value === Tag.NameTransferTx) { // Unsupported type
+        return [];
+      }
+      if (NAME_TAGS.has(outerTxType.value!)) {
         innerLabels = [AENS, txTransactionType];
-      } else if (txType.value === SCHEMA.TX_TYPE.gaMeta) {
+      } else if (innerTxType.value === Tag.GaMetaTx) {
         innerLabels = [
           t('transaction.type.contractCallTx'),
           t('transaction.type.multisigProposal'),
         ];
-      } else if (txType.value === SCHEMA.TX_TYPE.spend) {
+      } else if (innerTxType.value === Tag.SpendTx) {
         innerLabels = [
           t('transaction.type.spendTx'),
           direction.value === TX_DIRECTION.received
@@ -126,14 +130,14 @@ export default defineComponent({
             : t('transaction.spendType.out'),
         ];
       } else if (
-        txType.value === TX_TYPE_MDW.GAAttachTx
-        && outerTxType.value === TX_TYPE_MDW.PayingForTx
+        outerTxType.value === Tag.PayingForTx
+        && innerTxType.value === Tag.GaAttachTx
       ) {
         innerLabels = [
           t('transaction.type.createMultisigVault'),
         ];
       } else if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
+        outerTxType.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer

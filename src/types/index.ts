@@ -312,28 +312,6 @@ export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
 export type TxFunction = TxFunctionRaw | TxFunctionParsed;
 
-export type TxType =
-  | 'SpendTx'
-  | 'ContractCreateTx'
-  | 'ContractCallTx'
-  | 'NameBidTx'
-  | 'NamePreclaimTx'
-  | 'NameClaimTx'
-  | 'NameUpdateTx'
-  | 'NameTransferTx'
-  | 'NameRevokeTx'
-  | 'OracleRegisterTx'
-  | 'OracleExtendTx'
-  | 'OraclePostQueryTx'
-  | 'OracleRespondTx'
-  | 'ChannelCloseSoloTx'
-  | 'ChannelSlashTx'
-  | 'ChannelSettleTx'
-  | 'ChannelSnapshotSoloTx'
-  | 'PayingForTx'
-  | 'GAAttachTx'
-  | 'GAMetaTx';
-
 export interface IGAAttachTx {
   contractId: Encoded.ContractAddress;
   fee: number;
@@ -389,8 +367,8 @@ export interface ITx {
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
-  tag?: Tag; // Allows to establish the transaction type
-  type: TxType; // Custom property we add after unpacking the Tx
+  tag?: Tag;
+  type: keyof typeof Tag,
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;

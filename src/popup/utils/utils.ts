@@ -14,6 +14,7 @@ import {
   InvalidTxError,
 } from '@aeternity/aepp-sdk';
 import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import { useI18n } from 'vue-i18n';
 
 import {
@@ -29,7 +30,6 @@ import {
   SIMPLEX_URL,
   SUPPORTED_TX_TYPES,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
   FUNCTION_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
   HASH_PREFIXES_ALLOWED,
@@ -46,7 +46,6 @@ import type {
   ISdk,
   ITransaction,
   ITx,
-  TxType,
   BigNumberPublic,
   IPageableResponse,
   IDashboardTransaction,
@@ -475,12 +474,20 @@ export function amountRounded(rawAmount: number | BigNumberPublic): string {
   return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
 }
 
-export function getTxType(tx: ITx): TxType {
-  return (
-    TX_TYPE_MDW[tx.type]
-    || (tx.tag && SCHEMA.OBJECT_ID_TX_TYPE[tx.tag])
-    || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)
-  );
+export function getTxType(tx: ITx): Tag | null {
+  if (tx.tag) {
+    return tx.tag;
+  }
+  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // Sdk: GaAttachTx, mdw: GAAttachTx
+    return Tag.GaAttachTx;
+  }
+  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // Sdk: GaMetaTx, mdw: GAMetaTx
+    return Tag.GaMetaTx;
+  }
+  if (tx.type in Tag) {
+    return Tag[tx.type as keyof typeof Tag];
+  }
+  return null;
 }
 
 export function isTransactionAex9(transaction: ITransaction): boolean {
@@ -489,9 +496,11 @@ export function isTransactionAex9(transaction: ITransaction): boolean {
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {
-  return [TX_TYPE_MDW.GAMetaTx, TX_TYPE_MDW.PayingForTx].includes(
-    getTxType(tx),
-  );
+  return [
+    'GAMetaTx', // Sdk: GaMetaTx, mdw: GAMetaTx
+    Tag[Tag.GaMetaTx],
+    Tag[Tag.PayingForTx],
+  ].includes(tx.type);
 }
 
 export function getInnerTransaction(tx?: ITx): any {

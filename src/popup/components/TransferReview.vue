@@ -221,6 +221,7 @@ export default defineComponent({
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
       const sdk = await getSdk();
+
       loading.value = true;
       try {
         let actionResult;

@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import {
   AETERNITY_SYMBOL,
   NETWORK_MAINNET,
@@ -13,7 +13,6 @@ import {
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
-  getTxType,
 } from '../popup/utils';
 import { useSdk13 } from '../composables';
 
@@ -88,7 +87,7 @@ export default {
   getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
     const currentAddress = externalAddress || address;
 
-    if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
+    if (tx.tag === Tag.SpendTx) {
       return tx.senderId === currentAddress
         ? TX_DIRECTION.sent
         : TX_DIRECTION.received;

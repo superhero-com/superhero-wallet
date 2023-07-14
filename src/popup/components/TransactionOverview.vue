@@ -10,8 +10,7 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
 import {
   computed,
   defineComponent,
@@ -25,7 +24,6 @@ import {
   postJson,
   TX_DIRECTION,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
 } from '../utils';
 import { AeScan } from '../../lib/AeScan';
 import { useMiddleware, useSdk, useTransactionTx } from '../../composables';
@@ -35,7 +33,6 @@ import {
   IAccountOverview,
   ITransaction,
   ITx,
-  TxType,
   TxFunction,
   INetwork,
 } from '../../types';
@@ -68,7 +65,8 @@ export default defineComponent({
 
     const {
       isDex,
-      txType,
+      outerTxType,
+      innerTxType,
       direction,
       getOwnershipAccount,
       innerTx,
@@ -88,7 +86,7 @@ export default defineComponent({
     }
 
     const preparedTransaction = computed((): TransactionData => {
-      const transactionTypes = tm('transaction.type') as unknown as Record<TxType, TranslateResult>;
+      const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
       const aeScan = new AeScan(activeNetwork.value.explorerUrl);
 
       const {
@@ -98,8 +96,8 @@ export default defineComponent({
         callerId,
       } = innerTx.value;
 
-      switch (txType.value) {
-        case SCHEMA.TX_TYPE.spend:
+      switch (outerTxType.value) {
+        case Tag.SpendTx:
           return {
             sender: {
               address: senderId,
@@ -115,7 +113,7 @@ export default defineComponent({
             },
             title: t('transaction.type.spendTx'),
           };
-        case SCHEMA.TX_TYPE.contractCall: {
+        case Tag.ContractCallTx: {
           const contract: IAccountOverview = {
             address: contractId,
             url: aeScan.prepareUrlByHash(contractId),
@@ -152,7 +150,7 @@ export default defineComponent({
             function: innerTx.value.function,
           };
         }
-        case SCHEMA.TX_TYPE.contractCreate:
+        case Tag.ContractCreateTx:
           return {
             sender: ownershipAccount.value,
             recipient: {
@@ -160,18 +158,17 @@ export default defineComponent({
             },
             title: t('transaction.type.contractCreateTx'),
           };
-        case SCHEMA.TX_TYPE.namePreClaim:
-        case SCHEMA.TX_TYPE.nameClaim:
-        case SCHEMA.TX_TYPE.nameBid:
-        case SCHEMA.TX_TYPE.nameUpdate:
+        case Tag.NamePreclaimTx:
+        case Tag.NameClaimTx:
+        case Tag.NameUpdateTx:
           return {
             sender: ownershipAccount.value,
             recipient: {
               label: t('transaction.overview.aens'),
             },
-            title: txType.value ? transactionTypes[txType.value] : undefined,
+            title: outerTxType.value ? transactionTypes[outerTxType.value] : undefined,
           };
-        case TX_TYPE_MDW.GAAttachTx: {
+        case Tag.PayingForTx: {
           return {
             sender: {
               address: innerTx.value.ownerId,
@@ -185,8 +182,28 @@ export default defineComponent({
             },
           };
         }
+        case Tag.GaMetaTx: {
+          if (innerTxType.value === Tag.SpendTx) {
+            return {
+              sender: {
+                address: senderId,
+                name: getPreferredName.value(senderId),
+                url: aeScan.prepareUrlByHash(senderId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              recipient: {
+                address: recipientId,
+                name: name.value || getPreferredName.value(recipientId),
+                url: aeScan.prepareUrlByHash(recipientId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              title: t('transaction.type.spendTx'),
+            };
+          }
+        }
+        // eslint-disable-next-line no-fallthrough
         default:
-          throw new Error(`Unsupported transaction type ${txType.value}`);
+          throw new Error(`Unsupported transaction type ${outerTxType.value}`);
       }
     });
 
