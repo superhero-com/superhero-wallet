@@ -368,7 +368,12 @@ export interface ITx {
   senderId?: string
   selectedTokenContractId?: string
   tag?: Tag;
-  type: keyof typeof Tag,
+  /**
+   * Middleware represents the `type` with different case than the SDK.
+   * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
+   * When comparing the `type` it is suggested to do case insensitive comparison.
+   */
+  type: keyof Tag | string ;
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
