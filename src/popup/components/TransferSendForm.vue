@@ -66,9 +66,7 @@
         show-help
         show-message-help
         :label="$t('modals.send.recipientLabel')"
-        :placeholder="isMultisig
-          ? $t('modals.send.recipientPlaceholder')
-          : $t('modals.send.recipientPlaceholderUrl')"
+        :placeholder="$t('modals.send.recipientPlaceholder')"
         :message="addressMessage"
         @help="showRecipientHelp()"
       >

@@ -34,17 +34,6 @@
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
           </i18n-t>
         </p>
-        <p>
-          <i18n-t
-            keypath="modals.recipient.msg.url.msg"
-            tag="div"
-            scope="global"
-          >
-            <strong class="title">
-              {{ $t('modals.recipient.msg.url.title') }}:
-            </strong>
-          </i18n-t>
-        </p>
         <p v-if="UNFINISHED_FEATURES">
           <i18n-t
             keypath="modals.readMore.msg"
