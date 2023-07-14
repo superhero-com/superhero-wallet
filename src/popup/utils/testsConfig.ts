@@ -72,7 +72,7 @@ export const popupProps: Record<string, IPopupConfig> = {
       host: 'localhost',
     },
     tx: {
-      tag: Tag.SpendTx,
+      type: Tag[Tag.SpendTx],
       VSN: '1',
       senderId: testAccount.address,
       recipientId,

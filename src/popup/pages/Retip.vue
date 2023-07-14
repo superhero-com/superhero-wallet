@@ -68,7 +68,7 @@ import {
   ref,
   computed,
 } from 'vue';
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk-13';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -189,7 +189,7 @@ export default defineComponent({
             amount,
             callerId: activeAccount.value.address,
             contractId: tippingContract.$options.address!,
-            type: SCHEMA.TX_TYPE.contractCall,
+            type: Tag[Tag.ContractCallTx],
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
             arguments: [],
