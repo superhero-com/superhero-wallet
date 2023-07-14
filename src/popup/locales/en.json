@@ -208,7 +208,7 @@
     },
     "recipient": {
       "title": "Send cryptocurrency",
-      "sub-header": "to public address, .chain name or URL",
+      "sub-header": "to public address or .chain name",
       "msg": {
         "publicAddress": {
           "title": "Send to public address",
@@ -218,10 +218,6 @@
           "title":"Send to .chain name",
           "linkTitle": "claim your own .chain name",
           "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
-        },
-        "url": {
-          "title": "Send to URL",
-          "msg": "{0} send cryptocurrency tip to any web page where æternity public address can be found. URL owners will be able to claim all tips accumulated as soon as they place their æccount address somewhere in the web page content."
         }
       }
     },
@@ -325,7 +321,6 @@
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
-      "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
       "payload": "Payload"
     },
     "multisigTxProposal": {
