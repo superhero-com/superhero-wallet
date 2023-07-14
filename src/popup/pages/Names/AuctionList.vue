@@ -22,9 +22,12 @@
             {{ name }}
             <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
           </div>
-          <div class="expiration">
+          <div
+            v-if="topBlockHeight"
+            class="expiration"
+          >
             {{ $t('pages.names.auctions.expires') }}
-            in ≈{{ blocksToRelativeTime(expiration - topBlockHeight) }}
+            in ≈ {{ blocksToRelativeTime(expiration - topBlockHeight) }}
           </div>
         </div>
       </NameRow>
