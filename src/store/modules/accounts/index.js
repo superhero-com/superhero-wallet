@@ -1,10 +1,11 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
 import hdWallet from './hdWallet';
-import ledger from './ledger';
 import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
 
-const modules = { hdWallet, ledger };
+// TODO: modules file is an object, because previously it contained more than one module,
+// should be improved in the future
+const modules = { hdWallet };
 
 export default {
   namespaced: true,
