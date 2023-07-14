@@ -266,9 +266,11 @@ import {
   fetchJson,
   handleUnknownError,
   isTransactionAex9,
+  DASHBOARD_TRANSACTION_LIMIT,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
+import { useDispatch } from '../../composables/vuex';
 import { AeScan } from '../../lib/AeScan';
 import {
   useAccounts,
@@ -327,6 +329,7 @@ export default defineComponent({
     const { getMiddleware } = useMiddleware({ store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount } = useAccounts({ store });
+    const fetchTransactions = useDispatch('fetchTransactions');
 
     const externalAddress = computed((): Encoded.AccountAddress => (
       props.transactionOwner
@@ -408,6 +411,11 @@ export default defineComponent({
     });
 
     onMounted(async () => {
+      await fetchTransactions({
+        limit: DASHBOARD_TRANSACTION_LIMIT,
+        address: props.transactionOwner,
+        recent: true,
+      });
       let rawTransaction = getTx.value(props.hash);
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();

@@ -149,6 +149,14 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     { deep: true },
   );
 
+  watch(
+    () => store.state.names.owned,
+    () => {
+      updateTransactionListData();
+    },
+    { deep: true },
+  );
+
   onNetworkChange(store, () => {
     fetchedTransactions.value = [];
     updateTransactionListData();
@@ -157,5 +165,6 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   return {
     isTransactionListLoading,
     latestTransactions,
+    updateTransactionListData,
   };
 }
