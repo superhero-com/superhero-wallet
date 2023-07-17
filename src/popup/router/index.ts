@@ -1,7 +1,7 @@
 import {
-  RouteRecordRaw, createWebHashHistory,
+  RouteRecordRaw,
 } from 'vue-router';
-import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
 import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
