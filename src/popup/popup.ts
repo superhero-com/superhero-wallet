@@ -24,7 +24,7 @@ import '../styles/ionic.scss';
 
 registerModals();
 const app = createApp(App);
-app.use(IonicVue, { mode: 'md' });
+app.use(IonicVue);
 app.use(i18n);
 app.use(store);
 app.use(router);
