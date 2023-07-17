@@ -24,7 +24,6 @@ $ npm run build:web # build a web version
 $ npm run gen:cordova-resources
 $ npx cordova build/run android/ios # to build Cordova application
 ```
-> *Note:* `npm install` may fail if it tries to compile `node-canvas`. In case that happens, follow the instructions [here](https://github.com/Automattic/node-canvas#compiling) to install the required dependencies for your OS. 
 
 ### Develop locally
 
