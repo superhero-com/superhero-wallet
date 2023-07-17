@@ -8,7 +8,6 @@ import { useSdk13 } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
-let initSdkRunning = false;
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
@@ -22,7 +21,7 @@ const addAeppConnection = async (port) => {
 };
 
 export async function init() {
-  const { isSdkReady, getSdk, createNodeInstance } = useSdk13({ store });
+  const { isSdkReady, getSdk, resetNode } = useSdk13({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
@@ -70,18 +69,8 @@ export async function init() {
   store.watch(
     (state, getters) => getters.activeNetwork,
     async (network, oldNetwork) => {
-      if (initSdkRunning || isEqual(network, oldNetwork)) {
-        return;
-      }
-      try {
-        initSdkRunning = true;
-        const sdk = await getSdk();
-        if (oldNetwork) {
-          sdk.pool.delete(oldNetwork.name);
-        }
-        sdk.addNode(network.name, await createNodeInstance(network.url), true);
-      } finally {
-        initSdkRunning = false;
+      if (!isEqual(network, oldNetwork)) {
+        resetNode(oldNetwork, network);
       }
     },
   );
@@ -94,7 +83,6 @@ export async function init() {
         sdk._pushAccountsToApps();
       }
     },
-    { deep: true },
   );
 }
 

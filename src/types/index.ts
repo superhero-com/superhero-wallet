@@ -359,7 +359,7 @@ export interface ITx {
   nameSalt?: string
   nonce?: number
   payerId?: string
-  payload?: Encoded.Any;
+  payload?: Encoded.Bytearray;
   pointers?: any
   result?: string;
   return?: ITxArguments
