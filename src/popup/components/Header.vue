@@ -165,11 +165,11 @@ export default defineComponent({
       }
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return router.push(backRoute as RouteLocationRaw);
+        return router.replace(backRoute as RouteLocationRaw);
       }
       const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 
-      return router.push(
+      return router.replace(
         path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
