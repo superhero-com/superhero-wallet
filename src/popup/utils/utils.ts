@@ -374,7 +374,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   url?: string
   note?: string
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
+  if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
