@@ -206,6 +206,11 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     };
   }
 
+  async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
+    sdk.pool.delete(oldNetwork.name);
+    sdk.addNode(newNetwork.name, (await createNodeInstance(newNetwork.url))!, true);
+  }
+
   return {
     isNodeReady,
     isNodeConnecting,
@@ -218,6 +223,7 @@ export function useSdk13({ store }: IDefaultComposableOptions) {
     dexContracts,
     getSdk,
     getDrySdk,
+    resetNode,
     fetchRespondChallenge,
     createNodeInstance,
   };
