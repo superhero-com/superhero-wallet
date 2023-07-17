@@ -327,7 +327,6 @@ export default defineComponent({
           ] = await Promise.all([
             fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.tx.contractId}/code`),
             // SDK is needed to establish the `networkId` and the dex contracts for the network
-            // TODO replace with `getSdk` after migration to SDK13
             getSdk(),
           ]);
 

@@ -71,7 +71,7 @@ router.beforeEach(async (to, from, next) => {
 
   const { isSdkReady } = useSdk13({ store });
 
-  if (!isSdkReady && !RUNNING_IN_POPUP) {
+  if (!isSdkReady.value && !RUNNING_IN_POPUP) {
     initSdk();
   }
 
