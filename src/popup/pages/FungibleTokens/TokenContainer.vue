@@ -59,7 +59,7 @@
               v-for="tab in tabs"
               :key="tab.routeName"
               :exact-path="tab.exact"
-              :to="{ name: tab.routeName }"
+              :to="{ name: tab.routeName, params: routeParams }"
               :text="tab.text"
             />
           </Tabs>
@@ -151,6 +151,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const route = useRoute();
+    const { params: routeParams } = route;
     const { t } = useI18n();
     const { setTokenProps } = useTokenProps();
 
@@ -265,6 +266,7 @@ export default defineComponent({
       convertedBalance,
       routeName,
       isMultisig,
+      routeParams,
     };
   },
 });
