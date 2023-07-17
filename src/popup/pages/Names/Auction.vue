@@ -4,12 +4,12 @@
       <div class="auction-tabs">
         <Tabs>
           <Tab
-            :to="{ name: 'auction-bid' }"
+            :to="{ name: 'auction-bid', params: routeParams }"
             :text="$t('pages.names.auctions.place-bid')"
             exact-path
           />
           <Tab
-            :to="{ name: 'auction-history' }"
+            :to="{ name: 'auction-history', params: routeParams }"
             :text="$t('pages.names.auctions.bid-history')"
           />
         </Tabs>
@@ -20,6 +20,7 @@
       <IonRouterOutlet
         v-else
         class="auction-router"
+        :name="name"
       />
     </div>
   </ion-page>
@@ -35,7 +36,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { executeAndSetInterval } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useMiddleware, useUi } from '../../../composables';
@@ -61,6 +62,7 @@ export default defineComponent({
     const router = useRouter();
 
     const { getMiddleware } = useMiddleware();
+    const { params: routeParams } = useRoute();
     const { isAppActive } = useUi();
 
     const loading = ref(true);
@@ -105,6 +107,7 @@ export default defineComponent({
 
     return {
       loading,
+      routeParams,
     };
   },
 });
