@@ -2,8 +2,7 @@ import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';
-import { mapObject } from '@aeternity/aepp-sdk/es/utils/other';
-import { genSwaggerClient } from '@aeternity/aepp-sdk';
+import { genSwaggerClient, mapObject } from '../lib/swagger';
 import { fetchJson, watchUntilTruthy } from '../popup/utils';
 import {
   IDefaultComposableOptions,
@@ -47,9 +46,9 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
     middlewareCurrentNetwork = activeNetwork.value;
 
     middleware.value = mapObject(
-      (await genSwaggerClient(middlewareUrl, { spec })).api,
+      (await genSwaggerClient(middlewareUrl, { spec }) as any).api,
       ([key, value]: any[]) => [camelCase(key), value],
-    );
+    ) as any;
 
     initializing.value = false;
   }
