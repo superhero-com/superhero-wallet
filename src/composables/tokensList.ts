@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { computed, Ref } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
   IToken,

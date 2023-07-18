@@ -1,8 +1,8 @@
-import { useSdk13 } from '../../composables';
+import { useSdk } from '../../composables';
 import { watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
-  const { isSdkReady, nodeNetworkId, getSdk } = useSdk13({ store });
+  const { isSdkReady, nodeNetworkId, getSdk } = useSdk({ store });
 
   const waitTransactionMined = async ({
     hash,

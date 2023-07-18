@@ -181,7 +181,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Field, Form, useFormErrors } from 'vee-validate';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   MODAL_READ_QR_CODE,

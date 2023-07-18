@@ -4,9 +4,9 @@ import {
   Tag,
   decode,
   buildTx,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 
-import { useModals, useSdk13 } from '../../../composables';
+import { useModals, useSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -27,7 +27,7 @@ export default {
   },
   actions: {
     async isAccountUsed(context, address) {
-      const { getSdk } = useSdk13({ store: context });
+      const { getSdk } = useSdk({ store: context });
       const sdk = await getSdk();
       return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },

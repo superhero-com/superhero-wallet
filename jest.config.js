@@ -1,6 +1,6 @@
 const packagesToTranspile = [
   'lodash-es',
-  '@aeternity/aepp-sdk-13',
+  '@aeternity/aepp-sdk',
   '@aeternity/hd-wallet',
   'vee-validate',
 ];

@@ -89,7 +89,7 @@ import {
   DEX_URL,
   SIMPLEX_URL,
 } from '../utils/constants';
-import { useAccounts, useSdk13 } from '../../composables';
+import { useAccounts, useSdk } from '../../composables';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -118,7 +118,7 @@ export default defineComponent({
     const store = useStore();
 
     const { activeAccountFaucetUrl } = useAccounts({ store });
-    const { isNodeMainnet, isNodeTestnet } = useSdk13({ store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
 
     return {
       BUG_REPORT_URL,

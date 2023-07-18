@@ -3,7 +3,7 @@ import {
   watch,
   computed,
 } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import {
   FUNCTION_TYPE_MULTISIG,

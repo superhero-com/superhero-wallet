@@ -26,7 +26,7 @@
     "release": "standard-version"
   },
   "dependencies": {
-    "@aeternity/aepp-sdk-13": "npm:@aeternity/aepp-sdk@^13.0.0",
+    "@aeternity/aepp-sdk": "~13.0.0",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/json-bigint": "^0.3.1",

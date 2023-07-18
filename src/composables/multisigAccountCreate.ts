@@ -7,7 +7,7 @@ import {
   generateKeyPair,
   hash,
   unpackTx,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import dayjs from 'dayjs';
 
 import type {
@@ -16,7 +16,7 @@ import type {
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '../types';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 import {
   DEFAULT_WAITING_HEIGHT,
   MULTISIG_CREATION_PHASES,
@@ -33,7 +33,7 @@ const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
-  const { getDrySdk, getSdk } = useSdk13({ store });
+  const { getDrySdk, getSdk } = useSdk({ store });
   const {
     getMultisigAccountByContractId,
     addPendingMultisigAccount,

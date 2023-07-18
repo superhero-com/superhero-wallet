@@ -75,7 +75,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { Tag } from '@aeternity/aepp-sdk-13';
+import { Tag } from '@aeternity/aepp-sdk';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { camelCase } from 'lodash-es';

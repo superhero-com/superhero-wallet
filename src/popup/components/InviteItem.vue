@@ -84,7 +84,7 @@ import {
   encode,
   getAddressFromPriv,
   Encoding,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { APP_LINK_WEB, formatDate } from '../utils';
@@ -93,7 +93,7 @@ import {
   IFormModel,
   useBalances,
   useMaxAmount,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 
 import TokenAmount from './TokenAmount.vue';
@@ -117,7 +117,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({

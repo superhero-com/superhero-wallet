@@ -4,7 +4,7 @@ import {
   Encoding,
   MemoryAccount,
   Node,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { useModals } from '../../composables';
 import { i18n } from '../plugins/languages';
 

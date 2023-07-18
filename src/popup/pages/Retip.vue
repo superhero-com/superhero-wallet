@@ -68,7 +68,7 @@ import {
   ref,
   computed,
 } from 'vue';
-import { Tag } from '@aeternity/aepp-sdk-13';
+import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -87,7 +87,7 @@ import {
   useModals,
   useAccounts,
   useTippingContracts,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
@@ -115,7 +115,7 @@ export default defineComponent({
       amount: '',
     });
 
-    const { isTippingSupported } = useSdk13({ store });
+    const { isTippingSupported } = useSdk({ store });
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });

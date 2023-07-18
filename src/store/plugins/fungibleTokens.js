@@ -10,10 +10,10 @@ import {
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { useMiddleware, useSdk13 } from '../../composables';
+import { useMiddleware, useSdk } from '../../composables';
 
 export default (store) => {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,

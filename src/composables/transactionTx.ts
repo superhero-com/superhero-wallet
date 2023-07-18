@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import type {
   IAccountOverview,
@@ -23,7 +23,7 @@ import {
   getTxOwnerAddress,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
@@ -35,7 +35,7 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
-  const { dexContracts } = useSdk13({ store });
+  const { dexContracts } = useSdk({ store });
   const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);

@@ -54,7 +54,7 @@ import {
   validateSeedLength,
   watchUntilTruthy,
 } from '../../utils';
-import { useSdk13 } from '../../../composables';
+import { useSdk } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -74,7 +74,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
-    const { isSdkReady } = useSdk13({ store });
+    const { isSdkReady } = useSdk({ store });
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');

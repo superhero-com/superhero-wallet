@@ -14,7 +14,7 @@ import {
   Encoded,
   Node,
   Tag,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,

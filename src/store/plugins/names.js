@@ -10,14 +10,14 @@ import {
   handleUnknownError,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware, useModals, useSdk13 } from '../../composables';
+import { useMiddleware, useModals, useSdk } from '../../composables';
 
 export default (store) => {
   const {
     nodeNetworkId,
     getSdk,
     fetchRespondChallenge,
-  } = useSdk13({ store });
+  } = useSdk({ store });
 
   const {
     isMiddlewareReady,

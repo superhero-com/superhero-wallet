@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import { decode } from '@aeternity/aepp-sdk-13';
+import { decode } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { useModals, useSdk13 } from '../../composables';
+import { useModals, useSdk } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -17,7 +17,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const router = useRouter();
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
 
     onMounted(async () => {

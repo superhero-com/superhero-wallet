@@ -18,7 +18,7 @@ import {
   isAddressValid,
   Tag,
   unpackTx,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 
 import {

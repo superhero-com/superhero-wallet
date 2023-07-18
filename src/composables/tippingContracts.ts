@@ -1,9 +1,9 @@
 import { computed, ref } from 'vue';
-import { Contract } from '@aeternity/aepp-sdk-13';
+import { Contract } from '@aeternity/aepp-sdk';
 
 import TippingV1ACI from '../lib/contracts/TippingV1ACI.json';
 import TippingV2ACI from '../lib/contracts/TippingV2ACI.json';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 import { watchUntilTruthy } from '../popup/utils';
 import {
   IDefaultComposableOptions,
@@ -22,7 +22,7 @@ let tippingV2: Contract<TippingV2ContractApi> | undefined;
 const initializing = ref(false);
 
 export function useTippingContracts({ store }: IDefaultComposableOptions) {
-  const { getSdk, isTippingSupported } = useSdk13({ store });
+  const { getSdk, isTippingSupported } = useSdk({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 

@@ -8,7 +8,7 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
   CompilerHttp,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { ShSdkWallet } from '../lib/shSdkWallet';
 import type {
   IDefaultComposableOptions,
@@ -50,7 +50,7 @@ const aeppInfo: Record<string, any> = {};
  * Composable that will replace the Vuex SDK plugin.
  * For now, it works as an abstraction layer.
  */
-export function useSdk13({ store }: IDefaultComposableOptions) {
+export function useSdk({ store }: IDefaultComposableOptions) {
   const { isLoggedIn, activeAccount } = useAccounts({ store });
   const { openModal } = useModals();
 

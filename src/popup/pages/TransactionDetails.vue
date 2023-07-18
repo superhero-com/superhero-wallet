@@ -250,7 +250,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import {
   AETERNITY_SYMBOL,

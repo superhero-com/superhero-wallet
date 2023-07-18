@@ -3,7 +3,7 @@ import { localize } from '@vee-validate/i18n';
 import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { Encoding, isAddressValid } from '@aeternity/aepp-sdk-13';
+import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
 import { i18n } from './languages';
 import {
   isNotFoundError,
@@ -13,7 +13,7 @@ import {
   isValidURL,
 } from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies, useSdk13 } from '../../composables';
+import { useBalances, useCurrencies, useSdk } from '../../composables';
 
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
@@ -58,7 +58,7 @@ configure({
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
   const { minTipAmount } = useCurrencies({ withoutPolling: true });
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),

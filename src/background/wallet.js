@@ -1,17 +1,17 @@
 import { isEqual } from 'lodash-es';
-import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk-13';
+import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useSdk13 } from '../composables';
+import { useSdk } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
   const sdk = await getSdk();
   const connection = new BrowserRuntimeConnection({ port });
   const clientId = sdk.addRpcClient(connection);
@@ -21,7 +21,7 @@ const addAeppConnection = async (port) => {
 };
 
 export async function init() {
-  const { isSdkReady, getSdk, resetNode } = useSdk13({ store });
+  const { isSdkReady, getSdk, resetNode } = useSdk({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
@@ -87,7 +87,7 @@ export async function init() {
 }
 
 export async function disconnect() {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
   const sdk = await getSdk();
 
   sdk._clients.forEach((aepp, aeppId) => {

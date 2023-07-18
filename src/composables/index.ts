@@ -13,7 +13,7 @@ export * from './multisigAccountCreate';
 export * from './multisigTransactions';
 export * from './notifications';
 export * from './pendingMultisigTransaction';
-export * from './sdk13';
+export * from './sdk';
 export * from './tippingContracts';
 export * from './tokensList';
 export * from './topHeader';
