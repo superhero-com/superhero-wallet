@@ -47,7 +47,7 @@ export default async function initSdk() {
       }
       try {
         sdkBlocked = true;
-        resetNode(oldValue, newValue);
+        await resetNode(oldValue, newValue);
       } finally {
         sdkBlocked = false;
       }
