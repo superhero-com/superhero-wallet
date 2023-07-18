@@ -102,8 +102,6 @@ import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 
-const extPackageJson = require('../../../package.json');
-
 export default defineComponent({
   components: {
     PanelItem,
@@ -114,7 +112,6 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { fetchMiddlewareStatus } = useMiddleware({ store });
-    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
     const mdwStatus = ref<IMiddlewareStatus>();
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
@@ -128,7 +125,7 @@ export default defineComponent({
       COMMIT_URL,
       extensionVersion: process.env.npm_package_version,
       commitHash: process.env.COMMIT_HASH,
-      sdkVersion,
+      sdkVersion: process.env.SDK_VERSION,
       mdwStatus,
       activeNetwork,
     };
