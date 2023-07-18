@@ -278,7 +278,7 @@ export default defineComponent({
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
-    height: 50vh;
+    height: 60vh;
   }
 
   .close-button {
