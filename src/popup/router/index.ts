@@ -1,3 +1,4 @@
+import { App, URLOpenListenerEvent } from '@capacitor/app';
 import {
   RouteRecordRaw,
 } from 'vue-router';
@@ -148,11 +149,19 @@ const routerReadyPromise = new Promise((resolve) => {
 if (IS_MOBILE_APP) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
-    window.IonicDeeplink.onDeepLink(({ url }: any) => {
-      const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => url.startsWith(p));
-      if (!prefix) throw new Error(`Unknown url: ${url}`);
+
+    App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+      const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => event.url.startsWith(p));
+      if (!prefix) throw new Error(`Unknown url: ${event.url}`);
+
       try {
-        window.location.href = `#/${url.slice(prefix.length)}`;
+        const path = `/${event.url.slice(prefix?.length).split('?')[0]}`;
+        const query = event.url.slice(prefix?.length).split('?')[1].split('&').reduce((acc, param) => {
+          const [key, value] = param.split('=');
+          return { ...acc, [key]: value };
+        }, {});
+
+        router.push({ path, query });
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
       }
