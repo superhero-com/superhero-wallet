@@ -42,6 +42,7 @@ import { useModals } from './modals';
 let sdk: ShSdkWallet;
 let drySdk: AeSdk;
 let sdkBlocked = false;
+const isSdkReady = ref(false);
 let sdkCurrentNetwork: INetwork;
 const nodeNetworkId = ref<string>();
 const aeppInfo: Record<string, any> = {};
@@ -53,8 +54,6 @@ const aeppInfo: Record<string, any> = {};
 export function useSdk({ store }: IDefaultComposableOptions) {
   const { isLoggedIn, activeAccount } = useAccounts({ store });
   const { openModal } = useModals();
-
-  const isSdkReady = computed(() => !!sdk);
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
 
@@ -94,6 +93,7 @@ export function useSdk({ store }: IDefaultComposableOptions) {
 
   async function initSdk() {
     sdkBlocked = true;
+    isSdkReady.value = false;
 
     await Promise.all([
       watchUntilTruthy(() => store.state.isRestored),
@@ -153,6 +153,7 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     }
 
     sdkBlocked = false;
+    isSdkReady.value = true;
   }
 
   /**
