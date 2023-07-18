@@ -1,13 +1,17 @@
 <template>
-  <Connect
-    :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
-  />
+  <ion-page>
+    <ion-content class="ion-padding">
+      <Connect
+        :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
+      />
+    </ion-content>
+  </ion-page>
 </template>
 
 <script lang="ts">
+import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import type { IAppData } from '@/types';
 import {
   useAccounts,
@@ -20,13 +24,16 @@ import Connect from './Popups/Connect.vue';
 
 export default defineComponent({
   name: 'Address',
-  components: { Connect },
+  components: {
+    Connect,
+    IonContent,
+    IonPage,
+  },
   setup() {
     const store = useStore();
-    const router = useRouter();
 
     const { nodeNetworkId } = useAeSdk({ store });
-    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
     const { activeAccount } = useAccounts({ store });
     const { setPopupProps } = usePopupProps();
 

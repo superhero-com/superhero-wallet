@@ -70,7 +70,7 @@ export default defineComponent({
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome } = useDeepLinkApi();
     const {
       aeAccountsSelectOptions,
       getLastActiveProtocolAccount,
