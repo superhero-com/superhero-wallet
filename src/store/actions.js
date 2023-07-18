@@ -6,8 +6,8 @@ import {
   postJson,
   handleUnknownError,
   isAccountNotFoundError,
-  parseBigIntJson,
 } from '../popup/utils';
+import JsonBig from '../lib/json-big';
 import {
   useMiddleware,
   useSdk13,
@@ -31,7 +31,7 @@ export default {
     const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-        (r) => parseBigIntJson(r.transactions),
+        (r) => JsonBig.parse(JsonBig.stringify(r.transactions)),
         (error) => {
           if (!isAccountNotFoundError(error)) {
             handleUnknownError(error);
