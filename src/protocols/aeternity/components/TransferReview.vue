@@ -134,7 +134,7 @@ export default defineComponent({
 
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome } = useDeepLinkApi();
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
     const { activeAccount } = useAccounts({ store });
     const {
