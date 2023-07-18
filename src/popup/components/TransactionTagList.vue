@@ -52,11 +52,11 @@ export default defineComponent({
     const { t, te } = useI18n();
     const {
       direction,
-      innerTxType,
+      innerTxTag,
       innerTx,
       isAllowance,
       isDex,
-      outerTxType,
+      outerTxTag,
     } = useTransactionTx({
       store,
       tx: props.transaction?.tx,
@@ -77,30 +77,30 @@ export default defineComponent({
       const externalLabels = [];
       let innerLabels = [];
 
-      if (outerTxType.value === Tag.GaMetaTx) {
+      if (outerTxTag.value === Tag.GaMetaTx) {
         externalLabels.push(t('transaction.type.gaMetaTx'));
       }
-      if (outerTxType.value === Tag.PayingForTx) {
+      if (outerTxTag.value === Tag.PayingForTx) {
         externalLabels.push(t('transaction.type.payingForTx'));
       }
 
-      const txTransactionType = outerTxType.value ? t(`transaction.type.${lowerFirst(Tag[outerTxType.value])}`) : undefined;
+      const txTransactionType = outerTxTag.value ? t(`transaction.type.${lowerFirst(Tag[outerTxTag.value])}`) : undefined;
       const { tipContractV1, tipContractV2 } = activeNetwork.value;
 
       if (!txTransactionType) {
         return [];
       }
-      if (outerTxType.value === Tag.NameTransferTx) { // Unsupported type
+      if (outerTxTag.value === Tag.NameTransferTx) { // Unsupported type
         return [];
       }
-      if (NAME_TAGS.has(outerTxType.value!)) {
+      if (NAME_TAGS.has(outerTxTag.value!)) {
         innerLabels = [AENS, txTransactionType];
-      } else if (innerTxType.value === Tag.GaMetaTx) {
+      } else if (innerTxTag.value === Tag.GaMetaTx) {
         innerLabels = [
           t('transaction.type.contractCallTx'),
           t('transaction.type.multisigProposal'),
         ];
-      } else if (innerTxType.value === Tag.SpendTx) {
+      } else if (innerTxTag.value === Tag.SpendTx) {
         innerLabels = [
           t('transaction.type.spendTx'),
           direction.value === TX_DIRECTION.received
@@ -130,14 +130,14 @@ export default defineComponent({
             : t('transaction.spendType.out'),
         ];
       } else if (
-        outerTxType.value === Tag.PayingForTx
-        && innerTxType.value === Tag.GaAttachTx
+        outerTxTag.value === Tag.PayingForTx
+        && innerTxTag.value === Tag.GaAttachTx
       ) {
         innerLabels = [
           t('transaction.type.createMultisigVault'),
         ];
       } else if (
-        outerTxType.value === Tag.ContractCallTx
+        outerTxTag.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer

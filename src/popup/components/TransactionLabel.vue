@@ -121,8 +121,8 @@ export default defineComponent({
     const { t } = useI18n();
 
     const {
-      outerTxType,
-      innerTxType,
+      outerTxTag,
+      innerTxTag,
       isAllowance,
       isDex,
       innerTx,
@@ -136,8 +136,8 @@ export default defineComponent({
 
     const label = computed((): ILabel => {
       if (
-        outerTxType.value === Tag.SpendTx
-        || (outerTxType.value === Tag.GaMetaTx && innerTxType.value === Tag.SpendTx)
+        outerTxTag.value === Tag.SpendTx
+        || (outerTxTag.value === Tag.GaMetaTx && innerTxTag.value === Tag.SpendTx)
       ) {
         const isSent = getTxDirection.value(
           innerTx.value,
@@ -152,7 +152,7 @@ export default defineComponent({
             : t('transaction.type.receivedTx'),
         };
       }
-      if (outerTxType.value === Tag.PayingForTx && innerTxType.value === Tag.GaAttachTx) {
+      if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
         return labelWrapper(t('transaction.type.multisigVaultCreated'));
       }
       if (isAllowance.value) {
@@ -186,7 +186,7 @@ export default defineComponent({
           : t('transaction.listType.tipSent'));
       }
       if (
-        outerTxType.value === Tag.ContractCallTx
+        outerTxTag.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
         && (innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete)
@@ -205,11 +205,11 @@ export default defineComponent({
         };
       }
       // TODO refactor from dynamic translation keys to map of translations
-      const translation = !t(`transaction.listType.${camelCase(Tag[outerTxType.value!])}`).includes('listType')
-        ? t(`transaction.listType.${camelCase(Tag[outerTxType.value!])}`)
-        : t(`transaction.type.${camelCase(Tag[outerTxType.value!])}`);
+      const translation = !t(`transaction.listType.${camelCase(Tag[outerTxTag.value!])}`).includes('listType')
+        ? t(`transaction.listType.${camelCase(Tag[outerTxTag.value!])}`)
+        : t(`transaction.type.${camelCase(Tag[outerTxTag.value!])}`);
 
-      if (outerTxType.value && NAME_TAGS.has(outerTxType?.value)) {
+      if (outerTxTag.value && NAME_TAGS.has(outerTxTag?.value)) {
         return labelWrapper(translation);
       }
 

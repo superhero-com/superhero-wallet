@@ -15,7 +15,7 @@ import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
   TX_DIRECTION,
-  getTxType,
+  getTxTag,
   isContainingNestedTx,
   getInnerTransaction,
   isTxDex,
@@ -50,8 +50,8 @@ export function useTransactionTx({
   const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
-  const innerTxType = computed<Tag | null>(() => innerTx.value ? getTxType(innerTx.value) : null);
-  const outerTxType = computed<Tag | null>(() => tx ? getTxType(tx) : null);
+  const innerTxTag = computed<Tag | null>(() => innerTx.value ? getTxTag(innerTx.value) : null);
+  const outerTxTag = computed<Tag | null>(() => tx ? getTxTag(tx) : null);
 
   const isAllowance = computed((): boolean => (
     !!innerTx.value?.function
@@ -128,9 +128,9 @@ export function useTransactionTx({
   }
 
   return {
-    outerTxType,
     hasNestedTx,
-    innerTxType,
+    outerTxTag,
+    innerTxTag,
     innerTx: innerTx as any,
     isAllowance,
     isErrorTransaction,
