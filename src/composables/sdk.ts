@@ -7,7 +7,6 @@ import {
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
-  CompilerHttp,
 } from '@aeternity/aepp-sdk';
 import { ShSdkWallet } from '../lib/shSdkWallet';
 import type {
@@ -110,7 +109,6 @@ export function useSdk({ store }: IDefaultComposableOptions) {
       }],
       id: 'Superhero Wallet',
       type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
-      onCompiler: new CompilerHttp(activeNetwork.value.compilerUrl),
       onConnection(aeppId: string, params: any, origin: string) {
         aeppInfo[aeppId] = { ...params, origin };
       },
