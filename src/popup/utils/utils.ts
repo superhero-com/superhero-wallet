@@ -478,7 +478,7 @@ export function amountRounded(rawAmount: number | BigNumberPublic): string {
   return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
 }
 
-export function getTxType(tx: ITx): Tag | null {
+export function getTxTag(tx: ITx): Tag | null {
   if (tx.tag) {
     return tx.tag;
   }

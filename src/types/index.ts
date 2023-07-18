@@ -373,7 +373,7 @@ export interface ITx {
    * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
    * When comparing the `type` it is suggested to do case insensitive comparison.
    */
-  type: keyof Tag | string ;
+  type: keyof typeof Tag | string ;
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
