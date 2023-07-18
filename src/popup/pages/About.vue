@@ -114,7 +114,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { fetchMiddlewareStatus } = useMiddleware({ store });
-    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
+    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk-13']).replace('^', '');
     const mdwStatus = ref<IMiddlewareStatus>();
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
