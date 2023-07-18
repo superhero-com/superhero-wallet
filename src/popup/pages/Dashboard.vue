@@ -60,7 +60,7 @@ import {
   watch,
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import {
@@ -107,13 +107,12 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const route = useRoute();
-    const router = useRouter();
 
     const {
       activeAccount,
       activeAccountSimplexLink,
     } = useAccounts({ store });
-    const { checkIfOpenTransferSendModal } = useDeepLinkApi({ router });
+    const { checkIfOpenTransferSendModal } = useDeepLinkApi();
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 

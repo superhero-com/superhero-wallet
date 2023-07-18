@@ -80,7 +80,7 @@ import {
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import type {
   IFormModel,
@@ -123,7 +123,6 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
     const errorAmount = useFieldError();
@@ -136,7 +135,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { marketData } = useCurrencies({ store });
     const { getLastActiveProtocolAccount } = useAccounts({ store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome } = useDeepLinkApi();
     const { balance } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });

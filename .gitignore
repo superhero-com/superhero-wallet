@@ -18,8 +18,6 @@
 
 # Ionic files
 /www
-/android
-/ios
 /plugins
 /resources/*/icon
 /resources/*/splash
@@ -29,6 +27,3 @@
 *.pub
 *.zip
 /artifacts
-
-# ionic files
-/android

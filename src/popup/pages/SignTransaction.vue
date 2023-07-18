@@ -3,7 +3,7 @@ import {
   defineComponent,
   onMounted,
 } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
@@ -21,12 +21,11 @@ export default defineComponent({
   name: 'SignTransaction',
   setup() {
     const store = useStore();
-    const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
 
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
       const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
       const { openDefaultModal } = useModals();
 
