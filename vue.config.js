@@ -4,6 +4,7 @@ const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
+const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/package.json');
 
 // eslint-disable-next-line camelcase
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;
@@ -101,6 +102,7 @@ module.exports = {
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
       definitions['process.env.IS_CORDOVA'] = IS_CORDOVA;
+      definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
 
       return [definitions];
     }).end();
