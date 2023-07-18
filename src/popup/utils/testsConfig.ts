@@ -4,7 +4,7 @@ import {
   VmVersion,
   Encoded,
   AE_AMOUNT_FORMATS,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import type { IPopupConfig } from '../../types';
 import {
   AETERNITY_CONTRACT_ID,

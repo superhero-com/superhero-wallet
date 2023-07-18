@@ -3,7 +3,7 @@ import {
   Encoding,
   METHODS,
   Tag,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,

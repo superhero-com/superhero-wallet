@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -26,7 +26,7 @@ import {
   TX_FUNCTIONS,
 } from '../utils';
 import { AeScan } from '../../lib/AeScan';
-import { useMiddleware, useSdk13, useTransactionTx } from '../../composables';
+import { useMiddleware, useSdk, useTransactionTx } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
   IAccount,
@@ -60,7 +60,7 @@ export default defineComponent({
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getPreferredName = useGetter('names/getPreferred');
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { getMiddleware } = useMiddleware({ store });
 
     const {

@@ -8,7 +8,7 @@ import {
   encode,
   Encoded,
   Encoding,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
@@ -19,7 +19,7 @@ import {
   handleUnknownError,
   MULTISIG_SIMPLE_GA_BYTECODE,
 } from '../popup/utils';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
 import type {
@@ -33,7 +33,7 @@ import type {
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
-  const { getDrySdk, getSdk } = useSdk13({ store });
+  const { getDrySdk, getSdk } = useSdk({ store });
   const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);

@@ -57,13 +57,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
-import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk-13';
+import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
 import { useStore } from 'vuex';
 import { useState } from '../../composables/vuex';
 import {
   useBalances,
-  useSdk13,
+  useSdk,
   useMaxAmount,
   IFormModel,
 } from '../../composables';
@@ -87,7 +87,7 @@ export default defineComponent({
     const store = useStore();
     const loading = ref(false);
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { balance, aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({

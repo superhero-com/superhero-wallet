@@ -3,7 +3,7 @@ import {
   BrowserWindowMessageConnection,
   MESSAGE_DIRECTION,
   connectionProxy,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 
 window.browser = require('webextension-polyfill');
 

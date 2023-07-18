@@ -16,7 +16,7 @@ import {
   Encoding,
   Tag,
   unpackTx,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 
 import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type {
@@ -32,7 +32,7 @@ import {
   checkAensName,
   handleUnknownError,
 } from '../popup/utils';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
@@ -51,7 +51,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  * considering the fee that needs to be paid.
  */
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
   const { balance } = useBalances({ store });
   const { activeAccount } = useAccounts({ store });
 

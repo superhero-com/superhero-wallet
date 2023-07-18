@@ -135,7 +135,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { usePopupProps, useSdk13, useTransactionTx } from '../../../composables';
+import { usePopupProps, useSdk, useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -176,7 +176,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { t } = useI18n();
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
 
     const { popupProps, setPopupProps } = usePopupProps();
 

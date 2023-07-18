@@ -19,7 +19,7 @@ import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 const isTransactionListLoading = ref(false);
 const fetchedTransactions = ref<ITransaction[]>([]);
@@ -35,7 +35,7 @@ const { onNetworkChange } = createNetworkWatcher();
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   const { accounts } = useAccounts({ store });
   const { balancesTotal } = useBalances({ store });
-  const { nodeNetworkId } = useSdk13({ store });
+  const { nodeNetworkId } = useSdk({ store });
 
   const tokens = computed(() => store.state.fungibleTokens.tokens);
 

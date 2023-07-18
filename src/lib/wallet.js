@@ -1,9 +1,9 @@
 import { isEqual } from 'lodash-es';
-import { METHODS } from '@aeternity/aepp-sdk-13';
+import { METHODS } from '@aeternity/aepp-sdk';
 import { IN_FRAME } from './environment';
 import store from '../store';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useSdk13 } from '../composables';
+import { useMiddleware, useSdk } from '../composables';
 
 let sdkBlocked = false;
 
@@ -11,7 +11,7 @@ if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
       async reset() {
-        const { getSdk } = useSdk13({ store });
+        const { getSdk } = useSdk({ store });
         const sdk = await getSdk();
 
         Object.values(sdk._clients).forEach((aepp) => {
@@ -29,7 +29,7 @@ if (IN_FRAME) {
 }
 
 export default async function initSdk() {
-  const { getSdk, resetNode } = useSdk13({ store });
+  const { getSdk, resetNode } = useSdk({ store });
 
   const { getMiddleware } = useMiddleware({ store });
 

@@ -266,7 +266,7 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { Tag } from '@aeternity/aepp-sdk-13';
+import { Tag } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';

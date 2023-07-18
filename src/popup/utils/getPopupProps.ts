@@ -1,5 +1,5 @@
 import { v4 as genUuid } from 'uuid';
-import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk-13';
+import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
 import type { Dictionary, IPopupConfig } from '../../types';
 import { txParams, popupProps } from './testsConfig';
 import { CONNECTION_TYPES } from './index';

@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 import { isEmpty, mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
@@ -22,7 +22,7 @@ import {
 } from './composablesHelpers';
 import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 type Balances = Record<string, Balance>;
 
@@ -44,7 +44,7 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  * to live update the values. If no components are using it the polling stops.
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
   const { aeternityData } = useCurrencies();
   const { activeAccount, accounts } = useAccounts({ store });
 

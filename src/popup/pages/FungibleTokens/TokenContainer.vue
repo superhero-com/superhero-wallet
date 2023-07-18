@@ -91,7 +91,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '../../../types';
 import {
@@ -110,7 +110,7 @@ import {
 import {
   useAccounts,
   useCurrencies,
-  useSdk13,
+  useSdk,
   useTokensList,
 } from '../../../composables';
 import { useState, useGetter } from '../../../composables/vuex';
@@ -150,7 +150,7 @@ export default defineComponent({
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
-    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk13({ store });
+    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store });
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,

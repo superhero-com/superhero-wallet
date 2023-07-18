@@ -51,8 +51,8 @@ import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { AensName, getMinimumNameFee } from '@aeternity/aepp-sdk-13';
-import { useModals, useSdk13 } from '../../../composables';
+import { AensName, getMinimumNameFee } from '@aeternity/aepp-sdk';
+import { useModals, useSdk } from '../../../composables';
 import type { IAuctionBid } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
 import {
@@ -83,7 +83,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
 
     const loading = ref(false);

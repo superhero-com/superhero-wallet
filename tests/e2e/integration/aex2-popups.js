@@ -1,4 +1,4 @@
-import { Tag } from '@aeternity/aepp-sdk-13';
+import { Tag } from '@aeternity/aepp-sdk';
 import { lowerFirst } from 'lodash-es';
 import {
   POPUP_TYPE_CONNECT,

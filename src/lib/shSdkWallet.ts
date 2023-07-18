@@ -4,7 +4,7 @@ import {
   sendTransaction,
   spend,
   Encoded,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
 import { useAccounts } from '../composables/accounts';
 import { AccountSuperhero } from './accounts/superhero';

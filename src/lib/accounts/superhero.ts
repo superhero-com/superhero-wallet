@@ -6,7 +6,7 @@ import {
   unpackTx,
   Encoded,
   METHODS,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
 import { useAccounts } from '../../composables/accounts';
 import { useModals } from '../../composables/modals';

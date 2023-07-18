@@ -6,13 +6,13 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 import { RejectedByUserError } from '../../lib/errors';
 import { handleUnknownError } from '../utils';
 import {
   useDeepLinkApi,
   useModals,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 
 export default defineComponent({
@@ -25,7 +25,7 @@ export default defineComponent({
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
-      const { nodeNetworkId, getSdk } = useSdk13({ store });
+      const { nodeNetworkId, getSdk } = useSdk({ store });
       const { openDefaultModal } = useModals();
 
       try {

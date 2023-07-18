@@ -22,7 +22,7 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { useAccounts, useConnection, useSdk13 } from '../../composables';
+import { useAccounts, useConnection, useSdk } from '../../composables';
 
 const CONNECTED_DISPLAY_TIME = 2000;
 
@@ -32,7 +32,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { isOnline } = useConnection();
-    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk13({ store });
+    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store });
     const { isLoggedIn } = useAccounts({ store });
 
     const justBeenConnected = ref(false);

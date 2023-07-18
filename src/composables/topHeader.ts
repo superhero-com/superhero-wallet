@@ -3,7 +3,7 @@ import {
   createNetworkWatcher,
   createPollingBasedOnMountedComponents,
 } from './composablesHelpers';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 import type { ITopHeader, IDefaultComposableOptions } from '../types';
 
@@ -17,7 +17,7 @@ const { onNetworkChange } = createNetworkWatcher();
  * Composable that provides the information about the last block of the blockchain.
  */
 export function useTopHeaderData({ store }: IDefaultComposableOptions) {
-  const { getSdk } = useSdk13({ store });
+  const { getSdk } = useSdk({ store });
 
   const topBlockHeight = computed(() => topHeaderData.value?.height || 0);
 

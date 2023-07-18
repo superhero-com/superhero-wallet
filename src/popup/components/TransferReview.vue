@@ -126,7 +126,7 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { encode, Encoding, Tag } from '@aeternity/aepp-sdk-13';
+import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -136,7 +136,7 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useSdk13,
+  useSdk,
   useUi,
   useTippingContracts,
 } from '../../composables';
@@ -198,7 +198,7 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
