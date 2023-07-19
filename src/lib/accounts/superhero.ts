@@ -42,7 +42,7 @@ export class AccountSuperhero extends AccountBase {
         { ...options, origin: options.aeppOrigin },
       );
     }
-    return this.store.dispatch('accounts/signTransaction', { txBase64, options: { ...options, onAccount: this.address } });
+    return this.store.dispatch('accounts/signTransaction', { txBase64, options });
   }
 
   async signMessage(message: string, options: any): Promise<Uint8Array> {

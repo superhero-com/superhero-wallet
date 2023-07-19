@@ -58,7 +58,7 @@ export default {
     },
 
     signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, options }) {
-      if (options && options.onAccount) {
+      if (options && options.fromAccount) {
         return dispatch(`${getModule(active).name}/signTransactionFromAccount`, { txBase64, options });
       }
       return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, options });

@@ -54,8 +54,8 @@ export default {
       state.nextAccountIdx += 1;
     },
     signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, options }) {
-      const { secretKey } = options && options.onAccount
-        ? accounts.find(({ address }) => address === options.onAccount)
+      const { secretKey } = options && options.fromAccount
+        ? accounts.find(({ address }) => address === options.fromAccount)
         : account;
       return sign(data, secretKey);
     },
@@ -104,7 +104,7 @@ export default {
     },
     async signTransactionFromAccount({ dispatch, rootGetters }, {
       txBase64,
-      options: { modal = true, app = null, onAccount },
+      options: { modal = true, app = null, fromAccount },
     }) {
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
@@ -117,7 +117,7 @@ export default {
             Buffer.from(rootGetters.activeNetwork.networkId),
             Buffer.from(encodedTx),
           ]),
-          options: { onAccount },
+          options: { fromAccount },
         },
       );
       return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
