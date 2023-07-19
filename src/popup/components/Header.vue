@@ -1,68 +1,73 @@
 <template>
-  <div
-    class="header"
-    :class="{
-      'not-logged-in': !isLoggedIn,
-    }"
-  >
-    <div
-      v-if="isLoggedIn || titleTruncated"
-      class="left"
-    >
-      <BtnIcon
-        v-if="showHeaderNavigation"
-        class="icon-btn"
-        data-cy="back-arrow"
-        :icon="BackIcon"
-        @click="back"
-      />
-      <Component
-        :is="isLogoDisabled ? 'div' : 'RouterLink'"
-        v-else-if="isLoggedIn"
-        :to="isLogoDisabled ? null : { name: homeRouteName }"
-        :class="['home-button', { 'disabled': isLogoDisabled }]"
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
+      <div
+        class="header"
+        :class="{
+          'not-logged-in': !isLoggedIn,
+        }"
       >
-        <Logo class="home-icon" />
-      </Component>
-    </div>
-
-    <div
-      v-if="showHeaderNavigation"
-      class="title"
-    >
-      <Truncate
-        :str="titleTruncated"
-        class="text"
-      />
-    </div>
-
-    <div class="right">
-      <BtnClose
-        v-if="showHeaderNavigation"
-        data-cy="close"
-        class="btn-close"
-        @click="close"
-      />
-      <template v-else>
-        <NetworkButton />
-
-        <template v-if="isLoggedIn">
-          <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
-
-          <NotificationsIcon />
-
+        <div
+          v-if="isLoggedIn || titleTruncated"
+          class="left"
+        >
           <BtnIcon
-            :to="{ name: ROUTE_MORE }"
-            :icon="ThreeDotsIcon"
-            data-cy="page-more"
+            v-if="showHeaderNavigation"
+            class="icon-btn"
+            data-cy="back-arrow"
+            :icon="BackIcon"
+            @click="back"
           />
-        </template>
-      </template>
-    </div>
-  </div>
+          <Component
+            :is="isLogoDisabled ? 'div' : 'RouterLink'"
+            v-else-if="isLoggedIn"
+            :to="isLogoDisabled ? null : { name: homeRouteName }"
+            :class="['home-button', { 'disabled': isLogoDisabled }]"
+          >
+            <Logo class="home-icon" />
+          </Component>
+        </div>
+
+        <div
+          v-if="showHeaderNavigation"
+          class="title"
+        >
+          <Truncate
+            :str="titleTruncated"
+            class="text"
+          />
+        </div>
+
+        <div class="right">
+          <BtnClose
+            v-if="showHeaderNavigation"
+            data-cy="close"
+            class="btn-close"
+            @click="close"
+          />
+          <template v-else>
+            <NetworkButton />
+
+            <template v-if="isLoggedIn">
+              <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
+
+              <NotificationsIcon />
+
+              <BtnIcon
+                :to="{ name: ROUTE_MORE }"
+                :icon="ThreeDotsIcon"
+                data-cy="page-more"
+              />
+            </template>
+          </template>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
 </template>
 
 <script lang="ts">
+import { IonHeader, IonToolbar } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
@@ -98,6 +103,8 @@ export default defineComponent({
     Logo,
     Truncate,
     BtnIcon,
+    IonHeader,
+    IonToolbar,
   },
   setup() {
     const store = useStore();
@@ -202,17 +209,23 @@ export default defineComponent({
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
+ion-toolbar {
+  --background: var(--screen-bg-color);
+  --min-height: 0;
+}
+.ion-no-border {
+  z-index: variables.$z-index-header;
+  height: var(--header-height);
+}
+
 .header {
-  position: absolute;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  top: 0;
-  z-index: variables.$z-index-header;
-  height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
   padding: env(safe-area-inset-top) 8px 0;
   width: 100%;
+  height: 100%;
 
   @include mixins.mobile {
     display: flex;

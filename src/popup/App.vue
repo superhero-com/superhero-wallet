@@ -314,10 +314,6 @@ export default defineComponent({
 
   &.show-header {
     --header-height: 40px;
-
-    .app-inner {
-      padding-top: var(--header-height);
-    }
   }
 }
 </style>
