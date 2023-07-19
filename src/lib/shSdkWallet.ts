@@ -4,7 +4,7 @@ import {
   sendTransaction,
   spend,
   Encoded,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
 import { useAccounts } from '../composables/accounts';
 import { AccountSuperhero } from './accounts/superhero';
@@ -23,8 +23,8 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
 export class ShSdkWallet extends AeSdkWallet {
   store: Store<any>;
 
-  constructor(store: Store<any>, opt: any) {
-    super(opt);
+  constructor(store: Store<any>, options: any) {
+    super(options);
     this.store = store;
   }
 

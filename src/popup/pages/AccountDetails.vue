@@ -56,7 +56,7 @@ import {
   useAccounts,
   useBalances,
   useConnection,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -86,7 +86,7 @@ export default defineComponent({
     const store = useStore();
     const { isOnline } = useConnection();
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk13({ store });
+    const { isNodeMainnet, isNodeTestnet } = useSdk({ store });
 
     const {
       activeAccount,

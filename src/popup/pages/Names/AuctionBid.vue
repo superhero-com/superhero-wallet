@@ -51,13 +51,21 @@ import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { AensName, getMinimumNameFee } from '@aeternity/aepp-sdk-13';
-import { useModals, useSdk13 } from '../../../composables';
+import {
+  AensName,
+  buildTx,
+  unpackTx,
+  Tag,
+} from '@aeternity/aepp-sdk';
+import { useModals, useSdk } from '../../../composables';
 import type { IAuctionBid } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
 import {
   AENS_BID_MIN_RATIO,
+  AETERNITY_COIN_PRECISION,
   aeToAettos,
+  STUB_ADDRESS,
+  STUB_NONCE,
 } from '../../utils';
 
 import AuctionCard from '../../components/AuctionCard.vue';
@@ -83,7 +91,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const { openDefaultModal } = useModals();
 
     const loading = ref(false);
@@ -92,7 +100,19 @@ export default defineComponent({
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
     const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
-    const txFee = computed<BigNumber>(() => getMinimumNameFee(props.name));
+    const txFee = computed<BigNumber>(
+      () => BigNumber(unpackTx(
+        buildTx({
+          tag: Tag.NameClaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          name: props.name,
+          nameSalt: 0,
+          nameFee: aeToAettos(highestBid.value.multipliedBy(AENS_BID_MIN_RATIO).toString()),
+        }) as any,
+        Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
+      ).fee).shiftedBy(-AETERNITY_COIN_PRECISION),
+    );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
       const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);

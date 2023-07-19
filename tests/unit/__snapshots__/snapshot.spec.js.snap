@@ -63,7 +63,7 @@ exports[`Pages About 1`] = `
       <div
         class="value"
       >
-        11.0.1
+        13.0.0
       </div>
     </div>
     <!--v-if-->

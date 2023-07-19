@@ -29,7 +29,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts, usePopupProps } from '../../composables';
+import { useAccounts, usePopupProps, useSdk } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
@@ -69,7 +69,11 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (!store.getters['sdkPlugin/sdk'] && !RUNNING_IN_POPUP) initSdk();
+  const { isSdkReady } = useSdk({ store });
+
+  if (!isSdkReady.value && !RUNNING_IN_POPUP) {
+    initSdk();
+  }
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {

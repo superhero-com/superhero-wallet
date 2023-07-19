@@ -92,7 +92,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   IAccountFetched,
@@ -108,7 +108,7 @@ import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 
 import AccountSelector from './AccountSelector.vue';
@@ -149,7 +149,7 @@ export default defineComponent({
     } = useMultisigAccountCreate({ store });
     const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
 
     const { openModal } = useModals();
 

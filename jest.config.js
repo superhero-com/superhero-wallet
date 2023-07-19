@@ -1,7 +1,5 @@
 const packagesToTranspile = [
   'lodash-es',
-  '@aeternity/aepp-sdk',
-  '@aeternity/aepp-sdk-13',
   '@aeternity/hd-wallet',
   'vee-validate',
 ];
@@ -26,8 +24,5 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'ts-jest',
     '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.mjs$': 'babel-jest',
-  },
-  globals: {
-    Uint8Array,
   },
 };

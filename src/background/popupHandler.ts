@@ -27,7 +27,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
   });
 
   const extUrl = browser.runtime.getURL('./index.html');
-  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params?.tx, true);
+  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params.tx);
   const popupType = isRawSign ? POPUP_TYPE_RAW_SIGN : type;
   const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
 

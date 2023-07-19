@@ -1,5 +1,5 @@
 import { times } from 'lodash-es';
-import { AeSdkWallet, BrowserWindowMessageConnection } from '@aeternity/aepp-sdk-13';
+import { AeSdkWallet, BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
 import { ISdk } from '../types';
 import { executeAndSetInterval, handleUnknownError } from '../popup/utils';
 

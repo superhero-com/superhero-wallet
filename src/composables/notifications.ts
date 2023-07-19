@@ -17,7 +17,7 @@ import {
 } from '../popup/utils';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 export interface UseNotificationsOptions extends IDefaultComposableOptions {
   requirePolling?: boolean
@@ -35,7 +35,7 @@ export function useNotifications({
   requirePolling = false,
   store,
 }: UseNotificationsOptions) {
-  const { fetchRespondChallenge } = useSdk13({ store });
+  const { fetchRespondChallenge } = useSdk({ store });
   const { activeAccount } = useAccounts({ store });
 
   const canLoadMore = ref(true);

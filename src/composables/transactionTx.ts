@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import type {
   IAccountOverview,
@@ -15,7 +15,7 @@ import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
   TX_DIRECTION,
-  getTxType,
+  getTxTag,
   isContainingNestedTx,
   getInnerTransaction,
   isTxDex,
@@ -23,7 +23,7 @@ import {
   getTxOwnerAddress,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
@@ -35,7 +35,7 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
-  const { dexContracts } = useSdk13({ store });
+  const { dexContracts } = useSdk({ store });
   const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
@@ -50,8 +50,8 @@ export function useTransactionTx({
   const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
-  const innerTxType = computed<Tag | null>(() => innerTx.value ? getTxType(innerTx.value) : null);
-  const outerTxType = computed<Tag | null>(() => tx ? getTxType(tx) : null);
+  const innerTxTag = computed<Tag | null>(() => innerTx.value ? getTxTag(innerTx.value) : null);
+  const outerTxTag = computed<Tag | null>(() => tx ? getTxTag(tx) : null);
 
   const isAllowance = computed((): boolean => (
     !!innerTx.value?.function
@@ -128,9 +128,9 @@ export function useTransactionTx({
   }
 
   return {
-    outerTxType,
     hasNestedTx,
-    innerTxType,
+    outerTxTag,
+    innerTxTag,
     innerTx: innerTx as any,
     isAllowance,
     isErrorTransaction,

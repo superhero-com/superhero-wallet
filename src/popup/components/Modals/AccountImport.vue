@@ -51,7 +51,6 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '../../../types';
 import { validateSeedLength } from '../../utils';
-import { useSdk13 } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -71,7 +70,6 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
-    const { getSdk } = useSdk13({ store });
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -99,7 +97,6 @@ export default defineComponent({
       store.commit('setBackedUpSeed');
       props.resolve();
       setTimeout(async () => {
-        await getSdk();
         store.dispatch('accounts/hdWallet/discover');
       }, 100);
       router.push(store.state.loginTargetLocation);

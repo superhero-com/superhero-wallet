@@ -42,7 +42,7 @@ import {
   useAccounts,
   useDeepLinkApi,
   useModals,
-  useSdk13,
+  useSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
@@ -66,7 +66,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
 
-    const { getSdk, fetchRespondChallenge, isTippingSupported } = useSdk13({ store });
+    const { getSdk, fetchRespondChallenge, isTippingSupported } = useSdk({ store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {

@@ -14,7 +14,7 @@ import {
   Encoded,
   Node,
   Tag,
-} from '@aeternity/aepp-sdk-13';
+} from '@aeternity/aepp-sdk';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
   POPUP_TYPES,
@@ -359,7 +359,7 @@ export interface ITx {
   nameSalt?: string
   nonce?: number
   payerId?: string
-  payload?: string
+  payload?: Encoded.Bytearray;
   pointers?: any
   result?: string;
   return?: ITxArguments
@@ -368,7 +368,12 @@ export interface ITx {
   senderId?: string
   selectedTokenContractId?: string
   tag?: Tag;
-  type: keyof typeof Tag,
+  /**
+   * Middleware represents the `type` with different case than the SDK.
+   * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
+   * When comparing the `type` it is suggested to do case insensitive comparison.
+   */
+  type: keyof typeof Tag | string ;
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;

@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { DryRunError, Encoded } from '@aeternity/aepp-sdk-13';
+import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import {
@@ -21,7 +21,7 @@ import type {
   IMultisigConsensus,
   IMultisigAccountResponse,
 } from '../types';
-import { useSdk13 } from './sdk13';
+import { useSdk } from './sdk';
 import { AeScan } from '../lib/AeScan';
 import { useAccounts } from './accounts';
 
@@ -60,7 +60,7 @@ const isAdditionalInfoNeeded = ref(false);
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
-  const { nodeNetworkId, getSdk } = useSdk13({ store });
+  const { nodeNetworkId, getSdk } = useSdk({ store });
   const { accounts } = useAccounts({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);

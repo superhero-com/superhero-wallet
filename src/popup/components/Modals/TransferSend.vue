@@ -53,7 +53,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import { Encoded } from '@aeternity/aepp-sdk';
 import type { ITokenList, ObjectValues, ResolveCallback } from '../../../types';
 import { IFormModel } from '../../../composables';
 import { AENS_DOMAIN, validateTipUrl } from '../../utils';

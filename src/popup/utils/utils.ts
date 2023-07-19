@@ -6,15 +6,19 @@ import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
 import { defer } from 'lodash-es';
 import {
-  SCHEMA,
-  AmountFormatter,
-  Crypto,
-  TxBuilder,
-  TxBuilderHelper,
+  AE_AMOUNT_FORMATS,
+  decode,
+  derivePathFromKey,
+  encode,
+  Encoded,
+  Encoding,
+  formatAmount,
+  getKeyPair,
   InvalidTxError,
+  isAddressValid,
+  Tag,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
-import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
-import { Tag } from '@aeternity/aepp-sdk-13';
 import { useI18n } from 'vue-i18n';
 
 import {
@@ -217,14 +221,14 @@ export function isAensName(fullHash: string) {
 
 export function checkAddress(value: string) {
   return (
-    Crypto.isAddressValid(value, HASH_PREFIX_ACCOUNT)
-    || Crypto.isAddressValid(value, HASH_PREFIX_CONTRACT)
-    || Crypto.isAddressValid(value, HASH_PREFIX_ORACLE)
+    isAddressValid(value, HASH_PREFIX_ACCOUNT)
+    || isAddressValid(value, HASH_PREFIX_CONTRACT)
+    || isAddressValid(value, HASH_PREFIX_ORACLE)
   );
 }
 
 export function checkAddressOrChannel(value: string) {
-  return checkAddress(value) || Crypto.isAddressValid(value, HASH_PREFIX_CHANNEL);
+  return checkAddress(value) || isAddressValid(value, HASH_PREFIX_CHANNEL);
 }
 
 export function checkAensName(value: string) {
@@ -352,7 +356,7 @@ export async function fetchRespondChallenge(
 
 export function getPayload(transaction: ITransaction) {
   return (transaction.tx?.payload)
-    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+    ? decode(transaction.tx?.payload).toString()
     : null;
 }
 
@@ -374,7 +378,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   url?: string
   note?: string
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
+  if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
@@ -474,7 +478,7 @@ export function amountRounded(rawAmount: number | BigNumberPublic): string {
   return amount.toFixed(new BigNumber(amount).lt(0.01) ? 9 : 2);
 }
 
-export function getTxType(tx: ITx): Tag | null {
+export function getTxTag(tx: ITx): Tag | null {
   if (tx.tag) {
     return tx.tag;
   }
@@ -524,23 +528,23 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
         [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
         transaction.tx.function,
       )
-      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString())
+      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString())
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
 }
 
 export function aeToAettos(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AE,
+    targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
 }
 
 export function aettosToAe(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AETTOS,
+    targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 }
 
@@ -587,11 +591,11 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
 }
 
 export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
-  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, { ...wallet, secretKey: wallet.privateKey }).secretKey);
   return {
     ...keyPair,
     idx: accountIdx,
-    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+    address: encode(keyPair.publicKey, Encoding.AccountAddress),
   };
 }
 
@@ -618,14 +622,10 @@ export function calculateFontSize(amountValue: BigNumber | number) {
   return '12px';
 }
 
-export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
-  let txToUnpack: string | Uint8Array = encodedTx;
+export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   try {
-    if (isTxBase64) {
-      txToUnpack = new Uint8Array(TxBuilderHelper.decode(encodedTx, 'tx'));
-    }
-    const txObject = TxBuilder.unpackTx(txToUnpack, true).tx;
-    return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
+    const txObject = unpackTx(encodedTx);
+    return SUPPORTED_TX_TYPES.includes(txObject.tag);
   } catch (e) {
     return false;
   }

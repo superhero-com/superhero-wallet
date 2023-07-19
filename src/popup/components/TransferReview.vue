@@ -126,8 +126,7 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { encode, Encoding } from '@aeternity/aepp-sdk-13';
+import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -137,7 +136,7 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useSdk13,
+  useSdk,
   useUi,
   useTippingContracts,
 } from '../../composables';
@@ -199,7 +198,7 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getSdk } = useSdk13({ store });
+    const { getSdk } = useSdk({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -258,7 +257,7 @@ export default defineComponent({
               amount,
               callerId: activeAccount.value.address,
               contractId: selectedAsset.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
+              type: Tag[Tag.ContractCallTx],
               function: TX_FUNCTIONS.transfer,
               recipientId: recipient,
               arguments: [],
@@ -278,7 +277,7 @@ export default defineComponent({
               contractId: selectedAsset.contractId,
               senderId: activeAccount.value.address,
               recipientId: recipient,
-              type: SCHEMA.TX_TYPE.spend,
+              type: Tag[Tag.SpendTx],
               function: TX_FUNCTIONS.transfer,
               arguments: [],
               fee: 0,
@@ -338,8 +337,8 @@ export default defineComponent({
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.$options.address!, // TODO typing in sdk task
-            type: SCHEMA.TX_TYPE.contractCall,
+            contractId: tippingContract.$options.address!,
+            type: Tag[Tag.ContractCallTx],
             function: 'tip',
             selectedTokenContractId: selectedAsset.contractId,
             arguments: [],

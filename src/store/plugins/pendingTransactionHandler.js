@@ -1,21 +1,22 @@
-import { useSdk13 } from '../../composables';
+import { useSdk } from '../../composables';
 import { watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
-  const { nodeNetworkId } = useSdk13({ store });
+  const { isSdkReady, nodeNetworkId, getSdk } = useSdk({ store });
 
   const waitTransactionMined = async ({
     hash,
   }) => {
     try {
-      await store.getters['sdkPlugin/sdk'].poll(hash);
+      const sdk = await getSdk();
+      await sdk.poll(hash);
       store.commit('setPendingTransactionSentByHash', { hash, network: nodeNetworkId.value });
     } catch (e) {
       store.commit('removePendingTransactionByHash', { hash, network: nodeNetworkId.value });
     }
   };
 
-  await watchUntilTruthy(() => store.state.sdkPlugin.ready);
+  await watchUntilTruthy(() => isSdkReady);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[nodeNetworkId.value]

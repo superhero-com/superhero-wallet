@@ -1,5 +1,5 @@
 import { uniqBy, orderBy } from 'lodash-es';
-import { Tag } from '@aeternity/aepp-sdk-13';
+import { Tag } from '@aeternity/aepp-sdk';
 import {
   AEX9_TRANSFER_EVENT,
   fetchJson,
@@ -7,10 +7,10 @@ import {
   handleUnknownError,
   isAccountNotFoundError,
 } from '../popup/utils';
+import JsonBig from '../lib/json-big';
 import {
   useMiddleware,
   useSdk,
-  useSdk13,
 } from '../composables';
 
 export default {
@@ -19,7 +19,7 @@ export default {
     commit('initTransactions');
   },
   addPendingTransaction(context, transaction) {
-    const { nodeNetworkId } = useSdk13({ store: context });
+    const { nodeNetworkId } = useSdk({ store: context });
     context.commit('addPendingTransaction', {
       network: nodeNetworkId.value,
       transaction: { ...transaction, microTime: Date.now(), pending: true },
@@ -27,12 +27,11 @@ export default {
   },
   async fetchPendingTransactions(context, address) {
     const { state: { transactions } } = context;
-    const { nodeNetworkId } = useSdk13({ store: context });
-    const { getSdk } = useSdk({ store: context });
+    const { nodeNetworkId, getSdk } = useSdk({ store: context });
     const sdk = await getSdk();
     return (
       await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
-        (r) => r.transactions,
+        (r) => JsonBig.parse(JsonBig.stringify(r.transactions)),
         (error) => {
           if (!isAccountNotFoundError(error)) {
             handleUnknownError(error);
@@ -88,7 +87,7 @@ export default {
       return null;
     }
 
-    const { nodeNetworkId } = useSdk13({ store: context });
+    const { nodeNetworkId } = useSdk({ store: context });
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
 
     let txs = await Promise.all([

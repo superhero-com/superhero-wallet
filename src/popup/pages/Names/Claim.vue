@@ -64,7 +64,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
-import { getMinimumNameFee, AensName } from '@aeternity/aepp-sdk-13';
+import { getMinimumNameFee, AensName } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
@@ -78,7 +78,7 @@ import {
   checkAensName,
 } from '../../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useSdk13 } from '../../../composables';
+import { useAccounts, useModals, useSdk } from '../../../composables';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -113,7 +113,7 @@ export default defineComponent({
       .shiftedBy(-AETERNITY_COIN_PRECISION)
       .toFixed(4));
 
-    const { getSdk, isSdkReady } = useSdk13({ store });
+    const { getSdk, isSdkReady } = useSdk({ store });
 
     async function claim() {
       if (!await validate()) return;

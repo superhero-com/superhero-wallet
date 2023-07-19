@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { Encoded, Tag } from '@aeternity/aepp-sdk-13';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
@@ -65,8 +65,8 @@ export default defineComponent({
 
     const {
       isDex,
-      outerTxType,
-      innerTxType,
+      outerTxTag,
+      innerTxTag,
       direction,
       getOwnershipAccount,
       innerTx,
@@ -96,7 +96,7 @@ export default defineComponent({
         callerId,
       } = innerTx.value;
 
-      switch (outerTxType.value) {
+      switch (outerTxTag.value) {
         case Tag.SpendTx:
           return {
             sender: {
@@ -166,7 +166,7 @@ export default defineComponent({
             recipient: {
               label: t('transaction.overview.aens'),
             },
-            title: outerTxType.value ? transactionTypes[outerTxType.value] : undefined,
+            title: outerTxTag.value ? transactionTypes[outerTxTag.value] : undefined,
           };
         case Tag.PayingForTx: {
           return {
@@ -183,7 +183,7 @@ export default defineComponent({
           };
         }
         case Tag.GaMetaTx: {
-          if (innerTxType.value === Tag.SpendTx) {
+          if (innerTxTag.value === Tag.SpendTx) {
             return {
               sender: {
                 address: senderId,
@@ -203,7 +203,7 @@ export default defineComponent({
         }
         // eslint-disable-next-line no-fallthrough
         default:
-          throw new Error(`Unsupported transaction type ${outerTxType.value}`);
+          throw new Error(`Unsupported transaction type ${outerTxTag.value}`);
       }
     });
 

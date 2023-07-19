@@ -12,7 +12,7 @@ import { IAppData } from '../../types';
 import {
   useAccounts,
   useDeepLinkApi,
-  useSdk13,
+  useSdk,
   usePopupProps,
 } from '../../composables';
 import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
@@ -25,7 +25,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { nodeNetworkId } = useSdk13({ store });
+    const { nodeNetworkId } = useSdk({ store });
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
     const { activeAccount } = useAccounts({ store });
     const { setPopupProps } = usePopupProps();

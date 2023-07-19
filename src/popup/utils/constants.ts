@@ -1,5 +1,9 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Encoded, METHODS, Tag } from '@aeternity/aepp-sdk-13';
+import {
+  Encoded,
+  Encoding,
+  METHODS,
+  Tag,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,
@@ -71,12 +75,12 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const HASH_PREFIX_ACCOUNT = 'ak';
-export const HASH_PREFIX_CHANNEL = 'ch';
-export const HASH_PREFIX_CONTRACT = 'ct';
-export const HASH_PREFIX_NAME = 'nm';
-export const HASH_PREFIX_ORACLE = 'ok';
-export const HASH_PREFIX_TRANSACTION = 'th';
+export const HASH_PREFIX_ACCOUNT = Encoding.AccountAddress;
+export const HASH_PREFIX_CHANNEL = Encoding.Channel;
+export const HASH_PREFIX_CONTRACT = Encoding.ContractAddress;
+export const HASH_PREFIX_NAME = Encoding.Name;
+export const HASH_PREFIX_ORACLE = Encoding.OracleAddress;
+export const HASH_PREFIX_TRANSACTION = Encoding.TxHash;
 
 export const HASH_PREFIXES_ALLOWED = [
   HASH_PREFIX_ACCOUNT,
@@ -496,13 +500,13 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 export const RETURN_TYPE_OK = 'ok';
 
 export const SUPPORTED_TX_TYPES = [
-  SCHEMA.TX_TYPE.spend,
-  SCHEMA.TX_TYPE.contractCreate,
-  SCHEMA.TX_TYPE.contractCall,
-  SCHEMA.TX_TYPE.namePreClaim,
-  SCHEMA.TX_TYPE.nameClaim,
-  SCHEMA.TX_TYPE.nameUpdate,
-  SCHEMA.TX_TYPE.nameTransfer,
+  Tag.SpendTx,
+  Tag.ContractCreateTx,
+  Tag.ContractCallTx,
+  Tag.NamePreclaimTx,
+  Tag.NameClaimTx,
+  Tag.NameUpdateTx,
+  Tag.NameTransferTx,
 ];
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
