@@ -157,9 +157,10 @@ export default defineComponent({
 @use '../../../styles/mixins';
 
 ion-toolbar {
-  padding: 0 var(--screen-padding-x);
   --background: var(--screen-bg-color);
   --min-height: 0;
+
+  padding: 0 var(--screen-padding-x);
 }
 
 .auction-list {
