@@ -1,6 +1,4 @@
-import { merge } from 'lodash-es';
-import { h } from 'vue';
-import type { WalletAppRouteConfig } from '../../types';
+import type { WalletAppRouteConfig } from '@/types';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -30,20 +28,23 @@ import {
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
 } from './routeNames';
+import {
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+} from '../utils';
 
-import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
-import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import About from '../pages/About.vue';
-import AccountDetails from '../pages/AccountDetails.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
 import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
+import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
 import AccountDetailsTokens from '../pages/AccountDetailsTokens.vue';
 import AccountDetailsTransactions from '../pages/AccountDetailsTransactions.vue';
 import AccountDetailsNames from '../pages/AccountDetailsNames.vue';
+import Address from '../pages/Address.vue';
 import Dashboard from '../pages/Dashboard.vue';
 import DashboardMultisig from '../pages/DashboardMultisig.vue';
-import Address from '../pages/Address.vue';
 import CommentNew from '../pages/CommentNew.vue';
+import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
+import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import DonateError from '../pages/DonateError.vue';
 import TokenContainer from '../pages/FungibleTokens/TokenContainer.vue';
 import TokenTransactions from '../pages/FungibleTokens/TokenTransactions.vue';
@@ -70,6 +71,7 @@ import PopupConnect from '../pages/Popups/Connect.vue';
 import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
+import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
 import Retip from '../pages/Retip.vue';
 import SeedPhraseSettings from '../pages/SeedPhraseSettings.vue';
 import SeedPhraseDetailsSettings from '../pages/SeedPhraseDetailsSettings.vue';
@@ -87,7 +89,6 @@ import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
-import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -105,7 +106,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/',
     component: DefaultPagesRouter,
-    redirect: '/account',
+    redirect: { name: ROUTE_ACCOUNT },
     children: [
       {
         path: 'account',
@@ -114,7 +115,8 @@ export const routes: WalletAppRouteConfig[] = [
       },
       {
         path: 'account-details/',
-        component: AccountDetails,
+        component: ProtocolSpecificView,
+        props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
         children: [
           {
             path: '',
@@ -221,14 +223,8 @@ export const routes: WalletAppRouteConfig[] = [
       {
         path: 'details/transactions/:hash/:transactionOwner',
         name: ROUTE_MULTISIG_TX_DETAILS,
-        component: {
-          functional: true,
-          render: (context: any) => h(
-            TransactionDetails,
-            merge({}, context, { props: { multisigDashboard: true } }),
-          ),
-        },
-        props: true,
+        component: TransactionDetails,
+        props: { multisigDashboard: true },
         meta: {
           title: 'txDetails',
           showHeaderNavigation: true,

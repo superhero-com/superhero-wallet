@@ -7,7 +7,7 @@ import type {
   IDefaultComposableOptions,
   IFormSelectOption,
   INetwork,
-} from '../types';
+} from '@/types';
 import { tg } from '../store/plugins/languages';
 import {
   FAUCET_URL,
