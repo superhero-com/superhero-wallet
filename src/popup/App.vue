@@ -39,8 +39,9 @@
       <Component
         v-bind="props"
         :is="component"
-        v-for="({ component, key, props }) in modalsOpen"
+        v-for="({ component, key, props, viewComponentName }) in modalsOpen"
         :key="key"
+        :view-component-name="viewComponentName"
       />
     </div>
   </div>

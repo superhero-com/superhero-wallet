@@ -5,15 +5,27 @@ import {
   ref,
 } from 'vue';
 import { TranslateResult } from 'vue-i18n';
-import { RejectCallback, ResolveCallback, StatusIconType } from '../types';
+import type {
+  ProtocolView,
+  RejectCallback,
+  ResolveCallback,
+  StatusIconType,
+} from '@/types';
 import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
 import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
 import { usePopupProps } from './popupProps';
 
+/**
+ * Settings used when registering the modal.
+ */
 interface IModalSettings {
   component?: Component;
   showInPopupIfWebFrame?: boolean;
+  /**
+   * Usable only with `ProtocolSpecificView` passed to the `component` property.
+   */
+  viewComponentName?: ProtocolView;
 }
 
 interface IModalProps {
@@ -23,6 +35,9 @@ interface IModalProps {
   show?: boolean;
 }
 
+/**
+ * Params passed to the modal when trying to open it.
+ */
 interface IOpenModalParams {
   name: string;
   key: number;
