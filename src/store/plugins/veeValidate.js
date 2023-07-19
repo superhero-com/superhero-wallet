@@ -17,8 +17,8 @@ import { useBalances, useCurrencies, useSdk } from '../../composables';
 
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
-defineRule('account', (value) => Crypto.isAddressValid(value) || checkAensName(value));
-defineRule('account_address', (value) => Crypto.isAddressValid(value, Encoding.AccountAddress));
+defineRule('account', (value) => isAddressValid(value) || checkAensName(value));
+defineRule('account_address', (value) => isAddressValid(value, Encoding.AccountAddress));
 defineRule('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
