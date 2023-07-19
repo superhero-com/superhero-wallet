@@ -1,15 +1,17 @@
 <template>
   <ion-page>
+    <ion-toolbar>
+      <Filters
+        v-if="activeAuctions.length || auctions.length || loading"
+        v-model="displayMode"
+        :filters="filters"
+        sticky
+      />
+    </ion-toolbar>
     <ion-content
       class="ion-padding"
     >
       <div class="auction-list">
-        <Filters
-          v-if="activeAuctions.length || auctions.length || loading"
-          v-model="displayMode"
-          :filters="filters"
-          sticky
-        />
         <ul
           v-if="activeAuctions.length || auctions.length"
           class="list"
@@ -50,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
+import { IonPage, IonContent, IonToolbar } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -97,6 +99,7 @@ export default defineComponent({
     RegisterName,
     IonPage,
     IonContent,
+    IonToolbar,
   },
   setup() {
     const store = useStore();
@@ -152,6 +155,12 @@ export default defineComponent({
 @use '../../../styles/variables';
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
+
+ion-toolbar {
+  padding: 0 var(--screen-padding-x);
+  --background: var(--screen-bg-color);
+  --min-height: 0;
+}
 
 .auction-list {
   --filter-top-offset: 166px;
