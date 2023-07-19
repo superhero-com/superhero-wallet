@@ -110,6 +110,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
         setTimeout(() => updateTransactionListData(), MDW_TO_NODE_APPROX_DELAY_TIME);
       }
     },
+    { immediate: true },
   );
 
   watch(
