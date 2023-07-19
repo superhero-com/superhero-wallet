@@ -4,7 +4,6 @@
     no-unused-vars,
 */
 
-import { Component, ComponentOptions } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -57,11 +56,6 @@ type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
 export type ResolveCallback = (...args: any) => void;
 export type RejectCallback = (error?: RejectedByUserError) => void;
-
-export type VueAnyComponent = Component | ComponentOptions | {
-  functional: boolean;
-  render: any;
-}
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues

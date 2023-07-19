@@ -1,9 +1,3 @@
-declare module '*.vue' {
-  import Vue from 'vue';
-
-  export default Vue;
-}
-
 /**
  * Declaration for SVG files imported as Vue components.
  */
