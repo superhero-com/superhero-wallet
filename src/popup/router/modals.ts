@@ -24,10 +24,12 @@ import {
   MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_ACCOUNT_SELECT_OPTIONS,
-} from '../utils/constants';
-import { useModals } from '../../composables';
+  PROTOCOL_VIEW_TRANSFER_RECEIVE,
+} from '@/popup/utils';
+import { useModals } from '@/composables';
 
 import Default from '../components/Modals/Default.vue';
+import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
@@ -39,7 +41,6 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
-import TransferReceive from '../components/Modals/TransferReceive.vue';
 import ResetWallet from '../components/Modals/ResetWallet.vue';
 import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
@@ -103,7 +104,8 @@ export default () => {
     component: QrCodeReader,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
-    component: TransferReceive,
+    component: ProtocolSpecificView,
+    viewComponentName: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   });
   registerModal(MODAL_TRANSFER_SEND, {
     component: TransferSend,

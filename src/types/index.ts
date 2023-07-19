@@ -14,23 +14,25 @@ import {
   Node,
   Tag,
 } from '@aeternity/aepp-sdk';
-import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
+import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
+import type { RejectedByUserError } from '@/lib/errors';
 import {
-  AETERNITY_COIN_ID,
+  AETERNITY_CONTRACT_ID,
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
   POPUP_TYPES,
-  TX_FUNCTIONS_MULTISIG,
   TX_FUNCTIONS,
+  TX_FUNCTIONS_MULTISIG,
   TX_RETURN_TYPES,
-} from '../popup/utils';
-import { RejectedByUserError } from '../lib/errors';
+} from '@/popup/utils';
+import { Protocol } from './protocols';
 
 export * from './cordova';
 export * from './router';
 export * from './filter';
 export * from './forms';
+export * from './protocols';
 
 export type Dictionary<T = any> = Record<string, T>;
 
@@ -113,7 +115,7 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: Encoded.ContractAddress | typeof AETERNITY_COIN_ID;
+  contractId: Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -169,7 +171,8 @@ export interface IAeternityAccountRaw {
  */
 export interface IAccount extends IKeyPair, IAeternityAccountRaw {
   address: Encoded.AccountAddress;
-  name: string; // .chain
+  name?: string; // .chain
+  protocol: Protocol;
 }
 
 /**

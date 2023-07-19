@@ -1,6 +1,6 @@
 <template>
   <Modal
-    class="transfer-receive-modal"
+    class="transfer-receive-base"
     has-close-button
     from-bottom
     @close="resolve()"
@@ -9,14 +9,15 @@
       class="transfer-receive"
       data-cy="top-up-container"
     >
-      <h2 class="text-heading-2 text-center">
-        {{ isMultisig ? $t('modals.receiveMultisig.title') : $t('modals.receive.title') }}
-      </h2>
+      <h2
+        class="text-heading-2 text-center"
+        v-text="heading"
+      />
 
       <div class="account-row">
         <AccountItem
-          :address="activeAccountAddress"
-          :name="isMultisig ? undefined : activeAccount.name"
+          :address="accountAddress"
+          :name="accountName"
         />
       </div>
 
@@ -60,12 +61,13 @@
             :label="$t('modals.receive.requestAmount')"
             :message="errorMessage"
             :selected-asset="selectedAsset"
-            :ae-only="isMultisig"
+            :ae-only="disableAssetSelection"
             @asset-selected="handleAssetChange"
           />
         </Field>
       </div>
     </div>
+
     <template #footer>
       <BtnMain
         data-cy="copy"
@@ -105,7 +107,7 @@ import type {
 } from '../../../types';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
-import { useAccounts, useCopy, useMultisigAccounts } from '../../../composables';
+import { useAccounts, useCopy } from '../../../composables';
 import {
   AETERNITY_SYMBOL,
   AETERNITY_CONTRACT_ID,
@@ -118,11 +120,12 @@ import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import AddressFormatted from '../AddressFormatted.vue';
 import CopyText from '../CopyText.vue';
-import ShareIcon from '../../../icons/share.svg?vue-component';
 import AccountItem from '../AccountItem.vue';
 
+import ShareIcon from '../../../icons/share.svg?vue-component';
+
 export default defineComponent({
-  name: 'TransferReceive',
+  name: 'TransferReceiveBase',
   components: {
     InputAmount,
     Modal,
@@ -136,31 +139,27 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
-    defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
-    isMultisig: Boolean,
+    heading: { type: String, default: '' },
+    accountAddress: { type: String, default: null },
+    accountName: { type: String, default: null },
+    tokens: { type: Object as PropType<ITokenList>, default: () => ({}) },
+    disableAssetSelection: Boolean,
   },
   setup(props) {
     const store = useStore();
     const { t } = useI18n();
 
     const { activeAccount } = useAccounts({ store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { copied, copy } = useCopy();
 
-    const amount = ref<number | string>(props.defaultAmount ? Number(props.defaultAmount) : '');
+    const amount = ref<number | string>('');
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
-    const activeAccountAddress = computed(() => props.isMultisig
-      ? activeMultisigAccountId.value
-      : activeAccount.value.address);
-
-    const availableTokens = computed<ITokenList>(
-      () => store.state.fungibleTokens.availableTokens,
-    );
-
     function getTokenInfoQuery(account?: string): Record<string, string> {
-      if (!amount.value || amount.value <= 0) return {};
+      if (!amount.value || +amount.value <= 0) {
+        return {};
+      }
       const token = (selectedAsset.value?.contractId === AETERNITY_CONTRACT_ID)
         ? AETERNITY_SYMBOL
         : selectedAsset.value?.contractId || AETERNITY_SYMBOL;
@@ -175,21 +174,21 @@ export default defineComponent({
     }
 
     const accountAddressToCopy = computed(
-      () => (amount.value && amount.value > 0)
-        ? getAccountLink(activeAccountAddress.value)
-        : activeAccountAddress.value,
+      () => (amount.value && +amount.value > 0)
+        ? getAccountLink(props.accountAddress)
+        : props.accountAddress,
     );
 
     const accountAddressToDisplay = computed(
-      () => (amount.value && amount.value > 0)
-        ? `${activeAccountAddress.value}?${new URLSearchParams(getTokenInfoQuery()).toString()}`
-        : activeAccountAddress.value,
+      () => (amount.value && +amount.value > 0)
+        ? `${props.accountAddress}?${new URLSearchParams(getTokenInfoQuery()).toString()}`
+        : props.accountAddress,
     );
 
     async function share() {
       const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
-      const text = (amount.value && amount.value > 0)
+      const text = (amount.value && +amount.value > 0)
         ? t('modals.receive.shareTextNoAmount', { address, walletLink })
         : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
       await store.dispatch('share', { text });
@@ -204,8 +203,8 @@ export default defineComponent({
     }
 
     (() => {
-      if (props.tokenContractId && availableTokens.value[props.tokenContractId]) {
-        handleAssetChange(availableTokens.value[props.tokenContractId]);
+      if (props.tokenContractId && props.tokens[props.tokenContractId]) {
+        handleAssetChange(props.tokens[props.tokenContractId]);
       }
     })();
 
@@ -219,7 +218,6 @@ export default defineComponent({
       copyAddress,
       copied,
       activeAccount,
-      activeAccountAddress,
       accountAddressToDisplay,
       accountAddressToCopy,
     };
@@ -233,7 +231,7 @@ export default defineComponent({
 @use '../../../styles/share-info';
 @use '../../../styles/mixins';
 
-.transfer-receive-modal {
+.transfer-receive-base {
   font-weight: 500;
   color: variables.$color-white;
 

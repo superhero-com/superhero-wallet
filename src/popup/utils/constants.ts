@@ -22,6 +22,25 @@ export const MOBILE_WIDTH = 480;
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
+export const PROTOCOL_AETERNITY = 'aeternity';
+export const PROTOCOL_BITCOIN = 'bitcoin';
+
+export const PROTOCOLS = [
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
+] as const;
+
+export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
+export const PROTOCOL_VIEW_TRANSFER_RECEIVE = 'TransferReceiveModal';
+
+/**
+ * Components (names) required to be present in every protocol.
+ */
+export const DISTINCT_PROTOCOL_VIEWS = [
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_VIEW_TRANSFER_RECEIVE,
+] as const;
+
 export const SEED_LENGTH = 12;
 
 export const DECIMAL_PLACES_HIGH_PRECISION = 9;

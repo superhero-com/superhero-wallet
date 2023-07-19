@@ -7,16 +7,19 @@ import type {
   IDefaultComposableOptions,
   IFormSelectOption,
   INetwork,
-} from '../types';
+} from '@/types';
 import { tg } from '../store/plugins/languages';
 import {
   ACCOUNT_HD_WALLET,
   FAUCET_URL,
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
   buildSimplexLink,
   getAccountNameToDisplay,
   getHdWalletAccount,
 } from '../popup/utils';
 import { AeScan } from '../lib/AeScan';
+import { testAccount } from '../popup/utils/testsConfig';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -24,7 +27,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const accountsRaw = computed((): IAeternityAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => {
     if (!store.getters.wallet) return [];
-    return accountsRaw.value
+    const baseAccounts: IAccount[] = accountsRaw.value
       // Currently we support only HD Wallet
       .filter(({ type }) => type === ACCOUNT_HD_WALLET)
       .map(({ idx, ...acc }) => ({
@@ -35,7 +38,27 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       .map(({ ...account }) => ({
         ...account,
         name: store.getters['names/getDefault'](account.address),
+        protocol: PROTOCOL_AETERNITY,
       }));
+
+    /**
+     * For the purpose of multichain Vue components architecture testing
+     * we add this dummy BTC account.
+     * TODO remove when PoC is approved
+     */
+    if (baseAccounts.length) {
+      baseAccounts.push({
+        idx: baseAccounts.length,
+        address: testAccount.address,
+        protocol: PROTOCOL_BITCOIN,
+        publicKey: new Uint8Array(),
+        secretKey: new Uint8Array(),
+        showed: true,
+        type: 'hd-wallet',
+        isRestored: true,
+      });
+    }
+    return baseAccounts;
   });
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
