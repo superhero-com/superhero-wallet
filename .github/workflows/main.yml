@@ -9,6 +9,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 100
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
       - uses: actions/setup-node@v3
         with:
           node-version: 18.x
@@ -16,9 +20,8 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-      - name: Install Ionic
-        run: npm install -g @ionic/cli
-      - run: npm ci
+      - name: Install app dependencies
+        run: npm ci
       - name: Run Commitlint
         if: github.event_name == 'pull_request'
         env:
@@ -27,6 +30,10 @@ jobs:
         run: npx commitlint --from $BASE --to $HEAD --verbose
       - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
       - run: npm test
+      - name: Build Ionic Vue android app
+        run: npm run build:android
+      - name: Build android apk
+        run: cd android && ./gradlew assembleDebug
       - run: |
           npm run build:web
           npm run build:extension
@@ -36,6 +43,7 @@ jobs:
           mkdir -p tests/e2e/screenshots
           mv tests/e2e/screenshots dist-stage/artifacts/screenshots
           mv tests/pages/index.html dist-stage/artifacts/deeplink-test.html
+          cp -r ./android/app/build/outputs/apk/debug ./dist-stage/artifacts/android
       - run: cp ./dist/web/root/index.html ./dist/web/root/404.html
       - name: Deploy to production
         uses: peaceiris/actions-gh-pages@v3
