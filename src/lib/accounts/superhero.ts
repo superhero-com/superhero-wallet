@@ -32,7 +32,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
-    if (IS_CORDOVA) {
+    if (IS_CORDOVA && options.aeppOrigin) {
       return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -46,7 +46,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   async signMessage(message: string, options: any): Promise<Uint8Array> {
-    if (IS_CORDOVA || IN_FRAME) {
+    if ((IS_CORDOVA || IN_FRAME) && options.aeppOrigin) {
       return this.fgPermissionCheckAndSign('message.sign', message, options, options.aeppOrigin);
     }
     if (IS_EXTENSION_BACKGROUND) {
@@ -69,8 +69,8 @@ export class AccountSuperhero extends AccountBase {
   async fgPermissionCheckAndSign(method: any, payload: any, options: any, origin?: string) {
     try {
       const app = origin ? new URL(origin) : null;
-      const permission = (!app?.host && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
-        host: app?.host,
+      const permission = (!origin && IS_CORDOVA) || await this.store.dispatch('permissions/checkPermissions', {
+        host: app ? app.host : null,
         method,
         params: payload,
       });
@@ -96,7 +96,7 @@ export class AccountSuperhero extends AccountBase {
         options: {
           ...options,
           modal: !permission,
-          host: app?.host,
+          app,
         },
       });
     } catch (error: any) {
