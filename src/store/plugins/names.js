@@ -9,7 +9,7 @@ import {
   isInsufficientBalanceError,
   handleUnknownError,
 } from '../../popup/utils';
-import { i18n } from './languages';
+import { tg } from './languages';
 import { useMiddleware, useModals, useAeSdk } from '../../composables';
 
 export default (store) => {
@@ -163,7 +163,7 @@ export default (store) => {
             await aeSdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
           openDefaultModal({
-            msg: i18n.global.t('pages.names.pointer-added', { type }),
+            msg: tg('pages.names.pointer-added', { type }),
           });
         } catch (e) {
           if (e.message.includes('Account not found')) {

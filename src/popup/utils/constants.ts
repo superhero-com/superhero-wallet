@@ -15,7 +15,7 @@ import type {
   IToken,
   DexFunctionType,
 } from '../../types';
-import { i18n } from '../../store/plugins/languages';
+import { tg } from '../../store/plugins/languages';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -243,38 +243,37 @@ export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
-    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
-    text: i18n.global.t('pages.notification-settings.wallet'),
+    text: tg('pages.notification-settings.wallet'),
     checked: true,
     type: NOTIFICATION_TYPE_WALLET,
   },
   {
-    text: i18n.global.t('pages.notification-settings.commentOnTip'),
+    text: tg('pages.notification-settings.commentOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
   },
   {
-    text: i18n.global.t('pages.notification-settings.commentOnComment'),
+    text: tg('pages.notification-settings.commentOnComment'),
     checked: false,
     type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
   },
   {
-    text: i18n.global.t('pages.notification-settings.retipOnTip'),
+    text: tg('pages.notification-settings.retipOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_RETIP_ON_TIP,
   },
   {
-    text: i18n.global.t('pages.notification-settings.tipOnComment'),
+    text: tg('pages.notification-settings.tipOnComment'),
     checked: true,
     type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
   },
   {
-    text: i18n.global.t('pages.notification-settings.claimOfTip'),
+    text: tg('pages.notification-settings.claimOfTip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
   },
   {
-    text: i18n.global.t('pages.notification-settings.claimOfRetip'),
+    text: tg('pages.notification-settings.claimOfRetip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   },

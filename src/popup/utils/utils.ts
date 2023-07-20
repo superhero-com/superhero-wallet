@@ -35,7 +35,7 @@ import {
   TX_FUNCTIONS_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
-import { i18n } from '../../store/plugins/languages';
+import { tg } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
 import type {
   BigNumberPublic,
@@ -401,10 +401,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
  * Eg.: `somehuman.chain`, `Account 2`
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return (
-    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
-    acc?.name || `${i18n.global.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`
-  );
+  return acc?.name || `${tg('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
 }
 
 export function sortTransactionsByDateCallback(

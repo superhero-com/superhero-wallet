@@ -4,7 +4,7 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
-import { i18n } from './languages';
+import { tg } from './languages';
 import {
   isNotFoundError,
   getAddressByNameEntry,
@@ -29,28 +29,28 @@ defineRule('max_len', (value, [maxLength]) => value && value.length <= maxLength
 configure({
   generateMessage: localize('en', {
     messages: {
-      url: () => i18n.global.t('validation.url'),
-      required: () => i18n.global.t('validation.required'),
-      account: () => i18n.global.t('validation.address'),
-      account_address: () => i18n.global.t('validation.invalidAddress'),
-      name: () => i18n.global.t('validation.name'),
-      name_registered_address: () => i18n.global.t('validation.nameRegisteredAddress'),
-      name_unregistered: () => i18n.global.t('validation.nameUnregistered'),
-      not_same_as: () => i18n.global.t('validation.notSameAs'),
-      token_to_an_address: () => i18n.global.t('validation.tokenToAnAddress'),
-      min_value: ({ rule }) => i18n.global.t('validation.minValue', [rule.params[0]]),
-      min_value_exclusive: ({ rule }) => i18n.global.t('validation.minValueExclusive', [rule.params[0]]),
-      max_value: ({ rule }) => i18n.global.t('validation.maxValue', [rule.params[0]]),
-      max_value_vault: ({ rule }) => i18n.global.t('validation.maxValueVault', [rule.params[0]]),
-      max_len: ({ rule }) => i18n.global.t('validation.maxLength', [rule.params[0]]),
-      enough_ae: () => i18n.global.t('validation.enoughAe'),
-      enough_ae_signer: () => i18n.global.t('validation.enoughAeSigner'),
-      not_token: () => i18n.global.t('validation.notToken'),
-      name_registered_address_or_url: () => i18n.global.t('validation.invalidAddressChainUrl'),
-      min_tip_amount: () => i18n.global.t('pages.tipPage.minAmountError'),
-      invalid_hostname: () => i18n.global.t('pages.network.error.invalidHostname'),
-      network_name: () => i18n.global.t('pages.network.error.enterName'),
-      network_exists: () => i18n.global.t('pages.network.error.networkExists'),
+      url: () => tg('validation.url'),
+      required: () => tg('validation.required'),
+      account: () => tg('validation.address'),
+      account_address: () => tg('validation.invalidAddress'),
+      name: () => tg('validation.name'),
+      name_registered_address: () => tg('validation.nameRegisteredAddress'),
+      name_unregistered: () => tg('validation.nameUnregistered'),
+      not_same_as: () => tg('validation.notSameAs'),
+      token_to_an_address: () => tg('validation.tokenToAnAddress'),
+      min_value: ({ rule }) => tg('validation.minValue', [rule.params[0]]),
+      min_value_exclusive: ({ rule }) => tg('validation.minValueExclusive', [rule.params[0]]),
+      max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
+      max_value_vault: ({ rule }) => tg('validation.maxValueVault', [rule.params[0]]),
+      max_len: ({ rule }) => tg('validation.maxLength', [rule.params[0]]),
+      enough_ae: () => tg('validation.enoughAe'),
+      enough_ae_signer: () => tg('validation.enoughAeSigner'),
+      not_token: () => tg('validation.notToken'),
+      name_registered_address_or_url: () => tg('validation.invalidAddressChainUrl'),
+      min_tip_amount: () => tg('pages.tipPage.minAmountError'),
+      invalid_hostname: () => tg('pages.network.error.invalidHostname'),
+      network_name: () => tg('pages.network.error.enterName'),
+      network_exists: () => tg('pages.network.error.networkExists'),
     },
   }),
 });
