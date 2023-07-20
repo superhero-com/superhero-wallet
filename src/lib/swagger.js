@@ -33,7 +33,7 @@ const pascalizeKeys = traverseKeys.bind(null, snakeToPascal);
  * Generator of Swagger client
  * @function
  * @alias module:@aeternity/aepp-sdk/es/utils/swagger
- * @rtype Object
+ * @type Object
  * @param {String} specUrl - Swagger specification URL on external node host
  * @param {Object} options
  * @param {String} [options.spec] - Override OpenAPI definition
@@ -90,6 +90,7 @@ export async function genSwaggerClient(
     ...external.apis.external ? [external.apis.external] : Object.values(external.apis),
     mapObject(internal?.apis.internal || {}, ([key, handler]) => [key, (...args) => {
       if (!warnedAboutInternalApiUsage) {
+        // eslint-disable-next-line no-console
         console.warn(
           'SDK\'s wrapper of aeternity node internal API is deprecated, please use external '
           + 'equivalent (for example, "sdk.api.protectedDryRunTxs" instead of "sdk.api.dryRunTxs") '
