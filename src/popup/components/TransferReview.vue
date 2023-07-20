@@ -136,7 +136,7 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useSdk,
+  useAeSdk,
   useUi,
   useTippingContracts,
 } from '../../composables';
@@ -198,7 +198,7 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -219,7 +219,7 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
 
       loading.value = true;
       try {
@@ -241,7 +241,7 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk.spendWithCustomOptions(amount, recipient, {
+          actionResult = await aeSdk.spendWithCustomOptions(amount, recipient, {
             payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
           });
@@ -325,7 +325,7 @@ export default defineComponent({
             {
               amount,
               waitMined: false,
-              ...{ modal: false } as any, // TODO: `modal` is not a part of sdk types
+              ...{ modal: false } as any, // TODO: `modal` is not a part of aeSdk types
             },
           );
         }

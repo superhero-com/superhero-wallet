@@ -16,7 +16,7 @@ import type {
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '../types';
-import { useSdk } from './sdk';
+import { useAeSdk } from './aeSdk';
 import {
   DEFAULT_WAITING_HEIGHT,
   MULTISIG_CREATION_PHASES,
@@ -33,7 +33,7 @@ const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
-  const { getDrySdk, getSdk } = useSdk({ store });
+  const { getDryAeSdk, getAeSdk } = useAeSdk({ store });
   const {
     getMultisigAccountByContractId,
     addPendingMultisigAccount,
@@ -54,8 +54,8 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   ));
 
   async function createMultisigContractInstance() {
-    const drySdk = await getDrySdk();
-    return drySdk.initializeContract({
+    const dryAeSdk = await getDryAeSdk();
+    return dryAeSdk.initializeContract({
       aci: SimpleGAMultiSigAci,
       bytecode: MULTISIG_SIMPLE_GA_BYTECODE,
     });
@@ -85,7 +85,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     if (noOfConfirmations > signersAddresses.length) throw Error('Number of confirmations exceed amount of signers');
 
     const contractArgs = [noOfConfirmations, signersAddresses];
-    const drySdk = await getDrySdk();
+    const dryAeSdk = await getDryAeSdk();
 
     // Create a temporary account
     const gaAccount = generateKeyPair();
@@ -99,7 +99,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       );
 
     // Build Attach transaction
-    const attachTX = await drySdk.buildTx({
+    const attachTX = await dryAeSdk.buildTx({
       ownerId: gaAccount.publicKey,
       code: multisigContractInstance.$options.bytecode!,
       callData: pendingMultisigCreationTxs.value[gaAccount.publicKey]
@@ -115,7 +115,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       nonce: 1,
     });
     pendingMultisigCreationTxs.value[gaAccount.publicKey]
-      .signedAttachTx = await drySdk.signTransaction(attachTX, {
+      .signedAttachTx = await dryAeSdk.signTransaction(attachTX, {
         innerTx: true,
         onAccount: new MemoryAccount(gaAccount.secretKey),
       });
@@ -136,9 +136,9 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       throw Error(`GA Attach Tx not found for account ${accountId}, Prepare attach transaction first`);
     }
 
-    const sdk = await getSdk();
-    const payedTx = await sdk.signTransaction(
-      await sdk.buildTx({
+    const aeSdk = await getAeSdk();
+    const payedTx = await aeSdk.signTransaction(
+      await aeSdk.buildTx({
         tag: Tag.PayingForTx,
         payerId,
         tx: signedAttachTx,
@@ -180,14 +180,14 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
       throw Error(`Raw PayForTransaction not found for account ${accountId}, Prepare PayForTransaction first`);
     }
 
-    const sdk = await getSdk();
+    const aeSdk = await getAeSdk();
 
     // Send transaction to the chain
-    const { txHash } = await sdk.api.postTransaction({ tx: rawTx });
-    const pollingResponse = await sdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
+    const { txHash } = await aeSdk.api.postTransaction({ tx: rawTx });
+    const pollingResponse = await aeSdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
     if (pollingResponse && pollingResponse.blockHeight !== -1) {
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.deployed;
-      const gaContract = await sdk.getAccount(accountId);
+      const gaContract = await aeSdk.getAccount(accountId);
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.created;
 
       const currentDate = dayjs().toISOString();

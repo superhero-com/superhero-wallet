@@ -35,7 +35,7 @@ import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
 import { DEX_CONTRACTS, isTxFunctionDexSwap } from '../utils';
-import { useSdk } from '../../composables';
+import { useAeSdk } from '../../composables';
 
 import Tokens from './Tokens.vue';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
@@ -68,7 +68,7 @@ export default {
           tokens[1],
         ];
       }
-      const { nodeNetworkId } = useSdk({ store: this.$store });
+      const { nodeNetworkId } = useAeSdk({ store: this.$store });
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value]?.wae;
       if (tokens[0].isAe && waeContract && !waeContract?.includes(tokens[1].contractId)) {
         tokens.unshift({
@@ -90,7 +90,7 @@ export default {
       if (idx === this.tokens.length - 1) {
         return false;
       }
-      const { nodeNetworkId } = useSdk({ store: this.$store });
+      const { nodeNetworkId } = useAeSdk({ store: this.$store });
       const contracts = DEX_CONTRACTS[nodeNetworkId.value];
       return (
         contracts?.wae?.includes(this.tokens[idx].contractId)

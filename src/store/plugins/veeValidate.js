@@ -13,7 +13,7 @@ import {
   isValidURL,
 } from '../../popup/utils';
 import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies, useSdk } from '../../composables';
+import { useBalances, useCurrencies, useAeSdk } from '../../composables';
 
 defineRule('url', (url) => isValidURL(url));
 defineRule('required', required);
@@ -58,7 +58,7 @@ configure({
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
   const { minTipAmount } = useCurrencies({ withoutPolling: true });
-  const { getSdk } = useSdk({ store });
+  const { getAeSdk } = useAeSdk({ store });
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),
@@ -70,8 +70,8 @@ export default (store) => {
   const checkNameDebounced = debounce(
     async (name, expectedNameState, comparedAddress, { resolve, reject }) => {
       try {
-        const sdk = await getSdk();
-        const nameEntry = await sdk.api.getNameEntryByName(name);
+        const aeSdk = await getAeSdk();
+        const nameEntry = await aeSdk.api.getNameEntryByName(name);
         const address = getAddressByNameEntry(nameEntry);
         resolve(({
           [NAME_STATES.REGISTERED]: true,

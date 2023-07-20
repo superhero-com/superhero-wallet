@@ -110,7 +110,7 @@ import {
 import {
   useAccounts,
   useCurrencies,
-  useSdk,
+  useAeSdk,
   useTokensList,
 } from '../../../composables';
 import { useState, useGetter } from '../../../composables/vuex';
@@ -150,7 +150,7 @@ export default defineComponent({
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
-    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store });
+    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk({ store });
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
@@ -216,7 +216,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
-        await getSdk();
+        await getAeSdk();
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;

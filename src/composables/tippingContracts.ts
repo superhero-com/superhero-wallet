@@ -3,7 +3,7 @@ import { Contract } from '@aeternity/aepp-sdk';
 
 import TippingV1ACI from '../lib/contracts/TippingV1ACI.json';
 import TippingV2ACI from '../lib/contracts/TippingV2ACI.json';
-import { useSdk } from './sdk';
+import { useAeSdk } from './aeSdk';
 import { watchUntilTruthy } from '../popup/utils';
 import {
   IDefaultComposableOptions,
@@ -22,7 +22,7 @@ let tippingV2: Contract<TippingV2ContractApi> | undefined;
 const initializing = ref(false);
 
 export function useTippingContracts({ store }: IDefaultComposableOptions) {
-  const { getSdk, isTippingSupported } = useSdk({ store });
+  const { getAeSdk, isTippingSupported } = useAeSdk({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
@@ -31,18 +31,18 @@ export function useTippingContracts({ store }: IDefaultComposableOptions) {
       return;
     }
     initializing.value = true;
-    const sdk = await getSdk();
+    const aeSdk = await getAeSdk();
 
     [
       tippingV1,
       tippingV2,
     ] = await Promise.all([
-      sdk.initializeContract<TippingV1ContractApi>({
+      aeSdk.initializeContract<TippingV1ContractApi>({
         aci: TippingV1ACI,
         address: activeNetwork.value.tipContractV1,
       }),
       activeNetwork.value.tipContractV2
-        ? sdk.initializeContract<TippingV2ContractApi>({
+        ? aeSdk.initializeContract<TippingV2ContractApi>({
           aci: TippingV2ACI,
           address: activeNetwork.value.tipContractV2,
         })

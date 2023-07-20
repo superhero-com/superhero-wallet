@@ -87,7 +87,7 @@ import {
   useModals,
   useAccounts,
   useTippingContracts,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
@@ -115,7 +115,7 @@ export default defineComponent({
       amount: '',
     });
 
-    const { isTippingSupported } = useSdk({ store });
+    const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
     const { activeAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });

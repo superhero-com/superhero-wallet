@@ -40,9 +40,6 @@ import dayjs from '../plugins/dayjsConfig';
 import type {
   BigNumberPublic,
   IAccount,
-  IRespondChallenge,
-  IResponseChallenge,
-  ISdk,
   ITransaction,
   ITx,
   IPageableResponse,
@@ -335,21 +332,6 @@ export async function fetchAllPages<T = any>(
   return result;
 }
 
-// TODO - move to sdk.ts composable after the removal of action.js file
-export async function fetchRespondChallenge(
-  sdk: ISdk,
-  responseChallenge: IResponseChallenge,
-): Promise<IRespondChallenge> {
-  const signedChallenge = Buffer.from(
-    await sdk.signMessage(responseChallenge.challenge),
-  ).toString('hex');
-
-  return {
-    challenge: responseChallenge.challenge,
-    signature: signedChallenge,
-  };
-}
-
 export function getPayload(transaction: ITransaction) {
   return (transaction.tx?.payload)
     ? decode(transaction.tx?.payload).toString()
@@ -478,10 +460,10 @@ export function getTxTag(tx: ITx): Tag | null {
   if (tx.tag) {
     return tx.tag;
   }
-  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // Sdk: GaAttachTx, mdw: GAAttachTx
+  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
     return Tag.GaAttachTx;
   }
-  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // Sdk: GaMetaTx, mdw: GAMetaTx
+  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
     return Tag.GaMetaTx;
   }
   if (tx.type in Tag) {
@@ -497,7 +479,7 @@ export function isTransactionAex9(transaction: ITransaction): boolean {
 
 export function isContainingNestedTx(tx: ITx): boolean {
   return [
-    'GAMetaTx', // Sdk: GaMetaTx, mdw: GAMetaTx
+    'GAMetaTx', // aeSdk: GaMetaTx, mdw: GAMetaTx
     Tag[Tag.GaMetaTx],
     Tag[Tag.PayingForTx],
   ].includes(tx.type);

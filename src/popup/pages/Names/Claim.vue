@@ -50,7 +50,7 @@
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!isSdkReady || !name || errorName"
+      :disabled="!isAeSdkReady || !name || errorName"
       @click="claim"
     >
       {{
@@ -78,7 +78,7 @@ import {
   checkAensName,
 } from '../../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useSdk } from '../../../composables';
+import { useAccounts, useModals, useAeSdk } from '../../../composables';
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -113,7 +113,7 @@ export default defineComponent({
       .shiftedBy(-AETERNITY_COIN_PRECISION)
       .toFixed(4));
 
-    const { getSdk, isSdkReady } = useSdk({ store });
+    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 
     async function claim() {
       if (!await validate()) return;
@@ -121,10 +121,10 @@ export default defineComponent({
       const { openDefaultModal } = useModals();
       const { activeAccount } = useAccounts({ store });
 
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
 
       const fullName: AensName = `${name.value}${AENS_DOMAIN}`;
-      const nameEntry = await sdk.api.getNameEntryByName(fullName).catch(() => false);
+      const nameEntry = await aeSdk.api.getNameEntryByName(fullName).catch(() => false);
 
       if (nameEntry) {
         openDefaultModal({
@@ -135,8 +135,8 @@ export default defineComponent({
         let claimTxHash;
 
         try {
-          const { salt } = await sdk.aensPreclaim(fullName);
-          claimTxHash = (await sdk.aensClaim(fullName, salt, { waitMined: false })).hash;
+          const { salt } = await aeSdk.aensPreclaim(fullName);
+          claimTxHash = (await aeSdk.aensClaim(fullName, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
             store.commit('names/setPendingAutoExtendName', fullName);
           }
@@ -157,7 +157,7 @@ export default defineComponent({
 
         try {
           store.dispatch('names/fetchOwned');
-          await sdk.poll(claimTxHash);
+          await aeSdk.poll(claimTxHash);
           if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
             store.dispatch('names/updatePointer', {
               name: fullName,
@@ -176,7 +176,7 @@ export default defineComponent({
       AENS_DOMAIN,
       autoExtend,
       isNameValid,
-      isSdkReady,
+      isAeSdkReady,
       name,
       nameFee,
       errorName,

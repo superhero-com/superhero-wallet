@@ -1,7 +1,7 @@
 import { times } from 'lodash-es';
-import { AeSdkWallet, BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
-import { ISdk } from '../types';
+import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
 import { executeAndSetInterval, handleUnknownError } from '../popup/utils';
+import { AeSdkSupehero } from './AeSdkSupehero';
 
 const POLLING_INTERVAL = 3000;
 
@@ -21,7 +21,7 @@ export const FramesConnection = (() => {
     ];
   }
 
-  function init(sdk: ISdk | AeSdkWallet) {
+  function init(aeSdk: AeSdkSupehero) {
     initialized = true;
     clearInterval(baseIntervalId);
 
@@ -49,14 +49,14 @@ export const FramesConnection = (() => {
               }, () => {});
             };
 
-            const clientId = sdk.addRpcClient(connection);
+            const clientId = aeSdk.addRpcClient(connection);
 
             intervalId = executeAndSetInterval(() => {
               if (!getArrayOfAvailableFrames().includes(target)) {
                 clearInterval(intervalId);
                 return;
               }
-              sdk.shareWalletInfo(clientId);
+              aeSdk.shareWalletInfo(clientId);
             }, 3000);
           }),
         POLLING_INTERVAL,

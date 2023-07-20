@@ -108,7 +108,7 @@ import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 
 import AccountSelector from './AccountSelector.vue';
@@ -149,7 +149,7 @@ export default defineComponent({
     } = useMultisigAccountCreate({ store });
     const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
 
     const { openModal } = useModals();
 
@@ -169,9 +169,9 @@ export default defineComponent({
     watch(creatorAddress, async (val, oldVal) => {
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         try {
-          const rawAccount = await sdk.api.getAccountByPubkey(val);
+          const rawAccount = await aeSdk.api.getAccountByPubkey(val);
           creatorAccountFetched.value = {
             ...rawAccount,
             balance: rawAccount.balance.toString(),

@@ -411,7 +411,7 @@ export default defineComponent({
         type: Tag[Tag.GaMetaTx],
         tag: Tag.GaMetaTx,
       } as any;
-      // TODO: remove `any` by adding returned type from `unpackTx` sdk function to `ITx` type
+      // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
     }
 
     function handleInsufficientBalanceError(

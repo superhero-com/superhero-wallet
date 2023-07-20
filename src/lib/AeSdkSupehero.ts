@@ -20,7 +20,11 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
     payload?: Encoded.Any,
   }
 
-export class ShSdkWallet extends AeSdkWallet {
+/**
+ * Class extends `AeSdkWallet` from aepp-sdk-js
+ * provides flexibility to manage the accounts the way wallet would like to handle
+ */
+export class AeSdkSupehero extends AeSdkWallet {
   store: Store<any>;
 
   constructor(store: Store<any>, options: any) {

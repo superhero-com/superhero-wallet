@@ -8,7 +8,7 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
 } from '@aeternity/aepp-sdk';
-import { ShSdkWallet } from '../lib/shSdkWallet';
+import { AeSdkSupehero } from '../lib/AeSdkSupehero';
 import type {
   IDefaultComposableOptions,
   INetwork,
@@ -38,19 +38,15 @@ import { useAccounts } from './accounts';
 import { FramesConnection } from '../lib/FramesConnection';
 import { useModals } from './modals';
 
-let sdk: ShSdkWallet;
-let drySdk: AeSdk;
-let sdkBlocked = false;
-const isSdkReady = ref(false);
-let sdkCurrentNetwork: INetwork;
+let aeSdk: AeSdkSupehero;
+let dryAeSdk: AeSdk;
+let aeSdkBlocked = false;
+const isAeSdkReady = ref(false);
+let aeSdkCurrentNetwork: INetwork;
 const nodeNetworkId = ref<string>();
 const aeppInfo: Record<string, any> = {};
 
-/**
- * Composable that will replace the Vuex SDK plugin.
- * For now, it works as an abstraction layer.
- */
-export function useSdk({ store }: IDefaultComposableOptions) {
+export function useAeSdk({ store }: IDefaultComposableOptions) {
   const { isLoggedIn, activeAccount } = useAccounts({ store });
   const { openModal } = useModals();
 
@@ -90,18 +86,18 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     return nodeInstance;
   }
 
-  async function initSdk() {
-    sdkBlocked = true;
-    isSdkReady.value = false;
+  async function initAeSdk() {
+    aeSdkBlocked = true;
+    isAeSdkReady.value = false;
 
     await Promise.all([
       watchUntilTruthy(() => store.state.isRestored),
       watchUntilTruthy(isLoggedIn),
     ]);
-    sdkCurrentNetwork = activeNetwork.value;
+    aeSdkCurrentNetwork = activeNetwork.value;
     const nodeInstance = await createNodeInstance(activeNetwork.value.url);
 
-    sdk = new ShSdkWallet(store, {
+    aeSdk = new AeSdkSupehero(store, {
       name: 'Superhero',
       nodes: [{
         name: activeNetwork.value.name,
@@ -147,56 +143,56 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     });
 
     if (IN_FRAME && !FramesConnection.initialized) {
-      FramesConnection.init(sdk);
+      FramesConnection.init(aeSdk);
     }
 
-    sdkBlocked = false;
-    isSdkReady.value = true;
+    aeSdkBlocked = false;
+    isAeSdkReady.value = true;
   }
 
   /**
-   * Get the SDK instance. For now the SDK state is asynchronous.
+   * Get the aeSdk instance. For now the SDK state is asynchronous.
    * TODO: this probably could be replaced with a computed prop.
    */
-  async function getSdk(): Promise<ShSdkWallet> {
-    if (sdkBlocked) {
-      await watchUntilTruthy(isSdkReady);
-    } else if (!sdk) {
-      await initSdk();
+  async function getAeSdk(): Promise<AeSdkSupehero> {
+    if (aeSdkBlocked) {
+      await watchUntilTruthy(isAeSdkReady);
+    } else if (!aeSdk) {
+      await initAeSdk();
     }
-    return sdk;
+    return aeSdk;
   }
 
   /**
-   * drySdk is the sdk instance with no accounts attached.
+   * dryAeSdk is the aeSdk instance with no accounts attached.
    * To use for multisig operations.
    */
-  async function getDrySdk(): Promise<AeSdk> {
-    if (!drySdk) {
+  async function getDryAeSdk(): Promise<AeSdk> {
+    if (!dryAeSdk) {
       const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-      drySdk = new AeSdk({
+      dryAeSdk = new AeSdk({
         nodes: [{
           name: activeNetwork.value.name,
           instance: nodeInstance!,
         }],
       });
-      return drySdk;
+      return dryAeSdk;
     }
-    const networkId = await drySdk.api.getNetworkId();
+    const networkId = await dryAeSdk.api.getNetworkId();
     if (activeNetwork.value.networkId !== networkId) {
-      drySdk.pool.delete(sdkCurrentNetwork.name);
+      dryAeSdk.pool.delete(aeSdkCurrentNetwork.name);
       const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-      drySdk.addNode(activeNetwork.value.name, nodeInstance!, true);
+      dryAeSdk.addNode(activeNetwork.value.name, nodeInstance!, true);
     }
-    return drySdk;
+    return dryAeSdk;
   }
 
   async function fetchRespondChallenge(
     responseChallenge: IResponseChallenge,
   ): Promise<IRespondChallenge> {
-    const sdkLocal = await getSdk();
+    const aeSdkLocal = await getAeSdk();
     const signedChallenge = Buffer.from(
-      await sdkLocal.signMessage(responseChallenge.challenge),
+      await aeSdkLocal.signMessage(responseChallenge.challenge),
     ).toString('hex');
 
     return {
@@ -206,8 +202,8 @@ export function useSdk({ store }: IDefaultComposableOptions) {
   }
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
-    sdk.pool.delete(oldNetwork.name);
-    sdk.addNode(newNetwork.name, (await createNodeInstance(newNetwork.url))!, true);
+    aeSdk.pool.delete(oldNetwork.name);
+    aeSdk.addNode(newNetwork.name, (await createNodeInstance(newNetwork.url))!, true);
   }
 
   return {
@@ -216,12 +212,12 @@ export function useSdk({ store }: IDefaultComposableOptions) {
     isNodeError,
     isNodeMainnet,
     isNodeTestnet,
-    isSdkReady,
+    isAeSdkReady,
     nodeNetworkId,
     isTippingSupported,
     dexContracts,
-    getSdk,
-    getDrySdk,
+    getAeSdk,
+    getDryAeSdk,
     resetNode,
     fetchRespondChallenge,
     createNodeInstance,

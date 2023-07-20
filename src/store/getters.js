@@ -14,7 +14,7 @@ import {
   categorizeContractCallTxObject,
   getHdWalletAccount,
 } from '../popup/utils';
-import { useSdk } from '../composables';
+import { useAeSdk } from '../composables';
 
 export default {
   wallet({ mnemonic }) {
@@ -52,7 +52,7 @@ export default {
     return nodeStatus === NODE_STATUS_CONNECTED;
   },
   getTx: (state, getters) => (hash) => {
-    const { nodeNetworkId } = useSdk({ store: { state, getters } });
+    const { nodeNetworkId } = useAeSdk({ store: { state, getters } });
     return state.transactions.loaded
       .concat(state.transactions.pending[nodeNetworkId.value])
       ?.find((tx) => tx?.hash === hash);
@@ -100,7 +100,7 @@ export default {
       : TX_DIRECTION.received;
   },
   getAccountPendingTransactions: (state, getters) => {
-    const { nodeNetworkId } = useSdk({ store: { state, getters } });
+    const { nodeNetworkId } = useAeSdk({ store: { state, getters } });
     const { address } = getters.account;
     const pendingTransactions = state.transactions.pending[nodeNetworkId.value];
 

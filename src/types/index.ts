@@ -154,7 +154,7 @@ export interface IAccount {
 }
 
 /**
- * Account fetched from the node with the use of `sdk.api.getAccountByPubkey`
+ * Account fetched from the node with the use of `aeSdk.api.getAccountByPubkey`
  */
 type AeternityAccountFetched = Awaited<ReturnType<InstanceType<typeof Node>['getAccountByPubkey']>>;
 
@@ -371,7 +371,7 @@ export interface ITx {
   selectedTokenContractId?: string
   tag?: Tag;
   /**
-   * Middleware represents the `type` with different case than the SDK.
+   * Middleware represents the `type` with different case than the aeSdk.
    * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
    * When comparing the `type` it is suggested to do case insensitive comparison.
    */
@@ -486,78 +486,13 @@ export interface IName {
 }
 
 /**
- * Data fetched with the use of `sdk.api.getNameEntryByName` method.
+ * Data fetched with the use of `aeSdk.api.getNameEntryByName` method.
  */
 export interface INameEntryFetched {
   id: string;
   owner: string;
   pointers: { id: string; key: string }[];
   ttl: number;
-}
-
-/**
- * Temporary typing for the SDK used in the app.
- * TODO remove after migrating to SDK v12
- */
-export interface ISdk {
-  addNode: (name: string, node: any, select: boolean) => void;
-  addRpcClient: (connection: any) => any;
-  Ae: Dictionary;
-  aensClaim: (name: string, salt: string, options?: any) => Promise<any>;
-  aensPreclaim: (name: string) => Promise<any>;
-  aensQuery: (name: string) => Promise<any>;
-  api: Record<string, GenericApiMethod>;
-  balance: (address: string, options?: any) => Promise<number>;
-  compilerApi: Record<string, (...args: any[]) => Promise<any>>;
-  getAccount: (publicKey: any) => Promise<any>
-  gaAttachTx: (options: {
-    ownerId: any
-    code: any
-    callData: any
-    authFun: any
-    gas: any
-    options: { innerTx: boolean }
-  }) => Promise<any>
-  getContractInstance: (o: any) => Promise<any>
-  getContractByteCode: (contractId: Encoded.ContractAddress) => Promise<{ bytecode: any }>
-  getNetworkId: () => string
-  payForTransaction: (
-    rawTx: string,
-    options: {
-      waitMined: boolean;
-      modal: boolean;
-      innerTx?: boolean;
-    }
-  ) => Promise<{ hash: string, rawTx: string }>;
-  payingForTx(arg0: any): any;
-  poll: (txHash: string, options?: any) => any;
-  pool: Map<string, any>;
-  rpcClients: any[];
-  shareWalletInfo: (c: any) => any;
-  signTransaction: (t: any, o: any) => Promise<any>;
-  signMessage: ISignMessage;
-  send: (
-    tx: any,
-    options?: {
-      innerTx?: boolean;
-      onAccount: string;
-      authData?: any;
-    }
-  ) => Promise<ITransaction>;
-  sendTransaction: (t: any, o: any) => Promise<any>;
-  selectedNode: {
-    consensusProtocolVersion: number;
-    instance: any; // Node instance
-    internalUrl?: any;
-    name: string; // Testnet / Mainnet
-    networkId: string; // ae_uat / ae_mainnet
-    url: string;
-    version: string;
-  };
-  spend: (a: any, r: any, o: any) => Promise<any>;
-  spendTx: (a: any) => Promise<any>;
-  address: () => Promise<string>;
-  aensBid: (name: string, aettos: any) => Promise<any>;
 }
 
 /**

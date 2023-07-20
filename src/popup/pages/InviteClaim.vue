@@ -7,7 +7,7 @@ import { defineComponent, onMounted } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { useModals, useSdk } from '../../composables';
+import { useModals, useAeSdk } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -17,11 +17,11 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const router = useRouter();
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
 
     onMounted(async () => {
-      await getSdk();
+      await getAeSdk();
 
       try {
         // sg_ prefix was chosen as a dummy to decode from base58Check

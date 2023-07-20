@@ -4,24 +4,24 @@ import { CONNECTION_TYPES } from '../popup/utils/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useSdk } from '../composables';
+import { useAeSdk } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
-  const { getSdk } = useSdk({ store });
-  const sdk = await getSdk();
+  const { getAeSdk } = useAeSdk({ store });
+  const aeSdk = await getAeSdk();
   const connection = new BrowserRuntimeConnection({ port });
-  const clientId = sdk.addRpcClient(connection);
-  await sdk.shareWalletInfo(clientId);
-  const shareWalletInfo = setInterval(() => sdk.shareWalletInfo(clientId), 3000);
+  const clientId = aeSdk.addRpcClient(connection);
+  await aeSdk.shareWalletInfo(clientId);
+  const shareWalletInfo = setInterval(() => aeSdk.shareWalletInfo(clientId), 3000);
   port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
 };
 
 export async function init() {
-  const { isSdkReady, getSdk, resetNode } = useSdk({ store });
+  const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
@@ -45,7 +45,7 @@ export async function init() {
         break;
       }
       case CONNECTION_TYPES.OTHER: {
-        if (!isSdkReady.value) {
+        if (!isAeSdkReady.value) {
           if (!connectionsQueue) connectionsQueue = [];
           connectionsQueue.push(port);
           port.onDisconnect.addListener(() => {
@@ -61,7 +61,7 @@ export async function init() {
         throw new Error('Unknown connection type');
     }
   });
-  await getSdk();
+  await getAeSdk();
 
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
@@ -78,19 +78,19 @@ export async function init() {
   store.watch(
     (state) => state.accounts?.activeIdx,
     async (oldVal, newVal) => {
-      const sdk = await getSdk();
-      if (!isEqual(oldVal, newVal) && sdk) {
-        sdk._pushAccountsToApps();
+      const aeSdk = await getAeSdk();
+      if (!isEqual(oldVal, newVal) && aeSdk) {
+        aeSdk._pushAccountsToApps();
       }
     },
   );
 }
 
 export async function disconnect() {
-  const { getSdk } = useSdk({ store });
-  const sdk = await getSdk();
+  const { getAeSdk } = useAeSdk({ store });
+  const aeSdk = await getAeSdk();
 
-  sdk._clients.forEach((aepp, aeppId) => {
+  aeSdk._clients.forEach((aepp, aeppId) => {
     if (aepp.status && aepp.status !== 'DISCONNECTED') {
       aepp.rpc.connection.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
@@ -99,6 +99,6 @@ export async function disconnect() {
       aepp.rpc.connection.disconnect();
       browser.tabs.reload(aepp.rpc.connection.port.sender.tab.id);
     }
-    sdk.removeRpcClient(aeppId);
+    aeSdk.removeRpcClient(aeppId);
   });
 }
