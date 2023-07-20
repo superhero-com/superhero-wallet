@@ -7,7 +7,7 @@ import type {
   IFormSelectOption,
   INetwork,
 } from '../types';
-import { i18n } from '../store/plugins/languages';
+import { tg } from '../store/plugins/languages';
 import { FAUCET_URL, buildSimplexLink, getAccountNameToDisplay } from '../popup/utils';
 import { AeScan } from '../lib/AeScan';
 
@@ -37,7 +37,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountExtended = computed((): IAccountOverview => ({
     ...activeAccount.value,
-    label: i18n.global.t('transaction.overview.accountAddress'),
+    label: tg('transaction.overview.accountAddress'),
     url: (new AeScan(activeNetwork.value.explorerUrl))
       .prepareUrlForAccount(activeAccount.value.address),
   }));

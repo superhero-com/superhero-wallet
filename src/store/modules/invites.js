@@ -6,7 +6,7 @@ import {
   Node,
 } from '@aeternity/aepp-sdk';
 import { useModals } from '../../composables';
-import { i18n } from '../plugins/languages';
+import { tg } from '../plugins/languages';
 
 export default {
   namespaced: true,
@@ -34,8 +34,8 @@ export default {
       const { openDefaultModal } = useModals();
       await openDefaultModal({
         msg: isInviteError
-          ? i18n.global.t('pages.invite.insufficient-invite-balance')
-          : i18n.global.t('pages.invite.insufficient-balance'),
+          ? tg('pages.invite.insufficient-invite-balance')
+          : tg('pages.invite.insufficient-balance'),
       });
       return true;
     },

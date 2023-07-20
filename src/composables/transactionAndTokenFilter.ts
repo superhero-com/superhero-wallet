@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { IFilterInputPayload, IFilters, ObjectValues } from '../types';
-import { i18n } from '../store/plugins/languages';
+import { tg } from '../store/plugins/languages';
 
 const FILTER_MODE = {
   all: 'all',
@@ -26,11 +26,10 @@ export const useTransactionAndTokenFilter = () => {
   );
 
   const filtersConfig = ref<IFilters<ObjectValues<typeof FILTER_MODE>>>({
-    // @ts-ignore - type coming from VueI18n is excessively deep and possibly infinite
-    all: { name: i18n.global.t('common.all') },
-    in: { name: i18n.global.t('filters.in') },
-    out: { name: i18n.global.t('filters.out') },
-    dex: { name: i18n.global.t('filters.dex') },
+    all: { name: tg('common.all') },
+    in: { name: tg('filters.in') },
+    out: { name: tg('filters.out') },
+    dex: { name: tg('filters.dex') },
   });
 
   function resetFilter() {
