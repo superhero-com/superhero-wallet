@@ -7,15 +7,17 @@ import type {
   ITokenList,
   ITx,
   ObjectValues,
-  TxFunctionMultisig,
   TxFunctionRaw,
   TxType,
 } from '../types';
 import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_DIRECTION,
-  TX_FUNCTION_TYPE_MULTISIG,
+  TX_FUNCTIONS_MULTISIG,
+  TX_FUNCTION_TRANSLATIONS,
   TX_FUNCTIONS,
+  TX_TYPE_TRANSLATIONS,
+  TX_TYPE_LIST_TRANSLATIONS,
   TX_RETURN_TYPE_OK,
   getInnerTransaction,
   getOwnershipStatus,
@@ -29,7 +31,6 @@ import {
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
 } from '../popup/utils';
-import { i18n } from '../store/plugins/languages';
 import { useAccounts } from './accounts';
 import { useSdk } from './sdk';
 
@@ -37,56 +38,6 @@ interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
   externalAddress?: Encoded.AccountAddress;
 }
-
-type TxPropertyTranslations<T extends string | number | symbol = string> = Partial<
-  Record<T, () => string>
->;
-
-// @ts-ignore type coming from VueI18n is excessively deep and possibly infinite
-const tg = i18n.global.t;
-
-const txTypeTranslations: TxPropertyTranslations<TxType> = {
-  ChannelCloseSoloTx: () => tg('transaction.type.channelCloseSoloTx'),
-  ChannelSlashTx: () => tg('transaction.type.channelSlashTx'),
-  ChannelSettleTx: () => tg('transaction.type.channelSettleTx'),
-  ChannelSnapshotSoloTx: () => tg('transaction.type.channelSnapshotSoloTx'),
-  ContractCreateTx: () => tg('transaction.type.contractCreateTx'),
-  ContractCallTx: () => tg('transaction.type.contractCallTx'),
-  GaMetaTx: () => tg('transaction.type.gaMetaTx'),
-  GaAttachTx: () => tg('transaction.type.gaAttachTx'),
-  NamePreclaimTx: () => tg('transaction.type.namePreClaimTx'),
-  NameClaimTx: () => tg('transaction.type.nameClaimTx'),
-  NameUpdateTx: () => tg('transaction.type.nameUpdateTx'),
-  NameTransferTx: () => tg('transaction.type.nameTransferTx'),
-  NameRevokeTx: () => tg('transaction.type.nameRevokeTx'),
-  OracleRegisterTx: () => tg('transaction.type.oracleRegisterTx'),
-  OracleExtendTx: () => tg('transaction.type.oracleExtendTx'),
-  OracleQueryTx: () => tg('transaction.type.oraclePostQueryTx'),
-  OracleResponseTx: () => tg('transaction.type.oracleRespondTx'),
-  PayingForTx: () => tg('transaction.type.payingForTx'),
-  SpendTx: () => tg('transaction.type.sentTx'),
-};
-
-/**
- * Replacements for the `txTypeTranslations` displayed on the transaction lists
- */
-const txTypeListTranslations: TxPropertyTranslations<TxType> = {
-  NamePreclaimTx: () => tg('transaction.listType.namePreClaimTx'),
-  NameClaimTx: () => tg('transaction.listType.nameClaimTx'),
-  NameUpdateTx: () => tg('transaction.listType.nameUpdateTx'),
-  NameTransferTx: () => tg('transaction.listType.nameTransferTx'),
-  NameRevokeTx: () => tg('transaction.listType.nameRevokeTx'),
-  SpendTx: () => tg('transaction.listType.sentTx'),
-};
-
-const txFunctionTranslations: TxPropertyTranslations<TxFunctionRaw | TxFunctionMultisig> = {
-  propose: () => tg('transaction.function.propose'),
-  revoke: () => tg('transaction.function.revoke'),
-  refuse: () => tg('transaction.function.refuse'),
-  confirm: () => tg('transaction.function.confirm'),
-  tip_token: () => tg('transaction.function.tip_token'),
-  retip_token: () => tg('transaction.function.retip_token'),
-};
 
 export function useTransactionTx({
   store,
@@ -120,7 +71,7 @@ export function useTransactionTx({
    * displayed on the transaction details page.
    */
   const txTypeLabel = computed((): string => {
-    const translateFunc = (txType.value) ? txTypeTranslations[txType.value] : null;
+    const translateFunc = (txType.value) ? TX_TYPE_TRANSLATIONS[txType.value] : null;
     return translateFunc ? translateFunc() : '';
   });
 
@@ -130,7 +81,7 @@ export function useTransactionTx({
    */
   const txTypeListLabel = computed((): string => {
     const translateFunc = (txType.value)
-      ? txTypeListTranslations[txType.value]
+      ? TX_TYPE_LIST_TRANSLATIONS[txType.value]
       : null;
     return translateFunc ? translateFunc() : txTypeLabel.value;
   });
@@ -140,7 +91,7 @@ export function useTransactionTx({
    */
   const txFunctionLabel = computed((): string => {
     const translateFunc = (outerTx.value?.function)
-      ? txFunctionTranslations[outerTx.value.function as TxFunctionRaw]
+      ? TX_FUNCTION_TRANSLATIONS[outerTx.value.function as TxFunctionRaw]
       : null;
     return translateFunc ? translateFunc() : '';
   });
@@ -168,7 +119,7 @@ export function useTransactionTx({
   const isMultisig = computed((): boolean => (
     !!outerTx.value?.function
     && (
-      includes(Object.values(TX_FUNCTION_TYPE_MULTISIG), outerTx.value.function)
+      includes(Object.values(TX_FUNCTIONS_MULTISIG), outerTx.value.function)
       || !!outerTx.value.payerId
     )
   ));

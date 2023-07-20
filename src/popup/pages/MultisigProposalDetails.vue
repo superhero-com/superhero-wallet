@@ -201,7 +201,7 @@
               extra-padded
               :disabled="processingAction"
               @click="dispatchProposalAction(
-                TX_FUNCTION_TYPE_MULTISIG.refuse,
+                TX_FUNCTIONS_MULTISIG.refuse,
                 $t('pages.proposalDetails.refuse')
               )"
             >
@@ -229,7 +229,7 @@
                   || pendingMultisigTxExpired
               "
               @click="dispatchProposalAction(
-                TX_FUNCTION_TYPE_MULTISIG.confirm,
+                TX_FUNCTIONS_MULTISIG.confirm,
                 $t('pages.proposalDetails.sign')
               )"
             >
@@ -244,7 +244,7 @@
             extra-padded
             :disabled="processingAction"
             @click="dispatchProposalAction(
-              TX_FUNCTION_TYPE_MULTISIG.revoke,
+              TX_FUNCTIONS_MULTISIG.revoke,
               $t('pages.proposalDetails.revoke')
             )"
           >
@@ -279,7 +279,7 @@ import {
   splitAddress,
   AETERNITY_SYMBOL,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  TX_FUNCTION_TYPE_MULTISIG,
+  TX_FUNCTIONS_MULTISIG,
   getPayload,
   blocksToRelativeTime,
   isInsufficientBalanceError,
@@ -536,7 +536,7 @@ export default defineComponent({
       blocksToRelativeTime,
       dispatchProposalAction,
       processProposal,
-      TX_FUNCTION_TYPE_MULTISIG,
+      TX_FUNCTIONS_MULTISIG,
     };
   },
 });
