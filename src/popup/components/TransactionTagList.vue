@@ -29,7 +29,7 @@ import {
   DEX,
   TX_DIRECTION,
   TX_FUNCTIONS,
-  TX_NAME_TAGS,
+  TX_TAGS_AENS,
   excludeFalsy,
   includes,
   isTxFunctionDexPool,
@@ -90,7 +90,7 @@ export default defineComponent({
         arr.push(t('transaction.type.payingForTx'));
       }
 
-      if (TX_NAME_TAGS.has(outerTxTag.value!)) {
+      if (TX_TAGS_AENS.has(outerTxTag.value!)) {
         arr.push(AENS, txTypeLabel.value);
       } else if (innerTxTag.value === Tag.GaMetaTx) {
         arr.push(

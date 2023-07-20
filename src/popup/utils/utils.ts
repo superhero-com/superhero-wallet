@@ -24,12 +24,7 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AETERNITY_CONTRACT_ID,
-  HASH_PREFIX_CONTRACT,
-  HASH_PREFIX_NAME,
   HASH_PREFIXES_ALLOWED,
-  HASH_PREFIX_ORACLE,
-  HASH_PREFIX_ACCOUNT,
-  HASH_PREFIX_CHANNEL,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
   SEED_LENGTH,
@@ -37,7 +32,7 @@ import {
   TX_DIRECTION,
   TX_TAGS_SUPPORTED,
   TX_FUNCTIONS,
-  TX_FUNCTION_TYPE_DEX,
+  TX_FUNCTIONS_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
 import { i18n } from '../../store/plugins/languages';
@@ -212,24 +207,24 @@ export function validateHash(fullHash?: string) {
 
 export function isContract(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return valid && prefix === HASH_PREFIX_CONTRACT;
+  return valid && prefix === Encoding.ContractAddress;
 }
 
 export function isAensName(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return valid && prefix === HASH_PREFIX_NAME;
+  return valid && prefix === Encoding.Name;
 }
 
 export function checkAddress(value: string) {
   return (
-    isAddressValid(value, HASH_PREFIX_ACCOUNT)
-    || isAddressValid(value, HASH_PREFIX_CONTRACT)
-    || isAddressValid(value, HASH_PREFIX_ORACLE)
+    isAddressValid(value, Encoding.AccountAddress)
+    || isAddressValid(value, Encoding.ContractAddress)
+    || isAddressValid(value, Encoding.OracleAddress)
   );
 }
 
 export function checkAddressOrChannel(value: string) {
-  return checkAddress(value) || isAddressValid(value, HASH_PREFIX_CHANNEL);
+  return checkAddress(value) || isAddressValid(value, Encoding.Channel);
 }
 
 export function checkAensName(value: string) {
@@ -639,37 +634,37 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
     tx
     && tx.contractId
     && tx.function
-    && Object.values(TX_FUNCTION_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
+    && Object.values(TX_FUNCTIONS_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId)
   );
 }
 
 export function isTxFunctionDexAllowance(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.allowance, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunction);
 }
 
 export function isTxFunctionDexSwap(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.swap, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunction);
 }
 
 export function isTxFunctionDexPool(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.pool, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunction);
 }
 
 export function isTxFunctionDexMaxSpent(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.maxSpent, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunction);
 }
 
 export function isTxFunctionDexMinReceived(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.minReceived, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunction);
 }
 
 export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.addLiquidity, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunction);
 }
 
 export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
-  return !!txFunction && includes(TX_FUNCTION_TYPE_DEX.removeLiquidity, txFunction);
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunction);
 }
 
 export function getTxOwnerAddress(innerTx?: ITx) {

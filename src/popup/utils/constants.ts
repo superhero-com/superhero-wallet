@@ -72,14 +72,17 @@ export const TX_FUNCTIONS = {
   claim: 'claim',
 } as const;
 
-export const TX_FUNCTION_TYPE_MULTISIG = {
+/**
+ * ITx.function
+ */
+export const TX_FUNCTIONS_MULTISIG = {
   propose: 'propose',
   confirm: 'confirm',
   refuse: 'refuse',
   revoke: 'revoke',
 } as const;
 
-export const TX_FUNCTION_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
+export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
   pool: [
     'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
   ],
@@ -118,7 +121,10 @@ export const TX_TAGS_SUPPORTED = [
   Tag.NameTransferTx,
 ];
 
-export const TX_NAME_TAGS = new Set([
+/**
+ * ITx.tag
+ */
+export const TX_TAGS_AENS = new Set([
   Tag.NameClaimTx,
   Tag.NamePreclaimTx,
   Tag.NameRevokeTx,
@@ -142,20 +148,13 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const HASH_PREFIX_ACCOUNT = Encoding.AccountAddress;
-export const HASH_PREFIX_CHANNEL = Encoding.Channel;
-export const HASH_PREFIX_CONTRACT = Encoding.ContractAddress;
-export const HASH_PREFIX_NAME = Encoding.Name;
-export const HASH_PREFIX_ORACLE = Encoding.OracleAddress;
-export const HASH_PREFIX_TRANSACTION = Encoding.TxHash;
-
 export const HASH_PREFIXES_ALLOWED = [
-  HASH_PREFIX_ACCOUNT,
-  HASH_PREFIX_CHANNEL,
-  HASH_PREFIX_CONTRACT,
-  HASH_PREFIX_NAME,
-  HASH_PREFIX_ORACLE,
-  HASH_PREFIX_TRANSACTION,
+  Encoding.AccountAddress,
+  Encoding.Channel,
+  Encoding.ContractAddress,
+  Encoding.Name,
+  Encoding.OracleAddress,
+  Encoding.TxHash,
 ] as const;
 
 export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
@@ -543,14 +542,6 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
   claim: '',
   propose: '',
 } as const;
-
-export const ADDRESS_TYPES: Record<string, string> = {
-  [HASH_PREFIX_ACCOUNT]: 'account/transactions',
-  [HASH_PREFIX_CONTRACT]: 'contracts/transactions',
-  [HASH_PREFIX_NAME]: 'names',
-  [HASH_PREFIX_ORACLE]: 'oracles/queries',
-  [HASH_PREFIX_TRANSACTION]: 'transactions',
-};
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_SIGN = 'sign';

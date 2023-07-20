@@ -58,7 +58,7 @@
       />
       <BtnMain
         v-if="activeMultisigAccount"
-        :variant="action === TX_FUNCTION_TYPE_MULTISIG.revoke ? 'danger': 'primary'"
+        :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger': 'primary'"
         data-cy="to-confirm"
         extra-padded
         :disabled="!!actionHasError"
@@ -85,7 +85,7 @@ import type {
   StatusIconType,
 } from '../../../types';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
-import { TX_FUNCTION_TYPE_MULTISIG } from '../../utils';
+import { TX_FUNCTIONS_MULTISIG } from '../../utils';
 
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -133,14 +133,14 @@ export default defineComponent({
     );
 
     const statusIcon = computed((): StatusIconType => (
-      props.action === TX_FUNCTION_TYPE_MULTISIG.confirm ? 'success' : 'critical'
+      props.action === TX_FUNCTIONS_MULTISIG.confirm ? 'success' : 'critical'
     ));
 
     const confirmActionContent = computed((): Record<string, TranslateResult> => {
       switch (props.action) {
-        case TX_FUNCTION_TYPE_MULTISIG.confirm:
+        case TX_FUNCTIONS_MULTISIG.confirm:
           return tm('pages.proposalDetails.signDialog');
-        case TX_FUNCTION_TYPE_MULTISIG.revoke:
+        case TX_FUNCTIONS_MULTISIG.revoke:
           return tm('pages.proposalDetails.revokeDialog');
         default:
           return tm('pages.proposalDetails.refuseDialog');
@@ -153,19 +153,19 @@ export default defineComponent({
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
-        props.action === TX_FUNCTION_TYPE_MULTISIG.revoke
+        props.action === TX_FUNCTIONS_MULTISIG.revoke
         && activeMultisigAccount.value?.proposedBy !== activeAccount.value.address
       ) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
-        props.action === TX_FUNCTION_TYPE_MULTISIG.confirm
+        props.action === TX_FUNCTIONS_MULTISIG.confirm
         && pendingMultisigTxConfirmedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
       if (
-        props.action === TX_FUNCTION_TYPE_MULTISIG.refuse
+        props.action === TX_FUNCTIONS_MULTISIG.refuse
         && pendingMultisigTxRefusedBy.value.includes(activeAccount.value.address)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
@@ -186,7 +186,7 @@ export default defineComponent({
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,
-      TX_FUNCTION_TYPE_MULTISIG,
+      TX_FUNCTIONS_MULTISIG,
     };
   },
 });

@@ -21,7 +21,7 @@ import {
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
   POPUP_TYPES,
-  TX_FUNCTION_TYPE_MULTISIG,
+  TX_FUNCTIONS_MULTISIG,
   TX_FUNCTIONS,
   TX_RETURN_TYPES,
 } from '../popup/utils';
@@ -305,7 +305,7 @@ export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
  */
 export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
-export type TxFunctionMultisig = keyof typeof TX_FUNCTION_TYPE_MULTISIG;
+export type TxFunctionMultisig = keyof typeof TX_FUNCTIONS_MULTISIG;
 
 export type TxFunction = TxFunctionRaw | TxFunctionParsed | TxFunctionMultisig;
 
