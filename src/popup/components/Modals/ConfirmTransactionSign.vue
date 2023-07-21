@@ -84,7 +84,7 @@
         <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
-          :label="$t('modals.confirmTransactionSign')[key]"
+          :label="TX_FIELDS_TO_DISPLAY[key]"
           :value="popupProps?.tx?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
@@ -128,6 +128,7 @@ import BigNumber from 'bignumber.js';
 import { getExecutionCost } from '@aeternity/aepp-sdk';
 import ContractByteArrayEncoder from '@aeternity/aepp-calldata/src/ContractByteArrayEncoder';
 
+import { tg } from '../../../store/plugins/languages';
 import { RejectedByUserError } from '../../../lib/errors';
 import {
   DEX_TRANSACTION_TAGS,
@@ -172,20 +173,20 @@ import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
 type ITxKey = keyof ITx;
 
-const TX_FIELDS_TO_DISPLAY: ITxKey[] = [
-  'callData',
-  'code',
-  'contractId',
-  'commitmentId',
-  'name',
-  'nameFee',
-  'nameSalt',
-  'nameId',
-  'nonce',
-  'payload',
-  'pointers',
-  'recipientId',
-];
+const TX_FIELDS_TO_DISPLAY: Partial<Record<ITxKey, string>> = {
+  callData: tg('common.callData'),
+  code: tg('pages.transactionDetails.code'),
+  contractId: tg('common.contractId'),
+  commitmentId: tg('modals.confirmTransactionSign.commitmentId'),
+  name: tg('pages.transactionDetails.name'),
+  nameFee: tg('modals.confirmTransactionSign.nameFee'),
+  nameSalt: tg('pages.transactionDetails.nameSalt'),
+  nameId: tg('pages.transactionDetails.nameId'),
+  nonce: tg('pages.transactionDetails.nonce'),
+  payload: tg('pages.transactionDetails.payload'),
+  pointers: tg('modals.confirmTransactionSign.pointers'),
+  recipientId: tg('modals.confirmTransactionSign.recipientId'),
+};
 
 export default defineComponent({
   components: {
@@ -267,7 +268,8 @@ export default defineComponent({
     }));
 
     const filteredTxFields = computed(
-      () => TX_FIELDS_TO_DISPLAY.filter((field) => !!popupProps.value?.tx?.[field]),
+      () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
+        .filter((field) => !!popupProps.value?.tx?.[field]),
     );
 
     const swapTokenAmountData = computed((): ITokenResolved => {
@@ -438,6 +440,7 @@ export default defineComponent({
     return {
       AnimatedSpinner,
       AETERNITY_SYMBOL,
+      TX_FIELDS_TO_DISPLAY,
       error,
       verifying,
       loading,

@@ -91,21 +91,11 @@
       "msg": "Hubo un problema enviando tu reporte de error"
     },
     "confirmTransactionSign": {
-      "unknown": "Desconocido",
-      "contract-create": "Crear contrato",
-      "aens": "AENS",
-      "payload": "Carga útil",
       "recipientId": "Id del Receptor",
-      "code": "Código",
-      "callData": "Llamar data",
-      "contractId": "Id del Contrato",
       "commitmentId": "Id de la Entrega",
-      "name": "Nombre",
       "nameFee": "Comisión por el Nombre",
-      "nameSalt": "Nombre Salt",
       "nameId": "Id del Nombre",
       "pointers": "Apuntadores",
-      "sign-raw": "Firmar transacción sin procesar por",
       "data-sign": "Firmar Datar"
     }
   },

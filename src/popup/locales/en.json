@@ -260,23 +260,12 @@
       "msg": "The scanned QR code is invalid."
     },
     "confirmTransactionSign": {
-      "unknown": "Unknown",
-      "contract-create": "Contract create",
-      "aens": "AENS",
-      "payload": "Payload",
       "recipientId": "Recipient ID",
-      "code": "Code",
-      "callData": "Call data",
-      "contractId": "Contract ID",
       "commitmentId": "Commitment ID",
-      "name": "Name",
       "nameFee": "Name fee",
-      "nameSalt": "Name salt",
       "nameId": "Name ID",
       "pointers": "Pointers",
-      "sign-raw": "Sign raw transaction by",
-      "data-sign": "Data to sign",
-      "nonce": "Nonce"
+      "data-sign": "Data to sign"
     },
     "confirm-raw-sign": {
       "title": "Sign raw transaction",
