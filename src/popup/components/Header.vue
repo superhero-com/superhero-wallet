@@ -1,71 +1,73 @@
 <template>
-  <ion-header class="header-ionic">
-    <div
-      class="header"
-      :class="{
-        'not-logged-in': !isLoggedIn,
-      }"
-    >
+  <ion-header class="ion-no-border">
+    <ion-toolbar>
       <div
-        v-if="isLoggedIn || titleTruncated"
-        class="left"
+        class="header"
+        :class="{
+          'not-logged-in': !isLoggedIn,
+        }"
       >
-        <BtnIcon
-          v-if="showHeaderNavigation"
-          class="icon-btn"
-          data-cy="back-arrow"
-          :icon="BackIcon"
-          @click="back"
-        />
-        <Component
-          :is="isLogoDisabled ? 'div' : 'RouterLink'"
-          v-else-if="isLoggedIn"
-          :to="isLogoDisabled ? null : { name: homeRouteName }"
-          :class="['home-button', { 'disabled': isLogoDisabled }]"
+        <div
+          v-if="isLoggedIn || titleTruncated"
+          class="left"
         >
-          <Logo class="home-icon" />
-        </Component>
-      </div>
+          <BtnIcon
+            v-if="showHeaderNavigation"
+            class="icon-btn"
+            data-cy="back-arrow"
+            :icon="BackIcon"
+            @click="back"
+          />
+          <Component
+            :is="isLogoDisabled ? 'div' : 'RouterLink'"
+            v-else-if="isLoggedIn"
+            :to="isLogoDisabled ? null : { name: homeRouteName }"
+            :class="['home-button', { 'disabled': isLogoDisabled }]"
+          >
+            <Logo class="home-icon" />
+          </Component>
+        </div>
 
-      <div
-        v-if="showHeaderNavigation"
-        class="title"
-      >
-        <Truncate
-          :str="titleTruncated"
-          class="text"
-        />
-      </div>
-
-      <div class="right">
-        <BtnClose
+        <div
           v-if="showHeaderNavigation"
-          data-cy="close"
-          class="btn-close"
-          @click="close"
-        />
-        <template v-else>
-          <NetworkButton />
+          class="title"
+        >
+          <Truncate
+            :str="titleTruncated"
+            class="text"
+          />
+        </div>
 
-          <template v-if="isLoggedIn">
-            <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
+        <div class="right">
+          <BtnClose
+            v-if="showHeaderNavigation"
+            data-cy="close"
+            class="btn-close"
+            @click="close"
+          />
+          <template v-else>
+            <NetworkButton />
 
-            <NotificationsIcon />
+            <template v-if="isLoggedIn">
+              <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
 
-            <BtnIcon
-              :to="{ name: ROUTE_MORE }"
-              :icon="ThreeDotsIcon"
-              data-cy="page-more"
-            />
+              <NotificationsIcon />
+
+              <BtnIcon
+                :to="{ name: ROUTE_MORE }"
+                :icon="ThreeDotsIcon"
+                data-cy="page-more"
+              />
+            </template>
           </template>
-        </template>
+        </div>
       </div>
-    </div>
+    </ion-toolbar>
   </ion-header>
 </template>
 
 <script lang="ts">
-import { IonHeader } from '@ionic/vue';
+import { IonHeader, IonToolbar } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
@@ -102,6 +104,7 @@ export default defineComponent({
     Truncate,
     BtnIcon,
     IonHeader,
+    IonToolbar,
   },
   setup() {
     const store = useStore();
@@ -206,7 +209,11 @@ export default defineComponent({
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
-.header-ionic {
+ion-toolbar {
+  --background: var(--screen-bg-color);
+  --min-height: 0;
+}
+.ion-no-border {
   z-index: variables.$z-index-header;
   height: var(--header-height);
 }
