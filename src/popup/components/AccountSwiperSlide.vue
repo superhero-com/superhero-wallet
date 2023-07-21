@@ -34,6 +34,7 @@ import { RouteLocation } from 'vue-router';
 
 import { getAddressColor } from '@/utils';
 
+import { IS_MOBILE_APP } from '@/constants';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnBase from './buttons/BtnBase.vue';
 import ChevronIcon from '../../icons/chevron.svg?vue-component';
@@ -57,7 +58,7 @@ export default defineComponent({
 
     return {
       color,
-      IS_MOBILE_APP: process.env.IS_MOBILE_APP,
+      IS_MOBILE_APP,
     };
   },
 });
