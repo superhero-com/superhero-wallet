@@ -69,7 +69,7 @@ import {
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { getAddressColor } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
 import SwiperCore from 'swiper';
 import { Virtual } from 'swiper/modules';
 
@@ -133,7 +133,7 @@ export default defineComponent({
     });
 
     return {
-      IS_MOBILE_APP: process.env.IS_MOBILE_APP,
+      IS_MOBILE_APP,
       PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,

@@ -63,6 +63,7 @@
 
 <script lang="ts">
 import { IonRouterOutlet } from '@ionic/vue';
+import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
@@ -164,7 +165,9 @@ export default defineComponent({
 
     onMounted(() => {
       if (IS_MOBILE_APP) {
-        window.StatusBar.setBackgroundColor('#191919');
+        StatusBar.setBackgroundColor({
+          color: '#191919',
+        });
       }
       if (accountDetailsElem.value && appInnerElem.value) {
         resizeObserver.observe(accountDetailsElem.value);
@@ -178,7 +181,9 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       if (IS_MOBILE_APP) {
-        window.StatusBar.setBackgroundColor('#141414');
+        StatusBar.setBackgroundColor({
+          color: '#141414',
+        });
       }
 
       resizeObserver.disconnect();
