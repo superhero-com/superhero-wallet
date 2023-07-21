@@ -65,11 +65,11 @@
         </DetailsItem>
 
         <DetailsItem
-          v-if="!isDex"
+          v-if="swapDirection === 'total'"
           :label="$t('common.total')"
         >
           <TokenAmount
-            :amount="totalAmount"
+            :amount="executionCost || totalAmount"
             :symbol="getTxSymbol(popupProps?.tx)"
             :aex9="isTransactionAex9(transactionWrapped)"
             data-cy="total"
@@ -218,6 +218,7 @@ export default defineComponent({
     const showAdvanced = ref(false);
     const tokenList = ref<ITokenResolved[]>([]);
     const txFunction = ref<TxFunctionRaw | undefined>();
+    const executionCost = ref(0);
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
@@ -253,7 +254,7 @@ export default defineComponent({
       switch (swapDirection.value) {
         case 'maxSpent': return t('pages.signTransaction.maxSpent');
         case 'minReceived': return t('pages.signTransaction.minReceived');
-        default: return t('pages.signTransaction.total');
+        default: return t('common.total');
       }
     });
 
@@ -361,6 +362,7 @@ export default defineComponent({
           // We've chosen the approach to trust the aepp itself in amount of gas,
           // they think is needed
           const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
+          executionCost.value = getAeFee(executionCostAettos);
 
           if (new BigNumber(balance).isLessThan(executionCostAettos)) {
             error.value = t('validation.enoughAe');
@@ -442,6 +444,7 @@ export default defineComponent({
       AETERNITY_SYMBOL,
       TX_FIELDS_TO_DISPLAY,
       error,
+      executionCost,
       verifying,
       loading,
       showAdvanced,
