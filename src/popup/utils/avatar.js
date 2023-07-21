@@ -242,7 +242,7 @@ export const JDENTICON_CONFIG = {
     grayscale: [0.47, 0.58]
   },
   saturation: {
-    color: 1.00,
+    color: 0.83,
     grayscale: 0.42
   },
   backColor: '#12121bff',
