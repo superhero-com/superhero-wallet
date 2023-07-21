@@ -26,7 +26,7 @@ import {
   TX_FUNCTIONS,
 } from '../utils';
 import { AeScan } from '../../lib/AeScan';
-import { useMiddleware, useSdk, useTransactionTx } from '../../composables';
+import { useMiddleware, useAeSdk, useTransactionTx } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import {
   IAccount,
@@ -60,7 +60,7 @@ export default defineComponent({
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getPreferredName = useGetter('names/getPreferred');
 
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { getMiddleware } = useMiddleware({ store });
 
     const {
@@ -213,9 +213,9 @@ export default defineComponent({
 
       if (!(innerTx.value.contractId && calldata)) return undefined;
 
-      const sdk = await getSdk();
-      const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
-      // TODO: use sdk method on sdk 13 update
+      const aeSdk = await getAeSdk();
+      const { bytecode } = await aeSdk.getContractByteCode(innerTx.value.contractId);
+      // TODO: use method from aeSdk once calldata-js library supports decoding bytecode feature
       const txParams: ITx = await postJson(
         `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
         { body: { bytecode, calldata } },

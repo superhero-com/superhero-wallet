@@ -29,7 +29,7 @@ import {
   IS_CORDOVA,
   IS_WEB,
 } from '../../lib/environment';
-import { useAccounts, usePopupProps, useSdk } from '../../composables';
+import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
@@ -69,9 +69,9 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  const { isSdkReady } = useSdk({ store });
+  const { isAeSdkReady } = useAeSdk({ store });
 
-  if (!isSdkReady.value && !RUNNING_IN_POPUP) {
+  if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
     initSdk();
   }
 

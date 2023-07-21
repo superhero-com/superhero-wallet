@@ -93,7 +93,7 @@ import {
   IFormModel,
   useBalances,
   useMaxAmount,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 
 import TokenAmount from './TokenAmount.vue';
@@ -117,7 +117,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
@@ -147,9 +147,9 @@ export default defineComponent({
     }
 
     async function updateBalance() {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       inviteLinkBalance.value = parseFloat(
-        (await sdk
+        (await aeSdk
           .getBalance(address.value, { format: AE_AMOUNT_FORMATS.AE })
           .catch(() => 0)
         )
@@ -183,9 +183,9 @@ export default defineComponent({
 
     async function sendTopUp() {
       emit('loading', true);
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       try {
-        await sdk.spend(
+        await aeSdk.spend(
           formModel.value.amount!, // validateAll method confirms the presence of the amount field
           address.value,
           // @ts-ignore

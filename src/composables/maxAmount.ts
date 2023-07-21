@@ -32,7 +32,7 @@ import {
   checkAensName,
   handleUnknownError,
 } from '../popup/utils';
-import { useSdk } from './sdk';
+import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
@@ -51,7 +51,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  * considering the fee that needs to be paid.
  */
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
-  const { getSdk } = useSdk({ store });
+  const { getAeSdk } = useAeSdk({ store });
   const { balance } = useBalances({ store });
   const { activeAccount } = useAccounts({ store });
 
@@ -75,14 +75,14 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
     () => formModel.value,
     async (val) => {
       if (!val?.selectedAsset) return;
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
 
       if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
         if (
           !tokenInstance
           || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
-          tokenInstance = await sdk.initializeContract({
+          tokenInstance = await aeSdk.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
             address: val.selectedAsset.contractId,
           });
@@ -150,16 +150,16 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   onMounted(() => {
     updateTokenBalanceInterval = executeAndSetInterval(async () => {
       if (!tokenInstance) return;
-      await getSdk();
+      await getAeSdk();
       selectedTokenBalance.value = new BigNumber(
         (await tokenInstance.balance(activeAccount.value.address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
     updateNonceInterval = executeAndSetInterval(async () => {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       try {
-        nonce.value = (await sdk.api
+        nonce.value = (await aeSdk.api
           .getAccountByPubkey(activeAccount.value.address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);

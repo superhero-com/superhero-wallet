@@ -42,7 +42,7 @@ import {
   useAccounts,
   useDeepLinkApi,
   useModals,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
@@ -66,7 +66,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
 
-    const { getSdk, fetchRespondChallenge, isTippingSupported } = useSdk({ store });
+    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
@@ -99,14 +99,14 @@ export default defineComponent({
 
     async function sendComment() {
       loading.value = true;
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       try {
         const postToCommentApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/comment/api/`, { body });
 
         const responseChallenge = await postToCommentApi({
           tipId: id.value,
           text: text.value,
-          author: sdk.address,
+          author: aeSdk.address,
           parentId: parentId.value,
         });
         const respondChallenge = await fetchRespondChallenge(responseChallenge);
@@ -126,10 +126,10 @@ export default defineComponent({
       }
     }
 
-    // Wait until the `isTippingSupported` is established by the SDK
+    // Wait until the `isTippingSupported` is established by the aeSdk
     (async () => {
       loading.value = true;
-      await getSdk();
+      await getAeSdk();
       loading.value = false;
     })();
 

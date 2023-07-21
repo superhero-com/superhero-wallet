@@ -1,22 +1,22 @@
-import { useSdk } from '../../composables';
+import { useAeSdk } from '../../composables';
 import { watchUntilTruthy } from '../../popup/utils';
 
 export default async (store) => {
-  const { isSdkReady, nodeNetworkId, getSdk } = useSdk({ store });
+  const { isAeSdkReady, nodeNetworkId, getAeSdk } = useAeSdk({ store });
 
   const waitTransactionMined = async ({
     hash,
   }) => {
     try {
-      const sdk = await getSdk();
-      await sdk.poll(hash);
+      const aeSdk = await getAeSdk();
+      await aeSdk.poll(hash);
       store.commit('setPendingTransactionSentByHash', { hash, network: nodeNetworkId.value });
     } catch (e) {
       store.commit('removePendingTransactionByHash', { hash, network: nodeNetworkId.value });
     }
   };
 
-  await watchUntilTruthy(() => isSdkReady);
+  await watchUntilTruthy(() => isAeSdkReady);
 
   // eslint-disable-next-line no-unused-expressions
   store.state.transactions.pending[nodeNetworkId.value]

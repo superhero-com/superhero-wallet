@@ -10,10 +10,10 @@ import {
   calculateSupplyAmount,
   fetchAllPages,
 } from '../../popup/utils';
-import { useMiddleware, useSdk } from '../../composables';
+import { useMiddleware, useAeSdk } from '../../composables';
 
 export default (store) => {
-  const { getSdk } = useSdk({ store });
+  const { getAeSdk } = useAeSdk({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -97,10 +97,10 @@ export default (store) => {
         { rootGetters: { activeNetwork, account } },
         [contractId, amount],
       ) {
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
-        const tokenContract = await sdk.initializeContract({
+        const tokenContract = await aeSdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
           address: selectedToken.contractId,
         });
@@ -123,8 +123,8 @@ export default (store) => {
         address,
       ) {
         try {
-          const sdk = await getSdk();
-          const tokenContract = await sdk.initializeContract({
+          const aeSdk = await getAeSdk();
+          const tokenContract = await aeSdk.initializeContract({
             aci: AedexV2PairACI,
             address,
           });
@@ -169,16 +169,16 @@ export default (store) => {
         }
       },
       async transfer(_, [address, toAccount, amount, option]) {
-        const sdk = await getSdk();
-        const tokenContract = await sdk.initializeContract({
+        const aeSdk = await getAeSdk();
+        const tokenContract = await aeSdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
           address,
         });
         return tokenContract.transfer(toAccount, amount.toFixed(), option);
       },
       async burnTriggerPoS(_, [address, amount, posAddress, invoiceId, option]) {
-        const sdk = await getSdk();
-        const tokenContract = await sdk.initializeContract({
+        const aeSdk = await getAeSdk();
+        const tokenContract = await aeSdk.initializeContract({
           aci: ZeitTokenACI,
           address,
         });

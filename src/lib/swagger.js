@@ -1,7 +1,7 @@
 import SwaggerClient from 'swagger-client';
 import JsonBig from './json-big';
 
-// TODO: remove this file in favor of sdk 13's built-in way of wrapping middleware calls
+// TODO: remove this file in favor of aeSdk 13's built-in way of wrapping middleware calls
 
 let warnedAboutInternalApiUsage = false;
 
@@ -93,7 +93,7 @@ export async function genSwaggerClient(
         // eslint-disable-next-line no-console
         console.warn(
           'SDK\'s wrapper of aeternity node internal API is deprecated, please use external '
-          + 'equivalent (for example, "sdk.api.protectedDryRunTxs" instead of "sdk.api.dryRunTxs") '
+          + 'equivalent (for example, "aeSdk.api.protectedDryRunTxs" instead of "aeSdk.api.dryRunTxs") '
           + 'or create a wrapper of internal API by yourself (using "genSwaggerClient")',
         );
         warnedAboutInternalApiUsage = true;

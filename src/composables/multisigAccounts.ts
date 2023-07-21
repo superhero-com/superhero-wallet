@@ -21,7 +21,7 @@ import type {
   IMultisigConsensus,
   IMultisigAccountResponse,
 } from '../types';
-import { useSdk } from './sdk';
+import { useAeSdk } from './aeSdk';
 import { AeScan } from '../lib/AeScan';
 import { useAccounts } from './accounts';
 
@@ -60,7 +60,7 @@ const isAdditionalInfoNeeded = ref(false);
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
-  const { nodeNetworkId, getSdk } = useSdk({ store });
+  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
   const { accounts } = useAccounts({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
@@ -83,7 +83,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
 
   // Get initial data for currently used network
   (async () => {
-    await getSdk(); // Ensure we are connected
+    await getAeSdk(); // Ensure we are connected
     if (
       !multisigAccounts.value.length
       || activeMultisigNetworkId.value !== nodeNetworkId.value
@@ -157,7 +157,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
    * Refresh the list of the multisig accounts.
    */
   async function updateMultisigAccounts() {
-    const sdk = await getSdk();
+    const aeSdk = await getAeSdk();
 
     /**
      * Establish the list of multisig accounts used by the regular accounts
@@ -197,7 +197,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
           ...otherMultisigData
         }): Promise<IMultisigAccount> => {
           try {
-            const contractInstance = await sdk.initializeContract({
+            const contractInstance = await aeSdk.initializeContract({
               aci: SimpleGAMultiSigAci,
               address: contractId,
             });
@@ -221,7 +221,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
                 ? { decodedResult: currentAccount.signers }
                 : contractInstance.get_signers(),
               contractInstance.get_consensus_info(),
-              gaAccountId ? sdk.getBalance(gaAccountId) : 0,
+              gaAccountId ? aeSdk.getBalance(gaAccountId) : 0,
             ]));
 
             const decodedConsensus = consensusResult.decodedResult;

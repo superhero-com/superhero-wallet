@@ -57,7 +57,7 @@ import {
   unpackTx,
   Tag,
 } from '@aeternity/aepp-sdk';
-import { useModals, useSdk } from '../../../composables';
+import { useModals, useAeSdk } from '../../../composables';
 import type { IAuctionBid } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
 import {
@@ -91,7 +91,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
 
     const loading = ref(false);
@@ -122,11 +122,11 @@ export default defineComponent({
     });
 
     async function bid() {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {
         loading.value = true;
-        await sdk.aensBid(props.name, aeToAettos(amount.value));
+        await aeSdk.aensBid(props.name, aeToAettos(amount.value));
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });

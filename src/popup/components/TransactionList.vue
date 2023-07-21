@@ -64,7 +64,7 @@ import {
   useAccounts,
   usePendingMultisigTransaction,
   useUi,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
@@ -113,7 +113,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { dexContracts } = useSdk({ store });
+    const { dexContracts } = useAeSdk({ store });
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 

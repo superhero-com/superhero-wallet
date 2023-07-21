@@ -3,18 +3,18 @@ import { METHODS } from '@aeternity/aepp-sdk';
 import { IN_FRAME } from './environment';
 import store from '../store';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useSdk } from '../composables';
+import { useMiddleware, useAeSdk } from '../composables';
 
-let sdkBlocked = false;
+let aeSdkBlocked = false;
 
 if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
       async reset() {
-        const { getSdk } = useSdk({ store });
-        const sdk = await getSdk();
+        const { getAeSdk } = useAeSdk({ store });
+        const aeSdk = await getAeSdk();
 
-        Object.values(sdk._clients).forEach((aepp) => {
+        Object.values(aeSdk._clients).forEach((aepp) => {
           if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
             aepp.sendMessage(
               { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
@@ -29,27 +29,27 @@ if (IN_FRAME) {
 }
 
 export default async function initSdk() {
-  const { getSdk, resetNode } = useSdk({ store });
+  const { getAeSdk, resetNode } = useAeSdk({ store });
 
   const { getMiddleware } = useMiddleware({ store });
 
-  const [sdk] = await Promise.all([getSdk(), getMiddleware()]);
+  const [aeSdk] = await Promise.all([getAeSdk(), getMiddleware()]);
 
   if (IN_FRAME && !FramesConnection.initialized) {
-    FramesConnection.init(sdk);
+    FramesConnection.init(aeSdk);
   }
 
   store.watch(
     (state, getters) => getters.activeNetwork,
     async (newValue, oldValue) => {
-      if (sdkBlocked || isEqual(newValue, oldValue)) {
+      if (aeSdkBlocked || isEqual(newValue, oldValue)) {
         return;
       }
       try {
-        sdkBlocked = true;
+        aeSdkBlocked = true;
         await resetNode(oldValue, newValue);
       } finally {
-        sdkBlocked = false;
+        aeSdkBlocked = false;
       }
     },
   );
@@ -57,8 +57,8 @@ export default async function initSdk() {
   store.watch(
     (state) => state.accounts?.activeIdx,
     async (oldVal, newVal) => {
-      if (!isEqual(oldVal, newVal) && sdk) {
-        sdk._pushAccountsToApps();
+      if (!isEqual(oldVal, newVal) && aeSdk) {
+        aeSdk._pushAccountsToApps();
       }
     },
   );

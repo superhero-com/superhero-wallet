@@ -138,7 +138,7 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { usePopupProps, useSdk, useTransactionTx } from '../../../composables';
+import { usePopupProps, useAeSdk, useTransactionTx } from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -179,7 +179,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { t } = useI18n();
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
 
     const { popupProps, setPopupProps } = usePopupProps();
 
@@ -331,8 +331,8 @@ export default defineComponent({
             { bytecode },
           ] = await Promise.all([
             fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.tx.contractId}/code`),
-            // SDK is needed to establish the `networkId` and the dex contracts for the network
-            getSdk(),
+            // aeSdk is needed to establish the `networkId` and the dex contracts for the network
+            getAeSdk(),
           ]);
 
           const txParams: ITx = await postJson(

@@ -6,7 +6,7 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useModals, useSdk } from '../../../composables';
+import { useModals, useAeSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -27,9 +27,9 @@ export default {
   },
   actions: {
     async isAccountUsed(context, address) {
-      const { getSdk } = useSdk({ store: context });
-      const sdk = await getSdk();
-      return sdk.api.getAccountByPubkey(address).then(() => true, () => false);
+      const { getAeSdk } = useAeSdk({ store: context });
+      const aeSdk = await getAeSdk();
+      return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;

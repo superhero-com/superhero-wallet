@@ -3,7 +3,7 @@ import { defineComponent, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../lib/errors';
-import { useDeepLinkApi, useModals, useSdk } from '../../composables';
+import { useDeepLinkApi, useModals, useAeSdk } from '../../composables';
 import { MODAL_MESSAGE_SIGN, handleUnknownError } from '../utils';
 
 export default defineComponent({
@@ -15,11 +15,11 @@ export default defineComponent({
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
-      const { getSdk } = useSdk({ store });
+      const { getAeSdk } = useAeSdk({ store });
       const { openModal } = useModals();
 
       try {
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         const { message } = route.query;
 
         await openModal(MODAL_MESSAGE_SIGN, {
@@ -31,7 +31,7 @@ export default defineComponent({
           },
         });
 
-        const signature = await sdk.signMessage(message as string);
+        const signature = await aeSdk.signMessage(message as string);
         const signatureHex = Buffer.from(signature).toString('hex');
         openCallbackOrGoHome(true, { signature: signatureHex });
       } catch (error: any) {

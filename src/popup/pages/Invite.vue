@@ -63,7 +63,7 @@ import { useStore } from 'vuex';
 import { useState } from '../../composables/vuex';
 import {
   useBalances,
-  useSdk,
+  useAeSdk,
   useMaxAmount,
   IFormModel,
 } from '../../composables';
@@ -87,7 +87,7 @@ export default defineComponent({
     const store = useStore();
     const loading = ref(false);
 
-    const { getSdk } = useSdk({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { balance, aeternityCoin } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
@@ -104,8 +104,8 @@ export default defineComponent({
       const { publicKey, secretKey } = generateKeyPair();
 
       try {
-        const sdk = await getSdk();
-        await sdk.spend(
+        const aeSdk = await getAeSdk();
+        await aeSdk.spend(
           formModel.value.amount || 0,
           publicKey,
           // @ts-ignore

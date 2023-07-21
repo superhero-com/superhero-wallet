@@ -12,7 +12,7 @@ import { handleUnknownError } from '../utils';
 import {
   useDeepLinkApi,
   useModals,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 
 export default defineComponent({
@@ -25,11 +25,11 @@ export default defineComponent({
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
-      const { nodeNetworkId, getSdk } = useSdk({ store });
+      const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
       const { openDefaultModal } = useModals();
 
       try {
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         const { transaction, networkId, broadcast } = route.query;
 
         if (networkId !== nodeNetworkId.value) {
@@ -43,7 +43,7 @@ export default defineComponent({
           return;
         }
 
-        const signedTransaction = await sdk.signTransaction(
+        const signedTransaction = await aeSdk.signTransaction(
           transaction as Encoded.Transaction,
           {
             networkId,
@@ -52,7 +52,7 @@ export default defineComponent({
         );
 
         if (broadcast) {
-          const result = await sdk.sendTransaction(signedTransaction, { waitMined: true });
+          const result = await aeSdk.sendTransaction(signedTransaction, { waitMined: true });
           openCallbackOrGoHome(true, { 'transaction-hash': result.hash });
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });

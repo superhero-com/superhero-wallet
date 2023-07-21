@@ -10,7 +10,7 @@ import {
 import JsonBig from '../lib/json-big';
 import {
   useMiddleware,
-  useSdk,
+  useAeSdk,
 } from '../composables';
 
 export default {
@@ -19,7 +19,7 @@ export default {
     commit('initTransactions');
   },
   addPendingTransaction(context, transaction) {
-    const { nodeNetworkId } = useSdk({ store: context });
+    const { nodeNetworkId } = useAeSdk({ store: context });
     context.commit('addPendingTransaction', {
       network: nodeNetworkId.value,
       transaction: { ...transaction, microTime: Date.now(), pending: true },
@@ -27,10 +27,10 @@ export default {
   },
   async fetchPendingTransactions(context, address) {
     const { state: { transactions } } = context;
-    const { nodeNetworkId, getSdk } = useSdk({ store: context });
-    const sdk = await getSdk();
+    const { nodeNetworkId, getAeSdk } = useAeSdk({ store: context });
+    const aeSdk = await getAeSdk();
     return (
-      await sdk.api.getPendingAccountTransactionsByPubkey(address).then(
+      await aeSdk.api.getPendingAccountTransactionsByPubkey(address).then(
         (r) => JsonBig.parse(JsonBig.stringify(r.transactions)),
         (error) => {
           if (!isAccountNotFoundError(error)) {
@@ -87,7 +87,7 @@ export default {
       return null;
     }
 
-    const { nodeNetworkId } = useSdk({ store: context });
+    const { nodeNetworkId } = useAeSdk({ store: context });
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
 
     let txs = await Promise.all([

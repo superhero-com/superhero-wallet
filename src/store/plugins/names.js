@@ -10,14 +10,14 @@ import {
   handleUnknownError,
 } from '../../popup/utils';
 import { i18n } from './languages';
-import { useMiddleware, useModals, useSdk } from '../../composables';
+import { useMiddleware, useModals, useAeSdk } from '../../composables';
 
 export default (store) => {
   const {
     nodeNetworkId,
-    getSdk,
+    getAeSdk,
     fetchRespondChallenge,
-  } = useSdk({ store });
+  } = useAeSdk({ store });
 
   const {
     isMiddlewareReady,
@@ -154,13 +154,13 @@ export default (store) => {
         _,
         { name, address, type = 'update' },
       ) {
-        const sdk = await getSdk();
-        const nameEntry = await sdk.aensQuery(name);
+        const aeSdk = await getAeSdk();
+        const nameEntry = await aeSdk.aensQuery(name);
         try {
           if (type === 'extend') {
             await nameEntry.extendTtl();
           } else if (type === 'update') {
-            await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
+            await aeSdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
           openDefaultModal({
             msg: i18n.global.t('pages.names.pointer-added', { type }),
@@ -229,13 +229,13 @@ export default (store) => {
 
   watch(getMiddlewareRef(), async () => {
     if (isMiddlewareReady.value) {
-      const [sdk] = await Promise.all([
-        getSdk(),
+      const [aeSdk] = await Promise.all([
+        getAeSdk(),
         store.dispatch('names/fetchOwned').catch(() => {}),
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await sdk.getHeight();
+      const height = await aeSdk.getHeight();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)

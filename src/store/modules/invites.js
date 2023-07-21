@@ -21,11 +21,11 @@ export default {
   },
   actions: {
     async claim({ rootGetters: { account, activeNetwork } }, secretKey) {
-      const sdk = new AeSdk({
+      const aeSdk = new AeSdk({
         nodes: [{ name: activeNetwork.name, instance: new Node(activeNetwork.url) }],
         accounts: [new MemoryAccount(secretKey)],
       });
-      await sdk.transferFunds(1, account.address, { payload: encode(Buffer.from('referral'), Encoding.Bytearray), verify: false });
+      await aeSdk.transferFunds(1, account.address, { payload: encode(Buffer.from('referral'), Encoding.Bytearray), verify: false });
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
