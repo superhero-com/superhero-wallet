@@ -5,6 +5,5 @@ export { };
 declare global {
   interface Window {
     popupProps?: Partial<IPopupConfig>
-    StatusBar?: any // ionic-plugin-statusbar
   }
 }
