@@ -15,6 +15,14 @@
         :transaction="completeTransaction"
       />
 
+      <DetailsItem
+        v-if="!!error"
+        :label="$t('pages.transactionDetails.reason')"
+        :value="error"
+        class="reason"
+        data-cy="reason"
+      />
+
       <template v-if="(isDex || isDexAllowance) && tokenList.length">
         <TransactionDetailsPoolTokenRow
           v-for="(token, idx) in tokenList"
@@ -93,9 +101,12 @@
         @click="cancel()"
       />
       <BtnMain
+        class="button-action-primary"
         data-cy="accept"
         third
-        :text="$t('common.confirm')"
+        :disabled="!!error || verifying"
+        :icon="verifying ? AnimatedSpinner : null"
+        :text="verifying ? $t('common.verifying') : $t('common.confirm')"
         @click="popupProps?.resolve()"
       />
     </template>
@@ -113,6 +124,10 @@ import {
 import { camelCase } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import BigNumber from 'bignumber.js';
+import { getExecutionCost } from '@aeternity/aepp-sdk';
+import ContractByteArrayEncoder from '@aeternity/aepp-calldata/src/ContractByteArrayEncoder';
+
 import { RejectedByUserError } from '../../../lib/errors';
 import {
   DEX_TRANSACTION_TAGS,
@@ -125,6 +140,8 @@ import {
   getAeFee,
   fetchJson,
   postJson,
+  handleUnknownError,
+  isNotFoundError,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
   isTxFunctionDexMaxSpent,
@@ -138,7 +155,11 @@ import type {
   TxFunctionRaw,
 } from '../../../types';
 import { transactionTokenInfoResolvers } from '../../utils/transactionTokenInfoResolvers';
-import { usePopupProps, useAeSdk, useTransactionTx } from '../../../composables';
+import {
+  usePopupProps,
+  useAeSdk,
+  useTransactionTx,
+} from '../../../composables';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -197,11 +218,14 @@ export default defineComponent({
     const tokenList = ref<ITokenResolved[]>([]);
     const txFunction = ref<TxFunctionRaw | undefined>();
     const loading = ref(false);
+    const error = ref('');
+    const verifying = ref(false);
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
     const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
+    const account = useGetter('account');
 
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
@@ -321,7 +345,43 @@ export default defineComponent({
       popupProps.value?.reject(new RejectedByUserError());
     }
 
-    onMounted(async () => {
+    async function verifyTransaction() {
+      if (popupProps.value?.txBase64) {
+        try {
+          verifying.value = true;
+          const sdk = await getAeSdk();
+          const balance = await sdk.getBalance(account.value.address).catch((err) => {
+            if (!isNotFoundError(err)) {
+              handleUnknownError(err);
+            }
+            return 0;
+          });
+          // We've chosen the approach to trust the aepp itself in amount of gas,
+          // they think is needed
+          const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
+
+          if (new BigNumber(balance).isLessThan(executionCostAettos)) {
+            error.value = t('validation.enoughAe');
+            return;
+          }
+          if (popupProps.value.tx?.contractId) {
+            const dryRunResult = await sdk.txDryRun(
+              popupProps.value.txBase64,
+              popupProps.value.tx.callerId || popupProps.value.tx.senderId as any,
+            );
+            if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
+              error.value = new ContractByteArrayEncoder().decode(dryRunResult.callObj.returnValue);
+            }
+          }
+        } catch (e: any) {
+          error.value = e.message;
+        } finally {
+          verifying.value = false;
+        }
+      }
+    }
+
+    async function loadAdditionalDexInfo() {
       if (popupProps.value?.tx?.contractId) {
         try {
           loading.value = true;
@@ -358,6 +418,17 @@ export default defineComponent({
           loading.value = false;
         }
       }
+    }
+
+    onMounted(async () => {
+      if (popupProps.value) {
+        await Promise.all([
+          verifyTransaction(),
+          loadAdditionalDexInfo(),
+        ]);
+      } else {
+        error.value = t('modals.transaction-failed.msg');
+      }
     });
 
     onUnmounted(() => {
@@ -365,7 +436,10 @@ export default defineComponent({
     });
 
     return {
+      AnimatedSpinner,
       AETERNITY_SYMBOL,
+      error,
+      verifying,
       loading,
       showAdvanced,
       transactionWrapped,
@@ -411,6 +485,13 @@ export default defineComponent({
     margin-bottom: 16px;
   }
 
+  .reason:deep() {
+    .value {
+      word-break: break-all;
+      color: variables.$color-warning;
+    }
+  }
+
   .details {
     @include mixins.flex(flex-start, flex-start, column);
 
@@ -424,6 +505,10 @@ export default defineComponent({
 
   .pool-token-row:deep() {
     padding-bottom: 8px;
+  }
+
+  .button-action-primary {
+    display: flex;
   }
 }
 </style>

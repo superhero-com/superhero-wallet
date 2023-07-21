@@ -51,7 +51,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
           host,
         },
         ...(params?.message && { message: params.message }),
-        ...(params?.txObject && !isRawSign && { tx: params.txObject }),
+        ...(params?.txObject && !isRawSign && { tx: params.txObject, txBase64: params.tx }),
         ...(isRawSign && { data: params.tx }),
       },
     };
