@@ -7,14 +7,13 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
   },
-  cordova: {
-    preferences: {
-      orientation: 'portrait',
-      SplashScreen: 'screen',
-      ShowSplashScreenSpinner: 'false',
-      StatusBarOverlaysWebView: 'false',
-      StatusBarBackgroundColor: '#141414',
-      BackgroundColor: '0xff141414',
+  plugins: {
+    SplashScreen: {
+      launchAutoHide: true,
+      backgroundColor: '#141414FF',
+      androidScaleType: 'CENTER_INSIDE',
+      splashFullScreen: true,
+      splashImmersive: true,
     },
   },
 };

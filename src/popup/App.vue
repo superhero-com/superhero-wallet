@@ -48,9 +48,11 @@
 import {
   IonRouterOutlet, IonApp,
 } from '@ionic/vue';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
+  onBeforeMount,
   onMounted,
   ref,
   watch,
@@ -190,6 +192,15 @@ export default defineComponent({
     });
 
     initVisibilityListeners();
+
+    onBeforeMount(async () => {
+      if (IS_MOBILE_APP) {
+        StatusBar.setStyle({ style: Style.Dark });
+        StatusBar.setBackgroundColor({
+          color: '#141414',
+        });
+      }
+    });
 
     onMounted(async () => {
       setDocumentHeight();
