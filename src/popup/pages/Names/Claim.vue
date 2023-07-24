@@ -3,7 +3,12 @@
     <Field
       v-slot="{ field, errorMessage }"
       name="name"
-      :rules="'required|name|name_unregistered'"
+      :rules="{
+        enough_ae: nameFee.toString(),
+        required: true,
+        name: true,
+        name_unregistered: true,
+      }"
     >
       <InputField
         v-bind="field"
@@ -55,7 +60,7 @@
     >
       {{
         isNameValid
-          ? $t('pages.names.claim.button-price', [nameFee])
+          ? $t('pages.names.claim.button-price', [nameFee.toFixed(4)])
           : $t('pages.names.claim.button')
       }}
     </BtnMain>
@@ -69,6 +74,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
+import BigNumber from 'bignumber.js';
 
 import {
   AETERNITY_COIN_PRECISION,
@@ -107,16 +113,15 @@ export default defineComponent({
 
     const isNameValid = computed(() => name.value && checkAensName(`${name.value}${AENS_DOMAIN}`));
 
-    const nameFee = computed(() => getMinimumNameFee(
+    const nameFee = computed(() => (getMinimumNameFee(
       `${name.value}${AENS_DOMAIN}` as AensName,
-    )
-      .shiftedBy(-AETERNITY_COIN_PRECISION)
-      .toFixed(4));
+    ) || BigNumber(0))
+      .shiftedBy(-AETERNITY_COIN_PRECISION));
 
     const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 
     async function claim() {
-      if (!await validate()) return;
+      if (!(await validate()).valid) return;
 
       const { openDefaultModal } = useModals();
       const { activeAccount } = useAccounts({ store });

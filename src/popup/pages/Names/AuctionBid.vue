@@ -3,12 +3,24 @@
     <AuctionCard :name="name" />
 
     <div class="form">
-      <InputAmount
-        v-model="amount"
-        :error="!!amountError"
-        :message="amountError"
-        ae-only
-      />
+      <Field
+        v-slot="{ field, errorMessage }"
+        name="amount"
+        :rules="{
+          enough_ae: amountTotal.toString(),
+          required: true,
+          name: true,
+          name_unregistered: true,
+        }"
+      >
+        <InputAmount
+          v-bind="field"
+          v-model="amount"
+          name="amount"
+          :message="amountError || errorMessage"
+          ae-only
+        />
+      </Field>
       <div class="tx-details">
         <DetailsItem :label="$t('transaction.fee')">
           <template #value>
@@ -28,7 +40,7 @@
       </div>
 
       <BtnMain
-        :disabled="!!amountError || !amount"
+        :disabled="!!amountError || !amount || errorName"
         class="button"
         extend
         @click="bid"
@@ -57,6 +69,8 @@ import {
   unpackTx,
   Tag,
 } from '@aeternity/aepp-sdk';
+import { useForm, useFieldError, Field } from 'vee-validate';
+
 import { useModals, useAeSdk } from '../../../composables';
 import type { IAuctionBid } from '../../../types';
 import { useGetter } from '../../../composables/vuex';
@@ -82,6 +96,7 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     BtnMain,
+    Field,
   },
   props: {
     name: { type: String as PropType<AensName>, required: true },
@@ -90,6 +105,8 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
+    const { validate } = useForm();
+    const errorName = useFieldError('amount');
 
     const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
@@ -122,6 +139,7 @@ export default defineComponent({
     });
 
     async function bid() {
+      if (!(await validate()).valid) return;
       const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {
@@ -147,6 +165,7 @@ export default defineComponent({
       amount,
       amountTotal,
       amountError,
+      errorName,
       txFee,
       bid,
     };
