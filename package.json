@@ -23,6 +23,7 @@
     "test:e2e": "cross-env PLATFORM=web RUNNING_IN_TESTS=true vue-cli-service test:e2e",
     "test": "npm run test:unit && npm run test:e2e -- --headless",
     "build:Testnet": "cross-env NETWORK=Testnet npm run build:extension",
+    "gen:capacitor-assets": "npx @capacitor/assets generate --iconBackgroundColor '#141414' ",
     "cap-config": "trapeze run config.yaml",
     "release": "standard-version"
   },
@@ -36,6 +37,7 @@
     "@capacitor-community/barcode-scanner": "^4.0.1",
     "@capacitor/android": "5.0.4",
     "@capacitor/app": "5.0.2",
+    "@capacitor/assets": "^2.0.4",
     "@capacitor/cli": "5.0.4",
     "@capacitor/clipboard": "^5.0.5",
     "@capacitor/core": "5.0.4",
