@@ -126,7 +126,11 @@ export default defineComponent({
       isErrorTransaction,
       isTip,
       txTypeListLabel,
-    } = useTransactionTx({ store, tx: props.transaction.tx });
+    } = useTransactionTx({
+      store,
+      tx: props.transaction.tx,
+      externalAddress: props.transaction.transactionOwner,
+    });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
