@@ -139,7 +139,9 @@ export default defineComponent({
     });
 
     async function bid() {
-      if (!(await validate()).valid) return;
+      if (!(await validate()).valid) {
+        return;
+      }
       const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {

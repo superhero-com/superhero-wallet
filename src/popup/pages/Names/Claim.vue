@@ -4,7 +4,7 @@
       v-slot="{ field, errorMessage }"
       name="name"
       :rules="{
-        enough_ae: nameFee.toString(),
+        enough_ae: totalNameClaimAmount.toString(),
         required: true,
         name: true,
         name_unregistered: true,
@@ -60,7 +60,7 @@
     >
       {{
         isNameValid
-          ? $t('pages.names.claim.button-price', [nameFee.toFixed(4)])
+          ? $t('pages.names.claim.button-price', [totalNameClaimAmount.toFixed(4)])
           : $t('pages.names.claim.button')
       }}
     </BtnMain>
@@ -69,7 +69,15 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
-import { getMinimumNameFee, AensName } from '@aeternity/aepp-sdk';
+import {
+  AensName,
+  buildTx,
+  commitmentHash,
+  getExecutionCost,
+  getMinimumNameFee,
+  Tag,
+  unpackTx,
+} from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
@@ -82,6 +90,8 @@ import {
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
   checkAensName,
+  STUB_ADDRESS,
+  STUB_NONCE,
 } from '../../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
 import { useAccounts, useModals, useAeSdk } from '../../../composables';
@@ -89,6 +99,8 @@ import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import BtnHelp from '../../components/buttons/BtnHelp.vue';
+
+const STUB_NAME_SALT = 4204563566073083;
 
 export default defineComponent({
   name: 'Claim',
@@ -111,25 +123,42 @@ export default defineComponent({
     const loading = ref(false);
     const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
 
-    const isNameValid = computed(() => name.value && checkAensName(`${name.value}${AENS_DOMAIN}`));
+    const fullName = computed((): AensName => `${name.value}${AENS_DOMAIN}`);
+    const isNameValid = computed(() => name.value && checkAensName(fullName.value));
 
-    const nameFee = computed(() => (getMinimumNameFee(
-      `${name.value}${AENS_DOMAIN}` as AensName,
-    ) || BigNumber(0))
-      .shiftedBy(-AETERNITY_COIN_PRECISION));
+    const totalNameClaimAmount = computed(() => !name.value.length
+      ? BigNumber(0)
+      : BigNumber(unpackTx(
+          buildTx({
+            tag: Tag.NamePreclaimTx,
+            accountId: STUB_ADDRESS,
+            nonce: STUB_NONCE,
+            commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
+          }) as any,
+          Tag.NamePreclaimTx,
+      ).fee)
+        .plus(getExecutionCost(buildTx({
+          tag: Tag.NameClaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          name: fullName.value,
+          nameSalt: 0,
+          nameFee: getMinimumNameFee(fullName.value),
+        }) as any).toString())
+        .shiftedBy(-AETERNITY_COIN_PRECISION));
 
     const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 
     async function claim() {
-      if (!(await validate()).valid) return;
+      if (!(await validate()).valid) {
+        return;
+      }
 
       const { openDefaultModal } = useModals();
       const { activeAccount } = useAccounts({ store });
 
       const aeSdk = await getAeSdk();
-
-      const fullName: AensName = `${name.value}${AENS_DOMAIN}`;
-      const nameEntry = await aeSdk.api.getNameEntryByName(fullName).catch(() => false);
+      const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
 
       if (nameEntry) {
         openDefaultModal({
@@ -140,10 +169,10 @@ export default defineComponent({
         let claimTxHash;
 
         try {
-          const { salt } = await aeSdk.aensPreclaim(fullName);
-          claimTxHash = (await aeSdk.aensClaim(fullName, salt, { waitMined: false })).hash;
+          const { salt } = await aeSdk.aensPreclaim(fullName.value);
+          claimTxHash = (await aeSdk.aensClaim(fullName.value, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            store.commit('names/setPendingAutoExtendName', fullName);
+            store.commit('names/setPendingAutoExtendName', fullName.value);
           }
           router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e: any) {
@@ -163,9 +192,9 @@ export default defineComponent({
         try {
           store.dispatch('names/fetchOwned');
           await aeSdk.poll(claimTxHash);
-          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
+          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
             store.dispatch('names/updatePointer', {
-              name: fullName,
+              name: fullName.value,
               address: activeAccount.value.address,
             });
           }
@@ -183,7 +212,7 @@ export default defineComponent({
       isNameValid,
       isAeSdkReady,
       name,
-      nameFee,
+      totalNameClaimAmount,
       errorName,
       loading,
       maxNameLength,
