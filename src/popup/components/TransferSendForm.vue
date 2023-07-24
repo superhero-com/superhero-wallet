@@ -35,7 +35,7 @@
           :label="$t('modals.multisigTxProposal.multisigVault')"
         >
           <template #value>
-            <AccountItem :address="multisigVaultAddress!" />
+            <AccountItem :address="multisigVaultAddress" />
           </template>
         </DetailsItem>
       </div>
@@ -53,7 +53,6 @@
 
     <Field
       v-slot="{ field }"
-      v-model.trim="formModel.address"
       name="address"
       :rules="{
         required: true,
@@ -65,7 +64,7 @@
     >
       <InputField
         v-bind="field"
-        :model-value="formModel.address"
+        v-model.trim="formModel.address"
         name="address"
         data-cy="address"
         show-help
@@ -283,6 +282,8 @@ export default defineComponent({
 
     const { validate, errors } = useForm();
 
+    const WARNING_RULES_WORDING = [t('validation.notSameAs'), t('validation.enoughAeSigner')];
+
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
@@ -309,6 +310,9 @@ export default defineComponent({
     function getMessageByFieldName(fieldName: string): IInputMessage {
       if (!errors.value) return { status: 'success' };
       const items = errors.value[fieldName as keyof typeof errors.value];
+      if (items && WARNING_RULES_WORDING.includes(items)) {
+        return { status: 'warning', text: items };
+      }
       if (items) {
         return { status: 'error', text: items };
       }
@@ -431,8 +435,7 @@ export default defineComponent({
 
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      const isValid = Object.keys(errors.value).length === 0;
-      if (isValid) {
+      if (!hasError.value) {
         await emitCurrentFormModelState();
         emit('success');
       }

@@ -56,9 +56,9 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .enterAddress(ownAddress)
       .get('[data-cy=address]')
-      .should('have.class', 'error')
+      .should('have.class', 'warning')
       .get('[data-cy=next-step-button]')
-      .should('have.class', 'disabled')
+      .should('not.have.class', 'disabled')
 
       // send to another account
       .get('[data-cy=amount]')
