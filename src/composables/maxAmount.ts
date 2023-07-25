@@ -27,6 +27,7 @@ import {
   AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
   STUB_CALLDATA,
+  STUB_CONTRACT_ADDRESS,
   executeAndSetInterval,
   validateTipUrl,
   checkAensName,
@@ -111,7 +112,9 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           buildTx({
             tag: Tag.ContractCallTx,
             callerId: activeAccount.value.address,
-            contractId: val.selectedAsset.contractId as Encoded.ContractAddress,
+            contractId: val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+              ? STUB_CONTRACT_ADDRESS
+              : val.selectedAsset.contractId as Encoded.ContractAddress,
             amount: 0,
             callData: calldata,
             nonce: nonce.value,
