@@ -1,19 +1,18 @@
-// import { transactions } from '../../../src/popup/utils/testsConfig';
+import { transactions } from '../../../src/popup/utils/testsConfig';
 
-// const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
-
-// const txs = [
-//   transactions.pendingSpend,
-//   transactions.pendingTransfer,
-//   {
-//     ...transactions.pendingTipToken,
-//     tx: { ...transactions.pendingTipToken.tx, callerId: ACCOUNT_ADDRESS },
-//   },
-//   {
-//     ...transactions.pendingTipAe,
-//     tx: { ...transactions.pendingTipAe.tx, callerId: ACCOUNT_ADDRESS },
-//   },
-// ];
+const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
+const txs = [
+  transactions.pendingSpend,
+  transactions.pendingTransfer,
+  {
+    ...transactions.pendingTipToken,
+    tx: { ...transactions.pendingTipToken.tx, callerId: ACCOUNT_ADDRESS },
+  },
+  {
+    ...transactions.pendingTipAe,
+    tx: { ...transactions.pendingTipAe.tx, callerId: ACCOUNT_ADDRESS },
+  },
+];
 
 describe('Tests cases not connected to specific page', () => {
   it('(not) redirects to last visited routes', () => {
@@ -29,17 +28,13 @@ describe('Tests cases not connected to specific page', () => {
     });
   });
 
-  /* TODO: Refactor test in order to pass every time */
-
-  // it('Shows pending tx', () => {
-  //   cy.login().openTransactions();
-
-  //   txs.forEach((pendingTransaction) => {
-  //     cy.login({ pendingTransaction })
-  //       .get('[data-cy=pending-txs]')
-  //       .should('be.visible');
-  //   });
-  // });
+  it('Shows pending tx', () => {
+    txs.forEach((pendingTransaction) => {
+      cy.login({ pendingTransaction })
+        .get('[data-cy=pending-txs]')
+        .should('be.visible');
+    });
+  });
 
   it('Connection message disappear', () => {
     cy.login().get('[data-cy=connect-node]').should('not.exist');
