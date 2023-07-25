@@ -8,6 +8,7 @@ import { useAeSdk } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
+let aeSdkBlocked = false;
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
@@ -16,7 +17,7 @@ const addAeppConnection = async (port) => {
   const connection = new BrowserRuntimeConnection({ port });
   const clientId = aeSdk.addRpcClient(connection);
   await aeSdk.shareWalletInfo(clientId);
-  const shareWalletInfo = setInterval(() => aeSdk.shareWalletInfo(clientId), 3000);
+  const shareWalletInfo = setInterval(() => aeSdkBlocked && aeSdk.shareWalletInfo(clientId), 3000);
   port.onDisconnect.addListener(() => clearInterval(shareWalletInfo));
 };
 
@@ -68,9 +69,15 @@ export async function init() {
 
   store.watch(
     (state, getters) => getters.activeNetwork,
-    async (network, oldNetwork) => {
-      if (!isEqual(network, oldNetwork)) {
-        resetNode(oldNetwork, network);
+    async (newValue, oldValue) => {
+      if (aeSdkBlocked || isEqual(newValue, oldValue)) {
+        return;
+      }
+      try {
+        aeSdkBlocked = true;
+        await resetNode(oldValue, newValue);
+      } finally {
+        aeSdkBlocked = false;
       }
     },
   );
