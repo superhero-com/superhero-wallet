@@ -77,7 +77,7 @@ export default {
 
       if (!checkTransactionSignPermission) {
         const { openModal } = useModals();
-        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject });
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },
     sign({ dispatch }, data) {

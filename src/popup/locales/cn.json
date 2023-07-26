@@ -94,21 +94,11 @@
       "msg": "发送你的错误报告时发生了某个问题。"
     },
     "confirmTransactionSign": {
-      "unknown": "Unknown",
-      "contract-create": "合约创建",
-      "aens": "AENS",
-      "payload": "附言",
       "recipientId": "接收者Id",
-      "code": "代码",
-      "callData": "呼叫数据",
-      "contractId": "合约Id",
       "commitmentId": "承诺Id",
-      "name": "名称",
       "nameFee": "名称费",
-      "nameSalt": "名称随机数",
       "nameId": "名称Id",
       "pointers": "指向者",
-      "sign-raw": "原生交易签名基于",
       "data-sign": "数字签名"
     }
   },

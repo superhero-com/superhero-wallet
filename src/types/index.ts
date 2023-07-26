@@ -341,8 +341,8 @@ export interface ITx {
   abiVersion?: number
   accountId?: Encoded.AccountAddress
   amount: number
-  arguments: TxArguments[]
-  callData?: string // TODO find source
+  arguments: TxArguments[];
+  callData?: Encoded.ContractBytearray;
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: Encoded.AccountAddress
   code?: string
@@ -551,6 +551,7 @@ export interface IPopupConfig {
   resolve?: any;
   reject?: any;
   show?: boolean;
+  txBase64?: Encoded.Transaction;
 }
 
 export interface IResponseChallenge {
