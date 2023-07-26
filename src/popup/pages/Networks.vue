@@ -17,7 +17,7 @@
             :key="network.name"
             :network="network"
             :is-active="network.name === activeNetwork.name"
-            @selectNetwork="switchNetwork"
+            @selectNetwork="switchNetworkHandler"
             @deleteNetwork="deleteCustomNetwork"
           />
         </div>
@@ -41,6 +41,7 @@ import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { useNetworks } from '@/composables';
 import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
+import { IS_MOBILE_APP } from '@/constants';
 
 import NetworkRow from '@/popup/components/NetworkRow.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
@@ -61,9 +62,17 @@ export default defineComponent({
       deleteCustomNetwork,
     } = useNetworks();
 
+    async function switchNetworkHandler(payload: any) {
+      switchNetwork(payload);
+      if (IS_MOBILE_APP) {
+        window.location.reload();
+      }
+    }
+
     return {
       activeNetwork,
       networks,
+      switchNetworkHandler,
       PlusCircleIcon,
       ROUTE_NETWORK_ADD,
       switchNetwork,
