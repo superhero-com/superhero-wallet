@@ -11,6 +11,7 @@ import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { getHdWalletAccount, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
@@ -69,7 +70,12 @@ export default {
     create({ state, commit }, isRestored = false) {
       commit(
         'accounts/add',
-        { idx: state.nextAccountIdx, type: ACCOUNT_HD_WALLET, isRestored },
+        {
+          idx: state.nextAccountIdx,
+          type: ACCOUNT_HD_WALLET,
+          isRestored,
+          protocol: PROTOCOL_AETERNITY,
+        },
         { root: true },
       );
       state.nextAccountIdx += 1;
