@@ -9,9 +9,8 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
+import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
-import { STUB_ACCOUNT } from '@/constants/stubs';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink, getHdWalletAccount } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
@@ -21,39 +20,25 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accountsRaw = computed((): IAeternityAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => {
-    if (!store.getters.wallet) return [];
-    const baseAccounts: IAccount[] = accountsRaw.value
+    if (!store.getters.wallet) {
+      return [];
+    }
+    return accountsRaw.value
       // Currently we support only HD Wallet
       .filter(({ type }) => type === ACCOUNT_HD_WALLET)
-      .map(({ idx, ...acc }) => ({
+      .map(({
+        idx, type, ...acc
+      }) => ({
         idx,
+        type,
         ...acc,
         ...getHdWalletAccount(store.getters.wallet, idx),
       }))
       .map(({ ...account }) => ({
         ...account,
-        name: store.getters['names/getDefault'](account.address),
         protocol: PROTOCOL_AETERNITY,
+        name: store.getters['names/getDefault'](account.address),
       }));
-
-    /**
-     * For the purpose of multichain Vue components architecture testing
-     * we add this dummy BTC account.
-     * TODO remove when PoC is approved
-     */
-    if (baseAccounts.length) {
-      baseAccounts.push({
-        idx: baseAccounts.length,
-        address: STUB_ACCOUNT.address,
-        protocol: PROTOCOL_BITCOIN,
-        publicKey: new Uint8Array(),
-        secretKey: new Uint8Array(),
-        showed: true,
-        type: 'hd-wallet',
-        isRestored: true,
-      });
-    }
-    return baseAccounts;
   });
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});

@@ -36,6 +36,8 @@ export * from './filter';
 export * from './forms';
 export * from './protocols';
 
+export type Class<T> = new (...args: unknown[]) => T
+
 export type Dictionary<T = any> = Record<string, T>;
 
 export type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T;
