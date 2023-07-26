@@ -28,10 +28,12 @@ export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
 export const PROTOCOL_AETERNITY = 'aeternity';
 export const PROTOCOL_BITCOIN = 'bitcoin';
+export const PROTOCOL_DOGECOIN = 'dogecoin';
 
 export const PROTOCOLS = [
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
+  PROTOCOL_DOGECOIN,
 ] as const;
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';

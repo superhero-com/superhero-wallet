@@ -13,6 +13,7 @@ import {
   MODAL_CONFIRM_TRANSACTION_SIGN,
   getHdWalletAccount,
   isTxOfASupportedType,
+  PROTOCOL_AETERNITY,
 } from '../../../popup/utils';
 
 export default {
@@ -48,7 +49,12 @@ export default {
     create({ state, commit }, isRestored = false) {
       commit(
         'accounts/add',
-        { idx: state.nextAccountIdx, type: ACCOUNT_HD_WALLET, isRestored },
+        {
+          idx: state.nextAccountIdx,
+          type: ACCOUNT_HD_WALLET,
+          isRestored,
+          protocol: PROTOCOL_AETERNITY,
+        },
         { root: true },
       );
       state.nextAccountIdx += 1;

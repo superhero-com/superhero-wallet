@@ -1,5 +1,4 @@
 import { computed } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { isEmpty, mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
@@ -24,7 +23,7 @@ import {
 } from './composablesHelpers';
 import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
-import { useAeSdk } from './aeSdk';
+import { useSdk } from './sdk';
 
 type Balances = Record<string, Balance>;
 
@@ -46,7 +45,7 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  * to live update the values. If no components are using it the polling stops.
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
-  const { getAeSdk } = useAeSdk({ store });
+  const { getSdk } = useSdk({ store });
   const { aeternityData } = useCurrencies();
   const { activeAccount, accounts } = useAccounts({ store });
 
@@ -71,10 +70,11 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   }
 
   async function updateBalances() {
-    const aeSdk = await getAeSdk();
     const balancesPromises = accounts.value.map(
-      // TODO - type address in IAccount interface
-      ({ address }) => aeSdk.getBalance(address as Encoded.AccountAddress).catch((error) => {
+      async ({
+        address,
+        protocol,
+      }) => (await getSdk(protocol)).getBalance(address).catch((error: any) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }

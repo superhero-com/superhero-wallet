@@ -14,6 +14,7 @@ export * from './multisigTransactions';
 export * from './notifications';
 export * from './pendingMultisigTransaction';
 export * from './aeSdk';
+export * from './sdk';
 export * from './tippingContracts';
 export * from './tokensList';
 export * from './topHeader';

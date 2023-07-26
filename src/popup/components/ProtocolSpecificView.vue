@@ -37,6 +37,7 @@ import InfoBox from './InfoBox.vue';
 const views: Record<Protocol, ProtocolViewsConfig> = {
   aeternity: aeternityViews,
   bitcoin: bitcoinViews,
+  dogecoin: bitcoinViews, // TODO: implement dogecoin view
 };
 
 export default defineComponent({

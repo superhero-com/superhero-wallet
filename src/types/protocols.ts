@@ -17,3 +17,12 @@ export type ProtocolView = typeof DISTINCT_PROTOCOL_VIEWS[number];
  * List of protocol views with corresponding dynamic imports.
  */
 export type ProtocolViewsConfig = Record<ProtocolView, () => Promise<any>>;
+
+/**
+ * Transaction fee varies to control the transaction confirmation time: slow, normal and fast
+ */
+export interface SpendTransactionFee {
+  low: string;
+  average: string;
+  max: string;
+}

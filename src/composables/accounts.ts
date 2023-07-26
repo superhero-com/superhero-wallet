@@ -9,42 +9,16 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import {
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
   getAccountNameToDisplay,
 } from '@/popup/utils';
 import { AeScan } from '@/lib/AeScan';
-import { testAccount } from '@/popup/utils/testsConfig';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
-  const accounts = computed((): IAccount[] => {
-    const baseAccounts: IAccount[] = (store.getters.accounts || []).map((acc: IAccount) => ({
-      ...acc,
-      protocol: PROTOCOL_AETERNITY,
-    }));
-
-    /**
-     * For the purpose of multichain Vue components architecture testing
-     * we add this dummy BTC account.
-     * TODO remove when PoC is approved
-     */
-    if (baseAccounts.length) {
-      baseAccounts.push({
-        idx: baseAccounts.length,
-        address: testAccount.address,
-        protocol: PROTOCOL_BITCOIN,
-        publicKey: new Uint8Array(),
-        secretKey: new Uint8Array(),
-        showed: true,
-        type: '',
-      });
-    }
-    return baseAccounts;
-  });
+  const accounts = computed((): IAccount[] => store.getters.accounts || []);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
   const isLoggedIn = computed(

@@ -10,6 +10,7 @@ import {
   ACCOUNT_HD_WALLET,
   TX_DIRECTION,
   getHdWalletAccount,
+  PROTOCOL_AETERNITY,
 } from '@/popup/utils';
 import { useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
@@ -26,9 +27,12 @@ export default {
   accounts({ accounts: { list } }, getters) {
     if (!getters.wallet) return [];
     return list
-      .map(({ idx, type, ...acc }) => ({
+      .map(({
+        idx, type, protocol, ...acc
+      }) => ({
         idx,
         type,
+        protocol: protocol || PROTOCOL_AETERNITY,
         ...acc,
         ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))

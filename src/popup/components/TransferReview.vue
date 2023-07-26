@@ -141,7 +141,7 @@ import {
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useAeSdk,
+  useSdk,
   useUi,
   useTippingContracts,
 } from '@/composables';
@@ -200,7 +200,7 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getAeSdk } = useAeSdk({ store });
+    const { getSdk } = useSdk({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && isAensNameValid(props.recipientAddress),
     );
@@ -220,15 +220,15 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const aeSdk = await getAeSdk();
+      const sdk = await getSdk();
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
       try {
-        let actionResult;
+        let transactionHash;
 
         if (props.transferData.invoiceId !== null) {
-          actionResult = await store.dispatch('fungibleTokens/burnTriggerPoS', [
+          transactionHash = await store.dispatch('fungibleTokens/burnTriggerPoS', [
             selectedAsset.contractId,
             amount,
             props.transferData.invoiceContract,
@@ -236,22 +236,22 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else if (!isSelectedAssetAeCoin) {
-          actionResult = await store.dispatch('fungibleTokens/transfer', [
+          transactionHash = await store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
             recipient,
             amount,
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await aeSdk.spendWithCustomOptions(amount, recipient, {
+          transactionHash = await sdk.spend(amount, recipient, {
             payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
           });
         }
 
-        if (actionResult && !isSelectedAssetAeCoin) {
+        if (transactionHash && !isSelectedAssetAeCoin) {
           const transaction: ITransaction = {
-            hash: actionResult.hash,
+            hash: transactionHash,
             pendingTokenTx: true,
             pending: true,
             transactionOwner: activeAccount.value.address,
@@ -268,9 +268,9 @@ export default defineComponent({
           };
 
           store.dispatch('addPendingTransaction', transaction);
-        } else if (actionResult) {
+        } else if (transactionHash) {
           const transaction: ITransaction = {
-            hash: actionResult.hash,
+            hash: transactionHash,
             pending: true,
             transactionOwner: activeAccount.value.address,
             tx: {
@@ -289,7 +289,7 @@ export default defineComponent({
           store.dispatch('addPendingTransaction', transaction);
         }
         emit('success');
-        return actionResult.hash;
+        return transactionHash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
