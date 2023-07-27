@@ -9,7 +9,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
-      // "@/*": ["src/*"] // TODO - Uncomment when short paths will be enabled again
+      "@/*": ["src/*"]
     },
     "strict": true,
     "strictFunctionTypes": false,
