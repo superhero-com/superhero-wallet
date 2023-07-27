@@ -73,7 +73,11 @@ module.exports = {
       enableInSFC: false,
     },
   },
-
+  configureWebpack: {
+    experiments: {
+      asyncWebAssembly: true,
+    },
+  },
   chainWebpack: (config) => {
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
