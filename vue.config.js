@@ -152,12 +152,10 @@ module.exports = {
     }
 
     config.resolve.alias
-      .delete('@')
       .set('core-js-pure', 'core-js')
-      .set('lodash', 'lodash-es')
-      .parent.parent
-      .module
-      .rule('aes')
+      .set('lodash', 'lodash-es');
+
+    config.module.rule('aes')
       .test(/\.aes$/)
       .use('raw-loader')
       .loader('raw-loader')
@@ -209,6 +207,7 @@ module.exports = {
       .use('svgo-loader')
       .loader('svgo-loader')
       .end();
+
     return config;
   },
 

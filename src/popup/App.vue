@@ -57,13 +57,13 @@ import {
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { WalletRouteMeta } from '../types';
+import { WalletRouteMeta } from '@/types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
   watchUntilTruthy,
-} from './utils';
+} from '@/popup/utils';
 import {
   IS_WEB,
   IS_IOS,
@@ -73,7 +73,7 @@ import {
   IS_CHROME_BASED,
   IS_FIREFOX,
   RUNNING_IN_POPUP,
-} from '../lib/environment';
+} from '@/lib/environment';
 import {
   useAccounts,
   useConnection,
@@ -82,11 +82,11 @@ import {
   useNotifications,
   useUi,
   useViewport,
-} from '../composables';
+} from '@/composables';
 
-import Header from './components/Header.vue';
-import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
-import Close from '../icons/close.svg?vue-component';
+import Header from '@/popup/components/Header.vue';
+import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import Close from '@/icons/close.svg?vue-component';
 
 export default defineComponent({
   name: 'App',
