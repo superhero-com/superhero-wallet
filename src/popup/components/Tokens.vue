@@ -39,16 +39,18 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { ITokenResolved } from '../../types';
+import { ITokenResolved } from '@/types';
 import {
-  AETERNITY_COIN_NAME,
-  AETERNITY_COIN_SYMBOL,
-  AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
-  AVATAR_URL,
   truncateString as truncateStringFactory,
-} from '../utils';
-import AeIcon from '../../icons/tokens/ae.svg';
+} from '@/popup/utils';
+import {
+  AE_AVATAR_URL,
+  AE_COIN_NAME,
+  AE_COIN_SYMBOL,
+  AE_CONTRACT_ID,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
+import AeIcon from '@/icons/tokens/ae.svg';
 
 const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
 
@@ -89,17 +91,17 @@ export default defineComponent({
     }
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
-      return `${AVATAR_URL}${token.contractId}`;
+      return `${AE_AVATAR_URL}${token.contractId}`;
     }
 
     function mapToken(token: ITokenResolved): ITokenResolved {
       let { image, symbol } = token;
       let name = token.symbol;
 
-      if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
+      if (token.isAe || token.contractId === AE_CONTRACT_ID) {
         image = AeIcon;
-        symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
-        name = AETERNITY_COIN_NAME;
+        symbol = props.fullAeSymbol ? AE_COIN_SYMBOL : AE_SYMBOL;
+        name = AE_COIN_NAME;
       }
 
       return {

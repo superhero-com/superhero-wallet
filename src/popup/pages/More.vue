@@ -42,7 +42,7 @@
 
     <PanelItem
       v-if="isNodeMainnet && !IS_IOS"
-      :href="SIMPLEX_URL"
+      :href="AE_SIMPLEX_URL"
       :title="$t('pages.fungible-tokens.buyAe')"
     >
       <template #icon>
@@ -60,7 +60,7 @@
     </PanelItem>
 
     <PanelItem
-      :href="DEX_URL"
+      :href="AE_DEX_URL"
       :title="$t('pages.more.dex')"
     >
       <template #icon>
@@ -83,13 +83,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { IS_IOS } from '../../lib/environment';
+import { IS_IOS } from '@/lib/environment';
+import { BUG_REPORT_URL } from '@/popup/utils';
 import {
-  BUG_REPORT_URL,
-  DEX_URL,
-  SIMPLEX_URL,
-} from '../utils/constants';
-import { useAccounts, useAeSdk } from '../../composables';
+  AE_DEX_URL,
+  AE_SIMPLEX_URL,
+} from '@/protocols/aeternity/config';
+import { useAccounts, useAeSdk } from '@/composables';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -121,10 +121,10 @@ export default defineComponent({
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     return {
+      AE_DEX_URL,
+      AE_SIMPLEX_URL,
       BUG_REPORT_URL,
-      DEX_URL,
       IS_IOS,
-      SIMPLEX_URL,
       activeAccountFaucetUrl,
       isNodeMainnet,
       isNodeTestnet,

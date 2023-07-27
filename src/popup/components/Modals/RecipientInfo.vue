@@ -40,7 +40,7 @@
             class="help"
             scope="global"
           >
-            <a :href="BLOG_CLAIM_TIP_URL">
+            <a :href="AE_BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
           </i18n-t>
@@ -61,8 +61,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { ResolveCallback } from '../../../types';
-import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
+import { ResolveCallback } from '@/types';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -77,7 +77,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      BLOG_CLAIM_TIP_URL,
+      AE_BLOG_CLAIM_TIP_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },

@@ -1,35 +1,36 @@
 import BigNumber from 'bignumber.js';
 import getters from '../../../src/store/getters';
 import { transactions } from '../../../src/popup/utils/testsConfig';
-import { TX_DIRECTION, AETERNITY_COIN_PRECISION, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
+import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
+import { TX_DIRECTION, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
 
 const TEST_TOKEN_DECIMALS = 12;
 
 const tests = [{
   transaction: transactions.payForGaAttach,
   resultSent: new BigNumber(transactions.payForGaAttach.tx.fee)
-    .plus(transactions.payForGaAttach.tx.tx.tx.fee).shiftedBy(-AETERNITY_COIN_PRECISION),
+    .plus(transactions.payForGaAttach.tx.tx.tx.fee).shiftedBy(-AE_COIN_PRECISION),
   resultReceived: 0,
 }, {
   transaction: transactions.gaMetaSpend,
   resultSent: new BigNumber(transactions.gaMetaSpend.tx.tx.tx.amount)
     .plus(transactions.gaMetaSpend.tx.tx.tx.fee)
     .plus(transactions.gaMetaSpend.tx.fee)
-    .shiftedBy(-AETERNITY_COIN_PRECISION),
+    .shiftedBy(-AE_COIN_PRECISION),
   resultReceived: new BigNumber(transactions.gaMetaSpend.tx.tx.tx.amount)
-    .shiftedBy(-AETERNITY_COIN_PRECISION),
+    .shiftedBy(-AE_COIN_PRECISION),
 }, {
   transaction: transactions.nameClaim,
   resultSent: new BigNumber(transactions.nameClaim.tx.fee)
-    .plus(transactions.nameClaim.tx.nameFee).shiftedBy(-AETERNITY_COIN_PRECISION),
+    .plus(transactions.nameClaim.tx.nameFee).shiftedBy(-AE_COIN_PRECISION),
 },
 ...[transactions.spend, transactions.tip, transactions.retip, transactions.claim]
   .map((transaction) => ({
     transaction,
     resultSent: new BigNumber(transaction.tx.amount)
       .plus(transaction.tx.fee)
-      .shiftedBy(-AETERNITY_COIN_PRECISION),
-    resultReceived: new BigNumber(transaction.tx.amount).shiftedBy(-AETERNITY_COIN_PRECISION),
+      .shiftedBy(-AE_COIN_PRECISION),
+    resultReceived: new BigNumber(transaction.tx.amount).shiftedBy(-AE_COIN_PRECISION),
   })),
 ...[
   transactions.transfer, transactions.createAllowance,

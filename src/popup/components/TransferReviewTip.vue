@@ -76,8 +76,10 @@
 <script>
 import { useStore } from 'vuex';
 
-import { AGGREGATOR_URL, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { useAccounts } from '../../composables';
+import { AGGREGATOR_URL } from '@/popup/utils';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import { useAccounts } from '@/composables';
+
 import ModalHeader from './ModalHeader.vue';
 import TokenAmount from './TokenAmount.vue';
 import FormTextarea from './form/FormTextarea.vue';
@@ -112,15 +114,14 @@ export default {
   data() {
     return {
       AGGREGATOR_URL,
-      AETERNITY_CONTRACT_ID,
+      AE_CONTRACT_ID,
       note: '',
       noteMaxLength: 280,
     };
   },
   computed: {
     isAex9() {
-      return !!this.transferData.selectedAsset
-        && this.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID;
+      return this.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID;
     },
     noteError() {
       return (this.note.length > this.noteMaxLength)

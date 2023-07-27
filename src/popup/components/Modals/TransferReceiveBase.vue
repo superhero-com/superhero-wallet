@@ -104,14 +104,14 @@ import type {
   IToken,
   ITokenList,
   ResolveCallback,
-} from '../../../types';
-import { IS_MOBILE_DEVICE } from '../../../lib/environment';
-import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
-import { useAccounts, useCopy } from '../../../composables';
+} from '@/types';
+import { IS_MOBILE_DEVICE } from '@/lib/environment';
+import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { useAccounts, useCopy } from '@/composables';
 import {
-  AETERNITY_SYMBOL,
-  AETERNITY_CONTRACT_ID,
-} from '../../utils';
+  AE_CONTRACT_ID,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
 
 import InputAmount from '../InputAmount.vue';
 import QrCode from '../QrCode.vue';
@@ -160,9 +160,9 @@ export default defineComponent({
       if (!amount.value || +amount.value <= 0) {
         return {};
       }
-      const token = (selectedAsset.value?.contractId === AETERNITY_CONTRACT_ID)
-        ? AETERNITY_SYMBOL
-        : selectedAsset.value?.contractId || AETERNITY_SYMBOL;
+      const token = (selectedAsset.value?.contractId === AE_CONTRACT_ID)
+        ? AE_SYMBOL
+        : selectedAsset.value?.contractId || AE_SYMBOL;
       const tokenResult = { token, amount: amount.value.toString() };
       return account ? { ...tokenResult, account } : tokenResult;
     }

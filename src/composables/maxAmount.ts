@@ -18,14 +18,16 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type {
   IAsset,
   IDefaultComposableOptions,
-} from '../types';
+} from '@/types';
 import {
-  AETERNITY_COIN_PRECISION,
-  AETERNITY_CONTRACT_ID,
+  AE_COIN_PRECISION,
+  AE_CONTRACT_ID,
+} from '@/protocols/aeternity/config';
+import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
   executeAndSetInterval,
@@ -65,7 +67,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const selectedAssetDecimals = ref(0);
 
   const max = computed(() => {
-    if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
+    if (balance.value && formModel.value?.selectedAsset?.contractId === AE_CONTRACT_ID) {
       const _max = balance.value.minus(fee.value);
       return (_max.isPositive() ? _max : 0).toString();
     }
@@ -75,33 +77,36 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   watch(
     () => formModel.value,
     async (val) => {
-      if (!val?.selectedAsset) return;
+      if (!val?.selectedAsset) {
+        return;
+      }
       const aeSdk = await getAeSdk();
+      const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
 
-      if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+      if (!isAssetAe) {
         if (
           !tokenInstance
           || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
           tokenInstance = await aeSdk.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
-            address: val.selectedAsset.contractId,
+            address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
       const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
-      const amount = new BigNumber(numericAmount).shiftedBy(AETERNITY_COIN_PRECISION);
+      const amount = new BigNumber(numericAmount).shiftedBy(AE_COIN_PRECISION);
 
       if (
-        val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+        !isAssetAe
         || (
           val.address && !checkAensName(val.address) && validateTipUrl(val.address)
         )
       ) {
         let calldata: Encoded.ContractBytearray = STUB_CALLDATA;
-        if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID && tokenInstance) {
+        if (tokenInstance) {
           calldata = tokenInstance._calldata.encode(
             tokenInstance._name,
             'transfer',
@@ -112,7 +117,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           buildTx({
             tag: Tag.ContractCallTx,
             callerId: activeAccount.value.address,
-            contractId: val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+            contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
             amount: 0,
@@ -120,14 +125,11 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
             nonce: nonce.value,
           }) as any,
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-        ).fee).shiftedBy(-AETERNITY_COIN_PRECISION);
+        ).fee).shiftedBy(-AE_COIN_PRECISION);
         return;
       }
 
-      if (
-        val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
-        && tokenInstance
-      ) {
+      if (isAssetAe && tokenInstance) {
         tokenInstance = null;
       }
 
@@ -141,7 +143,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           nonce: nonce.value,
         }) as any,
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-      ).fee).shiftedBy(-AETERNITY_COIN_PRECISION);
+      ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
     {

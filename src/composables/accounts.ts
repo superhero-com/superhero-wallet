@@ -8,18 +8,18 @@ import type {
   IFormSelectOption,
   INetwork,
 } from '@/types';
-import { tg } from '../store/plugins/languages';
+import { tg } from '@/store/plugins/languages';
 import {
   ACCOUNT_HD_WALLET,
-  FAUCET_URL,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
-  buildSimplexLink,
   getAccountNameToDisplay,
   getHdWalletAccount,
-} from '../popup/utils';
-import { AeScan } from '../lib/AeScan';
-import { testAccount } from '../popup/utils/testsConfig';
+} from '@/popup/utils';
+import { AeScan } from '@/lib/AeScan';
+import { testAccount } from '@/popup/utils/testsConfig';
+import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
+import { buildSimplexLink } from '@/protocols/aeternity/utils';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -91,7 +91,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
-  const activeAccountFaucetUrl = computed(() => `${FAUCET_URL}?address=${activeAccount.value.address}`);
+  const activeAccountFaucetUrl = computed(() => `${AE_FAUCET_URL}?address=${activeAccount.value.address}`);
 
   function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);

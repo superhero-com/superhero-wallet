@@ -76,8 +76,8 @@ import { Field, useFieldError } from 'vee-validate';
 import {
   IToken,
   ITransaction,
-} from '../../types';
-import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
+} from '@/types';
+import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { convertToken } from '../utils';
 import {
   useDeepLinkApi,
@@ -137,9 +137,9 @@ export default defineComponent({
     async function sendTip() {
       const amount = convertToken(
         +(formModel.value.amount || 0),
-        formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
+        formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID
           ? (formModel.value.selectedAsset as IToken).decimals
-          : AETERNITY_COIN_PRECISION,
+          : AE_COIN_PRECISION,
       ).toNumber();
       loading.value = true;
       try {
@@ -154,7 +154,7 @@ export default defineComponent({
         if (
           tippingV2
           && formModel.value.selectedAsset?.contractId
-          && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+          && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
           await store.dispatch(
             'fungibleTokens/createOrChangeAllowance',

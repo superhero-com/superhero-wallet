@@ -7,10 +7,12 @@ import type {
   BalanceRaw,
   ICoin,
   IDefaultComposableOptions,
-} from '../types';
+} from '@/types';
 import {
-  AETERNITY_SYMBOL,
-  AETERNITY_CONTRACT_ID,
+  AE_SYMBOL,
+  AE_CONTRACT_ID,
+} from '@/protocols/aeternity/config';
+import {
   aettosToAe,
   isNotFoundError,
   handleUnknownError,
@@ -59,9 +61,9 @@ export function useBalances({ store }: IDefaultComposableOptions) {
 
   const aeternityCoin = computed((): ICoin => ({
     ...aeternityData.value!,
-    contractId: AETERNITY_CONTRACT_ID,
+    contractId: AE_CONTRACT_ID,
     convertedBalance: +balance.value,
-    symbol: AETERNITY_SYMBOL,
+    symbol: AE_SYMBOL,
   }));
 
   function getAccountBalance(address: string) {

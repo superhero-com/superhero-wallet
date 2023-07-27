@@ -142,7 +142,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.gasPrice)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -159,7 +159,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(multisigTx.fee)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -171,7 +171,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.fee)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -184,7 +184,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(totalSpent)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
                 high-precision
               />
             </template>
@@ -277,13 +277,13 @@ import {
   formatTime,
   aettosToAe,
   splitAddress,
-  AETERNITY_SYMBOL,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   TX_FUNCTIONS_MULTISIG,
   getPayload,
   blocksToRelativeTime,
   isInsufficientBalanceError,
-} from '../utils';
+} from '@/popup/utils';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import type {
   IGAMetaTx,
   TxFunctionMultisig,
@@ -514,7 +514,7 @@ export default defineComponent({
     onBeforeUnmount(stopFetchingAdditionalInfo);
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,

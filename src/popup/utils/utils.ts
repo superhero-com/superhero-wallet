@@ -23,14 +23,12 @@ import { useI18n } from 'vue-i18n';
 import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
-  AETERNITY_CONTRACT_ID,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   HASH_PREFIXES_ALLOWED,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
   SEED_LENGTH,
-  SIMPLEX_URL,
   TX_DIRECTION,
   TX_TAGS_SUPPORTED,
   TX_FUNCTIONS,
@@ -263,12 +261,6 @@ export function blocksToRelativeTime(blocks: number) {
   return secondsToRelativeTime(blocks * 3 * 60);
 }
 
-export function buildSimplexLink(address: string) {
-  const link = new URL(SIMPLEX_URL);
-  link.searchParams.set('wallet_address', address);
-  return link.toString();
-}
-
 /**
  * Watch for the getter to be truthy with the use of the compositionApi.
  */
@@ -485,11 +477,6 @@ export function getTxTag(tx: ITx): Tag | null {
     return Tag[tx.type as TxType];
   }
   return null;
-}
-
-export function isTransactionAex9(transaction: ITransaction): boolean {
-  const token = categorizeContractCallTxObject(transaction)?.token;
-  return !!transaction.tx && !!token && token !== AETERNITY_CONTRACT_ID;
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {

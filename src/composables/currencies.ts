@@ -5,14 +5,16 @@ import type {
   CurrencyRates,
   ICoin,
   ICurrency,
-} from '../types';
+} from '@/types';
 import {
-  AETERNITY_TOKEN_BASE_DATA,
+  AE_COINGECKO_COIN_ID,
+  AE_TOKEN_BASE_DATA,
+} from '@/protocols/aeternity/config';
+import {
   CURRENCIES,
   getLocalStorageItem,
   handleUnknownError,
   setLocalStorageItem,
-  AETERNITY_COIN_ID,
 } from '../popup/utils';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -56,13 +58,13 @@ export function useCurrencies({
   async function loadAeternityData() {
     try {
       const aeMarketData = await CoinGecko.fetchCoinMarketData(
-        AETERNITY_COIN_ID,
+        AE_COINGECKO_COIN_ID,
         currentCurrencyCode.value,
       );
 
       aeternityData.value = {
         ...aeMarketData || {} as any,
-        ...AETERNITY_TOKEN_BASE_DATA,
+        ...AE_TOKEN_BASE_DATA,
         convertedBalance: new BigNumber(0),
       };
     } catch (e) {
@@ -78,7 +80,7 @@ export function useCurrencies({
   }
 
   async function loadCurrencyRates() {
-    const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(AETERNITY_COIN_ID);
+    const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(AE_COINGECKO_COIN_ID);
 
     if (fetchedCurrencyRates) {
       currencyRates.value = fetchedCurrencyRates;

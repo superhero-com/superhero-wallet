@@ -11,7 +11,7 @@
         <p v-if="UNFINISHED_FEATURES">
           <section class="help">
             {{ $t('modals.readMore.msg') }}
-            <a :href="BLOG_CLAIM_TIP_URL">
+            <a :href="AE_BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
           </section>
@@ -31,8 +31,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { ResolveCallback } from '../../../types';
-import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
+import type { ResolveCallback } from '@/types';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -49,10 +49,12 @@ export default defineComponent({
     type: { type: String, default: '' },
     icon: { type: String, default: '' },
   },
-  data: () => ({
-    BLOG_CLAIM_TIP_URL,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
+  setup() {
+    return {
+      AE_BLOG_CLAIM_TIP_URL,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+    };
+  },
 });
 </script>
 

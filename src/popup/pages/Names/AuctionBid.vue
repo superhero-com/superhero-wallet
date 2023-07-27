@@ -71,12 +71,14 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useForm, useFieldError, Field } from 'vee-validate';
 
-import { useModals, useAeSdk } from '../../../composables';
-import type { IAuctionBid } from '../../../types';
-import { useGetter } from '../../../composables/vuex';
+import type { IAuctionBid } from '@/types';
+import { useModals, useAeSdk } from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import {
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
 import {
   AENS_BID_MIN_RATIO,
-  AETERNITY_COIN_PRECISION,
   aeToAettos,
   STUB_ADDRESS,
   STUB_NONCE,
@@ -128,7 +130,7 @@ export default defineComponent({
           nameFee: aeToAettos(highestBid.value.multipliedBy(AENS_BID_MIN_RATIO).toString()),
         }) as any,
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-      ).fee).shiftedBy(-AETERNITY_COIN_PRECISION),
+      ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {

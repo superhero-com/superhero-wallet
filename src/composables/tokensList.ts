@@ -9,8 +9,8 @@ import type {
   ICoin,
   IAsset,
   Balance,
-} from '../types';
-import { AETERNITY_CONTRACT_ID } from '../popup/utils';
+} from '@/types';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useBalances } from './balances';
 import { useMultisigAccounts } from './multisigAccounts';
 
@@ -96,12 +96,12 @@ export function useTokensList({
     return allTokens.value
       .filter((token) => (
         !ownedOnly
-        || token.contractId === AETERNITY_CONTRACT_ID
+        || token.contractId === AE_CONTRACT_ID
         || tokenBalances.value.includes(token)
       ))
       .filter((token) => (
         !withBalanceOnly
-        || token.contractId === AETERNITY_CONTRACT_ID
+        || token.contractId === AE_CONTRACT_ID
         || (token.convertedBalance && +token.convertedBalance)
       ))
       .filter(({ symbol, name, contractId }) => (

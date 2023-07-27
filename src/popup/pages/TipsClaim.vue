@@ -17,7 +17,7 @@
         :msg="$t('modals.verify.msg')"
         :option="{
           attrs: {
-            href: BLOG_CLAIM_TIP_URL,
+            href: AE_BLOG_CLAIM_TIP_URL,
             target: '_blank'
           },
         }"
@@ -54,20 +54,21 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
-  BLOG_CLAIM_TIP_URL,
   MODAL_CLAIM_SUCCESS,
   aettosToAe,
   toURL,
   validateTipUrl,
-} from '../utils';
-import { IS_EXTENSION } from '../../lib/environment';
+} from '@/popup/utils';
+import { IS_EXTENSION } from '@/lib/environment';
 import {
   useAccounts,
   useModals,
   useAeSdk,
   useTippingContracts,
-} from '../../composables';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+} from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -166,7 +167,7 @@ export default defineComponent({
       normalizedUrl,
       tipUrl,
       isTippingSupported,
-      BLOG_CLAIM_TIP_URL,
+      AE_BLOG_CLAIM_TIP_URL,
     };
   },
 });

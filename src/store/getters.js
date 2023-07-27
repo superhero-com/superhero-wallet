@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
-  AETERNITY_SYMBOL,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
@@ -40,7 +40,7 @@ export default {
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
+    return availableTokens[contractCallData?.token]?.symbol || AE_SYMBOL;
   },
   getTxAmountTotal: (
     { fungibleTokens: { availableTokens } },

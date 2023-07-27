@@ -230,7 +230,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transactionFee)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -253,7 +253,6 @@ import { useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import {
-  AETERNITY_SYMBOL,
   formatDate,
   formatTime,
   aettosToAe,
@@ -263,10 +262,11 @@ import {
   getTransactionTipUrl,
   fetchJson,
   handleUnknownError,
-  isTransactionAex9,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
-} from '../utils';
+} from '@/popup/utils';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { isTransactionAex9 } from '@/protocols/aeternity/utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
 import { AeScan } from '../../lib/AeScan';
@@ -446,7 +446,7 @@ export default defineComponent({
     });
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       transaction,
       isSwap,
       isPool,

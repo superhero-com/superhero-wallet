@@ -1,7 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
-import { AETERNITY_SYMBOL, NETWORK_ID_TESTNET, TX_DIRECTION } from '../../src/popup/utils';
+import { TX_DIRECTION } from '../../src/popup/utils';
+import { AE_NETWORK_TESTNET_ID, AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -111,13 +112,13 @@ function mountComponent({ hasError = false } = {}) {
     getters: {
       getTx: () => () => testTransaction,
       getTxType: () => () => 'provide liquidity',
-      getTxSymbol: () => () => AETERNITY_SYMBOL,
+      getTxSymbol: () => () => AE_SYMBOL,
       getTransactionTipUrl: () => () => '',
       getTxAmountTotal: () => () => 1,
       getTxDirection: () => () => TX_DIRECTION.sent,
       getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTransactionAex9: () => () => true,
-      activeNetwork: () => NETWORK_ID_TESTNET,
+      activeNetwork: () => AE_NETWORK_TESTNET_ID,
     },
   });
 

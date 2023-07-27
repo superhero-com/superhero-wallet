@@ -22,14 +22,14 @@
       <TokenAmount
         :amount="+tokenData.convertedBalance || 0"
         :symbol="tokenData.symbol"
-        :aex9="tokenData.contractId !== AETERNITY_CONTRACT_ID"
+        :aex9="isTokenAeCoin"
         dynamic-sizing
         no-symbol
         hide-fiat
       />
     </div>
     <div
-      v-if="tokenData.contractId === AETERNITY_CONTRACT_ID"
+      v-if="isTokenAeCoin"
       class="row bottom"
     >
       <div class="price">
@@ -44,8 +44,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { IToken } from '../../../types';
-import { AETERNITY_CONTRACT_ID } from '../../utils';
+import type { IToken } from '@/types';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useCurrencies } from '../../../composables';
 
@@ -75,18 +75,20 @@ export default defineComponent({
       () => getFormattedFiat(props.tokenData.convertedBalance || 0),
     );
 
+    const isTokenAeCoin = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
+
     const targetRouteName = computed(() => {
       if (props.isMultisig) {
         return ROUTE_MULTISIG_COIN;
       }
-      if (props.tokenData.contractId === AETERNITY_CONTRACT_ID) {
+      if (isTokenAeCoin.value) {
         return ROUTE_COIN;
       }
       return ROUTE_TOKEN;
     });
 
     return {
-      AETERNITY_CONTRACT_ID,
+      isTokenAeCoin,
       price,
       targetRouteName,
       balanceFormatted,
