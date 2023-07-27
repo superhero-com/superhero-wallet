@@ -128,16 +128,16 @@ import BigNumber from 'bignumber.js';
 import { getExecutionCost } from '@aeternity/aepp-sdk';
 import ContractByteArrayEncoder from '@aeternity/aepp-calldata/src/ContractByteArrayEncoder';
 
-import { tg } from '../../../store/plugins/languages';
-import { RejectedByUserError } from '../../../lib/errors';
+import { tg } from '@/store/plugins/languages';
+import { RejectedByUserError } from '@/lib/errors';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { isTransactionAex9 } from '@/protocols/aeternity/utils';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
-  AETERNITY_SYMBOL,
   TX_DIRECTION,
   convertToken,
-  isTransactionAex9,
   getAeFee,
   fetchJson,
   postJson,
@@ -284,7 +284,7 @@ export default defineComponent({
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isAe ? AETERNITY_SYMBOL : swapTokenAmountData.value.symbol,
+      () => swapTokenAmountData.value.isAe ? AE_SYMBOL : swapTokenAmountData.value.symbol,
     );
 
     const completeTransaction = computed(
@@ -441,7 +441,7 @@ export default defineComponent({
 
     return {
       AnimatedSpinner,
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       TX_FIELDS_TO_DISPLAY,
       error,
       executionCost,

@@ -36,7 +36,7 @@
         v-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
         :icon="SwapIcon"
         :text="$t('common.swap')"
-        :href="DEX_URL"
+        :href="AE_DEX_URL"
         :disabled="!isOnline"
       />
     </template>
@@ -51,13 +51,14 @@
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { IS_IOS } from '@/lib/environment';
-import { DEX_URL, PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/popup/utils';
+import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/popup/utils';
 import {
   useAccounts,
   useBalances,
   useConnection,
   useAeSdk,
 } from '@/composables';
+import { AE_DEX_URL } from '@/protocols/aeternity/config';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
@@ -102,7 +103,7 @@ export default defineComponent({
       CreditCardIcon,
       SwapIcon,
       FaucetIcon,
-      DEX_URL,
+      AE_DEX_URL,
       IS_IOS,
       isOnline,
       isNodeMainnet,

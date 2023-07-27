@@ -28,7 +28,7 @@
       <div
         v-else
         class="ae-symbol"
-        v-text="AETERNITY_SYMBOL"
+        v-text="AE_SYMBOL"
       />
     </template>
 
@@ -69,9 +69,9 @@ import {
   PropType,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useBalances, useCurrencies } from '../../composables';
-import type { IAsset } from '../../types';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL } from '../utils';
+import { useBalances, useCurrencies } from '@/composables';
+import type { IAsset } from '@/types';
+import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -95,7 +95,7 @@ export default defineComponent({
     const { currentCurrencyRate, formatCurrency } = useCurrencies();
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const isAssetAe = computed(() => currentAsset.value.contractId === AETERNITY_CONTRACT_ID);
+    const isAssetAe = computed(() => currentAsset.value.contractId === AE_CONTRACT_ID);
     const currentAssetFiatPrice = computed(
       () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
     );
@@ -119,8 +119,8 @@ export default defineComponent({
     });
 
     return {
+      AE_SYMBOL,
       currentCurrencyRate,
-      AETERNITY_SYMBOL,
       totalAmountFormatted,
       currentAssetFiatPrice,
       currentAssetFiatPriceFormatted,

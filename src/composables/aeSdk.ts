@@ -8,36 +8,38 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
 } from '@aeternity/aepp-sdk';
-import { AeSdkSupehero } from '../lib/AeSdkSupehero';
 import type {
   IDefaultComposableOptions,
   INetwork,
   IResponseChallenge,
   IRespondChallenge,
-} from '../types';
-import { App } from '../store/modules/permissions';
+} from '@/types';
+import { AeSdkSupehero } from '@/lib/AeSdkSupehero';
+import { FramesConnection } from '@/lib/FramesConnection';
+import { App } from '@/store/modules/permissions';
 import {
   IN_FRAME,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
   RUNNING_IN_TESTS,
-} from '../lib/environment';
+} from '@/lib/environment';
 import {
   DEX_CONTRACTS,
-  MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
-  NETWORK_ID_MAINNET,
-  NETWORK_ID_TESTNET,
+  MODAL_CONFIRM_CONNECT,
   NODE_STATUS_CONNECTED,
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
   watchUntilTruthy,
-} from '../popup/utils';
-import { showPopup } from '../background/popupHandler';
+} from '@/popup/utils';
+import { showPopup } from '@/background/popupHandler';
+import {
+  AE_NETWORK_MAINNET_ID,
+  AE_NETWORK_TESTNET_ID,
+} from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
-import { FramesConnection } from '../lib/FramesConnection';
 import { useModals } from './modals';
 
 let aeSdk: AeSdkSupehero;
@@ -59,8 +61,8 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
   const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-  const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
-  const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
+  const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
+  const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
   const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
 
   const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));

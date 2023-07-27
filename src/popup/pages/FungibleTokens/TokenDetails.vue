@@ -114,7 +114,7 @@
     >
       <template #text>
         <a
-          :href="DEX_URL"
+          :href="AE_DEX_URL"
           target="_blank"
         >
           {{ displayDexUrl }}
@@ -163,10 +163,9 @@ import {
   PropType,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import type { IAsset, IToken } from '../../../types';
+import type { IAsset, IToken } from '@/types';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import {
-  AETERNITY_CONTRACT_ID,
-  DEX_URL,
   amountRounded,
   convertToken,
   formatNumber,
@@ -195,9 +194,9 @@ export default defineComponent({
   setup(props) {
     const { formatCurrency } = useCurrencies();
 
-    const displayDexUrl = DEX_URL.replace('https://', '');
+    const displayDexUrl = AE_DEX_URL.replace('https://', '');
 
-    const isAe = computed(() => props.tokenData.contractId === AETERNITY_CONTRACT_ID);
+    const isAe = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
 
     const poolShare = computed(() => {
       if (!props.tokenPairs || !props.tokenPairs.balance || !props.tokenPairs.totalSupply) {
@@ -212,7 +211,7 @@ export default defineComponent({
     );
 
     return {
-      DEX_URL,
+      AE_DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       displayDexUrl,
       isAe,

@@ -38,17 +38,15 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useCurrencies } from '../../composables';
-import {
-  AETERNITY_SYMBOL,
-  calculateFontSize,
-} from '../utils';
+import { useCurrencies } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { calculateFontSize } from '@/popup/utils';
 
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
     label: { type: String, default: null },
-    symbol: { type: String, default: AETERNITY_SYMBOL },
+    symbol: { type: String, default: AE_SYMBOL },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
     hideFiat: Boolean,

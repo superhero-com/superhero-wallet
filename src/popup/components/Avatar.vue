@@ -14,10 +14,11 @@ import {
   onMounted,
   ref,
 } from 'vue';
-import type { INetwork } from '../../types';
-import { useGetter } from '../../composables/vuex';
-import { AVATAR_URL, checkImageAvailability, isContract } from '../utils';
-import { getAddressColor } from '../utils/avatar';
+import type { INetwork } from '@/types';
+import { useGetter } from '@/composables/vuex';
+import { checkImageAvailability, isContract } from '@/popup/utils';
+import { getAddressColor } from '@/popup/utils/avatar';
+import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
@@ -36,7 +37,7 @@ export default defineComponent({
     const error = ref(false);
     const hasProfileImage = ref(false);
     const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const avatar = computed(() => `${AVATAR_URL}${props.name || props.address}`);
+    const avatar = computed(() => `${AE_AVATAR_URL}${props.name || props.address}`);
     const color = computed(() => props.address ? getAddressColor(props.address) : null);
     const profileImage = computed(() => (isContract(props.address) || props.address === '')
       ? null

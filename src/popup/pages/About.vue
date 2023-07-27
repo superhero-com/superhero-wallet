@@ -11,7 +11,7 @@
       </div>
       <a
         class="table-item link"
-        :href="`${COMMIT_URL}${commitHash}`"
+        :href="`${AE_COMMIT_URL}${commitHash}`"
         target="_blank"
       >
         <div class="name">
@@ -92,10 +92,11 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
-import type { IMiddlewareStatus, INetwork } from '../../types';
-import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
-import { useMiddleware } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import type { IMiddlewareStatus, INetwork } from '@/types';
+import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/popup/utils/constants';
+import { useMiddleware } from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
 
 import PanelItem from '../components/PanelItem.vue';
 import Terms from '../../icons/terms.svg?vue-component';
@@ -122,7 +123,7 @@ export default defineComponent({
     return {
       BUG_REPORT_URL,
       AGGREGATOR_URL,
-      COMMIT_URL,
+      AE_COMMIT_URL,
       extensionVersion: process.env.npm_package_version,
       commitHash: process.env.COMMIT_HASH,
       sdkVersion: process.env.SDK_VERSION,
