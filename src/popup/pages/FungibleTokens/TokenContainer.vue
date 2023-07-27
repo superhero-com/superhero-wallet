@@ -44,7 +44,7 @@
         v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
         :text="$t('common.swap')"
         :icon="SwapIcon"
-        :href="DEX_URL"
+        :href="AE_DEX_URL"
       />
     </div>
 
@@ -93,12 +93,9 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, ITokenList } from '../../../types';
-import {
-  AETERNITY_CONTRACT_ID,
-  DEX_URL,
-  isContract,
-} from '../../utils';
+import type { IToken, ITokenList } from '@/types';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { isContract } from '@/popup/utils';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -164,8 +161,8 @@ export default defineComponent({
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = route.params.id as Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
-    const isAe = contractId === AETERNITY_CONTRACT_ID;
+    const contractId = route.params.id as Encoded.ContractAddress | typeof AE_CONTRACT_ID;
+    const isAe = contractId === AE_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
@@ -223,11 +220,10 @@ export default defineComponent({
     });
 
     return {
+      AE_DEX_URL,
       BuyIcon,
       SwapIcon,
       FaucetIcon,
-      DEX_URL,
-      AETERNITY_CONTRACT_ID,
       fungibleToken,
       contractId,
       isAe,

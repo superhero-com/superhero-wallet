@@ -32,8 +32,8 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useMultisigAccounts } from '../../composables';
-import { buildSimplexLink } from '../utils';
+import { useMultisigAccounts } from '@/composables';
+import { buildSimplexLink } from '@/protocols/aeternity/utils';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';

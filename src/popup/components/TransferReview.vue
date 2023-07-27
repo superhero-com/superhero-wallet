@@ -73,7 +73,7 @@
         <!-- TODO provide correct fee for the multisig -->
         <TokenAmount
           :amount="PROPOSE_TRANSACTION_FEE"
-          :symbol="AETERNITY_SYMBOL"
+          :symbol="AE_SYMBOL"
           hide-fiat
           high-precision
           data-cy="multisig-review-fee"
@@ -88,7 +88,7 @@
       <template #value>
         <TokenAmount
           :amount="+transferData.fee.toFixed()"
-          :symbol="AETERNITY_SYMBOL"
+          :symbol="AE_SYMBOL"
           high-precision
           data-cy="review-fee"
         />
@@ -96,14 +96,14 @@
     </DetailsItem>
 
     <DetailsItem
-      v-if="transferData.selectedAsset.contractId === AETERNITY_CONTRACT_ID"
+      v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
       :label="$t('common.total')"
       class="details-item"
     >
       <template #value>
         <TokenAmount
           :amount="+transferData.total"
-          :symbol="AETERNITY_SYMBOL"
+          :symbol="AE_SYMBOL"
           high-precision
           data-cy="review-total"
         />
@@ -140,10 +140,12 @@ import {
   useUi,
   useTippingContracts,
   useTransactionList,
-} from '../../composables';
+} from '@/composables';
 import {
-  AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
+  AE_CONTRACT_ID,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
+import {
   TX_FUNCTIONS,
   aeToAettos,
   checkAensName,
@@ -154,6 +156,7 @@ import {
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
 import { ITransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
+
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import AvatarWithChainName from './AvatarWithChainName.vue';
@@ -205,10 +208,9 @@ export default defineComponent({
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
-    const isSelectedAssetAex9 = computed(() => (
-      !!props.transferData.selectedAsset
-      && props.transferData.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
-    ));
+    const isSelectedAssetAex9 = computed(
+      () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
+    );
 
     // TODO provide correct fee for the multisig
     const PROPOSE_TRANSACTION_FEE = 0.000182940;
@@ -222,6 +224,7 @@ export default defineComponent({
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
       const aeSdk = await getAeSdk();
+      const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
       try {
@@ -235,7 +238,7 @@ export default defineComponent({
             props.transferData.invoiceId,
             { waitMined: false, modal: false },
           ]);
-        } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+        } else if (!isSelectedAssetAeCoin) {
           actionResult = await store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
             recipient,
@@ -249,7 +252,7 @@ export default defineComponent({
           });
         }
 
-        if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+        if (actionResult && !isSelectedAssetAeCoin) {
           const transaction: ITransaction = {
             hash: actionResult.hash,
             pendingTokenTx: true,
@@ -308,7 +311,7 @@ export default defineComponent({
         let txResult = null;
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tippingV2 || tippingV1;
-        if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID && tippingV2) {
+        if (selectedAsset.contractId !== AE_CONTRACT_ID && tippingV2) {
           await store.dispatch('fungibleTokens/createOrChangeAllowance', [
             selectedAsset.contractId,
             props.amount,
@@ -407,7 +410,7 @@ export default defineComponent({
         return;
       }
 
-      const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
+      const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
         ? aeToAettos(amountRaw)
         : convertToken(amountRaw, selectedAsset.decimals);
 
@@ -431,8 +434,8 @@ export default defineComponent({
     }
 
     return {
-      AETERNITY_SYMBOL,
-      AETERNITY_CONTRACT_ID,
+      AE_CONTRACT_ID,
+      AE_SYMBOL,
       PROPOSE_TRANSACTION_FEE,
       loading,
       submit,

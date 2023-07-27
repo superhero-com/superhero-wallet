@@ -85,7 +85,9 @@ import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
 import {
-  AETERNITY_COIN_PRECISION,
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
+import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
@@ -145,7 +147,7 @@ export default defineComponent({
           nameSalt: 0,
           nameFee: getMinimumNameFee(fullName.value),
         }) as any).toString())
-        .shiftedBy(-AETERNITY_COIN_PRECISION));
+        .shiftedBy(-AE_COIN_PRECISION));
 
     const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 

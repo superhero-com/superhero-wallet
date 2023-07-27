@@ -2,11 +2,13 @@ import { computed, ref } from 'vue';
 import { uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
-// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import BigNumber from 'bignumber.js';
-import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
+// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import {
-  AETERNITY_COIN_PRECISION,
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
+import {
   SUPPORTED_MULTISIG_CONTRACT_VERSION,
   fetchJson,
   handleUnknownError,
@@ -241,7 +243,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
               gaAccountId,
               nonce: Number(nonce.decodedResult),
               signers: signers.decodedResult,
-              balance: convertToken(balance, -AETERNITY_COIN_PRECISION),
+              balance: convertToken(balance, -AE_COIN_PRECISION),
               hasPendingTransaction,
               txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
             };

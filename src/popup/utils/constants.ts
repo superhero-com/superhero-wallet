@@ -12,10 +12,14 @@ import type {
   INetwork,
   INotificationSetting,
   IPermission,
-  IToken,
   DexFunctionType,
-} from '../../types';
-import { tg } from '../../store/plugins/languages';
+} from '@/types';
+import { tg } from '@/store/plugins/languages';
+import {
+  AE_NETWORK_MAINNET_ID,
+  AE_NETWORK_TESTNET_ID,
+  AE_NETWORK_MAINNET_NODE_URL,
+} from '@/protocols/aeternity/config';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -45,21 +49,6 @@ export const SEED_LENGTH = 12;
 
 export const DECIMAL_PLACES_HIGH_PRECISION = 9;
 export const DECIMAL_PLACES_LOW_PRECISION = 2;
-
-export const AETERNITY_CONTRACT_ID = 'aeternity';
-export const AETERNITY_SYMBOL = 'AE';
-export const AETERNITY_COIN_ID = 'aeternity';
-export const AETERNITY_COIN_SYMBOL = 'AE Coin';
-export const AETERNITY_COIN_NAME = 'Aeternity';
-export const AETERNITY_COIN_PRECISION = 18; // Amount of decimals
-
-export const AETERNITY_TOKEN_BASE_DATA: IToken = {
-  contractId: AETERNITY_CONTRACT_ID,
-  decimals: AETERNITY_COIN_PRECISION,
-  name: AETERNITY_COIN_NAME,
-  symbol: AETERNITY_COIN_SYMBOL,
-  convertedBalance: 0,
-};
 
 export const TX_DIRECTION = {
   sent: 'sent',
@@ -200,16 +189,9 @@ export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMM
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
 
-/**
- * Default `networkId` values returned by the Node after establishing the connection.
- * Nodes returns different values when connecting to the Hyperchains.
- */
-export const NETWORK_ID_MAINNET = 'ae_mainnet';
-export const NETWORK_ID_TESTNET = 'ae_uat';
-
 export const NETWORK_MAINNET: INetwork = {
-  url: 'https://mainnet.aeternity.io',
-  networkId: NETWORK_ID_MAINNET,
+  url: AE_NETWORK_MAINNET_NODE_URL,
+  networkId: AE_NETWORK_MAINNET_ID,
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
   explorerUrl: 'https://aescan.io',
   compilerUrl: 'https://compiler.aepps.com',
@@ -221,7 +203,7 @@ export const NETWORK_MAINNET: INetwork = {
 
 export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
-  networkId: NETWORK_ID_TESTNET,
+  networkId: AE_NETWORK_TESTNET_ID,
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
   explorerUrl: 'https://testnet.aescan.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
@@ -241,9 +223,6 @@ export const DEFAULT_WAITING_HEIGHT = 15;
 export const NODE_STATUS_CONNECTING = 'connecting';
 export const NODE_STATUS_CONNECTED = 'connected';
 export const NODE_STATUS_ERROR = 'error';
-
-export const AGGREGATOR_URL = 'https://superhero.com/';
-export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const TXS_PER_PAGE = 30;
 export const AENS_DOMAIN = '.chain';
@@ -472,16 +451,9 @@ export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/
 export const APP_LINK_ANDROID = 'https://play.google.com/store/apps/details?id=com.superhero.cordova';
 export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id1502786641';
 
-export const SIMPLEX_URL = 'https://simplex.superhero.com';
-export const FAUCET_URL = 'https://faucet.aepps.com';
-export const DEX_URL = 'https://aepp.dex.superhero.com';
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
-
-export const AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
-
-export const BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
-
-export const COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/commit/';
+export const AGGREGATOR_URL = 'https://superhero.com/';
+export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
@@ -510,7 +482,7 @@ export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 
 export const DEX_CONTRACTS: Record<string, IDexContracts> = {
-  [NETWORK_ID_MAINNET]: {
+  [AE_NETWORK_MAINNET_ID]: {
     router: [
       'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
     ],
@@ -518,7 +490,7 @@ export const DEX_CONTRACTS: Record<string, IDexContracts> = {
       'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
     ],
   },
-  [NETWORK_ID_TESTNET]: {
+  [AE_NETWORK_TESTNET_ID]: {
     router: [
       STUB_CONTRACT_ADDRESS,
       'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
