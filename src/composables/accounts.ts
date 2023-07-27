@@ -6,15 +6,15 @@ import type {
   IDefaultComposableOptions,
   IFormSelectOption,
   INetwork,
-} from '../types';
-import { tg } from '../store/plugins/languages';
+} from '@/types';
+import { tg } from '@/store/plugins/languages';
 import {
-  FAUCET_URL,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
-  buildSimplexLink,
   getAccountNameToDisplay,
-} from '../popup/utils';
+} from '@/popup/utils';
+import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
+import { buildSimplexLink } from '@/protocols/aeternity/utils';
 import { AeScan } from '../lib/AeScan';
 import { testAccount } from '../popup/utils/testsConfig';
 
@@ -76,7 +76,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
-  const activeAccountFaucetUrl = computed(() => `${FAUCET_URL}?address=${activeAccount.value.address}`);
+  const activeAccountFaucetUrl = computed(() => `${AE_FAUCET_URL}?address=${activeAccount.value.address}`);
 
   function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);

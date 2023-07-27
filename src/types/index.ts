@@ -17,7 +17,9 @@ import {
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
 import {
-  AETERNITY_CONTRACT_ID,
+  AE_CONTRACT_ID,
+} from '@/protocols/aeternity/config';
+import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
@@ -103,7 +105,7 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
+  contractId: Encoded.ContractAddress | typeof AE_CONTRACT_ID;
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;

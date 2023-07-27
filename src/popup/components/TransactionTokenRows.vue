@@ -34,12 +34,12 @@ import {
   computed, defineComponent, PropType, ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   amountRounded,
   convertToken,
   truncateString,
   calculateFontSize,
-  AETERNITY_SYMBOL,
   TX_DIRECTION,
 } from '../utils';
 import { useTransactionTokens } from '../../composables';
@@ -86,7 +86,7 @@ export default defineComponent({
         : token.amount;
     }
 
-    const getTokenName = (token: ITokenResolved) => token?.isAe ? AETERNITY_SYMBOL : token.symbol;
+    const getTokenName = (token: ITokenResolved) => token?.isAe ? AE_SYMBOL : token.symbol;
 
     return {
       filteredTokens,

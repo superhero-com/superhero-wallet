@@ -4,8 +4,8 @@ import {
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
-} from '../../types';
-import { AETERNITY_SYMBOL } from './constants';
+} from '@/types';
+import { AE_SYMBOL, AE_COIN_PRECISION } from '@/protocols/aeternity/config';
 
 /* eslint-disable no-unused-vars */
 interface TransactionResolverReturnData {
@@ -30,12 +30,12 @@ type TransactionResolvers = Partial<Record<TxFunctionParsed, TransactionResolver
 /* eslint-enable no-unused-vars */
 
 const defaultToken = {
-  symbol: AETERNITY_SYMBOL,
-  decimals: 18,
+  symbol: AE_SYMBOL,
+  decimals: AE_COIN_PRECISION,
 };
 const defaultPoolToken = {
   symbol: 'Pool Token',
-  decimals: 18,
+  decimals: AE_COIN_PRECISION,
 };
 
 // liquidityMethod: null - not a liquidity, add, remove
@@ -60,8 +60,8 @@ const genLiquiditySwapResolver: TransactionResolverGenerator = (
   let poolTokenSymbol;
   if ((tokens?.[tokenA.contractId] || tokenA.isAe)
     && (tokens?.[tokenB.contractId] || tokenB.isAe)) {
-    const symbolA = tokenA.isAe ? AETERNITY_SYMBOL : tokens?.[tokenA.contractId].symbol;
-    const symbolB = tokenB.isAe ? AETERNITY_SYMBOL : tokens?.[tokenB.contractId].symbol;
+    const symbolA = tokenA.isAe ? AE_SYMBOL : tokens?.[tokenA.contractId].symbol;
+    const symbolB = tokenB.isAe ? AE_SYMBOL : tokens?.[tokenB.contractId].symbol;
     poolTokenSymbol = `${symbolA}/${symbolB}`;
   }
 

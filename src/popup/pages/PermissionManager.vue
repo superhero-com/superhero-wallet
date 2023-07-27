@@ -159,7 +159,8 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
+import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
 import { useBalances, useCurrencies } from '../../composables';
 import { useState } from '../../composables/vuex';
@@ -200,8 +201,8 @@ export default defineComponent({
     const permissions = useState<Record<string, IPermission>>('permissions');
 
     const selectedAsset = computed(() => ({
-      contractId: AETERNITY_CONTRACT_ID,
-      symbol: AETERNITY_SYMBOL,
+      contractId: AE_CONTRACT_ID,
+      symbol: AE_SYMBOL,
       currentPrice: currentCurrencyRate.value,
     }));
 

@@ -41,6 +41,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import {
   getTransaction,
   getMultisigTransaction,
@@ -52,7 +53,6 @@ import {
   pipe,
   includesCaseInsensitive,
   TXS_PER_PAGE,
-  AETERNITY_CONTRACT_ID,
   TX_DIRECTION,
   TRANSACTION_OWNERSHIP_STATUS,
 } from '../utils';
@@ -152,7 +152,7 @@ export default defineComponent({
         return transactionList.filter((transaction) => {
           const innerTx = getInnerTransaction(transaction.tx);
 
-          if (props.tokenContractId !== AETERNITY_CONTRACT_ID) {
+          if (props.tokenContractId !== AE_CONTRACT_ID) {
             return innerTx?.contractId === props.tokenContractId;
           }
 

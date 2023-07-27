@@ -4,7 +4,8 @@ import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
-import { AETERNITY_SYMBOL, NETWORK_TESTNET } from '../../src/popup/utils';
+import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
+import { NETWORK_TESTNET } from '../../src/popup/utils';
 import { testAccount } from '../../src/popup/utils/testsConfig';
 
 const maxBalance = 10000;
@@ -92,7 +93,7 @@ describe('InputAmount', () => {
     defineRule('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
 
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
-    expect(wrapper.find('[data-cy=select-asset]').text()).toBe(AETERNITY_SYMBOL);
+    expect(wrapper.find('[data-cy=select-asset]').text()).toBe(AE_SYMBOL);
 
     // expect(wrapper.find('[data-cy=amount-currency]').text())
     //   .toBe(`($${test.currency.toFixed(2)})`);

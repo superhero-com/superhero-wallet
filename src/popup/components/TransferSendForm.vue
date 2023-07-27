@@ -207,15 +207,17 @@ import type {
   IInputMessage,
   IToken,
   ITokenList,
-} from '../../types';
+} from '@/types';
+import {
+  AE_CONTRACT_ID,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
 import {
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
-  AETERNITY_CONTRACT_ID,
   AGGREGATOR_URL,
   APP_LINK_WEB,
-  AETERNITY_SYMBOL,
   convertToken,
   validateTipUrl,
   checkAensName,
@@ -349,7 +351,7 @@ export default defineComponent({
       amountMessage.value.status === 'error' || addressMessage.value.status === 'error'
     ));
     const isAe = computed(
-      () => formModel.value.selectedAsset?.contractId === AETERNITY_CONTRACT_ID,
+      () => formModel.value.selectedAsset?.contractId === AE_CONTRACT_ID,
     );
     const isMaxValue = computed((): boolean => {
       const amountInt = +(formModel.value?.amount || 0);
@@ -402,7 +404,7 @@ export default defineComponent({
       token,
     }: Dictionary) {
       if (token) {
-        if (props.isMultisig && ![AETERNITY_SYMBOL, AETERNITY_CONTRACT_ID].includes(token)) {
+        if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(token)) {
           hasMultisigTokenWarning.value = true;
         } else {
           formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;

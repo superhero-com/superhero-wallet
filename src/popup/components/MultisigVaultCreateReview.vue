@@ -14,7 +14,7 @@
           class="creator-error-message"
           scope="global"
         >
-          <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
+          <span>{{ fee }} {{ AE_SYMBOL }}</span>
         </i18n-t>
       </template>
     </DetailsItem>
@@ -60,7 +60,7 @@
         <template #value>
           <TokenAmount
             :amount="fee"
-            :symbol="AETERNITY_SYMBOL"
+            :symbol="AE_SYMBOL"
           />
         </template>
       </DetailsItem>
@@ -94,13 +94,13 @@ import {
 import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import {
+import type {
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
-} from '../../types';
+} from '@/types';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
-  AETERNITY_SYMBOL,
   handleUnknownError,
   MODAL_CONSENSUS_INFO,
 } from '../utils';
@@ -195,7 +195,7 @@ export default defineComponent({
     }
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,

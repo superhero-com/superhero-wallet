@@ -6,13 +6,15 @@ import type {
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
-} from '../types';
+} from '@/types';
 import {
-  AETERNITY_SYMBOL,
-  AETERNITY_COIN_PRECISION,
+  AE_COIN_PRECISION,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
+import { isTransactionAex9 } from '@/protocols/aeternity/utils';
+import {
   TX_DIRECTION,
   convertToken,
-  isTransactionAex9,
   getInnerTransaction,
 } from '../popup/utils';
 import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
@@ -65,14 +67,14 @@ export function useTransactionTokens({
     return [{
       ...innerTx.value || {},
       amount: isAllowance
-        ? convertToken(innerTx.value?.fee || 0, -AETERNITY_COIN_PRECISION)
+        ? convertToken(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
         : getTxAmountTotal.value(transaction, direction),
-      symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
+      symbol: isAllowance ? AE_SYMBOL : getTxSymbol.value(transaction),
       isReceived: direction === TX_DIRECTION.received,
       isAe:
         isAllowance
         || (
-          getTxSymbol.value(transaction) === AETERNITY_SYMBOL
+          getTxSymbol.value(transaction) === AE_SYMBOL
           && !isTransactionAex9(transaction)
         ),
     }];
