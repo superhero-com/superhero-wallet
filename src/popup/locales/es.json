@@ -245,7 +245,7 @@
       "remaining-time": "Tiempo restante"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "le gustaría conectarse a su cuenta",
+      "websiteRequestConnect": "le gustaría conectarse a su cuenta",
       "websiteRequest": "Este sitio web está solicitando acceso para ver tu dirección de cuenta actual. Siempre asegúrate que confías en el sitio web con el que interactúas. ",
       "cancelButton": "Denegar",
       "confirmButton": "Aceptar",

@@ -458,6 +458,7 @@ export const MODAL_CONFIRM = 'confirm';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
+export const MODAL_CONFIRM_ACCOUNT_LIST = 'confirm-account-list';
 export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
 export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_HELP = 'help';
@@ -543,6 +544,7 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 } as const;
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
+export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
@@ -550,6 +552,7 @@ export const POPUP_TYPE_TX_SIGN = METHODS.sign;
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
@@ -563,6 +566,7 @@ export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
   name: '',
   address: false,
+  addressList: false,
   messageSign: false,
   dailySpendLimit: false,
   transactionSignLimit: 0,

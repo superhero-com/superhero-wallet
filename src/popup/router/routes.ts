@@ -67,6 +67,7 @@ import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
 import PermissionManager from '../pages/PermissionManager.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
+import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
@@ -314,6 +315,15 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'message-sign',
     path: '/message-sign',
     component: PopupMessageSign,
+    props: true,
+    meta: {
+      notPersist: true,
+    },
+  },
+  {
+    name: 'account-list',
+    path: '/account-list',
+    component: PopupAccountList,
     props: true,
     meta: {
       notPersist: true,

@@ -25,12 +25,14 @@ import {
 import {
   DEX_CONTRACTS,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_ACCOUNT_LIST,
   NETWORK_ID_MAINNET,
   NETWORK_ID_TESTNET,
   NODE_STATUS_CONNECTED,
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_ACCOUNT_LIST,
   watchUntilTruthy,
 } from '../popup/utils';
 import { showPopup } from '../background/popupHandler';
@@ -136,7 +138,29 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         }
         return activeAccount.value.address;
       },
-      onAskAccounts: () => {
+      async onAskAccounts(aeppId: string) {
+        const aepp = aeppInfo[aeppId];
+        const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
+        const app = new App(url);
+        if (!(await store.dispatch('permissions/requestAllAddressesForHost', {
+          host: app.host.host,
+          name: app.host.hostname,
+          address: activeAccount.value.address,
+          connectionPopupCb: () => IS_EXTENSION_BACKGROUND
+            ? showPopup(app.host.href, POPUP_TYPE_ACCOUNT_LIST)
+            : openModal(MODAL_CONFIRM_ACCOUNT_LIST, {
+              app: {
+                name: app.host.hostname,
+                icons: [],
+                protocol: app.host.protocol,
+                host: app.host.host,
+                url: app.host.href,
+              },
+            }),
+        }))
+        ) {
+          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+        }
         const { accountsAddressList } = useAccounts({ store });
         return accountsAddressList.value;
       },

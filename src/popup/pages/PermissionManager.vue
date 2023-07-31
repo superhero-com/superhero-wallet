@@ -56,6 +56,13 @@
 
     <div class="permission-row switch">
       <SwitchButton
+        v-model="permission.addressList"
+        :label="$t('pages.permissions.addressList')"
+      />
+    </div>
+
+    <div class="permission-row switch">
+      <SwitchButton
         v-model="permission.messageSign"
         :label="$t('pages.permissions.message-sign')"
       />

@@ -27,6 +27,11 @@
           v-if="recipient.aens"
           class="icon"
         />
+        <SHLogo
+          v-if="recipient.wallet"
+          class="icon logo"
+        />
+
         <ActionIcon
           v-else
           class="icon"
@@ -57,6 +62,7 @@ import type { IAccountOverview } from '../../types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
+import SHLogo from '../../icons/logo-small.svg?vue-component';
 
 import Avatar from './Avatar.vue';
 import TransactionInfoDetailsParty from './TransactionInfoDetailsParty.vue';
@@ -71,6 +77,7 @@ export default defineComponent({
     ActionIcon,
     AensIcon,
     Avatar,
+    SHLogo,
   },
   props: {
     sender: { type: Object as PropType<IAccountOverview>, required: true },
@@ -100,6 +107,10 @@ export default defineComponent({
       width: 36px;
       height: 36px;
       color: variables.$color-white;
+    }
+
+    .logo {
+      color: variables.$color-primary;
     }
 
     .mid {

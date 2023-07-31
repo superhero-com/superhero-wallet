@@ -199,7 +199,7 @@
       "remaining-time": "Temps restant"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "souhaite se connecter à votre compte",
+      "websiteRequestConnect": "souhaite se connecter à votre compte",
       "websiteRequest": "Ce site demande l'accès pour afficher votre adresse de compte courant. Assurez-vous toujours confiance au site Web vous interagissez avec. ",
       "cancelButton": "Annuler",
       "confirmButton": "Confirmer",

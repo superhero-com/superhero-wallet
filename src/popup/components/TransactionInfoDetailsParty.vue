@@ -15,6 +15,12 @@
       />
     </a>
     <span
+      v-else-if="txParty.wallet"
+      class="wallet"
+    >
+      {{ $t('common.title') }}
+    </span>
+    <span
       v-else
       class="name"
       :class="{ aens: txParty.aens }"
@@ -76,12 +82,14 @@ export default defineComponent({
     padding-left: $padding-middle;
     padding-right: $padding-edge;
 
-    .name {
+    .name,
+    .wallet {
       text-align: right;
     }
   }
 
-  .name {
+  .name,
+  .wallet {
     @extend %face-sans-15-medium;
 
     display: block;

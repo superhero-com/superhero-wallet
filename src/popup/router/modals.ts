@@ -8,6 +8,7 @@ import {
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_ERROR_LOG,
   MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
@@ -89,6 +90,9 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_MESSAGE_SIGN, {

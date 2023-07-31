@@ -33,6 +33,7 @@
     "send": "Send",
     "smartContract": "Smart contract",
     "swap": "Swap",
+    "title": "Superhero wallet",
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
@@ -558,9 +559,14 @@
       "remaining-time": "Remaining Time",
       "ending-height": "Ending height"
     },
+    "accountListConfirm": {
+      "websiteRequestConnect": "would like to connect to your Superhero wallet.",
+      "addressesRequest": "This aepp is requesting access to view all of your account addresses.",
+      "message": "Make sure you trust the aepp provider before accepting the request."
+    },
     "connectConfirm": {
       "title": "Allow access",
-      "websiteRequestconnect": "would like to connect to your account.",
+      "websiteRequestConnect": "would like to connect to your account.",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
@@ -1086,6 +1092,7 @@
     "permissions": {
       "login": "Don't ask for login requests",
       "message-sign": "Auto-sign messages",
+      "addressList": "Don't ask for list of all addresses",
       "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
