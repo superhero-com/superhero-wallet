@@ -491,8 +491,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/tips/:tip(.*)',
-    redirect: '/account/:account(.*)',
+    path: '/tips',
+    redirect: '/account',
   },
   {
     path: '/retip',

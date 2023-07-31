@@ -148,7 +148,10 @@ export function toURL(url: string): URL {
   return new URL(url.includes('://') ? url : `https://${url}`);
 }
 
-export function truncateAddress(address: string): [string, string] {
+export function truncateAddress(address: string | null): [string, string] {
+  if (!address) {
+    return ['', ''];
+  }
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
   const secondPart = address

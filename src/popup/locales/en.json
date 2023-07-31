@@ -311,6 +311,7 @@
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
+      "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
       "payload": "Payload"
     },
     "multisigTxProposal": {

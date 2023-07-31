@@ -70,7 +70,9 @@
         show-help
         show-message-help
         :label="$t('modals.send.recipientLabel')"
-        :placeholder="$t('modals.send.recipientPlaceholder')"
+        :placeholder="(isUrlTippingEnabled)
+          ? $t('modals.send.recipientPlaceholderUrl')
+          : $t('modals.send.recipientPlaceholder')"
         :message="addressMessage"
         @help="showRecipientHelp()"
       >
@@ -191,7 +193,6 @@ import {
   computed,
   ref,
   watch,
-  onMounted,
   PropType,
   nextTick,
 } from 'vue';
@@ -401,7 +402,7 @@ export default defineComponent({
       token,
     }: Dictionary) {
       if (token) {
-        if (props.isMultisig && token !== AETERNITY_SYMBOL) {
+        if (props.isMultisig && ![AETERNITY_SYMBOL, AETERNITY_CONTRACT_ID].includes(token)) {
           hasMultisigTokenWarning.value = true;
         } else {
           formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
@@ -529,23 +530,28 @@ export default defineComponent({
       { deep: true },
     );
 
-    onMounted(async () => {
-      if (
-        props.isMultisig
-        && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
-      ) {
-        store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
-      }
+    watch(
+      activeAccount,
+      () => {
+        if (
+          props.isMultisig
+          && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
+        ) {
+          store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+        }
 
-      const { query } = route;
-      if ([query['x-success'], query['x-cancel']].every((value) => value === AGGREGATOR_URL)) {
-        isUrlTippingEnabled.value = true;
-      }
-      updateFormModelValues({
-        ...query,
-        token: query.token || formModel.value?.selectedAsset?.contractId,
-      });
-    });
+        const { query } = route;
+        const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
+        if ([query['x-success'], query['x-cancel']].every((value) => value && (value as string).startsWith(slicedAggregatorUrl))) {
+          isUrlTippingEnabled.value = true;
+        }
+        updateFormModelValues({
+          ...query,
+          token: query.token || formModel.value?.selectedAsset?.contractId,
+        });
+      },
+      { deep: true, immediate: true },
+    );
 
     return {
       INFO_BOX_TYPES,
