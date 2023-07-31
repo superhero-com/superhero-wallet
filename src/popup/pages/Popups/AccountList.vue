@@ -22,7 +22,7 @@
     <div class="permissions">
       <template v-if="access.includes(POPUP_CONNECT_ADDRESS_PERMISSION)">
         <span class="title">
-          <CheckMark class="icon" /> {{ $t('common.address') }}
+          <CheckMark class="icon" /> {{ $t('common.allAddresses') }}
         </span>
         <div class="description">
           <p>
