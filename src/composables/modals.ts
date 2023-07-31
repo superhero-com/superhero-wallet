@@ -45,11 +45,11 @@ function registerModal(name: string, settings: IModalSettings) {
 
 /**
  * Composable that handles the logic of modal windows.
- * The modals opens in 2 ways:
+ * The modal opens in 2 ways:
  *
  * 1. If the app is working as an extension, mobile app or web app the modals opens
  *    as a stack of layers displayed above the actual app.
- * 2. If the app is open inside of a web iframe (eg. as a widget on the Superhero.com)
+ * 2. If the app is open inside a web iframe (e.g. as a widget on the Superhero.com)
  *    and the modal is registered with `showInPopupIfWebFrame` flag
  *    open separate browser window (popup) with the app covered with the modal
  *    taking whole space. Popup modal routes: router/webIframePopups.ts

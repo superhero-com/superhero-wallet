@@ -44,7 +44,7 @@ const lastRouteKey = 'last-path';
 const { isLoggedIn } = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
-RouteQueryActionsController.init(router);
+RouteQueryActionsController.init(router, isLoggedIn);
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);

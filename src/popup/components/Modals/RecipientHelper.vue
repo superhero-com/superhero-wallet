@@ -10,7 +10,7 @@
         {{ msg }}
         <p v-if="UNFINISHED_FEATURES">
           <section class="help">
-            {{ t('modals.readMore.msg') }}
+            {{ $t('modals.readMore.msg') }}
             <a :href="BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
