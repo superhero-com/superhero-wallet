@@ -19,6 +19,40 @@ html.is-extension {
   height: $extension-height;
 }
 
+// When scanner is active we need to hide everything else
+// because the scanner will show-up behind the webview
+body.scanner-active {
+  background-color: transparent;
+
+  --background: transparent;
+  --ion-background-color: transparent;
+  --screen-bg-color: transparent;
+
+  .app-wrapper {
+    --screen-bg-color: transparent;
+
+    background: transparent;
+  }
+
+  .ionic-wrapper {
+    background-color: transparent;
+  }
+
+  #app {
+    background: transparent;
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+  }
+
+  ion-content,
+  .ion-padding {
+    --background: transparent;
+
+    background: transparent;
+  }
+}
+
 ion-content {
   /** hide scrollbar **/
   --offset-bottom: auto !important;

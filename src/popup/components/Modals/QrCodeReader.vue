@@ -123,13 +123,11 @@ export default {
   },
   async mounted() {
     if (this.mobile) {
-      try {
-        await new Promise((resolve, reject) => BarcodeScanner.prepare((error, status) => (
-          !error && status.authorized
-            ? resolve() : reject(error || new Error('Denied to use the camera'))
-        )));
-      } catch {
+      if (await this.hasPermission()) {
+        await BarcodeScanner.prepare();
+      } else {
         this.cameraAllowed = false;
+        return;
       }
       this.resolve(await this.scan());
       return;
@@ -165,13 +163,18 @@ export default {
       return this.mobile
         ? new Promise((resolve, reject) => {
           this.setQrScanner(true);
-          window.plugins.webviewcolor.change('#00FFFFFF');
-          BarcodeScanner.startScan((error, text) => (!error && text)
-            ? resolve(text)
-            : reject(error));
-          BarcodeScanner.show();
-          ['body', '#app', '.app-wrapper'].forEach((s) => {
-            document.querySelector(s).style = 'background: transparent';
+
+          document.querySelector('body').classList.add('scanner-active');
+          BarcodeScanner.hideBackground().then(() => {
+            BarcodeScanner.startScan().then((result) => {
+              if (result.hasContent) {
+                resolve(result.content);
+              } else {
+                reject(new Error('No content'));
+              }
+            }, (error) => {
+              reject(error);
+            });
           });
 
           setTimeout(() => {
@@ -184,14 +187,28 @@ export default {
     },
     async stopReading() {
       if (this.mobile) {
-        ['body', '#app', '.app-wrapper'].forEach((s) => {
-          document.querySelector(s).style = 'background: #141414';
-        });
+        document.querySelector('body').classList.remove('scanner-active');
         BarcodeScanner.showBackground();
-        window.plugins.webviewcolor.change('#141414');
         this.setQrScanner(false);
         BarcodeScanner.stopScan();
       } else this.browserReader.reset();
+    },
+    async hasPermission() {
+      // check if user already granted permission
+      const status = await BarcodeScanner.checkPermission({ force: false });
+
+      if (status.granted) {
+        return true;
+      } if ((status.denied || status.restricted || status.unknown) && status.asked) {
+        return false;
+      }
+
+      const statusRequest = await BarcodeScanner.checkPermission({ force: true });
+
+      if (statusRequest.granted) {
+        return true;
+      }
+      return false;
     },
     cancelReading() {
       this.stopReading();
