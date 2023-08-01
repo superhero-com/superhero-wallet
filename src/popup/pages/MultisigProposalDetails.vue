@@ -100,7 +100,7 @@
 
           <PayloadDetails
             v-if="multisigTx"
-            :payload="getPayload(multisigTx)"
+            :payload="getPayload({ tx: multisigTx }, true)"
           />
 
           <div class="span-3-columns">

@@ -335,9 +335,26 @@ export async function fetchAllPages<T = any>(
   return result;
 }
 
-export function getPayload(transaction: ITransaction) {
-  return (transaction.tx?.payload)
-    ? decode(transaction.tx?.payload).toString()
+export function isContainingNestedTx(tx: ITx): boolean {
+  return [
+    'GAMetaTx', // aeSdk: GaMetaTx, mdw: GAMetaTx
+    Tag[Tag.GaMetaTx],
+    Tag[Tag.PayingForTx],
+  ].includes(tx.type);
+}
+
+export function getInnerTransaction(tx?: ITx): any {
+  if (!tx) {
+    return null;
+  }
+
+  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+}
+
+export function getPayload(transaction: ITransaction, isMultisigTx: boolean) {
+  const innerTx = isMultisigTx ? transaction.tx : getInnerTransaction(transaction.tx);
+  return (innerTx?.payload)
+    ? decode(innerTx?.payload).toString()
     : null;
 }
 
@@ -475,22 +492,6 @@ export function getTxTag(tx: ITx): Tag | null {
 export function isTransactionAex9(transaction: ITransaction): boolean {
   const token = categorizeContractCallTxObject(transaction)?.token;
   return !!transaction.tx && !!token && token !== AETERNITY_CONTRACT_ID;
-}
-
-export function isContainingNestedTx(tx: ITx): boolean {
-  return [
-    'GAMetaTx', // aeSdk: GaMetaTx, mdw: GAMetaTx
-    Tag[Tag.GaMetaTx],
-    Tag[Tag.PayingForTx],
-  ].includes(tx.type);
-}
-
-export function getInnerTransaction(tx?: ITx): any {
-  if (!tx) {
-    return null;
-  }
-
-  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
 export function getTransactionTipUrl(transaction: ITransaction): string {
