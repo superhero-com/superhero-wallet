@@ -1,7 +1,7 @@
 import {
   fetchJson,
   postJson,
-} from '../popup/utils';
+} from '@/utils';
 
 export default {
   switchNetwork({ commit }, payload) {

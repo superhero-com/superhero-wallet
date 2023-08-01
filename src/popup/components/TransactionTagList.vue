@@ -18,22 +18,21 @@ import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import { useTransactionTx } from '../../composables';
-import {
+import { useTransactionTx } from '@/composables';
+import type {
   INetwork,
   ITokenList,
   ITransaction,
-} from '../../types';
+} from '@/types';
+import { excludeFalsy, includes } from '@/utils';
 import {
   AENS,
   DEX,
   TX_DIRECTION,
   TX_FUNCTIONS,
   TX_TAGS_AENS,
-  excludeFalsy,
-  includes,
-  isTxFunctionDexPool,
-} from '../utils';
+} from '@/popup/utils';
+import { isTxFunctionDexPool } from '@/protocols/aeternity/helpers';
 
 import TransactionTag from './TransactionTag.vue';
 

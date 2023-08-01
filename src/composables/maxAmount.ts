@@ -24,17 +24,22 @@ import type {
   IDefaultComposableOptions,
 } from '@/types';
 import {
+  executeAndSetInterval,
+  isUrlValid,
+} from '@/utils';
+import {
+  STUB_CALLDATA,
+  STUB_CONTRACT_ADDRESS,
+  handleUnknownError,
+} from '@/popup/utils';
+import {
   AE_COIN_PRECISION,
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import {
-  STUB_CALLDATA,
-  STUB_CONTRACT_ADDRESS,
-  executeAndSetInterval,
-  validateTipUrl,
-  checkAensName,
-  handleUnknownError,
-} from '../popup/utils';
+  isAensNameValid,
+} from '@/protocols/aeternity/helpers';
+
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
@@ -102,7 +107,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (
         !isAssetAe
         || (
-          val.address && !checkAensName(val.address) && validateTipUrl(val.address)
+          val.address && !isAensNameValid(val.address) && isUrlValid(val.address)
         )
       ) {
         let calldata: Encoded.ContractBytearray = STUB_CALLDATA;

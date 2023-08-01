@@ -130,6 +130,11 @@ import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { ITransaction } from '@/types';
+import {
+  escapeSpecialChars,
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -142,19 +147,13 @@ import {
   useTransactionList,
 } from '@/composables';
 import {
-  AE_CONTRACT_ID,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
-import {
   TX_FUNCTIONS,
-  aeToAettos,
-  checkAensName,
-  convertToken,
-  escapeSpecialChars,
   handleUnknownError,
-} from '../utils';
-import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { ITransaction } from '../../types';
+} from '@/popup/utils';
+import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
+import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { aeToAettos, isAensNameValid } from '@/protocols/aeternity/helpers';
+
 import { TransferFormModel } from './Modals/TransferSend.vue';
 
 import DetailsItem from './DetailsItem.vue';
@@ -205,7 +204,7 @@ export default defineComponent({
     const loading = ref<boolean>(false);
     const { getAeSdk } = useAeSdk({ store });
     const isRecipientName = computed(
-      () => props.recipientAddress && checkAensName(props.recipientAddress),
+      () => props.recipientAddress && isAensNameValid(props.recipientAddress),
     );
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
     const isSelectedAssetAex9 = computed(
@@ -412,7 +411,7 @@ export default defineComponent({
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : convertToken(amountRaw, selectedAsset.decimals);
+        : toShiftedBigNumber(amountRaw, selectedAsset.decimals);
 
       if (props.isMultisig) {
         await proposeMultisigTransaction();

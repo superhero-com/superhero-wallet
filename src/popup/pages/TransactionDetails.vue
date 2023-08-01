@@ -155,7 +155,7 @@
             </div>
           </DetailsItem>
 
-          <PayloadDetails :payload="getPayload(transaction)" />
+          <PayloadDetails :payload="getTransactionPayload(transaction)" />
 
           <div class="span-3-columns">
             <DetailsItem
@@ -251,32 +251,35 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
-
+import type { INetwork, ITransaction, TxFunctionRaw } from '@/types';
 import {
   useAccounts,
   useMiddleware,
   useMultisigAccounts,
-  useTransactionTx,
   useTransactionList,
+  useTransactionTx,
 } from '@/composables';
 import {
+  fetchJson,
   formatDate,
   formatTime,
-  aettosToAe,
   watchUntilTruthy,
+} from '@/utils';
+import {
   splitAddress,
-  getPayload,
-  getTransactionTipUrl,
-  fetchJson,
   handleUnknownError,
+} from '@/popup/utils';
+import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { AeScan } from '@/lib/AeScan';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
+  aettosToAe,
+  getTransactionPayload,
+  getTransactionTipUrl,
+  isTransactionAex9,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
-} from '@/popup/utils';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { isTransactionAex9 } from '@/protocols/aeternity/utils';
-import { ROUTE_NOT_FOUND } from '../router/routeNames';
-import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import { AeScan } from '../../lib/AeScan';
+} from '@/protocols/aeternity/helpers';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -471,12 +474,12 @@ export default defineComponent({
       isDexAllowance,
       isDex,
       isTransactionAex9,
+      getTransactionPayload,
       isMultisig,
       tipUrl,
       tipLink,
       direction,
       explorerUrl,
-      getPayload,
       splitAddress,
       aettosToAe,
       formatDate,

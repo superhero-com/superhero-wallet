@@ -73,12 +73,11 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
-import {
+import type {
   IToken,
   ITransaction,
 } from '@/types';
-import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { convertToken } from '../utils';
+import { toShiftedBigNumber } from '@/utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
@@ -89,7 +88,9 @@ import {
   useTippingContracts,
   useAeSdk,
   useTransactionList,
-} from '../../composables';
+} from '@/composables';
+import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -137,12 +138,10 @@ export default defineComponent({
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     async function sendTip() {
-      const amount = convertToken(
-        +(formModel.value.amount || 0),
-        formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID
-          ? (formModel.value.selectedAsset as IToken).decimals
-          : AE_COIN_PRECISION,
-      ).toNumber();
+      const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
+        ? (formModel.value.selectedAsset as IToken).decimals
+        : AE_COIN_PRECISION;
+      const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();

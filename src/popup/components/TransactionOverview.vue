@@ -20,8 +20,8 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import { postJson } from '@/utils';
 import {
-  postJson,
   TX_DIRECTION,
   TX_FUNCTIONS,
 } from '../utils';

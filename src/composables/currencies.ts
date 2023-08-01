@@ -7,15 +7,17 @@ import type {
   ICurrency,
 } from '@/types';
 import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+} from '@/utils';
+import {
+  CURRENCIES,
+  handleUnknownError,
+} from '@/popup/utils';
+import {
   AE_COINGECKO_COIN_ID,
   AE_TOKEN_BASE_DATA,
 } from '@/protocols/aeternity/config';
-import {
-  CURRENCIES,
-  getLocalStorageItem,
-  handleUnknownError,
-  setLocalStorageItem,
-} from '../popup/utils';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { CoinGecko } from '../lib/CoinGecko';

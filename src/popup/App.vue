@@ -59,11 +59,11 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
+import { watchUntilTruthy } from '@/utils';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
-  watchUntilTruthy,
 } from '@/popup/utils';
 import {
   IS_WEB,

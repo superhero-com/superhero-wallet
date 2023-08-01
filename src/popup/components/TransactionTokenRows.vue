@@ -31,19 +31,24 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, PropType, ref,
+  computed,
+  defineComponent,
+  PropType,
+  ref,
 } from 'vue';
 import { useStore } from 'vuex';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import type { ITokenResolved, ITransaction } from '@/types';
 import {
   amountRounded,
-  convertToken,
-  truncateString,
   calculateFontSize,
+  toShiftedBigNumber,
+  truncateString,
+} from '@/utils';
+import {
   TX_DIRECTION,
-} from '../utils';
-import { useTransactionTokens } from '../../composables';
-import type { ITokenResolved, ITransaction } from '../../types';
+} from '@/popup/utils';
+import { useTransactionTokens } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import Tokens from './Tokens.vue';
 
@@ -82,7 +87,7 @@ export default defineComponent({
 
     function tokenAmount(token: ITokenResolved) {
       return token.decimals
-        ? convertToken(token.amount || 0, -token.decimals)
+        ? toShiftedBigNumber(token.amount || 0, -token.decimals)
         : token.amount;
     }
 

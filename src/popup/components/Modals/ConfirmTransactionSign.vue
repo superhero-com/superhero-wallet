@@ -137,32 +137,36 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { isTransactionAex9 } from '@/protocols/aeternity/utils';
+import {
+  fetchJson,
+  postJson,
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
   TX_DIRECTION,
-  convertToken,
-  getAeFee,
-  fetchJson,
-  postJson,
   handleUnknownError,
   isNotFoundError,
+} from '@/popup/utils';
+import {
+  useAccounts,
+  useAeSdk,
+  usePopupProps,
+  useTransactionTx,
+} from '@/composables';
+import { useGetter, useState } from '@/composables/vuex';
+import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
+  getAeFee,
+  isTransactionAex9,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
   isTxFunctionDexMaxSpent,
   isTxFunctionDexMinReceived,
-} from '@/popup/utils';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
-import {
-  usePopupProps,
-  useAeSdk,
-  useTransactionTx,
-  useAccounts,
-} from '@/composables';
-import { useGetter, useState } from '@/composables/vuex';
+} from '@/protocols/aeternity/helpers';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -279,7 +283,7 @@ export default defineComponent({
       return token || {};
     });
 
-    const tokenAmount = computed((): number => +convertToken(
+    const tokenAmount = computed((): number => +toShiftedBigNumber(
       swapTokenAmountData.value.amount || 0,
       -(swapTokenAmountData.value.decimals || 0),
     ));

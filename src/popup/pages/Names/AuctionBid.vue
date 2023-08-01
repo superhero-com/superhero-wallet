@@ -73,14 +73,14 @@ import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import {
-  AE_COIN_PRECISION,
-} from '@/protocols/aeternity/config';
-import {
   AENS_BID_MIN_RATIO,
-  aeToAettos,
   STUB_ADDRESS,
   STUB_NONCE,
-} from '../../utils';
+} from '@/popup/utils';
+import {
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';

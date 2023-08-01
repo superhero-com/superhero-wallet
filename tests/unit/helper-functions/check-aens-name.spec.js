@@ -1,4 +1,4 @@
-import { checkAensName } from '../../../src/popup/utils';
+import { isAensNameValid } from '../../../src/protocols/aeternity/helpers';
 
 const testErrors = [
   { name: undefined },
@@ -15,10 +15,10 @@ const testNames = [
 
 describe('checkAens', () => {
   testErrors.forEach((test) => it('should throw an error', () => {
-    expect(() => checkAensName(test.hash)).toThrow();
+    expect(() => isAensNameValid(test.hash)).toThrow();
   }));
   testNames.forEach((test) => it('should allow only letters and numbers followed by ".chain" as aens name', () => {
-    const result = checkAensName(test.name);
+    const result = isAensNameValid(test.name);
     expect(result).toBe(!test.error);
   }));
 });

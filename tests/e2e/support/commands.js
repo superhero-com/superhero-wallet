@@ -6,10 +6,14 @@ import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig
 import {
   formatDate,
   formatTime,
+} from '../../../src/utils';
+import {
   LOCAL_STORAGE_PREFIX,
-  NETWORK_ID_TESTNET,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/popup/utils';
+import {
+  AE_NETWORK_MAINNET_ID,
+} from '../../../src/protocols/aeternity/config';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 import runMigrations from '../../../src/store/migrations';
 
@@ -31,7 +35,7 @@ export async function getLoginState({
     backedUpSeed,
     current: { network: network || 'Testnet' },
     balance,
-    ...(name && { names: { defaults: { [`${account.address}-${NETWORK_ID_TESTNET}`]: name } } }),
+    ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
   };
 }
 
@@ -39,7 +43,7 @@ export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = testAccount;
 
   return {
-    [address]: { loaded: [], pending: { [NETWORK_ID_TESTNET]: [pendingTransaction] } },
+    [address]: { loaded: [], pending: { [AE_NETWORK_MAINNET_ID]: [pendingTransaction] } },
   };
 }
 
@@ -104,7 +108,7 @@ Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = 
       const localStorageKey = [
         LOCAL_STORAGE_PREFIX,
         TRANSACTIONS_LOCAL_STORAGE_KEY,
-        NETWORK_ID_TESTNET,
+        AE_NETWORK_MAINNET_ID,
       ].join('_');
 
       // eslint-disable-next-line no-param-reassign

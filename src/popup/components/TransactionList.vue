@@ -46,21 +46,27 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { useGetter, useState } from '@/composables/vuex';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import type {
+  ITokenList,
+  ITransaction,
+  ICommonTransaction,
+  ITx,
+} from '@/types';
 import {
-  TXS_PER_PAGE,
-  TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS,
+  includesCaseInsensitive,
+  pipe,
+} from '@/utils';
+import {
   getMultisigTransaction,
-  getInnerTransaction,
   getOwnershipStatus,
   getTransaction,
   getTxDirection,
   getTxOwnerAddress,
-  isTxDex,
   sortTransactionsByDateCallback,
-  pipe,
-  includesCaseInsensitive,
-} from '../utils';
+  TXS_PER_PAGE,
+  TX_DIRECTION,
+  TRANSACTION_OWNERSHIP_STATUS,
+} from '@/popup/utils';
 import {
   useMultisigAccounts,
   useTransactionAndTokenFilter,
@@ -70,17 +76,15 @@ import {
   useUi,
   useAeSdk,
   useTransactionList,
-} from '../../composables';
+} from '@/composables';
+import {
+  getInnerTransaction,
+  isTxDex,
+} from '@/protocols/aeternity/helpers';
 
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
-import {
-  ITokenList,
-  ITransaction,
-  ICommonTransaction,
-  ITx,
-} from '../../types';
 
 export default defineComponent({
   components: {

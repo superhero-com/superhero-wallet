@@ -6,18 +6,21 @@ import type {
   ITransactionsState,
   IAccountTransactionsState,
   IDefaultComposableOptions,
-} from '../types';
-import { useMiddleware } from './middleware';
+} from '@/types';
 import {
   AEX9_TRANSFER_EVENT,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TX_DIRECTION,
+} from '@/popup/utils';
+import {
   fetchJson,
   getLocalStorageItem,
   setLocalStorageItem,
-} from '../popup/utils';
+} from '@/utils';
+import JsonBig from '@/lib/json-big';
+
 import { useAccounts } from './accounts';
-import JsonBig from '../lib/json-big';
+import { useMiddleware } from './middleware';
 import { useAeSdk } from './aeSdk';
 import { INetwork } from '../types';
 

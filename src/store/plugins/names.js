@@ -7,15 +7,17 @@ import {
   useTransactionList,
 } from '@/composables';
 import {
-  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
+  fetchAllPages,
   fetchJson,
   postJson,
+} from '@/utils';
+import {
+  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   checkAddress,
-  checkAensName,
-  fetchAllPages,
   isInsufficientBalanceError,
   handleUnknownError,
-} from '../../popup/utils';
+} from '@/popup/utils';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import { tg } from './languages';
 
 export default (store) => {
@@ -216,7 +218,7 @@ export default (store) => {
       },
       async getAddress(context, id) {
         if (checkAddress(id)) return id;
-        if (checkAensName(id)) {
+        if (isAensNameValid(id)) {
           const middleware = await getMiddleware();
           const { info: nameEntry } = await middleware.getName(id);
           return nameEntry.pointers?.accountPubkey;
