@@ -132,6 +132,9 @@ export interface IToken {
   value?: string; // TODO copy of the contractId, maybe we should remove it
 }
 
+/**
+ * In most cases it's the result of firing one of the `TransactionResolvers`.
+ */
 export interface ITokenResolved extends Partial<IToken> {
   amount?: number;
   isAe?: boolean;

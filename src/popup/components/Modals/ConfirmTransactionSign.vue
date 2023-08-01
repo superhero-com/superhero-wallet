@@ -157,10 +157,10 @@ import {
   useTransactionTx,
 } from '@/composables';
 import { useGetter, useState } from '@/composables/vuex';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   getAeFee,
+  getTransactionTokenInfoResolver,
   isTransactionAex9,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
@@ -305,7 +305,7 @@ export default defineComponent({
         return [singleToken.value];
       }
       const functionName = camelCase(txParams.function) as TxFunctionParsed;
-      const resolver = transactionTokenInfoResolvers[functionName];
+      const resolver = getTransactionTokenInfoResolver(functionName);
       if (!resolver) {
         return [];
       }

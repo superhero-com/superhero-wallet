@@ -26,6 +26,8 @@ import {
   AE_SIMPLEX_URL,
 } from '../config';
 
+export * from './transactionTokenInfoResolvers';
+
 export function buildSimplexLink(address: string) {
   const link = new URL(AE_SIMPLEX_URL);
   link.searchParams.set('wallet_address', address);

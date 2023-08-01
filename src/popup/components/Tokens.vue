@@ -58,9 +58,6 @@ export type AllowedTokenIconSize = typeof SIZES[number];
 
 export default defineComponent({
   props: {
-    /**
-     * transactionTokenInfoResolvers []
-     */
     tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
