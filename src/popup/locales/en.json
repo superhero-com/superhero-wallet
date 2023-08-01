@@ -1118,6 +1118,12 @@
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
+    },
+    "warningDappBrowser": {
+      "title": "You are going to visit a third-party website",
+      "warning": "Superhero wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
+      "decline": "Decline"
     }
   },
   "validation": {

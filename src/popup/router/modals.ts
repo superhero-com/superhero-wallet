@@ -25,6 +25,7 @@ import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
+  MODAL_WARNING_DAPP_BROWSER,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -50,6 +51,7 @@ import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
@@ -136,5 +138,8 @@ export default () => {
   });
   registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
+  });
+  registerModal(MODAL_WARNING_DAPP_BROWSER, {
+    component: WarningDappBrowser,
   });
 };
