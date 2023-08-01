@@ -40,8 +40,8 @@
 <script>
 import { mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import {
+  getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
@@ -68,7 +68,7 @@ export default {
     rates() {
       if (!this.isSwapTx) return [];
 
-      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
+      const resolver = getTransactionTokenInfoResolver(camelCase(this.transaction.tx.function));
 
       if (!resolver) return [];
 
