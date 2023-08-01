@@ -74,6 +74,11 @@
       "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
       "button": "Back up now"
     },
+    "daeppBrowserCard": {
+      "title": "Browse the AEcosystem",
+      "description": "Board Superhero wallet built-in browser to explore aeternity web 3.0 universe and discover new dapps.",
+      "button": "Browse"
+    },
     "buyCard": {
       "title": "Buy AE coin",
       "description": "Use Simplex to buy AE coins with your credit card or bank account.",

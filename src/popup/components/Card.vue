@@ -71,12 +71,19 @@ export default {
     disabled: Boolean,
     cardId: { type: String, default: null },
     icon: { type: Object, default: null },
+    bgDarken: { type: Boolean, default: false },
+    bgPosition: {
+      type: String,
+      default: null,
+    },
   },
   setup(props) {
     const hiddenCards = useState('hiddenCards');
 
+    const bgImage = computed(() => props.bgDarken ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("${props.background}")` : `url("${props.background}")`);
     const styleComponent = computed(() => ({
-      backgroundImage: props.background ? `url("${props.background}")` : null,
+      backgroundImage: props.background ? bgImage.value : null,
+      backgroundPosition: props.bgPosition ? props.bgPosition : null,
     }));
 
     const isVisible = computed(

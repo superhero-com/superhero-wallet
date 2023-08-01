@@ -379,6 +379,7 @@ export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
+  daeppBrowser: 'daeppBrowser',
 } as const;
 
 export const ALLOWED_ICON_STATUSES = [
