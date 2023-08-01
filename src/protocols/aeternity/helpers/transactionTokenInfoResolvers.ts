@@ -355,7 +355,7 @@ const withdraw: TransactionResolver = (transaction, tokens = null) => ({
   ],
 });
 
-export const transactionTokenInfoResolvers: TransactionResolvers = {
+const resolvers: TransactionResolvers = {
   addLiquidity,
   addLiquidityAe,
   removeLiquidity,
@@ -372,3 +372,7 @@ export const transactionTokenInfoResolvers: TransactionResolvers = {
   deposit,
   withdraw,
 };
+
+export function getTransactionTokenInfoResolver(txFunctionName: TxFunctionParsed) {
+  return resolvers[txFunctionName];
+}
