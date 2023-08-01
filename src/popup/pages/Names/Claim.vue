@@ -25,7 +25,7 @@
           </span>
         </template>
         <template #after>
-          <span class="aens-domain">{{ AENS_DOMAIN }}</span>
+          <span class="aens-domain">{{ AE_AENS_DOMAIN }}</span>
         </template>
       </InputField>
     </Field>
@@ -85,18 +85,18 @@ import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
 import {
-  AE_COIN_PRECISION,
-} from '@/protocols/aeternity/config';
-import {
-  AENS_DOMAIN,
-  AENS_NAME_MAX_LENGTH,
-  AENS_NAME_AUCTION_MAX_LENGTH,
   STUB_ADDRESS,
   STUB_NONCE,
 } from '@/popup/utils';
 import { useAccounts, useModals, useAeSdk } from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import {
+  AE_COIN_PRECISION,
+  AE_AENS_DOMAIN,
+  AE_AENS_NAME_MAX_LENGTH,
+  AE_AENS_NAME_AUCTION_MAX_LENGTH,
+} from '@/protocols/aeternity/config';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -124,9 +124,9 @@ export default defineComponent({
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
-    const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
+    const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
-    const fullName = computed((): AensName => `${name.value}${AENS_DOMAIN}`);
+    const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
     const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
 
     const totalNameClaimAmount = computed(() => !name.value.length
@@ -195,7 +195,7 @@ export default defineComponent({
         try {
           store.dispatch('names/fetchOwned');
           await aeSdk.poll(claimTxHash);
-          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
+          if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
             store.dispatch('names/updatePointer', {
               name: fullName.value,
               address: activeAccount.value.address,
@@ -210,7 +210,7 @@ export default defineComponent({
     }
 
     return {
-      AENS_DOMAIN,
+      AE_AENS_DOMAIN,
       autoExtend,
       isNameValid,
       isAeSdkReady,
