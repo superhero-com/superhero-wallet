@@ -185,7 +185,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: ProtocolSpecificView,
     props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
     meta: {
-      title: 'tx-details',
+      title: 'txDetails',
       showHeaderNavigation: true,
       backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
     },
