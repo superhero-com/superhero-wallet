@@ -15,9 +15,9 @@ import { toShiftedBigNumber } from '@/utils';
 import {
   TX_DIRECTION,
 } from '@/popup/utils';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import {
   getInnerTransaction,
+  getTransactionTokenInfoResolver,
   isTransactionAex9,
 } from '@/protocols/aeternity/helpers';
 
@@ -48,7 +48,7 @@ export function useTransactionTokens({
       const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
 
       // TODO this line needs refactoring in TransactionResolver
-      return transactionTokenInfoResolvers[functionName];
+      return getTransactionTokenInfoResolver(functionName);
     }
     return null;
   });

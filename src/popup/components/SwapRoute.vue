@@ -33,10 +33,9 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import { DEX_CONTRACTS } from '@/popup/utils';
 import { useAeSdk } from '@/composables';
-import { isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
+import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
 
 import Tokens from './Tokens.vue';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
@@ -56,7 +55,7 @@ export default {
       if (!isTxFunctionDexSwap(this.transaction.tx.function)) {
         return [];
       }
-      const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
+      const resolver = getTransactionTokenInfoResolver(camelCase(this.transaction.tx.function));
       if (!resolver) return [];
       let { tokens } = resolver(this.transaction, this.availableTokens);
       const index = this.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
