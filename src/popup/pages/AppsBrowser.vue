@@ -75,10 +75,10 @@ import {
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { Field } from 'vee-validate';
-
 import { handleUnknownError } from '@/utils';
-import { useAeSdk } from '../../composables';
+import { useAeSdk, useModals } from '../../composables';
 
 import InputField from '../components/InputField.vue';
 import AppsBrowserHeader from '../components/AppsBrowserHeader.vue';
@@ -124,6 +124,7 @@ export default defineComponent({
     let shareWalletInfoInterval : any;
 
     const { getAeSdk } = useAeSdk({ store });
+    const { openModal } = useModals();
 
     async function onAppLoaded() {
       if (!iframeRef.value || !selectedApp.value) return;
@@ -163,7 +164,9 @@ export default defineComponent({
     }
 
     function onSelectApp(app: any) {
-      selectedApp.value = app;
+      openModal(MODAL_WARNING_DAPP_BROWSER).then(() => {
+        selectedApp.value = app;
+      }, () => { });
     }
 
     onUnmounted(() => {

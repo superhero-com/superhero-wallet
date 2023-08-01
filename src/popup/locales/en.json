@@ -1146,6 +1146,12 @@
     "appsBrowser": {
       "popularApps": "Popular daepps",
       "inputPlaceholder": "Enter URL"
+    },
+    "warningDappBrowser": {
+      "title": "You are going to visit a third-party website",
+      "warning": "Superhero wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
+      "decline": "Decline"
     }
   },
   "dappActionBrowser": {

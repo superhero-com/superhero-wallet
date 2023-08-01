@@ -319,6 +319,7 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 export const MODAL_BOWSER_ACTIONS_DAPP = 'browser-actions';
+export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

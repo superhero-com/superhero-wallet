@@ -29,6 +29,7 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_BOWSER_ACTIONS_DAPP,
+  MODAL_WARNING_DAPP_BROWSER,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -57,6 +58,7 @@ import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
@@ -153,5 +155,8 @@ export default () => {
   });
   registerModal(MODAL_BOWSER_ACTIONS_DAPP, {
     component: BrowserActions,
+  });
+  registerModal(MODAL_WARNING_DAPP_BROWSER, {
+    component: WarningDappBrowser,
   });
 };
