@@ -9,7 +9,10 @@ import type {
   ObjectValues,
   TxFunctionRaw,
   TxType,
-} from '../types';
+} from '@/types';
+import {
+  includes,
+} from '@/utils';
 import {
   TRANSACTION_OWNERSHIP_STATUS,
   TX_DIRECTION,
@@ -19,18 +22,19 @@ import {
   TX_TYPE_TRANSLATIONS,
   TX_TYPE_LIST_TRANSLATIONS,
   TX_RETURN_TYPE_OK,
-  getInnerTransaction,
   getOwnershipStatus,
-  getTxTag,
   getTxOwnerAddress,
-  includes,
+} from '@/popup/utils';
+import {
+  getInnerTransaction,
+  getTxTag,
   isContainingNestedTx,
   isTxDex,
   isTxFunctionDexAddLiquidity,
   isTxFunctionDexAllowance,
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
-} from '../popup/utils';
+} from '@/protocols/aeternity/helpers';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 

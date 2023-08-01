@@ -100,7 +100,7 @@
 
           <PayloadDetails
             v-if="multisigTx"
-            :payload="getPayload(multisigTx)"
+            :payload="getTransactionPayload(multisigTx)"
           />
 
           <div class="span-3-columns">
@@ -272,33 +272,37 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
 
-import {
-  formatDate,
-  formatTime,
-  aettosToAe,
-  splitAddress,
-  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  TX_FUNCTIONS_MULTISIG,
-  getPayload,
-  blocksToRelativeTime,
-  isInsufficientBalanceError,
-} from '@/popup/utils';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import type {
   IGAMetaTx,
   TxFunctionMultisig,
   ITransaction,
   ITx,
-} from '../../types';
+} from '@/types';
+import {
+  formatDate,
+  formatTime,
+} from '@/utils';
+import {
+  splitAddress,
+  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+  TX_FUNCTIONS_MULTISIG,
+  blocksToRelativeTime,
+  isInsufficientBalanceError,
+} from '@/popup/utils';
 import {
   useAccounts,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
   useModals,
-} from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+} from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
+  aettosToAe,
+  getTransactionPayload,
+} from '@/protocols/aeternity/helpers';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -521,7 +525,7 @@ export default defineComponent({
       transaction,
       totalSpent,
       getTxSymbol,
-      getPayload,
+      getTransactionPayload,
       splitAddress,
       aettosToAe,
       formatDate,

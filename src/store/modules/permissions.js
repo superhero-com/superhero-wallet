@@ -1,4 +1,4 @@
-import { aettosToAe } from '../../popup/utils';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
 
 const hostConfig = (addresses, isDefault = false) => ({
   addresses,

@@ -1,4 +1,9 @@
-import { getTwitterAccountUrl, fetchJson, validateTipUrl } from '../../popup/utils';
+import { fetchJson, isUrlValid } from '@/utils';
+
+function getTwitterAccountUrl(url) {
+  const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
+  return match ? match[0] : false;
+}
 
 export default (store) => store.registerModule('tipUrl', {
   namespaced: true,
@@ -18,7 +23,7 @@ export default (store) => store.registerModule('tipUrl', {
         status = 'blacklisted';
       } else if (verifiedUrls.includes(url)) {
         status = 'verified';
-      } else if (validateTipUrl(url) && url.startsWith('http:')) {
+      } else if (isUrlValid(url) && url.startsWith('http:')) {
         status = 'not-secure';
       } else {
         status = 'not-verified';

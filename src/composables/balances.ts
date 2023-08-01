@@ -13,10 +13,10 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import {
-  aettosToAe,
   isNotFoundError,
   handleUnknownError,
-} from '../popup/utils';
+} from '@/popup/utils';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
 import {
   createNetworkWatcher,
   createPollingBasedOnMountedComponents,

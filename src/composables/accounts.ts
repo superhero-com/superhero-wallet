@@ -13,10 +13,10 @@ import {
   PROTOCOL_BITCOIN,
   getAccountNameToDisplay,
 } from '@/popup/utils';
+import { AeScan } from '@/lib/AeScan';
+import { testAccount } from '@/popup/utils/testsConfig';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
-import { buildSimplexLink } from '@/protocols/aeternity/utils';
-import { AeScan } from '../lib/AeScan';
-import { testAccount } from '../popup/utils/testsConfig';
+import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable

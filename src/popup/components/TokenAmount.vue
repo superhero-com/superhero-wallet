@@ -38,9 +38,9 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { calculateFontSize } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { calculateFontSize } from '@/popup/utils';
 
 export default defineComponent({
   props: {

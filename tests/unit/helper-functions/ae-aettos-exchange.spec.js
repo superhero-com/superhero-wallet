@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
-import { aeToAettos, aettosToAe } from '../../../src/popup/utils';
+import { aeToAettos, aettosToAe } from '../../../src/protocols/aeternity/helpers';
 
 const testValues = [{
   value: 1,

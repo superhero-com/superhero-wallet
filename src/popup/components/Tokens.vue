@@ -42,7 +42,7 @@ import { computed, defineComponent, PropType } from 'vue';
 import { ITokenResolved } from '@/types';
 import {
   truncateString as truncateStringFactory,
-} from '@/popup/utils';
+} from '@/utils';
 import {
   AE_AVATAR_URL,
   AE_COIN_NAME,

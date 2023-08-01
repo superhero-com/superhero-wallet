@@ -1,5 +1,5 @@
-import { useAeSdk } from '../../composables';
-import { watchUntilTruthy } from '../../popup/utils';
+import { useAeSdk } from '@/composables';
+import { watchUntilTruthy } from '@/utils';
 
 export default async (store) => {
   const { isAeSdkReady, nodeNetworkId, getAeSdk } = useAeSdk({ store });

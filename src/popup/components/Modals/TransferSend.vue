@@ -54,9 +54,10 @@ import {
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
-import type { ITokenList, ObjectValues, ResolveCallback } from '../../../types';
-import { IFormModel } from '../../../composables';
-import { AENS_DOMAIN, validateTipUrl } from '../../utils';
+import type { ITokenList, ObjectValues, ResolveCallback } from '@/types';
+import { isUrlValid } from '@/utils';
+import { IFormModel } from '@/composables';
+import { AENS_DOMAIN } from '../../utils';
 import { useGetter, useState } from '../../../composables/vuex';
 
 import Modal from '../Modal.vue';
@@ -116,7 +117,7 @@ export default defineComponent({
     const isAddressUrl = computed(() => (
       !isAddressChain.value
       && transferData.value.address
-      && validateTipUrl(transferData.value.address)
+      && isUrlValid(transferData.value.address)
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {

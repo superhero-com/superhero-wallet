@@ -1,6 +1,7 @@
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { CurrencyRates } from '../types';
-import { CURRENCIES, fetchJson } from '../popup/utils';
+import { CurrencyRates } from '@/types';
+import { fetchJson } from '@/utils';
+import { CURRENCIES } from '../popup/utils';
 
 export interface CoinGeckoMarketResponse {
   ath: number;

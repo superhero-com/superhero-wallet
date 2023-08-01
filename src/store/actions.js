@@ -1,9 +1,11 @@
 import { uniqBy, orderBy } from 'lodash-es';
 import { Tag } from '@aeternity/aepp-sdk';
 import {
-  AEX9_TRANSFER_EVENT,
   fetchJson,
   postJson,
+} from '@/utils';
+import {
+  AEX9_TRANSFER_EVENT,
   handleUnknownError,
   isAccountNotFoundError,
 } from '../popup/utils';

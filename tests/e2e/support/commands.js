@@ -6,7 +6,7 @@ import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig
 import {
   formatDate,
   formatTime,
-} from '../../../src/popup/utils';
+} from '../../../src/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 import runMigrations from '../../../src/store/migrations';
 

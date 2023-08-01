@@ -183,13 +183,13 @@ import { useI18n } from 'vue-i18n';
 import { Field, Form, useFormErrors } from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
+import { excludeFalsy } from '@/utils';
 import {
   MODAL_READ_QR_CODE,
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   MULTISIG_CREATION_PHASES,
   validateHash,
   handleUnknownError,
-  excludeFalsy,
 } from '../../utils';
 import {
   ICreateMultisigAccount,
