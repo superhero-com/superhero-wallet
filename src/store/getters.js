@@ -35,7 +35,6 @@ export default {
         protocol: protocol || PROTOCOL_AETERNITY,
         ...acc,
         ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
-        protocol: 'aeternity',
       }))
       .map(({ ...account }) => ({
         ...account,

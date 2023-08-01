@@ -20,11 +20,11 @@ export class BitcoinProtocol implements IProtocol {
 
   constructor(store: Store<any>) {
     this.store = store;
-    this.getAddressFromPrivateKey('21');
+    this.getAddressFromMnemonic(store.state.mnemonic);
   }
 
   getActiveNetwork() {
-    return this.store.getters.activeNetwork.networkId === NETWORK_ID_MAINNET
+    return this.store.getters.activeNetwork?.networkId === NETWORK_ID_MAINNET
       ? bitcoin.networks.bitcoin
       : bitcoin.networks.testnet;
   }
@@ -41,17 +41,26 @@ export class BitcoinProtocol implements IProtocol {
     throw new Error('Method not implemented.');
   }
 
-  async getAddressFromMnemonic(mnemonic: string, derivationPath: string): Promise<BitcoinAddress> {
+  async getAccount(accountIndex: number) {
+    const { address } = await this.getAddressFromMnemonic(this.store.state.mnemonic);
+
+    return {
+      address,
+      protocol: 'bitcoin',
+    };
+  }
+
+  async getAddressFromMnemonic(mnemonic: string, derivationPath?: string): Promise<any> {
+    // `${accountIdx}h/0h/0h`
     const path = derivationPath || "m/44'/0'/0'/0/0";
     const seed = bip39.mnemonicToSeedSync(mnemonic);
 
     const node = bip32.fromSeed(seed);
     const child = node.derivePath(path);
 
-    const { address, ...result } = bitcoin.payments.p2pkh({
+    return bitcoin.payments.p2pkh({
       pubkey: child.publicKey,
       network: this.getActiveNetwork(),
     });
-    return address as string;
   }
 }

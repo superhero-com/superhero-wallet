@@ -6,7 +6,7 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useModals, useAeSdk } from '../../../composables';
+import { useModals, useAeSdk, useSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -32,18 +32,52 @@ export default {
       const aeSdk = await getAeSdk();
       return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
-    async discover({ state, rootGetters, dispatch }) {
+    async discover(context) {
+      const {
+        state,
+        rootGetters,
+        dispatch,
+        commit,
+      } = context;
+
+      const { getProtocols, getProtocolSdk } = useSdk({ store: context });
       let lastNotEmptyIdx = 0;
-      let account;
-      // eslint-disable-next-line no-plusplus
-      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
-        account = getHdWalletAccount(rootGetters.wallet, nextIdx);
-        // eslint-disable-next-line no-await-in-loop
-        if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
+      // loop through protocols, then loop through accounts
+      const protocols = getProtocols();
+      // eslint-disable-next-line no-restricted-syntax, guard-for-in
+      for (const protocol in protocols) {
+        const protocolSDK = getProtocolSdk(protocol);
+        if (protocolSDK.getAccount) {
+          const checkIndexes = protocol === 'aeternity' ? 5 : 1;
+          // eslint-disable-next-line no-plusplus
+          for (let nextIdx = 0; nextIdx < checkIndexes; nextIdx++) {
+            // eslint-disable-next-line no-await-in-loop
+            const account = await protocolSDK.getAccount(nextIdx);
+            commit(
+              'accounts/add',
+              {
+                idx: state.nextAccountIdx,
+                // type: ACCOUNT_HD_WALLET,
+                isRestored: true,
+                ...account,
+              },
+              { root: true },
+            );
+            state.nextAccountIdx += 1;
+          }
+        }
       }
-      // eslint-disable-next-line no-plusplus
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
-        dispatch('create', true);
+      if (false) {
+        // eslint-disable-next-line no-plusplus
+        for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
+          account = getHdWalletAccount(rootGetters.wallet, nextIdx);
+          // eslint-disable-next-line no-await-in-loop
+          if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
+        }
+        // eslint-disable-next-line no-plusplus
+        for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
+          dispatch('create', true);
+        }
       }
     },
     create({ state, commit }, isRestored = false) {
