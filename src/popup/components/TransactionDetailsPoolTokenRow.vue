@@ -27,14 +27,15 @@
   </DetailsItem>
 </template>
 
-<script>
-import { convertToken } from '../utils';
+<script lang="ts">
+import { computed, defineComponent } from 'vue';
+import { toShiftedBigNumber } from '@/utils';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Tokens from './Tokens.vue';
 import AddressTruncated from './AddressTruncated.vue';
 
-export default {
+export default defineComponent({
   components: {
     AddressTruncated,
     TokenAmount,
@@ -59,19 +60,18 @@ export default {
       default: false,
     },
   },
-  computed: {
-    amount() {
-      return +(
-        this.token.decimals
-          ? this.convertToken(this.token.amount, -this.token.decimals)
-          : this.token.amount
-      );
-    },
+  setup(props) {
+    const amount = computed(() => +(
+      props.token.decimals
+        ? toShiftedBigNumber(props.token.amount, -props.token.decimals)
+        : props.token.amount
+    ));
+
+    return {
+      amount,
+    };
   },
-  methods: {
-    convertToken,
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

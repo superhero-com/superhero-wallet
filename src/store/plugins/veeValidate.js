@@ -4,22 +4,23 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
-import { tg } from './languages';
+import {
+  isUrlValid,
+} from '@/utils';
 import {
   isNotFoundError,
   getAddressByNameEntry,
-  checkAensName,
-  validateTipUrl,
-  isValidURL,
-} from '../../popup/utils';
-import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies, useAeSdk } from '../../composables';
+} from '@/popup/utils';
+import { AENS_DOMAIN } from '@/popup/utils/constants';
+import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { tg } from './languages';
 
-defineRule('url', (url) => isValidURL(url));
+defineRule('url', (url) => isUrlValid(url));
 defineRule('required', required);
-defineRule('account', (value) => isAddressValid(value) || checkAensName(value));
+defineRule('account', (value) => isAddressValid(value) || isAensNameValid(value));
 defineRule('account_address', (value) => isAddressValid(value, Encoding.AccountAddress));
-defineRule('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
+defineRule('name', (value) => isAensNameValid(`${value}${AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
 defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
@@ -117,19 +118,19 @@ export default (store) => {
 
   defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
 
-  defineRule('name_registered_address', (value) => (checkAensName(value)
+  defineRule('name_registered_address', (value) => (isAensNameValid(value)
     ? checkNameRegisteredAddress(value)
     : isAddressValid(value)));
 
   defineRule('token_to_an_address',
     (value, [isToken]) => (
-      !checkAensName(value)
-      || (checkAensName(value) && !isToken)
+      !isAensNameValid(value)
+      || (isAensNameValid(value) && !isToken)
     ),
     { params: ['isToken'] });
 
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
-    if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
+    if (!isAensNameValid(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
 
@@ -143,9 +144,9 @@ export default (store) => {
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
 
-  defineRule('name_registered_address_or_url', (value) => (checkAensName(value)
+  defineRule('name_registered_address_or_url', (value) => (isAensNameValid(value)
     ? checkNameRegisteredAddress(value)
-    : isAddressValid(value) || validateTipUrl(value)));
+    : isAddressValid(value) || isUrlValid(value)));
 
   defineRule('invalid_hostname', (value) => {
     try {

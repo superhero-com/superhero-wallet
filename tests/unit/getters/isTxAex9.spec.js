@@ -1,4 +1,4 @@
-import { isTransactionAex9 } from '../../../src/protocols/aeternity/utils';
+import { isTransactionAex9 } from '../../../src/protocols/aeternity/helpers';
 import { transactions } from '../../../src/popup/utils/testsConfig';
 
 const tests = ({

@@ -12,7 +12,7 @@ import {
   getLocalStorageItem,
   setLocalStorageItem,
   watchUntilTruthy,
-} from '../popup/utils';
+} from '@/utils';
 import { INetwork } from '../types';
 import { useConnection } from './connection';
 import { useUi } from './ui';

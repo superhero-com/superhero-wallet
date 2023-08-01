@@ -15,8 +15,9 @@ import {
   ref,
 } from 'vue';
 import type { INetwork } from '@/types';
+import { checkImageAvailability } from '@/utils';
 import { useGetter } from '@/composables/vuex';
-import { checkImageAvailability, isContract } from '@/popup/utils';
+import { isContract } from '@/popup/utils';
 import { getAddressColor } from '@/popup/utils/avatar';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 

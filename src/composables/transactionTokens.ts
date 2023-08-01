@@ -11,13 +11,15 @@ import {
   AE_COIN_PRECISION,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
-import { isTransactionAex9 } from '@/protocols/aeternity/utils';
+import { toShiftedBigNumber } from '@/utils';
 import {
   TX_DIRECTION,
-  convertToken,
+} from '@/popup/utils';
+import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
+import {
   getInnerTransaction,
-} from '../popup/utils';
-import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
+  isTransactionAex9,
+} from '@/protocols/aeternity/helpers';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -67,7 +69,7 @@ export function useTransactionTokens({
     return [{
       ...innerTx.value || {},
       amount: isAllowance
-        ? convertToken(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
+        ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
         : getTxAmountTotal.value(transaction, direction),
       symbol: isAllowance ? AE_SYMBOL : getTxSymbol.value(transaction),
       isReceived: direction === TX_DIRECTION.received,

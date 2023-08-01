@@ -38,6 +38,7 @@ import {
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { postJson } from '@/utils';
 import {
   useAccounts,
   useDeepLinkApi,
@@ -46,7 +47,6 @@ import {
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
-import { postJson } from '../utils';
 import { INetwork } from '../../types';
 
 import AccountSelector from '../components/AccountSelector.vue';

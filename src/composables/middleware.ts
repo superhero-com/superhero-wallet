@@ -2,8 +2,8 @@ import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';
-import { genSwaggerClient, mapObject } from '../lib/swagger';
-import { fetchJson, watchUntilTruthy } from '../popup/utils';
+import { genSwaggerClient, mapObject } from '@/lib/swagger';
+import { fetchJson, watchUntilTruthy } from '@/utils';
 import {
   IDefaultComposableOptions,
   IMiddleware,

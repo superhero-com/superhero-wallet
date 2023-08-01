@@ -11,24 +11,26 @@ import {
 } from '@aeternity/aepp-sdk';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
-import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
+import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 
-import {
-  fetchJson,
-  postJson,
-  handleUnknownError,
-  MULTISIG_SIMPLE_GA_BYTECODE,
-} from '../popup/utils';
-import { useAeSdk } from './aeSdk';
-import { useMultisigAccounts } from './multisigAccounts';
-import { useTopHeaderData } from './topHeader';
 import type {
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   TxFunctionMultisig,
   INetwork,
   IRawMultisigTx,
-} from '../types';
+} from '@/types';
+import {
+  fetchJson,
+  postJson,
+} from '@/utils';
+import {
+  handleUnknownError,
+  MULTISIG_SIMPLE_GA_BYTECODE,
+} from '@/popup/utils';
+import { useAeSdk } from './aeSdk';
+import { useMultisigAccounts } from './multisigAccounts';
+import { useTopHeaderData } from './topHeader';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 

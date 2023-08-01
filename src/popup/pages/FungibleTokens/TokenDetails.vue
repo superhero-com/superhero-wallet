@@ -164,13 +164,13 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '@/types';
-import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import {
   amountRounded,
-  convertToken,
   formatNumber,
-} from '../../utils';
-import { useCurrencies } from '../../../composables';
+  toShiftedBigNumber,
+} from '@/utils';
+import { useCurrencies } from '@/composables';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressTruncated from '../../components/AddressTruncated.vue';
@@ -207,7 +207,7 @@ export default defineComponent({
     });
 
     const getPooledTokenAmount = (token: any) => amountRounded(
-      convertToken(token.amount, -token.decimals),
+      toShiftedBigNumber(token.amount, -token.decimals),
     );
 
     return {

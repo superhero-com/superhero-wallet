@@ -1,10 +1,10 @@
 import { computed, ref } from 'vue';
 import { Contract } from '@aeternity/aepp-sdk';
 
-import TippingV1ACI from '../lib/contracts/TippingV1ACI.json';
-import TippingV2ACI from '../lib/contracts/TippingV2ACI.json';
+import TippingV1ACI from '@/lib/contracts/TippingV1ACI.json';
+import TippingV2ACI from '@/lib/contracts/TippingV2ACI.json';
+import { watchUntilTruthy } from '@/utils';
 import { useAeSdk } from './aeSdk';
-import { watchUntilTruthy } from '../popup/utils';
 import {
   IDefaultComposableOptions,
   INetwork,

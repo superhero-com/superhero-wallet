@@ -159,12 +159,13 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
+
+import type { IPermission } from '@/types';
+import { PERMISSION_DEFAULTS } from '@/popup/utils';
+import { useBalances, useCurrencies } from '@/composables';
+import { useState } from '@/composables/vuex';
+import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
-import { PERMISSION_DEFAULTS } from '../utils';
-import { IPermission } from '../../types';
-import { useBalances, useCurrencies } from '../../composables';
-import { useState } from '../../composables/vuex';
-import { ROUTE_NOT_FOUND } from '../router/routeNames';
 
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmount.vue';

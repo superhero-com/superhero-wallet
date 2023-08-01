@@ -15,15 +15,14 @@
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import type { ITransaction, TxFunctionRaw } from '../../types';
+import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_ALLOW_TOKEN,
-  aettosToAe,
-  convertToken,
-} from '../utils';
-import { useTransactionTokens } from '../../composables';
+} from '@/popup/utils';
+import { useTransactionTokens } from '@/composables';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
 
 import TransactionDetailsPoolTokenRow from './TransactionDetailsPoolTokenRow.vue';
 
@@ -79,7 +78,6 @@ export default defineComponent({
     return {
       tokens,
       aettosToAe,
-      convertToken,
       getLabel,
     };
   },

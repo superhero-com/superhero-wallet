@@ -145,14 +145,15 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { IName } from '@/types';
+import { IS_CORDOVA, IS_EXTENSION } from '@/lib/environment';
+import Logger from '@/lib/logger';
 import {
   MODAL_CONFIRM,
   blocksToRelativeTime,
   checkAddressOrChannel,
-  readValueFromClipboard,
 } from '../utils';
 import { useAccounts, useModals, useTopHeaderData } from '../../composables';
-import { IName } from '../../types';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -207,6 +208,28 @@ export default defineComponent({
       nameEntry.value?.pointers?.accountPubkey
       || Object.values(nameEntry.value?.pointers || {})[0]
     ));
+
+    async function readValueFromClipboard(): Promise<string | undefined> {
+      if (!process.env.UNFINISHED_FEATURES) {
+        return undefined;
+      }
+      let value = '';
+
+      if (IS_CORDOVA) {
+        value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+      } else if (IS_EXTENSION) {
+        value = await browser!.runtime.sendMessage({ method: 'paste' });
+      } else {
+        try {
+          value = await navigator.clipboard.readText();
+        } catch (e: any) {
+          if (!e.message.includes('Read permission denied.')) {
+            Logger.write(e);
+          }
+        }
+      }
+      return value;
+    }
 
     async function insertValueFromClipboard() {
       newPointer.value = (await readValueFromClipboard()) || '';

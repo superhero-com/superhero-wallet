@@ -49,8 +49,8 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import type { RejectCallback, ResolveCallback } from '../../../types';
-import { validateSeedLength } from '../../utils';
+import type { RejectCallback, ResolveCallback } from '@/types';
+import { isSeedLengthValid } from '@/utils';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -85,7 +85,7 @@ export default defineComponent({
         .replace(/[^a-z ]/g, '')
         .trim();
 
-      if (!validateSeedLength(mnemonicParsed)) {
+      if (!isSeedLengthValid(mnemonicParsed)) {
         error.value = t('pages.index.invalidSeed');
         return;
       }

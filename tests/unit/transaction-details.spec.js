@@ -113,7 +113,6 @@ function mountComponent({ hasError = false } = {}) {
       getTx: () => () => testTransaction,
       getTxType: () => () => 'provide liquidity',
       getTxSymbol: () => () => AE_SYMBOL,
-      getTransactionTipUrl: () => () => '',
       getTxAmountTotal: () => () => 1,
       getTxDirection: () => () => 'sent',
       isTransactionAex9: () => () => true,
