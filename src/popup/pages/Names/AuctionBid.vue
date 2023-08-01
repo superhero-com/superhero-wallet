@@ -75,11 +75,11 @@ import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import {
-  AENS_BID_MIN_RATIO,
   STUB_ADDRESS,
   STUB_NONCE,
 } from '@/popup/utils';
 import {
+  AE_AENS_BID_MIN_RATIO,
   AE_COIN_PRECISION,
 } from '@/protocols/aeternity/config';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
@@ -127,14 +127,14 @@ export default defineComponent({
           nonce: STUB_NONCE,
           name: props.name,
           nameSalt: 0,
-          nameFee: aeToAettos(highestBid.value.multipliedBy(AENS_BID_MIN_RATIO).toString()),
+          nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
         }) as any,
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
-      const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
+      const minBid = highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO);
       return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
         ? t('pages.names.auctions.min-bid', { minBid })
         : null;

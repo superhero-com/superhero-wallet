@@ -31,3 +31,8 @@ export const AE_COMMIT_URL = 'https://github.com/aeternity/superhero-wallet/comm
 export const AE_DEX_URL = 'https://aepp.dex.superhero.com';
 export const AE_FAUCET_URL = 'https://faucet.aepps.com';
 export const AE_SIMPLEX_URL = 'https://simplex.superhero.com';
+
+export const AE_AENS_DOMAIN = '.chain';
+export const AE_AENS_NAME_MAX_LENGTH = 63 + AE_AENS_DOMAIN.length;
+export const AE_AENS_NAME_AUCTION_MAX_LENGTH = 12 + AE_AENS_DOMAIN.length;
+export const AE_AENS_BID_MIN_RATIO = 1.05;

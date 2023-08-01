@@ -20,8 +20,8 @@ import type {
   IActiveMultisigTransaction,
   ICommonTransaction,
 } from '@/types';
+import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 import {
-  AENS_DOMAIN,
   HASH_PREFIXES_ALLOWED,
   HASH_REGEX,
   TX_DIRECTION,
@@ -64,7 +64,7 @@ export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'a
 
 export function validateHash(fullHash?: string) {
   type HashPrefix = typeof HASH_PREFIXES_ALLOWED[number];
-  const isName = !!fullHash?.endsWith(AENS_DOMAIN);
+  const isName = !!fullHash?.endsWith(AE_AENS_DOMAIN);
   let valid = false;
   let prefix: HashPrefix | null = null;
   let hash = null;

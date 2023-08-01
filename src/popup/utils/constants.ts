@@ -211,10 +211,6 @@ export const NODE_STATUS_CONNECTED = 'connected';
 export const NODE_STATUS_ERROR = 'error';
 
 export const TXS_PER_PAGE = 30;
-export const AENS_DOMAIN = '.chain';
-export const AENS_NAME_MAX_LENGTH = 63 + AENS_DOMAIN.length;
-export const AENS_NAME_AUCTION_MAX_LENGTH = 12 + AENS_DOMAIN.length;
-export const AENS_BID_MIN_RATIO = 1.05;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
