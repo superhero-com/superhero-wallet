@@ -1,16 +1,18 @@
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
 
-import FungibleTokenFullInterfaceACI from '../../lib/contracts/FungibleTokenFullInterfaceACI.json';
-import AedexV2PairACI from '../../lib/contracts/AedexV2PairACI.json';
-import ZeitTokenACI from '../../lib/contracts/FungibleTokenFullACI.json';
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
+import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
+import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 import {
-  convertToken,
+  fetchAllPages,
+  toShiftedBigNumber,
+} from '@/utils';
+import {
   handleUnknownError,
   calculateSupplyAmount,
-  fetchAllPages,
-} from '../../popup/utils';
-import { useAccounts, useAeSdk, useMiddleware } from '../../composables';
+} from '@/popup/utils';
+import { useAccounts, useAeSdk, useMiddleware } from '@/composables';
 
 export default (store) => {
   const { getAeSdk } = useAeSdk({ store });
@@ -69,7 +71,7 @@ export default (store) => {
             const balances = tokens.map(({ amount, contract_id: contractId }) => {
               const token = availableTokens[contractId];
               if (!token) return null;
-              const balance = convertToken(amount, -token.decimals);
+              const balance = toShiftedBigNumber(amount, -token.decimals);
               const convertedBalance = balance.toFixed(2);
               const objectStructure = {
                 ...token,
@@ -107,9 +109,9 @@ export default (store) => {
         const allowanceAmount = decodedResult !== undefined
           ? new BigNumber(decodedResult)
             .multipliedBy(-1)
-            .plus(convertToken(amount, selectedToken.decimals))
+            .plus(toShiftedBigNumber(amount, selectedToken.decimals))
             .toNumber()
-          : convertToken(amount, selectedToken.decimals).toFixed();
+          : toShiftedBigNumber(amount, selectedToken.decimals).toFixed();
         return tokenContract.methods[
           decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
         ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);

@@ -1,17 +1,19 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { toShiftedBigNumber } from '@/utils';
 import {
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   TX_DIRECTION,
-  convertToken,
+} from '@/popup/utils';
+import { useAccounts, useAeSdk } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
   aettosToAe,
   categorizeContractCallTxObject,
-} from '../popup/utils';
-import { useAccounts, useAeSdk } from '../composables';
+} from '@/protocols/aeternity/helpers';
 
 export default {
   wallet({ mnemonic }) {
@@ -47,7 +49,7 @@ export default {
   ) => (transaction, direction = TX_DIRECTION.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
-      return +convertToken(
+      return +toShiftedBigNumber(
         contractCallData.amount,
         -availableTokens[contractCallData.token].decimals,
       );

@@ -59,23 +59,23 @@ import {
 import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
 import { useStore } from 'vuex';
+import type {
+  IActiveMultisigTransaction,
+  ITransaction,
+} from '@/types';
 import {
   amountRounded,
-  convertToken,
+  executeAndSetInterval,
   formatDate,
   formatTime,
   relativeTimeTo,
-  executeAndSetInterval,
-} from '../utils';
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
 } from '../router/routeNames';
-import {
-  IActiveMultisigTransaction,
-  ITransaction,
-} from '../../types';
 import {
   useCurrencies,
   useTransactionTokens,
@@ -158,7 +158,7 @@ export default defineComponent({
       ) return 0;
       return getFormattedAndRoundedFiat(
         +amountRounded((aeToken.decimals
-          ? convertToken(aeToken.amount || 0, -aeToken.decimals)
+          ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
           : aeToken.amount)!),
       );
     });

@@ -1,21 +1,23 @@
 import { watch } from 'vue';
 import {
-  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
+  fetchAllPages,
   fetchJson,
   postJson,
+} from '@/utils';
+import {
+  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   checkAddress,
-  checkAensName,
-  fetchAllPages,
   isInsufficientBalanceError,
   handleUnknownError,
-} from '../../popup/utils';
-import { tg } from './languages';
+} from '@/popup/utils';
 import {
-  useAeSdk,
   useAccounts,
+  useAeSdk,
   useMiddleware,
   useModals,
-} from '../../composables';
+} from '@/composables';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { tg } from './languages';
 
 export default (store) => {
   const {
@@ -212,7 +214,7 @@ export default (store) => {
       },
       async getAddress(context, id) {
         if (checkAddress(id)) return id;
-        if (checkAensName(id)) {
+        if (isAensNameValid(id)) {
           const middleware = await getMiddleware();
           const { info: nameEntry } = await middleware.getName(id);
           return nameEntry.pointers?.accountPubkey;

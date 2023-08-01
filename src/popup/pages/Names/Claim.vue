@@ -91,12 +91,13 @@ import {
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
   AENS_NAME_AUCTION_MAX_LENGTH,
-  checkAensName,
   STUB_ADDRESS,
   STUB_NONCE,
-} from '../../utils';
-import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useAeSdk } from '../../../composables';
+} from '@/popup/utils';
+import { useAccounts, useModals, useAeSdk } from '@/composables';
+import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -126,7 +127,7 @@ export default defineComponent({
     const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
 
     const fullName = computed((): AensName => `${name.value}${AENS_DOMAIN}`);
-    const isNameValid = computed(() => name.value && checkAensName(fullName.value));
+    const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
 
     const totalNameClaimAmount = computed(() => !name.value.length
       ? BigNumber(0)

@@ -23,6 +23,7 @@ import {
   IS_EXTENSION_BACKGROUND,
   RUNNING_IN_TESTS,
 } from '@/lib/environment';
+import { watchUntilTruthy } from '@/utils';
 import {
   DEX_CONTRACTS,
   MODAL_CONFIRM_ACCOUNT_LIST,
@@ -32,7 +33,6 @@ import {
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
-  watchUntilTruthy,
 } from '@/popup/utils';
 import { showPopup } from '@/background/popupHandler';
 import {

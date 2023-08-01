@@ -5,15 +5,14 @@ import type {
   INotification,
   INotificationSetting,
   NotificationStatus,
-} from '../types';
+} from '@/types';
+import { fetchJson, postJson } from '@/utils';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-  fetchJson,
-  postJson,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';

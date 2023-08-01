@@ -87,14 +87,15 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { APP_LINK_WEB, formatDate } from '../utils';
-import { ROUTE_INVITE_CLAIM } from '../router/routeNames';
+import { formatDate } from '@/utils';
+import { APP_LINK_WEB } from '@/popup/utils';
+import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
   IFormModel,
   useBalances,
   useMaxAmount,
   useAeSdk,
-} from '../../composables';
+} from '@/composables';
 
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';

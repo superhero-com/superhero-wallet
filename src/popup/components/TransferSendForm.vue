@@ -209,27 +209,27 @@ import type {
   ITokenList,
 } from '@/types';
 import {
-  AE_CONTRACT_ID,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
+  isUrlValid,
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_INFO,
   MODAL_PAYLOAD_FORM,
   AGGREGATOR_URL,
   APP_LINK_WEB,
-  convertToken,
-  validateTipUrl,
-  checkAensName,
-} from '../utils';
+} from '@/popup/utils';
 import {
   useAccounts,
   useBalances,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
-} from '../../composables';
-import { useState } from '../../composables/vuex';
+} from '@/composables';
+import { useState } from '@/composables/vuex';
+import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import InputField from './InputField.vue';
 import InputAmount from './InputAmount.vue';
@@ -329,8 +329,8 @@ export default defineComponent({
     const isTipUrl = computed(() => (
       !!formModel.value.address
       && isUrlTippingEnabled.value
-      && validateTipUrl(formModel.value.address)
-      && !checkAensName(formModel.value.address)
+      && isUrlValid(formModel.value.address)
+      && !isAensNameValid(formModel.value.address)
     ));
 
     const addressMessage = computed((): IInputMessage => {
@@ -486,7 +486,7 @@ export default defineComponent({
 
         // SET result data
         formModel.value.address = parsedScanResult.tokenContract;
-        formModel.value.amount = convertToken(
+        formModel.value.amount = toShiftedBigNumber(
           parsedScanResult.amount,
           -(formModel.value.selectedAsset as IToken)?.decimals,
         ).toString();

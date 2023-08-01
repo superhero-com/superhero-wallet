@@ -63,6 +63,7 @@
 import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { relativeTimeTo } from '@/utils';
 import {
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
@@ -72,7 +73,6 @@ import {
   NOTIFICATION_TYPE_RETIP_ON_TIP,
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
-  relativeTimeTo,
 } from '../utils';
 import { IS_EXTENSION, IS_MOBILE_DEVICE } from '../../lib/environment';
 import { INotification } from '../../types';

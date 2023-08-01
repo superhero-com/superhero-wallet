@@ -4,7 +4,10 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router';
-import { Dictionary } from '../../types';
+import { Dictionary } from '@/types';
+import {
+  watchUntilTruthy,
+} from '@/utils';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
@@ -16,7 +19,6 @@ import store from '../../store';
 import initSdk from '../../lib/wallet';
 import {
   APP_LINK_WEB,
-  watchUntilTruthy,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,

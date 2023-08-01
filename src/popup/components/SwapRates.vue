@@ -40,11 +40,11 @@
 <script>
 import { mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
+import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
 import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
-} from '../utils';
+} from '@/protocols/aeternity/helpers';
 
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';

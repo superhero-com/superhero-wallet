@@ -1,4 +1,4 @@
-import { categorizeContractCallTxObject } from '../../../src/popup/utils';
+import { categorizeContractCallTxObject } from '../../../src/protocols/aeternity/helpers';
 import { transactions } from '../../../src/popup/utils/testsConfig';
 
 const expectedKeys = {
