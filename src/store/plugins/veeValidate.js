@@ -11,16 +11,16 @@ import {
   isNotFoundError,
   getAddressByNameEntry,
 } from '@/popup/utils';
-import { AENS_DOMAIN } from '@/popup/utils/constants';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 import { tg } from './languages';
 
 defineRule('url', (url) => isUrlValid(url));
 defineRule('required', required);
 defineRule('account', (value) => isAddressValid(value) || isAensNameValid(value));
 defineRule('account_address', (value) => isAddressValid(value, Encoding.AccountAddress));
-defineRule('name', (value) => isAensNameValid(`${value}${AENS_DOMAIN}`));
+defineRule('name', (value) => isAensNameValid(`${value}${AE_AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
 defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
