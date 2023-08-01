@@ -25,6 +25,9 @@ import {
 } from '@/lib/environment';
 import { watchUntilTruthy } from '@/utils';
 import {
+  watchUntilTruthy,
+} from '@/utils';
+import {
   DEX_CONTRACTS,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
