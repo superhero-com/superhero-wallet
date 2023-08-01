@@ -4,6 +4,7 @@
 
 import { WatchSource, watch } from 'vue';
 import { defer } from 'lodash-es';
+import BigNumber from 'bignumber.js';
 import type {
   BigNumberPublic,
   IPageableResponse,
@@ -11,7 +12,6 @@ import type {
   Truthy,
 } from '@/types';
 import { LOCAL_STORAGE_PREFIX } from '@/popup/utils';
-import BigNumber from 'bignumber.js';
 
 export function amountRounded(rawAmount: number | BigNumberPublic): string {
   let amount = rawAmount;
