@@ -210,10 +210,14 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 ion-toolbar {
-  --background: var(--screen-bg-color);
   --min-height: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 0;
+  --padding-end: 0;
 }
-.ion-no-border {
+
+ion-header {
   z-index: variables.$z-index-header;
   height: var(--header-height);
 }
@@ -223,9 +227,9 @@ ion-toolbar {
   align-items: center;
   justify-content: space-between;
   background-color: var(--screen-bg-color);
-  padding: env(safe-area-inset-top) 8px 0;
+  padding: 0 8px;
   width: 100%;
-  height: 100%;
+  height: var(--header-height);
 
   @include mixins.mobile {
     display: flex;

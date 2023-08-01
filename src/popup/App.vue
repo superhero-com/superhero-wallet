@@ -1,6 +1,6 @@
 <template>
   <IonApp class="ionic-wrapper">
-    <div
+    <IonPage
       class="app-wrapper"
       :class="{
         'show-header': showHeader,
@@ -24,7 +24,7 @@
 
         <ion-router-outlet
           :animated="!RUNNING_IN_TESTS"
-          :class="{ 'show-header': showHeader }"
+          :class="{ 'show-header': showHeader, 'ios': IS_IOS }"
           class="main"
         />
         <NodeConnectionStatus
@@ -40,13 +40,13 @@
           :view-component-name="viewComponentName"
         />
       </div>
-    </div>
+    </IonPage>
   </IonApp>
 </template>
 
 <script lang="ts">
 import {
-  IonRouterOutlet, IonApp,
+  IonRouterOutlet, IonApp, IonPage,
 } from '@ionic/vue';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import {
@@ -98,6 +98,7 @@ export default defineComponent({
     Close,
     IonApp,
     IonRouterOutlet,
+    IonPage,
   },
   setup() {
     const store = useStore();
@@ -219,6 +220,7 @@ export default defineComponent({
     });
 
     return {
+      IS_IOS,
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
@@ -283,11 +285,13 @@ export default defineComponent({
   }
 
   .main {
-    margin-top: var(--header-height);
-    padding-bottom: 0;
+    margin-top: calc(var(--header-height) + env(safe-area-inset-top));
     padding-bottom: env(safe-area-inset-bottom);
-    padding-top: env(safe-area-inset-top);
     background-color: var(--screen-bg-color);
+
+    &.ios {
+      top: 10px;
+    }
   }
 
   .connection-status {
