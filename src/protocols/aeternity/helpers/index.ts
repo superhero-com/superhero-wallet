@@ -16,12 +16,12 @@ import type {
   TxType,
 } from '@/types';
 import {
-  AENS_NAME_MAX_LENGTH,
   TX_FUNCTIONS,
   TX_FUNCTIONS_TYPE_DEX,
 } from '@/popup/utils';
 import { compareCaseInsensitive, includes } from '@/utils';
 import {
+  AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
   AE_SIMPLEX_URL,
 } from '../config';
@@ -163,7 +163,7 @@ export function getTxTag(tx: ITx): Tag | null {
 
 export function isAensNameValid(value: string) {
   return (
-    value.length <= AENS_NAME_MAX_LENGTH
+    value.length <= AE_AENS_NAME_MAX_LENGTH
     && /^[\p{L}\d]+\.chain$/gu.test(value)
   );
 }

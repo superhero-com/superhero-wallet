@@ -56,9 +56,9 @@ import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type { ITokenList, ObjectValues, ResolveCallback } from '@/types';
 import { isUrlValid } from '@/utils';
-import { AENS_DOMAIN } from '@/popup/utils';
 import { IFormModel } from '@/composables';
 import { useGetter, useState } from '@/composables/vuex';
+import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -113,7 +113,7 @@ export default defineComponent({
       STEPS.reviewTip,
     ].includes(currentStep.value as any));
     const showSendButton = computed(() => currentStep.value === STEPS.review);
-    const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AENS_DOMAIN));
+    const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AE_AENS_DOMAIN));
     const isAddressUrl = computed(() => (
       !isAddressChain.value
       && transferData.value.address
