@@ -17,10 +17,10 @@
 </template>
 
 <script>
-import Default from '../../icons/badges/default.svg?vue-component';
 import { MODAL_RECIPIENT_HELPER } from '@/config';
-import { useModals } from '../../composables';
-import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
+import { useModals } from '@/composables';
+import Default from '@/icons/badges/default.svg?vue-component';
+import QuestionCircleIcon from '@/icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {

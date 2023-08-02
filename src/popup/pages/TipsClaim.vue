@@ -54,8 +54,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { isUrlValid, toURL } from '@/utils';
-import { MODAL_CLAIM_SUCCESS } from '@/config';
-import { IS_EXTENSION } from '@/lib/environment';
+import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/config';
 import {
   useAccounts,
   useModals,

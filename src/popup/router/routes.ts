@@ -1,4 +1,5 @@
 import type { WalletAppRouteConfig } from '@/types';
+import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/config';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -28,9 +29,6 @@ import {
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
 } from './routeNames';
-import {
-  PROTOCOL_VIEW_ACCOUNT_DETAILS,
-} from '@/config';
 
 import About from '../pages/About.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';

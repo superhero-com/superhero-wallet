@@ -1,4 +1,5 @@
 import Vuex from 'vuex';
+import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '@/config';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
@@ -15,7 +16,6 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '@/config';
 
 export default new Vuex.Store({
   state: {
