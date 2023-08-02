@@ -52,9 +52,9 @@
 
 <script>
 import { mapMutations } from 'vuex';
+import { IS_EXTENSION, IS_CORDOVA } from '@/config';
 import { openInNewWindow } from '@/utils';
-import { RejectedByUserError } from '../../../lib/errors';
-import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
+import { RejectedByUserError } from '@/lib/errors';
 import { handleUnknownError } from '../../utils';
 
 import Modal from '../Modal.vue';

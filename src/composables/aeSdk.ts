@@ -17,14 +17,11 @@ import type {
 import { AeSdkSupehero } from '@/lib/AeSdkSupehero';
 import { FramesConnection } from '@/lib/FramesConnection';
 import { App } from '@/store/modules/permissions';
+import { watchUntilTruthy } from '@/utils';
 import {
   IN_FRAME,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
-  RUNNING_IN_TESTS,
-} from '@/lib/environment';
-import { watchUntilTruthy } from '@/utils';
-import {
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
   NODE_STATUS_CONNECTED,
@@ -32,6 +29,7 @@ import {
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
+  RUNNING_IN_TESTS,
 } from '@/config';
 import { showPopup } from '@/background/popupHandler';
 import {

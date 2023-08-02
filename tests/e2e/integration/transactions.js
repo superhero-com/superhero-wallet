@@ -1,4 +1,4 @@
-import { TXS_PER_PAGE } from '../../../src/popup/utils/constants';
+import { TXS_PER_PAGE } from '@/config';
 
 describe('Tests cases for transactions page', () => {
   it('Load transactions, load additional transactions on scroll', () => {

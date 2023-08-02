@@ -7,12 +7,16 @@ import {
 import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
+  IS_CORDOVA,
+  IS_WEB,
+  POPUP_TYPE,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
+  RUNNING_IN_POPUP,
 } from '@/config';
 import {
   watchUntilTruthy,
@@ -26,12 +30,7 @@ import { routes } from './routes';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
-import {
-  RUNNING_IN_POPUP,
-  POPUP_TYPE,
-  IS_CORDOVA,
-  IS_WEB,
-} from '../../lib/environment';
+
 import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
 import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 

@@ -1,4 +1,3 @@
-import '../lib/environment';
 import '../lib/initPolyfills';
 import initDeeplinkHandler from './deeplinkHandler';
 import * as wallet from './wallet';
