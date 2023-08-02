@@ -1,4 +1,3 @@
-import '../lib/environment';
 import '../lib/initPolyfills';
 import { createApp } from 'vue';
 import store from '../store';

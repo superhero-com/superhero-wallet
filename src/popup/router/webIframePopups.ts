@@ -1,6 +1,8 @@
 import { Component, VNode, h } from 'vue';
 import { WalletAppRouteConfig } from '@/types';
 import {
+  IN_POPUP,
+  IS_WEB,
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_RAW_SIGN,
@@ -8,7 +10,6 @@ import {
   MODAL_MESSAGE_SIGN,
 } from '@/config';
 import { usePopupProps } from '../../composables';
-import { IN_POPUP, IS_WEB } from '../../lib/environment';
 import { RejectedByUserError } from '../../lib/errors';
 import { ROUTE_WEB_IFRAME_POPUP } from './routeNames';
 

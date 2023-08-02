@@ -86,9 +86,11 @@ import { generateMnemonic } from '@aeternity/bip39';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import {
-  IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
-} from '@/lib/environment';
-import { MODAL_ACCOUNT_IMPORT } from '@/config';
+  IN_FRAME,
+  IS_MOBILE_DEVICE,
+  IS_WEB,
+  MODAL_ACCOUNT_IMPORT,
+} from '@/config';
 import { useModals } from '@/composables';
 
 import CheckBox from '../components/CheckBox.vue';
