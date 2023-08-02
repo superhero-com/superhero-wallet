@@ -2,7 +2,7 @@ import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig';
+import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/config/stubs';
 import {
   formatDate,
   formatTime,
@@ -23,7 +23,7 @@ export async function getLoginState({
   name,
   network,
 }) {
-  const { mnemonic, address } = testAccount;
+  const { mnemonic, address } = STUB_ACCOUNT;
   const account = {
     address,
     privateKey: mnemonicToSeed(mnemonic).toString('hex'),
