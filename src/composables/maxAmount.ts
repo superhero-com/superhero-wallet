@@ -30,6 +30,8 @@ import {
 import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
+} from '@/config/stubs';
+import {
   handleUnknownError,
 } from '@/popup/utils';
 import {

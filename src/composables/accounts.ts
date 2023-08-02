@@ -17,7 +17,7 @@ import {
   getHdWalletAccount,
 } from '@/popup/utils';
 import { AeScan } from '@/lib/AeScan';
-import { testAccount } from '@/popup/utils/testsConfig';
+import { STUB_ACCOUNT } from '@/config/stubs';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -49,7 +49,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     if (baseAccounts.length) {
       baseAccounts.push({
         idx: baseAccounts.length,
-        address: testAccount.address,
+        address: STUB_ACCOUNT.address,
         protocol: PROTOCOL_BITCOIN,
         publicKey: new Uint8Array(),
         secretKey: new Uint8Array(),

@@ -7,7 +7,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
 } from '../../../src/popup/utils';
-import { popupProps, txParams } from '../../../src/popup/utils/testsConfig';
+import { STUB_POPUP_PROPS, STUB_TX_PARAMS } from '../../../src/config/stubs';
 import locale from '../../../src/popup/locales/en.json';
 
 const popups = [
@@ -29,7 +29,7 @@ describe('Tests cases for AEX-2 popups', () => {
   });
 
   it('Sign Message popup, Connect, Account list, Raw Sign display correct data', () => {
-    const props = popupProps[POPUP_TYPE_MESSAGE_SIGN];
+    const props = STUB_POPUP_PROPS[POPUP_TYPE_MESSAGE_SIGN];
     cy.openAex2Popup(POPUP_TYPE_MESSAGE_SIGN)
       .get('[data-cy=aepp]')
       .should('be.visible')
@@ -39,14 +39,14 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props.message);
 
-    const props1 = popupProps[POPUP_TYPE_CONNECT];
+    const props1 = STUB_POPUP_PROPS[POPUP_TYPE_CONNECT];
     cy.openAex2Popup(POPUP_TYPE_CONNECT)
       .get('[data-cy=aepp]')
       .should('be.visible')
       .should('contain', props1.app.name)
       .should('contain', props1.app.host);
 
-    const props2 = popupProps[POPUP_TYPE_RAW_SIGN];
+    const props2 = STUB_POPUP_PROPS[POPUP_TYPE_RAW_SIGN];
     cy.openAex2Popup(POPUP_TYPE_RAW_SIGN)
       .get('[data-cy=warning]')
       .should('be.visible')
@@ -57,7 +57,7 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .should('contain', props2.app.host);
 
-    const props3 = popupProps[POPUP_TYPE_ACCOUNT_LIST];
+    const props3 = STUB_POPUP_PROPS[POPUP_TYPE_ACCOUNT_LIST];
     cy.openAex2Popup(POPUP_TYPE_ACCOUNT_LIST)
       .get('[data-cy=aepp]')
       .should('be.visible')
@@ -89,7 +89,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   txTags.forEach((txTag) => {
     it(`Sign Popup display correct ${Tag[txTag]} data`, () => {
-      const tx = txParams[Tag[txTag]];
+      const tx = STUB_TX_PARAMS[Tag[txTag]];
       const amount = tx.amount / 10 ** 18;
       const fee = tx.fee / 10 ** 18;
       let receiver;

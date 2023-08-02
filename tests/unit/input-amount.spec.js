@@ -6,15 +6,15 @@ import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 import { NETWORK_TESTNET } from '../../src/popup/utils';
-import { testAccount } from '../../src/popup/utils/testsConfig';
+import { STUB_ACCOUNT } from '../../src/config/stubs';
 
 const maxBalance = 10000;
 
 const store = new Vuex.Store({
   plugins: [veeValidate],
   getters: {
-    account: () => testAccount,
-    accounts: () => [testAccount],
+    account: () => STUB_ACCOUNT,
+    accounts: () => [STUB_ACCOUNT],
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
     activeNetwork: () => (NETWORK_TESTNET),
