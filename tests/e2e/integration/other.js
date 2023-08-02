@@ -1,16 +1,15 @@
-import { transactions } from '../../../src/popup/utils/testsConfig';
+import { STUB_ACCOUNT, STUB_TRANSACTIONS } from '../../../src/config/stubs';
 
-const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 const txs = [
-  transactions.pendingSpend,
-  transactions.pendingTransfer,
+  STUB_TRANSACTIONS.pendingSpend,
+  STUB_TRANSACTIONS.pendingTransfer,
   {
-    ...transactions.pendingTipToken,
-    tx: { ...transactions.pendingTipToken.tx, callerId: ACCOUNT_ADDRESS },
+    ...STUB_TRANSACTIONS.pendingTipToken,
+    tx: { ...STUB_TRANSACTIONS.pendingTipToken.tx, callerId: STUB_ACCOUNT.address },
   },
   {
-    ...transactions.pendingTipAe,
-    tx: { ...transactions.pendingTipAe.tx, callerId: ACCOUNT_ADDRESS },
+    ...STUB_TRANSACTIONS.pendingTipAe,
+    tx: { ...STUB_TRANSACTIONS.pendingTipAe.tx, callerId: STUB_ACCOUNT.address },
   },
 ];
 

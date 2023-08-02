@@ -5,7 +5,7 @@ import {
   Encoded,
   AE_AMOUNT_FORMATS,
 } from '@aeternity/aepp-sdk';
-import type { IPopupConfig } from '@/types';
+import type { IPopupConfig, ITransaction, PartialDeep } from '@/types';
 import {
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
@@ -18,13 +18,16 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_SIGN,
-  STUB_ADDRESS,
-  STUB_CONTRACT_ADDRESS,
-  STUB_TOKEN_CONTRACT_ADDRESS,
-} from './constants';
-import { CoinGeckoMarketResponse } from '../../lib/CoinGecko';
+} from '@/popup/utils';
+import { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 
-export const testAccount = {
+export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
+export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+export const STUB_NONCE = 10000;
+export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
+
+export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
 };
@@ -36,7 +39,7 @@ export const STUB_CURRENCY: CoinGeckoMarketResponse = {
   id: AE_COINGECKO_COIN_ID, symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', currentPrice: 0.076783, marketCap: 31487891, marketCapRank: 523, fullyDilutedValuation: null, totalVolume: 217034, high24h: 0.078539, low24h: 0.076793, priceChange24h: -0.001092194951687525, priceChangePercentage24h: -1.4025, marketCapChange24h: -429134.39267925173, marketCapChangePercentage24h: -1.34453, circulatingSupply: 409885828.49932, totalSupply: 536306702.0, maxSupply: null, ath: 5.69, athChangePercentage: -98.65091, athDate: '2018-04-29T03:50:39.593Z', atl: 0.059135, atlChangePercentage: 29.84246, atlDate: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, lastUpdated: '2023-01-17T11:38:23.610Z',
 };
 
-export const popupProps: Record<string, IPopupConfig> = {
+export const STUB_POPUP_PROPS: Record<string, IPopupConfig> = {
   [POPUP_TYPE_CONNECT]: {
     type: POPUP_TYPE_CONNECT,
     app: {
@@ -86,7 +89,7 @@ export const popupProps: Record<string, IPopupConfig> = {
     tx: {
       type: Tag[Tag.SpendTx],
       VSN: '1',
-      senderId: testAccount.address,
+      senderId: STUB_ACCOUNT.address,
       recipientId,
       amount: 1000000000000000,
       fee: 16820000000000,
@@ -139,36 +142,40 @@ const commonParams = {
   },
   ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
   abiVersion: AbiVersion.Sophia,
-  callData:
-    'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF' as Encoded.ContractBytearray,
+  callData: STUB_CALLDATA,
 };
-export const txParams = {
+
+export const STUB_TX_PARAMS = {
   [Tag[Tag.ContractCreateTx]]: {
-    ownerId: testAccount.address,
+    ownerId: STUB_ACCOUNT.address,
     code:
       'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=' as Encoded.ContractBytearray,
     ...commonParams,
   },
   [Tag[Tag.ContractCallTx]]: {
     contractId: contractCallAddress,
-    callerId: testAccount.address,
+    callerId: STUB_ACCOUNT.address,
     ...commonParams,
   },
   [Tag[Tag.SpendTx]]: {
-    senderId: testAccount.address,
+    senderId: STUB_ACCOUNT.address,
     recipientId,
     ...commonParams,
   },
 };
 
-export const transactions = {
+/**
+ * The keys are the TxFunctionParsed values, but some of them does not exist in TxFunctionParsed
+ * so for now it is typed as `string`.
+ */
+export const STUB_TRANSACTIONS: Record<string, PartialDeep<ITransaction>> = {
   spend: {
     tx: {
       amount: 10000000000000,
       fee: 16780000000000,
       type: 'SpendTx',
       senderId: STUB_ADDRESS,
-      recipientId: testAccount.address,
+      recipientId: STUB_ACCOUNT.address,
     },
   },
   tip: {
@@ -289,7 +296,7 @@ export const transactions = {
       arguments: [
         {
           type: 'address',
-          value: testAccount.address,
+          value: STUB_ACCOUNT.address,
         },
         {
           type: 'int',
@@ -376,7 +383,7 @@ export const transactions = {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      recipientId: testAccount.address,
+      recipientId: STUB_ACCOUNT.address,
       senderId: STUB_ADDRESS,
       function: 'transfer',
       type: 'ContractCallTx',
@@ -387,18 +394,17 @@ export const transactions = {
     tx: {
       amount: 743000000000000000,
       senderId: STUB_ADDRESS,
-      recipientId: testAccount.address,
+      recipientId: STUB_ACCOUNT.address,
       type: 'SpendTx',
     },
   },
   pendingTransfer: {
     pending: true,
-    type: 'spendToken',
     tx: {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
       contractId: STUB_TOKEN_CONTRACT_ADDRESS,
-      recipientId: testAccount.address,
+      recipientId: STUB_ACCOUNT.address,
       function: 'transfer',
       type: 'ContractCallTx',
     },
@@ -436,13 +442,12 @@ export const transactions = {
         },
       },
       type: 'PayingForTx',
-      version: 1,
     },
   },
   gaMetaSpend: {
     tx: {
       fee: 76440000000000,
-      gaiId: STUB_ADDRESS,
+      gaId: STUB_ADDRESS,
       tx: {
         tx: {
           amount: 2341200000000000,

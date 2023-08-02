@@ -1,5 +1,5 @@
+import { STUB_TRANSACTIONS } from '../../../src/config/stubs';
 import { categorizeContractCallTxObject } from '../../../src/protocols/aeternity/helpers';
-import { transactions } from '../../../src/popup/utils/testsConfig';
 
 const expectedKeys = {
   retip_token: ['url', 'amount', 'token'],
@@ -29,7 +29,7 @@ const testCases = ({ retipToken, tipToken, ...otherTxs }) => [
   }];
 
 describe('categorizeContractCallTxObject', () => {
-  testCases(transactions).forEach((test) => it(
+  testCases(STUB_TRANSACTIONS).forEach((test) => it(
     `should return correct object for ${test.tx.type}/${test.tx.function ?? ''}\
 ${test.pending ? '/pending' : ''}${test.incomplete ? '/incomplete' : ''}`,
     () => {
