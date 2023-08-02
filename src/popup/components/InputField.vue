@@ -106,8 +106,8 @@ import {
   PropType,
   ref,
 } from 'vue';
-import type { IInputMessage, IInputMessageRaw } from '../../types';
-import { INPUT_MESSAGE_STATUSES } from '../utils';
+import type { IInputMessage, IInputMessageRaw } from '@/types';
+import { INPUT_MESSAGE_STATUSES } from '@/config';
 import BtnHelp from './buttons/BtnHelp.vue';
 
 type InputFieldType = 'text' | 'number';

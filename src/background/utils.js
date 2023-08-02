@@ -1,5 +1,5 @@
-import { IS_FIREFOX } from '../lib/environment';
-import { CONNECTION_TYPES } from '../popup/utils';
+import { IS_FIREFOX } from '@/lib/environment';
+import { CONNECTION_TYPES } from '@/config';
 
 export const detectConnectionType = (port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';

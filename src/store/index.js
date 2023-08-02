@@ -15,7 +15,7 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
+import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '@/config';
 
 export default new Vuex.Store({
   state: {

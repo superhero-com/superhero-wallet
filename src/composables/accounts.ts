@@ -9,10 +9,8 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
+import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/config';
 import {
-  ACCOUNT_HD_WALLET,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
   getAccountNameToDisplay,
   getHdWalletAccount,
 } from '@/popup/utils';

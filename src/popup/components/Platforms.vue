@@ -77,13 +77,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import {
   APP_LINK_CHROME,
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
-} from '../utils/constants';
+} from '@/config';
 import { IS_MOBILE_DEVICE, IS_IOS, IS_FIREFOX } from '../../lib/environment';
 import PlatformIcon from './PlatformIcon.vue';
 

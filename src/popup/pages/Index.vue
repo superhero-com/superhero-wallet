@@ -87,9 +87,9 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import {
   IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
-} from '../../lib/environment';
-import { MODAL_ACCOUNT_IMPORT } from '../utils';
-import { useModals } from '../../composables';
+} from '@/lib/environment';
+import { MODAL_ACCOUNT_IMPORT } from '@/config';
+import { useModals } from '@/composables';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';

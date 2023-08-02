@@ -74,8 +74,8 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { Field, Form } from 'vee-validate';
+import { NETWORK_DEFAULT } from '@/config';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
-import { NETWORK_DEFAULT } from '../utils';
 import { useDispatch, useGetter } from '../../composables/vuex';
 import type { INetworkBase } from '../../types';
 

@@ -13,19 +13,21 @@ import type {
 import {
   includes,
 } from '@/utils';
+import { TX_DIRECTION } from '@/config';
 import {
-  TRANSACTION_OWNERSHIP_STATUS,
-  TX_DIRECTION,
-  TX_FUNCTIONS_MULTISIG,
   TX_FUNCTION_TRANSLATIONS,
-  TX_FUNCTIONS,
   TX_TYPE_TRANSLATIONS,
   TX_TYPE_LIST_TRANSLATIONS,
-  TX_RETURN_TYPE_OK,
   getOwnershipStatus,
   getTxDirection,
   getTxOwnerAddress,
 } from '@/popup/utils';
+import {
+  AE_TRANSACTION_OWNERSHIP_STATUS,
+  TX_RETURN_TYPE_OK,
+  TX_FUNCTIONS,
+  TX_FUNCTIONS_MULTISIG,
+} from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   getTxTag,
@@ -163,7 +165,7 @@ export function useTransactionTx({
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress
         || (
-          ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
+          ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
         )
         || activeAccount.value.address,
@@ -181,9 +183,9 @@ export function useTransactionTx({
 
   function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
     switch (ownershipStatus.value) {
-      case TRANSACTION_OWNERSHIP_STATUS.current:
+      case AE_TRANSACTION_OWNERSHIP_STATUS.current:
         return activeAccountExtended.value;
-      case TRANSACTION_OWNERSHIP_STATUS.subAccount: {
+      case AE_TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};
 
         return accounts.value.find(({ address }) => [accountId, callerId].includes(address))!;

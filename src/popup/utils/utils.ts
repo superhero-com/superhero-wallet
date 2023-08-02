@@ -8,7 +8,6 @@ import {
   InvalidTxError,
   isAddressValid,
   Tag,
-  unpackTx,
 } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import type {
@@ -23,15 +22,16 @@ import type {
   IKeyPair,
   IGAAttachTx,
 } from '@/types';
-import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 import {
-  HASH_PREFIXES_ALLOWED,
+  AE_AENS_DOMAIN,
+  AE_HASH_PREFIXES_ALLOWED,
+  AE_TRANSACTION_OWNERSHIP_STATUS,
+} from '@/protocols/aeternity/config';
+import {
   HASH_REGEX,
   TX_DIRECTION,
-  TX_TAGS_SUPPORTED,
-  TRANSACTION_OWNERSHIP_STATUS,
-} from './constants';
-import { tg } from '../../store/plugins/languages';
+} from '@/config';
+import { tg } from '@/store/plugins/languages';
 
 export function handleUnknownError(error: any) {
   // eslint-disable-next-line no-console
@@ -66,7 +66,7 @@ export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'a
 }
 
 export function validateHash(fullHash?: string) {
-  type HashPrefix = typeof HASH_PREFIXES_ALLOWED[number];
+  type HashPrefix = typeof AE_HASH_PREFIXES_ALLOWED[number];
   const isName = !!fullHash?.endsWith(AE_AENS_DOMAIN);
   let valid = false;
   let prefix: HashPrefix | null = null;
@@ -74,7 +74,7 @@ export function validateHash(fullHash?: string) {
 
   if (fullHash) {
     [prefix, hash] = fullHash.split('_') as [HashPrefix, string];
-    valid = (HASH_PREFIXES_ALLOWED.includes(prefix) && HASH_REGEX.test(hash)) || isName;
+    valid = (AE_HASH_PREFIXES_ALLOWED.includes(prefix) && HASH_REGEX.test(hash)) || isName;
   }
 
   return {
@@ -197,15 +197,6 @@ export function getHdWalletAccount(
   };
 }
 
-export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
-  try {
-    const txObject = unpackTx(encodedTx);
-    return TX_TAGS_SUPPORTED.includes(txObject.tag);
-  } catch (e) {
-    return false;
-  }
-}
-
 export function getTxOwnerAddress(innerTx?: ITx) {
   return innerTx?.accountId || innerTx?.callerId;
 }
@@ -233,12 +224,12 @@ export function getOwnershipStatus(
 ) {
   const txOwnerAddress = getTxOwnerAddress(innerTx);
   if (activeAccount.address === txOwnerAddress) {
-    return TRANSACTION_OWNERSHIP_STATUS.current;
+    return AE_TRANSACTION_OWNERSHIP_STATUS.current;
   }
   if (accounts.find(({ address }) => address === txOwnerAddress)) {
-    return TRANSACTION_OWNERSHIP_STATUS.subAccount;
+    return AE_TRANSACTION_OWNERSHIP_STATUS.subAccount;
   }
-  return TRANSACTION_OWNERSHIP_STATUS.other;
+  return AE_TRANSACTION_OWNERSHIP_STATUS.other;
 }
 
 export function errorHasValidationKey(error: any, expectedKey: string) {

@@ -14,20 +14,20 @@ import {
   Node,
   Tag,
 } from '@aeternity/aepp-sdk';
+import {
+  ALLOWED_ICON_STATUSES,
+  INPUT_MESSAGE_STATUSES,
+  POPUP_TYPES,
+} from '@/config';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
 import {
   AE_CONTRACT_ID,
-} from '@/protocols/aeternity/config';
-import {
-  ALLOWED_ICON_STATUSES,
-  INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
-  POPUP_TYPES,
   TX_FUNCTIONS,
   TX_FUNCTIONS_MULTISIG,
   TX_RETURN_TYPES,
-} from '@/popup/utils';
+} from '@/protocols/aeternity/config';
 import { Protocol } from './protocols';
 
 export * from './cordova';
