@@ -51,6 +51,13 @@ export type ObjectValues<T> = T[keyof T];
 type PublicPart<T> = { [K in keyof T]: T[K] };
 
 /**
+ * Makes the interface and all the child interfaces to be partial.
+ */
+export type PartialDeep<T> = T extends object ? {
+  [P in keyof T]?: PartialDeep<T[P]>;
+} : T;
+
+/**
  * Allowed options that can be passed to our fetch utility functions
  */
 export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
@@ -301,8 +308,8 @@ export interface ICurrency {
 export type CurrencyRates = Record<CurrencyCode, number>;
 
 export interface TxArguments {
-  type: 'tuple' | 'list'
-  value: any // TODO find type, this was not correct: (string | number | any[])
+  type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
+  value: any; // TODO find type, this was not correct: (string | number | any[])
 }
 
 /**

@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
+import { STUB_ACCOUNT } from '../../../src/config/stubs';
 
-const ownAddress = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
 const recipientAddress = 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4';
 const amount = 0.1;
 
@@ -37,7 +37,7 @@ describe('Test cases for Withdraw Page', () => {
 
       // check on step2 if everything is OK
       .get('[data-cy=review-sender] > .value')
-      .should('contain', ownAddress)
+      .should('contain', STUB_ACCOUNT.address)
       .get('[data-cy=review-recipient] > .value')
       .should('contain', recipientAddress)
       .get('[data-cy=review-total]')
@@ -54,7 +54,7 @@ describe('Test cases for Withdraw Page', () => {
       // edit, sending to your own account
       .get('[data-cy=edit]')
       .click()
-      .enterAddress(ownAddress)
+      .enterAddress(STUB_ACCOUNT.address)
       .get('[data-cy=address]')
       .should('have.class', 'warning')
       .get('[data-cy=next-step-button]')
