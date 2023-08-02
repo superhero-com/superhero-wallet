@@ -246,10 +246,9 @@ import {
   defineComponent,
   ref,
   onMounted,
-  PropType,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { INetwork, ITransaction, TxFunctionRaw } from '@/types';
 import {
@@ -279,24 +278,24 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
-import TransactionOverview from '../components/TransactionOverview.vue';
-import SwapRoute from '../components/SwapRoute.vue';
-import SwapRates from '../components/SwapRates.vue';
-import TokenAmount from '../components/TokenAmount.vue';
-import DetailsItem from '../components/DetailsItem.vue';
-import LinkButton from '../components/LinkButton.vue';
-import Truncate from '../components/Truncate.vue';
-import TransactionTokens from '../components/TransactionTokenRows.vue';
-import CopyText from '../components/CopyText.vue';
-import TransactionDetailsPoolTokens from '../components/TransactionDetailsPoolTokens.vue';
-import PayloadDetails from '../components/PayloadDetails.vue';
-import TransactionErrorStatus from '../components/TransactionErrorStatus.vue';
-import Avatar from '../components/Avatar.vue';
-import DialogBox from '../components/DialogBox.vue';
+import TransactionOverview from '@/popup/components/TransactionOverview.vue';
+import SwapRoute from '@/popup/components/SwapRoute.vue';
+import SwapRates from '@/popup/components/SwapRates.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import LinkButton from '@/popup/components/LinkButton.vue';
+import Truncate from '@/popup/components/Truncate.vue';
+import TransactionTokens from '@/popup/components/TransactionTokenRows.vue';
+import CopyText from '@/popup/components/CopyText.vue';
+import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
+import PayloadDetails from '@/popup/components/PayloadDetails.vue';
+import TransactionErrorStatus from '@/popup/components/TransactionErrorStatus.vue';
+import Avatar from '@/popup/components/Avatar.vue';
+import DialogBox from '@/popup/components/DialogBox.vue';
 
-import AnimatedPending from '../../icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
+import AnimatedPending from '@/icons/animated-pending.svg?vue-component';
+import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
+import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -319,19 +318,22 @@ export default defineComponent({
     DialogBox,
   },
   props: {
-    hash: { type: String, required: true },
     multisigDashboard: { type: Boolean },
-    transactionOwner: { type: String as PropType<Encoded.AccountAddress>, default: '' },
   },
   setup(props) {
     const store = useStore();
     const router = useRouter();
+    const route = useRoute();
+
+    const hash = route.params.hash as string;
+    const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
+
     const { getMiddleware } = useMiddleware({ store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
 
     const externalAddress = computed((): Encoded.AccountAddress => (
-      props.transactionOwner
+      transactionOwner
       || (
         props.multisigDashboard
           ? activeMultisigAccountId.value
@@ -372,7 +374,7 @@ export default defineComponent({
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerUrl = computed(
-      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.hash),
+      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(hash),
     );
 
     const gasPrice = computed(() => {
@@ -407,17 +409,17 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      let rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+      let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
 
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();
         try {
-          rawTransaction = await middleware.getTx(props.hash);
+          rawTransaction = await middleware.getTx(hash);
         } catch (e) {
           // This case is for pending transaction
           await fetchAllPendingTransactions();
 
-          rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+          rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
 
           if (!rawTransaction) {
             router.push({ name: ROUTE_NOT_FOUND });
@@ -474,6 +476,7 @@ export default defineComponent({
       tipLink,
       direction,
       explorerUrl,
+      hash,
       splitAddress,
       aettosToAe,
       formatDate,
@@ -491,9 +494,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .transaction-details {
   display: flex;

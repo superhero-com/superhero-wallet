@@ -29,6 +29,7 @@ export const PROTOCOLS = [
 ] as const;
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
+export const PROTOCOL_VIEW_TRANSACTION_DETAILS = 'TransactionDetails';
 export const PROTOCOL_VIEW_TRANSFER_RECEIVE = 'TransferReceiveModal';
 
 /**
@@ -36,6 +37,7 @@ export const PROTOCOL_VIEW_TRANSFER_RECEIVE = 'TransferReceiveModal';
  */
 export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 ] as const;
 
