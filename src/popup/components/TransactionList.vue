@@ -41,14 +41,14 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import {
+import type {
   ITokenList,
   ITransaction,
   ICommonTransaction,
   ITransactionsState,
   ITx,
 } from '@/types';
+import { TX_DIRECTION, TXS_PER_PAGE } from '@/config';
 import {
   includesCaseInsensitive,
   pipe,
@@ -59,9 +59,6 @@ import {
   getOwnershipStatus,
   getTxOwnerAddress,
   sortTransactionsByDateCallback,
-  TXS_PER_PAGE,
-  TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS,
 } from '@/popup/utils';
 import { useDispatch, useGetter, useState } from '@/composables/vuex';
 import {
@@ -73,6 +70,7 @@ import {
   useUi,
   useAeSdk,
 } from '@/composables';
+import { AE_CONTRACT_ID, AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   isTxDex,
@@ -178,7 +176,7 @@ export default defineComponent({
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
-            !== TRANSACTION_OWNERSHIP_STATUS.current
+            !== AE_TRANSACTION_OWNERSHIP_STATUS.current
           ) && txOwnerAddress
           ),
         );

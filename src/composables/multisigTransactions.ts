@@ -26,8 +26,8 @@ import {
 } from '@/utils';
 import {
   handleUnknownError,
-  MULTISIG_SIMPLE_GA_BYTECODE,
 } from '@/popup/utils';
+import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';

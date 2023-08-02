@@ -895,7 +895,7 @@ import {
   APP_LINK_IOS,
   AGGREGATOR_URL,
   CONTACT_EMAIL,
-} from '../utils/constants';
+} from '@/config';
 import AccordionItem from '../components/AccordionItem.vue';
 
 export default defineComponent({

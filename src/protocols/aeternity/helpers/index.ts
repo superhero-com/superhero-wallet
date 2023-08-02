@@ -4,6 +4,7 @@ import {
   Tag,
   decode,
   formatAmount,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
@@ -15,15 +16,14 @@ import type {
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import {
-  TX_FUNCTIONS,
-  TX_FUNCTIONS_TYPE_DEX,
-} from '@/popup/utils';
 import { compareCaseInsensitive, includes } from '@/utils';
 import {
   AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
   AE_SIMPLEX_URL,
+  TX_FUNCTIONS,
+  TX_FUNCTIONS_TYPE_DEX,
+  TX_TAGS_SUPPORTED,
 } from '../config';
 
 export * from './transactionTokenInfoResolvers';
@@ -108,6 +108,15 @@ export function isContainingNestedTx(tx: ITx): boolean {
     Tag[Tag.GaMetaTx],
     Tag[Tag.PayingForTx],
   ].includes(tx.type);
+}
+
+export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
+  try {
+    const txObject = unpackTx(encodedTx);
+    return TX_TAGS_SUPPORTED.includes(txObject.tag);
+  } catch (e) {
+    return false;
+  }
 }
 
 export function getInnerTransaction(tx?: ITx): any {

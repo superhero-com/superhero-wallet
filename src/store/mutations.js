@@ -2,7 +2,7 @@
 import { uniqBy } from 'lodash-es';
 import {
   TX_DIRECTION,
-} from '../popup/utils';
+} from '@/config';
 
 export default {
   switchNetwork(state, payload) {

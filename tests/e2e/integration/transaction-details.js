@@ -1,5 +1,5 @@
 import { formatDate, formatTime } from '../../../src/utils';
-import { NETWORK_MAINNET } from '../../../src/popup/utils/constants';
+import { NETWORK_MAINNET } from '../../../src/config';
 
 describe('Tests cases for transaction details page', () => {
   it('Render transaction details', () => {

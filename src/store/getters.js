@@ -9,8 +9,8 @@ import {
   NODE_STATUS_CONNECTED,
   ACCOUNT_HD_WALLET,
   TX_DIRECTION,
-  getHdWalletAccount,
-} from '@/popup/utils';
+} from '@/config';
+import { getHdWalletAccount } from '@/popup/utils';
 import { useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {

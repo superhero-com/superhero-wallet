@@ -7,14 +7,12 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
+import { TX_DIRECTION } from '@/config';
+import { toShiftedBigNumber } from '@/utils';
 import {
   AE_COIN_PRECISION,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
-import { toShiftedBigNumber } from '@/utils';
-import {
-  TX_DIRECTION,
-} from '@/popup/utils';
 import {
   getInnerTransaction,
   getTransactionTokenInfoResolver,

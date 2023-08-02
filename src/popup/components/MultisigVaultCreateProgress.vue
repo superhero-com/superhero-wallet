@@ -84,8 +84,8 @@ import {
   PropType,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { MULTISIG_CREATION_PHASES } from '../utils';
-import type { IMultisigAccount, IMultisigCreationPhase } from '../../types';
+import type { IMultisigAccount, IMultisigCreationPhase } from '@/types';
+import { MULTISIG_CREATION_PHASES } from '@/protocols/aeternity/config';
 
 import AvatarWithChainName from './AvatarWithChainName.vue';
 import ProgressBar from './ProgressBar.vue';

@@ -6,7 +6,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
-} from '../../../src/popup/utils';
+} from '../../../src/config';
 import { STUB_POPUP_PROPS, STUB_TX_PARAMS } from '../../../src/config/stubs';
 import locale from '../../../src/popup/locales/en.json';
 

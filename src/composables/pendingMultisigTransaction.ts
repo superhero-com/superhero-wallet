@@ -5,17 +5,17 @@ import {
 } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import {
-  TX_FUNCTIONS_MULTISIG,
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-  handleUnknownError,
-} from '../popup/utils';
+import { handleUnknownError } from '@/popup/utils';
 import type {
   IAccount,
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   ITransaction,
-} from '../types';
+} from '@/types';
+import {
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  TX_FUNCTIONS_MULTISIG,
+} from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';

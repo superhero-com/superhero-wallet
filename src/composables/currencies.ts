@@ -6,12 +6,12 @@ import type {
   ICoin,
   ICurrency,
 } from '@/types';
+import { CURRENCIES } from '@/config';
 import {
   getLocalStorageItem,
   setLocalStorageItem,
 } from '@/utils';
 import {
-  CURRENCIES,
   handleUnknownError,
 } from '@/popup/utils';
 import {

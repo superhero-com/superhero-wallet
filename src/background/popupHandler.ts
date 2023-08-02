@@ -1,11 +1,11 @@
 import { v4 as uuid } from 'uuid';
-import { Dictionary } from '../types';
+import type { Dictionary } from '@/types';
 import {
-  isTxOfASupportedType,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_RAW_SIGN,
-} from '../popup/utils';
+} from '@/config';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
 const popups: Dictionary = {};
 

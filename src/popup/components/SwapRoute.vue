@@ -33,8 +33,8 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { DEX_CONTRACTS } from '@/popup/utils';
 import { useAeSdk } from '@/composables';
+import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
 import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
 
 import Tokens from './Tokens.vue';

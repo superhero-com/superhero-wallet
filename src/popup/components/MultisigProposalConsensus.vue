@@ -65,13 +65,13 @@
 import { computed, defineComponent } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import { MODAL_CONSENSUS_INFO } from '@/config';
 import {
   useAccounts,
   useModals,
   useMultisigAccounts,
   usePendingMultisigTransaction,
-} from '../../composables';
-import { MODAL_CONSENSUS_INFO } from '../utils';
+} from '@/composables';
 
 import AccountItem from './AccountItem.vue';
 import DialogBox from './DialogBox.vue';

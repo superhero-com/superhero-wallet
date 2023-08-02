@@ -30,7 +30,7 @@ import {
 } from './routeNames';
 import {
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-} from '../utils';
+} from '@/config';
 
 import About from '../pages/About.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';

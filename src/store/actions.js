@@ -5,15 +5,15 @@ import {
   postJson,
 } from '@/utils';
 import {
-  AEX9_TRANSFER_EVENT,
   handleUnknownError,
   isAccountNotFoundError,
-} from '../popup/utils';
-import JsonBig from '../lib/json-big';
+} from '@/popup/utils';
+import JsonBig from '@/lib/json-big';
 import {
   useMiddleware,
   useAeSdk,
-} from '../composables';
+} from '@/composables';
+import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
 
 export default {
   switchNetwork({ commit }, payload) {
