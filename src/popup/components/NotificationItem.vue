@@ -66,6 +66,8 @@ import { useI18n } from 'vue-i18n';
 import type { INotification } from '@/types';
 import { relativeTimeTo } from '@/utils';
 import {
+  IS_EXTENSION,
+  IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   NOTIFICATION_TYPE_CLAIM_OF_TIP,
@@ -75,7 +77,6 @@ import {
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
 } from '@/config';
-import { IS_EXTENSION, IS_MOBILE_DEVICE } from '@/lib/environment';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';

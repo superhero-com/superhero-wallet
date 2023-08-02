@@ -11,9 +11,13 @@ import type {
   ResolveCallback,
   StatusIconType,
 } from '@/types';
-import { MODAL_DEFAULT, MODAL_ERROR_LOG } from '@/config';
+import {
+  IN_FRAME,
+  IS_WEB,
+  MODAL_DEFAULT,
+  MODAL_ERROR_LOG,
+} from '@/config';
 import { handleUnknownError } from '../popup/utils';
-import { IN_FRAME, IS_WEB } from '../lib/environment';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
 import { usePopupProps } from './popupProps';
 

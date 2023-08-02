@@ -94,6 +94,7 @@ import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '@/types';
+import { IS_IOS } from '@/config';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/popup/utils';
 import {
@@ -111,7 +112,6 @@ import {
   useTokensList,
 } from '../../../composables';
 import { useState, useGetter } from '../../../composables/vuex';
-import { IS_IOS } from '../../../lib/environment';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';

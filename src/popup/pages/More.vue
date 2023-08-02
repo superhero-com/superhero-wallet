@@ -84,10 +84,7 @@
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { BUG_REPORT_URL } from '@/config';
-import {
-  AE_DEX_URL,
-  AE_SIMPLEX_URL,
-} from '@/protocols/aeternity/config';
+import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { useAccounts, useAeSdk } from '@/composables';
 
 import PanelItem from '../components/PanelItem.vue';

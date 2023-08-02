@@ -83,8 +83,10 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
+  IS_FIREFOX,
+  IS_IOS,
+  IS_MOBILE_DEVICE,
 } from '@/config';
-import { IS_MOBILE_DEVICE, IS_IOS, IS_FIREFOX } from '../../lib/environment';
 import PlatformIcon from './PlatformIcon.vue';
 
 export default {

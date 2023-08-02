@@ -61,11 +61,8 @@ import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
 import { watchUntilTruthy } from '@/utils';
 import {
-  NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
-} from '@/config';
-import {
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
@@ -73,8 +70,9 @@ import {
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
+  NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
-} from '@/lib/environment';
+} from '@/config';
 import {
   useAccounts,
   useConnection,

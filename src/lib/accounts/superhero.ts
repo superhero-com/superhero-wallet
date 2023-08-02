@@ -10,8 +10,10 @@ import {
 import { Store } from 'vuex';
 import { useAccounts } from '@/composables/accounts';
 import { useModals } from '@/composables/modals';
-import { IN_FRAME, IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '@/lib/environment';
 import {
+  IN_FRAME,
+  IS_CORDOVA,
+  IS_EXTENSION_BACKGROUND,
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_SIGN,
