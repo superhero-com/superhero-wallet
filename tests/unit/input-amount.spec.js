@@ -5,7 +5,7 @@ import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
-import { NETWORK_TESTNET } from '../../src/popup/utils';
+import { NETWORK_TESTNET } from '../../src/config';
 import { STUB_ACCOUNT } from '../../src/config/stubs';
 
 const maxBalance = 10000;

@@ -3,7 +3,7 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
-} from '../../../src/popup/utils';
+} from '../../../src/config';
 import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
 const mockCreate = jest.fn(() => true);

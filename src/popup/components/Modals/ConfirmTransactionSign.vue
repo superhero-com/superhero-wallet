@@ -137,16 +137,13 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
+import { TX_DIRECTION } from '@/config';
 import {
   fetchJson,
   postJson,
   toShiftedBigNumber,
 } from '@/utils';
 import {
-  DEX_TRANSACTION_TAGS,
-  DEX_PROVIDE_LIQUIDITY,
-  DEX_REMOVE_LIQUIDITY,
-  TX_DIRECTION,
   handleUnknownError,
   isNotFoundError,
 } from '@/popup/utils';
@@ -157,7 +154,12 @@ import {
   useTransactionTx,
 } from '@/composables';
 import { useGetter, useState } from '@/composables/vuex';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
+  AE_SYMBOL,
+  DEX_TRANSACTION_TAGS,
+  DEX_PROVIDE_LIQUIDITY,
+  DEX_REMOVE_LIQUIDITY,
+} from '@/protocols/aeternity/config';
 import {
   getAeFee,
   getTransactionTokenInfoResolver,

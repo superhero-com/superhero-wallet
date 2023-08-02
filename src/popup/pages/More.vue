@@ -83,7 +83,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { BUG_REPORT_URL } from '@/popup/utils';
+import { BUG_REPORT_URL } from '@/config';
 import {
   AE_DEX_URL,
   AE_SIMPLEX_URL,

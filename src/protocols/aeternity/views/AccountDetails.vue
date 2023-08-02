@@ -51,7 +51,7 @@
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { IS_IOS } from '@/lib/environment';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/popup/utils';
+import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/config';
 import {
   useAccounts,
   useBalances,

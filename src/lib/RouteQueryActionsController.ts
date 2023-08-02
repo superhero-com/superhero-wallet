@@ -3,12 +3,10 @@ import {
   Router,
 } from 'vue-router';
 import { Ref } from 'vue';
-import {
-  useModals,
-} from '../composables';
-import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '../popup/utils';
-import { ROUTE_NETWORK_ADD } from '../popup/router/routeNames';
-import { Dictionary } from '../types';
+import { Dictionary } from '@/types';
+import { useModals } from '@/composables';
+import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '@/config';
+import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
 
 // Allowed action names
 export type RouteQueryActionName = 'transferSend' | 'addNetwork';

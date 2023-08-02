@@ -19,11 +19,11 @@ import {
   setLocalStorageItem,
 } from '@/utils';
 import {
-  SUPPORTED_MULTISIG_CONTRACT_VERSION,
   handleUnknownError,
 } from '@/popup/utils';
 import {
   AE_COIN_PRECISION,
+  MULTISIG_SUPPORTED_CONTRACT_VERSION,
 } from '@/protocols/aeternity/config';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -196,7 +196,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
      */
     const result: IMultisigAccount[] = (await Promise.all(
       rawMultisigData
-        .filter(({ version }) => version === SUPPORTED_MULTISIG_CONTRACT_VERSION)
+        .filter(({ version }) => version === MULTISIG_SUPPORTED_CONTRACT_VERSION)
         .map(async ({
           contractId,
           gaAccountId,

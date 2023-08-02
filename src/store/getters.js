@@ -8,8 +8,8 @@ import {
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   TX_DIRECTION,
-  getHdWalletAccount,
-} from '@/popup/utils';
+} from '@/config';
+import { getHdWalletAccount } from '@/popup/utils';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,

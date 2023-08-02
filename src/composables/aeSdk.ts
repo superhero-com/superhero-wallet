@@ -25,7 +25,6 @@ import {
 } from '@/lib/environment';
 import { watchUntilTruthy } from '@/utils';
 import {
-  DEX_CONTRACTS,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
   NODE_STATUS_CONNECTED,
@@ -33,11 +32,12 @@ import {
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
-} from '@/popup/utils';
+} from '@/config';
 import { showPopup } from '@/background/popupHandler';
 import {
   AE_NETWORK_MAINNET_ID,
   AE_NETWORK_TESTNET_ID,
+  DEX_CONTRACTS,
 } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useModals } from './modals';

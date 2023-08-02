@@ -52,14 +52,12 @@ import {
 } from 'vue';
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
-import {
-  EXTENSION_HEIGHT,
-} from '../utils';
+import { EXTENSION_HEIGHT } from '@/config';
 import {
   useTransactionAndTokenFilter,
   useUi,
-} from '../../composables';
-import { IS_CORDOVA } from '../../lib/environment';
+} from '@/composables';
+import { IS_CORDOVA } from '@/lib/environment';
 
 import BtnClose from './buttons/BtnClose.vue';
 import TransactionAndTokenFilter from './TransactionAndTokenFilter.vue';

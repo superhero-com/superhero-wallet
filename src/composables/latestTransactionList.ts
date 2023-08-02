@@ -5,14 +5,13 @@ import {
 } from 'vue';
 import { isEqual, uniqWith } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
-
-import { IDefaultComposableOptions } from '@/types';
+import type { IDefaultComposableOptions } from '@/types';
+import { DASHBOARD_TRANSACTION_LIMIT } from '@/config';
 import {
-  DASHBOARD_TRANSACTION_LIMIT,
-  MDW_TO_NODE_APPROX_DELAY_TIME,
   sortTransactionsByDateCallback,
   handleUnknownError,
-} from '../popup/utils';
+} from '@/popup/utils';
+import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
@@ -97,7 +96,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     balancesTotal,
     (val, oldVal) => {
       if (val !== oldVal) {
-        setTimeout(() => updateTransactionListData(), MDW_TO_NODE_APPROX_DELAY_TIME);
+        setTimeout(() => updateTransactionListData(), AE_MDW_TO_NODE_APPROX_DELAY_TIME);
       }
     },
     { immediate: true },

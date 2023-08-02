@@ -8,14 +8,14 @@
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { IAppData } from '../../types';
+import type { IAppData } from '@/types';
 import {
   useAccounts,
   useDeepLinkApi,
   useAeSdk,
   usePopupProps,
-} from '../../composables';
-import { POPUP_CONNECT_ADDRESS_PERMISSION } from '../utils/constants';
+} from '@/composables';
+import { POPUP_CONNECT_ADDRESS_PERMISSION } from '@/config';
 import Connect from './Popups/Connect.vue';
 
 export default defineComponent({

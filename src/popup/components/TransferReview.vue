@@ -147,11 +147,10 @@ import {
   useTransactionList,
 } from '@/composables';
 import {
-  TX_FUNCTIONS,
   handleUnknownError,
 } from '@/popup/utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
-import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { AE_CONTRACT_ID, AE_SYMBOL, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { aeToAettos, isAensNameValid } from '@/protocols/aeternity/helpers';
 
 import { TransferFormModel } from './Modals/TransferSend.vue';

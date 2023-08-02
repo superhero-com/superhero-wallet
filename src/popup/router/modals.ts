@@ -25,7 +25,7 @@ import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
-} from '@/popup/utils';
+} from '@/config';
 import { useModals } from '@/composables';
 
 import Default from '../components/Modals/Default.vue';

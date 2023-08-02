@@ -42,9 +42,9 @@
 import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
-import { DASHBOARD_CARD_ID } from '../utils';
-import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
-import { useAccounts, useAeSdk } from '../../composables';
+import { DASHBOARD_CARD_ID } from '@/config';
+import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '@/popup/router/routeNames';
+import { useAccounts, useAeSdk } from '@/composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';

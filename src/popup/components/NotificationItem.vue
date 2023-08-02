@@ -63,6 +63,7 @@
 import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import type { INotification } from '@/types';
 import { relativeTimeTo } from '@/utils';
 import {
   NOTIFICATION_STATUS_READ,
@@ -73,9 +74,9 @@ import {
   NOTIFICATION_TYPE_RETIP_ON_TIP,
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
-} from '../utils';
-import { IS_EXTENSION, IS_MOBILE_DEVICE } from '../../lib/environment';
-import { INotification } from '../../types';
+} from '@/config';
+import { IS_EXTENSION, IS_MOBILE_DEVICE } from '@/lib/environment';
+
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
 import Truncate from './Truncate.vue';

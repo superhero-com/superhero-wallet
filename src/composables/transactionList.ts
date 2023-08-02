@@ -8,16 +8,16 @@ import type {
   IDefaultComposableOptions,
 } from '@/types';
 import {
-  AEX9_TRANSFER_EVENT,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TX_DIRECTION,
-} from '@/popup/utils';
+} from '@/config';
 import {
   fetchJson,
   getLocalStorageItem,
   setLocalStorageItem,
 } from '@/utils';
 import JsonBig from '@/lib/json-big';
+import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
 
 import { useAccounts } from './accounts';
 import { useMiddleware } from './middleware';

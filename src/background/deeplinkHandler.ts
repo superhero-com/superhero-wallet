@@ -1,4 +1,4 @@
-import { APP_LINK_WEB } from '../popup/utils/constants';
+import { APP_LINK_WEB } from '@/config';
 
 export default () => browser.webRequest.onBeforeRequest.addListener(
   ({ url }) => ({

@@ -29,9 +29,8 @@ import {
   AENS,
   DEX,
   TX_DIRECTION,
-  TX_FUNCTIONS,
-  TX_TAGS_AENS,
-} from '@/popup/utils';
+} from '@/config';
+import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
 import { isTxFunctionDexPool } from '@/protocols/aeternity/helpers';
 
 import TransactionTag from './TransactionTag.vue';

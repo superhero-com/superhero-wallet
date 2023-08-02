@@ -11,7 +11,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
-} from '@/popup/utils';
+} from '@/config';
 import { useAccounts } from '@/composables';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';

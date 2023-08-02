@@ -22,7 +22,7 @@
 import { PropType, defineAsyncComponent, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import type { Protocol, ProtocolView, ProtocolViewsConfig } from '@/types';
-import { DISTINCT_PROTOCOL_VIEWS } from '@/popup/utils';
+import { DISTINCT_PROTOCOL_VIEWS } from '@/config';
 import { useAccounts } from '@/composables';
 import Logger from '@/lib/logger';
 

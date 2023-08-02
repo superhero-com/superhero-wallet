@@ -6,6 +6,15 @@ import {
 } from 'vue-router';
 import { Dictionary } from '@/types';
 import {
+  APP_LINK_WEB,
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_TX_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
+} from '@/config';
+import {
   watchUntilTruthy,
 } from '@/utils';
 import {
@@ -17,15 +26,6 @@ import { routes } from './routes';
 import getPopupProps from '../utils/getPopupProps';
 import store from '../../store';
 import initSdk from '../../lib/wallet';
-import {
-  APP_LINK_WEB,
-  POPUP_TYPE_CONNECT,
-  POPUP_TYPE_SIGN,
-  POPUP_TYPE_MESSAGE_SIGN,
-  POPUP_TYPE_RAW_SIGN,
-  POPUP_TYPE_TX_SIGN,
-  POPUP_TYPE_ACCOUNT_LIST,
-} from '../utils';
 import {
   RUNNING_IN_POPUP,
   POPUP_TYPE,

@@ -60,12 +60,12 @@ import {
   onUnmounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { IAccountOverview, IPermission } from '../../../types';
-import { RejectedByUserError } from '../../../lib/errors';
+import type { IAccountOverview, IPermission } from '@/types';
+import { RejectedByUserError } from '@/lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
-} from '../../utils';
+} from '@/config';
 import { useState } from '../../../composables/vuex';
 import { usePopupProps } from '../../../composables';
 

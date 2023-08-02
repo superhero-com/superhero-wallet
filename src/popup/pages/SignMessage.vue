@@ -2,9 +2,10 @@
 import { defineComponent, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
+import { MODAL_MESSAGE_SIGN } from '@/config';
 import { RejectedByUserError } from '../../lib/errors';
 import { useDeepLinkApi, useModals, useAeSdk } from '../../composables';
-import { MODAL_MESSAGE_SIGN, handleUnknownError } from '../utils';
+import { handleUnknownError } from '../utils';
 
 export default defineComponent({
   name: 'SignMessage',

@@ -8,16 +8,16 @@ import {
   METHODS,
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
-import { useAccounts } from '../../composables/accounts';
-import { useModals } from '../../composables/modals';
-import { IN_FRAME, IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '../environment';
+import { useAccounts } from '@/composables/accounts';
+import { useModals } from '@/composables/modals';
+import { IN_FRAME, IS_CORDOVA, IS_EXTENSION_BACKGROUND } from '@/lib/environment';
 import {
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_TX_SIGN,
-} from '../../popup/utils';
-import { showPopup } from '../../background/popupHandler';
+} from '@/config';
+import { showPopup } from '@/background/popupHandler';
 
 export class AccountSuperhero extends AccountBase {
   address: Encoded.AccountAddress;

@@ -1,7 +1,7 @@
 import {
   PROTOCOLS,
   DISTINCT_PROTOCOL_VIEWS,
-} from '../popup/utils';
+} from '@/config';
 
 /**
  * Blockchain protocol slug name

@@ -3,7 +3,7 @@ import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
 import type { Dictionary, IPopupConfig, TxType } from '@/types';
 import { STUB_TX_PARAMS, STUB_POPUP_PROPS } from '@/config/stubs';
 import { IS_EXTENSION, POPUP_TYPE, RUNNING_IN_TESTS } from '@/lib/environment';
-import { CONNECTION_TYPES } from './index';
+import { CONNECTION_TYPES } from '@/config';
 
 interface PopupMessageData {
   type: 'resolve' | 'reject' | 'getProps'

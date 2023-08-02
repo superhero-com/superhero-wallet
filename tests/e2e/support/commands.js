@@ -10,7 +10,7 @@ import {
 import {
   LOCAL_STORAGE_PREFIX,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
-} from '../../../src/popup/utils';
+} from '../../../src/config';
 import {
   AE_NETWORK_MAINNET_ID,
 } from '../../../src/protocols/aeternity/config';

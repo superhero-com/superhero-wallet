@@ -278,14 +278,13 @@ import type {
   ITransaction,
   ITx,
 } from '@/types';
+import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/config';
 import {
   formatDate,
   formatTime,
 } from '@/utils';
 import {
   splitAddress,
-  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  TX_FUNCTIONS_MULTISIG,
   blocksToRelativeTime,
   isInsufficientBalanceError,
 } from '@/popup/utils';
@@ -298,7 +297,7 @@ import {
 } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getTransactionPayload,
