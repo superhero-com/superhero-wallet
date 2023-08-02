@@ -110,7 +110,7 @@ import type { IInputMessage, IInputMessageRaw } from '@/types';
 import { INPUT_MESSAGE_STATUSES } from '@/constants';
 import BtnHelp from './buttons/BtnHelp.vue';
 
-type InputFieldType = 'text' | 'number';
+type InputFieldType = 'text' | 'number' | 'url';
 
 export default defineComponent({
   name: 'InputField',
@@ -126,6 +126,7 @@ export default defineComponent({
       validator: (value: string) => [
         'text',
         'number',
+        'url',
       ].includes(value),
     },
     message: {
@@ -291,8 +292,8 @@ export default defineComponent({
       width: 100%;
 
       :deep(.icon) {
-        width: 24px;
-        height: 24px;
+        width: var(--size, 24px);
+        height: var(--size, 24px);
         flex-shrink: 0;
       }
     }

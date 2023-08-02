@@ -1,26 +1,53 @@
 <template>
   <div class="apps-browser">
     <div v-if="!selectedApp">
-      <div
-        v-for="(app, index) in apps"
-        :key="index"
-        class="apps-browser-card"
+      <Field
+        v-slot="{ field, errorMessage, resetField }"
+        v-model="customAppURL"
+        name="customAppURL"
+        :rules="{
+          url: customAppURL.length > 0 ? true : false,
+        }"
       >
-        <Card
-          :text="app.title"
-          :description="app.description"
-          :icon="GlobeSmallIcon"
-          btn-text="Browse"
-          variant="primary"
+        <InputField
+          v-bind="field"
+          :model-value="customAppURL"
+          class="input-url"
+          type="url"
+          :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
+          :message="errorMessage"
+          @keydown.enter="onSelectApp({ url: customAppURL })"
         >
-          <BtnMain
-            class="card-button"
-            text="Browse"
-            variant="primary"
-            inline
+          <template #after="{ focused }">
+            <Component
+              :is="GlobeSmallIcon"
+              v-if="!focused && customAppURL.length === 0"
+            />
+            <BtnIcon
+              v-else
+              size="sm"
+              :icon="CloseIcon"
+              @click="resetField()"
+            />
+          </template>
+        </InputField>
+      </Field>
+
+      <div class="apps-browser-popular-apps">
+        {{ $t('pages.appsBrowser.popularApps') }}
+      </div>
+
+      <div class="apps-browser-list">
+        <div
+          v-for="(app, index) in apps"
+          :key="index"
+          class="apps-browser-card"
+        >
+          <AppsBrowserListItem
+            :app-title="app.title"
             @click="onSelectApp(app)"
           />
-        </Card>
+        </div>
       </div>
     </div>
     <iframe
@@ -41,42 +68,51 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-
 import { useStore } from 'vuex';
+import { Field } from 'vee-validate';
+
 import { useAeSdk } from '../../composables';
 import { handleUnknownError } from '../utils';
 
-import Card from '../components/Card.vue';
-import BtnMain from '../components/buttons/BtnMain.vue';
+import InputField from '../components/InputField.vue';
+import BtnIcon from '../components/buttons/BtnIcon.vue';
+import AppsBrowserListItem from '../components/AppsBrowserListItem.vue';
+
+import CloseIcon from '../../icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
 
 export default defineComponent({
   components: {
-    Card,
-    BtnMain,
+    AppsBrowserListItem,
+    InputField,
+    BtnIcon,
+    Field,
   },
   setup() {
-    // TODO replace with new UI
     const store = useStore();
 
     const apps = [
       {
         title: 'Aepp Example',
-        description: 'This is an example of an aepp that uses the SDK to interact with the blockchain.',
         url: 'https://docs.aeternity.com/aepp-sdk-js/develop/examples/browser/aepp/',
       },
       {
         title: 'Graffiti',
-        description: 'This new creative medium, enables the global community to create a graffiti, built on the decentralised, uncensored, transparent blockchain where the work will remain indefinitely, uncensored and open to all.',
         url: 'https://graffiti.aeternity.com',
       },
-      // {
-      //   title: 'Dex',
-      //   url: 'https://dex.prd.aepps.com/swap',
-      // },
+      {
+        title: 'Superhero Social',
+        url: 'https://superhero.com',
+      },
+      {
+        title: 'Dex',
+        url: 'https://dex.prd.aepps.com/swap',
+      },
     ];
+
     const selectedApp = ref();
     const iframeRef = ref();
+    const customAppURL = ref('');
     let shareWalletInfoInterval : any;
 
     const { getAeSdk } = useAeSdk({ store });
@@ -124,12 +160,12 @@ export default defineComponent({
 
     return {
       iframeRef,
-
+      customAppURL,
       apps,
       selectedApp,
       onSelectApp,
       onAppLoaded,
-
+      CloseIcon,
       GlobeSmallIcon,
     };
   },
@@ -137,24 +173,47 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@use '../../styles/variables' as *;
+@use '../../styles/typography';
+
 .apps-browser {
   --screen-padding-x: 8px;
 
   padding-inline: var(--screen-padding-x);
   height: 100%;
 
+  .input-url {
+    padding: 16px 8px;
+
+    .icon {
+      width: 20px !important;
+      height: 20px !important;
+      margin: 4px;
+    }
+  }
+
+  .apps-browser-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 8px;
+    align-items: flex-start;
+    padding-top: 8px;
+  }
+
+  .apps-browser-popular-apps {
+    margin-left: 12px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+    color: $color-white;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+
   iframe {
     width: 100%;
     height: 100%;
     border: none;
-  }
-
-  .apps-browser-card {
-    margin-bottom: 12px;
-
-    .card-button {
-      margin-top: 12px;
-    }
   }
 }
 </style>
