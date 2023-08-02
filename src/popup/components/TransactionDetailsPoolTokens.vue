@@ -16,12 +16,12 @@ import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import type { ITransaction, TxFunctionRaw } from '@/types';
+import { useTransactionTokens } from '@/composables';
 import {
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_ALLOW_TOKEN,
-} from '@/popup/utils';
-import { useTransactionTokens } from '@/composables';
+} from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 
 import TransactionDetailsPoolTokenRow from './TransactionDetailsPoolTokenRow.vue';

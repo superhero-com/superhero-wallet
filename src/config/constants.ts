@@ -1,18 +1,12 @@
 import {
   Encoded,
-  Encoding,
   METHODS,
-  Tag,
 } from '@aeternity/aepp-sdk';
-import BigNumber from 'bignumber.js';
 import type {
-  TxFunctionRaw,
   ICurrency,
-  IDexContracts,
   INetwork,
   INotificationSetting,
   IPermission,
-  DexFunctionType,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import {
@@ -52,121 +46,12 @@ export const TX_DIRECTION = {
   received: 'received',
 } as const;
 
-/**
- * ITx.function
- */
-export const TX_FUNCTIONS = {
-  tip: 'tip',
-  retip: 'retip',
-  tipToken: 'tip_token',
-  retipToken: 'retip_token',
-  transfer: 'transfer',
-  deposit: 'deposit',
-  propose: 'propose', // Multisig
-  addLiquidity: 'add_liquidity',
-  addLiquidityAe: 'add_liquidity_ae',
-  removeLiquidity: 'remove_liquidity',
-  removeLiquidityAe: 'remove_liquidity_ae',
-  swapExactTokensForTokens: 'swap_exact_tokens_for_tokens',
-  swapTokensForExactTokens: 'swap_tokens_for_exact_tokens',
-  swapExactAeForTokens: 'swap_exact_ae_for_tokens',
-  swapTokensForExactAe: 'swap_tokens_for_exact_ae',
-  swapExactTokensForAe: 'swap_exact_tokens_for_ae',
-  swapAeForExactTokens: 'swap_ae_for_exact_tokens',
-  createAllowance: 'create_allowance',
-  changeAllowance: 'change_allowance',
-  transferAllowance: 'transfer_allowance',
-  transferPayload: 'transfer_payload',
-  withdraw: 'withdraw',
-  claim: 'claim',
-} as const;
-
-/**
- * ITx.function
- */
-export const TX_FUNCTIONS_MULTISIG = {
-  propose: 'propose',
-  confirm: 'confirm',
-  refuse: 'refuse',
-  revoke: 'revoke',
-} as const;
-
-export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
-  pool: [
-    'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
-  ],
-  removeLiquidity: [
-    'remove_liquidity', 'remove_liquidity_ae',
-  ],
-  addLiquidity: [
-    'add_liquidity', 'add_liquidity_ae',
-  ],
-  swap: [
-    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
-    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
-    'swap_ae_for_exact_tokens',
-  ],
-  allowance: [
-    'transfer_allowance', 'change_allowance', 'create_allowance',
-  ],
-  maxSpent: [
-    'swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens',
-  ],
-  minReceived: [
-    'swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae',
-  ],
-};
-
-/**
- * ITx.tag
- */
-export const TX_TAGS_SUPPORTED = [
-  Tag.SpendTx,
-  Tag.ContractCreateTx,
-  Tag.ContractCallTx,
-  Tag.NamePreclaimTx,
-  Tag.NameClaimTx,
-  Tag.NameUpdateTx,
-  Tag.NameTransferTx,
-];
-
-/**
- * ITx.tag
- */
-export const TX_TAGS_AENS = new Set([
-  Tag.NameClaimTx,
-  Tag.NamePreclaimTx,
-  Tag.NameRevokeTx,
-  Tag.NameUpdateTx,
-]);
-
-export const TX_RETURN_TYPE_OK = 'ok';
-export const TX_RETURN_TYPE_ABORT = 'abort';
-export const TX_RETURN_TYPE_REVERT = 'revert';
-
-export const TX_RETURN_TYPES = [
-  TX_RETURN_TYPE_OK,
-  TX_RETURN_TYPE_ABORT,
-  TX_RETURN_TYPE_REVERT,
-] as const;
-
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
   OTHER: 'OTHER',
 };
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
-
-export const HASH_PREFIXES_ALLOWED = [
-  Encoding.AccountAddress,
-  Encoding.Channel,
-  Encoding.ContractAddress,
-  Encoding.Name,
-  Encoding.OracleAddress,
-  Encoding.TxHash,
-] as const;
-
-export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
 
@@ -221,13 +106,6 @@ export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
 
 export const AENS = 'AENS';
 export const DEX = 'DEX';
-
-/**
- * Estimated time we need to wait for the middleware to sync it's state
- * with the node. There is a high risk that in some cases this won't be enough
- * so consider using this constant as a workaround.
- */
-export const MDW_TO_NODE_APPROX_DELAY_TIME = 5000;
 
 export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
@@ -458,74 +336,6 @@ export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 
-export const DEX_CONTRACTS: Record<string, IDexContracts> = {
-  [AE_NETWORK_MAINNET_ID]: {
-    router: [
-      'ct_azbNZ1XrPjXfqBqbAh1ffLNTQ1sbnuUDFvJrXjYz7JQA1saQ3',
-    ],
-    wae: [
-      'ct_J3zBY8xxjsRr3QojETNw48Eb38fjvEuJKkQ6KzECvubvEcvCa',
-    ],
-  },
-  [AE_NETWORK_TESTNET_ID]: {
-    router: [
-      'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6',
-      'ct_6iyAWnbGoEbX6hxWsjKMLSM3Hx542PM9dZeG8mHo1bXzB7DDW',
-      'ct_N3fFG5QqyTb2dhqw8YcTQ3gqQjxjCJT9MTvDWfqBes7wEu4r9',
-      'ct_2eyXvDw3V3WSbcCpSiWcsCYHShBmEJEkU8PpUg7ymDLfZ4cSy4',
-      'ct_2mZo6oniJYbbAuBqJxqydc2ZzUhgrdFbTaR4vq2QxocChGUymJ',
-      'ct_MLXQEP12MBn99HL6WDaiTqDbG4bJQ3Q9Bzr57oLfvEkghvpFb',
-    ],
-    wae: [
-      'ct_RzxedNERBDa9Kfx8FENNKQ33TQTt5FzV8i1WppiaTSC4adRXd',
-      'ct_y1sufvYLCwbbumgV16p8Bk9f5uHGFiteRDC1x8WNxxyvGJEw2',
-      'ct_2kc9naWGGnx4TWGK7UR9gut2cVcDvf7pv8CBYG1a8WML2jzUeb',
-      'ct_24gNuddxAbMYtT32sh8Xm1PpB2fZ3HMGtfST5sA3irect3Yu76',
-      'ct_2mdY71wG4zAjrdmqDJPXU6h8dYpzNs4mMZ81ujeNnrQPU2jMto',
-      'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
-    ],
-  },
-};
-
-export const DEX_PROVIDE_LIQUIDITY = 'provide_liquidity';
-export const DEX_REMOVE_LIQUIDITY = 'remove_liquidity';
-export const DEX_SWAP = 'swap';
-export const DEX_ALLOW_TOKEN = 'allow_token';
-
-export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
-
-export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
-  add_liquidity: DEX_PROVIDE_LIQUIDITY,
-  add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
-
-  remove_liquidity: DEX_REMOVE_LIQUIDITY,
-  remove_liquidity_ae: DEX_REMOVE_LIQUIDITY,
-
-  swap_exact_tokens_for_tokens: DEX_SWAP,
-  swap_exact_ae_for_tokens: DEX_SWAP,
-  swap_tokens_for_exact_tokens: DEX_SWAP,
-  swap_tokens_for_exact_ae: DEX_SWAP,
-  swap_exact_tokens_for_ae: DEX_SWAP,
-  swap_ae_for_exact_tokens: DEX_SWAP,
-
-  create_allowance: DEX_ALLOW_TOKEN,
-  change_allowance: DEX_ALLOW_TOKEN,
-  transfer_allowance: DEX_ALLOW_TOKEN,
-
-  deposit: DEX_SWAP,
-  withdraw: DEX_SWAP,
-
-  // TODO establish transaction tags for the following tx functions:
-  tip: '',
-  retip: '',
-  tip_token: '',
-  retip_token: '',
-  transfer: '',
-  transfer_payload: '',
-  claim: '',
-  propose: '',
-} as const;
-
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
@@ -565,35 +375,11 @@ export const INPUT_MESSAGE_STATUSES = {
   error: 'error',
 } as const;
 
-export const TRANSACTION_OWNERSHIP_STATUS = {
-  other: 0,
-  current: 1,
-  subAccount: 2,
-} as const;
-
-export const MULTISIG_CREATION_PHASES = {
-  prepared: 'prepared',
-  signed: 'signed',
-  deployed: 'deployed',
-  created: 'created',
-  accessible: 'accessible',
-} as const;
-
-export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
-
-export const MULTISIG_PROPOSAL_CONFIRM_ACTIONS = {
-  confirm: 'confirm',
-  revoke: 'revoke',
-  refuse: 'refuse',
-} as const;
-
 export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
 } as const;
-
-export const SUPPORTED_MULTISIG_CONTRACT_VERSION = '2.0.0';
 
 export const ALLOWED_ICON_STATUSES = [
   'alert',

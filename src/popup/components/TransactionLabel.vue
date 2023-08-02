@@ -78,19 +78,22 @@ import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
-import { useAccounts, useTransactionTx } from '../../composables';
-import { useState } from '../../composables/vuex';
+import { useAccounts, useTransactionTx } from '@/composables';
+import { useState } from '@/composables/vuex';
 import {
   ITokenList,
   ITransaction,
-} from '../../types';
+} from '@/types';
+import { TX_DIRECTION } from '@/config';
 import {
   getAccountNameToDisplay,
-  TX_DIRECTION,
+} from '@/popup/utils';
+import {
   TX_FUNCTIONS,
   TX_RETURN_TYPE_ABORT,
   TX_RETURN_TYPE_REVERT,
-} from '../utils';
+} from '@/protocols/aeternity/config';
+
 import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 import RevertedIcon from '../../icons/refresh.svg?vue-component';

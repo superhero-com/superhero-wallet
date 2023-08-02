@@ -20,22 +20,20 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { postJson } from '@/utils';
-import {
-  TX_DIRECTION,
-  TX_FUNCTIONS,
-} from '../utils';
-import { AeScan } from '../../lib/AeScan';
-import { useMiddleware, useAeSdk, useTransactionTx } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import {
+import type {
   IAccount,
   IAccountOverview,
   ITransaction,
   ITx,
   TxFunction,
   INetwork,
-} from '../../types';
+} from '@/types';
+import { postJson } from '@/utils';
+import { TX_DIRECTION } from '@/config';
+import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { AeScan } from '@/lib/AeScan';
+import { useMiddleware, useAeSdk, useTransactionTx } from '@/composables';
+import { useGetter } from '@/composables/vuex';
 import TransactionInfo from './TransactionInfo.vue';
 
 interface TransactionData {

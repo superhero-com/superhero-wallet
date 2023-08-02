@@ -1,7 +1,7 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
 import hdWallet from './hdWallet';
-import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
+import { ACCOUNT_HD_WALLET } from '@/config';
 
 // TODO: modules file is an object, because previously it contained more than one module,
 // should be improved in the future

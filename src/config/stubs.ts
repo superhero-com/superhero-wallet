@@ -5,21 +5,21 @@ import {
   Encoded,
   AE_AMOUNT_FORMATS,
 } from '@aeternity/aepp-sdk';
+import BigNumber from 'bignumber.js';
 import type { IPopupConfig, ITransaction, PartialDeep } from '@/types';
+import { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import {
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import {
-  MAX_UINT256,
   NETWORK_TESTNET,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_SIGN,
-} from '@/popup/utils';
-import { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
+} from './constants';
 
 export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
@@ -109,10 +109,11 @@ export const STUB_POPUP_PROPS: Record<string, IPopupConfig> = {
   },
 };
 
+const maxUint256 = new BigNumber(2).exponentiatedBy(256).minus(1).toNumber();
 const commonParams = {
   amount: 100000000000000000,
-  ttl: MAX_UINT256.toNumber(),
-  nonce: MAX_UINT256.toNumber(),
+  ttl: maxUint256,
+  nonce: maxUint256,
   fee: 10000000000000000,
   gas: 1579000,
   gasPrice: 1000000000,

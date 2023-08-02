@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/popup/utils';
+import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/config';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';

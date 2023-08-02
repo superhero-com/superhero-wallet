@@ -183,25 +183,27 @@ import { useI18n } from 'vue-i18n';
 import { Field, Form, useFormErrors } from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
+import { MODAL_READ_QR_CODE } from '@/config';
 import { excludeFalsy } from '@/utils';
 import {
-  MODAL_READ_QR_CODE,
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-  MULTISIG_CREATION_PHASES,
   validateHash,
   handleUnknownError,
-} from '../../utils';
-import {
+} from '@/popup/utils';
+import type {
   ICreateMultisigAccount,
   ObjectValues,
-} from '../../../types';
-import { ROUTE_MULTISIG_DETAILS_INFO } from '../../router/routeNames';
+} from '@/types';
+import { ROUTE_MULTISIG_DETAILS_INFO } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
   useMultisigAccounts,
-} from '../../../composables';
+} from '@/composables';
+import {
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  MULTISIG_CREATION_PHASES,
+} from '@/protocols/aeternity/config';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';

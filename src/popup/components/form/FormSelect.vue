@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '../../utils';
+import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '@/config';
 import type { IFormSelectOption } from '../../../types';
 import { useModals } from '../../../composables';
 

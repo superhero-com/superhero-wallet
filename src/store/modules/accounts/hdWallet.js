@@ -6,14 +6,16 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useModals, useAeSdk } from '../../../composables';
+import { useModals, useAeSdk } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
+} from '@/config';
+import {
   getHdWalletAccount,
-  isTxOfASupportedType,
-} from '../../../popup/utils';
+} from '@/popup/utils';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
 export default {
   namespaced: true,

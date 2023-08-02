@@ -1,4 +1,4 @@
-import { NETWORK_TESTNET } from '../../../src/popup/utils/constants';
+import { NETWORK_TESTNET } from '../../../src/config';
 
 describe('Test cases for networks page', () => {
   it('Opens network page, cancels/adds network, can not add network with default name/invalid url', () => {

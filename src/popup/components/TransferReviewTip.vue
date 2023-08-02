@@ -76,7 +76,7 @@
 <script>
 import { useStore } from 'vuex';
 
-import { AGGREGATOR_URL } from '@/popup/utils';
+import { AGGREGATOR_URL } from '@/config';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
 

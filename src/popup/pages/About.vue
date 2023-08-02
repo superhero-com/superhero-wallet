@@ -93,7 +93,7 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 import type { IMiddlewareStatus, INetwork } from '@/types';
-import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/popup/utils/constants';
+import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/config';
 import { useMiddleware } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';

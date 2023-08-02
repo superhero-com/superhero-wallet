@@ -8,9 +8,8 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
+import { PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/config';
 import {
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
   getAccountNameToDisplay,
 } from '@/popup/utils';
 import { AeScan } from '@/lib/AeScan';

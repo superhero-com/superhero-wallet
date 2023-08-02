@@ -14,9 +14,9 @@
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { useConnection, useModals, usePendingMultisigTransaction } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { MODAL_TRANSFER_SEND } from '../utils';
+import { MODAL_TRANSFER_SEND } from '@/config';
+import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
+import { useGetter } from '@/composables/vuex';
 
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';

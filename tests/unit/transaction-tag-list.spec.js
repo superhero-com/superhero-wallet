@@ -12,7 +12,7 @@ import {
 import {
   AENS,
   NETWORK_TESTNET,
-} from '../../src/popup/utils';
+} from '../../src/config';
 
 const store = new Vuex.Store({
   getters: {

@@ -18,7 +18,7 @@
 
 <script>
 import Default from '../../icons/badges/default.svg?vue-component';
-import { MODAL_RECIPIENT_HELPER } from '../utils/constants';
+import { MODAL_RECIPIENT_HELPER } from '@/config';
 import { useModals } from '../../composables';
 import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
 

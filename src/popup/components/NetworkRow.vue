@@ -62,7 +62,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { NETWORK_DEFAULT } from '../utils';
+import { NETWORK_DEFAULT } from '@/config';
 import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
 import { useGetter } from '../../composables/vuex';
 

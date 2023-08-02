@@ -64,7 +64,7 @@ import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
-} from '@/popup/utils';
+} from '@/config';
 import {
   IS_WEB,
   IS_IOS,
