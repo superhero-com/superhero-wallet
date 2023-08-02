@@ -1,5 +1,8 @@
 import type { WalletAppRouteConfig } from '@/types';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
+import {
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_VIEW_TRANSACTION_DETAILS,
+} from '@/constants';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
@@ -79,7 +82,6 @@ import SignMessage from '../pages/SignMessage.vue';
 import SignTransaction from '../pages/SignTransaction.vue';
 import TermsOfService from '../pages/TermsOfService.vue';
 import TipsClaim from '../pages/TipsClaim.vue';
-import TransactionDetails from '../pages/TransactionDetails.vue';
 import MultisigProposalDetails from '../pages/MultisigProposalDetails.vue';
 import ResetWallet from '../pages/ResetWallet.vue';
 import webIframePopups from './webIframePopups';
@@ -87,6 +89,8 @@ import Networks from '../pages/Networks.vue';
 import NetworkForm from '../pages/NetworkForm.vue';
 import MultisigDetails from '../pages/MultisigDetails.vue';
 import DefaultPagesRouter from '../components/DefaultPagesRouter.vue';
+
+import TransactionDetails from '../../protocols/aeternity/views/TransactionDetails.vue';
 
 export const routes: WalletAppRouteConfig[] = [
   ...webIframePopups,
@@ -171,6 +175,17 @@ export const routes: WalletAppRouteConfig[] = [
         ],
       },
     ],
+  },
+  {
+    path: '/account-details/transactions/:hash/:transactionOwner',
+    name: ROUTE_TX_DETAILS,
+    component: ProtocolSpecificView,
+    props: { viewComponentName: PROTOCOL_VIEW_TRANSACTION_DETAILS },
+    meta: {
+      title: 'tx-details',
+      showHeaderNavigation: true,
+      backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
+    },
   },
   {
     path: '/multisig',
@@ -504,17 +519,6 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'sendTip',
       notPersist: true,
-    },
-  },
-  {
-    path: '/account-details/transactions/:hash/:transactionOwner',
-    name: ROUTE_TX_DETAILS,
-    component: TransactionDetails,
-    props: true,
-    meta: {
-      title: 'tx-details',
-      showHeaderNavigation: true,
-      backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
     },
   },
   {
