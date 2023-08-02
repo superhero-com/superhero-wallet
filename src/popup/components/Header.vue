@@ -6,7 +6,7 @@
     }"
   >
     <div
-      v-if="isLoggedIn || titleTruncated"
+      v-if="(isLoggedIn || titleTruncated) && !hideBackButton"
       class="left"
     >
       <BtnIcon
@@ -29,6 +29,7 @@
     <div
       v-if="showHeaderNavigation"
       class="title"
+      :class="{ 'no-back-button': hideBackButton }"
     >
       <Truncate
         :str="titleTruncated"
@@ -138,6 +139,7 @@ export default defineComponent({
       networkEdit: () => t('pages.titles.networkEdit'),
       notFound: () => t('pages.titles.notFound'),
       multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
+      appsBrowser: () => t('pages.titles.appsBrowser'),
     };
 
     const currentHomeRouteName = computed(
@@ -147,6 +149,7 @@ export default defineComponent({
     );
     const routeMeta = computed(() => route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
+    const hideBackButton = computed(() => !!routeMeta.value?.hideBackButton);
     const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
       () => (routeMeta.value?.title && pageTitles[routeMeta.value.title])
@@ -186,6 +189,7 @@ export default defineComponent({
       showHeaderNavigation,
       isLogoDisabled,
       titleTruncated,
+      hideBackButton,
       back,
       close,
     };
@@ -268,6 +272,10 @@ export default defineComponent({
     &:only-child {
       flex-grow: 2;
       margin-left: 8px;
+    }
+
+    &.no-back-button {
+      padding-left: 4px;
     }
   }
 

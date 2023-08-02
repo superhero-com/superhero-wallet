@@ -38,6 +38,10 @@ export interface WalletRouteMeta {
    */
   showHeaderNavigation?: boolean;
   /**
+   * Decide if the header should hide back button
+   */
+  hideBackButton?: boolean;
+  /**
    * Decide if the scrollbar should be visible to the user
    * @default: false
    */

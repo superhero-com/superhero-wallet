@@ -457,7 +457,7 @@
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
       "multisigProposalDetails": "Multisig Tx proposal details",
-      "apps-browser": "Browser"
+      "appsBrowser": "Browse the AEcosystem"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -1118,6 +1118,10 @@
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
+    },
+    "appsBrowser": {
+      "popularApps": "Popular daepps",
+      "inputPlaceholder": "Enter URL"
     }
   },
   "validation": {

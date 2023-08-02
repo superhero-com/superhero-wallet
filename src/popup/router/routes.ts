@@ -686,9 +686,10 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/apps-browser',
     component: AppsBrowser,
     meta: {
-      title: 'apps-browser',
+      title: 'appsBrowser',
       notPersist: true,
       showHeaderNavigation: true,
+      hideBackButton: true,
     },
   },
   {
