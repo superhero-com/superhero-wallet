@@ -5,6 +5,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "ae-account-details" */
     './AccountDetails.vue'
   ),
+  TransactionDetails: () => import(
+    /* webpackChunkName: "ae-transaction-details" */
+    './TransactionDetails.vue'
+  ),
   TransferReceiveModal: () => import(
     /* webpackChunkName: "ae-transfer-receive-modal" */
     './TransferReceiveModal.vue'
