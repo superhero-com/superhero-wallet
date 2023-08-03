@@ -15,12 +15,10 @@ import type {
 import {
   fetchJson,
   getLocalStorageItem,
-  toShiftedBigNumber,
-  setLocalStorageItem,
-} from '@/utils';
-import {
   handleUnknownError,
-} from '@/popup/utils';
+  setLocalStorageItem,
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   AE_COIN_PRECISION,
   MULTISIG_SUPPORTED_CONTRACT_VERSION,

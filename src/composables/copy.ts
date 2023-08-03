@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { handleUnknownError } from '../popup/utils';
+import { handleUnknownError } from '@/utils';
 
 function fallbackCopyTextToClipboard(text: string) {
   const textarea = document.createElement('textarea');

@@ -53,9 +53,8 @@
 <script>
 import { mapMutations } from 'vuex';
 import { IS_EXTENSION, IS_CORDOVA } from '@/constants';
-import { openInNewWindow } from '@/utils';
+import { handleUnknownError, openInNewWindow } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
-import { handleUnknownError } from '../../utils';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';

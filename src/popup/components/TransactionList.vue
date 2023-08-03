@@ -44,7 +44,6 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { useGetter, useState } from '@/composables/vuex';
 import type {
   ITokenList,
   ITransaction,
@@ -55,28 +54,27 @@ import { TX_DIRECTION, TXS_PER_PAGE } from '@/constants';
 import {
   includesCaseInsensitive,
   pipe,
+  sortTransactionsByDate,
 } from '@/utils';
+import { useGetter, useState } from '@/composables/vuex';
 import {
+  useAccounts,
+  useAeSdk,
+  useMultisigAccounts,
+  usePendingMultisigTransaction,
+  useTransactionAndTokenFilter,
+  useTransactionList,
+  useUi,
+  useViewport,
+} from '@/composables';
+import { AE_CONTRACT_ID, AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
+import {
+  getInnerTransaction,
   getMultisigTransaction,
   getOwnershipStatus,
   getTransaction,
   getTxDirection,
   getTxOwnerAddress,
-  sortTransactionsByDateCallback,
-} from '@/popup/utils';
-import {
-  useMultisigAccounts,
-  useTransactionAndTokenFilter,
-  useViewport,
-  useAccounts,
-  usePendingMultisigTransaction,
-  useUi,
-  useAeSdk,
-  useTransactionList,
-} from '@/composables';
-import { AE_CONTRACT_ID, AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
-import {
-  getInnerTransaction,
   isTxDex,
 } from '@/protocols/aeternity/helpers';
 
@@ -218,16 +216,12 @@ export default defineComponent({
       );
     }
 
-    function sortTransactionListByDate(transactionList: ICommonTransaction[]) {
-      return transactionList.sort(sortTransactionsByDateCallback);
-    }
-
     const filteredTransactions = computed(
-      () => pipe<ICommonTransaction[]>([
+      () => pipe([
         narrowTransactionsToDefinedToken,
         filterTransactionsByDisplayMode,
         filterTransactionsBySearchPhrase,
-        sortTransactionListByDate,
+        sortTransactionsByDate,
       ])(loadedTransactionList.value),
     );
 

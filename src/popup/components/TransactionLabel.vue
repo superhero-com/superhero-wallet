@@ -85,9 +85,7 @@ import {
   ITransaction,
 } from '@/types';
 import { TX_DIRECTION } from '@/constants';
-import {
-  getAccountNameToDisplay,
-} from '@/popup/utils';
+import { getAccountNameToDisplay } from '@/utils';
 import {
   TX_FUNCTIONS,
   TX_RETURN_TYPE_ABORT,

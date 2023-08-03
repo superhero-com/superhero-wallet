@@ -1,23 +1,19 @@
 import { watch } from 'vue';
 import {
-  useMiddleware,
-  useModals,
-  useAeSdk,
-  useAccounts,
-  useTransactionList,
-} from '@/composables';
-import {
   fetchAllPages,
   fetchJson,
+  handleUnknownError,
   postJson,
 } from '@/utils';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/constants';
 import {
-  checkAddress,
-  isInsufficientBalanceError,
-  handleUnknownError,
-} from '@/popup/utils';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
+  useAccounts,
+  useAeSdk,
+  useMiddleware,
+  useModals,
+  useTransactionList,
+} from '@/composables';
+import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { tg } from './languages';
 
 export default (store) => {

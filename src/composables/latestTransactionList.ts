@@ -7,10 +7,7 @@ import { isEqual, uniqWith } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type { IDefaultComposableOptions } from '@/types';
 import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
-import {
-  sortTransactionsByDateCallback,
-  handleUnknownError,
-} from '@/popup/utils';
+import { handleUnknownError, pipe, sortTransactionsByDate } from '@/utils';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
@@ -58,10 +55,14 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
           };
         }));
 
-    return uniqWith(allTransactions.flatMap((transaction) => transaction), (a, b) => (
-      a.hash === b.hash && a.transactionOwner === b.transactionOwner
-    ))
-      .sort(sortTransactionsByDateCallback)
+    const allTransactionsFlat = allTransactions.flatMap((transaction) => transaction);
+    return pipe([
+      (txs) => uniqWith(
+        txs,
+        (a, b) => (a.hash === b.hash && a.transactionOwner === b.transactionOwner),
+      ),
+      sortTransactionsByDate,
+    ])(allTransactionsFlat)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
   });
 

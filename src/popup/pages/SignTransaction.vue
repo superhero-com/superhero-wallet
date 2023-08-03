@@ -7,13 +7,13 @@ import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
-import { RejectedByUserError } from '../../lib/errors';
-import { handleUnknownError } from '../utils';
+import { RejectedByUserError } from '@/lib/errors';
+import { handleUnknownError } from '@/utils';
 import {
   useDeepLinkApi,
   useModals,
   useAeSdk,
-} from '../../composables';
+} from '@/composables';
 
 export default defineComponent({
   name: 'SignTransaction',

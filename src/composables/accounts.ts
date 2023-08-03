@@ -9,7 +9,7 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import { getAccountNameToDisplay } from '@/popup/utils';
+import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
