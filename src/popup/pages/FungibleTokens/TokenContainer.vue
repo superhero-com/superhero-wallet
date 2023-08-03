@@ -95,8 +95,6 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '@/types';
 import { IS_IOS } from '@/constants';
-import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
-import { isContract } from '@/popup/utils';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -104,14 +102,16 @@ import {
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
-} from '../../router/routeNames';
+} from '@/popup/router/routeNames';
 import {
   useAccounts,
   useCurrencies,
   useAeSdk,
   useTokensList,
-} from '../../../composables';
-import { useState, useGetter } from '../../../composables/vuex';
+} from '@/composables';
+import { useState, useGetter } from '@/composables/vuex';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { isContract } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';

@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { validateHash } from '../utils';
+import { validateHash } from '@/protocols/aeternity/helpers';
 
 export default defineComponent({
   props: {

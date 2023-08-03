@@ -140,13 +140,11 @@ import { RejectedByUserError } from '@/lib/errors';
 import { TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
+  handleUnknownError,
+  isNotFoundError,
   postJson,
   toShiftedBigNumber,
 } from '@/utils';
-import {
-  handleUnknownError,
-  isNotFoundError,
-} from '@/popup/utils';
 import {
   useAccounts,
   useAeSdk,

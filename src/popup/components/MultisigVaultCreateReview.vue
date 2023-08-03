@@ -101,15 +101,13 @@ import type {
 } from '@/types';
 import { MODAL_CONSENSUS_INFO } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import {
-  handleUnknownError,
-} from '../utils';
+import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
   useAeSdk,
-} from '../../composables';
+} from '@/composables';
 
 import AccountSelector from './AccountSelector.vue';
 import AccountItem from './AccountItem.vue';

@@ -280,14 +280,11 @@ import type {
 } from '@/types';
 import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/constants';
 import {
+  blocksToRelativeTime,
   formatDate,
   formatTime,
-} from '@/utils';
-import {
   splitAddress,
-  blocksToRelativeTime,
-  isInsufficientBalanceError,
-} from '@/popup/utils';
+} from '@/utils';
 import {
   useAccounts,
   useMultisigAccounts,
@@ -301,6 +298,7 @@ import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   getTransactionPayload,
+  isInsufficientBalanceError,
 } from '@/protocols/aeternity/helpers';
 
 import TransactionInfo from '../components/TransactionInfo.vue';

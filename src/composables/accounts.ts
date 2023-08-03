@@ -10,10 +10,10 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
-import { getAccountNameToDisplay, getHdWalletAccount } from '@/popup/utils';
+import { getAccountNameToDisplay } from '@/utils';
 import { STUB_ACCOUNT } from '@/constants/stubs';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
-import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { buildSimplexLink, getHdWalletAccount } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {

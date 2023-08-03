@@ -12,10 +12,7 @@ import {
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
 } from '@/constants';
-import {
-  getHdWalletAccount,
-} from '@/popup/utils';
-import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { getHdWalletAccount, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
 export default {
   namespaced: true,

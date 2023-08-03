@@ -10,10 +10,7 @@ import type {
   ITransactionsState,
 } from '@/types';
 import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
-import {
-  sortTransactionsByDateCallback,
-  handleUnknownError,
-} from '@/popup/utils';
+import { handleUnknownError, pipe, sortTransactionsByDate } from '@/utils';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
@@ -54,10 +51,13 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
       ...fetchedTransactions.value,
     ];
 
-    latestTransactions.value = uniqWith(transactions, (a, b) => (
-      a.hash === b.hash && a.transactionOwner === b.transactionOwner
-    ))
-      .sort(sortTransactionsByDateCallback)
+    latestTransactions.value = pipe([
+      (txs) => uniqWith(
+        txs,
+        (a, b) => (a.hash === b.hash && a.transactionOwner === b.transactionOwner),
+      ),
+      sortTransactionsByDate,
+    ])(transactions)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
   }
 

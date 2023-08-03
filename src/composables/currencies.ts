@@ -9,11 +9,9 @@ import type {
 import { CURRENCIES } from '@/constants';
 import {
   getLocalStorageItem,
+  handleUnknownError,
   setLocalStorageItem,
 } from '@/utils';
-import {
-  handleUnknownError,
-} from '@/popup/utils';
 import {
   AE_COINGECKO_COIN_ID,
   AE_TOKEN_BASE_DATA,
