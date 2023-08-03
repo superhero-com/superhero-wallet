@@ -63,13 +63,12 @@ import {
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
+import { getAddressColor } from '@/utils';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
 import BulletSwitcher from './BulletSwitcher.vue';
 import ToggleMultisigButton from './ToggleMultisigButton.vue';
-
-import { getAddressColor } from '../utils/avatar';
 
 SwiperCore.use([Virtual]);
 

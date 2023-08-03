@@ -32,7 +32,7 @@
 import { computed, defineComponent, PropType } from 'vue';
 import { RouteLocation } from 'vue-router';
 
-import { getAddressColor } from '../utils/avatar';
+import { getAddressColor } from '@/utils';
 
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnBase from './buttons/BtnBase.vue';
