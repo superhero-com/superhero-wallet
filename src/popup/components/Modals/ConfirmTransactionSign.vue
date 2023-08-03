@@ -139,14 +139,12 @@ import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
 import { TX_DIRECTION } from '@/constants';
 import {
-  toShiftedBigNumber,
   fetchJson,
-  postJson,
-} from '@/utils';
-import {
   handleUnknownError,
   isNotFoundError,
-} from '@/popup/utils';
+  postJson,
+  toShiftedBigNumber,
+} from '@/utils';
 import {
   usePopupProps,
   useAeSdk,

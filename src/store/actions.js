@@ -2,18 +2,13 @@ import { uniqBy, orderBy } from 'lodash-es';
 import { Tag } from '@aeternity/aepp-sdk';
 import {
   fetchJson,
+  handleUnknownError,
   postJson,
 } from '@/utils';
-import {
-  handleUnknownError,
-  isAccountNotFoundError,
-} from '@/popup/utils';
 import JsonBig from '@/lib/json-big';
-import {
-  useMiddleware,
-  useAeSdk,
-} from '@/composables';
+import { useMiddleware, useAeSdk } from '@/composables';
 import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
+import { isAccountNotFoundError } from '@/protocols/aeternity/helpers';
 
 export default {
   switchNetwork({ commit }, payload) {

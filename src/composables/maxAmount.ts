@@ -25,6 +25,7 @@ import type {
 } from '@/types';
 import {
   executeAndSetInterval,
+  handleUnknownError,
   isUrlValid,
 } from '@/utils';
 import {
@@ -32,15 +33,10 @@ import {
   STUB_CONTRACT_ADDRESS,
 } from '@/constants/stubs';
 import {
-  handleUnknownError,
-} from '@/popup/utils';
-import {
   AE_COIN_PRECISION,
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
-import {
-  isAensNameValid,
-} from '@/protocols/aeternity/helpers';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
 
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';

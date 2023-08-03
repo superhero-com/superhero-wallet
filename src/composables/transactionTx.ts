@@ -18,8 +18,6 @@ import {
   TX_FUNCTION_TRANSLATIONS,
   TX_TYPE_TRANSLATIONS,
   TX_TYPE_LIST_TRANSLATIONS,
-  getOwnershipStatus,
-  getTxOwnerAddress,
 } from '@/popup/utils';
 import {
   AE_TRANSACTION_OWNERSHIP_STATUS,
@@ -29,6 +27,8 @@ import {
 } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
+  getOwnershipStatus,
+  getTxOwnerAddress,
   getTxTag,
   isContainingNestedTx,
   isTxDex,

@@ -52,14 +52,8 @@ import { TX_DIRECTION, TXS_PER_PAGE } from '@/constants';
 import {
   includesCaseInsensitive,
   pipe,
+  sortTransactionsByDate,
 } from '@/utils';
-import {
-  getTransaction,
-  getMultisigTransaction,
-  getOwnershipStatus,
-  getTxOwnerAddress,
-  sortTransactionsByDateCallback,
-} from '@/popup/utils';
 import { useDispatch, useGetter, useState } from '@/composables/vuex';
 import {
   useMultisigAccounts,
@@ -73,6 +67,10 @@ import {
 import { AE_CONTRACT_ID, AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
+  getTxOwnerAddress,
+  getMultisigTransaction,
+  getOwnershipStatus,
+  getTransaction,
   isTxDex,
 } from '@/protocols/aeternity/helpers';
 
@@ -210,16 +208,12 @@ export default defineComponent({
       );
     }
 
-    function sortTransactionListByDate(transactionList: ICommonTransaction[]) {
-      return transactionList.sort(sortTransactionsByDateCallback);
-    }
-
     const filteredTransactions = computed(
-      () => pipe<ICommonTransaction[]>([
+      () => pipe([
         narrowTransactionsToDefinedToken,
         filterTransactionsByDisplayMode,
         filterTransactionsBySearchPhrase,
-        sortTransactionListByDate,
+        sortTransactionsByDate,
       ])(loadedTransactionList.value),
     );
 

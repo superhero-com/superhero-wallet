@@ -5,13 +5,13 @@ import {
 } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import { handleUnknownError } from '@/popup/utils';
 import type {
   IAccount,
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   ITransaction,
 } from '@/types';
+import { handleUnknownError } from '@/utils';
 import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   TX_FUNCTIONS_MULTISIG,

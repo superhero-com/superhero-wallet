@@ -17,8 +17,8 @@ import {
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
 } from '@/constants';
-import { handleUnknownError } from '../popup/utils';
-import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
+import { handleUnknownError } from '@/utils';
+import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
 import { usePopupProps } from './popupProps';
 
 /**

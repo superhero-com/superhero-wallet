@@ -23,10 +23,10 @@
 import { computed, defineComponent } from 'vue';
 import type { INetwork } from '@/types';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { truncateAddress } from '../utils';
-import { useGetter } from '../../composables/vuex';
+import { truncateAddress } from '@/utils';
+import { useGetter } from '@/composables/vuex';
 
-import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
+import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 import LinkButton from './LinkButton.vue';
 
 export default defineComponent({

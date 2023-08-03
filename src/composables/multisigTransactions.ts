@@ -22,11 +22,9 @@ import type {
 } from '@/types';
 import {
   fetchJson,
+  handleUnknownError,
   postJson,
 } from '@/utils';
-import {
-  handleUnknownError,
-} from '@/popup/utils';
 import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';

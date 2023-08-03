@@ -10,12 +10,12 @@ import {
   ACCOUNT_HD_WALLET,
   TX_DIRECTION,
 } from '@/constants';
-import { getHdWalletAccount } from '@/popup/utils';
 import { useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   categorizeContractCallTxObject,
+  getHdWalletAccount,
 } from '@/protocols/aeternity/helpers';
 
 export default {

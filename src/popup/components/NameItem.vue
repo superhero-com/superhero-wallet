@@ -148,11 +148,9 @@ import { useI18n } from 'vue-i18n';
 import { IName } from '@/types';
 import { IS_CORDOVA, IS_EXTENSION, MODAL_CONFIRM } from '@/constants';
 import Logger from '@/lib/logger';
-import {
-  blocksToRelativeTime,
-  checkAddressOrChannel,
-} from '../utils';
-import { useAccounts, useModals, useTopHeaderData } from '../../composables';
+import { blocksToRelativeTime } from '@/utils';
+import { useAccounts, useModals, useTopHeaderData } from '@/composables';
+import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
