@@ -184,11 +184,7 @@ import { Field, Form, useFormErrors } from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import { MODAL_READ_QR_CODE } from '@/constants';
-import { excludeFalsy } from '@/utils';
-import {
-  validateHash,
-  handleUnknownError,
-} from '@/popup/utils';
+import { excludeFalsy, handleUnknownError } from '@/utils';
 import type {
   ICreateMultisigAccount,
   ObjectValues,
@@ -200,6 +196,7 @@ import {
   useMultisigAccountCreate,
   useMultisigAccounts,
 } from '@/composables';
+import { validateHash } from '@/protocols/aeternity/helpers';
 import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   MULTISIG_CREATION_PHASES,

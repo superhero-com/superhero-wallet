@@ -58,9 +58,9 @@ import type {
   IFilters,
   IFilterInputPayload,
 } from '@/types';
-import { blocksToRelativeTime } from '@/popup/utils';
-import { getAeFee } from '@/protocols/aeternity/helpers';
+import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
+import { getAeFee } from '@/protocols/aeternity/helpers';
 
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';

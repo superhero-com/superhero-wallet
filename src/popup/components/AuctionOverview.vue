@@ -17,10 +17,10 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { IAuction, IAuctionBid } from '../../types';
-import { useTopHeaderData } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { blocksToRelativeTime } from '../utils';
+import { IAuction, IAuctionBid } from '@/types';
+import { blocksToRelativeTime } from '@/utils';
+import { useTopHeaderData } from '@/composables';
+import { useGetter } from '@/composables/vuex';
 
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';

@@ -6,13 +6,11 @@ import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 import {
   fetchAllPages,
+  handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
-import {
-  handleUnknownError,
-  calculateSupplyAmount,
-} from '@/popup/utils';
 import { useMiddleware, useAeSdk } from '@/composables';
+import { calculateSupplyAmount } from '@/protocols/aeternity/helpers';
 
 export default (store) => {
   const { getAeSdk } = useAeSdk({ store });

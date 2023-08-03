@@ -2,16 +2,12 @@ import { watch } from 'vue';
 import {
   fetchAllPages,
   fetchJson,
+  handleUnknownError,
   postJson,
 } from '@/utils';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/constants';
-import {
-  checkAddress,
-  isInsufficientBalanceError,
-  handleUnknownError,
-} from '@/popup/utils';
 import { useMiddleware, useModals, useAeSdk } from '@/composables';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { tg } from './languages';
 
 export default (store) => {

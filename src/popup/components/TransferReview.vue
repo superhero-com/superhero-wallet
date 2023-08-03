@@ -133,6 +133,7 @@ import { useI18n } from 'vue-i18n';
 import { ITransaction } from '@/types';
 import {
   escapeSpecialChars,
+  handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
 import {
@@ -145,9 +146,6 @@ import {
   useUi,
   useTippingContracts,
 } from '@/composables';
-import {
-  handleUnknownError,
-} from '@/popup/utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
 import { AE_CONTRACT_ID, AE_SYMBOL, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { aeToAettos, isAensNameValid } from '@/protocols/aeternity/helpers';

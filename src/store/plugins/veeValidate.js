@@ -4,15 +4,9 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
-import {
-  isUrlValid,
-} from '@/utils';
-import {
-  isNotFoundError,
-  getAddressByNameEntry,
-} from '@/popup/utils';
+import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
-import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 import { tg } from './languages';
 

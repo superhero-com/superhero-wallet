@@ -1,26 +1,46 @@
 import {
   AE_AMOUNT_FORMATS,
   Encoded,
+  Encoding,
+  InvalidTxError,
   Tag,
   decode,
+  derivePathFromKey,
+  encode,
   formatAmount,
+  getKeyPair,
+  isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 
 import type {
+  IAccount,
+  IActiveMultisigTransaction,
+  ICommonTransaction,
   IDexContracts,
+  INameEntryFetched,
   ITransaction,
   ITx,
+  IWallet,
   TxFunction,
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import { compareCaseInsensitive, includes } from '@/utils';
+import { HASH_REGEX } from '@/constants';
 import {
+  compareCaseInsensitive,
+  errorHasValidationKey,
+  includes,
+  isNotFoundError,
+} from '@/utils';
+import {
+  AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
+  AE_HASH_PREFIXES_ALLOWED,
   AE_SIMPLEX_URL,
+  AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_FUNCTIONS,
   TX_FUNCTIONS_TYPE_DEX,
   TX_TAGS_SUPPORTED,
@@ -48,12 +68,21 @@ export function aettosToAe(value: number | string) {
   });
 }
 
+export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
+  if (!balance || !totalSupply || !reserve) {
+    return null;
+  }
+  const share = new BigNumber(balance).times(100).div(totalSupply);
+  const amount = new BigNumber(reserve).times(share).div(100);
+  return amount.toFixed(0);
+}
+
 export function categorizeContractCallTxObject(transaction: ITransaction): {
-  amount?: string | number
-  to?: string
-  token?: string
-  url?: string
-  note?: string
+  amount?: string | number;
+  to?: string;
+  token?: string;
+  url?: string;
+  note?: string;
 } | null {
   if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
     return null;
@@ -95,11 +124,28 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   }
 }
 
+export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+  return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
+}
+
 /**
  * Converts long raw values like '3280000000000000000' to human-readable 3.28
  */
 export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
+}
+
+export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
+  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, { ...wallet, secretKey: wallet.privateKey }).secretKey);
+  return {
+    ...keyPair,
+    idx: accountIdx,
+    address: encode(keyPair.publicKey, Encoding.AccountAddress),
+  };
+}
+
+export function getTxOwnerAddress(innerTx?: ITx) {
+  return innerTx?.accountId || innerTx?.callerId;
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {
@@ -110,15 +156,6 @@ export function isContainingNestedTx(tx: ITx): boolean {
   ].includes(tx.type);
 }
 
-export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
-  try {
-    const txObject = unpackTx(encodedTx);
-    return TX_TAGS_SUPPORTED.includes(txObject.tag);
-  } catch (e) {
-    return false;
-  }
-}
-
 export function getInnerTransaction(tx?: ITx): any {
   if (!tx) {
     return null;
@@ -127,6 +164,35 @@ export function getInnerTransaction(tx?: ITx): any {
     return tx.tx?.tx;
   }
   return tx;
+}
+
+export function getMultisigTransaction(
+  transaction: ICommonTransaction,
+): IActiveMultisigTransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? transaction as IActiveMultisigTransaction
+    : undefined;
+}
+
+export function getOwnershipStatus(
+  activeAccount: IAccount,
+  accounts: IAccount[],
+  innerTx?: ITx,
+) {
+  const txOwnerAddress = getTxOwnerAddress(innerTx);
+  if (activeAccount.address === txOwnerAddress) {
+    return AE_TRANSACTION_OWNERSHIP_STATUS.current;
+  }
+  if (accounts.find(({ address }) => address === txOwnerAddress)) {
+    return AE_TRANSACTION_OWNERSHIP_STATUS.subAccount;
+  }
+  return AE_TRANSACTION_OWNERSHIP_STATUS.other;
+}
+
+export function getTransaction(transaction: ICommonTransaction): ITransaction | undefined {
+  return (transaction as any).isMultisigTransaction
+    ? undefined
+    : transaction as ITransaction;
 }
 
 export function getTransactionPayload(transaction: ITransaction) {
@@ -168,6 +234,26 @@ export function getTxTag(tx: ITx): Tag | null {
     return Tag[tx.type as TxType];
   }
   return null;
+}
+
+export function isAccountNotFoundError(error: any) {
+  return isNotFoundError(error) && error?.response?.body?.reason === 'Account not found';
+}
+
+export function isInsufficientBalanceError(error: any) {
+  return (
+    error instanceof InvalidTxError
+    && errorHasValidationKey(error, 'InsufficientBalance')
+  );
+}
+
+export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
+  try {
+    const txObject = unpackTx(encodedTx);
+    return TX_TAGS_SUPPORTED.includes(txObject.tag);
+  } catch (e) {
+    return false;
+  }
 }
 
 export function isAensNameValid(value: string) {
@@ -220,4 +306,41 @@ export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
 
 export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
   return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunction);
+}
+
+export function validateHash(fullHash?: string) {
+  type HashPrefix = typeof AE_HASH_PREFIXES_ALLOWED[number];
+  const isName = !!fullHash?.endsWith(AE_AENS_DOMAIN);
+  let valid = false;
+  let prefix: HashPrefix | null = null;
+  let hash = null;
+
+  if (fullHash) {
+    [prefix, hash] = fullHash.split('_') as [HashPrefix, string];
+    valid = (AE_HASH_PREFIXES_ALLOWED.includes(prefix) && HASH_REGEX.test(hash)) || isName;
+  }
+
+  return {
+    valid,
+    isName,
+    prefix,
+    hash,
+  };
+}
+
+export function isContract(fullHash: string) {
+  const { valid, prefix } = validateHash(fullHash);
+  return valid && prefix === Encoding.ContractAddress;
+}
+
+export function checkAddress(value: string) {
+  return (
+    isAddressValid(value, Encoding.AccountAddress)
+    || isAddressValid(value, Encoding.ContractAddress)
+    || isAddressValid(value, Encoding.OracleAddress)
+  );
+}
+
+export function checkAddressOrChannel(value: string) {
+  return checkAddress(value) || isAddressValid(value, Encoding.Channel);
 }

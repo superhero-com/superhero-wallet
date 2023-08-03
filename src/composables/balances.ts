@@ -8,14 +8,11 @@ import type {
   ICoin,
   IDefaultComposableOptions,
 } from '@/types';
+import { handleUnknownError, isNotFoundError } from '@/utils';
 import {
   AE_SYMBOL,
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
-import {
-  isNotFoundError,
-  handleUnknownError,
-} from '@/popup/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import {
   createNetworkWatcher,

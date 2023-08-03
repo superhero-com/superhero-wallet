@@ -1,7 +1,6 @@
 import { times } from 'lodash-es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
-import { executeAndSetInterval } from '@/utils';
-import { handleUnknownError } from '@/popup/utils';
+import { executeAndSetInterval, handleUnknownError } from '@/utils';
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 
 const POLLING_INTERVAL = 3000;
