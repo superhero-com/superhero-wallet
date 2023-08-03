@@ -74,7 +74,7 @@ import { useForm, useFieldError, Field } from 'vee-validate';
 import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk } from '@/composables';
 import { useGetter } from '@/composables/vuex';
-import { STUB_ADDRESS, STUB_NONCE } from '@/config/stubs';
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
   AE_AENS_BID_MIN_RATIO,
   AE_COIN_PRECISION,

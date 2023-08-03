@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash-es';
 import { METHODS } from '@aeternity/aepp-sdk';
-import { IN_FRAME } from '@/config';
+import { IN_FRAME } from '@/constants';
 import store from '../store';
 import { FramesConnection } from './FramesConnection';
 import { useMiddleware, useAeSdk } from '../composables';

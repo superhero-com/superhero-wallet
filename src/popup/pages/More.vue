@@ -83,7 +83,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { BUG_REPORT_URL, IS_IOS } from '@/config';
+import { BUG_REPORT_URL, IS_IOS } from '@/constants';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { useAccounts, useAeSdk } from '@/composables';
 

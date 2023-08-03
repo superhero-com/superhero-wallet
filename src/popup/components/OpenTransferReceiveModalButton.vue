@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { MODAL_TRANSFER_RECEIVE } from '@/config';
+import { MODAL_TRANSFER_RECEIVE } from '@/constants';
 import { useModals } from '@/composables';
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';

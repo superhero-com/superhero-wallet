@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import getters from '../../../src/store/getters';
-import { TX_DIRECTION } from '../../../src/config';
-import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/config/stubs';
+import { TX_DIRECTION } from '../../../src/constants';
+import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
 
 const TEST_TOKEN_DECIMALS = 12;

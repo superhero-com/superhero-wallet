@@ -1,6 +1,6 @@
 import { debounce } from 'lodash-es';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { MOBILE_WIDTH } from '@/config';
+import { MOBILE_WIDTH } from '@/constants';
 
 export interface IScrollCallbackParams {
   isOutsideOfViewport: boolean

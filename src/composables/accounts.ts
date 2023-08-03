@@ -9,13 +9,13 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/config';
+import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
 import {
   getAccountNameToDisplay,
   getHdWalletAccount,
 } from '@/popup/utils';
 import { AeScan } from '@/lib/AeScan';
-import { STUB_ACCOUNT } from '@/config/stubs';
+import { STUB_ACCOUNT } from '@/constants/stubs';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 

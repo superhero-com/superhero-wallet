@@ -1,6 +1,6 @@
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { CurrencyRates } from '@/types';
-import { CURRENCIES } from '@/config';
+import { CURRENCIES } from '@/constants';
 import { fetchJson } from '@/utils';
 
 export interface CoinGeckoMarketResponse {

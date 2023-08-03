@@ -65,7 +65,7 @@
 import { computed, defineComponent } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { MODAL_CONSENSUS_INFO } from '@/config';
+import { MODAL_CONSENSUS_INFO } from '@/constants';
 import {
   useAccounts,
   useModals,

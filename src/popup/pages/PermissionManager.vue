@@ -161,7 +161,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
 
 import type { IPermission } from '@/types';
-import { PERMISSION_DEFAULTS } from '@/config';
+import { PERMISSION_DEFAULTS } from '@/constants';
 import { useBalances, useCurrencies } from '@/composables';
 import { useState } from '@/composables/vuex';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';

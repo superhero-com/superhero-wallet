@@ -52,7 +52,7 @@ import {
 } from 'vue';
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
-import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/config';
+import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/constants';
 import {
   useTransactionAndTokenFilter,
   useUi,

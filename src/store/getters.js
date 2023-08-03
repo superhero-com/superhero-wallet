@@ -7,7 +7,7 @@ import {
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   TX_DIRECTION,
-} from '@/config';
+} from '@/constants';
 import { useAccounts, useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {

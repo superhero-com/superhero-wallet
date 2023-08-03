@@ -24,7 +24,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { MODAL_TRANSFER_SEND } from '@/config';
+import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables';
 
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';

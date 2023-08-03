@@ -30,7 +30,7 @@ import {
 import {
   HASH_REGEX,
   TX_DIRECTION,
-} from '@/config';
+} from '@/constants';
 import { tg } from '@/store/plugins/languages';
 
 export function handleUnknownError(error: any) {

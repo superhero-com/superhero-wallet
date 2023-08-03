@@ -16,7 +16,7 @@ import {
   PropType,
 } from 'vue';
 import type { StatusIconType } from '@/types';
-import { ALLOWED_ICON_STATUSES } from '@/config';
+import { ALLOWED_ICON_STATUSES } from '@/constants';
 
 import TimesCircle from '../../icons/times-circle.svg?vue-component';
 import QuestionCircle from '../../icons/question-circle.svg?vue-component';

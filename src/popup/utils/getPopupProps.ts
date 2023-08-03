@@ -1,13 +1,13 @@
 import { v4 as genUuid } from 'uuid';
 import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
 import type { Dictionary, IPopupConfig, TxType } from '@/types';
-import { STUB_TX_PARAMS, STUB_POPUP_PROPS } from '@/config/stubs';
+import { STUB_TX_PARAMS, STUB_POPUP_PROPS } from '@/constants/stubs';
 import {
   CONNECTION_TYPES,
   IS_EXTENSION,
   POPUP_TYPE,
   RUNNING_IN_TESTS,
-} from '@/config';
+} from '@/constants';
 
 interface PopupMessageData {
   type: 'resolve' | 'reject' | 'getProps'

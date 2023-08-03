@@ -11,7 +11,7 @@ import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
-} from '@/config';
+} from '@/constants';
 import {
   getHdWalletAccount,
 } from '@/popup/utils';

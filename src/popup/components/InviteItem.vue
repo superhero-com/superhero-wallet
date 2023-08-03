@@ -88,7 +88,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { formatDate } from '@/utils';
-import { APP_LINK_WEB } from '@/config';
+import { APP_LINK_WEB } from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
   IFormModel,

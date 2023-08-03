@@ -17,7 +17,7 @@ import {
   POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-} from '@/config';
+} from '@/constants';
 import {
   watchUntilTruthy,
 } from '@/utils';

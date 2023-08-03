@@ -105,7 +105,7 @@ import type {
   ITokenList,
   ResolveCallback,
 } from '@/types';
-import { IS_MOBILE_DEVICE } from '@/config';
+import { IS_MOBILE_DEVICE } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy } from '@/composables';
 import {

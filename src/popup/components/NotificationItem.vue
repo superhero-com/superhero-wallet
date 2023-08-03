@@ -76,7 +76,7 @@ import {
   NOTIFICATION_TYPE_RETIP_ON_TIP,
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
-} from '@/config';
+} from '@/constants';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';

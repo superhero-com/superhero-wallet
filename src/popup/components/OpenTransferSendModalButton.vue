@@ -14,7 +14,7 @@
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { MODAL_TRANSFER_SEND } from '@/config';
+import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 

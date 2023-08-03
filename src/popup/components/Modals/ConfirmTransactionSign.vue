@@ -137,7 +137,7 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   postJson,

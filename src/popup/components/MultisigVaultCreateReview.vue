@@ -99,7 +99,7 @@ import type {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '@/types';
-import { MODAL_CONSENSUS_INFO } from '@/config';
+import { MODAL_CONSENSUS_INFO } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   handleUnknownError,
