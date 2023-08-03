@@ -80,7 +80,7 @@ import {
   onBeforeUnmount,
   onMounted,
 } from 'vue';
-import { IS_FIREFOX, IS_EXTENSION } from '@/config';
+import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
 

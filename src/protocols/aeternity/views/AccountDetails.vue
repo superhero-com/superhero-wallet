@@ -50,7 +50,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/config';
+import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import {
   useAccounts,
   useBalances,

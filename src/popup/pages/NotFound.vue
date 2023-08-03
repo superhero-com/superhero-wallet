@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { BUG_REPORT_URL } from '@/config';
+import { BUG_REPORT_URL } from '@/constants';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
 import NotFoundImage from '../../image/not-found.jpg';

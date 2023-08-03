@@ -11,7 +11,7 @@ import type {
   IRequestInitBodyParsed,
   Truthy,
 } from '@/types';
-import { LOCAL_STORAGE_PREFIX } from '@/config';
+import { LOCAL_STORAGE_PREFIX } from '@/constants';
 
 export function amountRounded(rawAmount: number | BigNumberPublic): string {
   let amount = rawAmount;

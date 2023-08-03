@@ -11,7 +11,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { NOTIFICATION_STATUS_CREATED } from '@/config';
+import { NOTIFICATION_STATUS_CREATED } from '@/constants';
 import { useNotifications } from '@/composables/notifications';
 
 import BellIcon from '../../icons/bell.svg?vue-component';

@@ -30,7 +30,7 @@ import {
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_TESTS,
-} from '@/config';
+} from '@/constants';
 import { showPopup } from '@/background/popupHandler';
 import {
   AE_NETWORK_MAINNET_ID,

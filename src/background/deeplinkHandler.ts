@@ -1,4 +1,4 @@
-import { APP_LINK_WEB } from '@/config';
+import { APP_LINK_WEB } from '@/constants';
 
 export default () => browser.webRequest.onBeforeRequest.addListener(
   ({ url }) => ({

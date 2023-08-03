@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useModals } from '@/composables';
-import { MODAL_HELP } from '@/config';
+import { MODAL_HELP } from '@/constants';
 import BtnPlain from './BtnPlain.vue';
 import QuestionCircle from '../../../icons/question-circle-border.svg?vue-component';
 

@@ -48,7 +48,7 @@ import type {
   ITransactionsState,
   ITx,
 } from '@/types';
-import { TX_DIRECTION, TXS_PER_PAGE } from '@/config';
+import { TX_DIRECTION, TXS_PER_PAGE } from '@/constants';
 import {
   includesCaseInsensitive,
   pipe,

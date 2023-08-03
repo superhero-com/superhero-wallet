@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_ACCOUNT_CREATE } from '@/config';
+import { MODAL_ACCOUNT_CREATE } from '@/constants';
 import { useModals } from '@/composables';
 
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';

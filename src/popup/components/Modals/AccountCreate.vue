@@ -45,7 +45,7 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
-import { MODAL_MULTISIG_VAULT_CREATE } from '@/config';
+import { MODAL_MULTISIG_VAULT_CREATE } from '@/constants';
 import { useConnection, useModals } from '@/composables';
 
 import BtnSubheader from '../buttons/BtnSubheader.vue';

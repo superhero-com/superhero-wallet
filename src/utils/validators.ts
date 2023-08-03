@@ -1,5 +1,5 @@
 import { isFQDN } from 'validator';
-import { SEED_LENGTH } from '@/config';
+import { SEED_LENGTH } from '@/constants';
 import { toURL } from './formatters';
 
 export function isUrlValid(urlAsString: string): boolean {

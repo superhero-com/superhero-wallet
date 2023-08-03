@@ -146,7 +146,7 @@ import {
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IName } from '@/types';
-import { IS_CORDOVA, IS_EXTENSION, MODAL_CONFIRM } from '@/config';
+import { IS_CORDOVA, IS_EXTENSION, MODAL_CONFIRM } from '@/constants';
 import Logger from '@/lib/logger';
 import {
   blocksToRelativeTime,

@@ -65,7 +65,7 @@ import { RejectedByUserError } from '@/lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
-} from '@/config';
+} from '@/constants';
 import { useState } from '../../../composables/vuex';
 import { usePopupProps } from '../../../composables';
 

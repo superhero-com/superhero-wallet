@@ -5,7 +5,7 @@ import {
 import { Ref } from 'vue';
 import { Dictionary } from '@/types';
 import { useModals } from '@/composables';
-import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '@/config';
+import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '@/constants';
 import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
 
 // Allowed action names

@@ -34,7 +34,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
-import { IS_IOS } from '@/config';
+import { IS_IOS } from '@/constants';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';

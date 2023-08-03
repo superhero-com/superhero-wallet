@@ -8,7 +8,7 @@ import {
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
-} from '@/config';
+} from '@/constants';
 import { usePopupProps } from '../../composables';
 import { RejectedByUserError } from '../../lib/errors';
 import { ROUTE_WEB_IFRAME_POPUP } from './routeNames';

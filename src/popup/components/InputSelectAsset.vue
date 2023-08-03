@@ -16,7 +16,7 @@
 import { computed, defineComponent } from 'vue';
 import type { IToken } from '@/types';
 import { useModals } from '@/composables';
-import { MODAL_ASSET_SELECTOR } from '@/config';
+import { MODAL_ASSET_SELECTOR } from '@/constants';
 import ChevronDown from '../../icons/chevron-down.svg?vue-component';
 import BtnPlain from './buttons/BtnPlain.vue';
 

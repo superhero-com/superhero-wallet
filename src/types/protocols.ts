@@ -1,7 +1,7 @@
 import {
   PROTOCOLS,
   DISTINCT_PROTOCOL_VIEWS,
-} from '@/config';
+} from '@/constants';
 
 /**
  * Blockchain protocol slug name

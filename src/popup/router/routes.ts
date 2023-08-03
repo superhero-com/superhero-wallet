@@ -1,5 +1,5 @@
 import type { WalletAppRouteConfig } from '@/types';
-import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/config';
+import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,

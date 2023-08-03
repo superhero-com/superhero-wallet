@@ -28,7 +28,7 @@ import {
   nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IS_EXTENSION } from '@/config';
+import { IS_EXTENSION } from '@/constants';
 
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';

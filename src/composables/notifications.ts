@@ -13,7 +13,7 @@ import {
   NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-} from '@/config';
+} from '@/constants';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';

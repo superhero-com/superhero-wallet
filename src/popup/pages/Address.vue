@@ -15,7 +15,7 @@ import {
   useAeSdk,
   usePopupProps,
 } from '@/composables';
-import { POPUP_CONNECT_ADDRESS_PERMISSION } from '@/config';
+import { POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
 import Connect from './Popups/Connect.vue';
 
 export default defineComponent({

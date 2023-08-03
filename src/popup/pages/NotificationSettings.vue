@@ -23,7 +23,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import { NOTIFICATION_TYPE_WALLET } from '@/config';
+import { NOTIFICATION_TYPE_WALLET } from '@/constants';
 import SwitchButton from '../components/SwitchButton.vue';
 
 export default {

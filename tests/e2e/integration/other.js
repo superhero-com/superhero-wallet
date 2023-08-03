@@ -1,4 +1,4 @@
-import { STUB_ACCOUNT, STUB_TRANSACTIONS } from '../../../src/config/stubs';
+import { STUB_ACCOUNT, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 
 const txs = [
   STUB_TRANSACTIONS.pendingSpend,

@@ -84,7 +84,7 @@ import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
-import { STUB_ADDRESS, STUB_NONCE } from '@/config/stubs';
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import { useAccounts, useModals, useAeSdk } from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
