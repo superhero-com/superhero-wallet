@@ -218,7 +218,7 @@ import {
   MODAL_PAYLOAD_FORM,
   AGGREGATOR_URL,
   APP_LINK_WEB,
-} from '@/config';
+} from '@/constants';
 import {
   useAccounts,
   useBalances,

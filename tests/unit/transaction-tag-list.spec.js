@@ -6,11 +6,11 @@ import {
   STUB_ACCOUNT,
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
-} from '../../src/config/stubs';
+} from '../../src/constants/stubs';
 import {
   AENS,
   NETWORK_TESTNET,
-} from '../../src/config';
+} from '../../src/constants';
 
 const store = new Vuex.Store({
   getters: {

@@ -72,7 +72,7 @@ import {
   IS_FIREFOX,
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
-} from '@/config';
+} from '@/constants';
 import {
   useAccounts,
   useConnection,

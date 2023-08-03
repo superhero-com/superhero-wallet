@@ -183,7 +183,7 @@ import { useI18n } from 'vue-i18n';
 import { Field, Form, useFormErrors } from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import { MODAL_READ_QR_CODE } from '@/config';
+import { MODAL_READ_QR_CODE } from '@/constants';
 import { excludeFalsy } from '@/utils';
 import {
   validateHash,

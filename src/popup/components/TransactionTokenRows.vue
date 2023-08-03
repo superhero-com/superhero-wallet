@@ -44,7 +44,7 @@ import {
   toShiftedBigNumber,
   truncateString,
 } from '@/utils';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import { useTransactionTokens } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 

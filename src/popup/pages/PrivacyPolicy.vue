@@ -352,7 +352,7 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
-} from '@/config';
+} from '@/constants';
 
 export default {
   data: () => ({

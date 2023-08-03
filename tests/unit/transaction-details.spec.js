@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/popup/pages/TransactionDetails.vue';
-import { STUB_ACCOUNT } from '../../src/config/stubs';
+import { STUB_ACCOUNT } from '../../src/constants/stubs';
 import { AE_NETWORK_TESTNET_ID, AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';

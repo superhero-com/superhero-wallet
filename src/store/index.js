@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '@/config';
+import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '@/constants';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';

@@ -52,7 +52,7 @@
 
 <script>
 import { mapMutations } from 'vuex';
-import { IS_EXTENSION, IS_CORDOVA } from '@/config';
+import { IS_EXTENSION, IS_CORDOVA } from '@/constants';
 import { openInNewWindow } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
 import { handleUnknownError } from '../../utils';

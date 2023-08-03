@@ -42,7 +42,7 @@
 import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
-import { DASHBOARD_CARD_ID } from '@/config';
+import { DASHBOARD_CARD_ID } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '@/popup/router/routeNames';
 import { useAccounts, useAeSdk } from '@/composables';
 

@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import DashboardHeader from '../../src/popup/components/DashboardHeader.vue';
-import { NETWORK_TESTNET } from '../../src/config';
+import { NETWORK_TESTNET } from '../../src/constants';
 
 jest.mock('../../src/store/index.js', () => ({}));
 

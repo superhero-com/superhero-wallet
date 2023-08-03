@@ -29,7 +29,7 @@ import type {
   INetwork,
 } from '@/types';
 import { postJson } from '@/utils';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { AeScan } from '@/lib/AeScan';
 import { useMiddleware, useAeSdk, useTransactionTx } from '@/composables';

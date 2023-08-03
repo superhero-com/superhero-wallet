@@ -5,7 +5,7 @@ import {
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
   IS_FIREFOX,
-} from '@/config';
+} from '@/constants';
 
 const KEY = 'state';
 

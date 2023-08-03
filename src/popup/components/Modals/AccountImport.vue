@@ -60,7 +60,7 @@ import { validateMnemonic } from '@aeternity/bip39';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { MODAL_READ_QR_CODE } from '@/config';
+import { MODAL_READ_QR_CODE } from '@/constants';
 import { isSeedLengthValid } from '@/utils';
 import { useModals } from '@/composables';
 

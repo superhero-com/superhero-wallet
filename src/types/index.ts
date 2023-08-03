@@ -18,7 +18,7 @@ import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   POPUP_TYPES,
-} from '@/config';
+} from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
 import {

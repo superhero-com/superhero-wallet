@@ -15,7 +15,7 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
-} from '@/config';
+} from '@/constants';
 
 /**
  * Round the number to calculated amount of decimals.

@@ -86,7 +86,7 @@ import {
   IS_FIREFOX,
   IS_IOS,
   IS_MOBILE_DEVICE,
-} from '@/config';
+} from '@/constants';
 import PlatformIcon from './PlatformIcon.vue';
 
 export default {

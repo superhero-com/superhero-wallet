@@ -6,7 +6,7 @@ import {
 import { isEqual, uniqWith } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type { IDefaultComposableOptions } from '@/types';
-import { DASHBOARD_TRANSACTION_LIMIT } from '@/config';
+import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
 import {
   sortTransactionsByDateCallback,
   handleUnknownError,

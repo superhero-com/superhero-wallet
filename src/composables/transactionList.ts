@@ -10,7 +10,7 @@ import type {
 import {
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TX_DIRECTION,
-} from '@/config';
+} from '@/constants';
 import {
   fetchJson,
   getLocalStorageItem,

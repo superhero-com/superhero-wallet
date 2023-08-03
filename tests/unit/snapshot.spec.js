@@ -3,7 +3,7 @@ import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
 import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
-import * as environment from '../../src/config/environment';
+import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
 
@@ -16,7 +16,7 @@ afterAll(() => {
   process.env = OLD_ENV;
 });
 
-jest.mock('../../src/config/environment', () => ({
+jest.mock('../../src/constants/environment', () => ({
   __esModule: true,
   IS_WEB: null,
   IN_FRAME: null,

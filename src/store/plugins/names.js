@@ -11,7 +11,7 @@ import {
   fetchJson,
   postJson,
 } from '@/utils';
-import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/config';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/constants';
 import {
   checkAddress,
   isInsufficientBalanceError,
