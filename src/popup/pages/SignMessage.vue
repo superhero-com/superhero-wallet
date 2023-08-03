@@ -2,7 +2,7 @@
 import { defineComponent, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { MODAL_MESSAGE_SIGN } from '@/config';
+import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { RejectedByUserError } from '../../lib/errors';
 import { useDeepLinkApi, useModals, useAeSdk } from '../../composables';
 import { handleUnknownError } from '../utils';

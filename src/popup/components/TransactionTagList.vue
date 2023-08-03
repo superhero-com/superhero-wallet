@@ -29,7 +29,7 @@ import {
   AENS,
   DEX,
   TX_DIRECTION,
-} from '@/config';
+} from '@/constants';
 import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
 import { isTxFunctionDexPool } from '@/protocols/aeternity/helpers';
 

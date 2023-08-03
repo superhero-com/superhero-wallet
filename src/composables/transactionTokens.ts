@@ -7,7 +7,7 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import { toShiftedBigNumber } from '@/utils';
 import {
   AE_COIN_PRECISION,

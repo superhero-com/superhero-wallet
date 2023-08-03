@@ -18,7 +18,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_TX_SIGN,
-} from '@/config';
+} from '@/constants';
 import { showPopup } from '@/background/popupHandler';
 
 export class AccountSuperhero extends AccountBase {

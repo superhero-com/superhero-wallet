@@ -15,7 +15,7 @@ import { useStore } from 'vuex';
 import type { ITokenList } from '@/types';
 import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
-} from '@/config';
+} from '@/constants';
 import { useAccounts, useMultisigAccounts } from '@/composables';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';

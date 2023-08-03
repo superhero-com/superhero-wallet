@@ -4,7 +4,7 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_RAW_SIGN,
-} from '@/config';
+} from '@/constants';
 import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
 const popups: Dictionary = {};

@@ -84,7 +84,7 @@ import {
   ITokenList,
   ITransaction,
 } from '@/types';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import {
   getAccountNameToDisplay,
 } from '@/popup/utils';

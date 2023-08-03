@@ -13,7 +13,7 @@ import type {
 import {
   includes,
 } from '@/utils';
-import { TX_DIRECTION } from '@/config';
+import { TX_DIRECTION } from '@/constants';
 import {
   TX_FUNCTION_TRANSLATIONS,
   TX_TYPE_TRANSLATIONS,

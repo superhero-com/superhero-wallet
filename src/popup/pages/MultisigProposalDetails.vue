@@ -278,7 +278,7 @@ import type {
   ITransaction,
   ITx,
 } from '@/types';
-import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/config';
+import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/constants';
 import {
   formatDate,
   formatTime,

@@ -91,7 +91,7 @@ import {
   onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { MODAL_CONSENSUS_INFO } from '@/config';
+import { MODAL_CONSENSUS_INFO } from '@/constants';
 import { useModals, useMultisigAccounts } from '@/composables';
 
 import DetailsItem from '../components/DetailsItem.vue';

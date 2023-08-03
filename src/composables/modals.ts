@@ -16,7 +16,7 @@ import {
   IS_WEB,
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
-} from '@/config';
+} from '@/constants';
 import { handleUnknownError } from '../popup/utils';
 import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
 import { usePopupProps } from './popupProps';

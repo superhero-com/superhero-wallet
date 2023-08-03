@@ -90,7 +90,7 @@ import {
   IS_MOBILE_DEVICE,
   IS_WEB,
   MODAL_ACCOUNT_IMPORT,
-} from '@/config';
+} from '@/constants';
 import { useModals } from '@/composables';
 
 import CheckBox from '../components/CheckBox.vue';

@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash-es';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
-import { CONNECTION_TYPES } from '@/config';
+import { CONNECTION_TYPES } from '@/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';

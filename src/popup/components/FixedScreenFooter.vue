@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IS_MOBILE_DEVICE } from '@/config';
+import { IS_MOBILE_DEVICE } from '@/constants';
 
 export default defineComponent({
   setup() {

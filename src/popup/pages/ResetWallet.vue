@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_RESET_WALLET } from '@/config';
+import { MODAL_RESET_WALLET } from '@/constants';
 import { useModals } from '@/composables';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';

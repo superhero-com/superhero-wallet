@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { STUB_ACCOUNT } from '../../../src/config/stubs';
+import { STUB_ACCOUNT } from '../../../src/constants/stubs';
 
 const recipientAddress = 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4';
 const amount = 0.1;

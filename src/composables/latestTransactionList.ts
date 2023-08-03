@@ -9,7 +9,7 @@ import type {
   ITransaction,
   ITransactionsState,
 } from '@/types';
-import { DASHBOARD_TRANSACTION_LIMIT } from '@/config';
+import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
 import {
   sortTransactionsByDateCallback,
   handleUnknownError,

@@ -94,7 +94,7 @@ import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '@/types';
-import { IS_IOS } from '@/config';
+import { IS_IOS } from '@/constants';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/popup/utils';
 import {

@@ -6,7 +6,7 @@ import type {
   ICoin,
   ICurrency,
 } from '@/types';
-import { CURRENCIES } from '@/config';
+import { CURRENCIES } from '@/constants';
 import {
   getLocalStorageItem,
   setLocalStorageItem,

@@ -2,7 +2,7 @@
 import { uniqBy } from 'lodash-es';
 import {
   TX_DIRECTION,
-} from '@/config';
+} from '@/constants';
 
 export default {
   switchNetwork(state, payload) {

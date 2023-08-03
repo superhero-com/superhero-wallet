@@ -16,7 +16,7 @@ import type {
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '@/types';
-import { DEFAULT_WAITING_HEIGHT } from '@/config';
+import { DEFAULT_WAITING_HEIGHT } from '@/constants';
 import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import {
   MULTISIG_CREATION_PHASES,
