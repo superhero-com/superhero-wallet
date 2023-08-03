@@ -3,10 +3,10 @@
 
 /**
  * Computes a SHA1 hash for any value and returns it as a hexadecimal string.
- * 
+ *
  * This function is optimized for minimal code size and rather short messages.
- * 
- * @param {string} message 
+ *
+ * @param {string} message
  */
 function sha1(message) {
   var HASH_SIZE_HALF_BYTES = 40;
@@ -213,7 +213,7 @@ function colorTheme(hue, config) {
 
 /**
  * Parses a substring of the hash as a number.
- * @param {number} startPosition 
+ * @param {number} startPosition
  * @param {number=} octets
  */
 function parseHex(hash, startPosition, octets) {
@@ -229,7 +229,7 @@ function computeHash(value) {
 }
 
 /**
- * Inputs a value that might be a valid hash string for Jdenticon and returns it 
+ * Inputs a value that might be a valid hash string for Jdenticon and returns it
  * if it is determined valid, otherwise a falsy value is returned.
  */
 function isValidHash(hashCandidate) {
@@ -368,7 +368,3 @@ export const getAddressColor = (hashOrValue) => {
   var parsedConfig = getConfiguration(JDENTICON_CONFIG, 0.08);
   return colorTheme(hue, parsedConfig)[4] // Pick dark color
 }
-
-export default {
-  getAddressColor,
-};
