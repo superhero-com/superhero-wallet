@@ -37,7 +37,7 @@ import {
 import { useStore } from 'vuex';
 import type { IFormSelectOption } from '@/types';
 import { useBalances } from '@/composables';
-import { getAddressColor } from '@/popup/utils/avatar';
+import { getAddressColor } from '@/utils';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import AccountInfo from './AccountInfo.vue';

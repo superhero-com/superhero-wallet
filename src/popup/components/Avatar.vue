@@ -15,11 +15,10 @@ import {
   ref,
 } from 'vue';
 import type { INetwork } from '@/types';
-import { checkImageAvailability } from '@/utils';
+import { checkImageAvailability, getAddressColor } from '@/utils';
 import { useGetter } from '@/composables/vuex';
-import { getAddressColor } from '@/popup/utils/avatar';
-import { isContract } from '@/protocols/aeternity/helpers';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
+import { isContract } from '@/protocols/aeternity/helpers';
 
 const SIZES = ['xs', 'sm', 'rg', 'md', 'lg', 'xl'];
 
