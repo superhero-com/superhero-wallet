@@ -263,8 +263,8 @@ import {
   handleUnknownError,
 } from '@/popup/utils';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { AeScan } from '@/lib/AeScan';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import {
   useAccounts,

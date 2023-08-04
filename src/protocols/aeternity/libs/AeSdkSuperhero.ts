@@ -6,8 +6,8 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
-import { useAccounts } from '../composables/accounts';
-import { AccountSuperhero } from './accounts/superhero';
+import { useAccounts } from '@/composables/accounts';
+import { AccountSuperhero } from '@/lib/accounts/superhero';
 
 /**
  * Custom fields in options, `modal` and `payload` for spend function.
@@ -24,7 +24,7 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
  * Class extends `AeSdkWallet` from aepp-sdk-js
  * provides flexibility to manage the accounts the way wallet would like to handle
  */
-export class AeSdkSupehero extends AeSdkWallet {
+export class AeSdkSuperhero extends AeSdkWallet {
   store: Store<any>;
 
   constructor(store: Store<any>, options: any) {
