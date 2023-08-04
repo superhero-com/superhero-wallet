@@ -12,6 +12,15 @@
     </slot>
     <ChevronDownIcon class="arrow-icon" />
   </BtnPlain>
+  <BtnPlain
+    v-else-if="customStyle"
+    class="form-select custom-style"
+    @click="openOptionsModal"
+  >
+    <slot
+      name="custom-style"
+    />
+  </BtnPlain>
   <InputField
     v-else
     v-bind="$attrs"
@@ -63,6 +72,10 @@ export default defineComponent({
      * Decides if the input looks like a regular text instead of a form input element
      */
     unstyled: Boolean,
+    /**
+     * Decides if the UI can be completely changed
+     */
+    customStyle: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {
