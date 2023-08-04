@@ -1,22 +1,29 @@
 <template>
   <div class="account-selector">
-    <Avatar :address="modelValue.toString()" />
+    <Avatar
+      v-if="!avatarOnly"
+      :address="modelValue.toString()"
+    />
     <div>
       <BtnPill
         class="account-select"
+        :class="{ 'avatar-only': avatarOnly }"
         dense
       >
         <FormSelect
           v-bind="$attrs"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
-          unstyled
+          :unstyled="!avatarOnly"
+          :custom-style="avatarOnly"
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
           @update:modelValue="$emit('update:modelValue', $event)"
-          v-on="$listeners"
         >
-          <template #current-text="{ text }">
+          <template
+            v-if="!avatarOnly"
+            #current-text="{ text }"
+          >
             <div>
               <Truncate
                 class="account-select-text"
@@ -24,9 +31,19 @@
               />
             </div>
           </template>
+          <template
+            v-if="avatarOnly"
+            #custom-style
+          >
+            <Avatar
+              :address="modelValue.toString()"
+              size="sm"
+            />
+          </template>
         </FormSelect>
       </BtnPill>
       <AddressTruncated
+        v-if="!avatarOnly"
         :protocol="modelValue.protocol"
         show-explorer-link
         :address="modelValue.toString()"
@@ -61,6 +78,7 @@ export default defineComponent({
   props: {
     modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
+    avatarOnly: { type: Boolean, default: false },
   },
   emits: ['update:modelValue'],
   setup() {
@@ -90,6 +108,20 @@ export default defineComponent({
     margin-bottom: 4px;
     margin-left: -3px; // Compensate roundness
     color: $color-white;
+
+    &.avatar-only {
+      margin-bottom: 0;
+
+      &.btn-pill {
+        padding: 4px;
+        background-color: transparent;
+
+        & .button-plain {
+          width: 24px;
+          height: 24px;
+        }
+      }
+    }
   }
 }
 </style>
