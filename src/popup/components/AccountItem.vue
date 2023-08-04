@@ -32,9 +32,9 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import type { INetwork } from '../../types';
-import { AeScan } from '../../lib/AeScan';
-import { useGetter } from '../../composables/vuex';
+import type { INetwork } from '@/types';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useGetter } from '@/composables/vuex';
 
 import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';

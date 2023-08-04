@@ -54,8 +54,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { AeScan } from '../../lib/AeScan';
-import { useGetter } from '../../composables/vuex';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useGetter } from '@/composables/vuex';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
