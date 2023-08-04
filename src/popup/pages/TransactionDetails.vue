@@ -270,7 +270,6 @@ import {
   handleUnknownError,
 } from '@/popup/utils';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { AeScan } from '@/lib/AeScan';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -280,6 +279,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -330,7 +330,7 @@ export default defineComponent({
     const router = useRouter();
     const { getMiddleware } = useMiddleware({ store });
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
 
     const externalAddress = computed((): Encoded.AccountAddress => (
       props.transactionOwner
@@ -352,10 +352,6 @@ export default defineComponent({
     } = useTransactionTx({
       store,
       externalAddress: externalAddress.value,
-    });
-
-    const { isLocalAccountAddress } = useAccounts({
-      store,
     });
 
     const {

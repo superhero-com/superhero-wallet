@@ -21,9 +21,9 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { AeScan } from '../../lib/AeScan';
+import type { INetwork } from '@/types';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { truncateAddress } from '../utils';
-import { INetwork } from '../../types';
 import { useGetter } from '../../composables/vuex';
 
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';

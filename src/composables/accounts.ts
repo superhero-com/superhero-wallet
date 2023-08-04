@@ -9,12 +9,10 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import {
-  getAccountNameToDisplay,
-} from '@/popup/utils';
-import { AeScan } from '@/lib/AeScan';
+import { getAccountNameToDisplay } from '@/popup/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable

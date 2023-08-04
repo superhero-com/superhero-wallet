@@ -14,7 +14,7 @@ import type {
   IResponseChallenge,
   IRespondChallenge,
 } from '@/types';
-import { AeSdkSupehero } from '@/lib/AeSdkSupehero';
+import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import { FramesConnection } from '@/lib/FramesConnection';
 import { App } from '@/store/modules/permissions';
 import { watchUntilTruthy } from '@/utils';
@@ -40,7 +40,7 @@ import {
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
 
-let aeSdk: AeSdkSupehero;
+let aeSdk: AeSdkSuperhero;
 let dryAeSdk: AeSdk;
 let aeSdkBlocked = false;
 const isAeSdkReady = ref(false);
@@ -99,7 +99,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
     aeSdkCurrentNetwork = activeNetwork.value;
     const nodeInstance = await createNodeInstance(activeNetwork.value.url);
 
-    aeSdk = new AeSdkSupehero(store, {
+    aeSdk = new AeSdkSuperhero(store, {
       name: 'Superhero',
       nodes: [{
         name: activeNetwork.value.name,
@@ -178,7 +178,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    * Get the aeSdk instance. For now the SDK state is asynchronous.
    * TODO: this probably could be replaced with a computed prop.
    */
-  async function getAeSdk(): Promise<AeSdkSupehero> {
+  async function getAeSdk(): Promise<AeSdkSuperhero> {
     if (aeSdkBlocked) {
       await watchUntilTruthy(isAeSdkReady);
     } else if (!aeSdk) {

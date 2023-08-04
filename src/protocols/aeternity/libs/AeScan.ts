@@ -1,5 +1,5 @@
 import { Encoding } from '@aeternity/aepp-sdk';
-import { validateHash } from '../popup/utils';
+import { validateHash } from '@/popup/utils';
 
 /**
  * @link https://aescan.io

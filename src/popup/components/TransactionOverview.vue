@@ -31,9 +31,9 @@ import type {
 import { postJson } from '@/utils';
 import { TX_DIRECTION } from '@/constants';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { AeScan } from '@/lib/AeScan';
 import { useMiddleware, useAeSdk, useTransactionTx } from '@/composables';
 import { useGetter } from '@/composables/vuex';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import TransactionInfo from './TransactionInfo.vue';
 
 interface TransactionData {

@@ -25,10 +25,10 @@ import {
   AE_COIN_PRECISION,
   MULTISIG_SUPPORTED_CONTRACT_VERSION,
 } from '@/protocols/aeternity/config';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
-import { AeScan } from '../lib/AeScan';
 import { useAccounts } from './accounts';
 
 const POLLING_INTERVAL = 7000;
