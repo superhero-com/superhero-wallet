@@ -28,6 +28,7 @@ import {
   MODAL_TRANSFER_SEND,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
+  MODAL_BOWSER_ACTIONS_DAPP,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -58,6 +59,7 @@ import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
+import BrowserActions from '../components/Modals/BrowserActions.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -148,5 +150,8 @@ export default () => {
   });
   registerModal(MODAL_AE_ACCOUNT_CREATE, {
     component: AeternityAccountCreate,
+  });
+  registerModal(MODAL_BOWSER_ACTIONS_DAPP, {
+    component: BrowserActions,
   });
 };

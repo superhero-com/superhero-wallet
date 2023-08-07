@@ -308,7 +308,6 @@ export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_HELP = 'help';
 export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
-export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_NETWORK_SWITCHER = 'network-switcher';
 export const MODAL_PAYLOAD_FORM = 'payload-form';
@@ -318,6 +317,8 @@ export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
+export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
+export const MODAL_BOWSER_ACTIONS_DAPP = 'browser-actions';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
