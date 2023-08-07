@@ -65,14 +65,18 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
+import { PROTOCOL_AETERNITY, MODAL_BOWSER_ACTIONS_DAPP } from '@/constants';
 
-import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
 } from '../router/routeNames';
-import { useAccounts, useUi } from '../../composables';
+import {
+  useAccounts,
+  useUi,
+  useModals,
+} from '../../composables';
 import AccountSelector from './AccountSelector.vue';
 import Truncate from './Truncate.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -95,11 +99,16 @@ export default defineComponent({
       type: Object,
       required: true,
     },
+    iFrame: {
+      type: Object,
+      required: true,
+    },
   },
-  emits: ['back'],
+  emits: ['back', 'refresh'],
   setup(props, { emit }) {
     const store = useStore();
     const router = useRouter();
+    const { openModal } = useModals();
 
     const { homeRouteName } = useUi();
     const {
@@ -140,8 +149,16 @@ export default defineComponent({
     }
 
     function openActions() {
-      // TODO implement
-      console.log('openActions');
+      openModal(MODAL_BOWSER_ACTIONS_DAPP,
+        {
+          iFrame: props.iFrame,
+          selectedApp: props.selectedApp,
+        })
+        .then((value) => {
+          if (value?.action === 'refresh') {
+            emit('refresh');
+          }
+        }, () => {});
     }
 
     return {
