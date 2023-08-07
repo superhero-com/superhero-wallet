@@ -13,13 +13,15 @@
         :icon="RefreshIcon"
         @click="refreshIframeContent"
       />
-
+      <!-- TODO: define share action -->
       <BrowserActionItem
+        v-if="false"
         :title="$t('dappActionBrowser.bookmark.title')"
         :info="$t('dappActionBrowser.bookmark.description')"
         :icon="FavoriteIcon"
       />
       <BrowserActionItem
+        v-if="IS_MOBILE_DEVICE"
         :title="$t('dappActionBrowser.share.title')"
         :info="$t('dappActionBrowser.share.description')"
         :icon="ShareIcon"
@@ -40,6 +42,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
+import { IS_MOBILE_DEVICE } from '@/constants';
 import type { RejectCallback, ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -79,6 +82,7 @@ export default defineComponent({
       RefreshIcon,
       ShareIcon,
       FavoriteIcon,
+      IS_MOBILE_DEVICE,
     };
   },
 });
