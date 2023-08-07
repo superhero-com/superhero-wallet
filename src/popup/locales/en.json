@@ -1124,6 +1124,20 @@
       "inputPlaceholder": "Enter URL"
     }
   },
+  "dappActionBrowser": {
+    "refresh": {
+      "title": "Refresh",
+      "description": "Reload contents of the page"
+    },
+    "bookmark": {
+      "title": "Add bookmark",
+      "description": "Add this page to your favorites"
+    },
+    "share": {
+      "title": "Share",
+      "description": "Share this page with your contacts"
+    }
+},
   "validation": {
     "required": "This field is required",
     "url": "Invalid URL",
