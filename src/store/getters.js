@@ -4,10 +4,11 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { Tag } from '@aeternity/aepp-sdk';
 import { toShiftedBigNumber } from '@/utils';
 import {
+  ACCOUNT_HD_WALLET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  ACCOUNT_HD_WALLET,
+  PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
 import { useAeSdk } from '@/composables';
@@ -26,9 +27,12 @@ export default {
   accounts({ accounts: { list } }, getters) {
     if (!getters.wallet) return [];
     return list
-      .map(({ idx, type, ...acc }) => ({
+      .map(({
+        idx, type, protocol, ...acc
+      }) => ({
         idx,
         type,
+        protocol: protocol || PROTOCOL_AETERNITY,
         ...acc,
         ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))

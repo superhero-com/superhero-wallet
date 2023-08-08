@@ -1,6 +1,9 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
-import { ACCOUNT_HD_WALLET } from '@/constants';
+import {
+  ACCOUNT_HD_WALLET,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import hdWallet from './hdWallet';
 
 // TODO: modules file is an object, because previously it contained more than one module,
@@ -13,7 +16,7 @@ export default {
 
   state: {
     list: [{
-      idx: 0, showed: true, type: ACCOUNT_HD_WALLET,
+      idx: 0, showed: true, type: ACCOUNT_HD_WALLET, protocol: PROTOCOL_AETERNITY,
     }],
     activeIdx: 0,
   },
