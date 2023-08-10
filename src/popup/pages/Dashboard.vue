@@ -13,8 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
-        v-if="isAeAccount"
-        :bg-darken="true"
+        bg-darken
         bg-position="center"
         :title="$t('dashboard.daeppBrowserCard.title')"
         :description="$t('dashboard.daeppBrowserCard.description')"
@@ -51,13 +50,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
-import { DASHBOARD_CARD_ID, IS_IOS, PROTOCOL_AETERNITY } from '@/constants';
+import { DASHBOARD_CARD_ID, IS_IOS } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
 import { useAccounts, useAeSdk } from '@/composables';
 
+import daeppBrowserBackground from '@/image/dashboard/daepp-browser.png';
+import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
 import DashboardHeader from '../components/DashboardHeader.vue';
@@ -69,11 +70,9 @@ import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
 import CardIcon from '../../icons/credit-card.svg?vue-component';
 import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
-import GlobeIcon from '../../icons/globe-small.svg?vue-component';
 
 import buyBackground from '../../image/dashboard/buy-ae.jpg';
 import chainNameBackground from '../../image/dashboard/chain-name.jpg';
-import daeppBrowserBackground from '../../image/dashboard/daepp-browser.png';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -89,13 +88,11 @@ export default defineComponent({
     const store = useStore();
 
     const {
-      activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
     } = useAccounts({ store });
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
-    const isAeAccount = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
 
     return {
       DASHBOARD_CARD_ID,
@@ -114,7 +111,6 @@ export default defineComponent({
       daeppBrowserBackground,
       isNodeMainnet,
       isNodeTestnet,
-      isAeAccount,
     };
   },
 });
