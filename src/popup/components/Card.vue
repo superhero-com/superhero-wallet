@@ -6,6 +6,7 @@
       :class="{
         dense,
         disabled,
+        'card-darken': bgDarken
       }"
       :style="styleComponent"
     >
@@ -80,9 +81,8 @@ export default {
   setup(props) {
     const hiddenCards = useState('hiddenCards');
 
-    const bgImage = computed(() => props.bgDarken ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("${props.background}")` : `url("${props.background}")`);
     const styleComponent = computed(() => ({
-      backgroundImage: props.background ? bgImage.value : null,
+      backgroundImage: props.background ? `url("${props.background}")` : null,
       backgroundPosition: props.bgPosition ? props.bgPosition : null,
     }));
 
@@ -108,6 +108,7 @@ export default {
 @use '../../styles/mixins';
 
 .card {
+  z-index: 1;
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -121,6 +122,14 @@ export default {
   background-size: cover;
   transition: $transition-interactive;
 
+  &-darken::before{
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-color: var(--screen-bg-color);
+    opacity: 0.7;
+}
   .card-icon {
     color: $color-white;
   }
