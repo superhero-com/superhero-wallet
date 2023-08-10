@@ -1,7 +1,15 @@
 <template>
   <div class="apps-browser-list-item-wrapper">
-    <!-- TODO add image -->
-    <div class="app-image" />
+    <IconWrapper
+      v-if="appIcon"
+      :icon="appIcon"
+      class="app-image"
+      is-boxed
+    />
+    <div
+      v-else
+      class="app-image"
+    />
     <div class="app-title">
       {{ appTitle }}
     </div>
@@ -9,12 +17,14 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue';
+import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   name: 'AppsBrowserListItem',
-  components: {},
+  components: { IconWrapper },
   props: {
     appTitle: { type: String, required: true },
+    appIcon: { type: Object, default: null },
   },
   setup() {
   },
@@ -53,6 +63,11 @@ export default defineComponent({
   opacity: 0.75;
   background: lightgray 50% / cover no-repeat;
   box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, 0.4);
+
+}
+:deep(.icon-wrapper .icon-wrapper-icon) {
+  width: 100%;
+  height: 100%;
 }
 
 .app-title {

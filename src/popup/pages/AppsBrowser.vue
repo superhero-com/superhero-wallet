@@ -51,6 +51,7 @@
         >
           <AppsBrowserListItem
             :app-title="app.title"
+            :app-icon="app.icon"
             @click="onSelectApp(app)"
           />
         </div>
@@ -87,6 +88,9 @@ import AppsBrowserListItem from '../components/AppsBrowserListItem.vue';
 
 import CloseIcon from '../../icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
+import GraffitiIcon from '../../icons/dapp/graffiti.svg?vue-component';
+import DEXIcon from '../../icons/dapp/SuperheroDEX.svg?vue-component';
+import SuperheroIcon from '../../icons/dapp/superhero.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -101,20 +105,19 @@ export default defineComponent({
 
     const apps = [
       {
-        title: 'Aepp Example',
-        url: 'https://docs.aeternity.com/aepp-sdk-js/develop/examples/browser/aepp/',
-      },
-      {
         title: 'Graffiti',
         url: 'https://graffiti.aeternity.com',
+        icon: GraffitiIcon,
       },
       {
         title: 'Superhero Social',
         url: 'https://superhero.com',
+        icon: SuperheroIcon,
       },
       {
         title: 'Dex',
         url: 'https://dex.prd.aepps.com/swap',
+        icon: DEXIcon,
       },
     ];
 

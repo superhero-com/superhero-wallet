@@ -43,13 +43,13 @@
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { IS_MOBILE_DEVICE } from '@/constants';
+import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
+import ShareIcon from '@/icons/dapp/dapp-share.svg?vue-component';
+import FavoriteIcon from '@/icons/dapp/dapp-favorite.svg?vue-component';
 import type { RejectCallback, ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BrowserActionItem from '../BrowserActionItem.vue';
-import RefreshIcon from '../../../icons/dapp/dapp-refresh.svg?vue-component';
-import ShareIcon from '../../../icons/dapp/dapp-share.svg?vue-component';
-import FavoriteIcon from '../../../icons/dapp/dapp-favorite.svg?vue-component';
 
 export default defineComponent({
   components: {
