@@ -1,5 +1,11 @@
 <template>
   <div class="apps-browser">
+    <AppsBrowserHeader
+      :selected-app="selectedApp"
+      :i-frame="iframeRef"
+      @back="selectedApp = null"
+      @refresh="refresh()"
+    />
     <div v-if="!selectedApp">
       <Field
         v-slot="{ field, errorMessage, resetField }"
@@ -27,7 +33,7 @@
               v-else
               size="sm"
               :icon="CloseIcon"
-              @click="resetField()"
+              @click="resetField({value: ''})"
             />
           </template>
         </InputField>
@@ -75,6 +81,7 @@ import { useAeSdk } from '../../composables';
 import { handleUnknownError } from '../utils';
 
 import InputField from '../components/InputField.vue';
+import AppsBrowserHeader from '../components/AppsBrowserHeader.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
 import AppsBrowserListItem from '../components/AppsBrowserListItem.vue';
 
@@ -84,6 +91,7 @@ import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
 export default defineComponent({
   components: {
     AppsBrowserListItem,
+    AppsBrowserHeader,
     InputField,
     BtnIcon,
     Field,
@@ -148,6 +156,12 @@ export default defineComponent({
       }
     }
 
+    function refresh() {
+      if (!iframeRef.value || !selectedApp.value) return;
+      // TODO: bypass cross origin
+      iframeRef.value.contentWindow.window.location.reload();
+    }
+
     function onSelectApp(app: any) {
       selectedApp.value = app;
     }
@@ -159,6 +173,7 @@ export default defineComponent({
     });
 
     return {
+      refresh,
       iframeRef,
       customAppURL,
       apps,
