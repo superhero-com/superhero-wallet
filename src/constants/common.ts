@@ -335,6 +335,7 @@ export const MODAL_PAYLOAD_FORM = 'payload-form';
 export const MODAL_FORM_SELECT_OPTIONS = 'form-select-options';
 export const MODAL_ACCOUNT_SELECT_OPTIONS = 'account-select-options';
 export const MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION = 'multisig-proposal-confirm-action';
+export const MODAL_BOWSER_ACTIONS_DAPP = 'browser-actions';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
