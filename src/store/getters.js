@@ -7,13 +7,14 @@ import {
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
+  PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
-import { getHdWalletAccount } from '@/popup/utils';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   categorizeContractCallTxObject,
+  getHdWalletAccount,
 } from '@/protocols/aeternity/helpers';
 
 export default {
@@ -27,6 +28,7 @@ export default {
       .map(({ idx, type, ...acc }) => ({
         idx,
         type,
+        protocol: PROTOCOL_AETERNITY,
         ...acc,
         ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
       }))
