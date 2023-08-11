@@ -10,11 +10,9 @@ import type {
 } from '../types';
 import { tg } from '../store/plugins/languages';
 import {
-  ACCOUNT_HD_WALLET,
   FAUCET_URL,
   buildSimplexLink,
   getAccountNameToDisplay,
-  getHdWalletAccount,
 } from '../popup/utils';
 import { AeScan } from '../lib/AeScan';
 
@@ -22,21 +20,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accountsRaw = computed((): IAeternityAccountRaw[] => store.state.accounts?.list || []);
-  const accounts = computed((): IAccount[] => {
-    if (!store.getters.wallet) return [];
-    return accountsRaw.value
-      // Currently we support only HD Wallet
-      .filter(({ type }) => type === ACCOUNT_HD_WALLET)
-      .map(({ idx, ...acc }) => ({
-        idx,
-        ...acc,
-        ...getHdWalletAccount(store.getters.wallet, idx),
-      }))
-      .map(({ ...account }) => ({
-        ...account,
-        name: store.getters['names/getDefault'](account.address),
-      }));
-  });
+  const accounts = computed((): IAccount[] => store.getters.accounts || []);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
   const isLoggedIn = computed(
@@ -96,6 +80,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accounts,
     accountsAddressList,
     accountsSelectOptions,
+    accountsRaw,
     activeAccount,
     activeAccountExtended,
     activeAccountSimplexLink,
