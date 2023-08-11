@@ -9,37 +9,16 @@ import type {
   INetwork,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import { ACCOUNT_HD_WALLET, PROTOCOL_AETERNITY } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
-import { buildSimplexLink, getHdWalletAccount } from '@/protocols/aeternity/helpers';
+import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accountsRaw = computed((): IAeternityAccountRaw[] => store.state.accounts?.list || []);
-  const accounts = computed((): IAccount[] => {
-    if (!store.getters.wallet) {
-      return [];
-    }
-    return accountsRaw.value
-      // Currently we support only HD Wallet
-      .filter(({ type }) => type === ACCOUNT_HD_WALLET)
-      .map(({
-        idx, type, ...acc
-      }) => ({
-        idx,
-        type,
-        ...acc,
-        ...getHdWalletAccount(store.getters.wallet, idx),
-      }))
-      .map(({ ...account }) => ({
-        ...account,
-        protocol: PROTOCOL_AETERNITY,
-        name: store.getters['names/getDefault'](account.address),
-      }));
-  });
+  const accounts = computed((): IAccount[] => store.getters.accounts || []);
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
   const isLoggedIn = computed(
@@ -97,6 +76,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   return {
     accounts,
+    accountsRaw,
     accountsAddressList,
     accountsSelectOptions,
     activeAccount,

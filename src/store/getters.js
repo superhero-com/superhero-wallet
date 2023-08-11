@@ -3,9 +3,11 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { toShiftedBigNumber } from '@/utils';
 import {
+  ACCOUNT_HD_WALLET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
+  PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
 import { useAccounts, useAeSdk } from '@/composables';
@@ -13,12 +15,28 @@ import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   categorizeContractCallTxObject,
+  getHdWalletAccount,
 } from '@/protocols/aeternity/helpers';
 
 export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
+  },
+  accounts({ accounts: { list } }, getters) {
+    if (!getters.wallet) return [];
+    return list
+      .map(({ idx, type, ...acc }) => ({
+        idx,
+        type,
+        protocol: PROTOCOL_AETERNITY,
+        ...acc,
+        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
+      }))
+      .map(({ ...account }) => ({
+        ...account,
+        name: getters['names/getDefault'](account.address),
+      }));
   },
   networks({ userNetworks }) {
     return [
