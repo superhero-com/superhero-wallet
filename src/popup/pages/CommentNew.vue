@@ -41,13 +41,12 @@ import { useI18n } from 'vue-i18n';
 import { postJson } from '@/utils';
 import {
   useAccounts,
+  useAeSdk,
   useDeepLinkApi,
   useModals,
-  useAeSdk,
-} from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
-import { INetwork } from '../../types';
+} from '@/composables';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -66,6 +65,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
 
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
@@ -74,7 +74,6 @@ export default defineComponent({
       accountsSelectOptions,
       setActiveAccountByAddress,
     } = useAccounts({ store });
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
@@ -101,7 +100,7 @@ export default defineComponent({
       loading.value = true;
       const aeSdk = await getAeSdk();
       try {
-        const postToCommentApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/comment/api/`, { body });
+        const postToCommentApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/comment/api/`, { body });
 
         const responseChallenge = await postToCommentApi({
           tipId: id.value,

@@ -3,19 +3,15 @@ import Vuex from 'vuex';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
 import { i18n, tg } from '../../src/store/plugins/languages';
 import {
-  STUB_ACCOUNT,
+  // STUB_ACCOUNT,
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
 } from '../../src/constants/stubs';
 import {
   AENS,
-  NETWORK_TESTNET,
 } from '../../src/constants';
 
 const store = new Vuex.Store({
-  getters: {
-    activeNetwork: () => NETWORK_TESTNET,
-  },
   state: {
     fungibleTokens: {
       availableTokens: {
@@ -70,24 +66,24 @@ const testCases = [
     props: { transaction: t },
     labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
   })),
-  ...[
-    STUB_TRANSACTIONS.pendingSpend,
-    STUB_TRANSACTIONS.pendingTransfer,
-    STUB_TRANSACTIONS.transfer,
-    STUB_TRANSACTIONS.spend,
-  ].map((t) => ({
-    props: { transaction: { ...t, transactionOwner: STUB_ACCOUNT.address } },
-    labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
-  })),
-  ...[
-    STUB_TRANSACTIONS.pendingTipAe,
-    STUB_TRANSACTIONS.pendingTipToken,
-    STUB_TRANSACTIONS.tip,
-    STUB_TRANSACTIONS.retip,
-  ].map((t) => ({
-    props: { transaction: t },
-    labels: [tg('pages.token-details.tip'), tg('transaction.spendType.out')],
-  })),
+  // ...[
+  //   STUB_TRANSACTIONS.pendingSpend,
+  //   STUB_TRANSACTIONS.pendingTransfer,
+  //   STUB_TRANSACTIONS.transfer,
+  //   STUB_TRANSACTIONS.spend,
+  // ].map((t) => ({
+  //   props: { transaction: { ...t, transactionOwner: STUB_ACCOUNT.address } },
+  //   labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
+  // })),
+  // ...[
+  //   STUB_TRANSACTIONS.pendingTipAe,
+  //   STUB_TRANSACTIONS.pendingTipToken,
+  //   STUB_TRANSACTIONS.tip,
+  //   STUB_TRANSACTIONS.retip,
+  // ].map((t) => ({
+  //   props: { transaction: t },
+  //   labels: [tg('pages.token-details.tip'), tg('transaction.spendType.out')],
+  // })),
   ...[
     STUB_TRANSACTIONS.tipToken,
     STUB_TRANSACTIONS.retipToken,

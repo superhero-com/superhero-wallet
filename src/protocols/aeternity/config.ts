@@ -1,9 +1,12 @@
 import { Encoding, Tag } from '@aeternity/aepp-sdk';
 import type {
   DexFunctionType,
+  IDefaultNetworkTypeData,
   IDexContracts,
   TxFunctionRaw,
 } from '@/types';
+import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
+import { AeTippingContractAddresses, IAeNetworkPredefinedSettings, IAeNetworkSettings } from './types';
 
 export * from './libs/multisig';
 
@@ -12,6 +15,7 @@ export const AE_SYMBOL = 'AE';
 export const AE_SYMBOL_SHORT = '\xC6';
 export const AE_COIN_SYMBOL = 'AE Coin';
 export const AE_COIN_NAME = 'Aeternity';
+export const AE_PROTOCOL_NAME = 'Æternity';
 export const AE_COIN_PRECISION = 18; // Amount of decimals
 
 export const AE_COINGECKO_COIN_ID = 'aeternity';
@@ -24,6 +28,39 @@ export const AE_NETWORK_MAINNET_ID = 'ae_mainnet';
 export const AE_NETWORK_TESTNET_ID = 'ae_uat';
 
 export const AE_NETWORK_MAINNET_NODE_URL = 'https://mainnet.aeternity.io';
+export const AE_NETWORK_TESTNET_NODE_URL = 'https://testnet.aeternity.io';
+
+export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSettings> = {
+  [NETWORK_TYPE_MAINNET]: {
+    nodeUrl: AE_NETWORK_MAINNET_NODE_URL,
+    middlewareUrl: 'https://mainnet.aeternity.io/mdw',
+    compilerUrl: 'https://compiler.aepps.com',
+    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
+  },
+  [NETWORK_TYPE_TESTNET]: {
+    nodeUrl: AE_NETWORK_TESTNET_NODE_URL,
+    middlewareUrl: 'https://testnet.aeternity.io/mdw',
+    compilerUrl: 'https://latest.compiler.aepps.com',
+    backendUrl: 'https://testnet.superhero.aeternity.art',
+  },
+};
+
+export const AE_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
+  ? AE_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
+  : AE_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
+
+export const AE_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
+  IAeNetworkPredefinedSettings
+> = {
+  [NETWORK_TYPE_MAINNET]: {
+    explorerUrl: 'https://aescan.io',
+    multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
+  },
+  [NETWORK_TYPE_TESTNET]: {
+    explorerUrl: 'https://testnet.aescan.io',
+    multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
+  },
+};
 
 export const AE_AVATAR_URL = 'https://avatars.z52da5wt.xyz/';
 export const AE_BLOG_CLAIM_TIP_URL = 'https://blog.aeternity.com/superhero-how-to-send-receive-superhero-tips-34971b18c919#024e';
@@ -237,3 +274,11 @@ export const MULTISIG_CREATION_PHASES = {
 export const MULTISIG_VAULT_MIN_NUM_OF_SIGNERS = 2;
 
 export const MULTISIG_SUPPORTED_CONTRACT_VERSION = '2.0.0';
+
+export const AE_TIPPING_CONTRACTS_MAINNET: AeTippingContractAddresses = {
+  tippingV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z',
+};
+export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
+  tippingV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
+  tippingV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
+};

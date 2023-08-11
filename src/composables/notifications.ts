@@ -1,7 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import type {
   IDefaultComposableOptions,
-  INetwork,
   INotification,
   INotificationSetting,
   NotificationStatus,
@@ -19,6 +18,7 @@ import {
   AGGREGATOR_URL,
   PROTOCOL_AETERNITY,
 } from '@/constants';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
@@ -39,13 +39,12 @@ export function useNotifications({
   requirePolling = false,
   store,
 }: UseNotificationsOptions) {
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { fetchRespondChallenge } = useAeSdk({ store });
   const { activeAccount } = useAccounts({ store });
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
-
-  const activeNetwork = computed((): INetwork => store.getters.activeNetwork);
   const notificationSettings = computed(
     (): INotificationSetting[] => store.state.notificationSettings,
   );
@@ -84,7 +83,7 @@ export function useNotifications({
     }
 
     try {
-      const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
+      const fetchUrl = `${aeActiveNetworkSettings.value.backendUrl}/notification/user/${activeAccount.value.address}`;
       const responseChallenge = await fetchJson(fetchUrl);
       const respondChallenge = await fetchRespondChallenge(responseChallenge);
       const url = new URL(fetchUrl);
@@ -106,7 +105,7 @@ export function useNotifications({
     if (!ids.length) {
       return;
     }
-    const postToNotificationApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/notification`, { body });
+    const postToNotificationApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/notification`, { body });
     const responseChallenge = await postToNotificationApi({
       ids,
       status,

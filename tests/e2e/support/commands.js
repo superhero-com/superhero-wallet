@@ -114,7 +114,7 @@ Cypress.Commands.add('openTip', () => {
     .should('be.visible');
 });
 
-Cypress.Commands.add('openWithdraw', () => {
+Cypress.Commands.add('openSendModal', () => {
   cy.get('[data-cy=send]').click();
 });
 
@@ -217,40 +217,43 @@ Cypress.Commands.add('openNetworks', () => {
     .urlEquals('/more/settings/networks');
 });
 
-Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
+/**
+ * For the values of the `data-cy` for particular fields please go to `AeternityAdapter`
+ * and look for `testId` within the `networkSettings`.
+ */
+Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl, compilerUrl) => {
   cy.get('[data-cy=network-form]')
     .should('be.visible')
-    .get('[data-cy=network] input')
+    .getInputByTestId('network-name')
     .clear()
-    .type(network)
-    .get('[data-cy=url] input')
+    .type(name)
+    .getInputByTestId('ae-node-url')
     .clear()
-    .type(url)
-    .get('[data-cy=middleware] input')
+    .type(nodeUrl)
+    .getInputByTestId('ae-middleware-url')
     .clear()
-    .type(middleware)
-    .get('[data-cy=compiler] input')
+    .type(middlewareUrl)
+    .getInputByTestId('ae-compiler-url')
     .clear()
-    .type(compiler);
+    .type(compilerUrl);
 });
 
-Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
+Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl, compilerUrl) => {
   cy.get('[data-cy=to-add]')
     .click()
-    .getByTestId('connect')
+    .getByTestId('btn-add-network')
     .should('be.visible')
-    .buttonShouldBeDisabled('[data-cy=connect]')
-    .enterNetworkDetails(network, url, middleware, compiler)
-    .getByTestId('connect')
+    .enterNetworkDetails(name, nodeUrl, middlewareUrl, compilerUrl)
+    .getByTestId('btn-add-network')
     .click()
     .getByTestId('networks')
     .should('be.visible')
-    .get('[data-cy=network-name]')
-    .should('contain', network)
-    .get('[data-cy=network-url]')
-    .should('contain', url)
-    .get('[data-cy=network-middleware]')
-    .should('contain', middleware);
+    .getInputByTestId('network-name')
+    .should('contain', name)
+    .getInputByTestId('ae-node-url')
+    .should('contain', nodeUrl)
+    .getInputByTestId('ae-middleware-url')
+    .should('contain', middlewareUrl);
 });
 
 Cypress.Commands.add('openTransactions', () => {

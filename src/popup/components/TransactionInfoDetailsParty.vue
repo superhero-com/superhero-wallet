@@ -25,7 +25,7 @@
       class="name"
       :class="{ aens: txParty.aens }"
     >
-      {{ txParty.label }}
+      {{ txParty.label || $t('transaction.overview.accountAddress') }}
     </span>
     <CopyText
       v-if="txParty.address"
@@ -45,7 +45,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IAccountOverview } from '../../types';
+import type { IAccountOverview } from '@/types';
+
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -67,8 +68,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .transaction-info-details-party {
   $padding-edge: 4px;

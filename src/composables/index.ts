@@ -11,6 +11,7 @@ export * from './modals';
 export * from './multisigAccounts';
 export * from './multisigAccountCreate';
 export * from './multisigTransactions';
+export * from './networks';
 export * from './notifications';
 export * from './pendingMultisigTransaction';
 export * from './aeSdk';

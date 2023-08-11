@@ -23,10 +23,9 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import type { INetwork } from '@/types';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { truncateAddress } from '@/utils';
-import { useGetter } from '@/composables/vuex';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 import LinkButton from './LinkButton.vue';
@@ -41,13 +40,13 @@ export default defineComponent({
     showExplorerLink: Boolean,
   },
   setup(props) {
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
 
     const truncatedAddress = computed(() => truncateAddress(props.address));
-    const explorerUrl = computed(() => {
-      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
-      return aeScan.prepareUrlForAccount(props.address);
-    });
+    const explorerUrl = computed(
+      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+        .prepareUrlForAccount(props.address),
+    );
 
     return {
       truncatedAddress,

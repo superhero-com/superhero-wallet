@@ -4,10 +4,10 @@ import { STUB_ACCOUNT } from '../../../src/constants/stubs';
 const recipientAddress = 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4';
 const amount = 0.1;
 
-describe('Test cases for Withdraw Page', () => {
-  it('Opens Withdraw page, uses scan button, validates entered amount, reviews and sends ', () => {
+describe('Test cases for Send Modal', () => {
+  it('Opens Send Modal, uses scan button, validates entered amount, reviews and sends', () => {
     cy.login()
-      .openWithdraw()
+      .openSendModal()
 
       .get('[data-cy=scan-button]')
       .click()
@@ -69,6 +69,7 @@ describe('Test cases for Withdraw Page', () => {
       .click()
       .get('[data-cy=review-recipient] > .value')
       .should('contain', recipientAddress)
+
       .get('[data-cy=next-step-button]')
       .click()
       .get('[data-cy=pending-txs]')

@@ -13,9 +13,12 @@ import {
   useModals,
 } from '@/composables';
 import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { tg } from './languages';
 
 export default (store) => {
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
+
   const {
     nodeNetworkId,
     getAeSdk,
@@ -27,7 +30,7 @@ export default (store) => {
     getMiddleware,
     getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
-  } = useMiddleware({ store });
+  } = useMiddleware();
 
   const { openDefaultModal } = useModals();
 
@@ -182,20 +185,20 @@ export default (store) => {
         }
       },
       async setDefaults(
-        { rootGetters: { activeNetwork }, commit },
+        { commit },
       ) {
         await Promise.all(aeAccounts.value.map(async ({ address }) => {
           const response = await fetchJson(
-            `${activeNetwork.backendUrl}/profile/${address}`,
+            `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
           ).catch(() => {});
           commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
       async setDefault(
-        { commit, rootGetters: { activeNetwork } },
+        { commit },
         { name, address },
       ) {
-        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+        const response = await postJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`, {
           body: {
             preferredChainName: name,
           },
@@ -203,7 +206,7 @@ export default (store) => {
 
         const respondChallenge = await fetchRespondChallenge(response);
 
-        await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+        await postJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`, {
           body: respondChallenge,
         });
         commit('setDefault', { name, address });
@@ -218,10 +221,9 @@ export default (store) => {
         return '';
       },
       async setPreferred({
-        rootGetters: { activeNetwork },
         commit,
       }, address) {
-        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
+        const response = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`).catch(() => {});
         if (response?.preferredChainName) {
           commit('setPreferred', { address, name: response?.preferredChainName });
         } else {

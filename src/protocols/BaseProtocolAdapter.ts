@@ -1,10 +1,18 @@
 import BigNumber from 'bignumber.js';
-import type { ICoin, IHdWalletAccount } from '@/types';
+import type {
+  AdapterNetworkSettingList,
+  ICoin,
+  IHdWalletAccount,
+  INetworkProtocolSettings,
+  NetworkTypeDefault,
+} from '@/types';
 
 /**
  *  Represents common attributes and behavior of a protocol
  */
 export abstract class BaseProtocolAdapter {
+  abstract protocolName: string;
+
   abstract getCoinSymbol(getShort: boolean): string;
 
   abstract getCoinGeckoCoinId(): string;
@@ -15,6 +23,17 @@ export abstract class BaseProtocolAdapter {
     marketData: any,
     convertedBalance?: number | BigNumber
   ): ICoin;
+
+  /**
+   * Get settings used to generate network settings form for this protocol.
+   */
+  abstract getNetworkSettings(): AdapterNetworkSettingList;
+
+  /**
+   * This function allows to obtain data that will be passed as the default values
+   * when setting up new networks. Then users can override them.
+   */
+  abstract getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings;
 
   abstract getBalance(address: string): Promise<string>;
 
