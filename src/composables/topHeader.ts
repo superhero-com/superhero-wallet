@@ -1,11 +1,8 @@
 import { computed, ref } from 'vue';
-import {
-  createNetworkWatcher,
-  createPollingBasedOnMountedComponents,
-} from './composablesHelpers';
+import type { ITopHeader, IDefaultComposableOptions } from '@/types';
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
-
-import type { ITopHeader, IDefaultComposableOptions } from '../types';
+import { createNetworkWatcher } from './networks';
 
 const POLLING_INTERVAL = 30000;
 
@@ -31,7 +28,7 @@ export function useTopHeaderData({ store }: IDefaultComposableOptions) {
     return topBlockHeight.value;
   }
 
-  onNetworkChange(store, () => updateTopHeaderData());
+  onNetworkChange(() => updateTopHeaderData());
 
   initPollingWatcher(() => updateTopHeaderData());
 

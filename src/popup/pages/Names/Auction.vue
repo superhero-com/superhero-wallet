@@ -52,7 +52,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getMiddleware } = useMiddleware({ store });
+    const { getMiddleware } = useMiddleware();
     const { isAppActive } = useUi();
 
     const loading = ref(true);

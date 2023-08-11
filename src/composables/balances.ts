@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { isEmpty, mapValues } from 'lodash-es';
+import { mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
   Balance,
@@ -10,11 +10,11 @@ import { handleUnknownError, isNotFoundError } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
-  createNetworkWatcher,
   createPollingBasedOnMountedComponents,
-  createStorageRef,
+  useStorageRef,
 } from './composablesHelpers';
 import { useAccounts } from './accounts';
+import { createNetworkWatcher } from './networks';
 
 type Balances = Record<string, Balance>;
 
@@ -23,8 +23,8 @@ const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 const { onNetworkChange } = createNetworkWatcher();
-const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
-  scopedToNetwork: true,
+
+const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
   serializer: {
     read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
     write: (val) => mapValues(val, (balance) => balance.toFixed()),
@@ -37,8 +37,6 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { activeAccount, accounts } = useAccounts({ store });
-
-  const balances = useStorageRef(store);
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
   const balancesTotal = computed(
@@ -74,10 +72,8 @@ export function useBalances({ store }: IDefaultComposableOptions) {
     );
   }
 
-  onNetworkChange(store, () => {
-    if (isEmpty(balances.value)) {
-      updateBalances();
-    }
+  onNetworkChange(() => {
+    updateBalances();
   });
 
   initPollingWatcher(() => updateBalances());

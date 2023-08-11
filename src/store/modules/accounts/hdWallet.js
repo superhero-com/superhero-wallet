@@ -6,7 +6,7 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useAccounts, useModals } from '@/composables';
+import { useAccounts, useAeSdk, useModals } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -86,38 +86,40 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', { data });
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction(context, {
       txBase64,
       options: { modal = true, app = null },
     }) {
+      const { nodeNetworkId } = useAeSdk({ store: context });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { txBase64, app });
+        await context.dispatch('confirmTxSigning', { txBase64, app });
       }
-      const signature = await dispatch(
+      const signature = await context.dispatch(
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
-            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(nodeNetworkId.value),
             Buffer.from(encodedTx),
           ]),
         },
       );
       return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
+    async signTransactionFromAccount(context, {
       txBase64,
       options: { modal = true, app = null, fromAccount },
     }) {
+      const { nodeNetworkId } = useAeSdk({ store: context });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { txBase64, app });
+        await context.dispatch('confirmTxSigning', { txBase64, app });
       }
-      const signature = await dispatch(
+      const signature = await context.dispatch(
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
-            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(nodeNetworkId.value),
             Buffer.from(encodedTx),
           ]),
           options: { fromAccount },

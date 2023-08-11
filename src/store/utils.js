@@ -1,7 +1,5 @@
 export default ({
   migrations,
-  current,
-  userNetworks,
   names,
   languages,
   backedUpSeed,
@@ -15,8 +13,6 @@ export default ({
   hiddenCards,
 }) => ({
   migrations,
-  current,
-  userNetworks,
   names,
   languages,
   backedUpSeed,

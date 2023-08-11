@@ -10,8 +10,8 @@ const store = new Vuex.Store({
   getters: {
     'names/getDefault': () => (address) => `placeholder name for ${address}`,
     wallet: getters.wallet,
-    networks: getters.networks,
-    activeNetwork: getters.activeNetwork,
+    accounts: getters.accounts,
+    account: getters.account,
   },
 });
 

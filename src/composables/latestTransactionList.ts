@@ -11,10 +11,10 @@ import { handleUnknownError, pipe, sortTransactionsByDate } from '@/utils';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
-import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
 import { useTransactionList } from './transactionList';
 import { useAeSdk } from './aeSdk';
+import { createNetworkWatcher } from './networks';
 
 const isTransactionListLoading = ref(false);
 
@@ -113,7 +113,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     { deep: true },
   );
 
-  onNetworkChange(store, () => {
+  onNetworkChange(() => {
     updateTransactionListData();
   });
 

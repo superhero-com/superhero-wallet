@@ -1,5 +1,5 @@
 import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
-import { useAccounts, useModals } from '../../composables';
+import { useAccounts, useModals, useNetworks } from '@/composables';
 import { tg } from '../plugins/languages';
 
 export default {
@@ -15,13 +15,14 @@ export default {
   },
   actions: {
     async claim({ rootGetters, rootState }, secretKey) {
+      const { activeNetwork } = useNetworks();
       const { activeAccount } = useAccounts({
         store: { state: rootState, getters: rootGetters },
       });
       const aeSdk = new AeSdk({
         nodes: [{
-          name: rootGetters.activeNetwork.name,
-          instance: new Node(rootGetters.activeNetwork.url),
+          name: activeNetwork.value.name,
+          instance: new Node(activeNetwork.value.protocols.aeternity.nodeUrl),
         }],
         accounts: [new MemoryAccount(secretKey)],
       });

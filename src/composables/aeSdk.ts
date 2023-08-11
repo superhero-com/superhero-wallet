@@ -37,18 +37,22 @@ import {
   AE_NETWORK_TESTNET_ID,
   DEX_CONTRACTS,
 } from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
 
 let aeSdk: AeSdkSuperhero;
-let dryAeSdk: AeSdk;
 let aeSdkBlocked = false;
+let storedNetworkName: string;
 const isAeSdkReady = ref(false);
-let aeSdkCurrentNetwork: INetwork;
 const nodeNetworkId = ref<string>();
 const aeppInfo: Record<string, any> = {};
 
+let dryAeSdk: AeSdk;
+let dryAeSdkCurrentNodeNetworkId: string;
+
 export function useAeSdk({ store }: IDefaultComposableOptions) {
+  const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
   const { isLoggedIn, activeAccount } = useAccounts({ store });
   const { openModal } = useModals();
 
@@ -58,7 +62,6 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
   const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
   const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
   const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
   const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
@@ -96,13 +99,13 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       watchUntilTruthy(() => store.state.isRestored),
       watchUntilTruthy(isLoggedIn),
     ]);
-    aeSdkCurrentNetwork = activeNetwork.value;
-    const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+    storedNetworkName = activeNetworkName.value;
+    const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
     aeSdk = new AeSdkSuperhero(store, {
       name: 'Superhero',
       nodes: [{
-        name: activeNetwork.value.name,
+        name: activeNetworkName.value,
         instance: nodeInstance!,
       }],
       id: 'Superhero Wallet',
@@ -193,20 +196,22 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    */
   async function getDryAeSdk(): Promise<AeSdk> {
     if (!dryAeSdk) {
-      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
       dryAeSdk = new AeSdk({
         nodes: [{
-          name: activeNetwork.value.name,
+          name: activeNetworkName.value,
           instance: nodeInstance!,
         }],
       });
+      dryAeSdkCurrentNodeNetworkId = await nodeInstance?.getNetworkId()!;
       return dryAeSdk;
     }
     const networkId = await dryAeSdk.api.getNetworkId();
-    if (activeNetwork.value.networkId !== networkId) {
-      dryAeSdk.pool.delete(aeSdkCurrentNetwork.name);
-      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-      dryAeSdk.addNode(activeNetwork.value.name, nodeInstance!, true);
+    if (dryAeSdkCurrentNodeNetworkId !== networkId) {
+      dryAeSdk.pool.delete(storedNetworkName);
+      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
+      dryAeSdk.addNode(activeNetworkName.value, nodeInstance!, true);
+      dryAeSdkCurrentNodeNetworkId = networkId;
     }
     return dryAeSdk;
   }
@@ -227,7 +232,11 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
     aeSdk.pool.delete(oldNetwork.name);
-    aeSdk.addNode(newNetwork.name, (await createNodeInstance(newNetwork.url))!, true);
+    aeSdk.addNode(
+      newNetwork.name,
+      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
+      true,
+    );
   }
 
   return {

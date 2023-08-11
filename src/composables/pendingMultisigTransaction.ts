@@ -25,7 +25,7 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
-  const { getMiddleware } = useMiddleware({ store });
+  const { getMiddleware } = useMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });

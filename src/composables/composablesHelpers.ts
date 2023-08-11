@@ -1,57 +1,25 @@
 import {
-  computed,
   getCurrentInstance,
   onBeforeUnmount,
   onMounted,
   Ref,
   ref,
+  watch,
 } from 'vue';
-import { Store } from 'vuex';
 import {
   excludeFalsy,
   getLocalStorageItem,
   setLocalStorageItem,
-  watchUntilTruthy,
 } from '@/utils';
-import { INetwork } from '../types';
 import { useConnection } from './connection';
 import { useUi } from './ui';
 
-/**
- * Monitor the network state and compare it with stored custom state to know when
- * user changes the network.
- */
-export function createNetworkWatcher() {
-  let currentNetwork: INetwork;
-
-  return {
-    onNetworkChange: async (store: Store<any>, callback: () => void) => {
-      await watchUntilTruthy(() => store.state.isRestored);
-      const activeNetwork = store.getters.activeNetwork as INetwork;
-
-      if (!currentNetwork) {
-        currentNetwork = activeNetwork;
-      } else if (currentNetwork.name !== activeNetwork.name) {
-        currentNetwork = activeNetwork;
-        callback();
-      }
-    },
-  };
-}
-
 interface ICreateStorageRefOptions<T> {
-  /**
-   * When set to true the state will be synced for each network separately
-   * by using networkId as a postfix for the storage key.
-   */
-  scopedToNetwork?: boolean;
   /**
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
   serializer?: {
-    // eslint-disable-next-line no-unused-vars
     read: (v: T) => any,
-    // eslint-disable-next-line no-unused-vars
     write: (v: T) => any,
   };
 }
@@ -61,60 +29,28 @@ interface ICreateStorageRefOptions<T> {
  * and scoped to active network.
  * Inspired by `useStorage`: https://vueuse.org/core/useStorage/
  */
-export function createStorageRef<T = string | object | any[]>(
+export function useStorageRef<T = string | object | any[]>(
   initialState: T,
   keys: string | string[],
-  { scopedToNetwork, serializer }: ICreateStorageRefOptions<T> = {},
+  { serializer }: ICreateStorageRefOptions<T> = {},
 ) {
-  let currentNetworkId: string | undefined;
-  let initialStateRestored = false;
+  let isRestored = false;
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136
+  const storageKeys: string[] = [...Array.isArray(keys) ? keys : [keys]].filter(excludeFalsy);
 
-  return {
-    /**
-     * Create computed property that acts like a Ref.
-     * TODO We are passing the `store` here to avoid dependency cycle. Fix this after removing Vuex.
-     */
-    useStorageRef: (store?: Store<any>) => {
-      if (scopedToNetwork && !store) {
-        throw new Error('Argument "store" is required for the "useStorageRef" function when using scoped storage.');
-      }
+  watch(state, (val) => {
+    setLocalStorageItem(storageKeys, serializer?.write(val) || val);
+  }, { deep: true });
 
-      const activeNetworkId = (scopedToNetwork)
-        ? (store!.getters.activeNetwork as INetwork).networkId
-        : undefined;
-      const storageKeys: string[] = [
-        ...Array.isArray(keys) ? keys : [keys],
-        activeNetworkId,
-      ].filter(excludeFalsy);
+  if (!isRestored) {
+    const restoredValue = getLocalStorageItem<T | null>(storageKeys);
+    state.value = (restoredValue)
+      ? serializer?.read(restoredValue) || restoredValue
+      : initialState;
+    isRestored = true;
+  }
 
-      function restoreStateFromStorage() {
-        currentNetworkId = activeNetworkId;
-        const restoredValue = getLocalStorageItem<T | null>(storageKeys);
-        state.value = (restoredValue)
-          ? serializer?.read(restoredValue) || restoredValue
-          : initialState;
-      }
-
-      if (!initialStateRestored) {
-        restoreStateFromStorage();
-        initialStateRestored = true;
-      }
-
-      return computed({
-        get: () => {
-          if (scopedToNetwork && currentNetworkId !== activeNetworkId) {
-            restoreStateFromStorage();
-          }
-          return state.value;
-        },
-        set: (val) => {
-          state.value = val;
-          setLocalStorageItem(storageKeys, serializer?.write(val) || val);
-        },
-      });
-    },
-  };
+  return state;
 }
 
 /**

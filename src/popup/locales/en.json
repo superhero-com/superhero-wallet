@@ -579,7 +579,6 @@
       "backToAuctions": "Back to auctions",
       "bidding": "Bidding",
       "bidOn": "Bid on",
-      "requiredField": "This field is required",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time",
       "ending-height": "Ending height"
@@ -1068,7 +1067,6 @@
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
       "thirdPartyDetails": "Network details below have been provided by a third party. Make sure you trust the network provider to avoid malicious behavior resulting in lose of funds.",
-      "url": "URL",
       "delete": "Delete",
       "middleware": "Middleware",
       "allNetworks": "Your networks",
@@ -1092,7 +1090,8 @@
         "networkExists": "Network with this name exist",
         "invalidHostname": "Invalid hostname",
         "enterName": "Enter network name"
-      }
+      },
+      "confirmDelete": "Are you sure you want to delete this custom network?"
     },
     "donate-error": {
       "error-report": "Error Report:",
@@ -1144,6 +1143,7 @@
     }
   },
   "validation": {
+    "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
     "required": "This field is required",
     "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",

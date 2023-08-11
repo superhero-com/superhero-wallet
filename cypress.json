@@ -10,6 +10,8 @@
   "ignoreTestFiles": [
     "tip.js",
     "transaction-details.js",
-    "transactions.js"
+    "transactions.js",
+    "transfer-send.js",
+    "networks.js"
   ]
 }

@@ -4,6 +4,7 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
+import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
@@ -143,6 +144,9 @@ export default (store) => {
     : isAddressValid(value) || isUrlValid(value)));
 
   defineRule('invalid_hostname', (value) => {
+    if (!value) {
+      return true;
+    }
     try {
       const _url = new URL(value);
       return !!_url.hostname;
@@ -160,11 +164,14 @@ export default (store) => {
     computesRequired: true,
   });
 
-  defineRule('network_exists', (name, [index, networks]) => {
-    const networkWithSameName = networks[name];
+  defineRule('network_exists', (name, customNetworks) => {
+    const networkWithSameName = customNetworks[name];
     return (
-      !networkWithSameName
-      || (index !== undefined && networkWithSameName?.index === index)
+      ![NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET].includes(name)
+      && (
+        !networkWithSameName
+        || (index !== undefined && networkWithSameName?.index === index)
+      )
     );
   });
 };

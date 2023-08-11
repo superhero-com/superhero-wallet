@@ -167,6 +167,7 @@ import {
   isTxFunctionDexMaxSpent,
   isTxFunctionDexMinReceived,
 } from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -206,6 +207,8 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { t } = useI18n();
+
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
     const { activeAccount } = useAccounts({ store });
 
@@ -231,7 +234,6 @@ export default defineComponent({
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
-    const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const transactionWrapped = computed(
@@ -399,13 +401,13 @@ export default defineComponent({
           const [
             { bytecode },
           ] = await Promise.all([
-            fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.tx.contractId}/code`),
+            fetchJson(`${aeActiveNetworkSettings.value.nodeUrl}/v3/contracts/${popupProps.value.tx.contractId}/code`),
             // aeSdk is needed to establish the `networkId` and the dex contracts for the network
             getAeSdk(),
           ]);
 
           const txParams: ITx = await postJson(
-            `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+            `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
             { body: { bytecode, calldata: popupProps.value.tx.callData } },
           );
           txFunction.value = txParams.function as TxFunctionRaw;

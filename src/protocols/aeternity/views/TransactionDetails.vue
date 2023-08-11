@@ -252,7 +252,7 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
-import type { INetwork, ITransaction, TxFunctionRaw } from '@/types';
+import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
   useAccounts,
   useMiddleware,
@@ -278,6 +278,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionOverview from '@/popup/components/TransactionOverview.vue';
@@ -327,12 +328,13 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    const hash = route.params.hash as string;
-    const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
-
-    const { getMiddleware } = useMiddleware({ store });
+    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    const { getMiddleware } = useMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
+
+    const hash = route.params.hash as string;
+    const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
 
     const externalAddress = computed((): Encoded.AccountAddress => (
       transactionOwner
@@ -367,7 +369,6 @@ export default defineComponent({
 
     const getTxSymbol = computed(() => store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
-    const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const contractId = computed(() => transaction.value?.tx.contractId);
@@ -376,7 +377,8 @@ export default defineComponent({
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
     const explorerUrl = computed(
-      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(hash),
+      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+        .prepareUrlByHash(hash),
     );
 
     const gasPrice = computed(() => {
@@ -452,7 +454,7 @@ export default defineComponent({
       if (outerTxTag.value === Tag.GaMetaTx) {
         try {
           const { contract_id: contractIdForMultisig = null } = await fetchJson(
-            `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
+            `${aeActiveNetworkSettings.value.nodeUrl}/v3/accounts/${transaction.value?.tx?.gaId}`,
           );
           multisigContractId.value = contractIdForMultisig;
         } catch (e) {

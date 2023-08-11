@@ -4,24 +4,72 @@ import {
   getHdWalletAccountFromSeed,
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
+
 import type {
-  IHdWalletAccount,
+  AdapterNetworkSettingList,
   ICoin,
+  IHdWalletAccount,
   MarketData,
+  NetworkTypeDefault,
 } from '@/types';
+import {
+  MAXIMUM_ACCOUNTS_TO_DISCOVER,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
-import { MAXIMUM_ACCOUNTS_TO_DISCOVER, PROTOCOL_AETERNITY } from '@/constants';
+import { tg } from '@/store/plugins/languages';
+
+import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
   AE_COIN_NAME,
   AE_COIN_PRECISION,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
+  AE_NETWORK_DEFAULT_ENV_SETTINGS,
+  AE_NETWORK_DEFAULT_SETTINGS,
+  AE_PROTOCOL_NAME,
   AE_SYMBOL,
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
 
 export class AeternityAdapter extends BaseProtocolAdapter {
+  protocolName = AE_PROTOCOL_NAME;
+
+  networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
+    {
+      key: 'nodeUrl',
+      testId: 'ae-node-url',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.nodeUrl,
+      getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
+      getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
+    {
+      key: 'middlewareUrl',
+      testId: 'ae-middleware-url',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.middlewareUrl,
+      getPlaceholder: () => tg('pages.network.networkMiddlewarePlaceholder'),
+      getLabel: () => tg('pages.network.networkMiddlewareLabel'),
+    },
+    {
+      key: 'compilerUrl',
+      testId: 'ae-compiler-url',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.compilerUrl,
+      getPlaceholder: () => tg('pages.network.networkCompilerPlaceholder'),
+      getLabel: () => tg('pages.network.networkCompilerLabel'),
+    },
+    {
+      key: 'backendUrl',
+      required: true,
+      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.backendUrl,
+      getPlaceholder: () => tg('pages.network.backendUrlPlaceholder'),
+      getLabel: () => tg('pages.network.backendUrlLabel'),
+    },
+  ];
+
   override getCoinSymbol(getShort = false) {
     return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
   }
@@ -47,6 +95,14 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       symbol: AE_SYMBOL,
       convertedBalance,
     };
+  }
+
+  getNetworkSettings() {
+    return this.networkSettings;
+  }
+
+  getNetworkTypeDefaultValues(networkType: NetworkTypeDefault) {
+    return AE_NETWORK_DEFAULT_SETTINGS[networkType] as any;
   }
 
   override async getBalance(address: Encoded.AccountAddress): Promise<string> {

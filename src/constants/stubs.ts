@@ -18,7 +18,6 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import {
-  NETWORK_TESTNET,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_MESSAGE_SIGN,
@@ -32,6 +31,8 @@ export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const STUB_NONCE = 10000;
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
+export const STUB_TIPPING_CONTRACT_ID_V1 = 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd';
+export const STUB_TIPPING_CONTRACT_ID_V2 = 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu';
 
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
@@ -199,7 +200,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV1,
+      contractId: STUB_TIPPING_CONTRACT_ID_V1,
       fee: 183820000000000,
       function: 'tip',
       type: 'ContractCallTx',
@@ -215,7 +216,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV1,
+      contractId: STUB_TIPPING_CONTRACT_ID_V1,
       fee: 182200000000000,
       function: 'retip',
       type: 'ContractCallTx',
@@ -243,7 +244,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2!,
+      contractId: STUB_TIPPING_CONTRACT_ID_V2,
       fee: 183720000000000,
       function: 'tip_token',
       type: 'ContractCallTx',
@@ -267,7 +268,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2!,
+      contractId: STUB_TIPPING_CONTRACT_ID_V2,
       fee: 183000000000000,
       function: 'retip_token',
       type: 'ContractCallTx',
@@ -425,7 +426,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     tx: {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV1,
+      contractId: STUB_TIPPING_CONTRACT_ID_V1,
       function: 'tip',
       type: 'ContractCallTx',
       selectedTokenContractId: AE_CONTRACT_ID,
@@ -438,7 +439,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     tx: {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2,
+      contractId: STUB_TIPPING_CONTRACT_ID_V2,
       function: 'tip',
       type: 'ContractCallTx',
       selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,

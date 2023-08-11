@@ -4,25 +4,52 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
 import { payments, networks } from 'bitcoinjs-lib';
 import type {
-  IHdWalletAccount,
+  AdapterNetworkSettingList,
   ICoin,
+  IHdWalletAccount,
+  INetworkProtocolSettings,
   MarketData,
+  NetworkTypeDefault,
 } from '@/types';
+import {
+  MAXIMUM_ACCOUNTS_TO_DISCOVER,
+  PROTOCOL_BITCOIN,
+} from '@/constants';
+import { tg } from '@/store/plugins/languages';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
-import { MAXIMUM_ACCOUNTS_TO_DISCOVER, PROTOCOL_BITCOIN } from '@/constants';
 import {
   BTC_COIN_NAME,
   BTC_COIN_PRECISION,
+  BTC_NETWORK_DEFAULT_SETTINGS,
   BTC_COINGECKO_COIN_ID,
   BTC_CONTRACT_ID,
   BTC_SYMBOL,
 } from '@/protocols/bitcoin/config';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
+  protocolName = 'Bitcoin';
+
   bip32 = BIP32Factory(ecc);
+
+  networkSettings: AdapterNetworkSettingList = [
+    {
+      key: 'nodeUrl',
+      testId: 'url',
+      getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
+      getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
+  ];
 
   override getCoinSymbol() {
     return BTC_SYMBOL;
+  }
+
+  getNetworkSettings() {
+    return this.networkSettings;
+  }
+
+  getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+    return BTC_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
   override getCoinGeckoCoinId() {

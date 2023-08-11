@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('pages.popupMessageSign.title')"
       :sender="sender"
-      :recipient="activeAccountExtended"
+      :recipient="activeAccount"
     />
 
     <div
@@ -67,7 +67,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { activeAccountExtended } = useAccounts({ store });
+    const { activeAccount } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
 
     function cancel() {
@@ -79,7 +79,7 @@ export default defineComponent({
     });
 
     return {
-      activeAccountExtended,
+      activeAccount,
       popupProps,
       sender,
       cancel,
@@ -89,8 +89,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .message-sign {
   .transaction-info {

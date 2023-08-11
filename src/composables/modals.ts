@@ -4,7 +4,6 @@ import {
   nextTick,
   ref,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
 import type {
   ProtocolView,
   RejectCallback,
@@ -14,6 +13,7 @@ import type {
 import {
   IN_FRAME,
   IS_WEB,
+  MODAL_CONFIRM,
   MODAL_DEFAULT,
   MODAL_ERROR_LOG,
 } from '@/constants';
@@ -158,13 +158,19 @@ export function useModals() {
   }
 
   function openDefaultModal(options: {
-    title?: string | TranslateResult;
-    msg?: string | TranslateResult;
+    title?: string;
+    msg?: string;
     icon?: StatusIconType;
-    buttonMessage?: string | TranslateResult;
+    buttonMessage?: string;
     textCenter?: boolean;
   }) {
     return openModal(MODAL_DEFAULT, options);
+  }
+
+  function openConfirmModal(options: {
+    msg?: string;
+  }) {
+    return openModal(MODAL_CONFIRM, options);
   }
 
   function openErrorModal(entry: Record<string, any>) {
@@ -176,6 +182,7 @@ export function useModals() {
     registerModal,
     openModal,
     openDefaultModal,
+    openConfirmModal,
     openErrorModal,
     closeModalByKey,
   };

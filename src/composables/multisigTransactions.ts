@@ -1,4 +1,3 @@
-import { computed } from 'vue';
 import {
   AccountGeneralized,
   hash,
@@ -17,7 +16,6 @@ import type {
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   TxFunctionMultisig,
-  INetwork,
   IRawMultisigTx,
 } from '@/types';
 import {
@@ -26,6 +24,7 @@ import {
   postJson,
 } from '@/utils';
 import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
@@ -33,10 +32,9 @@ import { useTopHeaderData } from './topHeader';
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
-  const { getDryAeSdk, getAeSdk } = useAeSdk({ store });
+  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk({ store });
   const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
-
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   async function buildSpendTx(
     senderId: Encoded.AccountAddress,
@@ -61,7 +59,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @returns returns transaction if exists or null
    */
   async function fetchTransactionByHash(txHash: string): Promise<IRawMultisigTx | null> {
-    return fetchJson(`${activeNetwork.value.multisigBackendUrl}/tx/${txHash}`)
+    return fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx/${txHash}`)
       .then((res) => res)
       .catch(handleUnknownError);
   }
@@ -97,7 +95,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   }
 
   async function postSpendTx(tx: string, txHash: string) {
-    return postJson(`${activeNetwork.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
+    return postJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
   }
 
   async function proposeTx(spendTx: Encoded.Transaction, contractId: Encoded.ContractAddress) {
@@ -105,7 +103,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
     const spendTxHash = new Uint8Array(hash(
-      Buffer.concat([Buffer.from(activeNetwork.value.networkId), decode(spendTx)]),
+      Buffer.concat([Buffer.from(nodeNetworkId.value!), decode(spendTx)]),
     ));
 
     const gaContractRpc = await aeSdk.initializeContract({

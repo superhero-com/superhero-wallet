@@ -1,4 +1,7 @@
-import { NETWORK_TESTNET } from '../../../src/constants';
+import { NETWORK_NAME_MAINNET } from '../../../src/constants/common';
+import { AE_NETWORK_DEFAULT_SETTINGS } from '../../../src/protocols/aeternity/config';
+
+const aeNetworkSettingsTestnet = AE_NETWORK_DEFAULT_SETTINGS.testnet;
 
 describe('Test cases for networks page', () => {
   it('Opens network page, cancels/adds network, can not add network with default name/invalid url', () => {
@@ -7,27 +10,24 @@ describe('Test cases for networks page', () => {
       .getByTestId('networks')
       .should('be.visible')
       .getByTestId('network-name')
-      .should('contain', NETWORK_TESTNET.name)
-      .getByTestId('network-url')
-      .should('contain', NETWORK_TESTNET.url)
-      .getByTestId('network-middleware')
-      .should('contain', NETWORK_TESTNET.middlewareUrl)
+      .should('contain', NETWORK_NAME_MAINNET)
 
+      // Test if it possible to add already existing default network (mainnet)
       .getByTestId('to-add')
       .click()
       .enterNetworkDetails(
-        NETWORK_TESTNET.name,
-        NETWORK_TESTNET.url,
-        NETWORK_TESTNET.middlewareUrl,
-        NETWORK_TESTNET.compilerUrl,
+        NETWORK_NAME_MAINNET,
+        aeNetworkSettingsTestnet.nodeUrl,
+        aeNetworkSettingsTestnet.middlewareUrl,
+        aeNetworkSettingsTestnet.compilerUrl,
       )
-      .getByTestId('connect')
-      .buttonShouldBeDisabled('[data-cy=connect]')
+      .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')
       .should('exist')
 
+      // Test if it's possible to add network with invalid URLs
       .enterNetworkDetails('test', 'test', 'test', 'test')
-      .buttonShouldBeDisabled('[data-cy=connect]')
+      .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')
       .should('exist')
 
@@ -42,31 +42,31 @@ describe('Test cases for networks page', () => {
       .openNetworks()
       .addNetwork(
         'NewNetwork',
-        NETWORK_TESTNET.url,
-        NETWORK_TESTNET.middlewareUrl,
-        NETWORK_TESTNET.compilerUrl,
+        aeNetworkSettingsTestnet.nodeUrl,
+        aeNetworkSettingsTestnet.middlewareUrl,
+        aeNetworkSettingsTestnet.compilerUrl,
       )
       .getByTestId('network-edit')
       .should('be.visible')
       .click()
-      .getInputByTestId('network')
+      .getInputByTestId('network-name')
       .should('have.value', 'NewNetwork')
-      .getInputByTestId('url')
-      .should('have.value', NETWORK_TESTNET.url)
+      .getInputByTestId('ae-node-url')
+      .should('have.value', aeNetworkSettingsTestnet.url)
       .clear()
-      .type(NETWORK_TESTNET.url)
-      .getInputByTestId('middleware')
-      .should('have.value', NETWORK_TESTNET.middlewareUrl)
+      .type(aeNetworkSettingsTestnet.url)
+      .getInputByTestId('ae-middleware-url')
+      .should('have.value', aeNetworkSettingsTestnet.middlewareUrl)
       .clear()
-      .type(NETWORK_TESTNET.middlewareUrl)
-      .getByTestId('connect')
+      .type(aeNetworkSettingsTestnet.middlewareUrl)
+      .getByTestId('btn-add-network')
       .click()
       .getByTestId('network-url')
       .eq(-1)
-      .should('contain', NETWORK_TESTNET.url)
+      .should('contain', aeNetworkSettingsTestnet.nodeUrl)
       .getByTestId('network-middleware')
       .eq(-1)
-      .should('contain', NETWORK_TESTNET.middlewareUrl)
+      .should('contain', aeNetworkSettingsTestnet.middlewareUrl)
       .goBack()
       .goBack()
       .goBack()
@@ -78,11 +78,11 @@ describe('Test cases for networks page', () => {
       .click()
       .enterNetworkDetails(
         'NewNetwork',
-        NETWORK_TESTNET.url,
-        NETWORK_TESTNET.middlewareUrl,
-        NETWORK_TESTNET.compilerUrl,
+        aeNetworkSettingsTestnet.nodeUrl,
+        aeNetworkSettingsTestnet.middlewareUrl,
+        aeNetworkSettingsTestnet.compilerUrl,
       )
-      .buttonShouldBeDisabled('[data-cy=connect]')
+      .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')
       .should('exist')
       .getByTestId('cancel')

@@ -1,6 +1,8 @@
+import { watch } from 'vue';
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
 
+import { PROTOCOL_AETERNITY } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
@@ -9,13 +11,21 @@ import {
   handleUnknownError,
   toShiftedBigNumber,
 } from '@/utils';
-import { useAccounts, useMiddleware, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useMiddleware,
+  useAeSdk,
+  useNetworks,
+  useTippingContracts,
+} from '@/composables';
 import { calculateSupplyAmount } from '@/protocols/aeternity/helpers';
 
 export default (store) => {
+  const { activeNetwork } = useNetworks();
   const { getAeSdk } = useAeSdk({ store });
-  const { fetchFromMiddleware } = useMiddleware({ store });
+  const { fetchFromMiddleware } = useMiddleware();
   const { aeAccounts, activeAccount } = useAccounts({ store });
+  const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -89,7 +99,7 @@ export default (store) => {
         commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
-        { rootGetters: { activeNetwork } },
+        _,
         [contractId, amount],
       ) {
         const aeSdk = await getAeSdk();
@@ -102,7 +112,7 @@ export default (store) => {
         });
         const { decodedResult } = await tokenContract.allowance({
           from_account: activeAccount.value.address,
-          for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
+          for_account: tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'),
         });
         const allowanceAmount = decodedResult !== undefined
           ? new BigNumber(decodedResult)
@@ -112,7 +122,7 @@ export default (store) => {
           : toShiftedBigNumber(amount, selectedToken.decimals).toFixed();
         return tokenContract.methods[
           decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
-        ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
+        ](tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
         { state: { availableTokens } },
@@ -185,12 +195,12 @@ export default (store) => {
     },
   });
 
-  store.watch(
-    (state) => state.current.network,
+  watch(
+    activeNetwork,
     async (network, oldNetwork) => {
-      const activeNetwork = store.getters.networks[network];
-      const oldActiveNetwork = store.getters.networks[oldNetwork];
-      if (activeNetwork?.middlewareUrl === oldActiveNetwork?.middlewareUrl) {
+      const newMiddlewareUrl = network.protocols[PROTOCOL_AETERNITY].middlewareUrl;
+      const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOL_AETERNITY]?.middlewareUrl;
+      if (newMiddlewareUrl === oldMiddlewareUrl) {
         return;
       }
       store.commit('fungibleTokens/resetTokensAndTransactions');

@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/protocols/aeternity/views/TransactionDetails.vue';
 import { STUB_ACCOUNT } from '../../src/constants/stubs';
-import { AE_NETWORK_TESTNET_ID, AE_SYMBOL } from '../../src/protocols/aeternity/config';
+import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -135,7 +135,6 @@ function mountComponent() {
       getTxAmountTotal: () => () => 1,
       getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTransactionAex9: () => () => true,
-      activeNetwork: () => AE_NETWORK_TESTNET_ID,
       account: () => STUB_ACCOUNT,
       accounts: () => [STUB_ACCOUNT],
       wallet: () => {},

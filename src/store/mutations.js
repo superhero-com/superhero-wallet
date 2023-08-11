@@ -1,18 +1,5 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 export default {
-  switchNetwork(state, payload) {
-    state.current.network = payload;
-  },
-  setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) {
-      state.userNetworks[index] = network;
-    } else {
-      state.userNetworks.push(network);
-    }
-  },
-  deleteUserNetwork(state, index) {
-    state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);
-  },
   setNodeStatus(state, payload) {
     state.nodeStatus = payload;
   },

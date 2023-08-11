@@ -1,15 +1,15 @@
 <template>
-  <div class="network-row">
-    <div
-      class="network-row-inner"
-      :class="{ 'inactive': !isActive }"
+  <div
+    class="network-row"
+    :class="{ 'inactive': !isActive }"
+  >
+    <RadioButton
+      :value="isActive"
+      type="radio"
+      name="activeNetwork"
+      @input="$emit('selectNetwork', network.name)"
     >
-      <RadioButton
-        :value="isActive"
-        type="radio"
-        name="activeNetwork"
-        @input="$emit('selectNetwork', network.name)"
-      >
+      <div class="name-and-actions">
         <p
           class="name"
           data-cy="network-name"
@@ -17,8 +17,8 @@
           {{ network.name }}
         </p>
         <div
-          v-if="network.index !== undefined"
-          class="action-wrapper"
+          v-if="network.type === NETWORK_TYPE_CUSTOM"
+          class="actions"
         >
           <BtnIcon
             size="sm"
@@ -33,38 +33,38 @@
             icon-variant="danger"
             dimmed
             :icon="TrashIcon"
-            @click="deleteNetwork(network.index)"
+            @click="$emit('deleteNetwork', network.name);"
           />
         </div>
-      </RadioButton>
-      <p
-        class="url"
-        data-cy="network-url"
-      >
-        <span class="url-label">
-          {{ $t('pages.network.url') }}
-        </span>
-        {{ network.url }}
-      </p>
-      <p
-        class="url"
-        data-cy="network-middleware"
-      >
-        <span class="url-label">
-          {{ $t('pages.network.middleware') }}
-        </span>
-        {{ network.middlewareUrl }}
-      </p>
-    </div>
+      </div>
+    </RadioButton>
+
+    <table class="network-details">
+      <tbody>
+        <tr
+          v-for="(protocolSettings, protocol) in networkSettingsToDisplay"
+          :key="protocol"
+          class="url"
+        >
+          <td
+            class="url-label"
+            v-text="getProtocolName(protocol)"
+          />
+          <td>
+            {{ protocolSettings.nodeUrl?.replace('https://', '') }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { NETWORK_DEFAULT } from '@/constants';
-import { ROUTE_NETWORK_EDIT } from '../router/routeNames';
-import { useGetter } from '../../composables/vuex';
+import { PropType, computed, defineComponent } from 'vue';
+import type { INetwork, INetworkProtocolSettings, Protocol } from '@/types';
+import { NETWORK_TYPE_CUSTOM } from '@/constants';
+import { ROUTE_NETWORK_EDIT } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import RadioButton from './RadioButton.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -77,47 +77,59 @@ export default defineComponent({
     RadioButton,
   },
   props: {
-    network: {
-      type: Object,
-      required: true,
-    },
+    network: { type: Object as PropType<INetwork>, required: true },
+    isActive: Boolean,
   },
-  setup(props, { emit }) {
-    const store = useStore();
-    const activeNetwork = useGetter('activeNetwork');
+  emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    selectNetwork: (name: string) => undefined,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    deleteNetwork: (name: string) => undefined,
+  },
+  setup(props) {
+    // Filter out the network protocol settings that has no `nodeUrl` default property
+    const networkSettingsToDisplay = computed(
+      () => (Object.keys(props.network.protocols) as Protocol[])
+        .reduce((networks, protocol) => {
+          const settings = props.network.protocols[protocol];
+          if (settings.nodeUrl) {
+            // eslint-disable-next-line no-param-reassign
+            networks[protocol] = settings;
+          }
+          return networks;
+        }, {} as Record<Protocol, INetworkProtocolSettings>),
+    );
 
-    const isActive = computed(() => props.network.name === activeNetwork.value.name);
-
-    async function deleteNetwork(networkIndex: number) {
-      if (networkIndex === activeNetwork.value.index) {
-        emit('selectNetwork', NETWORK_DEFAULT.name);
-      }
-      store.commit('deleteUserNetwork', networkIndex);
+    function getProtocolName(protocol: Protocol) {
+      return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
     return {
+      NETWORK_TYPE_CUSTOM,
+      ROUTE_NETWORK_EDIT,
       PencilIcon,
       TrashIcon,
-      isActive,
-      deleteNetwork,
-      ROUTE_NETWORK_EDIT,
+      networkSettingsToDisplay,
+      getProtocolName,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/typography';
-@use '../../styles/variables';
-@use '../../styles/mixins';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .network-row {
   margin-bottom: 12px;
 
-  .network-row-inner {
-    &.inactive {
-      opacity: 0.5;
-    }
+  &.inactive {
+    opacity: 0.5;
+  }
+
+  .name-and-actions {
+    display: flex;
+    justify-content: space-between;
 
     .name {
       @extend %face-sans-15-medium;
@@ -125,26 +137,31 @@ export default defineComponent({
       margin: 0;
     }
 
-    .url {
-      @extend %face-sans-14-regular;
+    .actions {
+      @include mixins.flex(flex-end, center);
 
-      margin: 0 0 0 26px;
+      gap: 4px;
+      flex: 1;
+    }
+  }
+
+  .network-details {
+    @extend %face-sans-14-regular;
+
+    margin: 0 0 0 26px;
+    border-spacing: 0;
+
+    td {
+      padding: 0;
     }
 
     .url-label {
       @extend %face-sans-14-medium;
 
-      margin-right: 4px;
+      padding-right: 8px;
       opacity: 0.6;
       user-select: none;
     }
-  }
-
-  .action-wrapper {
-    @include mixins.flex(flex-end, center);
-
-    gap: 4px;
-    flex: 1;
   }
 }
 </style>

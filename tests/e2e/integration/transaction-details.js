@@ -1,5 +1,5 @@
 import { formatDate, formatTime } from '../../../src/utils';
-import { NETWORK_MAINNET } from '../../../src/constants';
+import { AE_NETWORK_DEFAULT_SETTINGS } from '../../../src/protocols/aeternity/config';
 
 describe('Tests cases for transaction details page', () => {
   it('Render transaction details', () => {
@@ -10,7 +10,7 @@ describe('Tests cases for transaction details page', () => {
     cy.get('@transactionHash')
       .then((transactionHash) => {
         cy.request(
-          `${NETWORK_MAINNET.middlewareUrl}/v2/txs/${transactionHash.trim()}`,
+          `${AE_NETWORK_DEFAULT_SETTINGS.mainnet.middlewareUrl}/v2/txs/${transactionHash.trim()}`,
         ).then(
           ({
             body:

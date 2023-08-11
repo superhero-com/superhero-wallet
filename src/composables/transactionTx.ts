@@ -1,9 +1,8 @@
 import { computed, ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
-  IAccountOverview,
+  IAccount,
   IDefaultComposableOptions,
-  INetwork,
   ITokenList,
   ITx,
   ObjectValues,
@@ -38,6 +37,7 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
+import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
@@ -50,13 +50,13 @@ export function useTransactionTx({
   externalAddress,
 }: UseTransactionOptions) {
   const { dexContracts } = useAeSdk({ store });
-  const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
+  const { accounts, activeAccount } = useAccounts({ store });
+  const { tippingContractAddresses } = useTippingContracts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
@@ -126,7 +126,7 @@ export function useTransactionTx({
     innerTx.value?.contractId
     && innerTx.value?.function
     && includes(
-      [activeNetwork.value.tipContractV1, activeNetwork.value.tipContractV2!],
+      [tippingContractAddresses.value.tippingV1!, tippingContractAddresses.value.tippingV2!],
       innerTx.value.contractId,
     )
     && includes(
@@ -173,22 +173,22 @@ export function useTransactionTx({
     ownerAddress.value = address;
   }
 
-  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
+  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccount {
     switch (ownershipStatus.value) {
       case AE_TRANSACTION_OWNERSHIP_STATUS.current:
-        return activeAccountExtended.value;
+        return activeAccount.value;
       case AE_TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};
 
         return accounts.value.find(({ address }) => [accountId, callerId].includes(address))!;
       }
       default: {
-        const address = externalOwnerAddress || txOwnerAddress.value;
+        const address = externalOwnerAddress || txOwnerAddress.value!;
 
         return {
           name: getPreferredName.value(address) || '',
           address,
-        };
+        } as IAccount; // TODO establish the required return type for the function
       }
     }
   }

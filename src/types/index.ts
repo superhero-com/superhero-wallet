@@ -1,15 +1,10 @@
-/*
-  eslint-disable
-    camelcase,
-    no-unused-vars,
-*/
+/* eslint-disable camelcase */
 
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import {
-  ContractMethodsBase,
   Encoded,
   Node,
   Tag,
@@ -33,10 +28,11 @@ import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { Protocol } from './protocols';
 
 export * from './cordova';
-export * from './router';
 export * from './filter';
 export * from './forms';
+export * from './networks';
 export * from './protocols';
+export * from './router';
 
 export type Class<T> = new (...args: unknown[]) => T
 
@@ -203,6 +199,7 @@ export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'
   balance: string;
 }
 
+// TODO This interface is too loose. Empty object should not be valid.
 export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   // TODO: use a proper type for an address since it can be a url
   address?: Encoded.AccountAddress | string;
@@ -249,35 +246,6 @@ export interface IRawMultisigAccount {
   multisigAccountCreationEncodedCallData?: Encoded.ContractBytearray;
   signedAttachTx?: Encoded.Transaction;
   rawTx?: Encoded.Transaction;
-}
-
-export interface INetworkBase {
-  /**
-   * Node backend URL
-   */
-  url: string;
-  /**
-   * Unique name provided by the user
-   */
-  name: string;
-  middlewareUrl: string;
-  /**
-   * TODO: Replace with different way of differentiating the networks
-   */
-  networkId: string;
-  compilerUrl: string;
-  /**
-   * Tipping backend URL
-   */
-  backendUrl: string;
-  index?: number;
-}
-
-export interface INetwork extends INetworkBase {
-  explorerUrl: string
-  tipContractV1: Encoded.ContractAddress
-  tipContractV2?: Encoded.ContractAddress
-  multisigBackendUrl: string
 }
 
 export interface IPermission {
@@ -650,26 +618,6 @@ export interface IDefaultComposableOptions {
 }
 
 export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
-
-export interface TippingV1ContractApi extends ContractMethodsBase {
-  unclaimed_for_url: (url: string) => string;
-  tip: (recipientId: Encoded.AccountAddress, note: string) => void;
-  retip: (tipId: number) => void;
-}
-
-export interface TippingV2ContractApi extends TippingV1ContractApi {
-  tip_token: (
-    recipientId: Encoded.AccountAddress,
-    note: string,
-    contractId: Encoded.ContractAddress,
-    amount: string
-  ) => Encoded.TxHash;
-  retip_token: (
-    id: number,
-    contactId: Encoded.ContractAddress,
-    amount: number
-  ) => Encoded.TxHash;
-}
 
 export interface IFormModel {
   amount?: string;

@@ -7,7 +7,6 @@ import BigNumber from 'bignumber.js';
 import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import type {
   IDefaultComposableOptions,
-  INetwork,
   IMultisigAccount,
   IMultisigConsensus,
   IMultisigAccountResponse,
@@ -24,6 +23,7 @@ import {
   MULTISIG_SUPPORTED_CONTRACT_VERSION,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
@@ -64,10 +64,10 @@ const isAdditionalInfoNeeded = ref(false);
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
+  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
   const { aeAccounts } = useAccounts({ store });
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
     ...multisigAccounts.value,
     ...pendingMultisigAccounts.value,
@@ -80,7 +80,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
 
   const activeMultisigAccountExplorerUrl = computed(
     () => (activeMultisigAccount.value)
-      ? (new AeScan(activeNetwork.value.explorerUrl))
+      ? (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
         .prepareUrlByHash(activeMultisigAccount.value.contractId)
       : null,
   );
@@ -169,7 +169,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
     let rawMultisigData: IMultisigAccountResponse[] = [];
     try {
       await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
-        ...(await fetchJson(`${activeNetwork.value.multisigBackendUrl}/${address}`)),
+        ...(await fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/${address}`)),
       )));
     } catch {
       // TODO: handle failure in multisig loading
