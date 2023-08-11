@@ -3,6 +3,7 @@ import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import {
   AETERNITY_SYMBOL,
+  ACCOUNT_HD_WALLET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
@@ -10,6 +11,7 @@ import {
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
+  getHdWalletAccount,
 } from '../popup/utils';
 import { useAccounts, useAeSdk } from '../composables';
 
@@ -17,6 +19,20 @@ export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
     return generateHdWallet(mnemonicToSeed(mnemonic));
+  },
+  accounts({ accounts: { list } }, getters) {
+    if (!getters.wallet) return [];
+    return list
+      .map(({ idx, type, ...acc }) => ({
+        idx,
+        type,
+        ...acc,
+        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
+      }))
+      .map(({ ...account }) => ({
+        ...account,
+        name: getters['names/getDefault'](account.address),
+      }));
   },
   networks({ userNetworks }) {
     return [
