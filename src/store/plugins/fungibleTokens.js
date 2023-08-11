@@ -15,7 +15,7 @@ import { calculateSupplyAmount } from '@/protocols/aeternity/helpers';
 export default (store) => {
   const { getAeSdk } = useAeSdk({ store });
   const { fetchFromMiddleware } = useMiddleware({ store });
-  const { accounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, activeAccount } = useAccounts({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -58,7 +58,7 @@ export default (store) => {
         commit,
       }) {
         const newBalances = {};
-        await Promise.all(accounts.value.map(async ({ address }) => {
+        await Promise.all(aeAccounts.value.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(

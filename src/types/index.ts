@@ -98,8 +98,14 @@ export interface IAppData {
 }
 
 export interface IWallet {
-  privateKey: any;
+  secretKey: any;
   chainCode: any;
+}
+
+export interface IHdWalletAccount {
+  publicKey: string;
+  secretKey: string;
+  address: string,
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -166,17 +172,18 @@ export type AeternityAccountType = 'hd-wallet';
  * Simplified account structure stored it in the local storage
  * or fetched when discovering the accounts.
  */
-export interface IAeternityAccountRaw {
+export interface IAccountRaw {
   idx: number;
   showed: boolean;
   type: AeternityAccountType;
   isRestored: boolean;
+  protocol: Protocol;
 }
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IKeyPair, IAeternityAccountRaw {
+export interface IAccount extends IKeyPair, IAccountRaw {
   address: Encoded.AccountAddress;
   name?: string; // .chain
   protocol: Protocol;

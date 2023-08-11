@@ -5,10 +5,7 @@ import {
   InvalidTxError,
   Tag,
   decode,
-  derivePathFromKey,
-  encode,
   formatAmount,
-  getKeyPair,
   isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
@@ -20,11 +17,9 @@ import type {
   ICommonTransaction,
   IDexContracts,
   IGAAttachTx,
-  IKeyPair,
   INameEntryFetched,
   ITransaction,
   ITx,
-  IWallet,
   TxFunction,
   TxFunctionRaw,
   TxType,
@@ -135,21 +130,6 @@ export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'a
  */
 export function getAeFee(value: number | string) {
   return +aettosToAe(new BigNumber(value || 0).toNumber());
-}
-
-export function getHdWalletAccount(
-  wallet: IWallet,
-  accountIdx = 0,
-): IKeyPair & { address: Encoded.AccountAddress } {
-  const keyTreeNode = derivePathFromKey(
-    `${accountIdx}h/0h/0h`,
-    { ...wallet, secretKey: wallet.privateKey },
-  );
-  const keyPair = getKeyPair(keyTreeNode.secretKey);
-  return {
-    ...keyPair,
-    address: encode(keyPair.publicKey, Encoding.AccountAddress),
-  };
 }
 
 export function getTxOwnerAddress(innerTx?: ITx) {

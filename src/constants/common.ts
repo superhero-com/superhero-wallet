@@ -40,6 +40,7 @@ export const DISTINCT_PROTOCOL_VIEWS = [
 ] as const;
 
 export const SEED_LENGTH = 12;
+export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 
 export const DECIMAL_PLACES_HIGH_PRECISION = 9;
 export const DECIMAL_PLACES_LOW_PRECISION = 2;

@@ -65,7 +65,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
 
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
@@ -168,7 +168,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
      */
     let rawMultisigData: IMultisigAccountResponse[] = [];
     try {
-      await Promise.all(accounts.value.map(async ({ address }) => rawMultisigData.push(
+      await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
         ...(await fetchJson(`${activeNetwork.value.multisigBackendUrl}/${address}`)),
       )));
     } catch {
@@ -183,7 +183,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
       return (
         account.hasPendingTransaction
         && account.signers.some((signer) => (
-          accounts.value.map(({ address }) => address).includes(signer)
+          aeAccounts.value.map(({ address }) => address).includes(signer)
           && !account.confirmedBy.includes(signer)
         ))
       );

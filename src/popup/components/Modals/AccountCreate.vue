@@ -24,11 +24,19 @@
 
     <BtnSubheader
       v-if="!isMultisig"
-      :header="$t('pages.accounts.addAccount')"
+      :header="$t('pages.accounts.addAeternityAccount')"
       :subheader="$t('modals.createAccount.btnSubtitle')"
       :icon="PlusCircleIcon"
       :disabled="!isOnline"
-      @click="createPlainAccount()"
+      @click="createPlainAccount(PROTOCOL_AETERNITY)"
+    />
+    <BtnSubheader
+      v-if="!isMultisig"
+      :header="$t('pages.accounts.addBitcoinAccount')"
+      :subheader="$t('modals.createAccount.btnSubtitle')"
+      :icon="PlusCircleIcon"
+      :disabled="!isOnline"
+      @click="createPlainAccount(PROTOCOL_BITCOIN)"
     />
     <BtnSubheader
       :header="$t('modals.createMultisigAccount.btnText')"
@@ -45,7 +53,12 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
-import { MODAL_MULTISIG_VAULT_CREATE } from '@/constants';
+import type { Protocol } from '@/types';
+import {
+  MODAL_MULTISIG_VAULT_CREATE,
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
+} from '@/constants';
 import { useConnection, useModals } from '@/composables';
 
 import BtnSubheader from '../buttons/BtnSubheader.vue';
@@ -70,9 +83,12 @@ export default defineComponent({
 
     const loading = ref(false);
 
-    async function createPlainAccount() {
+    async function createPlainAccount(protocol: Protocol) {
       loading.value = true;
-      await store.dispatch('accounts/hdWallet/create');
+      await store.dispatch('accounts/hdWallet/create', {
+        isRestored: false,
+        protocol,
+      });
       loading.value = false;
       props.resolve();
     }
@@ -83,6 +99,8 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
+      PROTOCOL_BITCOIN,
       PlusCircleIcon,
       isOnline,
       loading,

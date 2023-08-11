@@ -25,7 +25,7 @@ const { onNetworkChange } = createNetworkWatcher();
  * that wants to use this data.
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
   const { balancesTotal } = useBalances({ store });
   const { nodeNetworkId } = useAeSdk({ store });
 
@@ -73,7 +73,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
 
     isTransactionListLoading.value = true;
 
-    await Promise.all(accounts.value.map(async ({ address }) => {
+    await Promise.all(aeAccounts.value.map(async ({ address }) => {
       try {
         return (await fetchTransactions(
           DASHBOARD_TRANSACTION_LIMIT,

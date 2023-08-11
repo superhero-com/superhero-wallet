@@ -6,21 +6,15 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useAccounts, useModals, useAeSdk } from '@/composables';
+import { useAccounts, useModals } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { getHdWalletAccount, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
-
-/**
- * Address gap limit is currently set to 5.
- * If the software hits 5 unused addresses in a row,
- * it expects there are no used addresses beyond this point and stops searching the address chain.
-*/
-const ADDRESS_GAP_LIMIT = 5;
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   namespaced: true,
@@ -38,43 +32,25 @@ export default {
       const aeSdk = await getAeSdk();
       return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
-    async discover({ state, rootGetters, dispatch }) {
-      let lastNotEmptyIdx = 0;
-      let lastIndex = 0;
-      let isAccountUsedArray = [];
-
-      do {
-        try {
-          lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
-          lastIndex += isAccountUsedArray.length;
-          // eslint-disable-next-line no-await-in-loop
-          isAccountUsedArray = await Promise.all(
-            Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1)
-              // eslint-disable-next-line no-loop-func
-              .fill().map((x, i) => i + lastIndex).map((index) => dispatch(
-                'isAccountUsed',
-                getHdWalletAccount(rootGetters.wallet, index).address,
-              )),
-          );
-        } catch (e) {
-          break;
-        }
-      } while (!(
-        isAccountUsedArray.lastIndexOf(true) === -1
-        || isAccountUsedArray.filter((isAccountUsed) => !isAccountUsed).length === ADDRESS_GAP_LIMIT
-      ));
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i += 1) {
-        dispatch('create', true);
+    async discover({ rootGetters: { wallet }, dispatch }) {
+      const numberOfAccounts = await ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
+        .discoverAccounts(wallet);
+      for (let i = 0; i <= numberOfAccounts; i += 1) {
+        dispatch('create', {
+          isRestored: true,
+          protocol: PROTOCOL_AETERNITY,
+        });
       }
     },
-    create({ state, commit }, isRestored = false) {
+    create({ state, commit }, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
       commit(
         'accounts/add',
         {
           idx: state.nextAccountIdx,
           type: ACCOUNT_HD_WALLET,
           isRestored,
-          protocol: PROTOCOL_AETERNITY,
+          protocol,
         },
         { root: true },
       );
@@ -87,7 +63,7 @@ export default {
       const { secretKey } = (options?.fromAccount)
         ? getAccountByAddress(options.fromAccount)
         : activeAccount.value;
-      return sign(data, secretKey);
+      return sign(data, Buffer.from(secretKey, 'hex'));
     },
     async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();

@@ -13,6 +13,7 @@ import {
   NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -73,6 +74,9 @@ export function useNotifications({
   );
 
   async function fetchAllNotifications(): Promise<INotification[]> {
+    // TODO: Remove this condition once global filter is ready
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) return [];
+
     const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
     const responseChallenge = await fetchJson(fetchUrl);
     const respondChallenge = await fetchRespondChallenge(responseChallenge);

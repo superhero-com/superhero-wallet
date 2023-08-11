@@ -36,7 +36,7 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
-  const { accounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, activeAccount } = useAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -120,7 +120,7 @@ export default (store) => {
 
         const middleware = await getMiddleware();
         const names = await Promise.all(
-          accounts.value.map(({ address }) => Promise.all([
+          aeAccounts.value.map(({ address }) => Promise.all([
             fetchPendingNameClaimTransactions(address),
             fetchAllPages(
               () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
@@ -188,7 +188,7 @@ export default (store) => {
       async setDefaults(
         { rootGetters: { activeNetwork }, commit },
       ) {
-        await Promise.all(accounts.value.map(async ({ address }) => {
+        await Promise.all(aeAccounts.value.map(async ({ address }) => {
           const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
           ).catch(() => {});
