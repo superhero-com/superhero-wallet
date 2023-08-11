@@ -7,6 +7,7 @@
     :target="href ? '_blank' : null"
     :aria-disabled="disabled ? 'true' : null"
     :style="bgColorStyle"
+    :type="submit ? 'submit' : null"
     :class="[
       `variant-${variant}`,
       {
@@ -44,6 +45,7 @@ export default defineComponent({
       default: BTN_VARIANT[0],
     },
     bgColor: { type: String, default: null },
+    submit: Boolean,
     disabled: Boolean,
     hollow: Boolean,
   },

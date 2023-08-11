@@ -148,6 +148,12 @@ hr {
   }
 
   &-heading-3 {
+    @extend %face-sans-15-bold;
+
+    color: $color-white;
+  }
+
+  &-heading-4 {
     @extend %face-sans-15-medium;
 
     color: rgba($color-white, 0.75);

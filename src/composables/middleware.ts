@@ -2,29 +2,31 @@ import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';
-import { genSwaggerClient, mapObject } from '@/lib/swagger';
-import { fetchJson, watchUntilTruthy } from '@/utils';
-import {
-  IDefaultComposableOptions,
+import type {
   IMiddleware,
   IMiddlewareStatus,
-  INetwork,
-} from '../types';
+} from '@/types';
+import { genSwaggerClient, mapObject } from '@/lib/swagger';
+import { fetchJson, watchUntilTruthy } from '@/utils';
+import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 const middleware = ref<IMiddleware | null>(null);
 const initializing = ref(false);
 const isMiddlewareReady = computed(() => !!middleware.value);
 
-let middlewareCurrentNetwork: INetwork;
+/**
+ * Store the last used network settings to detect network change
+ * whenever the middleware is accessed.
+ */
+let middlewareCurrentAeNetworkSettings: IAeNetworkSettings;
 
-export function useMiddleware({ store }: IDefaultComposableOptions) {
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+export function useMiddleware() {
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
   async function fetchFromMiddleware<T = any>(path: string): Promise<T | null> {
-    await watchUntilTruthy(activeNetwork);
-    // We can't use the `activeNetwork` in next line as it's not always properly evaluated
-    // TODO replace with `activeNetwork` after removing Vuex.
-    return fetchJson(`${store.getters.activeNetwork.middlewareUrl}${path}`);
+    await watchUntilTruthy(aeActiveNetworkSettings);
+    return fetchJson(`${aeActiveNetworkSettings.value.middlewareUrl}${path}`);
   }
 
   async function fetchFromMiddlewareCamelCased(path: string) {
@@ -40,12 +42,15 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
    */
   async function initMiddleware() {
     initializing.value = true;
-    const { middlewareUrl } = await watchUntilTruthy(activeNetwork);
 
-    const swagger = await fetch(`${middlewareUrl}/swagger/swagger_v2.yaml`).then((response) => response.text());
+    await watchUntilTruthy(aeActiveNetworkSettings);
+    const { middlewareUrl } = aeActiveNetworkSettings.value;
+
+    const swagger = await fetch(`${middlewareUrl}/swagger/swagger_v2.yaml`)
+      .then((response) => response.text());
     const spec = load(swagger);
 
-    middlewareCurrentNetwork = activeNetwork.value;
+    middlewareCurrentAeNetworkSettings = aeActiveNetworkSettings.value;
 
     middleware.value = mapObject(
       (await genSwaggerClient(middlewareUrl, { spec }) as any).api,
@@ -60,12 +65,12 @@ export function useMiddleware({ store }: IDefaultComposableOptions) {
    * or the currently used app network settings has different value for the `middlewareUrl`.
    */
   async function getMiddleware(): Promise<IMiddleware> {
+    const previousMdwUrl = middlewareCurrentAeNetworkSettings?.middlewareUrl;
+    const currentMdwUrl = aeActiveNetworkSettings.value.middlewareUrl;
+
     if (initializing.value) {
       await watchUntilTruthy(middleware);
-    } else if (
-      !middleware.value
-      || middlewareCurrentNetwork?.middlewareUrl !== activeNetwork.value.middlewareUrl
-    ) {
+    } else if (!middleware.value || previousMdwUrl !== currentMdwUrl) {
       await initMiddleware();
     }
     return middleware.value!;

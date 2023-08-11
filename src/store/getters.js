@@ -3,8 +3,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { toShiftedBigNumber } from '@/utils';
 import {
   ACCOUNT_HD_WALLET,
-  NETWORK_MAINNET,
-  NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
   PROTOCOLS,
   PROTOCOL_AETERNITY,
@@ -48,16 +46,6 @@ export default {
         ...account,
         name: getters['names/getDefault'](account.address),
       }));
-  },
-  networks({ userNetworks }) {
-    return [
-      NETWORK_MAINNET,
-      NETWORK_TESTNET,
-      ...userNetworks.map((network, index) => ({ index, ...network })),
-    ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
-  },
-  activeNetwork({ current: { network } }, { networks }) {
-    return networks[network];
   },
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;

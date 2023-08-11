@@ -1,19 +1,10 @@
-import {
-  Encoded,
-  METHODS,
-} from '@aeternity/aepp-sdk';
+import { METHODS } from '@aeternity/aepp-sdk';
 import type {
   ICurrency,
-  INetwork,
   INotificationSetting,
   IPermission,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
-import {
-  AE_NETWORK_MAINNET_ID,
-  AE_NETWORK_TESTNET_ID,
-  AE_NETWORK_MAINNET_NODE_URL,
-} from '@/protocols/aeternity/config';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -62,34 +53,14 @@ export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
 
-export const NETWORK_MAINNET: INetwork = {
-  url: AE_NETWORK_MAINNET_NODE_URL,
-  networkId: AE_NETWORK_MAINNET_ID,
-  middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-  explorerUrl: 'https://aescan.io',
-  compilerUrl: 'https://compiler.aepps.com',
-  backendUrl: 'https://raendom-backend.z52da5wt.xyz',
-  tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z' as Encoded.ContractAddress,
-  multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
-  name: 'Mainnet',
-};
+export const NETWORK_TYPE_MAINNET = 'mainnet';
+export const NETWORK_TYPE_TESTNET = 'testnet';
+export const NETWORK_TYPE_CUSTOM = 'custom';
 
-export const NETWORK_TESTNET: INetwork = {
-  url: 'https://testnet.aeternity.io',
-  networkId: AE_NETWORK_TESTNET_ID,
-  middlewareUrl: 'https://testnet.aeternity.io/mdw',
-  explorerUrl: 'https://testnet.aescan.io',
-  compilerUrl: 'https://latest.compiler.aepps.com',
-  backendUrl: 'https://testnet.superhero.aeternity.art',
-  tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd' as Encoded.ContractAddress,
-  tipContractV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu' as Encoded.ContractAddress,
-  multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
-  name: 'Testnet',
-};
+export const NETWORK_NAME_MAINNET = 'Mainnet';
+export const NETWORK_NAME_TESTNET = 'Testnet';
 
-export const NETWORK_DEFAULT = (process.env.NETWORK === 'Testnet')
-  ? NETWORK_TESTNET
-  : NETWORK_MAINNET;
+export const NETWORK_NAME_MAX_LENGTH = 15;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 

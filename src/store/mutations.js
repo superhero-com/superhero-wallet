@@ -5,9 +5,6 @@ import {
 } from '@/constants';
 
 export default {
-  switchNetwork(state, payload) {
-    state.current.network = payload;
-  },
   addTransactions(state, payload) {
     state.transactions.loaded = uniqBy([...state.transactions.loaded, ...payload], 'hash');
   },
@@ -40,13 +37,6 @@ export default {
   setPendingTransactionSentByHash(state, { network, hash }) {
     const index = state.transactions.pending[network].findIndex((t) => t.hash === hash);
     state.transactions.pending[network][index][TX_DIRECTION.sent] = true;
-  },
-  setUserNetwork(state, { index, ...network }) {
-    if (index !== undefined) {
-      state.userNetworks[index] = network;
-    } else {
-      state.userNetworks.push(network);
-    }
   },
   deleteUserNetwork(state, index) {
     state.userNetworks = state.userNetworks.filter((el, idx) => idx !== index);

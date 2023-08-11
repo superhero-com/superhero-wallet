@@ -1,10 +1,11 @@
+import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import { CONNECTION_TYPES } from '@/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useAeSdk } from '../composables';
+import { useAeSdk, useNetworks } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
@@ -25,6 +26,7 @@ const addAeppConnection = async (port) => {
 };
 
 export async function init() {
+  const { activeNetwork } = useNetworks();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -70,8 +72,8 @@ export async function init() {
   connectionsQueue.forEach(addAeppConnection);
   connectionsQueue = [];
 
-  store.watch(
-    (state, getters) => getters.activeNetwork,
+  watch(
+    activeNetwork,
     async (newValue, oldValue) => {
       if (isAeSdkBlocked || isEqual(newValue, oldValue)) {
         return;

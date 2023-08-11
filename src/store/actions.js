@@ -9,12 +9,9 @@ import JsonBig from '@/lib/json-big';
 import { useMiddleware, useAeSdk } from '@/composables';
 import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
 import { isAccountNotFoundError } from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 export default {
-  switchNetwork({ commit }, payload) {
-    commit('switchNetwork', payload);
-    commit('initTransactions');
-  },
   addPendingTransaction(context, transaction) {
     const { nodeNetworkId } = useAeSdk({ store: context });
     context.commit('addPendingTransaction', {
@@ -42,16 +39,17 @@ export default {
       .map((transaction) => ({ ...transaction, pending: true }));
   },
   async fetchTipWithdrawnTransactions(
-    { state, getters, commit },
+    { state, commit },
     {
       recent, limit = 5, address, multipleAccounts,
     },
   ) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
     if (state?.transactions?.tipWithdrawnTransactions?.length && !recent) {
       return state.transactions.tipWithdrawnTransactions;
     }
     const response = await fetchJson(
-      `${getters.activeNetwork.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ''}`,
+      `${aeActiveNetworkSettings.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? `&limit=${limit}` : ''}`,
     );
     if (response.message) return [];
     const tipWithdrawnTransactions = response.map(({
@@ -78,14 +76,14 @@ export default {
     limit, recent, address, multipleAccounts = false,
   }) {
     const {
-      state, getters, dispatch, commit,
+      state, dispatch, commit,
     } = context;
     if (state.transactions.nextPageUrl === null && !recent) {
       return null;
     }
 
     const { nodeNetworkId } = useAeSdk({ store: context });
-    const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware({ store: context });
+    const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware();
 
     let txs = await Promise.all([
       fetchFromMiddlewareCamelCased(
@@ -135,7 +133,7 @@ export default {
       }
     });
     txs = orderBy(txs, ['microTime'], ['desc']);
-    const network = getters.activeNetwork.networkId;
+    const network = nodeNetworkId.value;
     if (state.transactions.pending[network] && !multipleAccounts) {
       state.transactions.pending[network].forEach(({ hash }) => {
         if (txs.some((tx) => tx.hash === hash && !tx.pending)) {
@@ -149,22 +147,28 @@ export default {
     commit('addTransactions', recent ? txs.slice(0, limit) : txs);
     return null;
   },
-  async claimTips({ getters: { activeNetwork } }, { url, address }) {
-    return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
+  async claimTips(_, { url, address }) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return postJson(`${aeActiveNetworkSettings.value.backendUrl}/claim/submit`, { body: { url, address } });
   },
-  async cacheInvalidateOracle({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/oracle`);
+  async cacheInvalidateOracle() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/invalidate/oracle`);
   },
-  async cacheInvalidateTips({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
+  async cacheInvalidateTips() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/invalidate/tips`);
   },
-  async donateError({ getters: { activeNetwork } }, error) {
-    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
+  async donateError(_, error) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return postJson(`${aeActiveNetworkSettings.value.backendUrl}/errorreport`, { body: error });
   },
-  async getCacheChainNames({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
+  async getCacheChainNames() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/chainnames`);
   },
-  async getCacheTip({ getters: { activeNetwork } }, id) {
-    return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
+  async getCacheTip(_, id) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/tips/single/${id}`);
   },
 };

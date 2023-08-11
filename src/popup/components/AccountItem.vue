@@ -45,9 +45,9 @@
 
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue';
-import type { INetwork, Protocol } from '@/types';
+import type { Protocol } from '@/types';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useGetter } from '@/composables/vuex';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';
@@ -81,12 +81,12 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
 
-    const explorerUrl = computed(() => {
-      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
-      return aeScan.prepareUrlForAccount(props.address);
-    });
+    const explorerUrl = computed(
+      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+        .prepareUrlForAccount(props.address),
+    );
 
     return {
       explorerUrl,

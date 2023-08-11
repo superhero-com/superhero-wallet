@@ -1,8 +1,6 @@
 export default ({
   migrations,
-  current,
   transactions: { pending } = {},
-  userNetworks,
   names,
   languages,
   backedUpSeed,
@@ -16,9 +14,7 @@ export default ({
   hiddenCards,
 }) => ({
   migrations,
-  current,
   transactions: { pending, loaded: [], nextPageUrl: '' },
-  userNetworks,
   names,
   languages,
   backedUpSeed,

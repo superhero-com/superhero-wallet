@@ -60,7 +60,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useGetter } from '@/composables/vuex';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
@@ -89,10 +89,11 @@ export default defineComponent({
     withProtocolIcon: Boolean,
   },
   setup(props) {
-    const activeNetwork = useGetter('activeNetwork');
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
 
     const explorerUrl = computed(
-      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlForAccount(props.address),
+      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+        .prepareUrlForAccount(props.address),
     );
 
     return {

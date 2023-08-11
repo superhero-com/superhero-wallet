@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionDetails from '../../src/protocols/aeternity/views/TransactionDetails.vue';
 import { TX_DIRECTION } from '../../src/constants';
-import { AE_NETWORK_TESTNET_ID, AE_SYMBOL } from '../../src/protocols/aeternity/config';
+import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -123,7 +123,6 @@ function mountComponent({ hasError = false } = {}) {
       getTxDirection: () => () => TX_DIRECTION.sent,
       getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTransactionAex9: () => () => true,
-      activeNetwork: () => AE_NETWORK_TESTNET_ID,
     },
   });
 

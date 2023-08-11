@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { camelCase } from 'lodash-es';
 import { useAeSdk } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
@@ -50,7 +50,6 @@ export default {
   },
   computed: {
     ...mapState('fungibleTokens', ['availableTokens']),
-    ...mapGetters(['activeNetwork']),
     tokens() {
       if (!isTxFunctionDexSwap(this.transaction.tx.function)) {
         return [];

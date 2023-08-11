@@ -108,6 +108,7 @@ export default defineComponent({
   }
 
   .radio-holder {
+    width: 100%;
     opacity: 0.5;
 
     &.checked {

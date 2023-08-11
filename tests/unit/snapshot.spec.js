@@ -30,10 +30,6 @@ jest.mock('../../src/composables', () => ({
     openModal: jest.fn(),
   })),
 }));
-jest.mock('vuex', () => ({
-  useStore: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
-  Store: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
-}));
 jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({})),
 }));
@@ -88,7 +84,6 @@ describe.each(testCases)('Pages', (test) => {
     const wrapper = mount(test.page, {
       global: {
         mocks: {
-          $store: { getters: { activeNetwork: () => {} } },
           $t: () => 'locale-specific-text',
           $tm: () => 'locale-specific-text',
         },

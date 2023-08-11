@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import DashboardHeader from '../../src/popup/components/DashboardHeader.vue';
-import { NETWORK_TESTNET } from '../../src/constants';
 
 jest.mock('../../src/store/index.js', () => ({}));
 
@@ -15,7 +14,6 @@ const store = new Vuex.Store({
       idx: 1,
       showed: true,
     }],
-    activeNetwork: () => (NETWORK_TESTNET),
   },
   modules: {
     accounts: {

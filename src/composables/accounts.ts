@@ -3,19 +3,15 @@ import { uniq } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
-  IAccountOverview,
   IAccountRaw,
   IDefaultComposableOptions,
   IFormSelectOption,
-  INetwork,
   Protocol,
 } from '@/types';
-import { tg } from '@/store/plugins/languages';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -30,7 +26,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const isLoggedIn = computed(
     () => activeAccount.value && Object.keys(activeAccount.value).length > 0,
   );
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
   /**
    * Accounts data formatted as the form select options
@@ -44,13 +39,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       idx: acc.idx,
     }));
   }
-
-  const activeAccountExtended = computed((): IAccountOverview => ({
-    ...activeAccount.value,
-    label: tg('transaction.overview.accountAddress'),
-    url: (new AeScan(activeNetwork.value.explorerUrl))
-      .prepareUrlForAccount(activeAccount.value.address),
-  }));
 
   const accountsSelectOptions = computed(() => prepareAccountSelectOptions(accounts.value));
 
@@ -91,7 +79,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accountsAddressList,
     accountsSelectOptions,
     activeAccount,
-    activeAccountExtended,
     activeAccountSimplexLink,
     activeAccountFaucetUrl,
     activeIdx,

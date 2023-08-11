@@ -1,4 +1,5 @@
 import { fetchJson, isUrlValid } from '@/utils';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 function getTwitterAccountUrl(url) {
   const match = url.match(/https:\/\/twitter.com\/[a-zA-Z0-9_]+/g);
@@ -40,12 +41,14 @@ export default (store) => store.registerModule('tipUrl', {
     },
   },
   actions: {
-    async ensureFetched({ state: { verifiedUrls, blacklistedUrls }, commit, rootGetters }) {
+    async ensureFetched({ state: { verifiedUrls, blacklistedUrls }, commit }) {
       if (verifiedUrls.length && blacklistedUrls.length) return;
 
+      const { aeActiveNetworkSettings } = useAeNetworkSettings();
+
       const [verified, graylist] = await Promise.all([
-        fetchJson(`${rootGetters.activeNetwork.backendUrl}/verified`),
-        fetchJson(`${rootGetters.activeNetwork.backendUrl}/static/wallet/graylist`),
+        fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/verified`),
+        fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/static/wallet/graylist`),
       ]);
 
       commit('setVerified', verified);
