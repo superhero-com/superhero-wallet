@@ -3,7 +3,7 @@ import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
   IAccountOverview,
-  IAeternityAccountRaw,
+  IAccountRaw,
   IDefaultComposableOptions,
   IFormSelectOption,
   INetwork,
@@ -13,12 +13,16 @@ import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
-  const accountsRaw = computed((): IAeternityAccountRaw[] => store.state.accounts?.list || []);
+  const accountsRaw = computed((): IAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => store.getters.accounts || []);
+  const aeAccounts = computed(
+    () => accounts.value.filter(({ protocol }) => protocol === PROTOCOL_AETERNITY),
+  );
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
   const isLoggedIn = computed(
@@ -77,6 +81,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   return {
     accounts,
     accountsRaw,
+    aeAccounts,
     accountsAddressList,
     accountsSelectOptions,
     activeAccount,

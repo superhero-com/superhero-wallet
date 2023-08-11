@@ -491,6 +491,8 @@
     },
     "accounts": {
       "addAccount": "Add account",
+      "addAeternityAccount": "Add Aeternity account",
+      "addBitcoinAccount": "Add Bitcoin account",
       "searchAccountsPlaceholder": "Search for account",
       "addAccountDescription": "Add an account to your wallet to manage funds separately."
     },

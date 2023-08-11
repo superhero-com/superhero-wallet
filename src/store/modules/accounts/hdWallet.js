@@ -6,14 +6,15 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useAccounts, useModals, useAeSdk } from '@/composables';
+import { useAccounts, useModals } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { getHdWalletAccount, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   namespaced: true,
@@ -31,26 +32,25 @@ export default {
       const aeSdk = await getAeSdk();
       return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
-    async discover({ state, rootGetters, dispatch }) {
-      let lastNotEmptyIdx = 0;
-      let account;
-      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx += 1) {
-        account = getHdWalletAccount(rootGetters.wallet, nextIdx);
-        // eslint-disable-next-line no-await-in-loop
-        if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
-      }
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i += 1) {
-        dispatch('create', true);
+    async discover({ rootGetters: { wallet }, dispatch }) {
+      const numberOfAccounts = await ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
+        .discoverAccounts(wallet);
+      for (let i = 0; i <= numberOfAccounts; i += 1) {
+        dispatch('create', {
+          isRestored: true,
+          protocol: PROTOCOL_AETERNITY,
+        });
       }
     },
-    create({ state, commit }, isRestored = false) {
+    create({ state, commit }, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
       commit(
         'accounts/add',
         {
           idx: state.nextAccountIdx,
           type: ACCOUNT_HD_WALLET,
           isRestored,
-          protocol: PROTOCOL_AETERNITY,
+          protocol,
         },
         { root: true },
       );
@@ -63,7 +63,7 @@ export default {
       const { secretKey } = (options?.fromAccount)
         ? getAccountByAddress(options.fromAccount)
         : activeAccount.value;
-      return sign(data, secretKey);
+      return sign(data, Buffer.from(secretKey, 'hex'));
     },
     async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();

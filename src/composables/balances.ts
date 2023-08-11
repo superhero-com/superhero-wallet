@@ -70,7 +70,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       async ({
         address,
         protocol,
-      }) => (ProtocolAdapterFactory.getAdapter(protocol)).getBalance(address).catch((error) => {
+      }) => ProtocolAdapterFactory.getAdapter(protocol).getBalance(address).catch((error) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }

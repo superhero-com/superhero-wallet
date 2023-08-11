@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { toShiftedBigNumber } from '@/utils';
 import {
@@ -7,31 +6,43 @@ import {
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
+  PROTOCOLS,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
-import { useAccounts, useAeSdk } from '@/composables';
+import { useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
   categorizeContractCallTxObject,
-  getHdWalletAccount,
 } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
-    return generateHdWallet(mnemonicToSeed(mnemonic));
+    return mnemonicToSeed(mnemonic);
   },
   accounts({ accounts: { list } }, getters) {
     if (!getters.wallet) return [];
+
+    const protocolIdx = PROTOCOLS.reduce((acc, protocol) => ({ ...acc, [protocol]: 0 }), {});
+
     return list
-      .map(({ idx, type, ...acc }) => ({
+      .map(({
+        idx, type, protocol = PROTOCOL_AETERNITY, ...acc
+      }) => ({
         idx,
         type,
-        protocol: PROTOCOL_AETERNITY,
+        protocol,
         ...acc,
-        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
+        ...(type === ACCOUNT_HD_WALLET
+          ? ProtocolAdapterFactory
+            .getAdapter(protocol)
+            // eslint-disable-next-line no-plusplus
+            .getHdWalletAccountFromMnemonicSeed(getters.wallet, protocolIdx[protocol]++)
+          : {}
+        ),
       }))
       .map(({ ...account }) => ({
         ...account,
