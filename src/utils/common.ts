@@ -20,6 +20,7 @@ import type {
 import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
+  IS_CORDOVA,
   LOCAL_STORAGE_PREFIX,
   TX_DIRECTION,
 } from '@/constants';
@@ -169,6 +170,18 @@ export function includes<T, U extends T>(
 
 export function includesCaseInsensitive(baseString: string, searchString: string) {
   return baseString?.toLocaleLowerCase().includes(searchString?.toLocaleLowerCase());
+}
+
+/**
+ * Invokes the native sharing mechanism of the device to share data such as text.
+ */
+export async function invokeDeviceShare(text: string): Promise<void> {
+  return (IS_CORDOVA)
+    ? new Promise<void>((resolve) => (window as any).plugins.socialsharing.shareW3C(
+      { text },
+      ({ app }: any) => app && resolve(),
+    ))
+    : navigator.share({ text });
 }
 
 export function isNotFoundError(error: any) {
