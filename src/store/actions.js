@@ -167,12 +167,4 @@ export default {
   async getCacheTip({ getters: { activeNetwork } }, id) {
     return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
   },
-  async share(_, options) {
-    await (process.env.IS_CORDOVA
-      ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
-        options,
-        ({ app }) => app && resolve(),
-      ))
-      : navigator.share(options));
-  },
 };

@@ -108,6 +108,7 @@ import type {
 import { IS_MOBILE_DEVICE } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy } from '@/composables';
+import { invokeDeviceShare } from '@/utils';
 import {
   AE_CONTRACT_ID,
   AE_SYMBOL,
@@ -191,7 +192,7 @@ export default defineComponent({
       const text = (amount.value && +amount.value > 0)
         ? t('modals.receive.shareTextNoAmount', { address, walletLink })
         : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
-      await store.dispatch('share', { text });
+      await invokeDeviceShare(text);
     }
 
     function handleAssetChange(asset: IAsset | IToken) {
