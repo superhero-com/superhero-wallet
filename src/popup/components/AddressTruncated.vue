@@ -44,7 +44,7 @@ export default defineComponent({
     const truncatedAddress = computed(() => truncateAddress(props.address));
     const explorerUrl = computed(() => {
       const aeScan = new AeScan(activeNetwork.value.explorerUrl);
-      return aeScan.prepareUrlForAccount(props.address);
+      return aeScan.prepareUrlByHash(props.address);
     });
 
     return {

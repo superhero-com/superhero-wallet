@@ -10,7 +10,7 @@ export class AeScan {
    */
   static ADDRESS_TYPES: Record<string, string> = {
     [Encoding.AccountAddress]: 'accounts',
-    [Encoding.ContractAddress]: 'contracts/transactions',
+    [Encoding.ContractAddress]: 'contracts',
     [Encoding.Name]: 'names',
     [Encoding.OracleAddress]: 'oracles/queries',
     [Encoding.TxHash]: 'transactions',
