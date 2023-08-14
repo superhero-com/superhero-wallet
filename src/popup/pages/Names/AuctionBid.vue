@@ -9,8 +9,6 @@
         :rules="{
           enough_ae: amountTotal.toString(),
           required: true,
-          name: true,
-          name_unregistered: true,
         }"
       >
         <InputAmount
