@@ -283,7 +283,13 @@ export default defineComponent({
 
     const { validate, errors } = useForm();
 
-    const WARNING_RULES_WORDING = [t('validation.notSameAs'), t('validation.enoughAeSigner')];
+    // TOOD: in the future we might rely on the error codes instead
+    const noneAlphabeticCharsRegExp = /[^\p{L}]/gu;
+
+    const WARNING_RULES_WORDING = [
+      t('validation.notSameAs').replace(noneAlphabeticCharsRegExp, ''),
+      t('validation.maxValueVault').replace(noneAlphabeticCharsRegExp, ''),
+    ];
 
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
@@ -311,7 +317,7 @@ export default defineComponent({
     function getMessageByFieldName(fieldName: string): IInputMessage {
       if (!errors.value) return { status: 'success' };
       const items = errors.value[fieldName as keyof typeof errors.value];
-      if (items && WARNING_RULES_WORDING.includes(items)) {
+      if (items && WARNING_RULES_WORDING.includes(items.replace(noneAlphabeticCharsRegExp, ''))) {
         return { status: 'warning', text: items };
       }
       if (items) {
