@@ -18,21 +18,18 @@ import {
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
 } from '@/constants';
-import {
-  watchUntilTruthy,
-} from '@/utils';
+import { watchUntilTruthy } from '@/utils';
+import { getPopupProps } from '@/utils/getPopupProps';
+import store from '@/store';
+import initSdk from '@/lib/wallet';
+import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { useAccounts, usePopupProps, useAeSdk } from '@/composables';
+import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_NOT_FOUND,
 } from './routeNames';
-import { routes } from './routes';
-import getPopupProps from '../utils/getPopupProps';
-import store from '../../store';
-import initSdk from '../../lib/wallet';
-
-import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
-import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],

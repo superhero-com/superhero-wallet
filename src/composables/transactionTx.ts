@@ -12,13 +12,11 @@ import type {
 } from '@/types';
 import {
   includes,
+  getTxFunctionLabel,
+  getTxTypeLabel,
+  getTxTypeListLabel,
 } from '@/utils';
 import { TX_DIRECTION } from '@/constants';
-import {
-  TX_FUNCTION_TRANSLATIONS,
-  TX_TYPE_TRANSLATIONS,
-  TX_TYPE_LIST_TRANSLATIONS,
-} from '@/popup/utils';
 import {
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
@@ -76,31 +74,25 @@ export function useTransactionTx({
    * Transaction TX type value converted into human readable label
    * displayed on the transaction details page.
    */
-  const txTypeLabel = computed((): string => {
-    const translateFunc = (txType.value) ? TX_TYPE_TRANSLATIONS[txType.value] : null;
-    return translateFunc ? translateFunc() : '';
-  });
+  const txTypeLabel = computed((): string => txType.value ? getTxTypeLabel(txType.value) : '');
 
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction lists.
    */
   const txTypeListLabel = computed((): string => {
-    const translateFunc = (txType.value)
-      ? TX_TYPE_LIST_TRANSLATIONS[txType.value]
-      : null;
-    return translateFunc ? translateFunc() : txTypeLabel.value;
+    const listTranslation = (txType.value) ? getTxTypeListLabel(txType.value) : '';
+    return listTranslation ?? txTypeLabel.value;
   });
 
   /**
    * Transaction TX function value converted into human readable label
    */
-  const txFunctionLabel = computed((): string => {
-    const translateFunc = (outerTx.value?.function)
-      ? TX_FUNCTION_TRANSLATIONS[outerTx.value.function as TxFunctionRaw]
-      : null;
-    return translateFunc ? translateFunc() : '';
-  });
+  const txFunctionLabel = computed(
+    (): string => (outerTx.value?.function)
+      ? getTxFunctionLabel(outerTx.value.function as TxFunctionRaw)
+      : '',
+  );
 
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
 

@@ -83,7 +83,7 @@ const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn =>
  * Handle the communication between browser popup windows opened by the extension
  * and the extension itself.
  */
-export default async () => {
+export async function getPopupProps() {
   const internalPostMessage = (RUNNING_IN_TESTS)
     ? postMessageTest
     : postMessage;
@@ -111,4 +111,4 @@ export default async () => {
   props.resolve = closingWrapper(resolve);
   props.reject = closingWrapper(reject);
   return props;
-};
+}
