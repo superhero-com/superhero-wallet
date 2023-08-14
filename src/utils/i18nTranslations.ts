@@ -3,8 +3,8 @@
  * `t(`foo.bar.${someKey}`);`
  */
 
-import type { TxFunctionMultisig, TxFunctionRaw, TxType } from '../../types';
-import { tg } from '../../store/plugins/languages';
+import type { TxFunctionMultisig, TxFunctionRaw, TxType } from '@/types';
+import { tg } from '@/store/plugins/languages';
 
 type TranslationMap<T extends string | number | symbol = string> = Partial<
   Record<T, () => string>
@@ -13,7 +13,7 @@ type TranslationMap<T extends string | number | symbol = string> = Partial<
 /**
  * ITx.type translated into human readable label
  */
-export const TX_TYPE_TRANSLATIONS: TranslationMap<TxType> = {
+const TX_TYPE_TRANSLATIONS: TranslationMap<TxType> = {
   ChannelCloseSoloTx: () => tg('transaction.type.channelCloseSoloTx'),
   ChannelSlashTx: () => tg('transaction.type.channelSlashTx'),
   ChannelSettleTx: () => tg('transaction.type.channelSettleTx'),
@@ -34,12 +34,16 @@ export const TX_TYPE_TRANSLATIONS: TranslationMap<TxType> = {
   PayingForTx: () => tg('transaction.type.payingForTx'),
   SpendTx: () => tg('transaction.type.sentTx'),
 };
+export function getTxTypeLabel(txType: TxType): string {
+  const translateFunc = TX_TYPE_TRANSLATIONS[txType];
+  return translateFunc ? translateFunc() : '';
+}
 
 /**
  * Replacements for the `txTypeTranslations` displayed on the transaction lists
  * ITx.type
  */
-export const TX_TYPE_LIST_TRANSLATIONS: TranslationMap<TxType> = {
+const TX_TYPE_LIST_TRANSLATIONS: TranslationMap<TxType> = {
   NamePreclaimTx: () => tg('transaction.listType.namePreclaimTx'),
   NameClaimTx: () => tg('transaction.listType.nameClaimTx'),
   NameUpdateTx: () => tg('transaction.listType.nameUpdateTx'),
@@ -47,11 +51,15 @@ export const TX_TYPE_LIST_TRANSLATIONS: TranslationMap<TxType> = {
   NameRevokeTx: () => tg('transaction.listType.nameRevokeTx'),
   SpendTx: () => tg('transaction.listType.sentTx'),
 };
+export function getTxTypeListLabel(txType: TxType): string {
+  const translateFunc = TX_TYPE_LIST_TRANSLATIONS[txType];
+  return translateFunc ? translateFunc() : '';
+}
 
 /**
  * ITx.function translated into human readable label
  */
-export const TX_FUNCTION_TRANSLATIONS: TranslationMap<TxFunctionRaw | TxFunctionMultisig> = {
+const TX_FUNCTION_TRANSLATIONS: TranslationMap<TxFunctionRaw | TxFunctionMultisig> = {
   propose: () => tg('transaction.function.propose'),
   revoke: () => tg('transaction.function.revoke'),
   refuse: () => tg('transaction.function.refuse'),
@@ -59,3 +67,7 @@ export const TX_FUNCTION_TRANSLATIONS: TranslationMap<TxFunctionRaw | TxFunction
   tip_token: () => tg('transaction.function.tip_token'),
   retip_token: () => tg('transaction.function.retip_token'),
 };
+export function getTxFunctionLabel(txFunction: TxFunctionRaw | TxFunctionMultisig): string {
+  const translateFunc = TX_FUNCTION_TRANSLATIONS[txFunction];
+  return translateFunc ? translateFunc() : '';
+}
