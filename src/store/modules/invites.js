@@ -1,10 +1,4 @@
-import {
-  AeSdk,
-  encode,
-  Encoding,
-  MemoryAccount,
-  Node,
-} from '@aeternity/aepp-sdk';
+import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { useAccounts, useModals } from '../../composables';
 import { tg } from '../plugins/languages';
 
@@ -31,14 +25,7 @@ export default {
         }],
         accounts: [new MemoryAccount(secretKey)],
       });
-      await aeSdk.transferFunds(
-        1,
-        activeAccount.value.address,
-        {
-          payload: encode(Buffer.from('referral'), Encoding.Bytearray),
-          verify: false,
-        },
-      );
+      await aeSdk.transferFunds(1, activeAccount.value.address, { verify: false });
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
