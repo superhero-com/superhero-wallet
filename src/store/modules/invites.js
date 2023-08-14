@@ -5,7 +5,7 @@ import {
   MemoryAccount,
   Node,
 } from '@aeternity/aepp-sdk';
-import { useModals } from '../../composables';
+import { useAccounts, useModals } from '../../composables';
 import { tg } from '../plugins/languages';
 
 export default {
@@ -20,12 +20,25 @@ export default {
     },
   },
   actions: {
-    async claim({ rootGetters: { account, activeNetwork } }, secretKey) {
+    async claim({ rootGetters, rootState }, secretKey) {
+      const { activeAccount } = useAccounts({
+        store: { state: rootState, getters: rootGetters },
+      });
       const aeSdk = new AeSdk({
-        nodes: [{ name: activeNetwork.name, instance: new Node(activeNetwork.url) }],
+        nodes: [{
+          name: rootGetters.activeNetwork.name,
+          instance: new Node(rootGetters.activeNetwork.url),
+        }],
         accounts: [new MemoryAccount(secretKey)],
       });
-      await aeSdk.transferFunds(1, account.address, { payload: encode(Buffer.from('referral'), Encoding.Bytearray), verify: false });
+      await aeSdk.transferFunds(
+        1,
+        activeAccount.value.address,
+        {
+          payload: encode(Buffer.from('referral'), Encoding.Bytearray),
+          verify: false,
+        },
+      );
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
