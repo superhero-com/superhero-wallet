@@ -62,7 +62,7 @@ const setTransactionsNextPage = (address: Encoded.AccountAddress, url: string) =
 export function useTransactionList({ store }: IDefaultComposableOptions) {
   const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { isLoggedIn } = useAccounts({ store });
+  const { isLoggedIn, accounts } = useAccounts({ store });
   const {
     fetchFromMiddlewareCamelCased,
     getMiddleware,
@@ -78,7 +78,9 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
   }
 
   function getTransactionByHash(address: Encoded.AccountAddress, hash: string) {
-    return getAccountAllTransactions(address).find((transaction) => transaction.hash === hash);
+    return accounts.value.flatMap(
+      (account) => getAccountAllTransactions(account.address),
+    ).find((transaction) => transaction.hash === hash);
   }
 
   function setPendingTransactionSentByHash(address: Encoded.AccountAddress, hash: string) {
@@ -139,7 +141,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
       if (!recent) {
         setTransactionsNextPage(address, next);
       }
-      return data;
+      return data || [];
     } catch (error) {
       return [];
     }
@@ -291,6 +293,14 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     return preparedTransactions;
   }
 
+  async function fetchAllPendingTransactions() {
+    await Promise.all(
+      accounts.value.map(
+        (account) => fetchTransactions(0, false, account.address),
+      ),
+    );
+  }
+
   watch(nodeNetworkId, (value, oldValue) => {
     if (value) {
       setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, oldValue!], transactions.value);
@@ -325,5 +335,6 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     upsertCustomPendingTransactionForAccount,
     updateAccountTransaction,
     fetchPendingTransactions,
+    fetchAllPendingTransactions,
   };
 }
