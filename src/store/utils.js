@@ -1,7 +1,6 @@
 export default ({
   migrations,
   current,
-  transactions: { pending } = {},
   userNetworks,
   names,
   languages,
@@ -17,7 +16,6 @@ export default ({
 }) => ({
   migrations,
   current,
-  transactions: { pending, loaded: [], nextPageUrl: '' },
   userNetworks,
   names,
   languages,

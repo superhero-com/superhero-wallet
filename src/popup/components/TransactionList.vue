@@ -1,5 +1,8 @@
 <template>
-  <div class="transaction-list">
+  <div
+    :key="currentAddress"
+    class="transaction-list"
+  >
     <InfiniteScroll
       class="list"
       data-cy="list"
@@ -41,6 +44,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { useGetter, useState } from '@/composables/vuex';
 import {
   AETERNITY_CONTRACT_ID,
   TXS_PER_PAGE,
@@ -57,7 +61,6 @@ import {
   pipe,
   includesCaseInsensitive,
 } from '../utils';
-import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import {
   useMultisigAccounts,
   useTransactionAndTokenFilter,
@@ -66,6 +69,7 @@ import {
   usePendingMultisigTransaction,
   useUi,
   useAeSdk,
+  useTransactionList,
 } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
@@ -75,7 +79,6 @@ import {
   ITokenList,
   ITransaction,
   ICommonTransaction,
-  ITransactionsState,
   ITx,
 } from '../../types';
 
@@ -102,6 +105,12 @@ export default defineComponent({
       activeMultisigAccount,
     } = useMultisigAccounts({ store });
 
+    const {
+      getAccountAllTransactions,
+      getAccountTransactionsState,
+      fetchTransactions,
+    } = useTransactionList({ store });
+
     const { isAppActive } = useUi();
 
     const {
@@ -123,20 +132,18 @@ export default defineComponent({
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
-    const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
-    const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
-    const fetchTransactions = useDispatch('fetchTransactions');
-
-    const canLoadMore = computed(() => !!transactions.value.nextPageUrl);
 
     const currentAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
       : activeAccount.value.address);
 
+    const canLoadMore = computed(() => (
+      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
+    ));
+
     const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountPendingTransactions.value,
-      ...transactions.value.loaded,
+      ...getAccountAllTransactions(currentAddress.value!),
       ...((props.isMultisig && pendingMultisigTransaction.value?.tx)
         ? [pendingMultisigTransaction.value]
         : []
@@ -225,11 +232,11 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions({
-          limit: TXS_PER_PAGE,
-          recent,
-          address: currentAddress.value,
-        });
+        await fetchTransactions(
+          TXS_PER_PAGE,
+          !!recent,
+          currentAddress.value!,
+        );
       } finally {
         loading.value = false;
       }
@@ -287,6 +294,7 @@ export default defineComponent({
 
     return {
       loading,
+      currentAddress,
       filteredTransactions,
       loadMore,
       getMultisigTransaction,

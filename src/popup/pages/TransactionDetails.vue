@@ -253,6 +253,13 @@ import { useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 
 import {
+  useAccounts,
+  useTransactionTx,
+  useMultisigAccounts,
+  useMiddleware,
+  useTransactionList,
+} from '@/composables';
+import {
   AETERNITY_SYMBOL,
   formatDate,
   formatTime,
@@ -270,12 +277,6 @@ import {
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
 import { AeScan } from '../../lib/AeScan';
-import {
-  useAccounts,
-  useTransactionTx,
-  useMultisigAccounts,
-  useMiddleware,
-} from '../../composables';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -354,10 +355,14 @@ export default defineComponent({
       store,
     });
 
+    const {
+      updateAccountTransaction,
+      getTransactionByHash,
+    } = useTransactionList({ store });
+
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
-    const getTx = computed(() => store.getters.getTx);
     const getTxSymbol = computed(() => store.getters.getTxSymbol);
     const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
     const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
@@ -404,7 +409,8 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      let rawTransaction = getTx.value(props.hash);
+      let rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();
         try {
@@ -424,7 +430,7 @@ export default defineComponent({
             ...rawTransaction,
             transactionOwner: externalAddress.value,
           };
-          store.commit('setTransactionByHash', transaction.value);
+          updateAccountTransaction(activeAccount.value.address, transaction.value!);
         }
       } else {
         transaction.value = rawTransaction;

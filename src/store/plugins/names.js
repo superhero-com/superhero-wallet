@@ -1,5 +1,12 @@
 import { watch } from 'vue';
 import {
+  useMiddleware,
+  useModals,
+  useAeSdk,
+  useAccounts,
+  useTransactionList,
+} from '@/composables';
+import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   fetchJson,
   postJson,
@@ -10,12 +17,6 @@ import {
   handleUnknownError,
 } from '../../popup/utils';
 import { tg } from './languages';
-import {
-  useAeSdk,
-  useAccounts,
-  useMiddleware,
-  useModals,
-} from '../../composables';
 
 export default (store) => {
   const {
@@ -30,6 +31,10 @@ export default (store) => {
     getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
   } = useMiddleware({ store });
+
+  const {
+    fetchPendingTransactions,
+  } = useTransactionList({ store });
 
   const { openDefaultModal } = useModals();
 
@@ -104,10 +109,9 @@ export default (store) => {
       async fetchOwned({
         state: { owned, pendingAutoExtendNames },
         commit,
-        dispatch,
       }) {
         commit('setAreNamesFetching', true);
-        const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true })
+        const fetchPendingNameClaimTransactions = (address) => fetchPendingTransactions(address)
           .then((transactions) => transactions
             .filter(({ tx: { type } }) => type === 'NameClaimTx')
             .map(({ tx, ...otherTx }) => ({
@@ -119,7 +123,7 @@ export default (store) => {
         const middleware = await getMiddleware();
         const names = await Promise.all(
           accounts.value.map(({ address }) => Promise.all([
-            getPendingNameClaimTransactions(address),
+            fetchPendingNameClaimTransactions(address),
             fetchAllPages(
               () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
               fetchFromMiddlewareCamelCased,

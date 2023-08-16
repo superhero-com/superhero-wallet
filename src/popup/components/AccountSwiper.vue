@@ -61,7 +61,6 @@ import {
   watch,
 } from 'vue';
 import { RouteLocation } from 'vue-router';
-import { useStore } from 'vuex';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
 
@@ -90,8 +89,6 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props, { emit }) {
-    const store = useStore();
-
     const customSwiper = ref();
     const currentIdx = ref(0);
 
@@ -104,7 +101,6 @@ export default defineComponent({
     }
 
     function onSlideChange() {
-      store.commit('initTransactions');
       const { activeIndex } = swiper.value;
       if (activeIndex < props.addressList.length && activeIndex >= 0) {
         emit('selectAccount', activeIndex);

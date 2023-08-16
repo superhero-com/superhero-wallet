@@ -626,3 +626,5 @@ export const ALLOWED_ICON_STATUSES = [
   'success',
   'warning',
 ] as const;
+
+export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';

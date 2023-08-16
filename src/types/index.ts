@@ -408,7 +408,7 @@ export interface ITx {
 export interface ITransaction {
   blockHeight?: number;
   claim?: any; // TODO find type
-  hash: string;
+  hash: Encoded.TxHash;
   incomplete?: boolean;
   microIndex?: number;
   microTime?: number;
@@ -416,14 +416,13 @@ export interface ITransaction {
   pendingTokenTx?: boolean;
   rawTx?: any; // TODO find type
   tipUrl?: string;
+  /**
+   * TODO "sent" field is used for removing local pending transaction - remove or rename it
+   */
+  sent?: boolean;
   transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
   url?: string;
-}
-
-export interface IStoreTransactions {
-  loaded: ITransaction[];
-  nextPageUrl?: string;
 }
 
 export interface IDashboardTransaction extends ITransaction {
@@ -463,10 +462,12 @@ export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
 
 export type ITransactionsState = {
   loaded: ITransaction[];
-  nextPageUrl?: string;
-  pending: Record<string, ITransaction[]>;
+  nextPageUrl: string | null;
+  pending: Record<string, ITransaction[]>; // this string refers to node network ID.
   tipWithdrawnTransactions: ITransaction[];
 }
+
+export type IAccountTransactionsState = Record<Encoded.AccountAddress, ITransactionsState>
 
 /**
  * Browser popup window names

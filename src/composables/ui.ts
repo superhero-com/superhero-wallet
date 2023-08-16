@@ -5,10 +5,12 @@ const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
 
 export function useUi() {
-  function setHomeRouteName(routeName: string, onChangeCallback: () => any) {
+  function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
       homeRouteName.value = routeName;
-      onChangeCallback();
+      if (onChangeCallback) {
+        onChangeCallback();
+      }
     }
   }
 

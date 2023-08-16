@@ -3,6 +3,7 @@ import { uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+import BigNumber from 'bignumber.js';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import {
   AETERNITY_COIN_PRECISION,
@@ -271,7 +272,10 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         ) {
           return b.confirmedBy.length - a.confirmedBy.length;
         }
-        if (!b.balance.minus(a.balance).isZero()) {
+
+        if ((BigNumber.isBigNumber(a.balance) && BigNumber.isBigNumber(b.balance))
+          && !b.balance?.minus(a.balance).isZero()
+        ) {
           return b.balance.minus(a.balance).toNumber();
         }
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
