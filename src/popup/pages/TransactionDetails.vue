@@ -356,6 +356,7 @@ export default defineComponent({
     });
 
     const {
+      fetchAllPendingTransactions,
       updateAccountTransaction,
       getTransactionByHash,
     } = useTransactionList({ store });
@@ -416,7 +417,15 @@ export default defineComponent({
         try {
           rawTransaction = await middleware.getTx(props.hash);
         } catch (e) {
-          router.push({ name: ROUTE_NOT_FOUND });
+          // This case is for pending transaction
+          await fetchAllPendingTransactions();
+
+          rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+
+          if (!rawTransaction) {
+            router.push({ name: ROUTE_NOT_FOUND });
+            return;
+          }
         }
 
         if (rawTransaction?.tx) {
