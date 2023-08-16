@@ -4,11 +4,9 @@ import {
   watch,
 } from 'vue';
 import { isEqual, uniqWith } from 'lodash-es';
-import type {
-  IDefaultComposableOptions,
-  ITransaction,
-  ITransactionsState,
-} from '../types';
+import { Encoded } from '@aeternity/aepp-sdk';
+
+import { IDefaultComposableOptions } from '@/types';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   MDW_TO_NODE_APPROX_DELAY_TIME,
@@ -19,12 +17,10 @@ import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
+import { useTransactionList } from './transactionList';
 import { useAeSdk } from './aeSdk';
 
 const isTransactionListLoading = ref(false);
-const fetchedTransactions = ref<ITransaction[]>([]);
-const pendingTransactions = ref<ITransaction[]>([]);
-const latestTransactions = ref<ITransaction[]>([]);
 
 const { onNetworkChange } = createNetworkWatcher();
 
@@ -37,29 +33,38 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   const { balancesTotal } = useBalances({ store });
   const { nodeNetworkId } = useAeSdk({ store });
 
+  const {
+    transactions,
+    fetchTransactions,
+  } = useTransactionList({ store });
+
   const tokens = computed(() => store.state.fungibleTokens.tokens);
 
-  const localPendingTransactionsList = computed(
-    (): ITransaction[] => (store.state.transactions as ITransactionsState)
-      .pending[nodeNetworkId.value!] || [],
-  );
+  const latestTransactions = computed(() => {
+    const allTransactions = Object.entries(transactions.value)
+      .map(([
+        accountAddress,
+        { loaded, pending }]) => [...(pending[nodeNetworkId.value!] || []), ...(loaded || [])]
+        .map((tr) => {
+          const {
+            direction,
+          } = useTransactionTx({
+            store,
+            tx: tr.tx,
+            externalAddress: accountAddress as Encoded.AccountAddress,
+          });
+          return {
+            ...tr,
+            direction: direction.value,
+          };
+        }));
 
-  function buildLatestTransactions() {
-    pendingTransactions.value = pendingTransactions.value.filter(({ hash }) => (
-      !fetchedTransactions.value.some((transaction) => transaction.hash === hash)
-    ));
-
-    const transactions: ITransaction[] = [
-      ...pendingTransactions.value,
-      ...fetchedTransactions.value,
-    ];
-
-    latestTransactions.value = uniqWith(transactions, (a, b) => (
+    return uniqWith(allTransactions.flatMap((transaction) => transaction), (a, b) => (
       a.hash === b.hash && a.transactionOwner === b.transactionOwner
     ))
       .sort(sortTransactionsByDateCallback)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
-  }
+  });
 
   async function updateTransactionListData() {
     if (isTransactionListLoading.value) {
@@ -68,35 +73,20 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
 
     isTransactionListLoading.value = true;
 
-    fetchedTransactions.value = (await Promise.all(accounts.value.map(async ({ address }) => {
+    await Promise.all(accounts.value.map(async ({ address }) => {
       try {
-        return (await store.dispatch('fetchTransactions',
-          {
-            limit: DASHBOARD_TRANSACTION_LIMIT, address, recent: true, multipleAccounts: true,
-          })).map(
-          (transaction: ITransaction) => {
-            const {
-              direction,
-            } = useTransactionTx({
-              store,
-              tx: transaction.tx,
-              externalAddress: address,
-            });
-
-            return {
-              ...transaction,
-              direction: direction.value,
-            };
-          },
-        );
+        return (await fetchTransactions(
+          DASHBOARD_TRANSACTION_LIMIT,
+          true,
+          address,
+        ));
       } catch (e) {
         handleUnknownError(e);
         return [];
       }
-    }))).flat();
+    }));
 
     isTransactionListLoading.value = false;
-    buildLatestTransactions();
   }
 
   /**
@@ -114,23 +104,6 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   );
 
   watch(
-    localPendingTransactionsList,
-    (val) => {
-      const newPendingTransaction: ITransaction[] = [...pendingTransactions.value];
-      val.forEach((transaction) => {
-        if (!pendingTransactions.value.some(
-          ({ hash }) => hash === transaction.hash,
-        )) {
-          newPendingTransaction.push(transaction);
-        }
-      });
-      pendingTransactions.value = newPendingTransaction;
-      buildLatestTransactions();
-    },
-    { deep: true, immediate: true },
-  );
-
-  watch(
     tokens,
     (oldTokens, newTokens) => {
       if (!isEqual(oldTokens, newTokens)) {
@@ -141,7 +114,6 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   );
 
   onNetworkChange(store, () => {
-    fetchedTransactions.value = [];
     updateTransactionListData();
   });
 

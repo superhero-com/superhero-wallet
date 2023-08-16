@@ -5,7 +5,6 @@ import actions from './actions';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
-import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
@@ -25,12 +24,6 @@ export default new Vuex.Store({
       network: NETWORK_DEFAULT.name,
     },
     userNetworks: [],
-    transactions: {
-      loaded: [],
-      nextPageUrl: '',
-      pending: {},
-      tipWithdrawnTransactions: [],
-    },
     nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
@@ -52,7 +45,6 @@ export default new Vuex.Store({
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
-    pendingTransactionHandler,
     languagesPlugin,
     veeValidate,
     pollAccountInfo,

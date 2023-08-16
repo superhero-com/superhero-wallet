@@ -139,6 +139,7 @@ import {
   useAeSdk,
   useUi,
   useTippingContracts,
+  useTransactionList,
 } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
@@ -189,6 +190,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const { activeAccount } = useAccounts({ store });
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
 
     const {
       activeMultisigAccount,
@@ -264,8 +266,7 @@ export default defineComponent({
               fee: 0,
             },
           };
-
-          store.dispatch('addPendingTransaction', transaction);
+          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         } else if (actionResult) {
           const transaction: ITransaction = {
             hash: actionResult.hash,
@@ -284,7 +285,7 @@ export default defineComponent({
             },
           };
 
-          store.dispatch('addPendingTransaction', transaction);
+          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         }
         emit('success');
         return actionResult.hash;
@@ -345,7 +346,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        store.dispatch('addPendingTransaction', transaction);
+        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {

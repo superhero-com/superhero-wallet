@@ -389,6 +389,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       function: 'transfer',
       type: 'ContractCallTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingSpend: {
     pending: true,
@@ -398,6 +399,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       recipientId: testAccount.address,
       type: 'SpendTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingTransfer: {
     pending: true,
@@ -409,6 +411,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       function: 'transfer',
       type: 'ContractCallTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingTipAe: {
     pending: true,
@@ -420,6 +423,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       type: 'ContractCallTx',
       selectedTokenContractId: AETERNITY_CONTRACT_ID,
     },
+    microTime: new Date().getTime(),
   },
   pendingTipToken: {
     pending: true,
@@ -432,6 +436,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       type: 'ContractCallTx',
       selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,
     },
+    microTime: new Date().getTime(),
   },
   payForGaAttach: {
     tx: {
@@ -444,6 +449,7 @@ export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransac
       },
       type: 'PayingForTx',
     },
+    microTime: new Date().getTime(),
   },
   gaMetaSpend: {
     tx: {

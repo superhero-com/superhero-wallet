@@ -4,14 +4,12 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, onUpdated } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import { useUi } from '../../composables';
+import { useUi } from '@/composables';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   setup() {
-    const store = useStore();
     const route = useRoute();
 
     const { setHomeRouteName } = useUi();
@@ -23,7 +21,6 @@ export default defineComponent({
         rootRoute.meta.isMultisig
           ? ROUTE_MULTISIG_ACCOUNT
           : ROUTE_ACCOUNT,
-        () => store.commit('initTransactions'),
       );
     }
 

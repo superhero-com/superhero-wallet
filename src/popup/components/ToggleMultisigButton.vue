@@ -61,7 +61,6 @@ export default defineComponent({
     );
 
     function toggleMultisigDashboard(showMultisigDashboard: boolean) {
-      store.commit('initTransactions');
       router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }
 

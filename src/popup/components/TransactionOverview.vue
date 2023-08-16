@@ -76,7 +76,7 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    function getTransactionParty(address: string): IAccountOverview {
+    function getTransactionParty(address: Encoded.AccountAddress): IAccountOverview {
       const aeScan = new AeScan(activeNetwork.value.explorerUrl);
       return {
         address,

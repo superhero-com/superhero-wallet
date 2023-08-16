@@ -88,6 +88,7 @@ import {
   useAccounts,
   useTippingContracts,
   useAeSdk,
+  useTransactionList,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
@@ -122,6 +123,7 @@ export default defineComponent({
     const { balance, aeternityCoin } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
 
     const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -196,7 +198,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        store.dispatch('addPendingTransaction', transaction);
+        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
