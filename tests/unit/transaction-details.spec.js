@@ -1,5 +1,6 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import Loader from '../../src/popup/components/Loader.vue';
 import TransactionDetails from '../../src/protocols/aeternity/views/TransactionDetails.vue';
 import { STUB_ACCOUNT } from '../../src/constants/stubs';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
@@ -133,7 +134,6 @@ function mountComponent() {
       getTxType: () => () => 'provide liquidity',
       getTxSymbol: () => () => AE_SYMBOL,
       getTxAmountTotal: () => () => 1,
-      getExplorerPath: () => () => 'https://explorer.testnet.aeternity.io/transactions/th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8',
       isTransactionAex9: () => () => true,
       account: () => STUB_ACCOUNT,
       accounts: () => [STUB_ACCOUNT],
@@ -141,8 +141,16 @@ function mountComponent() {
     },
   });
 
-  return shallowMount(TransactionDetails, {
+  return mount(TransactionDetails, {
+    shallow: true,
     global: {
+      stubs: {
+        Loader: false,
+        TransactionDetailsBase: false,
+      },
+      components: {
+        Loader,
+      },
       plugins: [store],
       mocks: {
         $t: () => 'locale-specific-text',
@@ -177,7 +185,7 @@ describe('Transaction Details', () => {
 
   it('should display only spinner before loading transaction', async () => {
     const wrapper = mountComponent();
-    expect(wrapper.find('.spinner').exists()).toBeTruthy();
+    expect(wrapper.find('[data-cy=loader]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=hash]').exists()).toBeFalsy();
   });
 });
