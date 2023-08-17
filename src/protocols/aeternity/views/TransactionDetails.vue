@@ -1,58 +1,32 @@
 <template>
   <div class="transaction-details">
-    <AnimatedSpinner
-      v-if="!transaction || transaction.incomplete"
-      class="spinner"
-    />
+    <Loader v-if="!transaction || transaction.incomplete" />
     <template v-else>
-      <div
-        v-if="!isDexAllowance || isErrorTransaction"
-        class="header"
+      <TransactionDetailsBase
+        :transaction="transaction"
+        :coin-symbol="AE_SYMBOL"
+        :transaction-fee="+aettosToAe(transactionFee)"
+        :is-swap="isSwap"
+        :is-pool="isPool"
+        :token-symbol="getTxSymbol(transaction)"
+        :total-amount="getTxAmountTotal(transaction, direction)"
+        :is-error-transaction="isErrorTransaction"
+        :is-dex-allowance="isDexAllowance"
+        :is-dex="isDex"
+        :is-transaction-aex9="isTransactionAex9(transaction)"
+        :payload="getTransactionPayload(transaction)"
+        :is-multisig="isMultisig"
+        :direction="direction"
+        :explorer-url="explorerUrl || ''"
+        :is-local-account-address="isLocalAccountAddress"
+        :gas-price="gasPrice ? +aettosToAe(gasPrice) : 0"
+        :gas-used="gasUsed"
+        :contract-id="contractId"
+        :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
+        :multisig-contract-id="multisigContractId"
+        :hash="hash"
       >
-        <TransactionErrorStatus
-          v-if="isErrorTransaction"
-          :return-type="transaction.tx.returnType"
-        />
-        <TransactionTokens
-          :transaction="transaction"
-          :direction="direction"
-          :is-allowance="isDexAllowance"
-          :error="isErrorTransaction"
-          :class="{ reverse: isPool }"
-          icon-size="md"
-        />
-      </div>
-      <div class="content">
-        <TransactionOverview :transaction="transaction" />
-        <div class="explorer">
-          <LinkButton :to="explorerUrl">
-            {{ $t('pages.transactionDetails.explorer') }}
-            <template #icon>
-              <ExternalLink />
-            </template>
-          </LinkButton>
-        </div>
-        <div class="data-grid">
-          <template v-if="isSwap && !isErrorTransaction">
-            <SwapRates :transaction="transaction" />
-            <SwapRoute :transaction="transaction" />
-          </template>
-          <DetailsItem
-            v-if="isErrorTransaction"
-            :label="$t('pages.transactionDetails.reason')"
-            :value="transaction.tx.return"
-            class="reason"
-            data-cy="reason"
-          />
-          <TransactionDetailsPoolTokens
-            v-if="(isPool || isDexAllowance)"
-            :transaction="transaction"
-            :direction="direction"
-            :tx-function="transaction.tx.function"
-            :is-allowance="isDexAllowance"
-            :class="{ reverse: isPool }"
-          />
-
+        <template #tip-url>
           <DetailsItem
             v-if="tipUrl"
             :label="$t('pages.transactionDetails.tipUrl')"
@@ -70,174 +44,8 @@
               </CopyText>
             </template>
           </DetailsItem>
-
-          <DetailsItem
-            v-if="contractId"
-            :label="$t('common.smartContract')"
-            small
-          >
-            <template #value>
-              <CopyText
-                hide-icon
-                :value="hash"
-                :copied-text="$t('common.hashCopied')"
-              >
-                <span class="text-address">{{ splitAddress(contractId) }}</span>
-              </CopyText>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            :label="$t('pages.transactionDetails.hash')"
-            data-cy="hash"
-            small
-          >
-            <template #value>
-              <CopyText
-                hide-icon
-                :value="hash"
-                :copied-text="$t('common.hashCopied')"
-              >
-                <span class="text-address">{{ splitAddress(hash) }}</span>
-              </CopyText>
-            </template>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="multisigTransactionFeePaidBy"
-            :label="$t('pages.transactionDetails.feePaidBy')"
-            small
-          >
-            <div class="row payer-id">
-              <Avatar
-                :address="multisigTransactionFeePaidBy"
-                size="sm"
-              />
-              <div>
-                <DialogBox
-                  v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
-                  class="dialog-box"
-                  dense
-                  position="bottom"
-                >
-                  {{ $t('common.you') }}
-                </DialogBox>
-                <CopyText
-                  hide-icon
-                  :value="multisigTransactionFeePaidBy"
-                  :copied-text="$t('common.addressCopied')"
-                >
-                  <span class="text-address">
-                    {{ splitAddress(multisigTransactionFeePaidBy) }}
-                  </span>
-                </CopyText>
-              </div>
-            </div>
-          </DetailsItem>
-
-          <DetailsItem
-            v-if="multisigContractId"
-            :label="$t('pages.transactionDetails.vaultContractId')"
-            small
-          >
-            <div class="row">
-              <Avatar
-                :address="multisigContractId"
-                size="sm"
-              />
-              <CopyText
-                hide-icon
-                :value="multisigContractId"
-                :copied-text="$t('common.addressCopied')"
-              >
-                <span class="text-address">
-                  {{ splitAddress(multisigContractId) }}
-                </span>
-              </CopyText>
-            </div>
-          </DetailsItem>
-
-          <PayloadDetails :payload="getTransactionPayload(transaction)" />
-
-          <div class="span-3-columns">
-            <DetailsItem
-              v-if="transaction.microTime && !transaction.pending"
-              :value="formatDate(transaction.microTime)"
-              :secondary="formatTime(transaction.microTime)"
-              :label="$t('pages.transactionDetails.timestamp')"
-              data-cy="timestamp"
-            />
-            <DetailsItem
-              v-else-if="transaction.pending"
-              :label="$t('pages.transactionDetails.timestamp')"
-              data-cy="timestamp"
-            >
-              <template #value>
-                <AnimatedPending
-                  class="pending-icon"
-                />
-                {{ $t('common.pending') }}...
-              </template>
-            </DetailsItem>
-            <DetailsItem
-              v-if="transaction.blockHeight && transaction.blockHeight > 0"
-              :value="transaction.blockHeight"
-              :label="$t('pages.transactionDetails.blockHeight')"
-              data-cy="block-height"
-            />
-            <DetailsItem
-              v-if="transaction.tx.nonce"
-              :value="transaction.tx.nonce"
-              :label="$t('pages.transactionDetails.nonce')"
-              data-cy="nonce"
-            />
-          </div>
-          <DetailsItem
-            v-if="!(isDex || isDexAllowance || isMultisig)"
-            :label="$t('common.amount')"
-            data-cy="amount"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="getTxAmountTotal(transaction, direction)"
-                :symbol="getTxSymbol(transaction)"
-                :hide-fiat="isTransactionAex9(transaction)"
-              />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="gasPrice"
-            :label="$t('pages.transactionDetails.gasPrice')"
-            data-cy="gas-price"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+(aettosToAe(gasPrice))"
-                symbol="AE"
-                hide-fiat
-              />
-            </template>
-          </DetailsItem>
-          <DetailsItem
-            v-if="gasUsed"
-            :value="gasUsed"
-            :label="$t('pages.transactionDetails.gasUsed')"
-            data-cy="gas"
-          />
-          <DetailsItem
-            v-if="transactionFee"
-            :label="$t('transaction.fee')"
-            data-cy="fee"
-          >
-            <template #value>
-              <TokenAmount
-                :amount="+aettosToAe(transactionFee)"
-                :symbol="AE_SYMBOL"
-              />
-            </template>
-          </DetailsItem>
-        </div>
-      </div>
+        </template>
+      </TransactionDetailsBase>
     </template>
   </div>
 </template>
@@ -255,8 +63,6 @@ import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
   fetchJson,
-  formatDate,
-  formatTime,
   handleUnknownError,
   splitAddress,
   watchUntilTruthy,
@@ -281,44 +87,19 @@ import {
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
-import TransactionOverview from '@/popup/components/TransactionOverview.vue';
-import SwapRoute from '@/popup/components/SwapRoute.vue';
-import SwapRates from '@/popup/components/SwapRates.vue';
-import TokenAmount from '@/popup/components/TokenAmount.vue';
+import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
 import Truncate from '@/popup/components/Truncate.vue';
-import TransactionTokens from '@/popup/components/TransactionTokenRows.vue';
 import CopyText from '@/popup/components/CopyText.vue';
-import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
-import PayloadDetails from '@/popup/components/PayloadDetails.vue';
-import TransactionErrorStatus from '@/popup/components/TransactionErrorStatus.vue';
-import Avatar from '@/popup/components/Avatar.vue';
-import DialogBox from '@/popup/components/DialogBox.vue';
-
-import AnimatedPending from '@/icons/animated-pending.svg?vue-component';
-import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
-import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
-    PayloadDetails,
-    TransactionErrorStatus,
-    TransactionDetailsPoolTokens,
-    TransactionTokens,
-    TransactionOverview,
-    TokenAmount,
+    TransactionDetailsBase,
     DetailsItem,
+    CopyText,
     LinkButton,
     Truncate,
-    CopyText,
-    SwapRoute,
-    SwapRates,
-    AnimatedPending,
-    AnimatedSpinner,
-    ExternalLink,
-    Avatar,
-    DialogBox,
   },
   props: {
     multisigDashboard: { type: Boolean },
@@ -469,8 +250,6 @@ export default defineComponent({
       hash,
       splitAddress,
       aettosToAe,
-      formatDate,
-      formatTime,
       isLocalAccountAddress,
       gasPrice,
       gasUsed,
@@ -483,159 +262,17 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-@use '@/styles/variables';
-@use '@/styles/typography';
-@use '@/styles/mixins';
-
+<style lang="scss" scope>
 .transaction-details {
-  display: flex;
-  flex-direction: column;
+  .tip-url {
+    width: 100%;
 
-  .spinner {
-    align-self: center;
-    width: 56px;
-    height: 56px;
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .pending-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .row {
-    @include mixins.flex(flex-start, center, row);
-
-    gap: 8px;
-  }
-
-  .header {
-    @include mixins.flex(center, center, column);
-
-    min-height: 73px;
-    position: initial;
-
-    @include mixins.mobile {
+    .copy-text {
       width: 100%;
     }
 
-    .transaction-token-rows {
-      &.reverse {
-        display: flex;
-        flex-direction: column-reverse;
-      }
-
-      :deep(.token-row) {
-        margin-bottom: 12px;
-        padding-inline: 16px;
-
-        .amount {
-          @extend %face-sans-18-regular;
-        }
-
-        .tokens {
-          @extend %face-sans-18-medium;
-
-          color: rgba(variables.$color-white, 0.75);
-        }
-      }
-    }
-  }
-
-  .span-3-columns {
-    @include mixins.flex(flex-start, flex-start);
-
-    column-gap: 24px;
-  }
-
-  .content {
-    background-color: variables.$color-bg-4;
-
-    .transaction-overview {
-      padding: 16px 12px 8px;
-    }
-
-    .pool-tokens.reverse {
-      flex-direction: column-reverse;
-    }
-
-    .data-grid {
-      @include mixins.flex(flex-start, flex-start, column);
-
-      column-gap: 24px;
-      row-gap: 8px;
-      padding: 8px 16px;
-
-      .tip-url {
-        width: 100%;
-
-        .copy-text {
-          width: 100%;
-        }
-
-        .link-button {
-          display: block;
-        }
-      }
-    }
-
-    .explorer {
-      height: 38px;
-      padding-inline: 16px;
-      display: flex;
-      align-items: center;
-
-      .link-button {
-        @extend %face-sans-14-medium;
-
-        text-decoration: none;
-        color: rgba(variables.$color-white, 0.75);
-
-        svg {
-          opacity: 1;
-          color: rgba(variables.$color-white, 0.75);
-          width: 24px;
-          height: 24px;
-        }
-
-        &:hover {
-          color: variables.$color-white;
-          text-decoration: underline;
-
-          svg {
-            color: variables.$color-white;
-          }
-        }
-      }
-    }
-
-    .payer-id {
-      position: relative;
-
-      .dialog-box {
-        width: 30px;
-        height: 20px;
-        position: absolute;
-        right: 15px;
-        top: -28px;
-      }
-    }
-  }
-
-  .details-item:deep() {
-    .label {
-      white-space: nowrap;
-    }
-  }
-
-  .reason:deep() {
-    .value {
-      word-break: break-all;
-      color: variables.$color-warning;
+    .link-button {
+      display: block;
     }
   }
 }

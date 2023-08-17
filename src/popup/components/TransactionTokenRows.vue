@@ -20,7 +20,7 @@
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ amountRounded(tokenAmount(token)) }}
+        {{ isRounded ? tokenAmount(token) : amountRounded(tokenAmount(token)) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -60,6 +60,7 @@ export default defineComponent({
     direction: { type: String, default: '' },
     error: Boolean,
     isAllowance: Boolean,
+    isRounded: Boolean,
   },
   setup(props) {
     const store = useStore();

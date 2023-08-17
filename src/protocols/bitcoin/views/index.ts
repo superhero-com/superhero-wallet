@@ -7,7 +7,7 @@ const protocolViews: ProtocolViewsConfig = {
   ),
   TransactionDetails: () => import(
     /* webpackChunkName: "ae-transaction-details" */
-    './NotImplemented.vue' // TODO
+    './TransactionDetails.vue'
   ),
   TransferReceiveModal: () => import(
     /* webpackChunkName: "btc-transfer-receive-modal" */
