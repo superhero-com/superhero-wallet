@@ -65,6 +65,8 @@ import { useStore } from 'vuex';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
 import { getAddressColor } from '@/utils';
+import { useAccounts } from '@/composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -90,6 +92,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const store = useStore();
+    const { accounts } = useAccounts({ store });
 
     const customSwiper = ref();
     const currentIdx = ref(0);
@@ -130,9 +133,11 @@ export default defineComponent({
 
     return {
       IS_CORDOVA: process.env.IS_CORDOVA,
+      PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
       swiper,
+      accounts,
       getAccountColor,
       onSlideChange,
       setCurrentSlide,

@@ -10,6 +10,7 @@ export * from './libs/multisig';
 
 export const AE_CONTRACT_ID = 'aeternity';
 export const AE_SYMBOL = 'AE';
+export const AE_SYMBOL_SHORT = '\xC6';
 export const AE_COIN_SYMBOL = 'AE Coin';
 export const AE_COIN_NAME = 'Aeternity';
 export const AE_COIN_PRECISION = 18; // Amount of decimals

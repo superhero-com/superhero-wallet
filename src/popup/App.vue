@@ -104,7 +104,7 @@ export default defineComponent({
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
-    const { loadAeternityData } = useCurrencies({ withoutPolling: true });
+    const { loadAeternityData } = useCurrencies({ store, withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();

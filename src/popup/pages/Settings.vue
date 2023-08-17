@@ -41,6 +41,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import type { INetwork } from '../../types';
 import { useGetter, useState } from '../../composables/vuex';
 import { useCurrencies } from '../../composables';
@@ -54,7 +55,8 @@ export default defineComponent({
     PanelItem,
   },
   setup() {
-    const { currentCurrencyInfo } = useCurrencies();
+    const store = useStore();
+    const { currentCurrencyInfo } = useCurrencies({ store });
 
     const activeNetwork = useGetter<INetwork>('activeNetwork');
     const saveErrorLog = useState('saveErrorLog');

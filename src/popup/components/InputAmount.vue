@@ -92,7 +92,7 @@ export default defineComponent({
     const store = useStore();
 
     const { aeternityCoin } = useBalances({ store });
-    const { currentCurrencyRate, formatCurrency } = useCurrencies();
+    const { currentCurrencyRate, formatCurrency } = useCurrencies({ store });
 
     const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
     const isAssetAe = computed(() => currentAsset.value.contractId === AE_CONTRACT_ID);

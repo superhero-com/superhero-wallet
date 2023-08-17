@@ -7,10 +7,23 @@ import {
 import { useStore } from 'vuex';
 import type { IHdWalletAccount } from '@/types';
 import { useAeSdk } from '@/composables/aeSdk';
-import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { MAXIMUM_ACCOUNTS_TO_DISCOVER } from '@/constants';
+import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import {
+  AE_COINGECKO_COIN_ID,
+  AE_SYMBOL,
+  AE_SYMBOL_SHORT,
+} from '@/protocols/aeternity/config';
 
 export class AeternityAdapter extends BaseProtocolAdapter {
+  override getCoingeckoCoinId() {
+    return AE_COINGECKO_COIN_ID;
+  }
+
+  override getCoinSymbol(getShort: boolean) {
+    return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
+  }
+
   override async getBalance(address: Encoded.AccountAddress): Promise<string> {
     const store = useStore();
     const { getAeSdk } = useAeSdk({ store });
