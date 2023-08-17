@@ -10,7 +10,7 @@ import {
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
-import { useAeSdk } from '@/composables';
+import { useAccounts, useAeSdk } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
