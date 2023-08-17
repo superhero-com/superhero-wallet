@@ -37,6 +37,11 @@
         v-if="address && address.length"
         class="account-address"
       >
+        <ProtocolIconWrapper
+          v-if="withProtocolIcon"
+          :protocol="protocol"
+          class="protocol-icon"
+        />
         <CopyText
           data-cy="copy"
           :value="address"
@@ -61,9 +66,11 @@ import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
+import ProtocolIconWrapper from './ProtocolIconWrapper.vue';
 
 export default defineComponent({
   components: {
+    ProtocolIconWrapper,
     AddressTruncated,
     Avatar,
     Truncate,
@@ -72,12 +79,14 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
+    protocol: { type: String, default: '' },
     avatarSize: { type: String, default: 'lg' },
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
+    withProtocolIcon: Boolean,
   },
   setup(props) {
     const activeNetwork = useGetter('activeNetwork');
@@ -142,6 +151,16 @@ export default defineComponent({
         height: 22px;
         margin-left: 2px;
       }
+    }
+  }
+
+  .account-address {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    .protocol-icon {
+      margin-right: 6px;
     }
   }
 

@@ -42,7 +42,7 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  * to live update the values. If no components are using it the polling stops.
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
-  const { aeternityData } = useCurrencies();
+  const { aeternityData } = useCurrencies({ store });
   const { activeAccount, accounts } = useAccounts({ store });
 
   const balances = useStorageRef(store);

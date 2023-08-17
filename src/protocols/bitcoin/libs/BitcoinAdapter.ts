@@ -4,11 +4,24 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
 import { payments, networks } from 'bitcoinjs-lib';
 import type { IHdWalletAccount } from '@/types';
-import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { MAXIMUM_ACCOUNTS_TO_DISCOVER } from '@/constants';
+import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import {
+  BTC_COINGECKO_COIN_ID,
+  BTC_SYMBOL,
+  BTC_SYMBOL_SHORT,
+} from '@/protocols/bitcoin/config';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
   bip32 = BIP32Factory(ecc);
+
+  override getCoingeckoCoinId() {
+    return BTC_COINGECKO_COIN_ID;
+  }
+
+  override getCoinSymbol(getShort:boolean) {
+    return getShort ? BTC_SYMBOL_SHORT : BTC_SYMBOL;
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async getBalance(address: string): Promise<string> {

@@ -6,7 +6,11 @@ import type {
   INotificationSetting,
   NotificationStatus,
 } from '@/types';
-import { fetchJson, postJson } from '@/utils';
+import {
+  fetchJson,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_READ,
@@ -75,14 +79,24 @@ export function useNotifications({
 
   async function fetchAllNotifications(): Promise<INotification[]> {
     // TODO: Remove this condition once global filter is ready
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) return [];
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+      return [];
+    }
 
-    const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
-    const responseChallenge = await fetchJson(fetchUrl);
-    const respondChallenge = await fetchRespondChallenge(responseChallenge);
-    const url = new URL(fetchUrl);
-    Object.entries(respondChallenge).forEach(([key, value]) => url.searchParams.append(key, value));
-    return await fetchJson(url.toString()) || [];
+    try {
+      const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
+      const responseChallenge = await fetchJson(fetchUrl);
+      const respondChallenge = await fetchRespondChallenge(responseChallenge);
+      const url = new URL(fetchUrl);
+      Object.entries(respondChallenge).forEach(
+        ([key, value]) => url.searchParams.append(key, value),
+      );
+      const result = await fetchJson(url.toString());
+      return !result || result.err ? [] : result;
+    } catch (e) {
+      handleUnknownError(e);
+      return [];
+    }
   }
 
   async function modifyNotifications(

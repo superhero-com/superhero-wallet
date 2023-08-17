@@ -46,6 +46,7 @@
 import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import { useStore } from 'vuex';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useCurrencies } from '../../../composables';
 
@@ -67,7 +68,8 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { currentCurrencyRate, getFormattedFiat, formatCurrency } = useCurrencies();
+    const store = useStore();
+    const { currentCurrencyRate, getFormattedFiat, formatCurrency } = useCurrencies({ store });
 
     const price = computed(() => formatCurrency(currentCurrencyRate.value));
 

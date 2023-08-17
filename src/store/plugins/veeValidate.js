@@ -52,7 +52,7 @@ configure({
 
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
-  const { minTipAmount } = useCurrencies({ withoutPolling: true });
+  const { minTipAmount } = useCurrencies({ store, withoutPolling: true });
   const { getAeSdk } = useAeSdk({ store });
 
   const NAME_STATES = {

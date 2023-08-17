@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <Modal
-    class="transfer-send-modal"
+    class="transfer-send-modal color-warning"
     has-close-button
     from-bottom
     :body-without-padding-bottom="currentStep === STEPS.form"

@@ -172,6 +172,7 @@ import {
 import { useCurrencies } from '@/composables';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
+import { useStore } from 'vuex';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressTruncated from '../../components/AddressTruncated.vue';
 import Tokens from '../../components/Tokens.vue';
@@ -192,7 +193,8 @@ export default defineComponent({
     tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
   },
   setup(props) {
-    const { formatCurrency } = useCurrencies();
+    const store = useStore();
+    const { formatCurrency } = useCurrencies({ store });
 
     const displayDexUrl = AE_DEX_URL.replace('https://', '');
 

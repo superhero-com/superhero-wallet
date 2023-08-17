@@ -190,7 +190,7 @@ export default defineComponent({
     const { validate, setValues } = useForm();
 
     const { balance } = useBalances({ store });
-    const { currentCurrencyRate } = useCurrencies();
+    const { currentCurrencyRate } = useCurrencies({ store });
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;

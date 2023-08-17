@@ -8,16 +8,22 @@
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
+        :protocol="account.protocol"
         avatar-borderless
+        with-protocol-icon
       />
     </template>
 
     <template #middle>
-      <BalanceInfo :balance="numericBalance" />
+      <BalanceInfo
+        :balance="numericBalance"
+        :protocol="account.protocol"
+      />
     </template>
 
     <template #bottom>
       <AccountCardTotalTokens
+        v-if="account.protocol === PROTOCOL_AETERNITY"
         :current-account="account"
         :selected="selected"
       />
@@ -32,6 +38,7 @@ import {
   PropType,
 } from 'vue';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import type { IAccount } from '../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 import { useBalances } from '../../composables';
@@ -60,8 +67,9 @@ export default defineComponent({
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     return {
-      numericBalance,
       ROUTE_ACCOUNT_DETAILS,
+      PROTOCOL_AETERNITY,
+      numericBalance,
     };
   },
 });
