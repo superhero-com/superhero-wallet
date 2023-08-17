@@ -4,6 +4,10 @@ import type { IHdWalletAccount } from '@/types';
  *  Represents common attributes and behavior of a protocol
  */
 export abstract class BaseProtocolAdapter {
+  abstract getCoingeckoCoinId(): string;
+
+  abstract getCoinSymbol(getShort: boolean): string;
+
   abstract getBalance(address: string): Promise<string>;
 
   /**

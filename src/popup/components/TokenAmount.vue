@@ -41,6 +41,7 @@ import { computed, defineComponent } from 'vue';
 import { calculateFontSize } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   props: {
@@ -58,7 +59,8 @@ export default defineComponent({
     small: Boolean,
   },
   setup(props) {
-    const { getFormattedAndRoundedFiat } = useCurrencies();
+    const store = useStore();
+    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {

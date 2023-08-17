@@ -152,7 +152,7 @@ export default defineComponent({
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
     } = useAccounts({ store });
-    const { aeternityData } = useCurrencies();
+    const { aeternityData } = useCurrencies({ store });
     const { aeTokenBalance } = useTokensList({
       store,
       isMultisig: isMultisig.value,

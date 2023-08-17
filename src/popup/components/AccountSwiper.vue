@@ -64,6 +64,7 @@ import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
 import { getAddressColor } from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -126,6 +127,7 @@ export default defineComponent({
 
     return {
       IS_CORDOVA: process.env.IS_CORDOVA,
+      PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
       swiper,

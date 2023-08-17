@@ -103,7 +103,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies();
+    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
 
     let timerInterval: NodeJS.Timer;
     const transactionDate = ref();

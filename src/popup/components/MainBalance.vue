@@ -1,17 +1,24 @@
 <template>
-  <div class="ae-balance">
-    <span class="token-symbol">&aelig;</span>
+  <div class="main-balance">
+    <span class="token-symbol">{{ tokenSymbol }}</span>
     <span class="token-integer">{{ balanceParts.integer }}.</span>
     <span class="token-fractional">{{ balanceParts.fraction }}</span>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { Protocol } from '../../types';
 
 export default defineComponent({
   props: {
     balance: { type: Number, default: 0 },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const balanceParts = computed(() => {
@@ -22,7 +29,12 @@ export default defineComponent({
       };
     });
 
+    const tokenSymbol = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.protocol).getCoinSymbol(true),
+    );
+
     return {
+      tokenSymbol,
       balanceParts,
     };
   },
@@ -33,7 +45,7 @@ export default defineComponent({
 @use '../../styles/typography';
 @use '../../styles/variables';
 
-.ae-balance {
+.main-balance {
   display: flex;
   align-items: baseline;
 

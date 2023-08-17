@@ -1,4 +1,5 @@
-import { computed } from 'vue';
+import { computed, ComputedRef } from 'vue';
+import { uniq } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
@@ -7,6 +8,7 @@ import type {
   IDefaultComposableOptions,
   IFormSelectOption,
   INetwork,
+  Protocol,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { getAccountNameToDisplay } from '@/utils';
@@ -56,6 +58,10 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountFaucetUrl = computed(() => `${AE_FAUCET_URL}?address=${activeAccount.value.address}`);
 
+  const protocolsInUse: ComputedRef<Protocol[]> = computed(
+    () => uniq(accounts.value.map((account) => account.protocol)),
+  );
+
   function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
@@ -90,6 +96,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     activeAccountFaucetUrl,
     activeIdx,
     isLoggedIn,
+    protocolsInUse,
     prepareAccountSelectOptions,
     isLocalAccountAddress,
     getAccountByAddress,

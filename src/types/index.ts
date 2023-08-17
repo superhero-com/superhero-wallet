@@ -326,7 +326,7 @@ export interface ICurrency {
   symbol: string;
 }
 
-export type CurrencyRates = Record<CurrencyCode, number>;
+export type CurrencyRates = Record<Protocol, Record<CurrencyCode, number>>;
 
 export interface TxArguments {
   type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
