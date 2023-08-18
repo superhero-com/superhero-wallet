@@ -1,122 +1,73 @@
 <template>
-  <div class="transfer-review">
-    <ModalHeader
-      :title="isMultisig ? $t('modals.multisigTxProposal.title') : $t('pages.send.reviewtx')"
-      :subtitle="isMultisig ? null : $t('pages.send.checkalert')"
-    />
+  <TransferReviewBase
+    :title="isMultisig ? $t('modals.multisigTxProposal.title') : null"
+    :without-subtitle="isMultisig"
+    :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : null"
+    :base-token-symbol="AE_SYMBOL"
+    :transfer-data="transferData"
+    :loading="loading"
+    :avatar-name="isAddressChain ? transferData.address : null"
+    :show-fiat="isSelectedAssetAex9"
+    :protocol="PROTOCOL_AETERNITY"
+    class="transfer-review"
+  >
+    <template #subheader>
+      <div
+        v-if="isMultisig"
+        class="multisig-account"
+      >
+        <AccountItem :address="activeMultisigAccount.gaAccountId" />
+      </div>
+    </template>
 
-    <div
-      v-if="isMultisig"
-      class="multisig-account"
-    >
-      <AccountItem :address="activeMultisigAccount.gaAccountId" />
-    </div>
-
-    <DetailsItem
-      :label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : $t('pages.send.sender')"
-      data-cy="review-sender"
-    >
-      <template #value>
-        <AvatarWithChainName
-          :address="activeAccount.address"
-          :name="activeAccount.name"
-          :show-address="!isRecipientName"
-        />
-      </template>
-    </DetailsItem>
-
-    <DetailsItem
+    <template
       v-if="isAddressUrl"
-      data-cy="review-tip-url"
-      class="tip-url details-item"
-      :label="$t('pages.send.receivingUrl')"
-      :value="transferData.address"
-    />
-    <DetailsItem
-      v-else
-      class="details-item"
-      data-cy="review-recipient"
-      :label="$t('pages.send.recipient')"
+      #recipient
     >
-      <template #value>
-        <AvatarWithChainName
-          :address="transferData.address"
-          :name="isAddressChain ? transferData.address : null"
-          :show-address="!isAddressChain"
-        />
-      </template>
-    </DetailsItem>
+      <DetailsItem
+        data-cy="review-tip-url"
+        class="tip-url details-item"
+        :label="$t('pages.send.receivingUrl')"
+        :value="transferData.address"
+      />
+    </template>
 
-    <DetailsItem
-      :label="
-        (isMultisig)
-          ? $t('modals.multisigTxProposal.amountProposed')
-          : $t('common.amount')
-      "
-      class="details-item"
-    >
-      <template #value>
-        <TokenAmount
-          :amount="+transferData.amount"
-          :symbol="tokenSymbol"
-          :hide-fiat="isSelectedAssetAex9"
-        />
-      </template>
-    </DetailsItem>
+    <template #additional-fee>
+      <DetailsItem
+        v-if="isMultisig"
+        class="details-item"
+        :label="$t('modals.multisigTxProposal.fee')"
+      >
+        <template #value>
+          <!-- TODO provide correct fee for the multisig -->
+          <TokenAmount
+            :amount="PROPOSE_TRANSACTION_FEE"
+            :symbol="AE_SYMBOL"
+            hide-fiat
+            high-precision
+            data-cy="multisig-review-fee"
+          />
+        </template>
+      </DetailsItem>
+    </template>
 
-    <DetailsItem
-      v-if="isMultisig"
-      class="details-item"
-      :label="$t('modals.multisigTxProposal.fee')"
-    >
-      <template #value>
-        <!-- TODO provide correct fee for the multisig -->
-        <TokenAmount
-          :amount="PROPOSE_TRANSACTION_FEE"
-          :symbol="AE_SYMBOL"
-          hide-fiat
-          high-precision
-          data-cy="multisig-review-fee"
-        />
-      </template>
-    </DetailsItem>
-
-    <DetailsItem
-      class="details-item"
-      :label="$t('transaction.fee')"
-    >
-      <template #value>
-        <TokenAmount
-          :amount="+transferData.fee.toFixed()"
-          :symbol="AE_SYMBOL"
-          high-precision
-          data-cy="review-fee"
-        />
-      </template>
-    </DetailsItem>
-
-    <DetailsItem
-      v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
-      :label="$t('common.total')"
-      class="details-item"
-    >
-      <template #value>
-        <TokenAmount
-          :amount="+transferData.total"
-          :symbol="AE_SYMBOL"
-          high-precision
-          data-cy="review-total"
-        />
-      </template>
-    </DetailsItem>
-
-    <PayloadDetails
-      class="details-item"
-      :payload="transferData.payload"
-    />
-
-    <Loader v-if="loading" />
-  </div>
+    <template #total>
+      <DetailsItem
+        v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
+        :label="$t('common.total')"
+        class="details-item"
+      >
+        <template #value>
+          <TokenAmount
+            :amount="+transferData.total"
+            :symbol="AE_SYMBOL"
+            high-precision
+            data-cy="review-total"
+          />
+        </template>
+      </DetailsItem>
+    </template>
+  </TransferReviewBase>
 </template>
 
 <script lang="ts">
@@ -126,11 +77,15 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { ITransaction } from '@/types';
+import { useStore } from 'vuex';
+import {
+  encode,
+  Encoding,
+  Tag,
+} from '@aeternity/aepp-sdk';
+import type { TransferFormModel, ITransaction } from '@/types';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -138,59 +93,55 @@ import {
 } from '@/utils';
 import {
   useAccounts,
+  useAeSdk,
   useDeepLinkApi,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useAeSdk,
-  useUi,
   useTippingContracts,
   useTransactionList,
+  useUi,
 } from '@/composables';
+import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
-import { AE_CONTRACT_ID, AE_SYMBOL, TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { aeToAettos, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
 
-import { TransferFormModel } from './Modals/TransferSend.vue';
-
-import DetailsItem from './DetailsItem.vue';
-import TokenAmount from './TokenAmount.vue';
-import AvatarWithChainName from './AvatarWithChainName.vue';
-import ModalHeader from './ModalHeader.vue';
-import PayloadDetails from './PayloadDetails.vue';
-import AccountItem from './AccountItem.vue';
+import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
+import AccountItem from '@/popup/components/AccountItem.vue';
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
-  name: 'TransferReview',
+  name: 'AeTransferReview',
   components: {
-    AccountItem,
-    PayloadDetails,
-    ModalHeader,
-    AvatarWithChainName,
-    DetailsItem,
     TokenAmount,
+    DetailsItem,
+    TransferReviewBase,
+    AccountItem,
   },
   model: {
     prop: 'transferData',
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
-    isAddressChain: Boolean,
-    isAddressUrl: Boolean,
-    isMultisig: Boolean,
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
+    isMultisig: Boolean,
+    isAddressChain: Boolean,
+    isAddressUrl: Boolean,
   },
   setup(props, { emit }) {
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
+
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
-    const { activeAccount } = useAccounts({ store });
+    const { getAeSdk } = useAeSdk({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
-
+    const { activeAccount } = useAccounts({ store });
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
@@ -199,17 +150,13 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getAeSdk } = useAeSdk({ store });
-    const isRecipientName = computed(
-      () => props.recipientAddress && isAensNameValid(props.recipientAddress),
-    );
-    const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
-    const isSelectedAssetAex9 = computed(
-      () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
-    );
 
     // TODO provide correct fee for the multisig
     const PROPOSE_TRANSACTION_FEE = 0.000182940;
+
+    const isSelectedAssetAex9 = computed(
+      () => props.transferData?.selectedAsset?.contractId !== AE_CONTRACT_ID,
+    );
 
     function openTransactionFailedModal() {
       openDefaultModal({
@@ -430,16 +377,14 @@ export default defineComponent({
     }
 
     return {
-      AE_CONTRACT_ID,
+      PROTOCOL_AETERNITY,
+      isSelectedAssetAex9,
+      activeMultisigAccount,
       AE_SYMBOL,
+      AE_CONTRACT_ID,
       PROPOSE_TRANSACTION_FEE,
       loading,
       submit,
-      isRecipientName,
-      isSelectedAssetAex9,
-      tokenSymbol,
-      activeAccount,
-      activeMultisigAccount,
     };
   },
 });

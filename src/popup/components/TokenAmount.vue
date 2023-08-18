@@ -37,11 +37,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import { useStore } from 'vuex';
+import type { Protocol } from '@/types';
 import { calculateFontSize } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 export default defineComponent({
   props: {
@@ -57,10 +63,15 @@ export default defineComponent({
     highPrecision: Boolean,
     dynamicSizing: Boolean,
     small: Boolean,
+    // TODO - make required & remove default
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
   },
   setup(props) {
     const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
+    const { getFormattedAndRoundedFiat } = useCurrencies({
+      selectedProtocol: props.protocol,
+      store,
+    });
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {

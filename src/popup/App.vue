@@ -104,7 +104,7 @@ export default defineComponent({
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
-    const { loadAeternityData } = useCurrencies({ store, withoutPolling: true });
+    const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
@@ -193,7 +193,7 @@ export default defineComponent({
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([
-          loadAeternityData(),
+          loadCoinsData(),
           fetchAndSetChainNames(),
           setNotificationSettings(),
         ]);

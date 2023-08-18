@@ -51,7 +51,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
-          ae-only
+          readonly
         />
         <div class="centered-buttons">
           <BtnMain
@@ -87,16 +87,21 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import type { IFormModel } from '@/types';
 import { formatDate } from '@/utils';
-import { APP_LINK_WEB } from '@/constants';
+import {
+  APP_LINK_WEB,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
-  IFormModel,
   useBalances,
   useMaxAmount,
   useAeSdk,
+  useCurrencies,
 } from '@/composables';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
@@ -118,12 +123,15 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
+    const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
-    const { aeternityCoin } = useBalances({ store });
+    const { balance } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',
-      selectedAsset: aeternityCoin.value,
+      selectedAsset: ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData, +balance.value),
     });
     const { max } = useMaxAmount({ formModel, store });
 

@@ -27,10 +27,10 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
+import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import { useConnection, useCurrencies } from '@/composables';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { useStore } from 'vuex';
 import MainBalance from './MainBalance.vue';
 import MessageOffline from './MessageOffline.vue';
 

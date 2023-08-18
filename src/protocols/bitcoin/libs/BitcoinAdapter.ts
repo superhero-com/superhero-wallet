@@ -3,24 +3,48 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
 import { payments, networks } from 'bitcoinjs-lib';
-import type { IHdWalletAccount } from '@/types';
-import { MAXIMUM_ACCOUNTS_TO_DISCOVER } from '@/constants';
+import type {
+  IHdWalletAccount,
+  ICoin,
+  MarketData,
+} from '@/types';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import { MAXIMUM_ACCOUNTS_TO_DISCOVER, PROTOCOL_BITCOIN } from '@/constants';
 import {
+  BTC_COIN_NAME,
+  BTC_COIN_PRECISION,
   BTC_COINGECKO_COIN_ID,
+  BTC_CONTRACT_ID,
   BTC_SYMBOL,
-  BTC_SYMBOL_SHORT,
 } from '@/protocols/bitcoin/config';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
   bip32 = BIP32Factory(ecc);
 
-  override getCoingeckoCoinId() {
+  override getCoinSymbol() {
+    return BTC_SYMBOL;
+  }
+
+  override getCoinGeckoCoinId() {
     return BTC_COINGECKO_COIN_ID;
   }
 
-  override getCoinSymbol(getShort:boolean) {
-    return getShort ? BTC_SYMBOL_SHORT : BTC_SYMBOL;
+  override getDefaultAssetContractId() {
+    return BTC_CONTRACT_ID;
+  }
+
+  override getDefaultCoin(
+    marketData: MarketData,
+    convertedBalance?: number,
+  ): ICoin {
+    return {
+      ...(marketData?.[PROTOCOL_BITCOIN] || {}),
+      contractId: BTC_CONTRACT_ID,
+      symbol: BTC_SYMBOL,
+      decimals: BTC_COIN_PRECISION,
+      name: BTC_COIN_NAME,
+      convertedBalance,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

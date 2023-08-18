@@ -1,4 +1,4 @@
-import { computed, ComputedRef } from 'vue';
+import { computed } from 'vue';
 import { uniq } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
@@ -11,11 +11,11 @@ import type {
   Protocol,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { PROTOCOL_AETERNITY } from '@/constants';
 
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
@@ -58,8 +58,8 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   const activeAccountFaucetUrl = computed(() => `${AE_FAUCET_URL}?address=${activeAccount.value.address}`);
 
-  const protocolsInUse: ComputedRef<Protocol[]> = computed(
-    () => uniq(accounts.value.map((account) => account.protocol)),
+  const protocolsInUse = computed(
+    (): Protocol[] => uniq(accounts.value.map((account) => account.protocol)),
   );
 
   function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {

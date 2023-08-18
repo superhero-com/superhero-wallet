@@ -18,6 +18,7 @@
         <AccountItem
           :address="accountAddress"
           :name="accountName"
+          :protocol="protocol"
         />
       </div>
 
@@ -61,7 +62,7 @@
             :label="$t('modals.receive.requestAmount')"
             :message="errorMessage"
             :selected-asset="selectedAsset"
-            :ae-only="disableAssetSelection"
+            :readonly="disableAssetSelection"
             @asset-selected="handleAssetChange"
           />
         </Field>
@@ -104,6 +105,7 @@ import type {
   IToken,
   ITokenList,
   ResolveCallback,
+  Protocol,
 } from '@/types';
 import { IS_MOBILE_DEVICE } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
@@ -146,6 +148,7 @@ export default defineComponent({
     accountName: { type: String, default: null },
     tokens: { type: Object as PropType<ITokenList>, default: () => ({}) },
     disableAssetSelection: Boolean,
+    protocol: { type: String as PropType<Protocol>, default: null },
   },
   setup(props) {
     const store = useStore();

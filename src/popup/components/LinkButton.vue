@@ -5,6 +5,14 @@
     target="blank"
   >
     <slot />
+    <span
+      v-if="$slots.icon"
+      class="link-icon"
+    >
+      <slot
+        name="icon"
+      />
+    </span>
   </a>
 </template>
 
@@ -44,28 +52,38 @@ export default defineComponent({
   align-items: center;
   color: variables.$color-success;
 
-  :deep(svg) {
-    width: 24px;
-    height: 24px;
-    opacity: 0.44;
-    color: variables.$color-white;
+  .link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    :deep(svg) {
+      width: 24px;
+      height: 24px;
+      opacity: 0.44;
+      color: variables.$color-white;
+    }
   }
 
   &:hover {
     color: variables.$color-success-hover;
 
-    svg {
-      opacity: 1;
-      color: variables.$color-success;
+    .link-icon {
+      svg {
+        opacity: 1;
+        color: variables.$color-success;
+      }
     }
   }
 
   &:active {
     opacity: 0.7;
 
-    svg {
-      opacity: 0.7;
-      color: variables.$color-success;
+    .link-icon {
+      svg {
+        opacity: 0.7;
+        color: variables.$color-success;
+      }
     }
   }
 
@@ -73,16 +91,20 @@ export default defineComponent({
     text-decoration: none;
     color: rgba(variables.$color-white, 0.75);
 
-    svg {
-      opacity: 1;
-      color: rgba(variables.$color-white, 0.75);
+    .link-icon {
+      svg {
+        opacity: 1;
+        color: rgba(variables.$color-white, 0.75);
+      }
     }
 
     &:hover {
       color: variables.$color-white;
 
-      svg {
-        color: variables.$color-white;
+      .link-icon {
+        svg {
+          color: variables.$color-white;
+        }
       }
     }
   }

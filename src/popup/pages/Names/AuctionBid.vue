@@ -16,7 +16,7 @@
           v-model="amount"
           name="amount"
           :message="amountError || errorMessage"
-          ae-only
+          readonly
         />
       </Field>
       <div class="tx-details">
