@@ -40,7 +40,10 @@
     "tx": "Tx",
     "you": "You",
     "verifying": "Verifying",
-    "max": "MAX"
+    "max": "MAX",
+    "aeternity": "æternity",
+    "bitcoin": "Bitcoin",
+    "dogecoin": "Dogecoin"
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -112,6 +115,18 @@
     "waitingToBeSent": "Waiting to be sent..."
   },
   "modals": {
+    "createAccount": {
+      "title": "Add account",
+      "titleMultisig": "Add multisig vault",
+      "titleAeternityAccount": "Add æternity account",
+      "msg": "Please select blockchain to add an account address to.",
+      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
+      "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "btnSubtitle": "Derive another account from your seed",
+      "btnAeSubtitle": "Add æternity account",
+      "btnBtcSubtitle": "Add Bitcoin account",
+      "btnDogeSubtitle": "Add Dogecoin account"
+    },
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."
     },
@@ -153,12 +168,6 @@
     "accountLowBalance": {
       "title": "Insufficient funds",
       "msg": "You don’t have enough AE on your signing account to {action} this transaction."
-    },
-    "createAccount": {
-      "titleMultisig": "Add multisig vault",
-      "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
-      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "btnSubtitle": "Derive another account from your seed"
     },
     "createMultisigAccount": {
       "title": "Create new multisig vault",

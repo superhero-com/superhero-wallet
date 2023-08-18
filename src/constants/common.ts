@@ -318,6 +318,7 @@ export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_DEFAULT = 'default';
 export const MODAL_ACCOUNT_CREATE = 'account-create';
+export const MODAL_AE_ACCOUNT_CREATE = 'account-ae-create';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';

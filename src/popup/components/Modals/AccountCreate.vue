@@ -3,48 +3,42 @@
     class="account-create"
     from-bottom
     has-close-button
+    no-padding
     centered
     @close="resolve"
   >
-    <h2 class="text-heading-2">
-      {{
-        isMultisig
-          ? $t('modals.createAccount.titleMultisig')
-          : $t('pages.accounts.addAccount')
-      }}
-    </h2>
+    <div class="content-wrapper ">
+      <h2 class="text-heading-2">
+        {{ $t('modals.createAccount.title') }}
+      </h2>
 
-    <p class="message">
-      {{
-        isMultisig
-          ? $t('modals.createAccount.msgMultisig')
-          : $t('modals.createAccount.msg')
-      }}
-    </p>
+      <p class="message">
+        {{ $t('modals.createAccount.msg') }}
+      </p>
 
-    <BtnSubheader
-      v-if="!isMultisig"
-      :header="$t('pages.accounts.addAeternityAccount')"
-      :subheader="$t('modals.createAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      :disabled="!isOnline"
-      @click="createPlainAccount(PROTOCOL_AETERNITY)"
-    />
-    <BtnSubheader
-      v-if="!isMultisig"
-      :header="$t('pages.accounts.addBitcoinAccount')"
-      :subheader="$t('modals.createAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      :disabled="!isOnline"
-      @click="createPlainAccount(PROTOCOL_BITCOIN)"
-    />
-    <BtnSubheader
-      :header="$t('modals.createMultisigAccount.btnText')"
-      :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      :disabled="!isOnline"
-      @click="createMultisigAccount()"
-    />
+      <BtnSubheader
+        :header="$t('common.aeternity')"
+        :subheader="$t('modals.createAccount.btnAeSubtitle')"
+        :icon="iconAe"
+        @click="createAeAccount"
+      />
+      <BtnSubheader
+        :header="$t('common.bitcoin')"
+        :subheader="$t('modals.createAccount.btnBtcSubtitle')"
+        :icon="iconBtc"
+        :disabled="!isOnline"
+        @click="createBtcAccount"
+      />
+      <!-- TODO Remove v-if, when dogecoin will supported -->
+      <BtnSubheader
+        v-if="false"
+        :header="$t('common.dogecoin')"
+        :subheader="$t('modals.createAccount.btnDogeSubtitle')"
+        :icon="iconDoge"
+        :disabled="!isOnline"
+        @click="createDogeAccount"
+      />
+    </div>
 
     <Loader v-if="loading" />
   </Modal>
@@ -52,60 +46,65 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { useStore } from 'vuex';
-import type { Protocol } from '@/types';
 import {
-  MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_AE_ACCOUNT_CREATE,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
 } from '@/constants';
 import { useConnection, useModals } from '@/composables';
-
+import { useStore } from 'vuex';
+import Loader from '@/popup/components/Loader.vue';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
-import Loader from '../Loader.vue';
-import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
+import iconAe from '../../../icons/coin/aeternity.svg?vue-component';
+import iconBtc from '../../../icons/coin/bitcoin.svg?vue-component';
+import iconDoge from '../../../icons/coin/dogecoin.svg?vue-component';
 
 export default defineComponent({
   components: {
+    Loader,
     Modal,
     BtnSubheader,
-    Loader,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
-    isMultisig: Boolean,
   },
   setup(props) {
     const store = useStore();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-
     const loading = ref(false);
 
-    async function createPlainAccount(protocol: Protocol) {
+    async function createAeAccount() {
+      await openModal(MODAL_AE_ACCOUNT_CREATE);
+      props.resolve();
+    }
+
+    async function createBtcAccount() {
       loading.value = true;
       await store.dispatch('accounts/hdWallet/create', {
         isRestored: false,
-        protocol,
+        protocol: PROTOCOL_BITCOIN,
       });
       loading.value = false;
       props.resolve();
     }
 
-    async function createMultisigAccount() {
-      await openModal(MODAL_MULTISIG_VAULT_CREATE);
+    async function createDogeAccount() {
       props.resolve();
     }
 
     return {
       PROTOCOL_AETERNITY,
       PROTOCOL_BITCOIN,
-      PlusCircleIcon,
       isOnline,
+      iconAe,
+      iconBtc,
+      iconDoge,
       loading,
-      createPlainAccount,
-      createMultisigAccount,
+      createAeAccount,
+      createBtcAccount,
+      createDogeAccount,
     };
   },
 });
@@ -115,11 +114,15 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .account-create {
+  .content-wrapper {
+    padding: 0 16px 32px;
+  }
+
   .message {
     @extend %face-sans-16-medium;
 
+    padding-inline: inherit;
     line-height: 24px;
-    max-width: 280px;
     margin: 0 auto 36px;
   }
 }
