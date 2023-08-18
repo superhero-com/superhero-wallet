@@ -73,14 +73,14 @@ import {
 import {
   defineComponent,
   onUnmounted,
+  onMounted,
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { Field } from 'vee-validate';
-import { handleUnknownError } from '@/utils';
+import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
 import { useAeSdk, useModals } from '../../composables';
-
 import InputField from '../components/InputField.vue';
 import AppsBrowserHeader from '../components/AppsBrowserHeader.vue';
 import BtnIcon from '../components/buttons/BtnIcon.vue';
@@ -162,8 +162,8 @@ export default defineComponent({
 
     function refresh() {
       if (!iframeRef.value || !selectedApp.value) return;
-      // TODO: bypass cross origin
-      iframeRef.value.contentWindow.window.location.reload();
+      setLocalStorageItem(['selectedApp'], selectedApp.value);
+      window.location.reload();
     }
 
     function onSelectApp(app: any) {
@@ -172,6 +172,13 @@ export default defineComponent({
       }, () => { });
     }
 
+    onMounted(() => {
+      const isAppSelected = getLocalStorageItem(['selectedApp']);
+      if (isAppSelected) {
+        selectedApp.value = isAppSelected;
+        setLocalStorageItem(['selectedApp'], null);
+      }
+    });
     onUnmounted(() => {
       if (shareWalletInfoInterval) {
         clearInterval(shareWalletInfoInterval);
