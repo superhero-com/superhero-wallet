@@ -20,8 +20,8 @@ import {
 
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type {
-  IAsset,
   IDefaultComposableOptions,
+  IFormModel,
 } from '@/types';
 import {
   executeAndSetInterval,
@@ -42,12 +42,6 @@ import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
-export interface IFormModel {
-  amount?: string;
-  selectedAsset?: IAsset;
-  address?: Encoded.AccountAddress;
-  payload?: string;
-}
 export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
 }

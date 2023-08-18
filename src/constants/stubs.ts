@@ -24,6 +24,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_SIGN,
+  PROTOCOL_AETERNITY,
 } from './common';
 
 export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
@@ -35,6 +36,7 @@ export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMM
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
+  protocol: PROTOCOL_AETERNITY,
 };
 
 export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';

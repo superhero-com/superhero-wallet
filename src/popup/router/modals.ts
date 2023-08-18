@@ -1,31 +1,32 @@
 import {
-  MODAL_DEFAULT,
   MODAL_ACCOUNT_CREATE,
   MODAL_AE_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
+  MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_CONFIRM,
-  MODAL_CONFIRM_TRANSACTION_SIGN,
-  MODAL_CONFIRM_RAW_SIGN,
-  MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
+  MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  MODAL_CONSENSUS_INFO,
+  MODAL_DEFAULT,
   MODAL_ERROR_LOG,
   MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
-  MODAL_READ_QR_CODE,
   MODAL_MESSAGE_SIGN,
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_RESET_WALLET,
-  MODAL_TRANSFER_SEND,
-  MODAL_RECIPIENT_INFO,
-  MODAL_RECIPIENT_HELPER,
-  MODAL_CONSENSUS_INFO,
-  MODAL_PAYLOAD_FORM,
-  MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  MODAL_ACCOUNT_SELECT_OPTIONS,
+  MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_PAYLOAD_FORM,
+  MODAL_READ_QR_CODE,
+  MODAL_RECIPIENT_HELPER,
+  MODAL_RECIPIENT_INFO,
+  MODAL_RESET_WALLET,
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
+  PROTOCOL_VIEW_TRANSFER_SEND,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -44,7 +45,6 @@ import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
 import ResetWallet from '../components/Modals/ResetWallet.vue';
-import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
@@ -110,7 +110,8 @@ export default () => {
     viewComponentName: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   });
   registerModal(MODAL_TRANSFER_SEND, {
-    component: TransferSend,
+    component: ProtocolSpecificView,
+    viewComponentName: PROTOCOL_VIEW_TRANSFER_SEND,
   });
   registerModal(MODAL_ASSET_SELECTOR, {
     component: AssetSelector,

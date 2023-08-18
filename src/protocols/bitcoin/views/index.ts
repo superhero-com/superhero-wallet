@@ -13,6 +13,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "btc-transfer-receive-modal" */
     './TransferReceiveModal.vue'
   ),
+  TransferSendModal: () => import(
+    /* webpackChunkName: "btc-transfer-send-modal" */
+    './TransferSendModal.vue'
+  ),
 };
 
 export default protocolViews;

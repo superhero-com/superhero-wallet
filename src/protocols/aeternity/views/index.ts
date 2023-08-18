@@ -13,6 +13,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "ae-transfer-receive-modal" */
     './TransferReceiveModal.vue'
   ),
+  TransferSendModal: () => import(
+    /* webpackChunkName: "ae-transfer-send-modal" */
+    './TransferSendModal.vue'
+  ),
 };
 
 export default protocolViews;

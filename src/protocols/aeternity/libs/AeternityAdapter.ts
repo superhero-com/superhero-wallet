@@ -1,27 +1,52 @@
 /* eslint-disable class-methods-use-this */
-
 import {
   Encoded,
   getHdWalletAccountFromSeed,
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import type { IHdWalletAccount } from '@/types';
+import type {
+  IHdWalletAccount,
+  ICoin,
+  MarketData,
+} from '@/types';
 import { useAeSdk } from '@/composables/aeSdk';
-import { MAXIMUM_ACCOUNTS_TO_DISCOVER } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import { MAXIMUM_ACCOUNTS_TO_DISCOVER, PROTOCOL_AETERNITY } from '@/constants';
 import {
+  AE_COIN_NAME,
+  AE_COIN_PRECISION,
   AE_COINGECKO_COIN_ID,
+  AE_CONTRACT_ID,
   AE_SYMBOL,
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
 
 export class AeternityAdapter extends BaseProtocolAdapter {
-  override getCoingeckoCoinId() {
+  override getCoinSymbol(getShort = false) {
+    return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
+  }
+
+  override getCoinGeckoCoinId() {
     return AE_COINGECKO_COIN_ID;
   }
 
-  override getCoinSymbol(getShort: boolean) {
-    return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
+  override getDefaultAssetContractId() {
+    return AE_CONTRACT_ID;
+  }
+
+  override getDefaultCoin(
+    marketData: MarketData,
+    convertedBalance?: number,
+  ): ICoin {
+    return {
+      ...(marketData?.[PROTOCOL_AETERNITY] || {}),
+      contractId: AE_CONTRACT_ID,
+      // TODO - check usages why sometimes it's a bignumber
+      decimals: AE_COIN_PRECISION,
+      name: AE_COIN_NAME,
+      symbol: AE_SYMBOL,
+      convertedBalance,
+    };
   }
 
   override async getBalance(address: Encoded.AccountAddress): Promise<string> {

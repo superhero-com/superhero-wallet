@@ -188,19 +188,25 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
   });
 }
 
-export function secondsToRelativeTime(seconds: number) {
+export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {
   const { t } = useI18n();
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
   if (seconds < secondsPerMinute) {
-    return t('common.seconds', Math.round(seconds));
+    return (shortForm)
+      ? t('common.secondsShort', Math.round(seconds))
+      : t('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return t('common.minutes', Math.round(seconds / secondsPerMinute));
+    return (shortForm)
+      ? t('common.minutesShort', Math.round(seconds / secondsPerMinute))
+      : t('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return t('common.hours', Math.round(seconds / secondsPerHour));
+    return (shortForm)
+      ? t('common.hoursShort', Math.round(seconds / secondsPerHour))
+      : t('common.hours', Math.round(seconds / secondsPerHour));
   }
   return t('common.days', Math.round(seconds / secondsPerDay));
 }

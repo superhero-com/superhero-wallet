@@ -47,15 +47,17 @@ export class CoinGecko {
    * Obtain all the coin market data (price, market cap, volume, etc...)
    */
   static async fetchCoinMarketData(
-    coinId: string,
+    coinIds: string,
     currencyCode: string,
   ): Promise<CoinGeckoMarketResponse[] | null> {
     try {
       const marketData = (await CoinGecko.fetchFromApi<any[]>('/coins/markets', {
-        ids: coinId,
+        ids: coinIds,
         vs_currency: currencyCode,
       })) || [];
-      return marketData ? camelCaseKeysDeep(marketData) as CoinGeckoMarketResponse[] : null;
+      return (marketData)
+        ? camelCaseKeysDeep(marketData) as CoinGeckoMarketResponse[]
+        : null;
     } catch (error) {
       return null;
     }
@@ -64,10 +66,10 @@ export class CoinGecko {
   /**
    * Obtain all the coin rates for the currencies used in the app.
    */
-  static async fetchCoinCurrencyRates(coinIds: string[]): Promise<CurrencyRates | null> {
+  static async fetchCoinCurrencyRates(coinIds: string): Promise<CurrencyRates | null> {
     try {
       return (await CoinGecko.fetchFromApi('/simple/price', {
-        ids: coinIds.join(','),
+        ids: coinIds,
         vs_currencies: CURRENCIES.map(({ code }) => code).join(','),
       }) as any);
     } catch (error) {

@@ -94,7 +94,7 @@ import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '@/types';
-import { IS_IOS } from '@/constants';
+import { IS_IOS, PROTOCOL_AETERNITY } from '@/constants';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -105,13 +105,14 @@ import {
 } from '@/popup/router/routeNames';
 import {
   useAccounts,
-  useCurrencies,
   useAeSdk,
+  useCurrencies,
   useTokensList,
 } from '@/composables';
 import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -152,11 +153,11 @@ export default defineComponent({
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
     } = useAccounts({ store });
-    const { aeternityData } = useCurrencies({ store });
     const { aeTokenBalance } = useTokensList({
       store,
       isMultisig: isMultisig.value,
     });
+    const { marketData } = useCurrencies({ store });
 
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
@@ -194,10 +195,9 @@ export default defineComponent({
 
     const tokenData = computed((): IToken => {
       if (isAe) {
-        return {
-          ...aeternityData.value!,
-          convertedBalance: aeTokenBalance.value.toNumber(),
-        };
+        return ProtocolAdapterFactory
+          .getAdapter(PROTOCOL_AETERNITY)
+          .getDefaultCoin(marketData, aeTokenBalance.value.toNumber());
       }
       return tokenBalances.value.find(
         (token) => token.contractId === contractId,

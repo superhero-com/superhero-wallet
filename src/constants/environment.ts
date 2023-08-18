@@ -57,3 +57,5 @@ export const IS_MOBILE_DEVICE = userAgentLowerCase.includes('mobi');
 export const IS_CHROME_BASED = userAgentLowerCase.includes('chrome');
 
 export const IS_FIREFOX = userAgentLowerCase.includes('firefox');
+
+export const IS_PRODUCTION = process.env.NODE_ENV === 'production';

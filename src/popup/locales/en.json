@@ -21,7 +21,9 @@
     "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet.",
     "hashCopied": "Hash copied",
     "hours": "{n} hours | {n} hour | {n} hours",
+    "hoursShort": "{n} h",
     "minutes": "{n} minutes | {n} minute | {n} minutes",
+    "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
     "nonce": "Nonce",
     "of": "of",
@@ -31,6 +33,7 @@
     "receive": "Receive",
     "search": "Search",
     "seconds": "{n} seconds | {n} second | {n} seconds",
+    "secondsShort": "{n} s",
     "send": "Send",
     "smartContract": "Smart contract",
     "swap": "Swap",
@@ -43,7 +46,12 @@
     "max": "MAX",
     "aeternity": "æternity",
     "bitcoin": "Bitcoin",
-    "dogecoin": "Dogecoin"
+    "dogecoin": "Dogecoin",
+    "transferSpeed": {
+      "fast": "Fast",
+      "medium": "Medium",
+      "slow": "Slow"
+    }
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -318,11 +326,15 @@
     },
     "send": {
       "sendTitle": "Send funds",
+      "sendBtc": "Send Bitcoin",
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
+      "recipientPlaceholderBtc": "Enter Bitcoin public address",
+      "transactionSpeed": "Transaction speed",
+      "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
       "payload": "Payload"
     },
     "multisigTxProposal": {

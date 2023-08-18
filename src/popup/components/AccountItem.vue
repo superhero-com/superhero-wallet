@@ -5,12 +5,23 @@
     class="account-item"
     variant="muted"
   >
-    <Avatar
-      :address="address"
-      :name="name"
-      size="sm"
-    />
-
+    <div
+      class="avatar-wrapper"
+      :class="{ 'has-protocol-icon': protocol }"
+    >
+      <Avatar
+        :address="address"
+        :name="name"
+        :class="{ avatar: protocol }"
+        size="sm"
+      />
+      <ProtocolIcon
+        v-if="protocol"
+        :protocol="protocol"
+        icon-size="sm"
+        class="protocol-icon"
+      />
+    </div>
     <span
       v-if="name"
       class="name"
@@ -26,13 +37,15 @@
       :address="address"
     />
 
-    <ExternalLinkIcon class="external-link-icon" />
+    <template #icon>
+      <ExternalLinkIcon class="external-link-icon" />
+    </template>
   </LinkButton>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import type { INetwork } from '@/types';
+import { defineComponent, computed, PropType } from 'vue';
+import type { INetwork, Protocol } from '@/types';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useGetter } from '@/composables/vuex';
 
@@ -40,6 +53,7 @@ import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';
 import LinkButton from './LinkButton.vue';
 import Truncate from './Truncate.vue';
+import ProtocolIcon from './ProtocolIcon.vue';
 
 import ExternalLinkIcon from '../../icons/external-link.svg?vue-component';
 
@@ -49,6 +63,7 @@ type SizeType = typeof SIZE[number]
 
 export default defineComponent({
   components: {
+    ProtocolIcon,
     Avatar,
     AddressTruncated,
     ExternalLinkIcon,
@@ -58,6 +73,7 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, default: null },
     size: {
       type: String,
       default: 'rg',
@@ -87,8 +103,20 @@ export default defineComponent({
   display: flex;
   align-items: center;
 
-  .avatar {
+  .avatar-wrapper {
+    position: relative;
+    display: flex;
     margin-right: 4px;
+
+    &.has-protocol-icon {
+      margin-right: 8px;
+    }
+
+    .protocol-icon {
+      position: absolute;
+      bottom: 0;
+      right: -4px;
+    }
   }
 
   .name,
@@ -111,7 +139,8 @@ export default defineComponent({
 
   .external-link-icon {
     flex-shrink: 0;
-    margin-top: -2px; // Compensate the icon position
+    margin-top: -4px; // Compensate the icon position
+    margin-left: -4px;
     width: 22px;
     height: 22px;
   }

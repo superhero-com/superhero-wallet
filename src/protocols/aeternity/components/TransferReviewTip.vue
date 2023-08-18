@@ -80,12 +80,12 @@ import { AGGREGATOR_URL } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
 
-import ModalHeader from './ModalHeader.vue';
-import TokenAmount from './TokenAmount.vue';
-import FormTextarea from './form/FormTextarea.vue';
-import Avatar from './Avatar.vue';
-import Truncate from './Truncate.vue';
-import AddressTruncated from './AddressTruncated.vue';
+import ModalHeader from '@/popup/components/ModalHeader.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import FormTextarea from '@/popup/components/form/FormTextarea.vue';
+import Avatar from '@/popup/components/Avatar.vue';
+import Truncate from '@/popup/components/Truncate.vue';
+import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 
 export default {
   name: 'TransferReviewTip',
@@ -157,9 +157,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .review-tip-wrapper {
   .account-info {

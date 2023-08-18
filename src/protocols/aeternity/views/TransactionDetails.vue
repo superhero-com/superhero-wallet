@@ -27,7 +27,9 @@
         <div class="explorer">
           <LinkButton :to="explorerUrl">
             {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
+            <template #icon>
+              <ExternalLink />
+            </template>
           </LinkButton>
         </div>
         <div class="data-grid">

@@ -29,7 +29,7 @@
         v-model="formModel.amount"
         name="amount"
         class="amount-input"
-        ae-only
+        readonly
         :message="errorMessage"
       />
     </Field>
@@ -74,6 +74,7 @@ import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import type {
+  IFormModel,
   IToken,
   ITransaction,
 } from '@/types';
@@ -81,15 +82,17 @@ import { toShiftedBigNumber } from '@/utils';
 import {
   useDeepLinkApi,
   useMaxAmount,
-  IFormModel,
   useBalances,
   useModals,
   useAccounts,
   useTippingContracts,
   useAeSdk,
+  useCurrencies,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -118,9 +121,10 @@ export default defineComponent({
 
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
+    const { marketData } = useCurrencies({ store });
     const { activeAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
-    const { balance, aeternityCoin } = useBalances({ store });
+    const { balance } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
 
@@ -211,7 +215,9 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = aeternityCoin.value;
+      formModel.value.selectedAsset = ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
 
