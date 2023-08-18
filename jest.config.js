@@ -19,6 +19,7 @@ module.exports = {
   },
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',
+    '<rootDir>/src/protocols/registerAdapters.ts',
   ],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
