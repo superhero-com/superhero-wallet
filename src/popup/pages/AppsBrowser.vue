@@ -3,7 +3,7 @@
     <AppsBrowserHeader
       :selected-app="selectedApp"
       :i-frame="iframeRef"
-      @back="selectedApp = null"
+      @back="back()"
       @refresh="refresh()"
     />
     <div v-if="!selectedApp">
@@ -12,6 +12,7 @@
         v-model="customAppURL"
         name="customAppURL"
         :rules="{
+          required: true,
           url: customAppURL.length > 0 ? true : false,
         }"
       >
@@ -20,9 +21,14 @@
           :model-value="customAppURL"
           class="input-url"
           type="url"
+          show-message-help
           :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
           :message="errorMessage"
-          @keydown.enter="onSelectApp({ url: customAppURL })"
+          @keydown.enter.stop="
+            customAppURL.length > 0 &&
+              !errorMessage &&
+              onSelectApp({ url: customAppURL })
+          "
         >
           <template #after="{ focused }">
             <Component
@@ -172,6 +178,11 @@ export default defineComponent({
       }, () => { });
     }
 
+    function back() {
+      selectedApp.value = null;
+      customAppURL.value = '';
+    }
+
     onMounted(() => {
       const isAppSelected = getLocalStorageItem(['selectedApp']);
       if (isAppSelected) {
@@ -195,6 +206,7 @@ export default defineComponent({
       onAppLoaded,
       CloseIcon,
       GlobeSmallIcon,
+      back,
     };
   },
 });
