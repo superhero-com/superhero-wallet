@@ -1,4 +1,5 @@
-import '../lib/initPolyfills';
+import '@/lib/initPolyfills';
+import '@/protocols/registerAdapters';
 import { createApp } from 'vue';
 import store from '../store';
 import router from './router';

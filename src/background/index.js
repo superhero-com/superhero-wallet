@@ -1,4 +1,5 @@
 import '../lib/initPolyfills';
+import '@/protocols/registerAdapters';
 import initDeeplinkHandler from './deeplinkHandler';
 import * as wallet from './wallet';
 import Logger from '../lib/logger';
