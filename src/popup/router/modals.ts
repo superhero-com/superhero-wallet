@@ -1,6 +1,7 @@
 import {
   MODAL_DEFAULT,
   MODAL_ACCOUNT_CREATE,
+  MODAL_AE_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
@@ -31,6 +32,7 @@ import { useModals } from '@/composables';
 import Default from '../components/Modals/Default.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
+import AeternityAccountCreate from '../components/Modals/AeternityAccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
@@ -133,5 +135,8 @@ export default () => {
   });
   registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
+  });
+  registerModal(MODAL_AE_ACCOUNT_CREATE, {
+    component: AeternityAccountCreate,
   });
 };
