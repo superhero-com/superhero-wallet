@@ -47,7 +47,7 @@ const router = createRouter({
 
 const lastRouteKey = 'last-path';
 
-const { isLoggedIn, activeAccount } = useAccounts({ store });
+const { isLoggedIn, activeAccount, setActiveAccountByIdx } = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router, isLoggedIn);
@@ -77,7 +77,8 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.name === ROUTE_APPS_BROWSER && activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-    next({ name: ROUTE_ACCOUNT });
+    setActiveAccountByIdx(0);
+    next({ name: ROUTE_APPS_BROWSER });
     return;
   }
 
