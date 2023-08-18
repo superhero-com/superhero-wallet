@@ -31,6 +31,7 @@ export const PROTOCOLS = [
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
 export const PROTOCOL_VIEW_TRANSACTION_DETAILS = 'TransactionDetails';
 export const PROTOCOL_VIEW_TRANSFER_RECEIVE = 'TransferReceiveModal';
+export const PROTOCOL_VIEW_TRANSFER_SEND = 'TransferSendModal';
 
 /**
  * Components (names) required to be present in every protocol.
@@ -39,6 +40,7 @@ export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
+  PROTOCOL_VIEW_TRANSFER_SEND,
 ] as const;
 
 export const SEED_LENGTH = 12;
@@ -396,3 +398,9 @@ export const ALLOWED_ICON_STATUSES = [
   'success',
   'warning',
 ] as const;
+
+export const TRANSFER_SEND_STEPS = {
+  form: 'form',
+  review: 'review',
+  reviewTip: 'tip',
+} as const;

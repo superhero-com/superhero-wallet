@@ -1,11 +1,11 @@
 <template>
   <div class="address-truncated">
     <div class="address-truncated-chunks">
-      <span>{{ truncatedAddress[0] }}</span>
+      <span class="address-chunk">{{ truncatedAddress[0] }}</span>
       <span class="dots">
         &middot;&middot;&middot;
       </span>
-      <span>{{ truncatedAddress[1] }}</span>
+      <span class="address-chunk">{{ truncatedAddress[1] }}</span>
     </div>
 
     <LinkButton
@@ -14,7 +14,9 @@
       target="_blank"
       class="external-link"
     >
-      <ExternalLinkIcon class="external-link-icon" />
+      <template #icon>
+        <ExternalLinkIcon class="external-link-icon" />
+      </template>
     </LinkButton>
   </div>
 </template>
@@ -67,7 +69,7 @@ export default defineComponent({
     @extend %face-mono-12-medium;
 
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 2px;
     letter-spacing: 0.07em;
@@ -79,6 +81,11 @@ export default defineComponent({
       text-align: center;
       margin-left: -1px;
       margin-right: 3px;
+    }
+
+    .address-chunk,
+    .dots {
+      white-space: nowrap;
     }
   }
 

@@ -18,6 +18,7 @@ import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   POPUP_TYPES,
+  TRANSFER_SEND_STEPS,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
 import type { RejectedByUserError } from '@/lib/errors';
@@ -28,6 +29,7 @@ import {
   TX_FUNCTIONS_MULTISIG,
   TX_RETURN_TYPES,
 } from '@/protocols/aeternity/config';
+import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { Protocol } from './protocols';
 
 export * from './cordova';
@@ -125,7 +127,9 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: Encoded.ContractAddress | typeof AE_CONTRACT_ID;
+  contractId: Encoded.ContractAddress
+    | typeof AE_CONTRACT_ID
+    | typeof BTC_CONTRACT_ID
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -665,3 +669,24 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
     amount: number
   ) => Encoded.TxHash;
 }
+
+export interface IFormModel {
+  amount?: string;
+  selectedAsset?: IAsset;
+  address?: Encoded.AccountAddress;
+  payload?: string;
+}
+
+export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER_SEND_STEPS.review
+export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
+
+export interface TransferFormModel extends IFormModel {
+  fee?: BigNumber
+  total?: number
+  invoiceContract?: any
+  invoiceId?: any
+  note?: string
+  payload: string
+}
+
+export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;

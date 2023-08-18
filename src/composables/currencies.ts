@@ -1,36 +1,24 @@
-import {
-  computed,
-  ref,
-  watch,
-} from 'vue';
-import BigNumber from 'bignumber.js';
+import { computed, ref, watch } from 'vue';
+import { difference, isEmpty } from 'lodash-es';
 import type {
   CurrencyCode,
   CurrencyRates,
-  ICoin,
   ICurrency,
+  IDefaultComposableOptions,
   Protocol,
+  MarketData,
 } from '@/types';
-import {
-  CURRENCIES,
-  PROTOCOL_AETERNITY,
-} from '@/constants';
+import { CURRENCIES, PROTOCOL_AETERNITY } from '@/constants';
 import {
   getLocalStorageItem,
   handleUnknownError,
   setLocalStorageItem,
+  watchUntilTruthy,
 } from '@/utils';
-import {
-  AE_COINGECKO_COIN_ID,
-  AE_TOKEN_BASE_DATA,
-} from '@/protocols/aeternity/config';
-
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccounts } from '@/composables/accounts';
-import { IDefaultComposableOptions } from '@/types';
-import { difference } from 'lodash-es';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { CoinGecko } from '../lib/CoinGecko';
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 export interface UseCurrenciesOptions extends IDefaultComposableOptions {
   withoutPolling?: boolean;
@@ -44,7 +32,7 @@ const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
 /**
  * AE Coin details with additional market info
  */
-const aeternityData = ref<ICoin>();
+const marketData = ref<MarketData | null>(null);
 
 /**
  * Stores the list of currencies with the AE coin fiat exchange rate for each of them.
@@ -61,10 +49,9 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 export function useCurrencies({
   withoutPolling = false,
   store,
-  selectedProtocol = PROTOCOL_AETERNITY, // TODO - remove default value
+  selectedProtocol = PROTOCOL_AETERNITY, // TODO - remove default value & make the protocol required
 }: UseCurrenciesOptions) {
   const { protocolsInUse } = useAccounts({ store });
-
   const minTipAmount = computed(() => 0.01 / (currencyRates.value?.[selectedProtocol].usd || 1));
   const currentCurrencyRate = computed(
     (): number => currencyRates.value?.[selectedProtocol]?.[currentCurrencyCode.value] || 0,
@@ -73,39 +60,48 @@ export function useCurrencies({
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );
 
-  function getCoingeckoCoinIdList() {
+  function getCoinGeckoCoinIdList() {
     return protocolsInUse.value.map(
-      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).getCoingeckoCoinId(),
-    );
+      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).getCoinGeckoCoinId(),
+    ).join(',');
   }
 
-  async function loadAeternityData() {
+  async function loadCoinsData() {
     try {
-      const aeMarketData = await CoinGecko.fetchCoinMarketData(
-        AE_COINGECKO_COIN_ID,
+      await watchUntilTruthy(() => store.state.isRestored);
+
+      const fetchedMarketData = await CoinGecko.fetchCoinMarketData(
+        getCoinGeckoCoinIdList(),
         currentCurrencyCode.value,
+      ) || [];
+
+      const convertedMarketData = fetchedMarketData.reduce(
+        (o, currentValue, index) => {
+          const protocol = protocolsInUse.value[index];
+          return { ...o, [protocol]: currentValue };
+        },
+        {},
       );
 
-      aeternityData.value = {
-        ...aeMarketData || {} as any,
-        ...AE_TOKEN_BASE_DATA,
-        convertedBalance: new BigNumber(0),
-      };
+      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData;
     } catch (e) {
       handleUnknownError(e);
-      aeternityData.value = undefined;
+      marketData.value = null;
     }
   }
 
   function setCurrentCurrency(currency: CurrencyCode) {
     currentCurrencyCode.value = currency;
-    loadAeternityData();
+    loadCoinsData();
     setLocalStorageItem([LOCAL_STORAGE_CURRENCY_KEY], currency);
   }
 
   async function loadCurrencyRates() {
     isLoadingCurrencies.value = true;
-    const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(getCoingeckoCoinIdList());
+
+    const fetchedCurrencyRates = await CoinGecko.fetchCoinCurrencyRates(
+      getCoinGeckoCoinIdList(),
+    );
 
     if (fetchedCurrencyRates) {
       currencyRates.value = fetchedCurrencyRates;
@@ -165,14 +161,14 @@ export function useCurrencies({
   });
 
   return {
-    aeternityData,
     CURRENCIES,
+    marketData,
     minTipAmount,
     currencyRates,
     currentCurrencyCode,
     currentCurrencyRate,
     currentCurrencyInfo,
-    loadAeternityData,
+    loadCoinsData,
     loadCurrencyRates,
     setCurrentCurrency,
     formatCurrency,

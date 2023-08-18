@@ -22,7 +22,7 @@
           name="amount"
           :label="$t('pages.invite.tip-attached')"
           :message="errorMessage"
-          ae-only
+          readonly
           :selected-asset="formModel.selectedAsset"
           @asset-selected="(val) => formModel.selectedAsset = val"
         />
@@ -60,12 +60,15 @@ import { Field } from 'vee-validate';
 import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
 import { useStore } from 'vuex';
+import type { IFormModel } from '@/types';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useState } from '../../composables/vuex';
 import {
   useBalances,
   useAeSdk,
   useMaxAmount,
-  IFormModel,
+  useCurrencies,
 } from '../../composables';
 
 import InputAmount from '../components/InputAmount.vue';
@@ -87,12 +90,15 @@ export default defineComponent({
     const store = useStore();
     const loading = ref(false);
 
+    const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
-    const { balance, aeternityCoin } = useBalances({ store });
+    const { balance } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',
-      selectedAsset: aeternityCoin.value,
+      selectedAsset: ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData, +balance.value),
     });
 
     const { max, fee } = useMaxAmount({ formModel, store });

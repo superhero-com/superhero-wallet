@@ -35,7 +35,9 @@
             underlined
           >
             {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
+            <template #icon>
+              <ExternalLink />
+            </template>
           </LinkButton>
         </div>
         <div class="data-grid">

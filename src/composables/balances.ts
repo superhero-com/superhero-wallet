@@ -4,14 +4,9 @@ import BigNumber from 'bignumber.js';
 import type {
   Balance,
   BalanceRaw,
-  ICoin,
   IDefaultComposableOptions,
 } from '@/types';
 import { handleUnknownError, isNotFoundError } from '@/utils';
-import {
-  AE_SYMBOL,
-  AE_CONTRACT_ID,
-} from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
@@ -19,7 +14,6 @@ import {
   createPollingBasedOnMountedComponents,
   createStorageRef,
 } from './composablesHelpers';
-import { useCurrencies } from './currencies';
 import { useAccounts } from './accounts';
 
 type Balances = Record<string, Balance>;
@@ -42,7 +36,6 @@ const { useStorageRef } = createStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_
  * to live update the values. If no components are using it the polling stops.
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
-  const { aeternityData } = useCurrencies({ store });
   const { activeAccount, accounts } = useAccounts({ store });
 
   const balances = useStorageRef(store);
@@ -53,13 +46,6 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       .reduce((total, key) => total.plus(balances.value[key]), new BigNumber(0))
       .toFixed(),
   );
-
-  const aeternityCoin = computed((): ICoin => ({
-    ...aeternityData.value!,
-    contractId: AE_CONTRACT_ID,
-    convertedBalance: +balance.value,
-    symbol: AE_SYMBOL,
-  }));
 
   function getAccountBalance(address: string) {
     return balances.value[address] || new BigNumber(0);
@@ -97,7 +83,6 @@ export function useBalances({ store }: IDefaultComposableOptions) {
   initPollingWatcher(() => updateBalances());
 
   return {
-    aeternityCoin,
     balances,
     balancesTotal,
     balance,

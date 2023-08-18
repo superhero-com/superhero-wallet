@@ -97,7 +97,7 @@
             name="transactionSignLimit"
             label=" "
             :selected-asset="selectedAsset"
-            ae-only
+            readonly
           />
         </Field>
 

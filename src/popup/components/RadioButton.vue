@@ -17,7 +17,12 @@
       >
     </span>
 
-    <slot class="radio-holder" />
+    <span
+      class="radio-holder"
+      :class="{ checked: value }"
+    >
+      <slot />
+    </span>
   </label>
 </template>
 
@@ -99,6 +104,14 @@ export default defineComponent({
         height: 14px;
         opacity: 1;
       }
+    }
+  }
+
+  .radio-holder {
+    opacity: 0.5;
+
+    &.checked {
+      opacity: 1;
     }
   }
 }

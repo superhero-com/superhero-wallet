@@ -17,7 +17,7 @@
     </template>
     <template #after="{ focused }">
       <InputSelectAsset
-        v-if="!aeOnly"
+        v-if="!readonly"
         v-bind="$attrs"
         data-cy="select-asset"
         :value="currentAsset"
@@ -27,8 +27,8 @@
       />
       <div
         v-else
-        class="ae-symbol"
-        v-text="AE_SYMBOL"
+        class="readonly-symbol"
+        v-text="defaultCoin.symbol"
       />
     </template>
 
@@ -68,10 +68,15 @@ import {
   onMounted,
   PropType,
 } from 'vue';
+import {
+  useAccounts,
+  useBalances,
+  useCurrencies,
+} from '@/composables';
+import type { IAsset, Protocol } from '@/types';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useStore } from 'vuex';
-import { useBalances, useCurrencies } from '@/composables';
-import type { IAsset } from '@/types';
-import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -84,20 +89,34 @@ export default defineComponent({
     modelValue: { type: [String, Number], default: '' },
     label: { type: String, default: null },
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
-    aeOnly: Boolean,
+    readonly: Boolean,
     showTokensWithBalance: Boolean,
+    // TODO - handle usages & make protocol required
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {
     const store = useStore();
+    const {
+      currentCurrencyRate,
+      marketData,
+      formatCurrency,
+    } = useCurrencies({ selectedProtocol: props.protocol, store });
+    const { balance } = useBalances({ store });
+    const { protocolsInUse } = useAccounts({ store });
 
-    const { aeternityCoin } = useBalances({ store });
-    const { currentCurrencyRate, formatCurrency } = useCurrencies({ store });
+    const defaultCoin = computed(() => ProtocolAdapterFactory
+      .getAdapter(props.protocol)
+      .getDefaultCoin(marketData, +balance.value));
 
-    const currentAsset = computed((): IAsset => props.selectedAsset || aeternityCoin.value);
-    const isAssetAe = computed(() => currentAsset.value.contractId === AE_CONTRACT_ID);
+    const currentAsset = computed((): IAsset => props.selectedAsset || defaultCoin.value);
+    const isDefaultAsset = computed(
+      () => protocolsInUse.value.map(
+        (protocol) => ProtocolAdapterFactory.getAdapter(protocol).getDefaultAssetContractId(),
+      ).includes(currentAsset.value.contractId),
+    );
     const currentAssetFiatPrice = computed(
-      () => (isAssetAe.value) ? currentCurrencyRate.value : 0,
+      () => (isDefaultAsset.value) ? currentCurrencyRate.value : 0,
     );
     const currentAssetFiatPriceFormatted = computed(
       () => formatCurrency(currentAssetFiatPrice.value),
@@ -114,12 +133,12 @@ export default defineComponent({
 
     onMounted(() => {
       if (!props.selectedAsset) {
-        handleAssetSelected(aeternityCoin.value);
+        handleAssetSelected(defaultCoin.value);
       }
     });
 
     return {
-      AE_SYMBOL,
+      defaultCoin,
       currentCurrencyRate,
       totalAmountFormatted,
       currentAssetFiatPrice,
@@ -160,7 +179,7 @@ export default defineComponent({
     margin-right: -2px; // Compensate visually the roundness of the input
   }
 
-  .ae-symbol {
+  .readonly-symbol {
     @extend %face-sans-15-medium;
 
     white-space: nowrap;

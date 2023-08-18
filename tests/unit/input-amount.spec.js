@@ -5,7 +5,10 @@ import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
-import { NETWORK_TESTNET } from '../../src/constants';
+import {
+  NETWORK_TESTNET,
+  PROTOCOL_AETERNITY,
+} from '../../src/constants';
 import { STUB_ACCOUNT } from '../../src/constants/stubs';
 
 const maxBalance = 10000;
@@ -87,6 +90,7 @@ describe('InputAmount', () => {
     const wrapper = mount(InputAmount, {
       props: {
         modelValue: test.value,
+        protocol: PROTOCOL_AETERNITY,
         ...test.props,
       },
     });

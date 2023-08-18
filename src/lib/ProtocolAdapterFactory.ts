@@ -14,7 +14,7 @@ import {
  * Encapsulates helper methods related to multiple protocol instances
  */
 export const ProtocolAdapterFactory = (() => {
-  const protocolAdapterClassRegistry: Record<Protocol, Class<BaseProtocolAdapter> > = {
+  const protocolAdapterClassRegistry: Record<Protocol, Class<BaseProtocolAdapter>> = {
     [PROTOCOL_AETERNITY]: AeternityAdapter,
     [PROTOCOL_BITCOIN]: BitcoinAdapter,
   };

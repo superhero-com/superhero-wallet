@@ -1,12 +1,20 @@
-import type { IHdWalletAccount } from '@/types';
+import BigNumber from 'bignumber.js';
+import type { ICoin, IHdWalletAccount } from '@/types';
 
 /**
  *  Represents common attributes and behavior of a protocol
  */
 export abstract class BaseProtocolAdapter {
-  abstract getCoingeckoCoinId(): string;
-
   abstract getCoinSymbol(getShort: boolean): string;
+
+  abstract getCoinGeckoCoinId(): string;
+
+  abstract getDefaultAssetContractId(): string;
+
+  abstract getDefaultCoin(
+    marketData: any,
+    convertedBalance?: number | BigNumber
+  ): ICoin;
 
   abstract getBalance(address: string): Promise<string>;
 

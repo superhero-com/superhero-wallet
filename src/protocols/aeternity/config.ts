@@ -2,7 +2,6 @@ import { Encoding, Tag } from '@aeternity/aepp-sdk';
 import type {
   DexFunctionType,
   IDexContracts,
-  IToken,
   TxFunctionRaw,
 } from '@/types';
 
@@ -16,14 +15,6 @@ export const AE_COIN_NAME = 'Aeternity';
 export const AE_COIN_PRECISION = 18; // Amount of decimals
 
 export const AE_COINGECKO_COIN_ID = 'aeternity';
-
-export const AE_TOKEN_BASE_DATA: IToken = {
-  contractId: AE_CONTRACT_ID,
-  decimals: AE_COIN_PRECISION,
-  name: AE_COIN_NAME,
-  symbol: AE_COIN_SYMBOL,
-  convertedBalance: 0,
-};
 
 /**
  * Default `networkId` values returned by the Node after establishing the connection.

@@ -44,7 +44,9 @@
       :to="activeMultisigAccountExplorerUrl"
     >
       {{ $t('multisig.explorerLink') }}
-      <ExternalLinkIcon class="external-icon" />
+      <template #icon>
+        <ExternalLinkIcon class="external-icon" />
+      </template>
     </LinkButton>
 
     <div class="row">
