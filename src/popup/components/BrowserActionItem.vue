@@ -64,28 +64,28 @@ export default {
   &:hover,
   &:active {
     color: $color-white;
-
   }
 
   &:active {
     transform: scale(0.99);
   }
 
-  .card-icon{
+  .card-icon {
     margin-right: 16px;
   }
+
   &-content {
     display: inline-flex;
     align-items: center;
   }
 
   &-info {
-      opacity: 0.5;
-      padding-right: 8px;
-      margin: 0;
-      color: $color-white;
-      font-weight: 300;
-      font-size: 14px;
-    }
+    opacity: 0.5;
+    padding-right: 8px;
+    margin: 0;
+    color: $color-white;
+    font-weight: 300;
+    font-size: 14px;
+  }
 }
 </style>

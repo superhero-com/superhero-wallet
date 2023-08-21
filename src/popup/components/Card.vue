@@ -122,14 +122,15 @@ export default {
   background-size: cover;
   transition: $transition-interactive;
 
-  &-darken::before{
+  &-darken::before {
     content: '';
     position: absolute;
     z-index: -1;
     inset: 0;
     background-color: var(--screen-bg-color);
     opacity: 0.7;
-}
+  }
+
   .card-icon {
     color: $color-white;
   }

@@ -94,7 +94,7 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .browser-actions {
-    :deep(.fixed-screen-footer){
+  :deep(.fixed-screen-footer) {
     padding-top: 0;
   }
 }

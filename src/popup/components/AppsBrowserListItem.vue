@@ -63,8 +63,8 @@ export default defineComponent({
   opacity: 0.75;
   background: lightgray 50% / cover no-repeat;
   box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, 0.4);
-
 }
+
 :deep(.icon-wrapper .icon-wrapper-icon) {
   width: 100%;
   height: 100%;
