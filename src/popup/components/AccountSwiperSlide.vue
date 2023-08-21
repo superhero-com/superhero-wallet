@@ -2,9 +2,9 @@
   <Component
     :is="to ? 'BtnBase' : 'div'"
     :to="to"
-    :class="['account-swiper-slide-card', { selected }]"
-    :disabled="!selected"
+    :disabled="!active"
     :bg-color="color"
+    class="account-swiper-slide-card"
   >
     <slot />
 
@@ -48,7 +48,7 @@ export default defineComponent({
     idx: { type: Number, default: -1 },
     address: { type: String, default: '' },
     to: { type: Object as PropType<RouteLocation>, default: null },
-    selected: Boolean,
+    active: Boolean,
     hideNext: Boolean,
   },
   emits: ['slide'],

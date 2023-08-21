@@ -133,7 +133,7 @@ hr {
   }
 
   &-heading-1 {
-    @extend %face-sans-18-medium;
+    @extend %face-sans-19-regular;
 
     margin-bottom: 18px;
     color: $color-white;
@@ -153,9 +153,7 @@ hr {
     color: $color-white;
   }
 
-  &-heading-4 {
-    @extend %face-sans-15-medium;
-
+  &-muted {
     color: rgba($color-white, 0.75);
   }
 

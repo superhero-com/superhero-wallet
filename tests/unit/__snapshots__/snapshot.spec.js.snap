@@ -201,13 +201,17 @@ exports[`Pages Index 1`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -234,13 +238,17 @@ exports[`Pages Index 1`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -334,13 +342,17 @@ exports[`Pages Index 2`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -367,13 +379,17 @@ exports[`Pages Index 2`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -467,13 +483,17 @@ exports[`Pages Index 3`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -500,13 +520,17 @@ exports[`Pages Index 3`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"

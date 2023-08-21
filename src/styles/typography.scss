@@ -5,16 +5,12 @@
 @import '~@fontsource/ibm-plex-sans/600.css';
 @import '~@fontsource/ibm-plex-sans/700.css';
 @import '~@fontsource/ibm-plex-sans/700-italic.css';
-@import '~@fontsource/ibm-plex-mono/400.css';
 @import '~@fontsource/ibm-plex-mono/500.css';
 @import 'variables';
 
-%face-sans-30-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 30px;
-  line-height: 32px;
-}
+/**
+ * Sans Serif
+ */
 
 %face-sans-30-semi-bold {
   font-family: $font-sans;
@@ -23,32 +19,11 @@
   line-height: 32px;
 }
 
-%face-sans-30-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 30px;
-  line-height: 32px;
-}
-
-%face-sans-24-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 24px;
-  line-height: 24px;
-}
-
 %face-sans-24-semi-bold {
   font-family: $font-sans;
   font-weight: 600;
   font-size: 24px;
   line-height: 36px;
-}
-
-%face-sans-24-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 24px;
 }
 
 %face-sans-22-medium {
@@ -72,16 +47,9 @@
   line-height: 24px;
 }
 
-%face-sans-20-medium {
-  font-family: $font-sans;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 24px;
-}
-
 %face-sans-20-regular {
   font-family: $font-sans;
-  font-weight: normal;
+  font-weight: 400;
   font-size: 20px;
   line-height: 24px;
 }
@@ -90,13 +58,6 @@
   font-family: $font-sans;
   font-weight: 400;
   font-size: 19px;
-  line-height: 20px;
-}
-
-%face-sans-18-bold {
-  font-family: $font-sans;
-  font-weight: bold;
-  font-size: 18px;
   line-height: 24px;
 }
 
@@ -119,13 +80,6 @@
   font-weight: 500;
   font-size: 17px;
   line-height: 24px;
-}
-
-%face-sans-17-regular {
-  font-family: $font-sans;
-  font-weight: normal;
-  font-size: 17px;
-  line-height: 125%;
 }
 
 %face-sans-16-bold {
@@ -254,6 +208,10 @@
   line-height: 16px;
 }
 
+/**
+ * Monotype
+ */
+
 %face-mono-16-regular {
   font-family: $font-mono;
   font-weight: normal;
@@ -268,13 +226,6 @@
   line-height: 24px;
 }
 
-%face-mono-15-regular {
-  font-family: $font-mono;
-  font-weight: normal;
-  font-size: 15px;
-  line-height: 20px;
-}
-
 %face-mono-14-medium {
   font-family: $font-mono;
   font-weight: 500;
@@ -287,13 +238,6 @@
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
-}
-
-%face-mono-12-regular {
-  font-family: $font-mono;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 20px;
 }
 
 %face-mono-11-medium {

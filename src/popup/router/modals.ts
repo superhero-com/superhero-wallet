@@ -18,6 +18,7 @@ import {
   MODAL_MESSAGE_SIGN,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
   MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_NETWORK_SWITCHER,
   MODAL_PAYLOAD_FORM,
   MODAL_READ_QR_CODE,
   MODAL_RECIPIENT_HELPER,
@@ -30,11 +31,14 @@ import {
 } from '@/constants';
 import { useModals } from '@/composables';
 
+import AeternityAccountCreate from '@/protocols/aeternity/views/AccountCreateModal.vue';
+import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
+
 import Default from '../components/Modals/Default.vue';
 import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
-import AeternityAccountCreate from '../components/Modals/AeternityAccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
+import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ErrorLog from '../components/Modals/ErrorLog.vue';
@@ -52,7 +56,6 @@ import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
-import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -136,6 +139,9 @@ export default () => {
   });
   registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
+  });
+  registerModal(MODAL_NETWORK_SWITCHER, {
+    component: NetworkSwitcherModal,
   });
   registerModal(MODAL_AE_ACCOUNT_CREATE, {
     component: AeternityAccountCreate,

@@ -8,7 +8,7 @@
     @close="resolve"
   >
     <div class="content-wrapper ">
-      <h2 class="text-heading-2">
+      <h2 class="text-heading-1">
         {{ $t('modals.createAccount.title') }}
       </h2>
 

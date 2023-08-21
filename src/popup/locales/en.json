@@ -1063,6 +1063,9 @@
       "message": "Message"
     },
     "network": {
+      "connectToNetwork": "Connect to network",
+      "connectTo": "Connect to {name}",
+      "connectedTo": "Connected to {name}",
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
       "thirdPartyDetails": "Network details below have been provided by a third party. Make sure you trust the network provider to avoid malicious behavior resulting in lose of funds.",
@@ -1090,7 +1093,9 @@
         "invalidHostname": "Invalid hostname",
         "enterName": "Enter network name"
       },
-      "confirmDelete": "Are you sure you want to delete this custom network?"
+      "confirmDelete": "Are you sure you want to delete this custom network?",
+      "moreNetworks": "More",
+      "viewAndManage": "View and manage all networks"
     },
     "donate-error": {
       "error-report": "Error Report:",
