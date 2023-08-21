@@ -1,24 +1,17 @@
 import BigNumber from 'bignumber.js';
 import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { SCHEMA } from '@aeternity/aepp-sdk';
 import {
   AETERNITY_SYMBOL,
-  DEX_CONTRACTS,
-  NETWORK_ID_MAINNET,
-  NETWORK_ID_TESTNET,
+  ACCOUNT_HD_WALLET,
   NETWORK_MAINNET,
   NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
-  ACCOUNT_HD_WALLET,
   TX_DIRECTION,
-  validateHash,
   convertToken,
   aettosToAe,
   categorizeContractCallTxObject,
   getHdWalletAccount,
-  getMdwEndpointPrefixForHash,
-  getTxType,
 } from '../popup/utils';
 
 export default {
@@ -40,9 +33,6 @@ export default {
         name: getters['names/getDefault'](account.address),
       }));
   },
-  account({ accounts: { activeIdx } }, { accounts }) {
-    return accounts[activeIdx] || {}; // TODO: Return null
-  },
   networks({ userNetworks }) {
     return [
       NETWORK_MAINNET,
@@ -56,23 +46,6 @@ export default {
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;
   },
-  tippingSupported(state, { activeNetwork }) {
-    return (
-      [NETWORK_ID_MAINNET, NETWORK_ID_TESTNET].includes(activeNetwork.networkId)
-      || process.env.RUNNING_IN_TESTS
-    );
-  },
-  getExplorerPath: (_, { activeNetwork: { explorerUrl } }) => (hash) => {
-    const { valid } = validateHash(hash);
-    if (!valid) {
-      return null;
-    }
-    const endpoint = getMdwEndpointPrefixForHash(hash);
-    return `${explorerUrl}/${endpoint}/${hash}`;
-  },
-  getTx: ({ transactions }, { activeNetwork }) => (hash) => transactions.loaded
-    .concat(transactions.pending[activeNetwork.networkId])?.find((tx) => tx?.hash === hash),
-
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
@@ -100,28 +73,4 @@ export default {
         .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0),
     );
   },
-  getTxDirection: (_, { account: { address } }) => (tx, externalAddress = null) => {
-    const currentAddress = externalAddress || address;
-
-    if (getTxType(tx) === SCHEMA.TX_TYPE.spend) {
-      return tx.senderId === currentAddress
-        ? TX_DIRECTION.sent
-        : TX_DIRECTION.received;
-    }
-
-    return ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId']
-      .map((key) => tx?.[key])
-      .includes(currentAddress)
-      ? TX_DIRECTION.sent
-      : TX_DIRECTION.received;
-  },
-  getDexContracts: (_, { activeNetwork }) => (DEX_CONTRACTS[activeNetwork.networkId]),
-  getAccountPendingTransactions: (
-    { transactions: { pending } }, { activeNetwork, account: { address } },
-  ) => (pending[activeNetwork.networkId]?.length ? pending[activeNetwork.networkId]
-    ?.filter((transaction) => transaction.tx.callerId === address
-    || transaction.tx.senderId === address
-    || transaction.tx.recipientId === address
-    || transaction.recipientId === address
-    || transaction.recipient === address) : []),
 };

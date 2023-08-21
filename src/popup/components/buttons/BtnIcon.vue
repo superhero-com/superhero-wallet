@@ -11,7 +11,6 @@
         dimmed,
       }
     ]"
-    v-on="$listeners"
   >
     <Badge
       class="badge"

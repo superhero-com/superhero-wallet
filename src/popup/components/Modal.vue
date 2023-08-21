@@ -2,9 +2,10 @@
   <transition
     appear
     :name="fromBottom ? 'from-bottom-transition' : 'pop-in-transition'"
-    @after-enter="$emit('opened')"
+    @after-enter="$emit('open')"
   >
     <div
+      v-if="show"
       class="modal"
       :class="{
         'full-screen': fullScreen,
@@ -42,7 +43,7 @@
             v-if="hasCloseButton"
             data-cy="btn-close"
             class="close-button"
-            @click="$emit('close')"
+            @click="handleClose"
           />
         </div>
 
@@ -66,7 +67,7 @@
 
       <div
         class="cover"
-        @click="$emit('close')"
+        @click="handleClose"
       />
     </div>
   </transition>
@@ -78,7 +79,7 @@ import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
 import { IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
@@ -89,6 +90,7 @@ export default defineComponent({
     BtnClose,
   },
   props: {
+    show: Boolean,
     hasCloseButton: Boolean,
     fullScreen: Boolean,
     fromBottom: Boolean,
@@ -99,10 +101,8 @@ export default defineComponent({
     bodyWithoutPaddingBottom: Boolean,
     header: { type: String, default: null },
   },
-  emits: [
-    'close',
-  ],
-  setup(props, { slots }) {
+  emits: ['close', 'open'],
+  setup(props, { slots, emit }) {
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
     onMounted(() => {
@@ -111,11 +111,16 @@ export default defineComponent({
       }
     });
 
+    function handleClose() {
+      emit('close');
+    }
+
     onBeforeUnmount(() => {
       document.body.style.overflow = '';
     });
 
     return {
+      handleClose,
       IS_FIREFOX,
       IS_EXTENSION,
       showHeader,
@@ -233,8 +238,8 @@ export default defineComponent({
 
   &.full-screen {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: 0; // needed to overwrite #app .main styles
-    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite #app .main styles
+    padding-bottom: 0; // needed to overwrite .app-wrapper .main styles
+    padding-bottom: env(safe-area-inset-bottom); // needed to overwrite .app-wrapper .main styles
 
     @include mixins.desktop {
       position: absolute;
@@ -289,7 +294,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 
@@ -309,7 +314,7 @@ export default defineComponent({
       }
     }
 
-    &-enter,
+    &-enter-from,
     &-leave-to {
       opacity: 0;
 

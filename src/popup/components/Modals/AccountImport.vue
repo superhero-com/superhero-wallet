@@ -44,12 +44,13 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
-import type { ResolveRejectCallback } from '../../../types';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import type { RejectCallback, ResolveCallback } from '../../../types';
 import { validateSeedLength } from '../../utils';
-import { useSdk } from '../../../composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -62,11 +63,13 @@ export default defineComponent({
     FormTextarea,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
-    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -83,21 +86,20 @@ export default defineComponent({
         .trim();
 
       if (!validateSeedLength(mnemonicParsed)) {
-        error.value = root.$t('pages.index.invalidSeed');
+        error.value = t('pages.index.invalidSeed');
         return;
       }
       if (!mnemonicParsed || !validateMnemonic(mnemonicParsed)) {
-        error.value = root.$t('pages.index.accountNotFound');
+        error.value = t('pages.index.accountNotFound');
         return;
       }
-      root.$store.commit('setMnemonic', mnemonicParsed);
-      root.$store.commit('setBackedUpSeed');
+      store.commit('setMnemonic', mnemonicParsed);
+      store.commit('setBackedUpSeed');
       props.resolve();
       setTimeout(async () => {
-        await getSdk();
-        root.$store.dispatch('accounts/hdWallet/discover');
+        store.dispatch('accounts/hdWallet/discover');
       }, 100);
-      root.$router.push(root.$store.state.loginTargetLocation);
+      router.push(store.state.loginTargetLocation);
     }
 
     return {

@@ -41,7 +41,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { computed } from 'vue';
+import { useState } from '../../composables/vuex';
+
 import BtnIcon from './buttons/BtnIcon.vue';
 import CloseIcon from '../../icons/times-circle.svg?vue-component';
 import IconWrapper from './IconWrapper.vue';
@@ -70,21 +72,25 @@ export default {
     cardId: { type: String, default: null },
     icon: { type: Object, default: null },
   },
-  data: () => ({
-    CloseIcon,
-  }),
-  computed: {
-    ...mapState(['hiddenCards']),
-    styleComponent() {
-      return {
-        backgroundImage: (this.background)
-          ? `url("${this.background}")`
-          : null,
-      };
-    },
-    isVisible() {
-      return !this.cardId || !this.hiddenCards || !this.hiddenCards.includes(this.cardId);
-    },
+  setup(props) {
+    const hiddenCards = useState('hiddenCards');
+
+    const styleComponent = computed(() => ({
+      backgroundImage: props.background ? `url("${props.background}")` : null,
+    }));
+
+    const isVisible = computed(
+      () => !(
+        props.cardId
+        && hiddenCards.value.includes(props.cardId)
+      ),
+    );
+
+    return {
+      CloseIcon,
+      styleComponent,
+      isVisible,
+    };
   },
 };
 </script>

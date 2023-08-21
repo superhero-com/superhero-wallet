@@ -1,4 +1,4 @@
-import { computed } from '@vue/composition-api';
+import { computed } from 'vue';
 import store from '../store';
 
 export const useGetter = <T = any>(name: string) => computed<T>(() => store.getters[name]);

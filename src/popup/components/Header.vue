@@ -61,7 +61,10 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -90,42 +93,83 @@ export default defineComponent({
     Truncate,
     BtnIcon,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const route = useRoute();
+    const router = useRouter();
+    const { t } = useI18n();
+
     const { homeRouteName } = useUi();
-    const { isLoggedIn } = useAccounts({ store: root.$store });
+    const { isLoggedIn } = useAccounts({ store });
+
+    const pageTitles: Record<string, () => string> = {
+      settings: () => t('pages.titles.settings'),
+      language: () => t('pages.titles.language'),
+      about: () => t('pages.titles.about'),
+      sendTip: () => t('pages.titles.sendTip'),
+      claimTips: () => t('pages.claimTips.title'),
+      terms: () => t('pages.titles.terms'),
+      privacy: () => t('pages.titles.privacy'),
+      currency: () => t('pages.titles.currency'),
+      notifications: () => t('pages.titles.notifications'),
+      auction: () => t('pages.titles.auction'),
+      more: () => t('pages.titles.more'),
+      networks: () => t('pages.titles.networks'),
+      permissionsSettings: () => t('pages.titles.permissionsSettings'),
+      permissionsEdit: () => t('pages.titles.permissionsEdit'),
+      permissionsAdd: () => t('pages.titles.permissionsAdd'),
+      commentNew: () => t('pages.titles.commentNew'),
+      donateError: () => t('pages.titles.donateError'),
+      address: () => t('pages.titles.address'),
+      signMessage: () => t('pages.titles.signMessage'),
+      signTransaction: () => t('pages.titles.signTransaction'),
+      invite: () => t('pages.titles.invite'),
+      txDetails: () => t('pages.titles.txDetails'),
+      tokenDetails: () => t('pages.titles.tokenDetails'),
+      coinDetails: () => t('pages.titles.coinDetails'),
+      saveErrorsLog: () => t('pages.titles.saveErrorsLog'),
+      resetWallet: () => t('pages.resetWallet.title'),
+      seedPhrase: () => t('pages.titles.seedPhrase'),
+      networkAdd: () => t('pages.titles.networkAdd'),
+      networkEdit: () => t('pages.titles.networkEdit'),
+      notFound: () => t('pages.titles.notFound'),
+      multisigProposalDetails: () => t('pages.titles.multisigProposalDetails'),
+    };
 
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
         ? homeRouteName.value
         : ROUTE_INDEX,
     );
-    const routeMeta = computed(() => root.$route.meta as WalletRouteMeta);
+    const routeMeta = computed(() => route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
-    const isLogoDisabled = computed(() => root.$route.name === ROUTE_ACCOUNT);
+    const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
-      () => routeMeta.value?.title ? root.$t(`pages.titles.${routeMeta.value.title}`) : '',
+      () => (routeMeta.value?.title && pageTitles[routeMeta.value.title])
+        ? pageTitles[routeMeta.value.title]()
+        : '',
     );
 
     function back() {
-      const { fullPath, meta } = root.$route;
+      const { fullPath, meta } = route;
       const { directBackRoute, backRoute } = meta || {};
 
       if (directBackRoute) {
-        return root.$router.go(-1);
+        return router.go(-1);
       }
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return root.$router.push(backRoute);
+        return router.push(backRoute as RouteLocationRaw);
       }
       const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 
-      return root.$router.push(
+      return router.push(
         path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
       );
     }
 
     function close() {
-      root.$router.replace({ name: currentHomeRouteName.value });
+      router.replace({ name: currentHomeRouteName.value });
     }
 
     return {

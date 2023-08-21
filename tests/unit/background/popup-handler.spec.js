@@ -9,7 +9,7 @@ import {
 const mockCreate = jest.fn(() => true);
 const mockGetUrl = jest.fn((text) => text);
 
-const tesAeppUrl = 'http://test.com';
+const testAeppUrl = 'http://test.com';
 
 global.browser = {
   tabs: {
@@ -35,7 +35,7 @@ const testCases = [{
   },
   type: POPUP_TYPE_SIGN,
   resultType: POPUP_TYPE_SIGN,
-  propsField: 'transaction',
+  propsField: 'tx',
 }, {
   name: 'supported transaction with a connected aepp',
   params: {
@@ -47,7 +47,7 @@ const testCases = [{
   },
   type: POPUP_TYPE_SIGN,
   resultType: POPUP_TYPE_SIGN,
-  propsField: 'transaction',
+  propsField: 'tx',
   connectedAepp: {
     connection: {
       port: {
@@ -74,18 +74,18 @@ const testCases = [{
   propsField: 'message',
 }];
 
-describe('popupHanlder', () => {
+describe('popupHandler', () => {
   testCases.forEach(({
     name, params, type, resultType, propsField, connectedAepp = null,
   }, index) => it(
     `should be able to create, get, remove popup for signing a/an ${name}`,
     async () => {
-      showPopup(connectedAepp ?? tesAeppUrl, type, params);
+      showPopup(connectedAepp ?? testAeppUrl, type, params);
       await new Promise((r) => setTimeout(r, 50));
       const call = mockCreate.mock.calls[index][0];
       const queryParams = Object.fromEntries(new URLSearchParams(call.url.split('?')[1]).entries());
       expect(queryParams.type).toEqual(resultType);
-      expect(queryParams.url).toEqual(`${connectedAepp ? DEX_URL : tesAeppUrl}/`);
+      expect(queryParams.url).toEqual(`${connectedAepp ? DEX_URL : testAeppUrl}/`);
       expect(getPopup(queryParams.id).props[propsField]).toBeTruthy();
       removePopup(queryParams.id);
       expect(getPopup(queryParams.id)).toBeFalsy();

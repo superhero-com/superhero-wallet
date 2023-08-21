@@ -41,7 +41,7 @@
 
     <LinkButton
       class="explorer-link"
-      :to="getExplorerPath(activeMultisigAccount.contractId)"
+      :to="activeMultisigAccountExplorerUrl"
     >
       {{ $t('multisig.explorerLink') }}
       <ExternalLinkIcon class="external-icon" />
@@ -87,10 +87,10 @@
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
   onBeforeUnmount,
-} from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
+  onMounted,
+} from 'vue';
+import { useStore } from 'vuex';
 import { MODAL_CONSENSUS_INFO } from '../utils';
 import { useModals, useMultisigAccounts } from '../../composables';
 
@@ -116,14 +116,15 @@ export default defineComponent({
     DetailsItem,
     ExternalLinkIcon,
   },
-  setup(props, { root }) {
-    const getExplorerPath = useGetter('getExplorerPath');
+  setup() {
+    const store = useStore();
     const { openModal } = useModals();
     const {
       activeMultisigAccount,
+      activeMultisigAccountExplorerUrl,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     function openConsensusInfoModal() {
       openModal(MODAL_CONSENSUS_INFO);
@@ -135,7 +136,7 @@ export default defineComponent({
 
     return {
       activeMultisigAccount,
-      getExplorerPath,
+      activeMultisigAccountExplorerUrl,
       openConsensusInfoModal,
     };
   },
@@ -177,6 +178,8 @@ export default defineComponent({
     .external-icon {
       opacity: 1;
       color: rgba(variables.$color-white, 0.75);
+      width: 24px;
+      height: 24px;
     }
 
     &:active,

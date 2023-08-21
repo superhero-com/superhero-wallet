@@ -22,9 +22,12 @@
             {{ name }}
             <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
           </div>
-          <div class="expiration">
+          <div
+            v-if="topBlockHeight"
+            class="expiration"
+          >
             {{ $t('pages.names.auctions.expires') }}
-            in ≈{{ blocksToRelativeTime(expiration - topBlockHeight) }}
+            in ≈ {{ blocksToRelativeTime(expiration - topBlockHeight) }}
           </div>
         </div>
       </NameRow>
@@ -46,7 +49,9 @@ import {
   defineComponent,
   onMounted,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import { blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
@@ -83,16 +88,19 @@ export default defineComponent({
     AnimatedSpinner,
     RegisterName,
   },
-  setup(props, { root }) {
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const { t } = useI18n();
+
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const loading = ref(false);
     const activeAuctions = ref<IActiveAuction[]>([]);
     const displayMode = ref<AuctionsFilterPayload>({ key: 'soonest', rotated: false });
     const filters = ref<AuctionsFilters>({
-      soonest: { rotated: false, name: root.$t('filters.soonest') },
-      bid: { rotated: false, name: root.$t('filters.bid') },
-      length: { rotated: false, name: root.$t('filters.length') },
+      soonest: { rotated: false, name: t('filters.soonest') },
+      bid: { rotated: false, name: t('filters.bid') },
+      length: { rotated: false, name: t('filters.length') },
     });
 
     const auctions = computed(
@@ -112,7 +120,7 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      activeAuctions.value = await root.$store.dispatch('names/fetchAuctions');
+      activeAuctions.value = await store.dispatch('names/fetchAuctions');
       loading.value = false;
     });
 
@@ -173,7 +181,7 @@ export default defineComponent({
     margin: 72px auto 0 auto;
   }
 
-  ::v-deep .filters {
+  :deep(.filters) {
     position: sticky;
     top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
   }

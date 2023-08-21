@@ -20,7 +20,7 @@
     />
     <DetailsRow
       v-if="tokenData.contractId && !isAe"
-      :label="$t('pages.token-details.contract')"
+      :label="$t('common.smartContract')"
     >
       <template #text>
         <AddressTruncated
@@ -161,7 +161,7 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '../../../types';
 import {

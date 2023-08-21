@@ -1,5 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { computed, Ref } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
+
 import type {
   IToken,
   ITokenList,
@@ -68,7 +70,10 @@ export function useTokensList({
    */
   const allTokens = computed<IAsset[]>(() => {
     const tokens: IToken[] = Object.entries(availableTokens.value)
-      .map(([contractId, tokenData]) => ({ ...tokenData, contractId }));
+      .map(([contractId, tokenData]) => ({
+        ...tokenData,
+        contractId: contractId as Encoded.ContractAddress,
+      }));
 
     tokenBalances.value.forEach((singleBalance) => {
       const index = tokens.findIndex((token) => token.contractId === singleBalance?.contractId);

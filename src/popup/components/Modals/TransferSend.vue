@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <Modal
     class="transfer-send-modal"
@@ -11,7 +12,7 @@
         <component
           :is="currentStepConfig.component"
           ref="currentRenderedComponent"
-          v-model="transferData"
+          v-model:transferData="transferData"
           :is-multisig="isMultisig"
           :is-address-chain="isAddressChain"
           :is-address-url="isAddressUrl"
@@ -44,16 +45,19 @@
 
 <script lang="ts">
 import {
+  Component,
   computed,
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
-import type { ITokenList, ObjectValues, ResolveRejectCallback } from '../../../types';
-import { IFormModel } from '../../../composables';
-import { AENS_DOMAIN, validateTipUrl } from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
+import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk';
+import type { ITokenList, ObjectValues, ResolveCallback } from '@/types';
+import { AENS_DOMAIN, validateTipUrl } from '@/popup/utils';
+import { IFormModel } from '@/composables';
+import { useGetter, useState } from '@/composables/vuex';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -85,17 +89,19 @@ export default defineComponent({
     BtnMain,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
+    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
-    address: { type: String, default: null },
+    address: { type: String as PropType<Encoded.AccountAddress>, default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const currentRenderedComponent = ref<Vue.Component>();
+  setup(props) {
+    const { t } = useI18n();
+
+    const currentRenderedComponent = ref<Component>();
     const currentStep = ref<Step>(STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      address: '', amount: '', selectedAsset: undefined, payload: '',
+      amount: '', selectedAsset: undefined, payload: '',
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
@@ -114,12 +120,12 @@ export default defineComponent({
     ));
     const primaryButtonText = computed(() => {
       if (!showSendButton.value) {
-        return root.$t('common.next');
+        return t('common.next');
       }
       if (props.isMultisig) {
-        return root.$t('modals.multisigTxProposal.proposeAndApprove');
+        return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      return root.$t('common.send');
+      return t('common.send');
     });
 
     function proceedToNextStep() {
@@ -150,7 +156,7 @@ export default defineComponent({
       currentStep.value = STEPS.form;
     }
 
-    const steps: Record<Step, { component: Vue.Component, onSuccess: () => void }> = {
+    const steps: Record<Step, { component: Component, onSuccess: () => void }> = {
       [STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,

@@ -1,6 +1,5 @@
 const packagesToTranspile = [
   'lodash-es',
-  '@aeternity/aepp-sdk',
   '@aeternity/hd-wallet',
   'vee-validate',
 ];
@@ -16,14 +15,14 @@ module.exports = {
   moduleNameMapper: {
     '^.*\\.svg\\?vue-component$': '<rootDir>/config/jest/EmptySvg.vue',
     '^.*\\.svg\\?skip-optimize$': '<rootDir>/config/jest/EmptySvg.vue',
+    '\\.(css|scss)$': 'identity-obj-proxy',
   },
   setupFiles: [
     '<rootDir>/config/jest/setEnvVars.js',
-    '<rootDir>/config/jest/setup.js',
   ],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
-    '^.+\\.vue$': 'vue-jest',
+    '^.+\\.vue$': '@vue/vue3-jest',
     '^.+\\.mjs$': 'babel-jest',
   },
 };

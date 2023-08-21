@@ -1,6 +1,12 @@
-import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { useModals } from '../../../composables';
+import {
+  sign,
+  unpackTx,
+  Tag,
+  decode,
+  buildTx,
+} from '@aeternity/aepp-sdk';
+
+import { useAccounts, useModals, useAeSdk } from '../../../composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -8,6 +14,13 @@ import {
   getHdWalletAccount,
   isTxOfASupportedType,
 } from '../../../popup/utils';
+
+/**
+ * Address gap limit is currently set to 5.
+ * If the software hits 5 unused addresses in a row,
+ * it expects there are no used addresses beyond this point and stops searching the address chain.
+*/
+const ADDRESS_GAP_LIMIT = 5;
 
 export default {
   namespaced: true,
@@ -20,20 +33,37 @@ export default {
     nextAccountIdx: 1,
   },
   actions: {
-    async isAccountUsed({ rootGetters }, address) {
-      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed(context, address) {
+      const { getAeSdk } = useAeSdk({ store: context });
+      const aeSdk = await getAeSdk();
+      return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ state, rootGetters, dispatch }) {
       let lastNotEmptyIdx = 0;
-      let account;
-      // eslint-disable-next-line no-plusplus
-      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
-        account = getHdWalletAccount(rootGetters.wallet, nextIdx);
-        // eslint-disable-next-line no-await-in-loop
-        if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
-      }
-      // eslint-disable-next-line no-plusplus
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
+      let lastIndex = 0;
+      let isAccountUsedArray = [];
+
+      do {
+        try {
+          lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+          lastIndex += isAccountUsedArray.length;
+          // eslint-disable-next-line no-await-in-loop
+          isAccountUsedArray = await Promise.all(
+            Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1)
+              // eslint-disable-next-line no-loop-func
+              .fill().map((x, i) => i + lastIndex).map((index) => dispatch(
+                'isAccountUsed',
+                getHdWalletAccount(rootGetters.wallet, index).address,
+              )),
+          );
+        } catch (e) {
+          break;
+        }
+      } while (!(
+        isAccountUsedArray.lastIndexOf(true) === -1
+        || isAccountUsedArray.filter((isAccountUsed) => !isAccountUsed).length === ADDRESS_GAP_LIMIT
+      ));
+      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i += 1) {
         dispatch('create', true);
       }
     },
@@ -45,22 +75,23 @@ export default {
       );
       state.nextAccountIdx += 1;
     },
-    signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, opt }) {
-      const { secretKey } = opt && opt.fromAccount
-        ? accounts.find(({ address }) => address === opt.fromAccount)
-        : account;
-      return Crypto.sign(data, secretKey);
+    signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
+      const { activeAccount, getAccountByAddress } = useAccounts({
+        store: { state: rootState, getters: rootGetters },
+      });
+      const { secretKey } = (options?.fromAccount)
+        ? getAccountByAddress(options.fromAccount)
+        : activeAccount.value;
+      return sign(data, secretKey);
     },
-    async confirmRawDataSigning(context, { data, app }) {
+    async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();
-      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app });
-    },
-    async confirmTxSigning({ dispatch }, { encodedTx, app }) {
-      if (!isTxOfASupportedType(encodedTx)) {
-        await dispatch('confirmRawDataSigning', { data: encodedTx, app });
+
+      if (!isTxOfASupportedType(txBase64)) {
+        await openModal(MODAL_CONFIRM_RAW_SIGN, { data: txBase64, app });
         return;
       }
-      const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+      const txObject = unpackTx(txBase64);
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,
@@ -68,8 +99,7 @@ export default {
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
-        const { openModal } = useModals();
-        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { transaction: txObject });
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },
     sign({ dispatch }, data) {
@@ -77,36 +107,42 @@ export default {
     },
     async signTransaction({ dispatch, rootGetters }, {
       txBase64,
-      opt: { modal = true, app = null },
+      options: { modal = true, app = null },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
-      }
-      const signature = await dispatch(
-        'signWithoutConfirmation',
-        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
-      );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
-    },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
-      txBase64,
-      opt: { modal = true, app = null, fromAccount },
-    }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
-      const encodedTx = decode(txBase64, 'tx');
-      if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+        await dispatch('confirmTxSigning', { txBase64, app });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
         {
-          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
-          opt: { fromAccount },
+          data: Buffer.concat([
+            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(encodedTx),
+          ]),
         },
       );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+      return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
+    },
+    async signTransactionFromAccount({ dispatch, rootGetters }, {
+      txBase64,
+      options: { modal = true, app = null, fromAccount },
+    }) {
+      const encodedTx = decode(txBase64, 'tx');
+      if (modal) {
+        await dispatch('confirmTxSigning', { txBase64, app });
+      }
+      const signature = await dispatch(
+        'signWithoutConfirmation',
+        {
+          data: Buffer.concat([
+            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(encodedTx),
+          ]),
+          options: { fromAccount },
+        },
+      );
+      return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
   },
 };

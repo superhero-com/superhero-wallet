@@ -1,11 +1,11 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
-import Vue from 'vue';
 import hdWallet from './hdWallet';
-import ledger from './ledger';
 import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
 
-const modules = { hdWallet, ledger };
+// TODO: modules file is an object, because previously it contained more than one module,
+// should be improved in the future
+const modules = { hdWallet };
 
 export default {
   namespaced: true,
@@ -44,11 +44,11 @@ export default {
     },
     remove(state, idx) {
       if (state.activeIdx === state.list.length) state.activeIdx = 0;
-      Vue.delete(state.list, idx);
+      delete state.list[idx];
     },
     toggleShowed(state, idx) {
       if (state.activeIdx === idx) state.activeIdx = 0;
-      Vue.set(state.list[idx], 'showed', !state.list[idx].showed);
+      state.list[idx].showed = !state.list[idx].showed;
     },
   },
 
@@ -57,11 +57,11 @@ export default {
       return dispatch(`${getModule(active).name}/sign`, data);
     },
 
-    signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, opt }) {
-      if (opt && opt.fromAccount) {
-        return dispatch(`${getModule(active).name}/signTransactionFromAccount`, { txBase64, opt });
+    signTransaction({ getters: { active, getModule }, dispatch }, { txBase64, options }) {
+      if (options && options.fromAccount) {
+        return dispatch(`${getModule(active).name}/signTransactionFromAccount`, { txBase64, options });
       }
-      return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, opt });
+      return dispatch(`${getModule(active).name}/signTransaction`, { txBase64, options });
     },
   },
 };

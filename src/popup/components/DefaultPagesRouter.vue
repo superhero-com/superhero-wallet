@@ -3,22 +3,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUpdated } from '@vue/composition-api';
-import { useUi } from '../../composables';
+import { defineComponent, onMounted, onUpdated } from 'vue';
+import { useRoute } from 'vue-router';
+import { useUi } from '@/composables';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
-  setup(props, { root }) {
+  setup() {
+    const route = useRoute();
+
     const { setHomeRouteName } = useUi();
 
     function setHomeRoute() {
-      const [rootRoute] = root.$route.matched;
+      const [rootRoute] = route.matched;
 
       setHomeRouteName(
         rootRoute.meta.isMultisig
           ? ROUTE_MULTISIG_ACCOUNT
           : ROUTE_ACCOUNT,
-        () => root.$store.commit('initTransactions'),
       );
     }
 

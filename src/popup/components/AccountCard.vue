@@ -30,7 +30,8 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import type { IAccount } from '../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 import { useBalances } from '../../composables';
@@ -51,8 +52,10 @@ export default defineComponent({
     account: { type: Object as PropType<IAccount>, required: true },
     selected: Boolean,
   },
-  setup(props, { root }) {
-    const { balance } = useBalances({ store: root.$store });
+  setup() {
+    const store = useStore();
+
+    const { balance } = useBalances({ store });
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 

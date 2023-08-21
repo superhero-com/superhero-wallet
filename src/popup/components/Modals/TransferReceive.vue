@@ -16,7 +16,7 @@
       <div class="account-row">
         <AccountItem
           :address="activeAccountAddress"
-          :name="isMultisig ? null : activeAccount.name"
+          :name="isMultisig ? undefined : activeAccount.name"
         />
       </div>
 
@@ -45,18 +45,25 @@
       </div>
 
       <div class="request-specific-amount">
-        <InputAmount
+        <Field
+          v-slot="{ field, errorMessage }"
           v-model="amount"
-          v-validate="{
+          name="amount"
+          :rules="{
             min_value_exclusive: 0,
           }"
-          name="amount"
-          :label="$t('modals.receive.requestAmount')"
-          :message="errors.first('amount')"
-          :selected-asset="selectedAsset"
-          :ae-only="isMultisig"
-          @asset-selected="handleAssetChange"
-        />
+        >
+          <InputAmount
+            v-bind="field"
+            :model-value="amount"
+            name="amount"
+            :label="$t('modals.receive.requestAmount')"
+            :message="errorMessage"
+            :selected-asset="selectedAsset"
+            :ae-only="isMultisig"
+            @asset-selected="handleAssetChange"
+          />
+        </Field>
       </div>
     </div>
     <template #footer>
@@ -86,14 +93,16 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { Field } from 'vee-validate';
 import type {
   IAsset,
   IToken,
   ITokenList,
-  ResolveRejectCallback,
+  ResolveCallback,
 } from '../../../types';
-import { i18n } from '../../../store/plugins/languages';
 import { IS_MOBILE_DEVICE } from '../../../lib/environment';
 import { RouteQueryActionsController } from '../../../lib/RouteQueryActionsController';
 import { useAccounts, useCopy, useMultisigAccounts } from '../../../composables';
@@ -123,19 +132,23 @@ export default defineComponent({
     AddressFormatted,
     CopyText,
     AccountItem,
+    Field,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, default: () => null },
+    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     defaultAmount: { type: [String, Number], default: null },
     tokenContractId: { type: [String, Number], default: null },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
+  setup(props) {
+    const store = useStore();
+    const { t } = useI18n();
+
+    const { activeAccount } = useAccounts({ store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { copied, copy } = useCopy();
 
-    const amount = ref<number | null>(props.defaultAmount ? Number(props.defaultAmount) : null);
+    const amount = ref<number | string>(props.defaultAmount ? Number(props.defaultAmount) : '');
     const selectedAsset = ref<IAsset | IToken | null>(null);
 
     const activeAccountAddress = computed(() => props.isMultisig
@@ -143,7 +156,7 @@ export default defineComponent({
       : activeAccount.value.address);
 
     const availableTokens = computed<ITokenList>(
-      () => root.$store.state.fungibleTokens.availableTokens,
+      () => store.state.fungibleTokens.availableTokens,
     );
 
     function getTokenInfoQuery(account?: string): Record<string, string> {
@@ -177,9 +190,9 @@ export default defineComponent({
       const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
       const text = (amount.value && amount.value > 0)
-        ? i18n.t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : i18n.t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
-      await root.$store.dispatch('share', { text });
+        ? t('modals.receive.shareTextNoAmount', { address, walletLink })
+        : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+      await store.dispatch('share', { text });
     }
 
     function handleAssetChange(asset: IAsset | IToken) {

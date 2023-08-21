@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 import { MODAL_TRANSFER_SEND } from '../utils';
 import { useModals } from '../../composables';

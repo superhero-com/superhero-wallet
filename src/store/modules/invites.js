@@ -1,8 +1,6 @@
-import {
-  Universal, MemoryAccount, Crypto, Node,
-} from '@aeternity/aepp-sdk';
-import { useModals } from '../../composables';
-import { i18n } from '../plugins/languages';
+import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
+import { useAccounts, useModals } from '../../composables';
+import { tg } from '../plugins/languages';
 
 export default {
   namespaced: true,
@@ -16,13 +14,18 @@ export default {
     },
   },
   actions: {
-    async claim({ rootGetters: { account, activeNetwork } }, secretKey) {
-      const publicKey = Crypto.getAddressFromPriv(secretKey);
-      const s = await Universal({
-        nodes: [{ name: activeNetwork.name, instance: await Node({ url: activeNetwork.url }) }],
-        accounts: [MemoryAccount({ keypair: { publicKey, secretKey } })],
+    async claim({ rootGetters, rootState }, secretKey) {
+      const { activeAccount } = useAccounts({
+        store: { state: rootState, getters: rootGetters },
       });
-      await s.transferFunds(1, account.address, { payload: 'referral', verify: false });
+      const aeSdk = new AeSdk({
+        nodes: [{
+          name: rootGetters.activeNetwork.name,
+          instance: new Node(rootGetters.activeNetwork.url),
+        }],
+        accounts: [new MemoryAccount(secretKey)],
+      });
+      await aeSdk.transferFunds(1, activeAccount.value.address, { verify: false });
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;
@@ -31,8 +34,8 @@ export default {
       const { openDefaultModal } = useModals();
       await openDefaultModal({
         msg: isInviteError
-          ? i18n.t('pages.invite.insufficient-invite-balance')
-          : i18n.t('pages.invite.insufficient-balance'),
+          ? tg('pages.invite.insufficient-invite-balance')
+          : tg('pages.invite.insufficient-balance'),
       });
       return true;
     },

@@ -10,7 +10,7 @@
 <script>
 import {
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
 import { useTransactionAndTokenFilter } from '../../composables';
 

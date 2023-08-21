@@ -4,21 +4,28 @@
     no-unused-vars,
 */
 
-import Vue, { ComponentOptions } from 'vue';
-import { RawLocation } from 'vue-router';
-import { LocaleMessages, TranslateResult } from 'vue-i18n';
+import { RouteLocationRaw } from 'vue-router';
+import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
-import { ContractMethodsBase, Encoded } from '@aeternity/aepp-sdk-13';
+import {
+  ContractMethodsBase,
+  Encoded,
+  Node,
+  Tag,
+} from '@aeternity/aepp-sdk';
 import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
-  POPUP_TYPES,
+  AETERNITY_COIN_ID,
+  ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   MULTISIG_CREATION_PHASES,
+  POPUP_TYPES,
+  TX_FUNCTIONS_MULTISIG,
   TX_FUNCTIONS,
-  FUNCTION_TYPE_MULTISIG,
-  ALLOWED_ICON_STATUSES,
+  TX_RETURN_TYPES,
 } from '../popup/utils';
+import { RejectedByUserError } from '../lib/errors';
 
 export * from './cordova';
 export * from './router';
@@ -37,7 +44,14 @@ export type ObjectValues<T> = T[keyof T];
 /**
  * Generic that allows to pick only the public properties of a class.
  */
-type PublicPart<T> = {[K in keyof T]: T[K]};
+type PublicPart<T> = { [K in keyof T]: T[K] };
+
+/**
+ * Makes the interface and all the child interfaces to be partial.
+ */
+export type PartialDeep<T> = T extends object ? {
+  [P in keyof T]?: PartialDeep<T[P]>;
+} : T;
 
 /**
  * Allowed options that can be passed to our fetch utility functions
@@ -48,12 +62,8 @@ export interface IRequestInitBodyParsed extends Omit<RequestInit, 'body'> {
 
 type GenericApiMethod<T = any> = (...args: any) => Promise<T>;
 
-export type ResolveRejectCallback = (...args: any) => void;
-
-export type VueAnyComponent = typeof Vue | ComponentOptions<Vue> | {
-  functional: boolean;
-  render: any;
-}
+export type ResolveCallback = (...args: any) => void;
+export type RejectCallback = (error?: RejectedByUserError) => void;
 
 /**
  * Replacement for the regular `BigNumber` which was causing some issues
@@ -68,6 +78,11 @@ export interface IPageableResponse<T> {
   data: T[];
   next: string;
 }
+
+export type IKeyPair = {
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+};
 
 export interface IAppData {
   name: string;
@@ -98,7 +113,7 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: string;
+  contractId: Encoded.ContractAddress | typeof AETERNITY_COIN_ID;
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -136,52 +151,63 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
 export type IAsset = ICoin | IToken;
 
 export type AccountKind = 'basic'; // TODO establish other possible values
+export type AeternityAccountType = 'hd-wallet';
+
+/**
+ * Simplified account structure stored it in the local storage
+ * or fetched when discovering the accounts.
+ */
+export interface IAeternityAccountRaw {
+  idx: number;
+  showed: boolean;
+  type: AeternityAccountType;
+  isRestored: boolean;
+}
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount {
-  address: string
-  idx?: number
-  name: string // .chain
-  publicKey: Uint8Array
-  secretKey: Uint8Array
-  showed: boolean
-  type: string
+export interface IAccount extends IKeyPair, IAeternityAccountRaw {
+  address: Encoded.AccountAddress;
+  name: string; // .chain
 }
 
 /**
- * Account fetched from the node with the use of `sdk.api.getAccountByPubkey`
+ * Account fetched from the node with the use of `aeSdk.api.getAccountByPubkey`
  */
-export interface IAccountFetched {
+type AeternityAccountFetched = Awaited<ReturnType<InstanceType<typeof Node>['getAccountByPubkey']>>;
+
+// TODO: remove this wrapper when all the amount moved to a bigint
+export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'> {
   balance: string;
-  id: string; // ak_* hash
-  kind: AccountKind;
-  nonce: number;
-  payable: boolean;
 }
 
-export interface IAccountLabeled extends Partial<IAccount> {
-  url?: string
-  label?: TranslateResult
+export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
+  // TODO: use a proper type for an address since it can be a url
+  address?: Encoded.AccountAddress | string;
+  url?: string;
+  contractCreate?: boolean;
+  aens?: boolean;
+  label?: TranslateResult;
+  wallet?: string; // Is the whole Wallet is being accessed by an Aepp
 }
 
 export interface IMultisigConsensus {
   confirmationsRequired: number;
-  confirmedBy: string[];
+  confirmedBy: Encoded.AccountAddress[];
   expirationHeight: number;
   expired: boolean;
-  proposedBy: string;
+  proposedBy: Encoded.AccountAddress;
   txHash?: string;
 }
 
 export interface IMultisigAccountResponse {
-  contractId: string;
+  contractId: Encoded.ContractAddress;
   createdAt: string; // Date
-  gaAccountId: string; // Generalized Account used as the Multisig Account
+  gaAccountId: Encoded.AccountAddress; // Generalized Account used as the Multisig Account
   height: number;
   id: number;
-  signerId: string;
+  signerId: Encoded.AccountAddress;
   updatedAt: string; // Date
   version: string; // X.X.X
 }
@@ -191,27 +217,39 @@ export interface IMultisigAccountResponse {
  */
 export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountResponse {
   balance: Balance;
-  refusedBy?: string[];
+  refusedBy?: Encoded.AccountAddress[];
   nonce: number;
-  signers: string[];
+  signers: Encoded.AccountAddress[];
   hasPendingTransaction: boolean;
   pending?: boolean;
 }
 
 export interface IRawMultisigAccount {
-  multisigAccountCreationEncodedCallData?: string;
-  signedAttachTx?: string;
-  rawTx?: string;
+  multisigAccountCreationEncodedCallData?: Encoded.ContractBytearray;
+  signedAttachTx?: Encoded.Transaction;
+  rawTx?: Encoded.Transaction;
 }
 
 export interface INetworkBase {
-  url: string
-  name: string
-  middlewareUrl: string
-  networkId: string
-  compilerUrl: string
-  backendUrl: string
-  index?: number
+  /**
+   * Node backend URL
+   */
+  url: string;
+  /**
+   * Unique name provided by the user
+   */
+  name: string;
+  middlewareUrl: string;
+  /**
+   * TODO: Replace with different way of differentiating the networks
+   */
+  networkId: string;
+  compilerUrl: string;
+  /**
+   * Tipping backend URL
+   */
+  backendUrl: string;
+  index?: number;
 }
 
 export interface INetwork extends INetworkBase {
@@ -223,6 +261,7 @@ export interface INetwork extends INetworkBase {
 
 export interface IPermission {
   address: boolean
+  addressList: boolean,
   host: string
   messageSign: boolean
   name: string
@@ -242,7 +281,7 @@ export interface INotification {
   entityId?: string
   entityType?: string
   id?: number
-  path?: RawLocation
+  path?: RouteLocationRaw
   receiver?: string
   sender?: string
   sourceId?: string
@@ -272,47 +311,32 @@ export interface ICurrency {
 
 export type CurrencyRates = Record<CurrencyCode, number>;
 
-export interface ITxArguments {
-  type: 'tuple' | 'list'
-  value: any // TODO find type, this was not correct: (string | number | any[])
+export interface TxArguments {
+  type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
+  value: any; // TODO find type, this was not correct: (string | number | any[])
 }
 
 /**
- * TxFunction names coming directly from the API or ready to be sent.
+ * TxFunction snake_case names coming directly from the API or ready to be sent.
  */
 export type TxFunctionRaw = ObjectValues<typeof TX_FUNCTIONS>;
 
 /**
- * TxFunctions used internally by the app.
+ * TxFunction names parsed from snake_case to camelCase for the internal use.
  */
 export type TxFunctionParsed = keyof typeof TX_FUNCTIONS;
 
-export type TxFunction = TxFunctionRaw | TxFunctionParsed;
+export type TxFunctionMultisig = keyof typeof TX_FUNCTIONS_MULTISIG;
 
-export type TxType =
-  | 'SpendTx'
-  | 'ContractCreateTx'
-  | 'ContractCallTx'
-  | 'NameBidTx'
-  | 'NamePreclaimTx'
-  | 'NameClaimTx'
-  | 'NameUpdateTx'
-  | 'NameTransferTx'
-  | 'NameRevokeTx'
-  | 'OracleRegisterTx'
-  | 'OracleExtendTx'
-  | 'OraclePostQueryTx'
-  | 'OracleRespondTx'
-  | 'ChannelCloseSoloTx'
-  | 'ChannelSlashTx'
-  | 'ChannelSettleTx'
-  | 'ChannelSnapshotSoloTx'
-  | 'PayingForTx'
-  | 'GAAttachTx'
-  | 'GAMetaTx';
+export type TxFunction = TxFunctionRaw | TxFunctionParsed | TxFunctionMultisig;
+
+/**
+ * String representation of the ITx.tag.
+ */
+export type TxType = keyof typeof Tag;
 
 export interface IGAAttachTx {
-  contractId: string;
+  contractId: Encoded.ContractAddress;
   fee: number;
   gas: number;
   gasPrice: number;
@@ -320,9 +344,10 @@ export interface IGAAttachTx {
   nonce: number;
   ownerId: string;
   returnType: string;
-  type: string;
+  type: Tag;
   version: number;
 }
+
 export interface IGAMetaTx {
   amount: string;
   fee: number;
@@ -330,93 +355,78 @@ export interface IGAMetaTx {
   payload: string;
   recipientId: string;
   senderId: string;
-  type: string;
+  type: Tag;
   version: number;
 }
 
 export interface ITx {
-  abiVersion: number
-  accountId?: string
+  abiVersion?: number
+  accountId?: Encoded.AccountAddress
   amount: number
-  arguments: ITxArguments[]
-  callData?: string // TODO find source
+  arguments: TxArguments[];
+  callData?: Encoded.ContractBytearray;
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: string
-  code: string
-  commitmentId: any
-  contractId: string
+  callerId: Encoded.AccountAddress
+  code?: string
+  commitmentId?: any
+  contractId: Encoded.ContractAddress
   fee: number
   function?: TxFunction
   gaId?: string; // Generalized Account ID
-  gas: number
-  gasPrice: number
-  gasUsed: number
+  gas?: number
+  gasPrice?: number
+  gasUsed?: number
   log?: any[] // TODO find source
-  name: any
-  nameFee: number
-  nameId: any
-  nameSalt: string
-  nonce: number
+  name?: any
+  nameFee?: number
+  nameId?: any
+  nameSalt?: string
+  nonce?: number
   payerId?: string
-  payload?: string
-  pointers: any
-  result: string;
-  return: ITxArguments
-  returnType: string
+  payload?: Encoded.Bytearray;
+  pointers?: any;
+  result?: string;
+  return?: TxArguments;
+  returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string
   senderId?: string
   selectedTokenContractId?: string
-  tag?: string; // Allows to establish the transaction type
-  type: TxType; // Custom property we add after unpacking the Tx
+  tag?: Tag;
+  /**
+   * Middleware represents the `type` with different case than the aeSdk.
+   * the `Tag.GaAttachTx` is `GAAttachTX`, `Tag.GaMetaTX` equal to `GAMetaTx`.
+   * When comparing the `type` it is suggested to do case insensitive comparison.
+   */
+  type: TxType | string;
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
   }
-  VSN: string;
+  VSN?: string;
 }
 
 export interface ITransaction {
-  blockHeight: number;
-  claim: any; // TODO find type
-  hash: string;
+  blockHeight?: number;
+  claim?: any; // TODO find type
+  hash: Encoded.TxHash;
   incomplete?: boolean;
-  microIndex: number;
-  microTime: number;
-  pending: boolean; // There are cases that not only the IPendingTransaction can be pending
+  microIndex?: number;
+  microTime?: number;
+  pending: boolean;
+  pendingTokenTx?: boolean;
   rawTx?: any; // TODO find type
   tipUrl?: string;
-  transactionOwner?: string;
+  /**
+   * TODO "sent" field is used for removing local pending transaction - remove or rename it
+   */
+  sent?: boolean;
+  transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
   url?: string;
 }
 
-export interface IStoreTransactions {
-  loaded: ITransaction[];
-  nextPageUrl?: string;
-}
-
 export interface IDashboardTransaction extends ITransaction {
   direction?: 'received' | 'send'
-}
-
-export type PendingTransactionType = 'spend' | 'spendToken';
-
-export interface IPendingTransaction {
-  hash: string;
-  type?: PendingTransactionType;
-  recipient?: string;
-  incomplete?: boolean;
-  pending: true;
-  pendingTokenTx?: boolean;
-  tipUrl?: string;
-  tx: Partial<ITx>;
-}
-
-export interface IAccountOverView extends Partial<IAccount> {
-  url?: string;
-  contractCreate?: boolean;
-  aens?: boolean;
-  label: TranslateResult;
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
@@ -428,25 +438,36 @@ export interface IActiveMultisigTransaction extends IMultisigAccount {
 }
 
 export interface ITransactionOverview {
-  sender: IAccountOverView | IAccount;
-  recipient: IAccountOverView | IAccount;
+  sender: IAccountOverview | IAccount;
+  recipient: IAccountOverview | IAccount;
   title: TranslateResult;
   function?: any;
 }
 
 export interface IDexContracts {
-  router: string[];
-  wae: string[];
+  router: Encoded.ContractAddress[];
+  wae: Encoded.ContractAddress[];
 }
+
+export type DexFunctionType =
+  | 'pool'
+  | 'addLiquidity'
+  | 'removeLiquidity'
+  | 'swap'
+  | 'allowance'
+  | 'maxSpent'
+  | 'minReceived';
 
 export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
 
 export type ITransactionsState = {
   loaded: ITransaction[];
-  nextPageUrl?: string;
-  pending: ITransaction[];
+  nextPageUrl: string | null;
+  pending: Record<string, ITransaction[]>; // this string refers to node network ID.
   tipWithdrawnTransactions: ITransaction[];
 }
+
+export type IAccountTransactionsState = Record<Encoded.AccountAddress, ITransactionsState>
 
 /**
  * Browser popup window names
@@ -454,16 +475,16 @@ export type ITransactionsState = {
 export type IPopupType = typeof POPUP_TYPES[number];
 
 export interface ITopHeader {
-  hash: string
-  height: number
-  pofHash: string
-  prevHash: string
-  prevKeyHash: string
-  signature: string
-  stateHash: string
-  time: number
-  txsHash: string
-  version: number
+  hash: string;
+  height: number;
+  pofHash?: string;
+  prevHash: string;
+  prevKeyHash: string;
+  signature?: string;
+  stateHash: string;
+  time: number;
+  txsHash?: string;
+  version: number;
 }
 
 export type ISignMessage = (m: any) => Promise<any>
@@ -479,69 +500,13 @@ export interface IName {
 }
 
 /**
- * Data fetched with the use of `sdk.api.getNameEntryByName` method.
+ * Data fetched with the use of `aeSdk.api.getNameEntryByName` method.
  */
 export interface INameEntryFetched {
   id: string;
   owner: string;
   pointers: { id: string; key: string }[];
   ttl: number;
-}
-
-/**
- * Temporary typing for the SDK used in the app.
- * TODO remove after migrating to SDK v12
- */
-export interface ISdk {
-  addNode: (name: string, node: any, select: boolean) => void;
-  addRpcClient: (connection: any) => any;
-  Ae: Dictionary;
-  aensClaim: (name: string, salt: string, options?: any) => Promise<any>;
-  aensPreclaim: (name: string) => Promise<any>;
-  aensQuery: (name: string) => Promise<any>;
-  api: Record<string, GenericApiMethod>;
-  balance: (address: string, options?: any) => Promise<number>;
-  compilerApi: Record<string, (...args: any[]) => Promise<any>>;
-  getAccount: (publicKey: any) => Promise<any>
-  gaAttachTx: (options: {
-    ownerId: any
-    code: any
-    callData: any
-    authFun: any
-    gas: any
-    options: { innerTx: boolean }
-  }) => Promise<any>
-  getContractInstance: (o: any) => Promise<any>
-  getContractByteCode: (contractId: string) => Promise<{ bytecode: any }>
-  getNetworkId: () => string
-  payForTransaction: (
-    rawTx: string,
-    options: {
-      waitMined: boolean;
-      modal: boolean;
-      innerTx?: boolean
-    }
-  ) => Promise<{ hash: string, rawTx: string }>;
-  payingForTx(arg0: any): any;
-  poll: (txHash: string, options?: any) => any;
-  pool: Map<string, any>;
-  shareWalletInfo: (c: any) => any;
-  signTransaction: (t: any, o: any) => Promise<any>
-  signMessage: ISignMessage
-  send: (
-    tx: any,
-    options?: {
-      innerTx?: boolean,
-      onAccount: string,
-      authData?: any,
-    }
-  ) => Promise<ITransaction>
-  sendTransaction: (t: any, o: any) => Promise<any>
-  selectedNode: any
-  spend: (a: any, r: any, o: any) => Promise<any>
-  spendTx: (a: any) => Promise<any>
-  address: () => Promise<string>
-  aensBid: (name: string, aettos: any) => Promise<any>
 }
 
 /**
@@ -596,9 +561,11 @@ export interface IPopupConfig {
   action?: any;
   data?: string;
   message?: string;
-  transaction?: Partial<ITx>;
+  tx?: Partial<ITx>;
   resolve?: any;
   reject?: any;
+  show?: boolean;
+  txBase64?: Encoded.Transaction;
 }
 
 export interface IResponseChallenge {
@@ -642,29 +609,16 @@ export interface IActiveAuction {
 
 export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | null;
 
-export type IMultisigFunctionTypes = keyof typeof FUNCTION_TYPE_MULTISIG;
-
 export interface ICreateMultisigAccount {
-  address: string;
+  address?: Encoded.AccountAddress;
 }
 
 export interface IRawMultisigTx {
-  id: number
-  hash: string
-  tx: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface IKeyPair {
-  publicKey: string;
-  secretKey: string;
-}
-
-export interface ILabel {
-  text: string | LocaleMessages | TranslateResult,
-  customPending?: string | LocaleMessages | TranslateResult
-  hasComma?: boolean;
+  id: number;
+  hash: Encoded.TxHash;
+  tx: Encoded.Transaction;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IDefaultComposableOptions {
@@ -686,7 +640,7 @@ export interface TippingV2ContractApi extends TippingV1ContractApi {
   tip_token: (
     recipientId: Encoded.AccountAddress,
     note: string,
-    contacttId: Encoded.ContractAddress,
+    contractId: Encoded.ContractAddress,
     amount: string
   ) => Encoded.TxHash;
   retip_token: (

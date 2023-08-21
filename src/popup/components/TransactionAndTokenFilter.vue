@@ -39,7 +39,8 @@ import {
   defineComponent,
   onMounted,
   ref, watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useRoute } from 'vue-router';
 import {
   useTransactionAndTokenFilter,
 } from '../../composables';
@@ -56,7 +57,9 @@ export default defineComponent({
   props: {
     showFilters: Boolean,
   },
-  setup(props, { root, refs }) {
+  setup(props) {
+    const route = useRoute();
+    const transactionFilter = ref();
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
@@ -79,9 +82,9 @@ export default defineComponent({
       ? `${maxHeight.value}px`
       : 0);
 
-    const showFilterBar = computed(() => !!root.$route.meta?.showFilterBar);
-    const hideSearch = computed(() => !!root.$route.meta?.hideSearchBar);
-    const hideFilterButton = computed(() => !!root.$route.meta?.hideFilterButton);
+    const showFilterBar = computed(() => !!route.meta?.showFilterBar);
+    const hideSearch = computed(() => !!route.meta?.hideSearchBar);
+    const hideFilterButton = computed(() => !!route.meta?.hideFilterButton);
 
     function handleFocus(val: boolean) {
       inputIsFocused.value = val;
@@ -95,12 +98,13 @@ export default defineComponent({
 
     onMounted(() => {
       if (showFilterBar.value) {
-        maxHeight.value = (refs.transactionFilter as HTMLDivElement).clientHeight;
+        maxHeight.value = (transactionFilter?.value as HTMLDivElement)?.clientHeight;
         firstRender.value = false;
       }
     });
 
     return {
+      transactionFilter,
       searchPhrase,
       filtersConfig,
       openHeight,

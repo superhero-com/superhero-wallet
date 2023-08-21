@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 export const LINK_BUTTON_VARIANT = [
   'default',
@@ -44,7 +44,7 @@ export default defineComponent({
   align-items: center;
   color: variables.$color-success;
 
-  svg {
+  :deep(svg) {
     width: 24px;
     height: 24px;
     opacity: 0.44;

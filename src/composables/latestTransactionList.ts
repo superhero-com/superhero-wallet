@@ -1,6 +1,12 @@
-import { computed, ref, watch } from '@vue/composition-api';
+import {
+  computed,
+  ref,
+  watch,
+} from 'vue';
 import { isEqual, uniqWith } from 'lodash-es';
-import type { IDefaultComposableOptions, ITransaction } from '../types';
+import { Encoded } from '@aeternity/aepp-sdk';
+
+import { IDefaultComposableOptions } from '@/types';
 import {
   DASHBOARD_TRANSACTION_LIMIT,
   MDW_TO_NODE_APPROX_DELAY_TIME,
@@ -11,10 +17,10 @@ import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
+import { useTransactionList } from './transactionList';
+import { useAeSdk } from './aeSdk';
 
 const isTransactionListLoading = ref(false);
-const transactionList = ref<ITransaction[]>([]);
-let initialUpdateDone = false;
 
 const { onNetworkChange } = createNetworkWatcher();
 
@@ -25,8 +31,40 @@ const { onNetworkChange } = createNetworkWatcher();
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   const { accounts } = useAccounts({ store });
   const { balancesTotal } = useBalances({ store });
+  const { nodeNetworkId } = useAeSdk({ store });
+
+  const {
+    transactions,
+    fetchTransactions,
+  } = useTransactionList({ store });
 
   const tokens = computed(() => store.state.fungibleTokens.tokens);
+
+  const latestTransactions = computed(() => {
+    const allTransactions = Object.entries(transactions.value)
+      .map(([
+        accountAddress,
+        { loaded, pending }]) => [...(pending[nodeNetworkId.value!] || []), ...(loaded || [])]
+        .map((tr) => {
+          const {
+            direction,
+          } = useTransactionTx({
+            store,
+            tx: tr.tx,
+            externalAddress: accountAddress as Encoded.AccountAddress,
+          });
+          return {
+            ...tr,
+            direction: direction.value,
+          };
+        }));
+
+    return uniqWith(allTransactions.flatMap((transaction) => transaction), (a, b) => (
+      a.hash === b.hash && a.transactionOwner === b.transactionOwner
+    ))
+      .sort(sortTransactionsByDateCallback)
+      .slice(0, DASHBOARD_TRANSACTION_LIMIT);
+  });
 
   async function updateTransactionListData() {
     if (isTransactionListLoading.value) {
@@ -35,44 +73,20 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
 
     isTransactionListLoading.value = true;
 
-    const allTransactions = await Promise.all(accounts.value.map(async ({ address }) => {
+    await Promise.all(accounts.value.map(async ({ address }) => {
       try {
-        return (await store.dispatch('fetchTransactions',
-          {
-            limit: DASHBOARD_TRANSACTION_LIMIT, address, recent: true, multipleAccounts: true,
-          })).map(
-          (transaction: ITransaction) => {
-            const {
-              direction,
-            } = useTransactionTx({
-              store,
-              tx: transaction.tx,
-              externalAddress: address,
-            });
-            return {
-              ...transaction,
-              direction: direction.value,
-            };
-          },
-        );
+        return (await fetchTransactions(
+          DASHBOARD_TRANSACTION_LIMIT,
+          true,
+          address,
+        ));
       } catch (e) {
         handleUnknownError(e);
         return [];
       }
     }));
 
-    transactionList.value = uniqWith(allTransactions.flat(), (a, b) => (
-      a.hash === b.hash && a.transactionOwner === b.transactionOwner
-    ))
-      .sort(sortTransactionsByDateCallback)
-      .slice(0, DASHBOARD_TRANSACTION_LIMIT);
-
     isTransactionListLoading.value = false;
-    initialUpdateDone = true;
-  }
-
-  if (!initialUpdateDone && !isTransactionListLoading.value) {
-    updateTransactionListData();
   }
 
   /**
@@ -86,6 +100,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
         setTimeout(() => updateTransactionListData(), MDW_TO_NODE_APPROX_DELAY_TIME);
       }
     },
+    { immediate: true },
   );
 
   watch(
@@ -99,13 +114,11 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   );
 
   onNetworkChange(store, () => {
-    transactionList.value = [];
     updateTransactionListData();
   });
 
   return {
     isTransactionListLoading,
-    transactionList,
-    updateTransactionListData,
+    latestTransactions,
   };
 }

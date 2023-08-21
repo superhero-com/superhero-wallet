@@ -12,7 +12,7 @@
         v-for="network in networks"
         :key="network.name"
         :network="network"
-        @selectNetwork="selectNetwork"
+        @selectNetwork="switchNetwork"
       />
     </div>
 
@@ -23,14 +23,15 @@
       data-cy="to-add"
       :text="$t('pages.network.addCustomNetwork')"
       :icon="PlusCircleIcon"
-      :to="{ name: 'network-add' }"
+      :to="{ name: ROUTE_NETWORK_ADD }"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useDispatch, useGetter } from '../../composables/vuex';
+import { ROUTE_NETWORK_ADD } from '../router/routeNames';
 
 import NetworkRow from '../components/NetworkRow.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -43,12 +44,13 @@ export default defineComponent({
   },
   setup() {
     const networks = useGetter('networks');
-    const selectNetwork = useDispatch('selectNetwork');
+    const switchNetwork = useDispatch('switchNetwork');
 
     return {
       networks,
-      selectNetwork,
+      switchNetwork,
       PlusCircleIcon,
+      ROUTE_NETWORK_ADD,
     };
   },
 });

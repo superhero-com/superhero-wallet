@@ -9,35 +9,55 @@
 
     <div class="inputs">
       <div class="permission-row">
-        <InputField
-          v-model="permission.name"
-          v-validate="'required'"
+        <Field
+          v-slot="{ field, errorMessage }"
           name="name"
-          :label="$t('pages.permissions.custom-name')"
-          :placeholder="$t('pages.permissions.enter-custom-name')"
-          :text-limit="32"
-          :message="errors.first('name')"
-        />
+          rules="required"
+        >
+          <InputField
+            v-bind="field"
+            v-model="permission.name"
+            name="name"
+            :label="$t('pages.permissions.custom-name')"
+            :placeholder="$t('pages.permissions.enter-custom-name')"
+            :text-limit="32"
+            :message="errorMessage"
+          />
+        </Field>
       </div>
 
       <div class="permission-row">
-        <InputField
-          v-model="permission.host"
-          v-validate="{
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="url"
+          :rules="{
             required: true,
             url: permissionHostValidation
           }"
-          name="url"
-          :label="$t('pages.permissions.permissions-for-url')"
-          :placeholder="$t('pages.permissions.enter-url')"
-          :message="errors.first('url')"
-        />
+        >
+          <InputField
+            v-bind="field"
+            v-model="permission.host"
+            type="url"
+            name="url"
+            :label="$t('pages.permissions.permissions-for-url')"
+            :placeholder="$t('pages.permissions.enter-url')"
+            :message="errorMessage"
+          />
+        </Field>
       </div>
     </div>
     <div class="permission-row switch">
       <SwitchButton
         v-model="permission.address"
         :label="$t('pages.permissions.login')"
+      />
+    </div>
+
+    <div class="permission-row switch">
+      <SwitchButton
+        v-model="permission.addressList"
+        :label="$t('pages.permissions.addressList')"
       />
     </div>
 
@@ -63,17 +83,23 @@
         v-if="permission.dailySpendLimit"
         class="transaction-sign-limit"
       >
-        <InputAmount
-          v-model="permission.transactionSignLimit"
-          v-validate="{
+        <Field
+          v-slot="{ field }"
+          name="transactionSignLimit"
+          :rules="{
             min_value_exclusive: 0,
           }"
-          class="transaction-limit-input"
-          name="transactionSignLimit"
-          label=" "
-          :selected-asset="selectedAsset"
-          ae-only
-        />
+        >
+          <InputAmount
+            v-bind="field"
+            v-model="permission.transactionSignLimit"
+            class="transaction-limit-input"
+            name="transactionSignLimit"
+            label=" "
+            :selected-asset="selectedAsset"
+            ae-only
+          />
+        </Field>
 
         <div class="limit-info">
           <TokenAmount
@@ -129,7 +155,10 @@ import {
   defineComponent,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import { useForm, Field } from 'vee-validate';
 import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
 import { IPermission } from '../../types';
 import { useBalances, useCurrencies } from '../../composables';
@@ -150,13 +179,19 @@ export default defineComponent({
     InputAmount,
     TokenAmount,
     BtnMain,
+    Field,
   },
-  setup(props, { root }) {
-    const { balance } = useBalances({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { validate, setValues } = useForm();
+
+    const { balance } = useBalances({ store });
     const { currentCurrencyRate } = useCurrencies();
 
-    const routeHost = root.$route.params.host as string;
-    const editView = !!root.$route.meta?.isEdit;
+    const routeHost = route.params.host as string;
+    const editView = !!route.meta?.isEdit;
 
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
@@ -173,20 +208,21 @@ export default defineComponent({
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
 
     function removePermission() {
-      root.$store.commit('permissions/removePermission', routeHost);
-      root.$router.push({ name: 'permissions-settings' });
+      store.commit('permissions/removePermission', routeHost);
+      router.push({ name: 'permissions-settings' });
     }
 
     async function savePermission() {
-      if (!(await (root as any).$validator.validateAll())) return;
-
+      if (!(await validate()).valid) {
+        return;
+      }
       const hostValue = permission.value.host.toLowerCase();
       const { host } = (new URL(
         `${hostValue.includes('http') ? '' : 'http://'}${hostValue}`,
       ));
 
       if (host !== routeHost) {
-        root.$store.commit('permissions/removePermission', routeHost);
+        store.commit('permissions/removePermission', routeHost);
       }
 
       if (!permission.value.dailySpendLimit) {
@@ -197,17 +233,17 @@ export default defineComponent({
         );
       }
 
-      root.$store.commit('permissions/addPermission', {
+      store.commit('permissions/addPermission', {
         ...permission.value,
         host,
       });
-      root.$router.push({ name: 'permissions-settings' });
+      router.push({ name: 'permissions-settings' });
     }
 
     if (editView) {
       const savedPermission = permissions.value[routeHost];
       if (!savedPermission) {
-        root.$router.replace({ name: ROUTE_NOT_FOUND });
+        router.replace({ name: ROUTE_NOT_FOUND });
       } else {
         if (typeof savedPermission.transactionSignLimit === 'string') {
           savedPermission.transactionSignLimit = parseInt(
@@ -224,6 +260,7 @@ export default defineComponent({
           );
         }
 
+        setValues({ url: savedPermission.host, ...savedPermission });
         permission.value = savedPermission;
       }
     }

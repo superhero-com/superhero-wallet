@@ -33,9 +33,11 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 import { camelCase } from 'lodash-es';
-import Tokens from './Tokens.vue';
 import { transactionTokenInfoResolvers } from '../utils/transactionTokenInfoResolvers';
-import { DEX_CONTRACTS, FUNCTION_TYPE_DEX } from '../utils/constants';
+import { DEX_CONTRACTS, isTxFunctionDexSwap } from '../utils';
+import { useAeSdk } from '../../composables';
+
+import Tokens from './Tokens.vue';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
 
 export default {
@@ -50,7 +52,9 @@ export default {
     ...mapState('fungibleTokens', ['availableTokens']),
     ...mapGetters(['activeNetwork']),
     tokens() {
-      if (!FUNCTION_TYPE_DEX.swap.includes(this.transaction.tx.function)) return [];
+      if (!isTxFunctionDexSwap(this.transaction.tx.function)) {
+        return [];
+      }
       const resolver = transactionTokenInfoResolvers[camelCase(this.transaction.tx.function)];
       if (!resolver) return [];
       let { tokens } = resolver(this.transaction, this.availableTokens);
@@ -64,7 +68,8 @@ export default {
           tokens[1],
         ];
       }
-      const waeContract = DEX_CONTRACTS[this.activeNetwork.networkId]?.wae;
+      const { nodeNetworkId } = useAeSdk({ store: this.$store });
+      const waeContract = DEX_CONTRACTS[nodeNetworkId.value]?.wae;
       if (tokens[0].isAe && waeContract && !waeContract?.includes(tokens[1].contractId)) {
         tokens.unshift({
           ...tokens[0],
@@ -82,12 +87,19 @@ export default {
   },
   methods: {
     checkWaeAeTx(idx) {
-      if (idx === this.tokens.length - 1) return false;
-      const contracts = DEX_CONTRACTS[this.activeNetwork.networkId];
-      return (contracts?.wae?.includes(this.tokens[idx].contractId)
-        && this.tokens[idx + 1].isAe)
-        || (contracts?.wae?.includes(this.tokens[idx + 1].contractId)
-        && this.tokens[idx].isAe);
+      if (idx === this.tokens.length - 1) {
+        return false;
+      }
+      const { nodeNetworkId } = useAeSdk({ store: this.$store });
+      const contracts = DEX_CONTRACTS[nodeNetworkId.value];
+      return (
+        contracts?.wae?.includes(this.tokens[idx].contractId)
+        && this.tokens[idx + 1].isAe
+      )
+      || (
+        contracts?.wae?.includes(this.tokens[idx + 1].contractId)
+        && this.tokens[idx].isAe
+      );
     },
   },
 };
@@ -118,7 +130,7 @@ export default {
     :last-of-type {
       flex: 1;
 
-      .tokens::v-deep {
+      .tokens:deep() {
         width: 100%;
       }
     }
@@ -132,7 +144,7 @@ export default {
     height: 24px;
 
     .divider,
-    .tokens::v-deep {
+    .tokens:deep() {
       background: variables.$color-bg-4;
       z-index: 1;
       padding-right: 4px;

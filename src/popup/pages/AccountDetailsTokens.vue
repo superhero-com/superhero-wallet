@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useConnection, useTransactionAndTokenFilter } from '../../composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
 import MessageOffline from '../components/MessageOffline.vue';

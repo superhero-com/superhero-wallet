@@ -3,8 +3,8 @@ import {
   AeSdkWallet,
   sendTransaction,
   spend,
-} from '@aeternity/aepp-sdk-13';
-import { Encoded } from '@aeternity/aepp-sdk-13/src/utils/encoder';
+  Encoded,
+} from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
 import { useAccounts } from '../composables/accounts';
 import { AccountSuperhero } from './accounts/superhero';
@@ -20,11 +20,15 @@ type ISpendOptions = Omit<Parameters<typeof spend>[2], 'onAccount' | 'onNode'>
     payload?: Encoded.Any,
   }
 
-export class ShSdkWallet extends AeSdkWallet {
+/**
+ * Class extends `AeSdkWallet` from aepp-sdk-js
+ * provides flexibility to manage the accounts the way wallet would like to handle
+ */
+export class AeSdkSupehero extends AeSdkWallet {
   store: Store<any>;
 
-  constructor(store: Store<any>, opt: any) {
-    super(opt);
+  constructor(store: Store<any>, options: any) {
+    super(options);
     this.store = store;
   }
 
@@ -33,14 +37,10 @@ export class ShSdkWallet extends AeSdkWallet {
   }
 
   getAccounts() {
-    const { activeAccount, accounts } = useAccounts({ store: this.store });
+    const { activeAccount } = useAccounts({ store: this.store });
     return ({
       current: { [activeAccount.value.address]: {} },
       connected: {
-        ...accounts.value
-          .reduce((acc, { address }) => ({
-            ...acc, ...address !== activeAccount.value.address ? { [address]: {} } : {},
-          })),
       },
     });
   }

@@ -2,6 +2,7 @@
   <ListItemWrapper
     class="transaction-item"
     :to="redirectRoute"
+    :data-cy="currentTransaction.pending && 'pending-txs'"
   >
     <div class="body">
       <TransactionTokenRows
@@ -54,11 +55,11 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { Location } from 'vue-router';
+} from 'vue';
+import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
+import { useStore } from 'vuex';
 import {
-  FUNCTION_TYPE_DEX,
   amountRounded,
   convertToken,
   formatDate,
@@ -74,7 +75,6 @@ import {
 import {
   IActiveMultisigTransaction,
   ITransaction,
-  TxFunctionRaw,
 } from '../../types';
 import {
   useCurrencies,
@@ -101,7 +101,8 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     hasConsensus: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
@@ -114,25 +115,25 @@ export default defineComponent({
     const transactionOwner = computed(() => props.transaction?.transactionOwner);
 
     const {
-      isDex,
       direction,
-      isAllowance,
+      isDexAllowance,
+      isDexPool,
       isErrorTransaction,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
-      store: root.$store,
+      store,
       direction: direction.value,
-      isAllowance: isAllowance.value,
+      isAllowance: isDexAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx
       transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
     });
 
-    const redirectRoute = computed((): Location => {
+    const redirectRoute = computed((): Partial<RouteLocation> => {
       if (props.multisigTransaction) {
         return { name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS };
       }
@@ -153,10 +154,7 @@ export default defineComponent({
       if (
         !aeToken
         || isErrorTransaction.value
-        || (
-          isDex.value
-          && FUNCTION_TYPE_DEX.pool.includes(currentTransaction.value.tx?.function as TxFunctionRaw)
-        )
+        || isDexPool.value
       ) return 0;
       return getFormattedAndRoundedFiat(
         +amountRounded((aeToken.decimals

@@ -11,11 +11,11 @@
     </div>
     <div class="info">
       <h3 class="title">
-        {{ $t('pages.titles.reset-wallet') }}?
+        {{ $t('pages.resetWallet.title') }}?
       </h3>
       <div class="text">
-        <span>{{ $t('pages.reset-wallet.warning') }}</span>
-        <span>{{ $t('pages.reset-wallet.warningConfirm') }}</span>
+        <span>{{ $t('pages.resetWallet.warning') }}</span>
+        <span>{{ $t('pages.resetWallet.warningConfirm') }}</span>
       </div>
     </div>
     <template #footer>
@@ -29,42 +29,45 @@
         variant="danger"
         @click="onReset"
       >
-        {{ $t('pages.reset-wallet.reset') }}
+        {{ $t('pages.resetWallet.reset') }}
       </BtnMain>
     </template>
   </Modal>
 </template>
 
-<script>
-import { mapActions } from 'vuex';
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import type { RejectCallback, ResolveCallback } from '../../../types';
+import { useDispatch } from '../../../composables/vuex';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import IconBoxed from '../IconBoxed.vue';
 import ResetWalletIcon from '../../../icons/reset-wallet.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Modal,
     BtnMain,
     IconBoxed,
   },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
-  setup() {
+  setup(props) {
+    const reset = useDispatch('reset');
+
+    async function onReset() {
+      await props.resolve();
+      await reset();
+    }
+
     return {
       ResetWalletIcon,
+      onReset,
     };
   },
-  methods: {
-    ...mapActions(['reset']),
-    async onReset() {
-      await this.resolve();
-      await this.reset();
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

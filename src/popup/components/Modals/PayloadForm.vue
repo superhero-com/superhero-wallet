@@ -41,7 +41,8 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from '@vue/composition-api';
+import { ref, defineComponent, PropType } from 'vue';
+import type { RejectCallback, ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import FormTextarea from '../form/FormTextarea.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -54,8 +55,8 @@ export default defineComponent({
     Modal,
   },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     payload: { type: String, default: '' },
   },
   setup: (props) => ({ value: ref(props.payload) }),

@@ -1,7 +1,6 @@
 import { transactions } from '../../../src/popup/utils/testsConfig';
 
 const ACCOUNT_ADDRESS = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
-
 const txs = [
   transactions.pendingSpend,
   transactions.pendingTransfer,
@@ -30,8 +29,6 @@ describe('Tests cases not connected to specific page', () => {
   });
 
   it('Shows pending tx', () => {
-    cy.login().openTransactions();
-
     txs.forEach((pendingTransaction) => {
       cy.login({ pendingTransaction })
         .get('[data-cy=pending-txs]')

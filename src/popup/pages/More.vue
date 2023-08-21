@@ -13,7 +13,7 @@
     <template v-if="isNodeMainnet || isNodeTestnet">
       <PanelItem
         :to="{ name: 'tips-claim' }"
-        :title="$t('pages.titles.claim-tips')"
+        :title="$t('pages.claimTips.title')"
         data-cy="tips-claim"
       >
         <template #icon>
@@ -81,13 +81,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import {
   BUG_REPORT_URL,
   DEX_URL,
   SIMPLEX_URL,
 } from '../utils/constants';
-import { useAccounts, useSdk } from '../../composables';
+import { useAccounts, useAeSdk } from '../../composables';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -100,6 +101,7 @@ import ClaimTips from '../../icons/claim-tips.svg?vue-component';
 import FaucetIcon from '../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
+  name: 'More',
   components: {
     PanelItem,
     Invites,
@@ -111,9 +113,11 @@ export default defineComponent({
     ClaimTips,
     FaucetIcon,
   },
-  setup(props, { root }) {
-    const { activeAccountFaucetUrl } = useAccounts({ store: root.$store });
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+  setup() {
+    const store = useStore();
+
+    const { activeAccountFaucetUrl } = useAccounts({ store });
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     return {
       BUG_REPORT_URL,

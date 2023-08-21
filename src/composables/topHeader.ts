@@ -1,6 +1,9 @@
-import { computed, ref } from '@vue/composition-api';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
-import { useSdk } from './sdk';
+import { computed, ref } from 'vue';
+import {
+  createNetworkWatcher,
+  createPollingBasedOnMountedComponents,
+} from './composablesHelpers';
+import { useAeSdk } from './aeSdk';
 
 import type { ITopHeader, IDefaultComposableOptions } from '../types';
 
@@ -8,24 +11,27 @@ const POLLING_INTERVAL = 30000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 const topHeaderData = ref<ITopHeader>();
+const { onNetworkChange } = createNetworkWatcher();
 
 /**
  * Composable that provides the information about the last block of the blockchain.
  */
 export function useTopHeaderData({ store }: IDefaultComposableOptions) {
-  const { getSdk } = useSdk({ store });
+  const { getAeSdk } = useAeSdk({ store });
 
   const topBlockHeight = computed(() => topHeaderData.value?.height || 0);
 
   async function updateTopHeaderData() {
-    const sdk = await getSdk();
-    topHeaderData.value = await sdk.api.getTopHeader();
+    const aeSdk = await getAeSdk();
+    topHeaderData.value = await aeSdk.api.getTopHeader();
   }
 
   async function fetchCurrentTopBlockHeight() {
     await updateTopHeaderData();
     return topBlockHeight.value;
   }
+
+  onNetworkChange(store, () => updateTopHeaderData());
 
   initPollingWatcher(() => updateTopHeaderData());
 

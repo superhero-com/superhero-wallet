@@ -33,7 +33,7 @@
 <script>
 import {
   defineComponent,
-} from '@vue/composition-api';
+} from 'vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import NotFoundImage from '../../image/not-found.jpg';
 import BugIcon from '../../icons/bug.svg?vue-component';

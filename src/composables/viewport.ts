@@ -1,5 +1,5 @@
 import { debounce } from 'lodash-es';
-import { onBeforeUnmount, onMounted, ref } from '@vue/composition-api';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { MOBILE_WIDTH } from '../popup/utils';
 
 export interface IScrollCallbackParams {

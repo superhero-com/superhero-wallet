@@ -38,7 +38,7 @@ import {
   watch,
   nextTick,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
 import { AENS_DOMAIN } from '../utils';
 
 export default defineComponent({

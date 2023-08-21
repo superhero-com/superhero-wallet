@@ -1,5 +1,11 @@
-import type VueRouter from 'vue-router';
-import { useModals } from '../composables';
+import {
+  LocationQuery,
+  Router,
+} from 'vue-router';
+import { Ref } from 'vue';
+import {
+  useModals,
+} from '../composables';
 import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '../popup/utils';
 import { ROUTE_NETWORK_ADD } from '../popup/router/routeNames';
 import { Dictionary } from '../types';
@@ -8,7 +14,7 @@ import { Dictionary } from '../types';
 export type RouteQueryActionName = 'transferSend' | 'addNetwork';
 
 // Returned state controls if the requested page should be opened.
-export type RouteQueryActionMethod = (router: VueRouter, query: Dictionary) => boolean;
+export type RouteQueryActionMethod = (router: Router, query: Dictionary) => boolean;
 
 /**
  * The query object key whose value determines which controller method to use.
@@ -52,12 +58,28 @@ export const RouteQueryActionsController = (() => {
     },
   };
 
+  function getDeeplinkAction(
+    query: LocationQuery,
+    isLoggedIn: Ref<boolean>,
+  ): RouteQueryActionName | null {
+    if (!isLoggedIn.value || !query) {
+      return null;
+    }
+
+    return (query['x-success'] && query['x-cancel'])
+      ? 'transferSend'
+      : null;
+  }
+
   /**
    * Monitor the action arguments in the query string and perform assigned action method.
    */
-  function init(router: VueRouter) {
-    const unbind = router.beforeEach(({ query }, from, next) => {
-      const action = query?.[ACTION_PROP] as null | RouteQueryActionName;
+  function init(router: Router, isLoggedIn: Ref<boolean>) {
+    const unbind = router.beforeResolve(({ query }, from, next) => {
+      const action = (
+        query?.[ACTION_PROP]
+        || getDeeplinkAction(query, isLoggedIn)
+      ) as null | RouteQueryActionName;
 
       if (action && typeof action === 'string' && availableActions[action]) {
         const queryWithoutAction = { ...query };

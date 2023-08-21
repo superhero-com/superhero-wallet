@@ -8,7 +8,7 @@ describe('InputRange', () => {
   });
   [5, '5'].forEach((value) => it('should emit number value on input', async () => {
     const wrapper = shallowMount(InputRange, {
-      propsData: {
+      props: {
         min: 0,
         max: 10,
       },

@@ -1,28 +1,32 @@
 <template>
   <div class="seed-phrase-settings">
-    <i18n
-      path="pages.seed-phrase-settings.seedRecoverySmall"
+    <i18n-t
+      keypath="pages.seed-phrase-settings.seedRecoverySmall"
       tag="p"
       class="text-description"
+      scope="global"
     />
-    <i18n
-      path="pages.seed-phrase-settings.seedRecoverySmall-2"
+    <i18n-t
+      keypath="pages.seed-phrase-settings.seedRecoverySmall-2"
       tag="p"
       class="text-description"
+      scope="global"
     />
-    <i18n
-      path="pages.seed-phrase-settings.seedRecoverySmall-3"
+    <i18n-t
+      keypath="pages.seed-phrase-settings.seedRecoverySmall-3"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <strong>
         {{ $t('pages.seed-phrase-settings.seedRecoverySmallBackItUp') }}
       </strong>
-    </i18n>
-    <i18n
-      path="pages.seed-phrase-settings.seedRecoverySmall-4"
+    </i18n-t>
+    <i18n-t
+      keypath="pages.seed-phrase-settings.seedRecoverySmall-4"
       tag="p"
       class="text-description"
+      scope="global"
     />
     <BtnMain
       class="button"

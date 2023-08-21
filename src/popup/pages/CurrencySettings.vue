@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useCurrencies } from '../../composables';
 import RadioButton from '../components/RadioButton.vue';
 

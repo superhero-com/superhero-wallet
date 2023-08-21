@@ -15,6 +15,12 @@
       />
     </a>
     <span
+      v-else-if="txParty.wallet"
+      class="wallet"
+    >
+      {{ $t('common.title') }}
+    </span>
+    <span
       v-else
       class="name"
       :class="{ aens: txParty.aens }"
@@ -38,8 +44,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
-import { IAccountOverView } from '../../types';
+import { defineComponent, PropType } from 'vue';
+import { IAccountOverview } from '../../types';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
@@ -53,7 +59,7 @@ export default defineComponent({
   props: {
     isRecipient: Boolean,
     txParty: {
-      type: Object as PropType<IAccountOverView>,
+      type: Object as PropType<IAccountOverview>,
       required: true,
     },
   },
@@ -76,12 +82,14 @@ export default defineComponent({
     padding-left: $padding-middle;
     padding-right: $padding-edge;
 
-    .name {
+    .name,
+    .wallet {
       text-align: right;
     }
   }
 
-  .name {
+  .name,
+  .wallet {
     @extend %face-sans-15-medium;
 
     display: block;

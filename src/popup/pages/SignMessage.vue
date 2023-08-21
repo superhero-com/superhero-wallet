@@ -1,20 +1,26 @@
 <script lang="ts">
-import { defineComponent, onMounted } from '@vue/composition-api';
+import { defineComponent, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../lib/errors';
-import { useDeepLinkApi, useModals, useSdk } from '../../composables';
+import { useDeepLinkApi, useModals, useAeSdk } from '../../composables';
 import { MODAL_MESSAGE_SIGN, handleUnknownError } from '../utils';
 
 export default defineComponent({
   name: 'SignMessage',
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-      const { getSdk } = useSdk({ store: root.$store });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
+      const { getAeSdk } = useAeSdk({ store });
       const { openModal } = useModals();
 
       try {
-        const sdk = await getSdk();
-        const { message } = root.$route.query;
+        const aeSdk = await getAeSdk();
+        const { message } = route.query;
 
         await openModal(MODAL_MESSAGE_SIGN, {
           message,
@@ -25,7 +31,7 @@ export default defineComponent({
           },
         });
 
-        const signature = await sdk.signMessage(message);
+        const signature = await aeSdk.signMessage(message as string);
         const signatureHex = Buffer.from(signature).toString('hex');
         openCallbackOrGoHome(true, { signature: signatureHex });
       } catch (error: any) {

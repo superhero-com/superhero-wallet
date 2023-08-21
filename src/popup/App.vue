@@ -1,6 +1,6 @@
 <template>
   <div
-    id="app"
+    class="app-wrapper"
     :class="{
       'show-header': showHeader,
       'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
@@ -21,12 +21,15 @@
     >
       <Header v-if="showHeader" />
 
-      <Transition name="page-transition">
-        <RouterView
-          :class="{ 'show-header': showHeader }"
-          class="main"
-        />
-      </Transition>
+      <RouterView
+        v-slot="{ Component }"
+        :class="{ 'show-header': showHeader }"
+        class="main"
+      >
+        <Transition name="page-transition">
+          <Component :is="Component" />
+        </Transition>
+      </RouterView>
 
       <NodeConnectionStatus
         v-if="!modalsOpen.length"
@@ -34,10 +37,10 @@
       />
 
       <Component
+        v-bind="props"
         :is="component"
         v-for="({ component, key, props }) in modalsOpen"
         :key="key"
-        v-bind="props"
       />
     </div>
   </div>
@@ -50,14 +53,17 @@ import {
   onMounted,
   ref,
   watch,
-} from '@vue/composition-api';
-import type { WalletRouteMeta } from '../types';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { WalletRouteMeta } from '@/types';
 import {
   NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
   watchUntilTruthy,
-} from './utils';
+} from '@/popup/utils';
 import {
   IS_WEB,
   IS_IOS,
@@ -67,7 +73,7 @@ import {
   IS_CHROME_BASED,
   IS_FIREFOX,
   RUNNING_IN_POPUP,
-} from '../lib/environment';
+} from '@/lib/environment';
 import {
   useAccounts,
   useConnection,
@@ -76,11 +82,11 @@ import {
   useNotifications,
   useUi,
   useViewport,
-} from '../composables';
+} from '@/composables';
 
-import Header from './components/Header.vue';
-import NodeConnectionStatus from './components/NodeConnectionStatus.vue';
-import Close from '../icons/close.svg?vue-component';
+import Header from '@/popup/components/Header.vue';
+import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import Close from '@/icons/close.svg?vue-component';
 
 export default defineComponent({
   name: 'App',
@@ -89,26 +95,30 @@ export default defineComponent({
     NodeConnectionStatus,
     Close,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const route = useRoute();
+    const { t } = useI18n();
+
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store: root.$store });
-    const { addWalletNotification } = useNotifications({ store: root.$store });
+    const { isLoggedIn } = useAccounts({ store });
+    const { addWalletNotification } = useNotifications({ store });
     const { loadAeternityData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
 
-    const isRestored = computed(() => root.$store.state.isRestored);
-    const backedUpSeed = computed(() => root.$store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => root.$store.state.qrScannerOpen);
-    const routeMeta = computed<WalletRouteMeta | undefined>(() => root.$route.meta);
+    const isRestored = computed(() => store.state.isRestored);
+    const backedUpSeed = computed(() => store.state.backedUpSeed);
+    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
+    const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
     const showHeader = computed(() => !(
       RUNNING_IN_POPUP
-      || root.$route.params.app // TODO determine if still used
+      || route.params.app // TODO determine if still used
       || routeMeta.value?.hideHeader
     ));
 
@@ -120,8 +130,12 @@ export default defineComponent({
     }
 
     async function checkExtensionUpdates() {
-      if (IS_EXTENSION && browser?.runtime?.requestUpdateCheck) {
-        const [update] = await browser.runtime.requestUpdateCheck();
+      // `requestUpdateCheck` does not exists in the `runtime` type
+      // because this feature is available only for selected browsers.
+      const updateCheck = (browser?.runtime as any)?.requestUpdateCheck;
+
+      if (IS_EXTENSION && updateCheck) {
+        const [update] = await updateCheck();
         let path = '';
         if (IS_FIREFOX) {
           path = APP_LINK_FIREFOX;
@@ -131,9 +145,9 @@ export default defineComponent({
         }
         if (update === 'update_available') {
           addWalletNotification({
-            text: root.$t('pages.account.updateAvailableText'),
-            title: root.$t('pages.account.updateAvailable'),
-            buttonLabel: root.$t('pages.notifications.goToStore'),
+            text: t('pages.account.updateAvailableText'),
+            title: t('pages.account.updateAvailable'),
+            buttonLabel: t('pages.notifications.goToStore'),
             path,
           });
         }
@@ -142,28 +156,28 @@ export default defineComponent({
 
     async function setNotificationSettings() {
       await watchUntilTruthy(isRestored);
-      if (root.$store.state.notificationSettings.length === 0) {
-        root.$store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
+      if (store.state.notificationSettings.length === 0) {
+        store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
       }
     }
 
     async function fetchAndSetChainNames() {
-      root.$store.commit('setChainNames', await root.$store.dispatch('getCacheChainNames'));
+      store.commit('setChainNames', await store.dispatch('getCacheChainNames'));
     }
 
     watch(isLoggedIn, (val) => {
       if (val && !backedUpSeed.value) {
         addWalletNotification({
-          title: root.$t('pages.account.secureYourAccount'),
-          text: root.$t('pages.account.seedNotification'),
-          buttonLabel: root.$t('pages.account.backupNow'),
+          title: t('pages.account.secureYourAccount'),
+          text: t('pages.account.seedNotification'),
+          buttonLabel: t('pages.account.backupNow'),
           path: '/more/settings/seed-phrase',
           isSeedBackup: true,
         });
       }
     });
 
-    watch(() => root.$route.fullPath, () => {
+    watch(() => route.fullPath, () => {
       if (innerElement.value) {
         innerElement.value.scrollTop = 0;
       }
@@ -208,7 +222,7 @@ export default defineComponent({
 @use '../styles/typography';
 @use '../styles/mixins';
 
-#app {
+.app-wrapper {
   --screen-padding-x: 16px;
   --screen-border-radius: 0;
   --screen-bg-color: #{variables.$color-bg-app};

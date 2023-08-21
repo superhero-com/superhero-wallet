@@ -5,7 +5,7 @@ import {
   onMounted,
   Ref,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import { Store } from 'vuex';
 import {
   excludeFalsy,
@@ -22,17 +22,17 @@ import { useUi } from './ui';
  * user changes the network.
  */
 export function createNetworkWatcher() {
-  let currentNetworkId: string;
+  let currentNetwork: INetwork;
 
   return {
     onNetworkChange: async (store: Store<any>, callback: () => void) => {
       await watchUntilTruthy(() => store.state.isRestored);
       const activeNetwork = store.getters.activeNetwork as INetwork;
 
-      if (!currentNetworkId) {
-        currentNetworkId = activeNetwork.networkId;
-      } else if (currentNetworkId !== activeNetwork.networkId) {
-        currentNetworkId = activeNetwork.networkId;
+      if (!currentNetwork) {
+        currentNetwork = activeNetwork;
+      } else if (currentNetwork.name !== activeNetwork.name) {
+        currentNetwork = activeNetwork;
         callback();
       }
     },

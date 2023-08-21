@@ -9,7 +9,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { NOTIFICATION_STATUS_CREATED } from '../utils';
 import { useNotifications } from '../../composables/notifications';
 import BellIcon from '../../icons/bell.svg?vue-component';
@@ -20,8 +21,9 @@ export default defineComponent({
   components: {
     BtnIcon,
   },
-  setup(props, { root }) {
-    const { notificationsAll } = useNotifications({ store: root.$store, requirePolling: true });
+  setup() {
+    const store = useStore();
+    const { notificationsAll } = useNotifications({ store, requirePolling: true });
 
     const notificationsCount = computed<string | number | null>(() => {
       const count = notificationsAll.value

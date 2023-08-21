@@ -1,21 +1,22 @@
 <template>
   <Modal
+    show
     full-screen
     class="message-sign"
     data-cy="popup-aex2"
   >
     <TransactionInfo
       :custom-title="$t('pages.popupMessageSign.title')"
-      :sender="{ name: app.name, address: app.host, url: app.url }"
-      :recipient="accountExtended"
+      :sender="sender"
+      :recipient="activeAccountExtended"
     />
 
     <div
       class="subtitle"
       data-cy="aepp"
     >
-      <span class="app-name">{{ app.name }}</span>
-      ({{ app.host }}) {{ $t('pages.popupMessageSign.heading') }}
+      <span class="app-name">{{ sender.name }}</span>
+      ({{ sender.address }}) {{ $t('pages.popupMessageSign.heading') }}
     </div>
 
     <DetailsItem
@@ -23,7 +24,7 @@
       data-cy="message"
     >
       <template #value>
-        <CopyText :value="message" />
+        <CopyText :value="popupProps?.message" />
       </template>
     </DetailsItem>
 
@@ -38,18 +39,17 @@
       <BtnMain
         data-cy="accept"
         :text="$t('common.confirm')"
-        @click="resolve()"
+        @click="popupProps?.resolve()"
       />
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type { IAccountLabeled, IAppData } from '../../../types';
+import { defineComponent, onUnmounted } from 'vue';
+import { useStore } from 'vuex';
 import { RejectedByUserError } from '../../../lib/errors';
-import { useGetter } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+import { useAccounts, usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -65,28 +65,23 @@ export default defineComponent({
     DetailsItem,
     CopyText,
   },
-  props: {
-    message: { type: String, required: true },
-    app: { type: Object as PropType<IAppData>, required: true },
-    resolve: { type: Function as PropType<() => void>, required: true },
-    reject: { type: Function as PropType<(e: Error) => void>, required: true },
-  },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
-
-    const getExplorerPath = useGetter('getExplorerPath');
-    const accountExtended = computed((): IAccountLabeled => ({
-      ...activeAccount.value,
-      label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(activeAccount.value.address),
-    }));
+  setup() {
+    const store = useStore();
+    const { activeAccountExtended } = useAccounts({ store });
+    const { popupProps, sender, setPopupProps } = usePopupProps();
 
     function cancel() {
-      props.reject(new RejectedByUserError());
+      popupProps.value?.reject(new RejectedByUserError());
     }
 
+    onUnmounted(() => {
+      setPopupProps(null);
+    });
+
     return {
-      accountExtended,
+      activeAccountExtended,
+      popupProps,
+      sender,
       cancel,
     };
   },

@@ -4,11 +4,11 @@ import {
   MODAL_ACCOUNT_IMPORT,
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
-  MODAL_SPEND_SUCCESS,
   MODAL_CONFIRM,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_ERROR_LOG,
   MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
@@ -31,7 +31,6 @@ import Default from '../components/Modals/Default.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
-import SpendSuccess from '../components/Modals/SpendSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
@@ -67,9 +66,6 @@ export default () => {
   registerModal(MODAL_CLAIM_SUCCESS, {
     component: ClaimSuccess,
   });
-  registerModal(MODAL_SPEND_SUCCESS, {
-    component: SpendSuccess,
-  });
   registerModal(MODAL_CONFIRM, {
     component: Confirm,
   });
@@ -94,6 +90,9 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
+    showInPopupIfWebFrame: true,
+  });
+  registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_MESSAGE_SIGN, {

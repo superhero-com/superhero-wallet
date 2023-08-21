@@ -3,8 +3,7 @@
     class="input-search"
     v-bind="$attrs"
     thin
-    v-on="$listeners"
-    @input="$emit('input', $event)"
+    @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template #after>
       <Search
@@ -13,7 +12,7 @@
       <Eraser
         v-else
         class="erase-icon"
-        @click="$emit('input', '')"
+        @click="$emit('update:modelValue', '')"
       />
     </template>
   </InputField>

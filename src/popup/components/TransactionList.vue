@@ -1,5 +1,8 @@
 <template>
-  <div class="transaction-list">
+  <div
+    :key="currentAddress"
+    class="transaction-list"
+  >
     <InfiniteScroll
       class="list"
       data-cy="list"
@@ -12,7 +15,6 @@
         :transaction="getTransaction(transaction)"
         :multisig-transaction="getMultisigTransaction(transaction)"
         :is-multisig="isMultisig"
-        :data-cy="transaction.pending && 'pending-txs'"
       />
     </InfiniteScroll>
     <AnimatedSpinner
@@ -39,22 +41,26 @@ import {
   onUnmounted,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { useGetter, useState } from '@/composables/vuex';
 import {
-  getTransaction,
+  AETERNITY_CONTRACT_ID,
+  TXS_PER_PAGE,
+  TX_DIRECTION,
+  TRANSACTION_OWNERSHIP_STATUS,
   getMultisigTransaction,
   getInnerTransaction,
   getOwnershipStatus,
+  getTransaction,
+  getTxDirection,
   getTxOwnerAddress,
   isTxDex,
   sortTransactionsByDateCallback,
   pipe,
-  TXS_PER_PAGE,
-  AETERNITY_CONTRACT_ID,
-  TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS, includesCaseInsensitive,
+  includesCaseInsensitive,
 } from '../utils';
-import { useDispatch, useGetter, useState } from '../../composables/vuex';
 import {
   useMultisigAccounts,
   useTransactionAndTokenFilter,
@@ -62,20 +68,19 @@ import {
   useAccounts,
   usePendingMultisigTransaction,
   useUi,
+  useAeSdk,
+  useTransactionList,
 } from '../../composables';
 
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
 import {
-  IDexContracts,
   ITokenList,
   ITransaction,
   ICommonTransaction,
-  ITransactionsState,
   ITx,
 } from '../../types';
-import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
@@ -87,15 +92,24 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { t } = useI18n();
+
     const {
       activeAccount,
       accounts,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const {
       activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
+
+    const {
+      getAccountAllTransactions,
+      getAccountTransactionsState,
+      fetchTransactions,
+    } = useTransactionList({ store });
 
     const { isAppActive } = useUi();
 
@@ -109,29 +123,27 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { dexContracts } = useAeSdk({ store });
+
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const loading = ref(false);
     const isDestroyed = ref(false);
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
-    const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
-    const getTxDirection = useGetter('getTxDirection');
-    const getDexContracts = useGetter<IDexContracts>('getDexContracts');
-    const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
-    const fetchTransactions = useDispatch('fetchTransactions');
-
-    const canLoadMore = computed(() => !!transactions.value.nextPageUrl);
 
     const currentAddress = computed(() => props.isMultisig
       ? activeMultisigAccount.value?.gaAccountId
       : activeAccount.value.address);
 
+    const canLoadMore = computed(() => (
+      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
+    ));
+
     const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountPendingTransactions.value,
-      ...transactions.value.loaded,
+      ...getAccountAllTransactions(currentAddress.value!),
       ...((props.isMultisig && pendingMultisigTransaction.value?.tx)
         ? [pendingMultisigTransaction.value]
         : []
@@ -164,17 +176,18 @@ export default defineComponent({
 
         const txOwnerAddress = getTxOwnerAddress(innerTx);
 
-        const direction = getTxDirection.value(
+        const direction = getTxDirection(
           outerTx.payerId ? outerTx : innerTx,
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
             !== TRANSACTION_OWNERSHIP_STATUS.current
           ) && txOwnerAddress
-          ),
+          )
+          || activeAccount.value.address,
         );
 
-        const isDex = isTxDex(innerTx, getDexContracts.value);
+        const isDex = isTxDex(innerTx, dexContracts.value);
 
         switch (displayMode.value.key) {
           case FILTER_MODE.all:
@@ -186,7 +199,7 @@ export default defineComponent({
           case FILTER_MODE.in:
             return direction === TX_DIRECTION.received;
           default:
-            throw new Error(`${i18n.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });
     }
@@ -219,11 +232,11 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions({
-          limit: TXS_PER_PAGE,
-          recent,
-          address: currentAddress.value,
-        });
+        await fetchTransactions(
+          TXS_PER_PAGE,
+          !!recent,
+          currentAddress.value!,
+        );
       } finally {
         loading.value = false;
       }
@@ -281,6 +294,7 @@ export default defineComponent({
 
     return {
       loading,
+      currentAddress,
       filteredTransactions,
       loadMore,
       getMultisigTransaction,

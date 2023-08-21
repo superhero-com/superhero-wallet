@@ -2,10 +2,13 @@
   <div class="transfer-send-form">
     <template v-if="isMultisig">
       <ModalHeader :title="$t('modals.multisigTxProposal.title')" />
+      <InfoBox
+        v-if="hasMultisigTokenWarning"
+        :type="INFO_BOX_TYPES.warning"
+        :text="$t('modals.multisigTxProposal.tokenWarning')"
+      />
       <div class="multisig-addresses-row">
-        <DetailsItem
-          class="multisig-address-item"
-        >
+        <DetailsItem class="multisig-address-item">
           <template #label>
             <FormSelect
               v-if="multisigVaultOwnedByManyAccounts"
@@ -23,9 +26,7 @@
             </template>
           </template>
           <template #value>
-            <AccountItem
-              :address="activeAccount.address"
-            />
+            <AccountItem :address="activeAccount.address" />
           </template>
         </DetailsItem>
 
@@ -50,36 +51,42 @@
       </div>
     </template>
 
-    <InputField
-      v-model.trim="formModel.address"
-      v-validate="{
+    <Field
+      v-slot="{ field }"
+      name="address"
+      :rules="{
         required: true,
         not_same_as: isMultisig? multisigVaultAddress : activeAccount.address,
         name_registered_address_or_url: isUrlTippingEnabled,
         name_registered_address: !isUrlTippingEnabled,
-        token_to_an_address: { isToken: !isAe },
+        token_to_an_address: [ !isAe ],
       }"
-      name="address"
-      data-cy="address"
-      show-help
-      show-message-help
-      :label="$t('modals.send.recipientLabel')"
-      :placeholder="isMultisig || !isUrlTippingEnabled
-        ? $t('modals.send.recipientPlaceholder')
-        : $t('modals.send.recipientPlaceholderUrl')"
-      :message="addressMessage"
-      @help="showRecipientHelp()"
     >
-      <template #label-after>
-        <a
-          class="scan-button"
-          data-cy="scan-button"
-          @click="openScanQrModal"
-        >
-          <QrScanIcon />
-        </a>
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model.trim="formModel.address"
+        name="address"
+        data-cy="address"
+        show-help
+        show-message-help
+        :label="$t('modals.send.recipientLabel')"
+        :placeholder="(isUrlTippingEnabled)
+          ? $t('modals.send.recipientPlaceholderUrl')
+          : $t('modals.send.recipientPlaceholder')"
+        :message="addressMessage"
+        @help="showRecipientHelp()"
+      >
+        <template #label-after>
+          <a
+            class="scan-button"
+            data-cy="scan-button"
+            @click="openScanQrModal"
+          >
+            <QrScanIcon />
+          </a>
+        </template>
+      </InputField>
+    </Field>
     <div class="status">
       <UrlStatus
         v-show="isTipUrl"
@@ -87,39 +94,47 @@
       />
     </div>
 
-    <InputAmount
+    <Field
+      v-slot="{ field }"
+      ref="amountField"
       v-model="formModel.amount"
-      v-validate="{
+      name="amount"
+      :rules="{
         required: true,
         min_value_exclusive: 0,
         ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
         ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
         ...+balance.minus(fee) > 0 && isMultisig
-          ? { max_value_vault: activeMultisigAccount.balance.toString() }
+          ? { max_value_vault: activeMultisigAccount?.balance.toString() }
           : {},
         min_tip_amount: isTipUrl,
       }"
-      name="amount"
-      data-cy="amount"
-      class="amount-input"
-      show-tokens-with-balance
-      :ae-only="isMultisig"
-      :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
-      :message="amountMessage"
-      :selected-asset="formModel.selectedAsset"
-      @asset-selected="handleAssetChange"
     >
-      <template #label-after>
-        <BtnPlain
-          v-if="!isMultisig"
-          class="max-button"
-          :class="{ chosen: isMaxValue }"
-          @click="setMaxValue"
-        >
-          {{ $t('common.max') }}
-        </BtnPlain>
-      </template>
-    </InputAmount>
+      <InputAmount
+        v-bind="field"
+        :model-value="formModel.amount"
+        name="amount"
+        data-cy="amount"
+        class="amount-input"
+        show-tokens-with-balance
+        :ae-only="isMultisig"
+        :label="isMultisig ? $t('modals.multisigTxProposal.amount') : $t('common.amount')"
+        :message="amountMessage"
+        :selected-asset="formModel.selectedAsset"
+        @asset-selected="handleAssetChange"
+      >
+        <template #label-after>
+          <BtnPlain
+            v-if="!isMultisig"
+            class="max-button"
+            :class="{ chosen: isMaxValue }"
+            @click="setMaxValue"
+          >
+            {{ $t('common.max') }}
+          </BtnPlain>
+        </template>
+      </InputAmount>
+    </Field>
 
     <template v-if="isAe">
       <div
@@ -178,11 +193,14 @@ import {
   computed,
   ref,
   watch,
-  onMounted,
   PropType,
   nextTick,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useForm, Field } from 'vee-validate';
 import type {
   Dictionary,
   IFormSelectOption,
@@ -197,6 +215,7 @@ import {
   AETERNITY_CONTRACT_ID,
   AGGREGATOR_URL,
   APP_LINK_WEB,
+  AETERNITY_SYMBOL,
   convertToken,
   validateTipUrl,
   checkAensName,
@@ -223,17 +242,17 @@ import UrlStatus from './UrlStatus.vue';
 import PayloadDetails from './PayloadDetails.vue';
 import AccountItem from './AccountItem.vue';
 import FormSelect from './form/FormSelect.vue';
+import InfoBox, { INFO_BOX_TYPES } from './InfoBox.vue';
 
 import QrScanIcon from '../../icons/qr-scan.svg?vue-component';
 import EditIcon from '../../icons/pencil.svg?vue-component';
 import DeleteIcon from '../../icons/trash.svg?vue-component';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
-const WARNING_RULES = ['not_same_as', 'max_value_vault'];
-
 export default defineComponent({
   name: 'TransferSendForm',
   components: {
+    InfoBox,
     BtnText,
     BtnHelp,
     BtnIcon,
@@ -248,6 +267,7 @@ export default defineComponent({
     FormSelect,
     UrlStatus,
     QrScanIcon,
+    Field,
   },
   model: {
     prop: 'transferData',
@@ -256,43 +276,59 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const store = useStore();
+    const route = useRoute();
+    const { t } = useI18n();
+
+    const { validate, errors } = useForm();
+
+    // TOOD: in the future we might rely on the error codes instead
+    const noneAlphabeticCharsRegExp = /[^\p{L}]/gu;
+
+    const WARNING_RULES_WORDING = [
+      t('validation.notSameAs').replace(noneAlphabeticCharsRegExp, ''),
+      t('validation.maxValueVault').replace(noneAlphabeticCharsRegExp, ''),
+    ];
+
     const invoiceId = ref(null);
     const invoiceContract = ref(null);
     const formModel = ref<TransferFormModel>(props.transferData);
     const loading = ref<boolean>(false);
     const error = ref<boolean>(false);
     const isUrlTippingEnabled = ref<boolean>(false);
+    const amountField = ref<InstanceType<typeof Field> | null>(null);
+    const hasMultisigTokenWarning = ref(false);
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { balance, aeternityCoin } = useBalances({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const {
       accounts,
       activeAccount,
       prepareAccountSelectOptions,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
     const fungibleTokens = useState('fungibleTokens');
     const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
     const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
 
     function getMessageByFieldName(fieldName: string): IInputMessage {
-      const warning = (root as any).errors.items
-        .filter(({ field }: any) => field === fieldName)
-        .find((_error: any) => WARNING_RULES.includes(_error.rule))?.msg || null;
-      if (warning) return { status: 'warning', text: warning };
-      const _error = (root as any).errors.items
-        .filter(({ field }: any) => field === fieldName)
-        .filter(({ rule }: any) => !WARNING_RULES.includes(rule))[0]?.msg || null;
-      if (_error) return { status: 'error', text: _error };
+      if (!errors.value) return { status: 'success' };
+      const items = errors.value[fieldName as keyof typeof errors.value];
+      if (items && WARNING_RULES_WORDING.includes(items.replace(noneAlphabeticCharsRegExp, ''))) {
+        return { status: 'warning', text: items };
+      }
+      if (items) {
+        return { status: 'error', text: items };
+      }
       return { status: 'success' };
     }
     const amountMessage = computed(() => getMessageByFieldName('amount'));
 
     const urlStatus = computed(
-      () => root.$store.getters['tipUrl/status'](formModel.value.address),
+      () => store.getters['tipUrl/status'](formModel.value.address),
     );
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -343,12 +379,12 @@ export default defineComponent({
 
     function selectAccount(val: string) {
       if (val) {
-        root.$store.commit(
+        store.commit(
           'accounts/setActiveIdx',
           accounts.value.find(({ address }) => address === val)?.idx,
         );
-        if (formModel.value.amount) {
-          (root as any).$validator.validate('amount');
+        if (formModel.value.amount && amountField.value) {
+          amountField.value.validate();
         }
       }
     }
@@ -361,7 +397,7 @@ export default defineComponent({
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
       };
-      emit('input', inputPayload);
+      emit('update:transferData', inputPayload);
       return nextTick();
     }
 
@@ -372,7 +408,12 @@ export default defineComponent({
       token,
     }: Dictionary) {
       if (token) {
-        formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+        if (props.isMultisig && ![AETERNITY_SYMBOL, AETERNITY_CONTRACT_ID].includes(token)) {
+          hasMultisigTokenWarning.value = true;
+        } else {
+          formModel.value.selectedAsset = availableTokens.value[token] || aeternityCoin.value;
+          hasMultisigTokenWarning.value = false;
+        }
       } else if (!formModel.value.selectedAsset) {
         formModel.value.selectedAsset = aeternityCoin.value;
       }
@@ -401,8 +442,7 @@ export default defineComponent({
 
     // Method called from a parent scope - avoid changing its name.
     async function submit() {
-      const isValid = !(await (root as any).$validator._base.anyExcept('address', WARNING_RULES));
-      if (isValid) {
+      if (!hasError.value) {
         await emitCurrentFormModelState();
         emit('success');
       }
@@ -418,7 +458,7 @@ export default defineComponent({
 
     async function openScanQrModal() {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: root.$t('pages.send.scanAddress'),
+        title: t('pages.send.scanAddress'),
         icon: 'critical',
       });
       if (scanResult?.trim().charAt(0) === '{') {
@@ -428,9 +468,9 @@ export default defineComponent({
         } catch (e) {
           // eslint-disable-next-line no-console
           if (process.env.NODE_ENV !== 'production') console.error(e);
-          formModel.value.address = '';
+          formModel.value.address = undefined;
           openDefaultModal({
-            title: root.$t('modals.invalid-qr-code.msg'),
+            title: t('modals.invalid-qr-code.msg'),
             icon: 'critical',
           });
           return;
@@ -439,8 +479,8 @@ export default defineComponent({
         const requestedTokenBalance = tokenBalances.value
           .find(({ value }: any) => value === parsedScanResult.tokenContract);
         if (!requestedTokenBalance) {
-          formModel.value.address = '';
-          openDefaultModal({ msg: root.$t('modals.insufficient-balance.msg') });
+          formModel.value.address = undefined;
+          openDefaultModal({ msg: t('modals.insufficient-balance.msg') });
           return;
         }
 
@@ -456,7 +496,7 @@ export default defineComponent({
         ).toString();
         invoiceId.value = parsedScanResult.invoiceId;
         invoiceContract.value = parsedScanResult.invoiceContract;
-        await (root as any).validate();
+        await validate();
       } else {
         if (!scanResult) return;
         updateFormModelValues([
@@ -469,7 +509,7 @@ export default defineComponent({
         ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
         invoiceId.value = null;
       }
-      if (!formModel.value.address) formModel.value.address = '';
+      if (!formModel.value.address) formModel.value.address = undefined;
     }
 
     function editPayload() {
@@ -487,6 +527,7 @@ export default defineComponent({
     watch(
       () => hasError.value,
       (val) => emit('error', val),
+      { deep: true },
     );
 
     watch(
@@ -495,25 +536,31 @@ export default defineComponent({
       { deep: true },
     );
 
-    onMounted(async () => {
-      if (
-        props.isMultisig
-        && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
-      ) {
-        root.$store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
-      }
+    watch(
+      activeAccount,
+      () => {
+        if (
+          props.isMultisig
+          && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
+        ) {
+          store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+        }
 
-      const { query } = root.$route;
-      if ([query['x-success'], query['x-cancel']].every((value) => value === AGGREGATOR_URL)) {
-        isUrlTippingEnabled.value = true;
-      }
-      updateFormModelValues({
-        ...query,
-        token: query.token || formModel.value?.selectedAsset?.contractId,
-      });
-    });
+        const { query } = route;
+        const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
+        if ([query['x-success'], query['x-cancel']].every((value) => value && (value as string).startsWith(slicedAggregatorUrl))) {
+          isUrlTippingEnabled.value = true;
+        }
+        updateFormModelValues({
+          ...query,
+          token: query.token || formModel.value?.selectedAsset?.contractId,
+        });
+      },
+      { deep: true, immediate: true },
+    );
 
     return {
+      INFO_BOX_TYPES,
       EditIcon,
       DeleteIcon,
       PlusCircleIcon,
@@ -537,15 +584,17 @@ export default defineComponent({
       multisigVaultOwnedByManyAccounts,
       activeMultisigAccount,
       isUrlTippingEnabled,
+      hasMultisigTokenWarning,
+      amountField,
+      balance,
+      fee,
+      max,
       openScanQrModal,
       selectAccount,
       setMaxValue,
       showRecipientHelp,
       handleAssetChange,
       submit,
-      balance,
-      fee,
-      max,
       editPayload,
       clearPayload,
     };

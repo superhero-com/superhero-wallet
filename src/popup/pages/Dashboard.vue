@@ -39,11 +39,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
+import { useStore } from 'vuex';
 import { DASHBOARD_CARD_ID } from '../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
-import { useAccounts, useSdk } from '../../composables';
+import { useAccounts, useAeSdk } from '../../composables';
 
 import DashboardCard from '../components/DashboardCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -70,13 +71,15 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     return {
       DASHBOARD_CARD_ID,

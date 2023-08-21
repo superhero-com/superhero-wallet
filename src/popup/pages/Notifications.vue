@@ -26,7 +26,8 @@ import {
   onBeforeUnmount,
   onMounted,
   nextTick,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
@@ -38,13 +39,15 @@ export default defineComponent({
     InfiniteScroll,
     NotificationItem,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const {
       notificationsToShow,
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
-    } = useNotifications({ store: root.$store, requirePolling: true });
+    } = useNotifications({ store, requirePolling: true });
 
     onMounted(async () => {
       loadMoreNotifications();

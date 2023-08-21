@@ -1,20 +1,28 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
 import BigNumber from 'bignumber.js';
-import { AmountFormatter, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
+import {
+  Encoded,
+  MemoryAccount,
+  Tag,
+  generateKeyPair,
+  hash,
+  unpackTx,
+} from '@aeternity/aepp-sdk';
 import dayjs from 'dayjs';
+
 import type {
   IDefaultComposableOptions,
-  IKeyPair,
   IMultisigAccount,
   IMultisigCreationPhase,
   IRawMultisigAccount,
 } from '../types';
-import { useSdk } from './sdk';
+import { useAeSdk } from './aeSdk';
 import {
   DEFAULT_WAITING_HEIGHT,
   MULTISIG_CREATION_PHASES,
   MULTISIG_SIMPLE_GA_BYTECODE,
   SUPPORTED_MULTISIG_CONTRACT_VERSION,
+  aettosToAe,
 } from '../popup/utils';
 import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
 import { useMultisigAccounts } from './multisigAccounts';
@@ -25,7 +33,7 @@ const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
 export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
-  const { getDrySdk, getSdk } = useSdk({ store });
+  const { getDryAeSdk, getAeSdk } = useAeSdk({ store });
   const {
     getMultisigAccountByContractId,
     addPendingMultisigAccount,
@@ -46,8 +54,8 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   ));
 
   async function createMultisigContractInstance() {
-    const drySdk = await getDrySdk();
-    return drySdk.getContractInstance({
+    const dryAeSdk = await getDryAeSdk();
+    return dryAeSdk.initializeContract({
       aci: SimpleGAMultiSigAci,
       bytecode: MULTISIG_SIMPLE_GA_BYTECODE,
     });
@@ -59,10 +67,11 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
   async function estimateMultisigAccountDeployGasFee(
     multisigContractInstance: any,
     noOfConfirmations: number,
-    signersAddresses: string[],
+    signersAddresses: Encoded.AccountAddress[],
+    senderId: Encoded.AccountAddress,
   ): Promise<number> {
     return (multisigContractInstance || await createMultisigContractInstance())
-      ._estimateGas('init', [noOfConfirmations, signersAddresses]);
+      ._estimateGas('init', [noOfConfirmations, signersAddresses], { senderId });
   }
 
   /**
@@ -71,44 +80,44 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    */
   async function prepareVaultCreationAttachTx(
     noOfConfirmations: number,
-    signersAddresses: string[],
+    signersAddresses: Encoded.AccountAddress[],
   ) {
     if (noOfConfirmations > signersAddresses.length) throw Error('Number of confirmations exceed amount of signers');
 
     const contractArgs = [noOfConfirmations, signersAddresses];
-    const drySdk = await getDrySdk();
+    const dryAeSdk = await getDryAeSdk();
 
     // Create a temporary account
-    const gaAccount: IKeyPair = Crypto.generateKeyPair();
+    const gaAccount = generateKeyPair();
     pendingMultisigCreationTxs.value[gaAccount.publicKey] = {};
     const multisigContractInstance = await createMultisigContractInstance();
     pendingMultisigCreationTxs.value[gaAccount.publicKey]
-      .multisigAccountCreationEncodedCallData = multisigContractInstance.calldata.encode(
+      .multisigAccountCreationEncodedCallData = multisigContractInstance._calldata.encode(
         multisigContractInstance._name,
         'init',
         contractArgs,
       );
 
     // Build Attach transaction
-    const attachTX = await drySdk.gaAttachTx({
+    const attachTX = await dryAeSdk.buildTx({
       ownerId: gaAccount.publicKey,
-      code: multisigContractInstance.bytecode,
+      code: multisigContractInstance.$options.bytecode!,
       callData: pendingMultisigCreationTxs.value[gaAccount.publicKey]
-        .multisigAccountCreationEncodedCallData,
-      authFun: Crypto.hash('authorize'),
-      gas: await estimateMultisigAccountDeployGasFee(
+        .multisigAccountCreationEncodedCallData!,
+      authFun: hash('authorize'),
+      tag: Tag.GaAttachTx,
+      gasLimit: await estimateMultisigAccountDeployGasFee(
         multisigContractInstance,
         noOfConfirmations,
         signersAddresses,
+        gaAccount.publicKey,
       ),
-      options: {
-        innerTx: true,
-      },
+      nonce: 1,
     });
     pendingMultisigCreationTxs.value[gaAccount.publicKey]
-      .signedAttachTx = await drySdk.signTransaction(attachTX.tx, {
+      .signedAttachTx = await dryAeSdk.signTransaction(attachTX, {
         innerTx: true,
-        onAccount: gaAccount,
+        onAccount: new MemoryAccount(gaAccount.secretKey),
       });
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.prepared;
     return gaAccount.publicKey;
@@ -118,39 +127,39 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * First step of creating the multisig account
    * Prepare multisig account creation transaction
    */
-  async function prepareVaultCreationRawTx(payerId: string, accountId: string) {
-    if (!pendingMultisigCreationTxs.value[accountId]?.signedAttachTx) {
+  async function prepareVaultCreationRawTx(
+    payerId: Encoded.AccountAddress,
+    accountId: Encoded.AccountAddress,
+  ) {
+    const { signedAttachTx } = pendingMultisigCreationTxs.value[accountId];
+    if (!signedAttachTx) {
       throw Error(`GA Attach Tx not found for account ${accountId}, Prepare attach transaction first`);
     }
 
-    const sdk = await getSdk();
-
-    // Wrap signed GA attach transaction
-    const opt = {
-      ...sdk.Ae.defaults,
-      ...{
-        waitMined: true,
-        modal: false,
-        innerTx: true,
-        fromAccount: payerId,
-      },
-    };
-    const payedTx = await sdk.send(
-      await sdk.payingForTx({
-        ...opt,
+    const aeSdk = await getAeSdk();
+    const payedTx = await aeSdk.signTransaction(
+      await aeSdk.buildTx({
+        tag: Tag.PayingForTx,
         payerId,
-        tx: pendingMultisigCreationTxs.value[accountId].signedAttachTx,
+        tx: signedAttachTx,
       }),
-      opt,
+      {
+        modal: false,
+        fromAccount: payerId,
+      } as any,
     );
-    pendingMultisigCreationTxs.value[accountId].rawTx = payedTx.rawTx;
+
+    pendingMultisigCreationTxs.value[accountId].rawTx = payedTx;
 
     // Calculate fee
-    const { tx } = TxBuilder.unpackTx(payedTx.rawTx);
-    const outerFee = tx.encodedTx.tx.fee;
-    const innerFee = tx.encodedTx.tx.tx.tx.encodedTx.tx.fee;
+    const tx = unpackTx(payedTx, Tag.SignedTx);
+    if (tx.encodedTx.tag !== Tag.PayingForTx || tx.encodedTx.tx.encodedTx.tag !== Tag.GaAttachTx) {
+      throw Error('Transaction build failed');
+    }
+    const outerFee = tx.encodedTx.fee;
+    const innerFee = tx.encodedTx.tx.encodedTx.fee;
     const creationFeeUnformatted = new BigNumber(outerFee).plus(innerFee).toFixed();
-    multisigAccountCreationFee.value = Number(AmountFormatter.toAe(creationFeeUnformatted));
+    multisigAccountCreationFee.value = +aettosToAe(creationFeeUnformatted);
     multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.signed;
     notEnoughBalanceToCreateMultisig.value = (
       balances.value[payerId]?.isLessThan(multisigAccountCreationFee.value)
@@ -162,31 +171,30 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
    * @throws Error
    */
   async function deployMultisigAccount(
-    accountId: string,
+    accountId: Encoded.AccountAddress,
     confirmationsRequired: number,
-    signers: string[],
+    signers: Encoded.AccountAddress[],
   ) {
-    if (!pendingMultisigCreationTxs.value[accountId]?.signedAttachTx) {
+    const { rawTx } = pendingMultisigCreationTxs.value[accountId];
+    if (!rawTx) {
       throw Error(`Raw PayForTransaction not found for account ${accountId}, Prepare PayForTransaction first`);
     }
 
-    const sdk = await getSdk();
+    const aeSdk = await getAeSdk();
 
     // Send transaction to the chain
-    const { txHash } = await sdk.api.postTransaction(
-      { tx: pendingMultisigCreationTxs.value[accountId].rawTx },
-    );
-    const pollingResponse = await sdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
+    const { txHash } = await aeSdk.api.postTransaction({ tx: rawTx });
+    const pollingResponse = await aeSdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
     if (pollingResponse && pollingResponse.blockHeight !== -1) {
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.deployed;
-      const gaContract = await sdk.getAccount(accountId);
+      const gaContract = await aeSdk.getAccount(accountId);
       multisigAccountCreationPhase.value = MULTISIG_CREATION_PHASES.created;
 
       const currentDate = dayjs().toISOString();
 
       multisigAccount.value = {
-        contractId: gaContract.contractId,
-        balance: new BigNumber(gaContract.balance),
+        contractId: gaContract.contractId as Encoded.ContractAddress,
+        balance: new BigNumber(gaContract.balance.toString()),
         gaAccountId: accountId,
         signers,
         confirmationsRequired,
@@ -197,7 +205,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         confirmedBy: [],
         expired: false,
         id: 0,
-        proposedBy: '',
+        proposedBy: '' as any,
         refusedBy: [],
         txHash: undefined, // set from propose
         version: SUPPORTED_MULTISIG_CONTRACT_VERSION,

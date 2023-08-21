@@ -18,7 +18,7 @@
         {{ $t('common.cancel') }}
       </BtnMain>
       <BtnMain
-        :disabled="!tippingSupported"
+        :disabled="!isTippingSupported"
         @click="sendComment"
       >
         {{ $t('common.confirm') }}
@@ -34,16 +34,20 @@ import {
   defineComponent,
   ref,
   watch,
-} from '@vue/composition-api';
-import { Route } from 'vue-router';
+} from 'vue';
+import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import {
   useAccounts,
   useDeepLinkApi,
   useModals,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 import { useGetter } from '../../composables/vuex';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
+import { postJson } from '../utils';
+import { INetwork } from '../../types';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -56,32 +60,37 @@ export default defineComponent({
     BtnMain,
     FixedScreenFooter,
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { t } = useI18n();
+
+    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
       activeAccount,
       accountsSelectOptions,
       setActiveAccountByAddress,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
+    const activeNetwork = useGetter<INetwork>('activeNetwork');
 
     const creatorAddress = ref(activeAccount.value.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
     const loading = ref<boolean>(false);
-    const tippingSupported = useGetter('tippingSupported');
 
     watch(
-      () => root.$route,
-      ({ query }: Route) => {
+      () => route,
+      ({ query }: RouteLocationNormalized) => {
         id.value = query.id as string ?? '';
         parentId.value = query.parentId ? +query.parentId : undefined;
         text.value = query.text as string ?? '';
 
         if (!id.value || !text.value) {
-          root.$router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_ACCOUNT });
           throw new Error('CommentNew: Invalid arguments');
         }
       },
@@ -90,18 +99,24 @@ export default defineComponent({
 
     async function sendComment() {
       loading.value = true;
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       try {
-        await root.$store.dispatch('sendTipComment', [
-          id.value,
-          text.value,
-          await sdk.address(),
-          parentId.value,
-        ]);
+        const postToCommentApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/comment/api/`, { body });
+
+        const responseChallenge = await postToCommentApi({
+          tipId: id.value,
+          text: text.value,
+          author: aeSdk.address,
+          parentId: parentId.value,
+        });
+        const respondChallenge = await fetchRespondChallenge(responseChallenge);
+
+        postToCommentApi(respondChallenge);
+
         openCallbackOrGoHome(true);
       } catch (e: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         e.payload = { id, parentId, text };
@@ -111,10 +126,10 @@ export default defineComponent({
       }
     }
 
-    // Wait until the `tippingSupported` is established by the SDK
+    // Wait until the `isTippingSupported` is established by the aeSdk
     (async () => {
       loading.value = true;
-      await getSdk();
+      await getAeSdk();
       loading.value = false;
     })();
 
@@ -125,7 +140,7 @@ export default defineComponent({
       parentId,
       text,
       loading,
-      tippingSupported,
+      isTippingSupported,
       sendComment,
       openCallbackOrGoHome,
       setActiveAccountByAddress,

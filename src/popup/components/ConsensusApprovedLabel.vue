@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
+import { computed, defineComponent, PropType } from 'vue';
 import ConsensusLabel from './ConsensusLabel.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
 

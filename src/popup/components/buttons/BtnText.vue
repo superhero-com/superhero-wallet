@@ -5,7 +5,6 @@
       'has-icon': !!icon,
     }"
     :disabled="disabled"
-    @click="$emit('click')"
   >
     <Component
       :is="icon"
@@ -18,7 +17,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import BtnPlain from './BtnPlain.vue';
 
 export default defineComponent({

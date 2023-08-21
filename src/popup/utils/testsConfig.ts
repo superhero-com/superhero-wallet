@@ -1,27 +1,40 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import type { IPopupConfig } from '../../types';
 import {
+  Tag,
+  AbiVersion,
+  VmVersion,
+  Encoded,
+  AE_AMOUNT_FORMATS,
+} from '@aeternity/aepp-sdk';
+import type {
+  PartialDeep,
+  IPopupConfig,
+  ITransaction,
+  TxFunctionParsed,
+} from '../../types';
+import {
+  AETERNITY_COIN_ID,
   AETERNITY_CONTRACT_ID,
   MAX_UINT256,
   NETWORK_TESTNET,
+  POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
-  POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   STUB_ADDRESS,
+  STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
   STUB_TOKEN_CONTRACT_ADDRESS,
-  AETERNITY_COIN_ID,
 } from './constants';
 import { CoinGeckoMarketResponse } from '../../lib/CoinGecko';
 
 export const testAccount = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
-  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5',
+  address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
 };
 
-export const recipientId = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
-export const contractCallAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
+export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
+export const contractCallAddress: Encoded.ContractAddress = 'ct_ym8eXWR2YfQZcMaXA8GFid9aarfCozGkeMcRHYVCVoBdVMzio';
 
 export const STUB_CURRENCY: CoinGeckoMarketResponse = {
   id: AETERNITY_COIN_ID, symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', currentPrice: 0.076783, marketCap: 31487891, marketCapRank: 523, fullyDilutedValuation: null, totalVolume: 217034, high24h: 0.078539, low24h: 0.076793, priceChange24h: -0.001092194951687525, priceChangePercentage24h: -1.4025, marketCapChange24h: -429134.39267925173, marketCapChangePercentage24h: -1.34453, circulatingSupply: 409885828.49932, totalSupply: 536306702.0, maxSupply: null, ath: 5.69, athChangePercentage: -98.65091, athDate: '2018-04-29T03:50:39.593Z', atl: 0.059135, atlChangePercentage: 29.84246, atlDate: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, lastUpdated: '2023-01-17T11:38:23.610Z',
@@ -30,6 +43,15 @@ export const STUB_CURRENCY: CoinGeckoMarketResponse = {
 export const popupProps: Record<string, IPopupConfig> = {
   [POPUP_TYPE_CONNECT]: {
     type: POPUP_TYPE_CONNECT,
+    app: {
+      url: 'http://localhost:5000/aepp/aepp',
+      name: 'AEPP',
+      protocol: 'http:',
+      host: 'localhost',
+    },
+  },
+  [POPUP_TYPE_ACCOUNT_LIST]: {
+    type: POPUP_TYPE_ACCOUNT_LIST,
     app: {
       url: 'http://localhost:5000/aepp/aepp',
       name: 'AEPP',
@@ -65,8 +87,8 @@ export const popupProps: Record<string, IPopupConfig> = {
       protocol: 'http:',
       host: 'localhost',
     },
-    transaction: {
-      tag: '12',
+    tx: {
+      type: Tag[Tag.SpendTx],
       VSN: '1',
       senderId: testAccount.address,
       recipientId,
@@ -90,13 +112,13 @@ export const popupProps: Record<string, IPopupConfig> = {
 
 const commonParams = {
   amount: 100000000000000000,
-  ttl: MAX_UINT256,
-  nonce: MAX_UINT256,
+  ttl: MAX_UINT256.toNumber(),
+  nonce: MAX_UINT256.toNumber(),
   fee: 10000000000000000,
   gas: 1579000,
   gasPrice: 1000000000,
   waitMined: true,
-  denomination: 'aettos',
+  denomination: AE_AMOUNT_FORMATS.AETTOS,
   clientTtl: 84600,
   nameTtl: 50000,
   nameFee: 0,
@@ -119,34 +141,37 @@ const commonParams = {
     type: 'delta',
     value: 10,
   },
-  ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-  abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-  callData:
-    'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF',
+  ctVersion: { abiVersion: AbiVersion.Sophia, vmVersion: VmVersion.Sophia },
+  abiVersion: AbiVersion.Sophia,
+  callData: STUB_CALLDATA,
 };
+
 export const txParams = {
-  [SCHEMA.TX_TYPE.contractCreate]: {
+  [Tag[Tag.ContractCreateTx]]: {
     ownerId: testAccount.address,
     code:
-      'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=',
+      'cb_+LBGA6DK15BWhAK4E5OWH1kkfhQIx/qEDTVv8hrfY/bk13cN88C4g7hT/iiALJYANwGXQDcAGgaCAAEDP/5E1kQfADcANwAaDoKfAYEKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqgEDP/6LoCthADcAl0ABAoKqLwMRKIAsliVzZXRfYnl0ZXMRRNZEHxFpbml0EYugK2ElZ2V0X2J5dGVzgi8AhTQuMi4wABHX/Rk=' as Encoded.ContractBytearray,
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.contractCall]: {
+  [Tag[Tag.ContractCallTx]]: {
     contractId: contractCallAddress,
     callerId: testAccount.address,
     ...commonParams,
   },
-  [SCHEMA.TX_TYPE.spend]: {
+  [Tag[Tag.SpendTx]]: {
     senderId: testAccount.address,
     recipientId,
     ...commonParams,
   },
 };
 
-export const transactions = {
+export const transactions: Partial<Record<TxFunctionParsed, PartialDeep<ITransaction>>> = {
   spend: {
     tx: {
       amount: 10000000000000,
+      arguments: [],
+      callerId: STUB_ADDRESS,
+      contractId: contractCallAddress,
       fee: 16780000000000,
       type: 'SpendTx',
       senderId: STUB_ADDRESS,
@@ -211,7 +236,7 @@ export const transactions = {
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2,
+      contractId: NETWORK_TESTNET.tipContractV2!,
       fee: 183720000000000,
       function: 'tip_token',
       type: 'ContractCallTx',
@@ -235,7 +260,7 @@ export const transactions = {
         },
       ],
       callerId: STUB_ADDRESS,
-      contractId: NETWORK_TESTNET.tipContractV2,
+      contractId: NETWORK_TESTNET.tipContractV2!,
       fee: 183000000000000,
       function: 'retip_token',
       type: 'ContractCallTx',
@@ -268,6 +293,7 @@ export const transactions = {
   },
   transfer: {
     tx: {
+      amount: 0,
       arguments: [
         {
           type: 'address',
@@ -363,6 +389,7 @@ export const transactions = {
       function: 'transfer',
       type: 'ContractCallTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingSpend: {
     pending: true,
@@ -372,10 +399,10 @@ export const transactions = {
       recipientId: testAccount.address,
       type: 'SpendTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingTransfer: {
     pending: true,
-    type: 'spendToken',
     tx: {
       amount: 195697771897021980,
       callerId: STUB_ADDRESS,
@@ -384,6 +411,7 @@ export const transactions = {
       function: 'transfer',
       type: 'ContractCallTx',
     },
+    microTime: new Date().getTime(),
   },
   pendingTipAe: {
     pending: true,
@@ -395,6 +423,7 @@ export const transactions = {
       type: 'ContractCallTx',
       selectedTokenContractId: AETERNITY_CONTRACT_ID,
     },
+    microTime: new Date().getTime(),
   },
   pendingTipToken: {
     pending: true,
@@ -407,6 +436,7 @@ export const transactions = {
       type: 'ContractCallTx',
       selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,
     },
+    microTime: new Date().getTime(),
   },
   payForGaAttach: {
     tx: {
@@ -414,17 +444,17 @@ export const transactions = {
       tx: {
         tx: {
           fee: 163660000000000,
-          type: 'GAAttachTx',
+          type: 'GaAttachTx',
         },
       },
       type: 'PayingForTx',
-      version: 1,
     },
+    microTime: new Date().getTime(),
   },
   gaMetaSpend: {
     tx: {
       fee: 76440000000000,
-      gaiId: STUB_ADDRESS,
+      gaId: STUB_ADDRESS,
       tx: {
         tx: {
           amount: 2341200000000000,
@@ -434,7 +464,7 @@ export const transactions = {
           type: 'SpendTx',
         },
       },
-      type: 'GAMetaTx',
+      type: 'GaMetaTx',
     },
   },
 };

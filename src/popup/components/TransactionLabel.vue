@@ -12,7 +12,7 @@
       class="error"
     >
       <WarningIcon
-        v-if="transaction.tx.returnType === ABORT_TX_TYPE"
+        v-if="transaction.tx.returnType === TX_RETURN_TYPE_ABORT"
         class="icon"
       />
       <RevertedIcon
@@ -42,9 +42,8 @@
       <span
         v-if="isErrorTransaction"
         class="error-type"
-      >
-        {{ $t('transaction.returnType')[transaction.tx.returnType] }}
-      </span>
+        v-text="errorTypeName"
+      />
       <span
         v-if="transaction.pending"
         :class="{ secondary: !label.customPending || showTransactionOwner }"
@@ -74,26 +73,23 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { Tag } from '@aeternity/aepp-sdk';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+
 import { useAccounts, useTransactionTx } from '../../composables';
-import { useGetter, useState } from '../../composables/vuex';
+import { useState } from '../../composables/vuex';
 import {
-  INetwork,
   ITokenList,
   ITransaction,
-  ILabel,
-  TxFunction,
-  TxFunctionRaw,
-  TxType,
 } from '../../types';
 import {
-  ABORT_TX_TYPE,
-  FUNCTION_TYPE_DEX,
   getAccountNameToDisplay,
+  TX_DIRECTION,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
+  TX_RETURN_TYPE_ABORT,
+  TX_RETURN_TYPE_REVERT,
 } from '../utils';
 import Truncate from './Truncate.vue';
 import PendingIcon from '../../icons/animated-pending.svg?vue-component';
@@ -113,116 +109,106 @@ export default defineComponent({
     showTransactionOwner: Boolean,
     dense: Boolean,
   },
-  setup(props, { root }) {
-    const { accounts, activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { accounts, activeAccount } = useAccounts({ store });
+    const { t } = useI18n();
+
     const {
-      outerTxType,
-      txType,
-      isAllowance,
-      isDex,
+      outerTxTag,
+      innerTxTag,
+      direction,
       innerTx,
+      isDex,
+      isDexAddLiquidity,
+      isDexAllowance,
+      isDexRemoveLiquidity,
       isErrorTransaction,
-    } = useTransactionTx({ store: root.$store, tx: props.transaction.tx });
+      isTip,
+      txTypeListLabel,
+    } = useTransactionTx({
+      store,
+      tx: props.transaction.tx,
+      externalAddress: props.transaction.transactionOwner,
+    });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-    const getTxDirection = useGetter('getTxDirection');
-    const labelWrapper = (text: TranslateResult = ''): ILabel => ({ text });
 
-    const label = computed((): ILabel => {
-      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
-      const transactionListTypes = root.$t('transaction.listType') as Record<TxType, TranslateResult>;
+    const label = computed((): {
+      text: string;
+      customPending?: string;
+      hasComma?: boolean;
+    } => {
+      let customPending;
+      let hasComma = !props.transaction.transactionOwner;
+      let text = txTypeListLabel.value; // Default value
 
-      if (txType.value === SCHEMA.TX_TYPE.spend) {
-        const isSent = getTxDirection.value(
-          innerTx.value,
-          props.transaction.transactionOwner,
-        ) === 'sent';
-        return {
-          text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
-          customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
-        };
-      }
       if (
-        txType.value === TX_TYPE_MDW.GAAttachTx
-        && outerTxType.value === TX_TYPE_MDW.PayingForTx
+        outerTxTag.value === Tag.SpendTx
+        || (outerTxTag.value === Tag.GaMetaTx && innerTxTag.value === Tag.SpendTx)
       ) {
-        return labelWrapper(root.$t('transaction.type.multisigVaultCreated'));
-      }
-      if (isAllowance.value) {
-        return labelWrapper(root.$t('transaction.dexType.allowToken'));
-      }
-      if (isDex.value) {
-        if (FUNCTION_TYPE_DEX.addLiquidity.includes(innerTx.value?.function as TxFunctionRaw)) {
-          return labelWrapper(root.$t('transaction.dexType.provideLiquidity'));
-        }
-        if (FUNCTION_TYPE_DEX.removeLiquidity.includes(
-          innerTx.value?.function as TxFunctionRaw,
-        )) {
-          return labelWrapper(root.$t('transaction.dexType.removeLiquidity'));
-        }
-        return { text: root.$t('common.swap'), hasComma: true };
-      }
-      if (
-        (
-          innerTx.value.contractId
-          && [
-            activeNetwork.value.tipContractV1,
-            activeNetwork.value.tipContractV2,
-          ].includes(innerTx.value.contractId)
-          && ([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip] as TxFunction[])
-            .includes(innerTx.value?.function!)
-        )
-        || props.transaction.claim
-      ) {
-        return labelWrapper(props.transaction.claim
-          ? root.$t('transaction.listType.tipReceived')
-          : root.$t('transaction.listType.tipSent'));
-      }
-      if (
-        txType.value === SCHEMA.TX_TYPE.contractCall
+        const isSent = direction.value === TX_DIRECTION.sent;
+        text = (isSent)
+          ? t('transaction.listType.sentTx')
+          : t('transaction.listType.receivedTx');
+        customPending = (isSent)
+          ? t('transaction.type.sentTx')
+          : t('transaction.type.receivedTx');
+      } else if (outerTxTag.value === Tag.PayingForTx && innerTxTag.value === Tag.GaAttachTx) {
+        text = t('transaction.type.multisigVaultCreated');
+      } else if (isDexAllowance.value) {
+        text = t('transaction.dexType.allowToken');
+      } else if (isDexAddLiquidity.value) {
+        text = t('transaction.dexType.provideLiquidity');
+      } else if (isDexRemoveLiquidity.value) {
+        text = t('transaction.dexType.removeLiquidity');
+      } else if (isDex.value) {
+        text = t('common.swap');
+        hasComma = true;
+      } else if (isTip.value && props.transaction.claim) {
+        text = t('transaction.listType.tipReceived');
+      } else if (isTip.value) {
+        text = t('transaction.listType.tipSent');
+      } else if (
+        outerTxTag.value === Tag.ContractCallTx
         && availableTokens.value[innerTx.value.contractId]
-        && (innerTx.value.function === TX_FUNCTIONS.transfer
-          || props.transaction.incomplete)
+        && (
+          innerTx.value.function === TX_FUNCTIONS.transfer
+          || props.transaction.incomplete
+        )
       ) {
-        const isSent = !props.transaction.transactionOwner
-          ? innerTx.value.callerId === activeAccount.value.address
-          : props.transaction.transactionOwner === innerTx.value.callerId;
-
-        return {
-          text: isSent
-            ? root.$t('transaction.listType.sentTx')
-            : root.$t('transaction.listType.receivedTx'),
-          customPending: isSent
-            ? root.$t('transaction.type.sentTx')
-            : root.$t('transaction.type.receivedTx'),
-        };
+        const isSent = (props.transaction.transactionOwner)
+          ? props.transaction.transactionOwner === innerTx.value.callerId
+          : innerTx.value.callerId === activeAccount.value.address;
+        text = (isSent)
+          ? t('transaction.listType.sentTx')
+          : t('transaction.listType.receivedTx');
+        customPending = (isSent)
+          ? t('transaction.type.sentTx')
+          : t('transaction.type.receivedTx');
       }
 
-      const translation = transactionListTypes[txType.value!] || transactionTypes[txType.value!];
-
-      if (txType.value && txType.value?.includes('name')) {
-        return labelWrapper(translation);
-      }
-
-      return props.transaction.transactionOwner
-        ? labelWrapper(translation)
-        : { text: translation, hasComma: true };
+      return { text, customPending, hasComma };
     });
 
     const ownerName = computed(() => getAccountNameToDisplay(
       accounts.value.find((acc) => acc.address === props.transaction.transactionOwner),
     ));
 
+    const errorTypeName = computed((): string | null => {
+      switch (props.transaction.tx.returnType) {
+        case TX_RETURN_TYPE_ABORT: return t('transaction.returnType.abort');
+        case TX_RETURN_TYPE_REVERT: return t('transaction.returnType.revert');
+        default: return null;
+      }
+    });
+
     return {
+      TX_RETURN_TYPE_ABORT,
       isErrorTransaction,
       ownerName,
       label,
-      ABORT_TX_TYPE,
+      errorTypeName,
     };
   },
 });
@@ -263,7 +249,7 @@ export default defineComponent({
   }
 
   .icon {
-    width: 16px;
+    min-width: 16px;
     height: 16px;
     color: variables.$color-white;
     margin-left: 1px;

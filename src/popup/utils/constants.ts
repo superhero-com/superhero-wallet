@@ -1,5 +1,9 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { Encoded } from '@aeternity/aepp-sdk-13';
+import {
+  Encoded,
+  Encoding,
+  METHODS,
+  Tag,
+} from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
   TxFunctionRaw,
@@ -8,10 +12,10 @@ import type {
   INetwork,
   INotificationSetting,
   IPermission,
-  TxType,
   IToken,
+  DexFunctionType,
 } from '../../types';
-import { i18n } from '../../store/plugins/languages';
+import { tg } from '../../store/plugins/languages';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -19,6 +23,10 @@ export const MOBILE_WIDTH = 480;
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
 export const SEED_LENGTH = 12;
+
+export const DECIMAL_PLACES_HIGH_PRECISION = 9;
+export const DECIMAL_PLACES_LOW_PRECISION = 2;
+
 export const AETERNITY_CONTRACT_ID = 'aeternity';
 export const AETERNITY_SYMBOL = 'AE';
 export const AETERNITY_COIN_ID = 'aeternity';
@@ -39,6 +47,9 @@ export const TX_DIRECTION = {
   received: 'received',
 } as const;
 
+/**
+ * ITx.function
+ */
 export const TX_FUNCTIONS = {
   tip: 'tip',
   retip: 'retip',
@@ -63,20 +74,87 @@ export const TX_FUNCTIONS = {
   transferPayload: 'transfer_payload',
   withdraw: 'withdraw',
   claim: 'claim',
+  spend: 'spend',
+  namePreclaim: 'name_preclaim',
+  nameClaim: 'name_claim',
+  nameTransfer: 'name_transfer',
+  incompleteTransfer: 'incomplete_transfer',
+  pendingSpend: 'pending_spend',
+  pendingTransfer: 'pending_transfer',
+  pendingTipAe: 'pending_tip_ae',
+  pendingTipToken: 'pending_tip_token',
+  payForGaAttach: 'pay_for_ga_attach',
+  gaMetaSpend: 'ga_meta_spend',
 } as const;
 
-export const TX_TYPE_MDW: Partial<Record<TxType, string>> = {
-  SpendTx: SCHEMA.TX_TYPE.spend,
-  ContractCallTx: SCHEMA.TX_TYPE.contractCall,
-  ContractCreateTx: SCHEMA.TX_TYPE.contractCreate,
-  NamePreclaimTx: SCHEMA.TX_TYPE.namePreClaim,
-  NameClaimTx: SCHEMA.TX_TYPE.nameClaim,
-  NameBidTx: SCHEMA.TX_TYPE.nameClaim,
-  NameUpdateTx: SCHEMA.TX_TYPE.nameUpdate,
-  PayingForTx: 'payingForTx', // TODO: remove after https://github.com/aeternity/aepp-sdk-js/issues/1583 is resolved
-  GAMetaTx: 'gaMetaTx',
-  GAAttachTx: 'gaAttachTx',
+/**
+ * ITx.function
+ */
+export const TX_FUNCTIONS_MULTISIG = {
+  propose: 'propose',
+  confirm: 'confirm',
+  refuse: 'refuse',
+  revoke: 'revoke',
+} as const;
+
+export const TX_FUNCTIONS_TYPE_DEX: Record<DexFunctionType, TxFunctionRaw[]> = {
+  pool: [
+    'remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae',
+  ],
+  removeLiquidity: [
+    'remove_liquidity', 'remove_liquidity_ae',
+  ],
+  addLiquidity: [
+    'add_liquidity', 'add_liquidity_ae',
+  ],
+  swap: [
+    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
+    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
+    'swap_ae_for_exact_tokens',
+  ],
+  allowance: [
+    'transfer_allowance', 'change_allowance', 'create_allowance',
+  ],
+  maxSpent: [
+    'swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens',
+  ],
+  minReceived: [
+    'swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae',
+  ],
 };
+
+/**
+ * ITx.tag
+ */
+export const TX_TAGS_SUPPORTED = [
+  Tag.SpendTx,
+  Tag.ContractCreateTx,
+  Tag.ContractCallTx,
+  Tag.NamePreclaimTx,
+  Tag.NameClaimTx,
+  Tag.NameUpdateTx,
+  Tag.NameTransferTx,
+];
+
+/**
+ * ITx.tag
+ */
+export const TX_TAGS_AENS = new Set([
+  Tag.NameClaimTx,
+  Tag.NamePreclaimTx,
+  Tag.NameRevokeTx,
+  Tag.NameUpdateTx,
+]);
+
+export const TX_RETURN_TYPE_OK = 'ok';
+export const TX_RETURN_TYPE_ABORT = 'abort';
+export const TX_RETURN_TYPE_REVERT = 'revert';
+
+export const TX_RETURN_TYPES = [
+  TX_RETURN_TYPE_OK,
+  TX_RETURN_TYPE_ABORT,
+  TX_RETURN_TYPE_REVERT,
+] as const;
 
 export const CONNECTION_TYPES = {
   POPUP: 'POPUP',
@@ -85,14 +163,16 @@ export const CONNECTION_TYPES = {
 
 export const HASH_REGEX = /^[1-9A-HJ-NP-Za-km-z]{48,50}$/;
 
-export const HASH_PREFIX_CONTRACT = 'ct';
-export const HASH_PREFIX_ACCOUNT = 'ak';
-export const HASH_PREFIX_NAME = 'nm';
-export const HASH_PREFIX_ORACLE = 'ok';
-export const HASH_PREFIX_TRANSACTION = 'th';
+export const HASH_PREFIXES_ALLOWED = [
+  Encoding.AccountAddress,
+  Encoding.Channel,
+  Encoding.ContractAddress,
+  Encoding.Name,
+  Encoding.OracleAddress,
+  Encoding.TxHash,
+] as const;
 
-export const ABORT_TX_TYPE = 'abort';
-export const STUB_ADDRESS = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
+export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
 export const STUB_NONCE = 10000;
@@ -100,8 +180,11 @@ export const MAX_UINT256 = new BigNumber(2).exponentiatedBy(256).minus(1);
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 
 export const ACCOUNT_HD_WALLET = 'hd-wallet';
-export const ACCOUNT_LEDGER_WALLET = 'ledger';
 
+/**
+ * Default `networkId` values returned by the Node after establishing the connection.
+ * Nodes returns different values when connecting to the Hyperchains.
+ */
 export const NETWORK_ID_MAINNET = 'ae_mainnet';
 export const NETWORK_ID_TESTNET = 'ae_uat';
 
@@ -109,7 +192,7 @@ export const NETWORK_MAINNET: INetwork = {
   url: 'https://mainnet.aeternity.io',
   networkId: NETWORK_ID_MAINNET,
   middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-  explorerUrl: 'https://explorer.aeternity.io',
+  explorerUrl: 'https://aescan.io',
   compilerUrl: 'https://compiler.aepps.com',
   backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   tipContractV1: 'ct_2AfnEfCSZCTEkxL5Yoi4Yfq6fF7YapHRaFKDJK3THMXMBspp5z' as Encoded.ContractAddress,
@@ -121,7 +204,7 @@ export const NETWORK_TESTNET: INetwork = {
   url: 'https://testnet.aeternity.io',
   networkId: NETWORK_ID_TESTNET,
   middlewareUrl: 'https://testnet.aeternity.io/mdw',
-  explorerUrl: 'https://explorer.testnet.aeternity.io',
+  explorerUrl: 'https://testnet.aescan.io',
   compilerUrl: 'https://latest.compiler.aepps.com',
   backendUrl: 'https://testnet.superhero.aeternity.art',
   tipContractV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd' as Encoded.ContractAddress,
@@ -130,7 +213,9 @@ export const NETWORK_TESTNET: INetwork = {
   name: 'Testnet',
 };
 
-export const NETWORK_DEFAULT = process.env.NETWORK === 'Testnet' ? NETWORK_TESTNET : NETWORK_MAINNET;
+export const NETWORK_DEFAULT = (process.env.NETWORK === 'Testnet')
+  ? NETWORK_TESTNET
+  : NETWORK_MAINNET;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 
@@ -139,6 +224,7 @@ export const NODE_STATUS_CONNECTED = 'connected';
 export const NODE_STATUS_ERROR = 'error';
 
 export const AGGREGATOR_URL = 'https://superhero.com/';
+export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const TXS_PER_PAGE = 30;
 export const AENS_DOMAIN = '.chain';
@@ -172,37 +258,37 @@ export const DASHBOARD_TRANSACTION_LIMIT = 3;
 
 export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
   {
-    text: i18n.t('pages.notification-settings.wallet'),
+    text: tg('pages.notification-settings.wallet'),
     checked: true,
     type: NOTIFICATION_TYPE_WALLET,
   },
   {
-    text: i18n.t('pages.notification-settings.commentOnTip'),
+    text: tg('pages.notification-settings.commentOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.commentOnComment'),
+    text: tg('pages.notification-settings.commentOnComment'),
     checked: false,
     type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
   },
   {
-    text: i18n.t('pages.notification-settings.retipOnTip'),
+    text: tg('pages.notification-settings.retipOnTip'),
     checked: true,
     type: NOTIFICATION_TYPE_RETIP_ON_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.tipOnComment'),
+    text: tg('pages.notification-settings.tipOnComment'),
     checked: true,
     type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
   },
   {
-    text: i18n.t('pages.notification-settings.claimOfTip'),
+    text: tg('pages.notification-settings.claimOfTip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
   },
   {
-    text: i18n.t('pages.notification-settings.claimOfRetip'),
+    text: tg('pages.notification-settings.claimOfRetip'),
     checked: true,
     type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   },
@@ -361,27 +447,6 @@ export const CURRENCIES: ICurrency[] = [
   },
 ];
 
-export const FUNCTION_TYPE_DEX: Record<'pool' | 'addLiquidity' | 'removeLiquidity' | 'swap' | 'allowance' | 'maxSpent' | 'minReceived', TxFunctionRaw[]> = {
-  pool: ['remove_liquidity', 'remove_liquidity_ae', 'add_liquidity', 'add_liquidity_ae'],
-  removeLiquidity: ['remove_liquidity', 'remove_liquidity_ae'],
-  addLiquidity: ['add_liquidity', 'add_liquidity_ae'],
-  swap: [
-    'deposit', 'withdraw', 'swap_exact_tokens_for_tokens', 'swap_tokens_for_exact_tokens',
-    'swap_exact_ae_for_tokens', 'swap_tokens_for_exact_ae', 'swap_exact_tokens_for_ae',
-    'swap_ae_for_exact_tokens',
-  ],
-  allowance: ['transfer_allowance', 'change_allowance', 'create_allowance'],
-  maxSpent: ['swap_tokens_for_exact_tokens', 'swap_tokens_for_exact_ae', 'swap_ae_for_exact_tokens'],
-  minReceived: ['swap_exact_tokens_for_tokens', 'swap_exact_ae_for_tokens', 'swap_exact_tokens_for_ae'],
-};
-
-export const FUNCTION_TYPE_MULTISIG: Record<string, string> = {
-  propose: 'propose',
-  confirm: 'confirm',
-  refuse: 'refuse',
-  revoke: 'revoke',
-} as const;
-
 export const APP_LINK_WEB = 'https://wallet.superhero.com';
 export const APP_LINK_CHROME = 'https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne';
 export const APP_LINK_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet';
@@ -404,11 +469,11 @@ export const MODAL_ACCOUNT_CREATE = 'account-create';
 export const MODAL_MULTISIG_VAULT_CREATE = 'multisig-vault-create';
 export const MODAL_ACCOUNT_IMPORT = 'import-account';
 export const MODAL_CLAIM_SUCCESS = 'claim-success';
-export const MODAL_SPEND_SUCCESS = 'spend-success';
 export const MODAL_CONFIRM = 'confirm';
 export const MODAL_CONFIRM_TRANSACTION_SIGN = 'confirm-transaction-sign';
 export const MODAL_CONFIRM_RAW_SIGN = 'confirm-raw-sign';
 export const MODAL_CONFIRM_CONNECT = 'confirm-connect';
+export const MODAL_CONFIRM_ACCOUNT_LIST = 'confirm-account-list';
 export const MODAL_MESSAGE_SIGN = 'confirm-message-sign';
 export const MODAL_ERROR_LOG = 'error-log';
 export const MODAL_HELP = 'help';
@@ -461,7 +526,7 @@ export const DEX_ALLOW_TOKEN = 'allow_token';
 
 export const AEX9_TRANSFER_EVENT = 'Aex9TransferEvent';
 
-export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
+export const DEX_TRANSACTION_TAGS: Partial<Record<TxFunctionRaw, string>> = {
   add_liquidity: DEX_PROVIDE_LIQUIDITY,
   add_liquidity_ae: DEX_PROVIDE_LIQUIDITY,
 
@@ -481,46 +546,18 @@ export const DEX_TRANSACTION_TAGS: Record<TxFunctionRaw, string> = {
 
   deposit: DEX_SWAP,
   withdraw: DEX_SWAP,
-
-  // TODO establish transaction tags for the following tx functions:
-  tip: '',
-  retip: '',
-  tip_token: '',
-  retip_token: '',
-  transfer: '',
-  transfer_payload: '',
-  claim: '',
-  propose: '',
 } as const;
 
-export const RETURN_TYPE_OK = 'ok';
-
-export const ADDRESS_TYPES: Record<string, string> = {
-  [HASH_PREFIX_ACCOUNT]: 'account/transactions',
-  [HASH_PREFIX_CONTRACT]: 'contracts/transactions',
-  [HASH_PREFIX_NAME]: 'names',
-  [HASH_PREFIX_ORACLE]: 'oracles/queries',
-  [HASH_PREFIX_TRANSACTION]: 'transactions',
-};
-
-export const SUPPORTED_TX_TYPES = [
-  SCHEMA.TX_TYPE.spend,
-  SCHEMA.TX_TYPE.contractCreate,
-  SCHEMA.TX_TYPE.contractCall,
-  SCHEMA.TX_TYPE.namePreClaim,
-  SCHEMA.TX_TYPE.nameClaim,
-  SCHEMA.TX_TYPE.nameUpdate,
-  SCHEMA.TX_TYPE.nameTransfer,
-];
-
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
+export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
-export const POPUP_TYPE_TX_SIGN = 'transaction.sign';
+export const POPUP_TYPE_TX_SIGN = METHODS.sign;
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
+  POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
@@ -534,6 +571,7 @@ export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
   name: '',
   address: false,
+  addressList: false,
   messageSign: false,
   dailySpendLimit: false,
   transactionSignLimit: 0,
@@ -588,3 +626,5 @@ export const ALLOWED_ICON_STATUSES = [
   'success',
   'warning',
 ] as const;
+
+export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';

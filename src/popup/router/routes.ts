@@ -1,4 +1,5 @@
 import { merge } from 'lodash-es';
+import { h } from 'vue';
 import type { WalletAppRouteConfig } from '../../types';
 import {
   ROUTE_INDEX,
@@ -27,6 +28,7 @@ import {
   ROUTE_NETWORK_ADD,
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE_CLAIM,
+  ROUTE_DONATE_ERROR,
 } from './routeNames';
 
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -65,6 +67,7 @@ import ErrorLogSettings from '../pages/ErrorLogSettings.vue';
 import PermissionsSettings from '../pages/PermissionsSettings.vue';
 import PermissionManager from '../pages/PermissionManager.vue';
 import PopupConnect from '../pages/Popups/Connect.vue';
+import PopupAccountList from '../pages/Popups/AccountList.vue';
 import PopupMessageSign from '../pages/Popups/MessageSign.vue';
 import PrivacyPolicy from '../pages/PrivacyPolicy.vue';
 import Retip from '../pages/Retip.vue';
@@ -216,19 +219,20 @@ export const routes: WalletAppRouteConfig[] = [
       },
 
       {
-        path: 'details/transactions/:hash',
+        path: 'details/transactions/:hash/:transactionOwner',
         name: ROUTE_MULTISIG_TX_DETAILS,
         component: {
           functional: true,
-          render: (h, context) => h(
+          render: (context: any) => h(
             TransactionDetails,
             merge({}, context, { props: { multisigDashboard: true } }),
           ),
         },
         props: true,
         meta: {
-          title: 'tx-details',
+          title: 'txDetails',
           showHeaderNavigation: true,
+          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
         },
       },
       {
@@ -252,7 +256,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: TokenTransactions,
             props: true,
             meta: {
-              title: 'coin-details',
+              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS },
               showHeaderNavigation: true,
               showFilterBar: true,
@@ -266,7 +270,7 @@ export const routes: WalletAppRouteConfig[] = [
             component: TokenDetails,
             props: true,
             meta: {
-              title: 'coin-details',
+              title: 'coinDetails',
               backRoute: { name: ROUTE_MULTISIG_DETAILS },
               showHeaderNavigation: true,
               isMultisig: true,
@@ -277,8 +281,8 @@ export const routes: WalletAppRouteConfig[] = [
     ],
   },
   {
-    path: '/transfer*',
-    redirect: '/account*',
+    path: '/transfer/:t(.*)',
+    redirect: '/account/:a(.*)',
   },
   {
     name: 'popup-sign-tx',
@@ -317,6 +321,15 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
+    name: 'account-list',
+    path: '/account-list',
+    component: PopupAccountList,
+    props: true,
+    meta: {
+      notPersist: true,
+    },
+  },
+  {
     path: '/more/settings',
     name: 'settings',
     component: Settings,
@@ -330,7 +343,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-reset-wallet',
     component: ResetWallet,
     meta: {
-      title: 'reset-wallet',
+      title: 'resetWallet',
       showHeaderNavigation: true,
     },
   },
@@ -339,7 +352,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-errors-log',
     component: ErrorLogSettings,
     meta: {
-      title: 'save-errors-log',
+      title: 'saveErrorsLog',
       showHeaderNavigation: true,
     },
   },
@@ -366,7 +379,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase',
     component: SeedPhraseSettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -375,7 +388,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase-details',
     component: SeedPhraseDetailsSettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -384,7 +397,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'settings-seed-phrase-verify',
     component: SeedPhraseVerifySettings,
     meta: {
-      title: 'seed-phrase',
+      title: 'seedPhrase',
       showHeaderNavigation: true,
     },
   },
@@ -404,7 +417,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NetworkForm,
     props: true,
     meta: {
-      title: 'network-add',
+      title: 'networkAdd',
       showHeaderNavigation: true,
     },
   },
@@ -414,7 +427,7 @@ export const routes: WalletAppRouteConfig[] = [
     component: NetworkForm,
     props: true,
     meta: {
-      title: 'network-edit',
+      title: 'networkEdit',
       showHeaderNavigation: true,
     },
   },
@@ -483,30 +496,31 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'tips-claim',
     component: TipsClaim,
     meta: {
-      title: 'claim-tips',
+      title: 'claimTips',
       showHeaderNavigation: true,
     },
   },
   {
-    path: '/tips*',
-    redirect: '/account*',
+    path: '/tips',
+    redirect: '/account',
   },
   {
     path: '/retip',
     component: Retip,
     meta: {
-      title: 'send-tip',
+      title: 'sendTip',
       notPersist: true,
     },
   },
   {
-    path: '/account-details/transactions/:hash',
+    path: '/account-details/transactions/:hash/:transactionOwner',
     name: ROUTE_TX_DETAILS,
     component: TransactionDetails,
     props: true,
     meta: {
       title: 'tx-details',
       showHeaderNavigation: true,
+      backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
     },
   },
   {
@@ -568,18 +582,18 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/comment',
     component: CommentNew,
     meta: {
-      title: 'comment-new',
+      title: 'commentNew',
       notPersist: true,
       showHeaderNavigation: true,
     },
   },
   {
-    name: 'donate-error',
+    name: ROUTE_DONATE_ERROR,
     path: '/donate-error',
     component: DonateError,
     props: true,
     meta: {
-      title: 'donate-error',
+      title: 'donateError',
       notPersist: true,
       ifNotAuth: true,
     },
@@ -603,7 +617,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenTransactions,
         props: true,
         meta: {
-          title: 'coin-details',
+          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
           showFilterBar: true,
@@ -616,7 +630,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenDetails,
         props: true,
         meta: {
-          title: 'coin-details',
+          title: 'coinDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
@@ -633,7 +647,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenTransactions,
         props: true,
         meta: {
-          title: 'token-details',
+          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
           showFilterBar: true,
@@ -646,7 +660,7 @@ export const routes: WalletAppRouteConfig[] = [
         component: TokenDetails,
         props: true,
         meta: {
-          title: 'token-details',
+          title: 'tokenDetails',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS },
           showHeaderNavigation: true,
         },
@@ -658,7 +672,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-message',
     component: SignMessage,
     meta: {
-      title: 'sign-message',
+      title: 'signMessage',
       notPersist: true,
     },
   },
@@ -667,7 +681,7 @@ export const routes: WalletAppRouteConfig[] = [
     path: '/sign-transaction',
     component: SignTransaction,
     meta: {
-      title: 'sign-transaction',
+      title: 'signTransaction',
       notPersist: true,
     },
   },
@@ -693,14 +707,14 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '*',
+    path: '/:pathMatch(.*)',
     component: NotFound,
     props: true,
     meta: {
       ifNotAuth: true,
       notPersist: true,
       showHeaderNavigation: true,
-      title: 'not-found',
+      title: 'notFound',
     },
   },
 ];

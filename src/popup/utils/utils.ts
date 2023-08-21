@@ -1,57 +1,49 @@
-import Vue from 'vue';
-import VueCompositionApi, {
+import {
   watch,
   WatchSource,
-} from '@vue/composition-api';
+} from 'vue';
 import { isFQDN, isURL } from 'validator';
 import BigNumber from 'bignumber.js';
-import { defer, times } from 'lodash-es';
+import { defer } from 'lodash-es';
 import {
-  SCHEMA,
-  AmountFormatter,
-  Crypto,
-  TxBuilder,
-  TxBuilderHelper,
+  AE_AMOUNT_FORMATS,
+  decode,
+  derivePathFromKey,
+  encode,
+  Encoded,
+  Encoding,
+  formatAmount,
+  getKeyPair,
   InvalidTxError,
-  BrowserWindowMessageConnection,
+  isAddressValid,
+  Tag,
+  unpackTx,
 } from '@aeternity/aepp-sdk';
-import { AeSdkWallet } from '@aeternity/aepp-sdk-13';
-import { derivePathFromKey, getKeyPair } from '@aeternity/hd-wallet/src/hd-key';
+import { useI18n } from 'vue-i18n';
 import {
-  ADDRESS_TYPES,
   AENS_DOMAIN,
   AENS_NAME_MAX_LENGTH,
-  AETERNITY_COIN_PRECISION,
   AETERNITY_CONTRACT_ID,
-  TX_DIRECTION,
-  HASH_PREFIX_CONTRACT,
-  HASH_PREFIX_NAME,
+  DECIMAL_PLACES_HIGH_PRECISION,
+  DECIMAL_PLACES_LOW_PRECISION,
+  HASH_PREFIXES_ALLOWED,
   HASH_REGEX,
   LOCAL_STORAGE_PREFIX,
-  MAX_UINT256,
   SEED_LENGTH,
   SIMPLEX_URL,
-  SUPPORTED_TX_TYPES,
-  STUB_ADDRESS,
-  STUB_CALLDATA,
-  STUB_NONCE,
+  TX_DIRECTION,
+  TX_TAGS_SUPPORTED,
   TX_FUNCTIONS,
-  TX_TYPE_MDW,
-  FUNCTION_TYPE_DEX,
+  TX_FUNCTIONS_TYPE_DEX,
   TRANSACTION_OWNERSHIP_STATUS,
 } from './constants';
-import { i18n } from '../../store/plugins/languages';
+import { tg } from '../../store/plugins/languages';
 import dayjs from '../plugins/dayjsConfig';
 import type {
+  BigNumberPublic,
   IAccount,
-  IRespondChallenge,
-  IResponseChallenge,
-  ISdk,
   ITransaction,
   ITx,
-  TxType,
-  BigNumberPublic,
-  IPendingTransaction,
   IPageableResponse,
   IDashboardTransaction,
   INameEntryFetched,
@@ -59,19 +51,24 @@ import type {
   IRequestInitBodyParsed,
   IActiveMultisigTransaction,
   IDexContracts,
-  TxFunctionRaw,
   ICommonTransaction,
   Truthy,
+  TxFunction,
+  TxFunctionRaw,
+  TxType,
+  IKeyPair,
+  IGAAttachTx,
 } from '../../types';
-import { IS_CORDOVA, IS_EXTENSION, IN_FRAME } from '../../lib/environment';
-
-Vue.use(VueCompositionApi);
+import { IS_CORDOVA, IS_EXTENSION } from '../../lib/environment';
 
 /**
  * Replacement for `Array.includes` which has some TypeScript issues.
  * @link https://github.com/microsoft/TypeScript/issues/26255
  */
-export function includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
+export function includes<T, U extends T>(
+  arr: readonly U[],
+  elem: T,
+): elem is U {
   return arr.includes(elem as any);
 }
 
@@ -91,9 +88,11 @@ export function isNumbersEqual(a: number, b: number) {
   return new BigNumber(a).eq(b);
 }
 
-export function getLocalStorageItem<T = object>(keys: string[]): T | null {
-  const result = window.localStorage.getItem([LOCAL_STORAGE_PREFIX, ...keys].join('_'));
-  return result ? JSON.parse(result) : null;
+export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
+  const result = window.localStorage.getItem(
+    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+  );
+  return result ? JSON.parse(result) : undefined;
 }
 
 export function setLocalStorageItem(keys: string[], value: any): void {
@@ -127,12 +126,11 @@ export function isAccountNotFoundError(error: any) {
 
 // TODO: Use the current language from i18n module
 export function formatDate(time: number) {
-  return new Date(+time)
-    .toLocaleDateString(navigator.language, {
-      year: '2-digit',
-      month: '2-digit',
-      day: '2-digit',
-    });
+  return new Date(+time).toLocaleDateString(navigator.language, {
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+  });
 }
 
 export function formatTime(time: number) {
@@ -154,10 +152,15 @@ export function toURL(url: string): URL {
   return new URL(url.includes('://') ? url : `https://${url}`);
 }
 
-export function truncateAddress(address: string): [string, string] {
+export function truncateAddress(address: string | null): [string, string] {
+  if (!address) {
+    return ['', ''];
+  }
   const addressLength = address.length;
   const firstPart = address.slice(0, 6).match(/.{3}/g) as string[];
-  const secondPart = address.slice(addressLength - 3, addressLength).match(/.{3}/g) as string[];
+  const secondPart = address
+    .slice(addressLength - 3, addressLength)
+    .match(/.{3}/g) as string[];
   return [
     firstPart?.slice(0, 2).reduce((acc, current) => `${acc}${current}`),
     secondPart.slice(-1).reduce((acc, current) => `${acc}${current}`),
@@ -187,54 +190,45 @@ export function validateSeedLength(seed: string) {
 }
 
 export function validateHash(fullHash?: string) {
+  type HashPrefix = typeof HASH_PREFIXES_ALLOWED[number];
   const isName = !!fullHash?.endsWith(AENS_DOMAIN);
   let valid = false;
-  let prefix = null;
+  let prefix: HashPrefix | null = null;
   let hash = null;
 
   if (fullHash) {
-    [prefix, hash] = fullHash.split('_');
-    valid = (ADDRESS_TYPES[prefix] && HASH_REGEX.test(hash)) || isName;
+    [prefix, hash] = fullHash.split('_') as [HashPrefix, string];
+    valid = (HASH_PREFIXES_ALLOWED.includes(prefix) && HASH_REGEX.test(hash)) || isName;
   }
 
   return {
-    valid, isName, prefix, hash,
+    valid,
+    isName,
+    prefix,
+    hash,
   };
-}
-
-export function getMdwEndpointPrefixForHash(fullHash: string) {
-  const { valid, isName, prefix } = validateHash(fullHash);
-
-  if (!valid || !prefix) {
-    return null;
-  }
-
-  if (isName) {
-    return ADDRESS_TYPES.nm;
-  }
-  return ADDRESS_TYPES[prefix];
 }
 
 export function isContract(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return (valid && prefix === HASH_PREFIX_CONTRACT);
+  return valid && prefix === Encoding.ContractAddress;
 }
 
 export function isAensName(fullHash: string) {
   const { valid, prefix } = validateHash(fullHash);
-  return (valid && prefix === HASH_PREFIX_NAME);
+  return valid && prefix === Encoding.Name;
 }
 
 export function checkAddress(value: string) {
   return (
-    Crypto.isAddressValid(value, 'ak')
-    || Crypto.isAddressValid(value, 'ct')
-    || Crypto.isAddressValid(value, 'ok')
+    isAddressValid(value, Encoding.AccountAddress)
+    || isAddressValid(value, Encoding.ContractAddress)
+    || isAddressValid(value, Encoding.OracleAddress)
   );
 }
 
 export function checkAddressOrChannel(value: string) {
-  return checkAddress(value) || Crypto.isAddressValid(value, 'ch');
+  return checkAddress(value) || isAddressValid(value, Encoding.Channel);
 }
 
 export function checkAensName(value: string) {
@@ -249,20 +243,20 @@ export function escapeSpecialChars(str = '') {
 }
 
 export function secondsToRelativeTime(seconds: number) {
+  const { t } = useI18n();
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
-
   if (seconds < secondsPerMinute) {
-    return i18n.tc('common.seconds', Math.round(seconds));
+    return t('common.seconds', Math.round(seconds));
   }
   if (seconds < secondsPerHour) {
-    return i18n.tc('common.minutes', Math.round(seconds / secondsPerMinute));
+    return t('common.minutes', Math.round(seconds / secondsPerMinute));
   }
   if (seconds < secondsPerDay) {
-    return i18n.tc('common.hours', Math.round(seconds / secondsPerHour));
+    return t('common.hours', Math.round(seconds / secondsPerHour));
   }
-  return i18n.tc('common.days', Math.round(seconds / secondsPerDay));
+  return t('common.days', Math.round(seconds / secondsPerDay));
 }
 
 export function blocksToRelativeTime(blocks: number) {
@@ -294,44 +288,14 @@ export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable
 }
 
 export function splitAddress(address: string | null): string {
-  return address ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`) : '';
+  return address
+    ? address.match(/.{1,3}/g)!.reduce((acc, current) => `${acc} ${current}`)
+    : '';
 }
 
 export function relativeTimeTo(date: string): string {
   return dayjs().to(dayjs(date));
 }
-
-export function calculateFee(type: typeof SCHEMA.TX_TYPE, params: object = {}): BigNumber {
-  const minFee = TxBuilder.calculateMinFee(type, {
-    params: {
-      ...type === 'spendTx' ? {
-        senderId: STUB_ADDRESS,
-        recipientId: STUB_ADDRESS,
-      } : {},
-      amount: MAX_UINT256,
-      ttl: MAX_UINT256,
-      nonce: MAX_UINT256,
-      ctVersion: { abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA, vmVersion: SCHEMA.VM_VERSIONS.SOPHIA },
-      abiVersion: SCHEMA.ABI_VERSIONS.SOPHIA,
-      callData: STUB_CALLDATA,
-      gas: 0,
-      ...params,
-    },
-    ...type === 'nameClaimTx' ? { vsn: SCHEMA.VSN_2 } : {},
-  });
-  return new BigNumber(minFee).shiftedBy(-AETERNITY_COIN_PRECISION);
-}
-
-export const calculateNameClaimFee = (name: string): BigNumber => calculateFee(
-  SCHEMA.TX_TYPE.nameClaim, {
-    accountId: STUB_ADDRESS,
-    name,
-    nameSalt: Crypto.salt(),
-    nameFee: TxBuilderHelper.getMinimumNameFee(name),
-    nonce: STUB_NONCE,
-    ttl: SCHEMA.NAME_TTL,
-  },
-);
 
 export async function fetchJson<T = any>(
   url: string,
@@ -362,9 +326,9 @@ export async function fetchAllPages<T = any>(
 
   while (nextPageUrl !== null) {
     // eslint-disable-next-line no-await-in-loop
-    const { data, next } = await (nextPageUrl
+    const { data, next } = (await (nextPageUrl
       ? getNextPage(nextPageUrl)
-      : getFunction()) as IPageableResponse<T>;
+      : getFunction())) as IPageableResponse<T>;
 
     if (data?.length) {
       result.push(...data);
@@ -375,31 +339,30 @@ export async function fetchAllPages<T = any>(
   return result;
 }
 
-// TODO - move to sdk.ts composable after the removal of action.js file
-export async function fetchRespondChallenge(
-  sdk: ISdk,
-  responseChallenge: IResponseChallenge,
-): Promise<IRespondChallenge> {
-  const signedChallenge = Buffer.from(
-    await sdk.signMessage(responseChallenge.challenge),
-  ).toString('hex');
-
-  return {
-    challenge: responseChallenge.challenge,
-    signature: signedChallenge,
-  };
+export function isContainingNestedTx(tx: ITx): boolean {
+  return [
+    'GAMetaTx', // aeSdk: GaMetaTx, mdw: GAMetaTx
+    Tag[Tag.GaMetaTx],
+    Tag[Tag.PayingForTx],
+  ].includes(tx.type);
 }
 
-export function getPayload(transaction: ITransaction) {
-  return (transaction.tx?.payload)
-    ? TxBuilderHelper.decode(transaction.tx?.payload).toString()
+export function getInnerTransaction(tx?: ITx): any {
+  if (!tx) {
+    return null;
+  }
+
+  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
+}
+
+export function getPayload(transaction: ITransaction, isMultisigTx: boolean) {
+  const innerTx = isMultisigTx ? transaction.tx : getInnerTransaction(transaction.tx);
+  return (innerTx?.payload)
+    ? decode(innerTx?.payload).toString()
     : null;
 }
 
-export function compareCaseInsensitive(
-  str1?: string,
-  str2?: string,
-) {
+export function compareCaseInsensitive(str1?: string, str2?: string) {
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
 }
 
@@ -410,18 +373,18 @@ export function includesCaseInsensitive(
   return baseString?.toLocaleLowerCase().includes(searchString?.toLocaleLowerCase());
 }
 
-export function categorizeContractCallTxObject(transaction: ITransaction | IPendingTransaction): {
+export function categorizeContractCallTxObject(transaction: ITransaction): {
   amount?: string | number
   to?: string
   token?: string
   url?: string
   note?: string
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, SCHEMA.TX_TYPE.contractCall)) {
+  if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
   if (transaction.incomplete || transaction.pending) {
-    const { tx } = transaction as IPendingTransaction;
+    const { tx } = transaction;
     return {
       amount: tx.amount,
       token: tx.selectedTokenContractId ?? tx.contractId,
@@ -462,7 +425,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction | IPend
  * Eg.: `somehuman.chain`, `Account 2`
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return acc?.name || `${i18n.t('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
+  return acc?.name || `${tg('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
 }
 
 export function sortTransactionsByDateCallback(
@@ -477,9 +440,7 @@ export function sortTransactionsByDateCallback(
 
   const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
   const compareMicroTime = () => {
-    const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex(
-      (time) => Number.isNaN(time),
-    );
+    const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex((time) => Number.isNaN(time));
     if (withoutTimeIndex === 0) {
       return -1;
     }
@@ -504,44 +465,48 @@ export function truncateString(text: string, maxLength: number) {
     : '';
 }
 
+/**
+ * Round the number to calculated amount of decimals.
+ * If the number is between high and low precision
+ * no argument is passed to the `toFixed` method which means there will be no trailing zeros.
+ */
 export function amountRounded(rawAmount: number | BigNumberPublic): string {
-  let amount = rawAmount;
-  if (typeof rawAmount !== 'object') {
-    amount = new BigNumber(rawAmount);
-  }
-
-  if (amount < 0.01 && amount.toString().length < 9 + 2) {
+  const ZERO_AND_COMA_LEN = 2;
+  const amount: BigNumberPublic = (typeof rawAmount === 'object')
+    ? rawAmount
+    : new BigNumber(rawAmount);
+  if (
+    amount.lt(0.01)
+    && amount.toString().length - ZERO_AND_COMA_LEN < DECIMAL_PLACES_HIGH_PRECISION
+  ) {
     return amount.toFixed();
   }
-  return amount.toFixed((amount < 0.01) ? 9 : 2);
+  return amount.toFixed(
+    (amount.lt(0.01))
+      ? DECIMAL_PLACES_HIGH_PRECISION
+      : DECIMAL_PLACES_LOW_PRECISION,
+  );
 }
 
-export function getTxType(tx: ITx): TxType {
-  return (
-    TX_TYPE_MDW[tx.type]
-    || (tx.tag && SCHEMA.OBJECT_ID_TX_TYPE[tx.tag])
-    || (Object.values(SCHEMA.TX_TYPE).includes(tx.type) && tx.type)
-  );
+export function getTxTag(tx: ITx): Tag | null {
+  if (tx.tag) {
+    return tx.tag;
+  }
+  if (compareCaseInsensitive(tx.type, 'GAAttachTx')) { // aeSdk: GaAttachTx, mdw: GAAttachTx
+    return Tag.GaAttachTx;
+  }
+  if (compareCaseInsensitive(tx.type, 'GAMetaTx')) { // aeSdk: GaMetaTx, mdw: GAMetaTx
+    return Tag.GaMetaTx;
+  }
+  if (tx.type in Tag) {
+    return Tag[tx.type as TxType];
+  }
+  return null;
 }
 
 export function isTransactionAex9(transaction: ITransaction): boolean {
   const token = categorizeContractCallTxObject(transaction)?.token;
   return !!transaction.tx && !!token && token !== AETERNITY_CONTRACT_ID;
-}
-
-export function isContainingNestedTx(tx: ITx): boolean {
-  return [
-    TX_TYPE_MDW.GAMetaTx,
-    TX_TYPE_MDW.PayingForTx,
-  ].includes(getTxType(tx));
-}
-
-export function getInnerTransaction(tx?: ITx): any {
-  if (!tx) {
-    return null;
-  }
-
-  return isContainingNestedTx(tx) ? tx.tx?.tx : tx;
 }
 
 export function getTransactionTipUrl(transaction: ITransaction): string {
@@ -553,28 +518,27 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
       && !transaction.claim
       && transaction.tx.log?.[0]
       && transaction.tx?.function
-      && includes([
-        TX_FUNCTIONS.tip,
-        TX_FUNCTIONS.claim,
-      ], transaction.tx.function)
-      && TxBuilderHelper.decode(transaction.tx.log[0].data).toString()
-    )
+      && includes(
+        [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
+        transaction.tx.function,
+      )
+      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString())
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
 }
 
 export function aeToAettos(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AE,
+    targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
 }
 
 export function aettosToAe(value: number | string) {
-  return AmountFormatter.formatAmount(value.toString(), {
-    denomination: AmountFormatter.AE_AMOUNT_FORMATS.AETTOS,
-    targetDenomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
+  return formatAmount(value.toString(), {
+    denomination: AE_AMOUNT_FORMATS.AETTOS,
+    targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
 }
 
@@ -620,12 +584,18 @@ export async function readValueFromClipboard(): Promise<string | undefined> {
   return value;
 }
 
-export function getHdWalletAccount(wallet: IWallet, accountIdx = 0) {
-  const keyPair = getKeyPair(derivePathFromKey(`${accountIdx}h/0h/0h`, wallet).privateKey);
+export function getHdWalletAccount(
+  wallet: IWallet,
+  accountIdx = 0,
+): IKeyPair & { address: Encoded.AccountAddress } {
+  const keyTreeNode = derivePathFromKey(
+    `${accountIdx}h/0h/0h`,
+    { ...wallet, secretKey: wallet.privateKey },
+  );
+  const keyPair = getKeyPair(keyTreeNode.secretKey);
   return {
     ...keyPair,
-    idx: accountIdx,
-    address: TxBuilderHelper.encode(keyPair.publicKey, 'ak'),
+    address: encode(keyPair.publicKey, Encoding.AccountAddress),
   };
 }
 
@@ -652,36 +622,73 @@ export function calculateFontSize(amountValue: BigNumber | number) {
   return '12px';
 }
 
-export function isTxOfASupportedType(encodedTx: string, isTxBase64 = false) {
-  let txObject;
+export function isTxOfASupportedType(encodedTx: Encoded.Transaction) {
   try {
-    if (isTxBase64) {
-      txObject = TxBuilder.unpackTx(TxBuilderHelper.decode(encodedTx, 'tx'), true).tx;
-    } else {
-      txObject = TxBuilder.unpackTx(encodedTx, true).tx;
-    }
+    const txObject = unpackTx(encodedTx);
+    return TX_TAGS_SUPPORTED.includes(txObject.tag);
   } catch (e) {
     return false;
   }
-  return SUPPORTED_TX_TYPES.includes(SCHEMA.OBJECT_ID_TX_TYPE[txObject.tag]);
 }
 
-export function isTxDex(tx: ITx, dexContracts: IDexContracts) {
-  const { wae = [], router = [] } = dexContracts;
+export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
+  const { wae = [], router = [] } = dexContracts || {};
 
   return !!(
-    tx.contractId
+    tx
+    && tx.contractId
     && tx.function
-    && (
-      Object.values(FUNCTION_TYPE_DEX).flat()
-        .includes(tx.function as TxFunctionRaw)
-    )
+    && Object.values(TX_FUNCTIONS_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
     && [...wae, ...router].includes(tx.contractId)
   );
 }
 
+export function isTxFunctionDexAllowance(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.allowance, txFunction);
+}
+
+export function isTxFunctionDexSwap(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.swap, txFunction);
+}
+
+export function isTxFunctionDexPool(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.pool, txFunction);
+}
+
+export function isTxFunctionDexMaxSpent(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.maxSpent, txFunction);
+}
+
+export function isTxFunctionDexMinReceived(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.minReceived, txFunction);
+}
+
+export function isTxFunctionDexAddLiquidity(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.addLiquidity, txFunction);
+}
+
+export function isTxFunctionDexRemoveLiquidity(txFunction?: TxFunction) {
+  return !!txFunction && includes(TX_FUNCTIONS_TYPE_DEX.removeLiquidity, txFunction);
+}
+
 export function getTxOwnerAddress(innerTx?: ITx) {
   return innerTx?.accountId || innerTx?.callerId;
+}
+
+export function getTxDirection(tx?: ITx | IGAAttachTx, address?: Encoded.AccountAddress) {
+  type ICommonTx = ITx & IGAAttachTx; // All possible properties of the tx
+
+  if ((tx as ITx)?.tag === Tag.SpendTx) {
+    return (tx as ITx).senderId === address
+      ? TX_DIRECTION.sent
+      : TX_DIRECTION.received;
+  }
+
+  // Check if any of the properties that has an address-like value is equal to provided address
+  const keysWithHashes: (keyof ICommonTx)[] = ['senderId', 'accountId', 'ownerId', 'callerId', 'payerId'];
+  return (keysWithHashes.map((key) => (tx as ICommonTx)?.[key]).includes(address as never))
+    ? TX_DIRECTION.sent
+    : TX_DIRECTION.received;
 }
 
 export function getOwnershipStatus(
@@ -725,56 +732,6 @@ export function getMultisigTransaction(
   return (transaction as any).isMultisigTransaction
     ? transaction as IActiveMultisigTransaction
     : undefined;
-}
-
-export function connectFrames(sdk: ISdk | AeSdkWallet) {
-  if (!IN_FRAME) {
-    return;
-  }
-
-  try {
-    const getArrayOfAvailableFrames = (): Window[] => [
-      window.parent,
-      ...times(window.parent.frames.length, (i) => window.parent.frames[i]),
-    ];
-
-    const connectedFrames = new Set();
-
-    executeAndSetInterval(
-      () => getArrayOfAvailableFrames()
-        .filter((frame) => frame !== window)
-        .forEach((target) => {
-          if (connectedFrames.has(target)) {
-            return;
-          }
-          connectedFrames.add(target);
-          const connection = BrowserWindowMessageConnection({ target });
-          const originalConnect = connection.connect;
-          let intervalId: NodeJS.Timer;
-
-          connection.connect = function connect(onMessage: any) {
-            originalConnect.call(this, (data: any, origin: any, source: any) => {
-              if (source !== target) {
-                return;
-              }
-              clearInterval(intervalId);
-              onMessage(data, origin, source);
-            });
-          };
-          sdk.addRpcClient(connection);
-          intervalId = executeAndSetInterval(() => {
-            if (!getArrayOfAvailableFrames().includes(target)) {
-              clearInterval(intervalId);
-              return;
-            }
-            sdk.shareWalletInfo(connection.sendMessage.bind(connection));
-          }, 3000);
-        }),
-      3000,
-    );
-  } catch (error: any) {
-    handleUnknownError(error);
-  }
 }
 
 /**

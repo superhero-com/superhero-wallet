@@ -1,5 +1,9 @@
 <template>
-  <BtnPlain :class="['seed-phrase-badge', { selected, editable }]">
+  <BtnPlain
+    :class="['seed-phrase-badge', { selected, editable }]"
+    v-bind="$attrs"
+    @click="$emit('click', $event)"
+  >
     <div>{{ text }}</div>
     <CloseIcon
       v-if="editable"
@@ -9,7 +13,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import CloseIcon from '../../icons/close.svg?vue-component';
 
@@ -23,6 +27,7 @@ export default defineComponent({
     editable: Boolean,
     text: { type: String, required: true },
   },
+  emits: ['click'],
 });
 </script>
 

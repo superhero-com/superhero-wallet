@@ -26,8 +26,10 @@ import {
   ref,
   onBeforeUnmount,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { aettosToAe, executeAndSetInterval } from '../../utils';
 import { useMiddleware, useUi } from '../../../composables';
 
@@ -45,8 +47,11 @@ export default defineComponent({
   props: {
     name: { type: String, required: true },
   },
-  setup(props, { root }) {
-    const { getMiddleware } = useMiddleware({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+
+    const { getMiddleware } = useMiddleware({ store });
     const { isAppActive } = useUi();
 
     const loading = ref(true);
@@ -63,13 +68,13 @@ export default defineComponent({
             accountId: tx.accountId,
           };
         }));
-        root.$store.commit('names/setAuctionEntry', {
+        store.commit('names/setAuctionEntry', {
           name: props.name,
           expiration: auctionEnd,
           bids: loadedBids,
         });
       } catch (error) {
-        root.$router.push({ name: 'auction-bid' });
+        router.push({ name: 'auction-bid' });
       }
       loading.value = false;
     }

@@ -13,9 +13,9 @@
         :key="setting.type"
         :class="{ unchecked: !setting.checked }"
         :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
-        :value="setting.checked"
+        :model-value="setting.checked"
         :label="setting.text"
-        @input="toggleNotificationSetting(setting.type)"
+        @update:modelValue="toggleNotificationSetting(setting.type)"
       />
     </div>
   </div>

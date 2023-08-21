@@ -1,5 +1,11 @@
-import Vue from 'vue';
-import { watch } from '@vue/composition-api';
+import { watch } from 'vue';
+import {
+  useMiddleware,
+  useModals,
+  useAeSdk,
+  useAccounts,
+  useTransactionList,
+} from '@/composables';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
   fetchJson,
@@ -7,17 +13,17 @@ import {
   checkAddress,
   checkAensName,
   fetchAllPages,
-  fetchRespondChallenge,
   isInsufficientBalanceError,
   handleUnknownError,
 } from '../../popup/utils';
-import { i18n } from './languages';
-import { useMiddleware, useModals, useSdk } from '../../composables';
+import { tg } from './languages';
 
 export default (store) => {
   const {
-    getSdk,
-  } = useSdk({ store });
+    nodeNetworkId,
+    getAeSdk,
+    fetchRespondChallenge,
+  } = useAeSdk({ store });
 
   const {
     isMiddlewareReady,
@@ -26,7 +32,13 @@ export default (store) => {
     fetchFromMiddlewareCamelCased,
   } = useMiddleware({ store });
 
+  const {
+    fetchPendingTransactions,
+  } = useTransactionList({ store });
+
   const { openDefaultModal } = useModals();
+
+  const { accounts, activeAccount } = useAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -40,17 +52,16 @@ export default (store) => {
     },
     getters: {
       get: ({ owned }) => (name) => owned.find((n) => n.name === name),
-      getDefault: ({ defaults }, getters, _, { activeNetwork }) => (address) => {
+      getDefault: ({ defaults }) => (address) => {
         if (!defaults) return '';
-        const { networkId } = activeNetwork;
-        return defaults[`${address}-${networkId}`];
+        return defaults[`${address}-${nodeNetworkId.value}`];
       },
-      getPreferred: (
-        { preferred }, { getDefault }, _, { account, activeNetwork },
-      ) => (address) => {
-        if (account.address === address) return getDefault(address);
+      getPreferred: ({ preferred }, { getDefault }) => (address) => {
+        if (activeAccount.value.address === address) {
+          return getDefault(address);
+        }
         store.dispatch('names/setPreferred', address);
-        return preferred[`${address}-${activeNetwork.networkId}`] || '';
+        return preferred[`${address}-${nodeNetworkId.value}`] || '';
       },
       getName: ({ owned }) => (name) => owned.find((n) => n.name === name),
       getAuction: ({ auctions }) => (name) => auctions[name] || null,
@@ -65,18 +76,27 @@ export default (store) => {
         state.owned = names;
       },
       setDefault({ defaults }, { address, name }) {
-        const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(defaults, `${address}-${networkId}`, name);
-        else Vue.delete(defaults, `${address}-${networkId}`);
+        if (name) {
+          // eslint-disable-next-line no-param-reassign
+          defaults[`${address}-${nodeNetworkId.value}`] = name;
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          delete defaults[`${address}-${nodeNetworkId.value}`];
+        }
       },
       setAutoExtend(state, { name, value }) {
         const index = state.owned.findIndex((n) => n.name === name);
-        Vue.set(state.owned[index], 'autoExtend', value);
+        state.owned[index].autoExtend = value;
       },
       setPreferred({ preferred }, { address, name }) {
-        const { networkId } = store.getters.activeNetwork;
-        if (name) Vue.set(preferred, `${address}-${networkId}`, name);
-        else Vue.delete(preferred, `${address}-${networkId}`);
+        const key = `${address}-${nodeNetworkId.value}`;
+        if (name) {
+          // eslint-disable-next-line no-param-reassign
+          preferred[key] = name;
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          delete preferred[key];
+        }
       },
       setAuctionEntry(state, { name, expiration, bids }) {
         state.auctions[name] = { expiration, bids };
@@ -88,12 +108,10 @@ export default (store) => {
     actions: {
       async fetchOwned({
         state: { owned, pendingAutoExtendNames },
-        rootGetters: { accounts },
         commit,
-        dispatch,
       }) {
         commit('setAreNamesFetching', true);
-        const getPendingNameClaimTransactions = (address) => dispatch('fetchPendingTransactions', address, { root: true })
+        const fetchPendingNameClaimTransactions = (address) => fetchPendingTransactions(address)
           .then((transactions) => transactions
             .filter(({ tx: { type } }) => type === 'NameClaimTx')
             .map(({ tx, ...otherTx }) => ({
@@ -104,8 +122,8 @@ export default (store) => {
 
         const middleware = await getMiddleware();
         const names = await Promise.all(
-          accounts.map(({ address }) => Promise.all([
-            getPendingNameClaimTransactions(address),
+          accounts.value.map(({ address }) => Promise.all([
+            fetchPendingNameClaimTransactions(address),
             fetchAllPages(
               () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
               fetchFromMiddlewareCamelCased,
@@ -146,16 +164,16 @@ export default (store) => {
         _,
         { name, address, type = 'update' },
       ) {
-        const sdk = await getSdk();
-        const nameEntry = await sdk.aensQuery(name);
+        const aeSdk = await getAeSdk();
+        const nameEntry = await aeSdk.aensQuery(name);
         try {
           if (type === 'extend') {
             await nameEntry.extendTtl();
           } else if (type === 'update') {
-            await sdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
+            await aeSdk.aensUpdate(name, { account_pubkey: address }, { extendPointers: true });
           }
           openDefaultModal({
-            msg: i18n.t('pages.names.pointer-added', { type }),
+            msg: tg('pages.names.pointer-added', { type }),
           });
         } catch (e) {
           if (e.message.includes('Account not found')) {
@@ -170,9 +188,9 @@ export default (store) => {
         }
       },
       async setDefaults(
-        { rootGetters: { activeNetwork, accounts }, commit },
+        { rootGetters: { activeNetwork }, commit },
       ) {
-        await Promise.all(accounts.map(async ({ address }) => {
+        await Promise.all(accounts.value.map(async ({ address }) => {
           const response = await fetchJson(
             `${activeNetwork.backendUrl}/profile/${address}`,
           ).catch(() => {});
@@ -183,16 +201,13 @@ export default (store) => {
         { commit, rootGetters: { activeNetwork } },
         { name, address },
       ) {
-        const [sdk, response] = await Promise.all([
-          getSdk(),
-          postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
-            body: {
-              preferredChainName: name,
-            },
-          }),
-        ]);
+        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+          body: {
+            preferredChainName: name,
+          },
+        });
 
-        const respondChallenge = await fetchRespondChallenge(sdk, response);
+        const respondChallenge = await fetchRespondChallenge(response);
 
         await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
           body: respondChallenge,
@@ -224,13 +239,13 @@ export default (store) => {
 
   watch(getMiddlewareRef(), async () => {
     if (isMiddlewareReady.value) {
-      const [sdk] = await Promise.all([
-        getSdk(),
+      const [aeSdk] = await Promise.all([
+        getAeSdk(),
         store.dispatch('names/fetchOwned').catch(() => {}),
         store.dispatch('names/setDefaults'),
       ]);
 
-      const height = await sdk.height();
+      const height = await aeSdk.getHeight();
       await Promise.all(
         store.state.names.owned
           .filter(({ autoExtend }) => autoExtend)

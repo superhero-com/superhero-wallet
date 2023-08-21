@@ -6,7 +6,7 @@
     />
     <template v-else>
       <div
-        v-if="!isAllowance || isErrorTransaction"
+        v-if="!isDexAllowance || isErrorTransaction"
         class="header"
       >
         <TransactionErrorStatus
@@ -16,7 +16,7 @@
         <TransactionTokens
           :transaction="transaction"
           :direction="direction"
-          :is-allowance="isAllowance"
+          :is-allowance="isDexAllowance"
           :error="isErrorTransaction"
           :class="{ reverse: isPool }"
           icon-size="md"
@@ -25,7 +25,7 @@
       <div class="content">
         <TransactionOverview :transaction="transaction" />
         <div class="explorer">
-          <LinkButton :to="explorerPath">
+          <LinkButton :to="explorerUrl">
             {{ $t('pages.transactionDetails.explorer') }}
             <ExternalLink />
           </LinkButton>
@@ -43,11 +43,11 @@
             data-cy="reason"
           />
           <TransactionDetailsPoolTokens
-            v-if="(isPool || isAllowance)"
+            v-if="(isPool || isDexAllowance)"
             :transaction="transaction"
             :direction="direction"
             :tx-function="transaction.tx.function"
-            :is-allowance="isAllowance"
+            :is-allowance="isDexAllowance"
             :class="{ reverse: isPool }"
           />
 
@@ -65,6 +65,22 @@
                     fixed
                   />
                 </LinkButton>
+              </CopyText>
+            </template>
+          </DetailsItem>
+
+          <DetailsItem
+            v-if="contractId"
+            :label="$t('common.smartContract')"
+            small
+          >
+            <template #value>
+              <CopyText
+                hide-icon
+                :value="hash"
+                :copied-text="$t('common.hashCopied')"
+              >
+                <span class="text-address">{{ splitAddress(contractId) }}</span>
               </CopyText>
             </template>
           </DetailsItem>
@@ -175,7 +191,7 @@
             />
           </div>
           <DetailsItem
-            v-if="!(isDex || isAllowance || isMultisig)"
+            v-if="!(isDex || isDexAllowance || isMultisig)"
             :label="$t('common.amount')"
             data-cy="amount"
           >
@@ -230,11 +246,21 @@ import {
   defineComponent,
   ref,
   onMounted,
-} from '@vue/composition-api';
+  PropType,
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
+
+import {
+  useAccounts,
+  useTransactionTx,
+  useMultisigAccounts,
+  useMiddleware,
+  useTransactionList,
+} from '@/composables';
 import {
   AETERNITY_SYMBOL,
-  FUNCTION_TYPE_DEX,
-  TX_TYPE_MDW,
   formatDate,
   formatTime,
   aettosToAe,
@@ -245,15 +271,12 @@ import {
   fetchJson,
   handleUnknownError,
   isTransactionAex9,
+  isTxFunctionDexSwap,
+  isTxFunctionDexPool,
 } from '../utils';
 import { ROUTE_NOT_FOUND } from '../router/routeNames';
 import type { ITransaction, TxFunctionRaw, INetwork } from '../../types';
-import {
-  useAccounts,
-  useTransactionTx,
-  useMultisigAccounts,
-  useMiddleware,
-} from '../../composables';
+import { AeScan } from '../../lib/AeScan';
 
 import TransactionOverview from '../components/TransactionOverview.vue';
 import SwapRoute from '../components/SwapRoute.vue';
@@ -297,14 +320,16 @@ export default defineComponent({
   props: {
     hash: { type: String, required: true },
     multisigDashboard: { type: Boolean },
-    transactionOwner: { type: String, default: '' },
+    transactionOwner: { type: String as PropType<Encoded.AccountAddress>, default: '' },
   },
-  setup(props, { root }) {
-    const { getMiddleware } = useMiddleware({ store: root.$store });
-    const { activeMultisigAccountId } = useMultisigAccounts({ store: root.$store, pollOnce: true });
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+    const { getMiddleware } = useMiddleware({ store });
+    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
+    const { activeAccount } = useAccounts({ store });
 
-    const externalAddress = computed((): string => (
+    const externalAddress = computed((): Encoded.AccountAddress => (
       props.transactionOwner
       || (
         props.multisigDashboard
@@ -317,38 +342,41 @@ export default defineComponent({
       setTransactionTx,
       direction,
       isErrorTransaction,
-      isAllowance,
       isDex,
+      isDexAllowance,
       isMultisig,
-      outerTxType,
+      outerTxTag,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       externalAddress: externalAddress.value,
     });
 
     const { isLocalAccountAddress } = useAccounts({
-      store: root.$store,
+      store,
     });
+
+    const {
+      fetchAllPendingTransactions,
+      updateAccountTransaction,
+      getTransactionByHash,
+    } = useTransactionList({ store });
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
-    const getTx = computed(() => root.$store.getters.getTx);
-    const getExplorerPath = computed(() => root.$store.getters.getExplorerPath);
-    const getTxSymbol = computed(() => root.$store.getters.getTxSymbol);
-    const getTxAmountTotal = computed(() => root.$store.getters.getTxAmountTotal);
-    const activeNetwork = computed<INetwork>(() => root.$store.getters.activeNetwork);
+    const getTxSymbol = computed(() => store.getters.getTxSymbol);
+    const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
+    const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
+    const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
-    const isSwap = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.swap.includes(txFunction.value),
-    );
-    const isPool = computed(
-      () => txFunction.value && FUNCTION_TYPE_DEX.pool.includes(txFunction.value),
-    );
+    const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
+    const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerPath = computed(() => getExplorerPath.value(props.hash));
+    const explorerUrl = computed(
+      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlByHash(props.hash),
+    );
 
     const gasPrice = computed(() => {
       if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
@@ -365,7 +393,7 @@ export default defineComponent({
     });
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
-      if (outerTxType.value !== TX_TYPE_MDW.PayingForTx) return null;
+      if (outerTxTag.value !== Tag.PayingForTx) return null;
       return transaction.value?.tx?.payerId ?? null;
     });
 
@@ -382,13 +410,22 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      let rawTransaction = getTx.value(props.hash);
+      let rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();
         try {
           rawTransaction = await middleware.getTx(props.hash);
         } catch (e) {
-          root.$router.push({ name: ROUTE_NOT_FOUND });
+          // This case is for pending transaction
+          await fetchAllPendingTransactions();
+
+          rawTransaction = getTransactionByHash(activeAccount.value.address, props.hash);
+
+          if (!rawTransaction) {
+            router.push({ name: ROUTE_NOT_FOUND });
+            return;
+          }
         }
 
         if (rawTransaction?.tx) {
@@ -402,7 +439,7 @@ export default defineComponent({
             ...rawTransaction,
             transactionOwner: externalAddress.value,
           };
-          root.$store.commit('setTransactionByHash', transaction.value);
+          updateAccountTransaction(activeAccount.value.address, transaction.value!);
         }
       } else {
         transaction.value = rawTransaction;
@@ -411,12 +448,12 @@ export default defineComponent({
         setTransactionTx(transaction.value.tx);
       }
 
-      if (outerTxType.value === TX_TYPE_MDW.GAMetaTx) {
+      if (outerTxTag.value === Tag.GaMetaTx) {
         try {
-          const { contract_id: contractId = null } = await fetchJson(
+          const { contract_id: contractIdForMultisig = null } = await fetchJson(
             `${activeNetwork.value.url}/v3/accounts/${transaction.value?.tx?.gaId}`,
           );
-          multisigContractId.value = contractId;
+          multisigContractId.value = contractIdForMultisig;
         } catch (e) {
           handleUnknownError(e);
         }
@@ -431,14 +468,14 @@ export default defineComponent({
       getTxSymbol,
       getTxAmountTotal,
       isErrorTransaction,
-      isAllowance,
+      isDexAllowance,
       isDex,
       isTransactionAex9,
       isMultisig,
       tipUrl,
       tipLink,
       direction,
-      explorerPath,
+      explorerUrl,
       getPayload,
       splitAddress,
       aettosToAe,
@@ -447,6 +484,7 @@ export default defineComponent({
       isLocalAccountAddress,
       gasPrice,
       gasUsed,
+      contractId,
       multisigTransactionFeePaidBy,
       multisigContractId,
       transactionFee,
@@ -501,7 +539,7 @@ export default defineComponent({
         flex-direction: column-reverse;
       }
 
-      ::v-deep .token-row {
+      :deep(.token-row) {
         margin-bottom: 12px;
         padding-inline: 16px;
 
@@ -570,6 +608,8 @@ export default defineComponent({
         svg {
           opacity: 1;
           color: rgba(variables.$color-white, 0.75);
+          width: 24px;
+          height: 24px;
         }
 
         &:hover {
@@ -596,13 +636,13 @@ export default defineComponent({
     }
   }
 
-  .details-item::v-deep {
+  .details-item:deep() {
     .label {
       white-space: nowrap;
     }
   }
 
-  .reason::v-deep {
+  .reason:deep() {
     .value {
       word-break: break-all;
       color: variables.$color-warning;

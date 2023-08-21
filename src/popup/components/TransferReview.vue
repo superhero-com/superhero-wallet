@@ -125,17 +125,21 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import { encode, Encoding } from '@aeternity/aepp-sdk-13';
+} from 'vue';
+import { encode, Encoding, Tag } from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import {
   useAccounts,
   useDeepLinkApi,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
-  useSdk13,
+  useAeSdk,
+  useUi,
   useTippingContracts,
+  useTransactionList,
 } from '../../composables';
 import {
   AETERNITY_CONTRACT_ID,
@@ -148,7 +152,7 @@ import {
   handleUnknownError,
 } from '../utils';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '../router/routeNames';
-import { IPendingTransaction } from '../../types';
+import { ITransaction } from '../../types';
 import { TransferFormModel } from './Modals/TransferSend.vue';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -178,19 +182,25 @@ export default defineComponent({
     recipientAddress: { type: String, default: null },
     amount: { type: Number, default: null },
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
+    const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { activeAccount } = useAccounts({ store: root.$store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { activeAccount } = useAccounts({ store });
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
-    } = useMultisigAccounts({ store: root.$store });
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    } = useMultisigAccounts({ store });
+    const { getTippingContracts } = useTippingContracts({ store });
 
     const loading = ref<boolean>(false);
-    const { getSdk } = useSdk13({ store: root.$store });
+    const { getAeSdk } = useAeSdk({ store });
     const isRecipientName = computed(
       () => props.recipientAddress && checkAensName(props.recipientAddress),
     );
@@ -205,19 +215,20 @@ export default defineComponent({
 
     function openTransactionFailedModal() {
       openDefaultModal({
-        title: root.$t('modals.transaction-failed.msg'),
+        title: t('modals.transaction-failed.msg'),
         icon: 'critical',
       });
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
+
       loading.value = true;
       try {
         let actionResult;
 
         if (props.transferData.invoiceId !== null) {
-          actionResult = await root.$store.dispatch('fungibleTokens/burnTriggerPoS', [
+          actionResult = await store.dispatch('fungibleTokens/burnTriggerPoS', [
             selectedAsset.contractId,
             amount,
             props.transferData.invoiceContract,
@@ -225,53 +236,59 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          actionResult = await root.$store.dispatch('fungibleTokens/transfer', [
+          actionResult = await store.dispatch('fungibleTokens/transfer', [
             selectedAsset.contractId,
             recipient,
             amount,
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await sdk.spendWithCustomOptions(amount, recipient, {
+          actionResult = await aeSdk.spendWithCustomOptions(amount, recipient, {
             payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
             modal: false,
           });
         }
 
         if (actionResult && selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
-          const transaction: IPendingTransaction = {
-            recipient,
+          const transaction: ITransaction = {
             hash: actionResult.hash,
             pendingTokenTx: true,
             pending: true,
-            type: 'spendToken',
+            transactionOwner: activeAccount.value.address,
             tx: {
               amount,
               callerId: activeAccount.value.address,
               contractId: selectedAsset.contractId,
-              type: SCHEMA.TX_TYPE.contractCall,
+              type: Tag[Tag.ContractCallTx],
               function: TX_FUNCTIONS.transfer,
               recipientId: recipient,
+              arguments: [],
+              fee: 0,
             },
           };
-
-          root.$store.dispatch('addPendingTransaction', transaction);
+          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         } else if (actionResult) {
-          const transaction: IPendingTransaction = {
+          const transaction: ITransaction = {
             hash: actionResult.hash,
             pending: true,
-            type: 'spend',
+            transactionOwner: activeAccount.value.address,
             tx: {
               amount,
+              callerId: activeAccount.value.address,
+              contractId: selectedAsset.contractId,
               senderId: activeAccount.value.address,
               recipientId: recipient,
-              type: SCHEMA.TX_TYPE.spend,
+              type: Tag[Tag.SpendTx],
+              function: TX_FUNCTIONS.transfer,
+              arguments: [],
+              fee: 0,
             },
           };
 
-          root.$store.dispatch('addPendingTransaction', transaction);
+          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         }
         emit('success');
+        return actionResult.hash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
@@ -292,7 +309,7 @@ export default defineComponent({
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tippingV2 || tippingV1;
         if (selectedAsset.contractId !== AETERNITY_CONTRACT_ID && tippingV2) {
-          await root.$store.dispatch('fungibleTokens/createOrChangeAllowance', [
+          await store.dispatch('fungibleTokens/createOrChangeAllowance', [
             selectedAsset.contractId,
             props.amount,
           ]);
@@ -309,24 +326,27 @@ export default defineComponent({
             {
               amount,
               waitMined: false,
-              ...{ modal: false } as any, // TODO: `modal` is not a part of sdk types
+              ...{ modal: false } as any, // TODO: `modal` is not a part of aeSdk types
             },
           );
         }
-        const transaction: IPendingTransaction = {
+        const transaction: ITransaction = {
           hash: txResult.hash,
           pending: true,
           tipUrl: recipient,
+          transactionOwner: activeAccount.value.address,
           tx: {
             amount,
             callerId: activeAccount.value.address,
-            contractId: tippingContract.$options.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            contractId: tippingContract.$options.address!,
+            type: Tag[Tag.ContractCallTx],
             function: 'tip',
             selectedTokenContractId: selectedAsset.contractId,
+            arguments: [],
+            fee: 0,
           },
         };
-        root.$store.dispatch('addPendingTransaction', transaction);
+        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {
@@ -344,13 +364,13 @@ export default defineComponent({
       try {
         const {
           buildSpendTx, proposeTx, postSpendTx,
-        } = useMultisigTransactions({ store: root.$store });
+        } = useMultisigTransactions({ store });
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId,
             props.transferData.address!,
             aeToAettos(props.transferData.amount!),
-            props.transferData.payload || '',
+            props.transferData.payload || undefined,
           );
 
           const txHash = await proposeTx(txToPropose, activeMultisigAccount.value.contractId);
@@ -365,7 +385,7 @@ export default defineComponent({
 
           await postSpendTx(txToPropose, txHash);
           await updateMultisigAccounts();
-          root.$router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
+          router.push({ name: ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS });
         }
       } catch (error) {
         handleUnknownError(error);
@@ -375,7 +395,7 @@ export default defineComponent({
       }
     }
 
-    function submit(): any {
+    async function submit(): Promise<void> {
       const {
         amount: amountRaw,
         address: recipient,
@@ -384,7 +404,7 @@ export default defineComponent({
       } = props.transferData;
 
       if (!amountRaw || !recipient || !selectedAsset) {
-        return null;
+        return;
       }
 
       const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
@@ -392,21 +412,22 @@ export default defineComponent({
         : convertToken(amountRaw, selectedAsset.decimals);
 
       if (props.isMultisig) {
-        return proposeMultisigTransaction();
-      }
-      if (props.isAddressUrl) {
-        return sendTip({
+        await proposeMultisigTransaction();
+      } else if (props.isAddressUrl) {
+        await sendTip({
           amount,
           recipient,
           selectedAsset,
           note,
         });
+      } else {
+        const hash = await transfer({
+          amount,
+          recipient,
+          selectedAsset,
+        });
+        router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
       }
-      return transfer({
-        amount,
-        recipient,
-        selectedAsset,
-      });
     }
 
     return {

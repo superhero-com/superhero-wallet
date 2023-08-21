@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useModals } from '../../../composables';
 import { MODAL_HELP } from '../../utils';
 import BtnPlain from './BtnPlain.vue';

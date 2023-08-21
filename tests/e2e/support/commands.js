@@ -6,6 +6,9 @@ import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig
 import {
   formatDate,
   formatTime,
+  LOCAL_STORAGE_PREFIX,
+  NETWORK_ID_TESTNET,
+  TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/popup/utils';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 import runMigrations from '../../../src/store/migrations';
@@ -14,7 +17,6 @@ export async function getLoginState({
   backedUpSeed,
   balance,
   name,
-  pendingTransaction,
   network,
 }) {
   const { mnemonic, address } = testAccount;
@@ -29,9 +31,15 @@ export async function getLoginState({
     backedUpSeed,
     current: { network: network || 'Testnet' },
     balance,
-    ...(name && { names: { defaults: { [`${account.address}-ae_uat`]: name } } }),
-    ...(pendingTransaction
-        && { transactions: { loaded: [], pending: { ae_uat: [pendingTransaction] } } }),
+    ...(name && { names: { defaults: { [`${account.address}-${NETWORK_ID_TESTNET}`]: name } } }),
+  };
+}
+
+export function preparePendingTransactionToLocalStorage(pendingTransaction) {
+  const { address } = testAccount;
+
+  return {
+    [address]: { loaded: [], pending: { [NETWORK_ID_TESTNET]: [pendingTransaction] } },
   };
 }
 
@@ -44,7 +52,7 @@ Cypress.Commands.add('getInputByTestId', (testId) => {
 });
 
 Cypress.Commands.add('openPopup', (onBeforeLoad, route) => {
-  cy.visit(`${route ? `#${route}` : ''}`, { onBeforeLoad });
+  cy.visit(route || '', { onBeforeLoad });
 });
 
 Cypress.Commands.add('openAex2Popup', (type, txType) => {
@@ -91,6 +99,19 @@ Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = 
   cy.openPopup(async (contentWindow) => {
     /* eslint-disable-next-line no-param-reassign */
     contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
+
+    if (options.pendingTransaction) {
+      const localStorageKey = [
+        LOCAL_STORAGE_PREFIX,
+        TRANSACTIONS_LOCAL_STORAGE_KEY,
+        NETWORK_ID_TESTNET,
+      ].join('_');
+
+      // eslint-disable-next-line no-param-reassign
+      contentWindow.localStorage[localStorageKey] = JSON.stringify(
+        preparePendingTransactionToLocalStorage(options.pendingTransaction),
+      );
+    }
   }, route);
 });
 
@@ -251,14 +272,6 @@ Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
     .should('contain', url)
     .get('[data-cy=network-middleware]')
     .should('contain', middleware);
-});
-
-Cypress.Commands.add('selectNetwork', () => {
-  cy.get('[data-cy=networks] .network-row')
-    .eq(1)
-    .find('.checkmark')
-    .click()
-    .should('have.class', 'checked');
 });
 
 Cypress.Commands.add('openTransactions', () => {

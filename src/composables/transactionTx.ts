@@ -1,32 +1,43 @@
-import { computed, ref } from '@vue/composition-api';
+import { computed, ref } from 'vue';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
-  IAccountLabeled,
-  IDexContracts,
-  ITokenList,
-  TxFunctionRaw,
-  ITx,
+  IAccountOverview,
   IDefaultComposableOptions,
+  INetwork,
+  ITokenList,
+  ITx,
+  ObjectValues,
+  TxFunctionRaw,
+  TxType,
 } from '../types';
-import { i18n } from '../store/plugins/languages';
 import {
-  FUNCTION_TYPE_DEX,
-  FUNCTION_TYPE_MULTISIG,
-  RETURN_TYPE_OK,
   TRANSACTION_OWNERSHIP_STATUS,
-  TX_FUNCTIONS,
   TX_DIRECTION,
-  getTxType,
-  isContainingNestedTx,
+  TX_FUNCTIONS_MULTISIG,
+  TX_FUNCTION_TRANSLATIONS,
+  TX_FUNCTIONS,
+  TX_TYPE_TRANSLATIONS,
+  TX_TYPE_LIST_TRANSLATIONS,
+  TX_RETURN_TYPE_OK,
   getInnerTransaction,
-  isTxDex,
   getOwnershipStatus,
+  getTxDirection,
+  getTxTag,
   getTxOwnerAddress,
+  includes,
+  isContainingNestedTx,
+  isTxDex,
+  isTxFunctionDexAddLiquidity,
+  isTxFunctionDexAllowance,
+  isTxFunctionDexRemoveLiquidity,
+  isTxFunctionDexPool,
 } from '../popup/utils';
 import { useAccounts } from './accounts';
+import { useAeSdk } from './aeSdk';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
-  tx?: ITx
-  externalAddress?: string
+  tx?: ITx;
+  externalAddress?: Encoded.AccountAddress;
 }
 
 export function useTransactionTx({
@@ -34,60 +45,104 @@ export function useTransactionTx({
   tx,
   externalAddress,
 }: UseTransactionOptions) {
-  const { accounts, activeAccount } = useAccounts({ store });
+  const { dexContracts } = useAeSdk({ store });
+  const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
-  const ownerAddress = ref<string | undefined>(externalAddress);
+  const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
-  function setTransactionTx(newTx: ITx) {
-    outerTx.value = newTx;
-    innerTx.value = getInnerTransaction(newTx);
-  }
-
-  function setExternalAddress(address: string) {
-    ownerAddress.value = address;
-  }
-
+  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
 
-  const getTxDirection = computed(() => store.getters.getTxDirection);
-  const getDexContracts = computed<IDexContracts>(() => store.getters.getDexContracts);
-  const getExplorerPath = computed(() => store.getters.getExplorerPath);
-  const getPreferred = computed(() => store.getters['names/getPreferred']);
+  const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
+  const innerTxTag = computed((): Tag | null => innerTx.value ? getTxTag(innerTx.value) : null);
+  const outerTxTag = computed((): Tag | null => tx ? getTxTag(tx) : null);
+  const txType = computed(
+    (): TxType | null => outerTxTag.value ? Tag[outerTxTag.value] as TxType : null,
+  );
 
-  const txType = computed(() => innerTx.value ? getTxType(innerTx.value) : null);
-  const outerTxType = computed(() => outerTx.value ? getTxType(outerTx.value) : null);
+  /**
+   * Transaction TX type value converted into human readable label
+   * displayed on the transaction details page.
+   */
+  const txTypeLabel = computed((): string => {
+    const translateFunc = (txType.value) ? TX_TYPE_TRANSLATIONS[txType.value] : null;
+    return translateFunc ? translateFunc() : '';
+  });
 
-  const isAllowance = computed((): boolean => (
-    !!innerTx.value?.function
-    && FUNCTION_TYPE_DEX.allowance.includes(innerTx.value.function as TxFunctionRaw)
+  /**
+   * Transaction TX type value converted into human readable label
+   * displayed on the transaction lists.
+   */
+  const txTypeListLabel = computed((): string => {
+    const translateFunc = (txType.value)
+      ? TX_TYPE_LIST_TRANSLATIONS[txType.value]
+      : null;
+    return translateFunc ? translateFunc() : txTypeLabel.value;
+  });
+
+  /**
+   * Transaction TX function value converted into human readable label
+   */
+  const txFunctionLabel = computed((): string => {
+    const translateFunc = (outerTx.value?.function)
+      ? TX_FUNCTION_TRANSLATIONS[outerTx.value.function as TxFunctionRaw]
+      : null;
+    return translateFunc ? translateFunc() : '';
+  });
+
+  const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
+
+  const isDexAllowance = computed((): boolean => (
+    !!innerTx.value
+    && isTxFunctionDexAllowance(innerTx.value?.function)
     && !!availableTokens.value[innerTx.value.contractId]
   ));
+
+  const isDexAddLiquidity = computed(
+    (): boolean => isTxFunctionDexAddLiquidity(innerTx.value?.function),
+  );
+
+  const isDexRemoveLiquidity = computed(
+    (): boolean => isTxFunctionDexRemoveLiquidity(innerTx.value?.function),
+  );
+
+  const isDexPool = computed(
+    (): boolean => isTxFunctionDexPool(innerTx.value?.function),
+  );
 
   const isMultisig = computed((): boolean => (
     !!outerTx.value?.function
     && (
-      Object.values(FUNCTION_TYPE_MULTISIG).includes(outerTx.value.function as TxFunctionRaw)
+      includes(Object.values(TX_FUNCTIONS_MULTISIG), outerTx.value.function)
       || !!outerTx.value.payerId
+    )
+  ));
+
+  const isTip = computed((): boolean => !!(
+    innerTx.value?.contractId
+    && innerTx.value?.function
+    && includes(
+      [activeNetwork.value.tipContractV1, activeNetwork.value.tipContractV2!],
+      innerTx.value.contractId,
+    )
+    && includes(
+      [TX_FUNCTIONS.tip, TX_FUNCTIONS.retip],
+      innerTx.value.function,
     )
   ));
 
   const isErrorTransaction = computed(
     (): boolean => {
-      if (!outerTx.value) {
-        return false;
-      }
-      const { returnType } = outerTx.value;
-      return !!(returnType && returnType !== RETURN_TYPE_OK);
+      const { returnType } = outerTx.value || {};
+      return !!(returnType && returnType !== TX_RETURN_TYPE_OK);
     },
   );
-
-  const isDex = computed((): boolean => isTxDex(innerTx.value!, getDexContracts.value));
 
   const txOwnerAddress = computed(() => getTxOwnerAddress(innerTx.value));
 
@@ -97,27 +152,33 @@ export function useTransactionTx({
     innerTx.value,
   ));
 
-  const direction = computed(() => innerTx.value?.function === TX_FUNCTIONS.claim
-    ? TX_DIRECTION.received
-    : getTxDirection.value(
+  const direction = computed(
+    (): ObjectValues<typeof TX_DIRECTION> => (innerTx.value?.function === TX_FUNCTIONS.claim)
+      ? TX_DIRECTION.received
+      : getTxDirection(
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress
         || (
           ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
-        ),
-    ));
+        )
+        || activeAccount.value.address,
+      ),
+  );
 
-  function getOwnershipAccount(
-    externalOwnerAddress: string | undefined,
-  ): IAccountLabeled {
+  function setTransactionTx(newTx: ITx) {
+    outerTx.value = newTx;
+    innerTx.value = getInnerTransaction(newTx);
+  }
+
+  function setExternalAddress(address: Encoded.AccountAddress) {
+    ownerAddress.value = address;
+  }
+
+  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
     switch (ownershipStatus.value) {
       case TRANSACTION_OWNERSHIP_STATUS.current:
-        return {
-          ...activeAccount.value,
-          label: i18n.t('transaction.overview.accountAddress'),
-          url: getExplorerPath.value(activeAccount.value.address),
-        };
+        return activeAccountExtended.value;
       case TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};
 
@@ -127,7 +188,7 @@ export function useTransactionTx({
         const address = externalOwnerAddress || txOwnerAddress.value;
 
         return {
-          name: getPreferred.value(address) || '',
+          name: getPreferredName.value(address) || '',
           address,
         };
       }
@@ -135,14 +196,21 @@ export function useTransactionTx({
   }
 
   return {
-    outerTxType,
     hasNestedTx,
-    txType,
+    outerTxTag,
+    innerTxTag,
     innerTx: innerTx as any,
-    isAllowance,
+    txTypeLabel,
+    txTypeListLabel,
+    txFunctionLabel,
     isErrorTransaction,
     isDex,
+    isDexAddLiquidity,
+    isDexAllowance,
+    isDexPool,
+    isDexRemoveLiquidity,
     isMultisig,
+    isTip,
     direction,
     getOwnershipAccount,
     setTransactionTx,

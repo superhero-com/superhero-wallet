@@ -47,17 +47,17 @@
           name="before"
         />
         <slot
-          :id="_uid"
+          :id="uid"
           :input-id="inputId"
         >
           <input
-            :id="inputId"
             v-bind="$attrs"
+            :id="inputId"
             class="input"
             autocomplete="off"
             step="any"
             data-cy="input"
-            :value="value"
+            :value="modelValue"
             :disabled="readonly"
             :maxlength="textLimit"
             :inputmode="inputMode"
@@ -105,7 +105,7 @@ import {
   getCurrentInstance,
   PropType,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
 import type { IInputMessage, IInputMessageRaw } from '../../types';
 import { INPUT_MESSAGE_STATUSES } from '../utils';
 import BtnHelp from './buttons/BtnHelp.vue';
@@ -118,7 +118,7 @@ export default defineComponent({
     BtnHelp,
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     label: { type: String, default: '' },
     type: {
       type: String as PropType<InputFieldType>,
@@ -148,8 +148,15 @@ export default defineComponent({
       default: null,
     },
   },
+  emits: [
+    'update:modelValue',
+    'focus-change',
+    'click',
+    'help',
+  ],
   setup(props, { emit }) {
-    const inputId = `input-${getCurrentInstance()?.uid}`;
+    const uid = getCurrentInstance()?.uid;
+    const inputId = `input-${uid}`;
 
     const focused = ref(false);
 
@@ -170,14 +177,14 @@ export default defineComponent({
       () => !messageAsObject.value?.hideMessage && !!messageAsObject.value?.text,
     );
     const availableTextLimit = computed(
-      () => (props.textLimit && props.value)
-        ? props.textLimit - String(props.value).length
+      () => (props.textLimit && props.modelValue)
+        ? props.textLimit - String(props.modelValue).length
         : props.textLimit,
     );
 
     function checkIfNumber(event: KeyboardEvent) {
       const isSingleChar = event.key.length === 1 && !event.ctrlKey && !event.metaKey;
-      const alreadyHasDot = (typeof props.value === 'string' && props.value?.includes('.')) && [',', '.'].includes(event.key);
+      const alreadyHasDot = (typeof props.modelValue === 'string' && props.modelValue?.includes('.')) && [',', '.'].includes(event.key);
       if (
         props.type === 'number'
         && isSingleChar
@@ -187,9 +194,9 @@ export default defineComponent({
       }
     }
 
-    function handleInput(event: InputEvent) {
-      const { value } = event.target as HTMLInputElement;
-      emit('input', props.type === 'number' ? value?.replace(',', '.') : value);
+    function handleInput(payload: Event) {
+      const { value } = payload.target as HTMLInputElement;
+      emit('update:modelValue', props.type === 'number' ? value?.replace(',', '.') : value);
     }
 
     watch(
@@ -199,6 +206,7 @@ export default defineComponent({
 
     return {
       focused,
+      uid,
       inputId,
       inputMode,
       messageAsObject,
@@ -282,7 +290,7 @@ export default defineComponent({
       align-items: center;
       width: 100%;
 
-      .icon {
+      :deep(.icon) {
         width: 24px;
         height: 24px;
         flex-shrink: 0;
@@ -311,6 +319,7 @@ export default defineComponent({
 
       &[type='number'] {
         -moz-appearance: textfield;
+        appearance: textfield;
 
         &::-webkit-outer-spin-button,
         &::-webkit-inner-spin-button {
@@ -327,11 +336,13 @@ export default defineComponent({
   }
 
   .message {
-    @extend %face-sans-12-regular;
+    @extend %face-sans-14-regular;
 
+    min-height: 24px;
+    line-height: 20px;
     display: flex;
     align-items: center;
-    margin-top: 9px;
+    margin-top: 4px;
     text-align: left;
     color: var(--color-message);
 

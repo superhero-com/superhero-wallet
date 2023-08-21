@@ -90,7 +90,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from '@vue/composition-api';
+import { defineComponent, onMounted, ref } from 'vue';
+import { useStore } from 'vuex';
 import type { IMiddlewareStatus, INetwork } from '../../types';
 import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
 import { useMiddleware } from '../../composables';
@@ -101,8 +102,6 @@ import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
 
-const extPackageJson = require('../../../package.json');
-
 export default defineComponent({
   components: {
     PanelItem,
@@ -110,9 +109,9 @@ export default defineComponent({
     Github,
     ExternalLink,
   },
-  setup(props, { root }) {
-    const { fetchMiddlewareStatus } = useMiddleware({ store: root.$store });
-    const sdkVersion = String(extPackageJson.dependencies['@aeternity/aepp-sdk']).replace('^', '');
+  setup() {
+    const store = useStore();
+    const { fetchMiddlewareStatus } = useMiddleware({ store });
     const mdwStatus = ref<IMiddlewareStatus>();
     const activeNetwork = useGetter<INetwork>('activeNetwork');
 
@@ -126,7 +125,7 @@ export default defineComponent({
       COMMIT_URL,
       extensionVersion: process.env.npm_package_version,
       commitHash: process.env.COMMIT_HASH,
-      sdkVersion,
+      sdkVersion: process.env.SDK_VERSION,
       mdwStatus,
       activeNetwork,
     };

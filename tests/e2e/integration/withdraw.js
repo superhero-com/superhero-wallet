@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 
-const address = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
+const ownAddress = 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5';
+const recipientAddress = 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4';
 const amount = 0.1;
 
 describe('Test cases for Withdraw Page', () => {
@@ -24,7 +25,7 @@ describe('Test cases for Withdraw Page', () => {
       .inputShouldHaveError('[data-cy=address]')
       .enterAddress('test.chain')
       .should('not.have.class', 'error')
-      .enterAddress('ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
+      .enterAddress(recipientAddress)
       .get('[data-cy=address]')
       .should('not.have.class', 'error')
 
@@ -36,9 +37,9 @@ describe('Test cases for Withdraw Page', () => {
 
       // check on step2 if everything is OK
       .get('[data-cy=review-sender] > .value')
-      .should('contain', address)
+      .should('contain', ownAddress)
       .get('[data-cy=review-recipient] > .value')
-      .should('contain', 'ak_wMHNCzQJ4HUL3TZ1fi6nQsHg6TjmHLs1bPXSp8iQ1VmxGNAZ4')
+      .should('contain', recipientAddress)
       .get('[data-cy=review-total]')
       .invoke('text')
       .then((total) => {
@@ -53,24 +54,23 @@ describe('Test cases for Withdraw Page', () => {
       // edit, sending to your own account
       .get('[data-cy=edit]')
       .click()
-      .enterAddress(address)
+      .enterAddress(ownAddress)
       .get('[data-cy=address]')
       .should('have.class', 'warning')
       .get('[data-cy=next-step-button]')
       .should('not.have.class', 'disabled')
+
+      // send to another account
+      .get('[data-cy=amount]')
+      .enterAddress(recipientAddress)
+      .should('not.have.class', 'error')
+      .get('[data-cy=next-step-button]')
+      .should('not.have.class', 'disabled')
       .click()
       .get('[data-cy=review-recipient] > .value')
-      .should('contain', address)
-
-      // send
-      .get('[data-cy=edit] + [data-cy=next-step-button]')
-      .should('be.visible')
+      .should('contain', recipientAddress)
+      .get('[data-cy=next-step-button]')
       .click()
-      .get('[data-cy=spend-success]', { timeout: 10000 })
-      .should('be.visible')
-      .get('[data-cy=btn-close]')
-      .click()
-      .openTransactions()
       .get('[data-cy=pending-txs]')
       .should('be.visible');
   });

@@ -65,26 +65,6 @@
       "msg": "There was problem sending your error report"
     }
   },
-  "transaction": {
-    "type": {
-      "SpendTx": "Spend",
-      "ContractCreateTx": "Contract create",
-      "ContractCallTx": "Contract call",
-      "NamePreclaimTx": "Preclaim name",
-      "NameClaimTx": "Claim name",
-      "NameUpdateTx": "Update name",
-      "NameTransferTx": "Transfer name",
-      "NameRevokeTx": "Revoke name",
-      "OracleRegisterTx": "Register oracle",
-      "OracleExtendTx": "Extend oracle",
-      "OraclePostQueryTx": "Post query oracle",
-      "OracleRespondTx": "Respond oracle",
-      "ChannelCloseSoloTx": "Solo close channel",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Settle channel",
-      "ChannelSnapshotSoloTx": "Solo snapshot channel"
-    }
-  },
   "pages": {
     "intro": {
       "heading": "Intro",
@@ -106,27 +86,7 @@
       "ever": "Ever."
     },
     "titles": {
-      "settings": "Настройки кошелька",
-      "language": "Language",
-      "security": "Security",
-      "about": "About",
-      "send": "Send",
-      "send-tips": "Send Tips",
-      "claim-tips": "Claim Tips",
-      "scanQr": "Scan QR",
-      "terms": "Terms of Use",
-      "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "activity": "Activity History",
-      "topUp": "Top Up",
-      "notifications": "Notifications",
-      "names": "Names",
-      "bidding": "Bidding",
-      "comment-new": "Add comment",
-      "home": "Superhero Home",
-      "donate-error": "Donate Data",
-      "address": "Send Address",
-      "sign-message": "Sign Message"
+      "settings": "Настройки кошелька"
     },
     "about": {
       "heading": "About",
@@ -164,9 +124,6 @@
       "oracleFailed": "Oracle service check claim failed. Please try again later.",
       "unknownError": "Error occured during claim request. Please try again later.",
       "noMobileClaim": "Claiming is currently only available on desktop."
-    },
-    "claimTips": {
-      "urlToClaim": "URL to claim tips for"
     },
     "notFound": {
       "notFound": "Requested page can't be found",
@@ -223,7 +180,7 @@
       "remaining-time": "Remaining Time"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "would like to connect to your account",
+      "websiteRequestConnect": "would like to connect to your account",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
@@ -402,13 +359,10 @@
       "terms-of-use": "Terms of use",
       "terms-with-quotes": "(„TERMS“)",
       "terms": "terms",
-      "sub-heading": "The present {terms-of-use} were created on 3 April 2020.",
-      "section0Content": "{superhero.com} reserves its right to modify and update these {terms-of-use} according to the policy and practice of the {company}. The new version of thе {terms-of-use} becomes effective from the day it is announced on {our-superhero-wallet} unless stated otherwise.",
       "superhero-com": "Superhero.com LVC",
       "company": "company",
       "our-superhero-wallet": "Our Superhero Wallet",
       "section01Content": "THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
-      "section02Content": "These {terms-of-use} {terms-with-quotes} apply exclusively for the {superHero-wallet} (hereinafter referred to as the “{wallet}“ or the “{application}”) and all the content available on the {website-extension}. Please make sure that you have carefully read the {terms} before using the {application}. Otherwise, by using it, we consider these actions implicit agreement to the {terms-of-use}. These {terms-of-use} represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „{you}“) and Superhero.com LVC {superhero-we-us-with-quotes} or {our-with-quotes} in connection to your use of the {superHero-wallet} {website-extension}.",
       "superHero-wallet": "Superhero Wallet",
       "wallet": "Wallet",
       "application": "application",
@@ -417,7 +371,6 @@
       "superhero-we-us-with-quotes": "(“Superhero”, “we”, “us”",
       "our-with-quotes": "“our”)",
       "section1Title": "1. Definitions",
-      "section1Content": "1.1. Superhero.com Establishment (Superhero.com ”, “we”, “us”, “our” or “the company”) ​is a company with email address for communication related to Superhero Wallet: superherowallet@protonmail.com. Superhero.com ​is the company, which created and developed Superhero Wallet​. \n 1.2. ​„USER“ or ​„YOU“ means a natural or legal person, who has downloaded and uses the Superhero Wallet ​website extension. \n 1.3. „​Blockchain​“ means the list of records, also known as ​blocks,​ which are linked with the method of cryptography. The technology allows large groups of people to connect and reach agreement on data, which is afterwards permanently recorded without the presence of central authority. ​USERS can access, create and save information on the aeternity blockchain. The decentralized, distributed and public digital ledger is used for the purpose of recording transactions in blocks of information with the help of ​Validators​, which cannot be altered retroactively. \n 1.4. Superhero Wallet​” (“​WALLET​” or “​the application​”) is a website extension, which allows supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The website extension is a piece of software which acts as an add-on to the web browser Firefox and contributes to the browser’s additional functionality. The application is available at: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . The results of the donations and comments are published on the website ​https://superhero.com/​ . \n 1.5. “​Validators​” are independent physical persons or entities, which are not in any way part of Superhero.com . ​Their function in the system includes responsibility for ​blocks constitution and broadcast of these ​blocks​ with the​ aeternity ​network. \n 1.6. “​Account address​” is a hashed version of the ​USER’s ​public key​, used to identify USERS​ on ​the application​. \n 1.7. “​Keys​” represent uniquely related private and public cryptographic keys of random numbers used for encryption and decryption of information.",
       "section2Title": "2. GENERAL PROVISIONS",
       "section2Content": "Superhero.com ​designed and built ​the application as a cryptocurrency wallet through which ​USERS can store and send Superhero.com tokens for the purpose of conducting donations to creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content​. USERS can donate to different websites through the application. The application automatically searches for the public key of the website for the purpose of the donation. The donations can be oriented in two flows as it follows- ​USERS can tip the owner of the whole website or ​USERS can choose specific creators and authors on the website who have written the news to whom to send the tokens. \n After that, the website ​https://superhero.com/ reflects the ​USERS’ donations and comments and gives the possibility for other ​USERS to actively donate and comment on the news available on the newsfeed of the Website. \n USERS ​can browse through their transaction history. ​The Wallet displays the ​USER’s tokens​. ​USERS​ are in charge of the safe storage, sending and receiving of funds. \n The application is built for small transactions. High volume transactions or storage can be undertaken via the application at the ​USER’s​ own risk.",
       "section3Title": "3. USERS IDENTIFICATION",
@@ -433,7 +386,6 @@
       "section8Title": "8. LICENSE",
       "section8Content": "The application is created, developed and operated by Superhero.com ​. Each component on the application including but not limited to logos, trademarks and other intellectual property displayed on the application are considered a property of Superhero.com ​and are protected by the applicable intellectual property legislation. It is prohibited to use any intellectual property of Superhero.com ​before a prior explicit consent from the latter. \n None of the elements mentioned above can be edited, downloaded, reproduced, used for commercial purposes, distributed and transmitted in any manner and/or any medium whatsoever, partially or in whole, without the explicit prior written consent of Superhero.com. \n Superhero.com ​reserves its right to take any necessary legal action against intellectual property infringement.",
       "section9Title": "9. INTELLECTUAL PROPERTY RIGHTS",
-      "section9Content": "USERS understand and accept ​the application can be periodically modified, updated, maintained or technically supported, which could to some extent influence the use of the Wallet​, the visual representation of ​the application ​or could result in malfunction. In the latter case, if ​You as a ​USER notice any change in the funds, settings, accounts or any other information on the application, please superherowallet@protonmail.com​ for assistance.",
       "section10Title": "10. MODIFICATIONS",
       "section10Content": "The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding the present ​TERMS​. The invalidity of one or more clauses/ provisions in the ​TERMS does not lead to the invalidity of the whole agreement. \n The Privacy Policy is an inseparable part of the present ​TERMS and should be considered as a complementary document with compulsory character. Unless explicitly stated otherwise in the Privacy Policy, all rules from the ​TERMS​ apply respectively.",
       "section11Title": "11. FINAL PROVISIONS"

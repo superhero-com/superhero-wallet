@@ -1,19 +1,26 @@
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
+import { lowerFirst } from 'lodash-es';
 import {
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
 } from '../../../src/popup/utils';
 import { popupProps, txParams } from '../../../src/popup/utils/testsConfig';
 import locale from '../../../src/popup/locales/en.json';
 
-const popups = [POPUP_TYPE_CONNECT, POPUP_TYPE_SIGN, POPUP_TYPE_MESSAGE_SIGN];
+const popups = [
+  POPUP_TYPE_CONNECT,
+  POPUP_TYPE_SIGN,
+  POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_ACCOUNT_LIST,
+];
 
-const txTypes = [
-  SCHEMA.TX_TYPE.spend,
-  SCHEMA.TX_TYPE.contractCall,
-  SCHEMA.TX_TYPE.contractCreate,
+const txTags = [
+  Tag.SpendTx,
+  Tag.ContractCallTx,
+  Tag.ContractCreateTx,
 ];
 
 describe('Tests cases for AEX-2 popups', () => {
@@ -21,7 +28,7 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.login();
   });
 
-  it('Sign Message popup, Connect, Raw Sign display correct data', () => {
+  it('Sign Message popup, Connect, Account list, Raw Sign display correct data', () => {
     const props = popupProps[POPUP_TYPE_MESSAGE_SIGN];
     cy.openAex2Popup(POPUP_TYPE_MESSAGE_SIGN)
       .get('[data-cy=aepp]')
@@ -49,11 +56,18 @@ describe('Tests cases for AEX-2 popups', () => {
       .get('[data-cy=sender]')
       .should('be.visible')
       .should('contain', props2.app.host);
+
+    const props3 = popupProps[POPUP_TYPE_ACCOUNT_LIST];
+    cy.openAex2Popup(POPUP_TYPE_ACCOUNT_LIST)
+      .get('[data-cy=aepp]')
+      .should('be.visible')
+      .should('contain', props3.app.name)
+      .should('contain', props3.app.host);
   });
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && Tag[Tag.SpendTx])
         .get('[data-cy=deny]')
         .click()
         .window()
@@ -63,7 +77,7 @@ describe('Tests cases for AEX-2 popups', () => {
     });
 
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && SCHEMA.TX_TYPE.spend)
+      cy.openAex2Popup(popup, popup === 'sign' && Tag[Tag.SpendTx])
         .get('[data-cy=accept]')
         .click()
         .window()
@@ -73,25 +87,25 @@ describe('Tests cases for AEX-2 popups', () => {
     });
   });
 
-  txTypes.forEach((txType) => {
-    it(`Sign Popup display correct ${txType} data`, () => {
-      const tx = txParams[txType];
+  txTags.forEach((txTag) => {
+    it(`Sign Popup display correct ${Tag[txTag]} data`, () => {
+      const tx = txParams[Tag[txTag]];
       const amount = tx.amount / 10 ** 18;
       const fee = tx.fee / 10 ** 18;
       let receiver;
-      if (txType === SCHEMA.TX_TYPE.spend) {
+      if (txTag === Tag.SpendTx) {
         receiver = tx.recipientId;
-      } else if (txType === SCHEMA.TX_TYPE.contractCall) {
+      } else if (txTag === Tag.ContractCallTx) {
         receiver = tx.contractId;
       } else {
         receiver = 'Contract create';
       }
-      cy.openAex2Popup('sign', txType)
+      cy.openAex2Popup('sign', Tag[txTag])
         .get('[data-cy=label]')
         .should('be.visible')
-        .should('contain', locale.transaction.type[txType]);
+        .should('contain', locale.transaction.type[lowerFirst(Tag[txTag])]);
 
-      if (txType !== SCHEMA.TX_TYPE.contractCreate) {
+      if (txTag !== Tag.ContractCreateTx) {
         cy.get('[data-cy=recipient] [data-cy=address]')
           .should('be.visible')
           .then((recipient) => {

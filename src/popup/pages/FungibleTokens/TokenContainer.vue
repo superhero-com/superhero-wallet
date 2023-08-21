@@ -63,18 +63,21 @@
         :show-filters="showFilterBar"
       />
     </div>
-    <transition
-      name="fade-transition"
-      mode="out-in"
+    <RouterView
+      v-slot="{ Component }"
+      :contract-id="contractId"
+      :token-pairs="tokenPairs"
+      :token-data="tokenData"
+      :tokens="tokens"
+      :is-multisig="isMultisig"
     >
-      <RouterView
-        :contract-id="contractId"
-        :token-pairs="tokenPairs"
-        :token-data="tokenData"
-        :tokens="tokens"
-        :is-multisig="isMultisig"
-      />
-    </transition>
+      <transition
+        name="fade-transition"
+        mode="out-in"
+      >
+        <Component :is="Component" />
+      </transition>
+    </RouterView>
   </div>
 </template>
 
@@ -84,7 +87,12 @@ import {
   defineComponent,
   onMounted,
   ref,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { Encoded } from '@aeternity/aepp-sdk';
+
 import type { IToken, ITokenList } from '../../../types';
 import {
   AETERNITY_CONTRACT_ID,
@@ -102,7 +110,7 @@ import {
 import {
   useAccounts,
   useCurrencies,
-  useSdk,
+  useAeSdk,
   useTokensList,
 } from '../../../composables';
 import { useState, useGetter } from '../../../composables/vuex';
@@ -135,31 +143,35 @@ export default defineComponent({
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
   },
-  setup(props, { root }) {
-    const isMultisig = computed((): boolean => !!root.$route?.meta?.isMultisig);
+  setup() {
+    const store = useStore();
+    const route = useRoute();
+    const { t } = useI18n();
 
-    const { isNodeMainnet, isNodeTestnet, getSdk } = useSdk({ store: root.$store });
+    const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
+
+    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk({ store });
     const {
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
     const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
-      store: root.$store,
+      store,
       isMultisig: isMultisig.value,
     });
 
-    const isCoin: boolean = !!root.$route.matched.find(
-      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name),
+    const isCoin: boolean = !!route.matched.find(
+      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = root.$route.params.id;
+    const contractId = route.params.id as Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
     const isAe = contractId === AETERNITY_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
     const tabs = [
       {
-        text: root.$t('pages.transactionDetails.transactions'),
+        text: t('pages.transactionDetails.transactions'),
         routeName: isMultisig.value
           ? ROUTE_MULTISIG_COIN
           : transactionRouteName,
@@ -167,8 +179,8 @@ export default defineComponent({
       },
       {
         text: isCoin
-          ? root.$t('pages.token-details.coin-details')
-          : root.$t('pages.token-details.token-details'),
+          ? t('pages.token-details.coin-details')
+          : t('pages.token-details.token-details'),
         routeName: isMultisig.value
           ? ROUTE_MULTISIG_COIN_DETAILS
           : detailsRouteName,
@@ -180,8 +192,8 @@ export default defineComponent({
     const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const fungibleToken = computed(() => availableTokens.value[contractId]);
-    const routeName = computed(() => root.$route.name);
-    const showFilterBar = computed(() => !!root.$route?.meta?.showFilterBar);
+    const routeName = computed(() => route.name);
+    const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
 
     const tokenData = computed((): IToken => {
       if (isAe) {
@@ -204,8 +216,8 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
-        await getSdk();
-        tokenPairs.value = await root.$store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        await getAeSdk();
+        tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
     });
@@ -277,7 +289,7 @@ export default defineComponent({
     padding-bottom: 4px;
   }
 
-  ::v-deep .filters {
+  :deep(.filters) {
     --buttons-height: 40px;
 
     padding-top: 12px;

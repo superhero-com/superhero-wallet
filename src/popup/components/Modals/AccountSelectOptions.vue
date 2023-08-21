@@ -34,8 +34,8 @@ import {
   defineComponent,
   PropType,
   ref,
-} from '@vue/composition-api';
-import type { IFormSelectOption, ResolveRejectCallback } from '../../../types';
+} from 'vue';
+import type { IFormSelectOption, RejectCallback, ResolveCallback } from '../../../types';
 
 import Modal from '../Modal.vue';
 import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';
@@ -48,8 +48,8 @@ export default defineComponent({
     Modal,
   },
   props: {
-    resolve: { type: Function as ResolveRejectCallback, required: true },
-    reject: { type: Function as ResolveRejectCallback, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     title: { type: String, default: null },
     value: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => [] },

@@ -21,11 +21,12 @@
   </BtnBase>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import IconWrapper from '../IconWrapper.vue';
 import BtnBase from './BtnBase.vue';
 
-export default {
+export default defineComponent({
   components: {
     BtnBase,
     IconWrapper,
@@ -35,7 +36,8 @@ export default {
     subheader: { type: String, default: '' },
     icon: { type: Object, default: null },
   },
-};
+  emits: ['click'],
+});
 </script>
 
 <style lang="scss" scoped>

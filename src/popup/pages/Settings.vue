@@ -29,18 +29,18 @@
     />
     <PanelItem
       :to="{ name: 'settings-errors-log' }"
-      :title="$t('pages.titles.save-errors-log')"
+      :title="$t('pages.titles.saveErrorsLog')"
       :info="saveErrorLog ? 'On' : 'Off'"
     />
     <PanelItem
       :to="{ name: 'settings-reset-wallet' }"
-      :title="$t('pages.titles.reset-wallet')"
+      :title="$t('pages.titles.resetWallet')"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
 import type { INetwork } from '../../types';
 import { useGetter, useState } from '../../composables/vuex';
 import { useCurrencies } from '../../composables';

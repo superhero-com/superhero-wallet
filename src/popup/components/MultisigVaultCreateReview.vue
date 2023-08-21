@@ -7,14 +7,15 @@
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
         <AccountSelector v-model="creatorAddress" />
-        <i18n
+        <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
-          path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
+          keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
           tag="div"
           class="creator-error-message"
+          scope="global"
         >
           <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
-        </i18n>
+        </i18n-t>
       </template>
     </DetailsItem>
 
@@ -89,7 +90,10 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { Encoded } from '@aeternity/aepp-sdk';
+
 import {
   IAccountFetched,
   ICreateMultisigAccount,
@@ -104,7 +108,7 @@ import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
-  useSdk,
+  useAeSdk,
 } from '../../composables';
 
 import AccountSelector from './AccountSelector.vue';
@@ -132,23 +136,26 @@ export default defineComponent({
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     signers: { type: Array as PropType<ICreateMultisigAccount[]>, required: true },
     confirmationsRequired: { type: Number, required: true },
-    accountId: { type: String, required: true },
+    accountId: { type: String as PropType<Encoded.AccountAddress>, required: true },
   },
-  setup(props, { root }) {
-    const { accounts } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { accounts } = useAccounts({ store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
-    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
+    const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk({ store: root.$store });
+    const { getAeSdk } = useAeSdk({ store });
 
     const { openModal } = useModals();
 
-    const creatorAddress = ref<string>(props.signers[0].address || accounts.value[0].address);
+    const creatorAddress = ref<Encoded.AccountAddress>(
+      props.signers[0].address || accounts.value[0].address,
+    );
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
       () => accounts.value.find(({ address }) => address === creatorAddress.value),
@@ -162,9 +169,13 @@ export default defineComponent({
     watch(creatorAddress, async (val, oldVal) => {
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         try {
-          creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+          const rawAccount = await aeSdk.api.getAccountByPubkey(val);
+          creatorAccountFetched.value = {
+            ...rawAccount,
+            balance: rawAccount.balance.toString(),
+          };
         } catch (error) {
           handleUnknownError(error);
           creatorAccountFetched.value = {

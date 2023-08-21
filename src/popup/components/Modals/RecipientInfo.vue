@@ -12,45 +12,38 @@
           {{ $t('modals.recipient.sub-header') }}
         </span>
         <p>
-          <i18n
-            path="modals.recipient.msg.publicAddress.msg"
+          <i18n-t
+            keypath="modals.recipient.msg.publicAddress.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.publicAddress.title') }}:
             </strong>
-          </i18n>
+          </i18n-t>
         </p>
         <p>
-          <i18n
-            path="modals.recipient.msg.chain.msg"
+          <i18n-t
+            keypath="modals.recipient.msg.chain.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
-          </i18n>
-        </p>
-        <p>
-          <i18n
-            path="modals.recipient.msg.url.msg"
-            tag="div"
-          >
-            <strong class="title">
-              {{ $t('modals.recipient.msg.url.title') }}:
-            </strong>
-          </i18n>
+          </i18n-t>
         </p>
         <p v-if="UNFINISHED_FEATURES">
-          <i18n
-            path="modals.readMore.msg"
+          <i18n-t
+            keypath="modals.readMore.msg"
             class="help"
+            scope="global"
           >
             <a :href="BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
-          </i18n>
+          </i18n-t>
         </p>
       </div>
     </template>
@@ -66,25 +59,29 @@
   </Default>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, PropType } from 'vue';
+import { ResolveCallback } from '../../../types';
+import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 
-export default {
+export default defineComponent({
   components: {
     Default,
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     close: { type: Function, default: null },
   },
-  data: () => ({
-    BLOG_CLAIM_TIP_URL,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
-};
+  setup() {
+    return {
+      BLOG_CLAIM_TIP_URL,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

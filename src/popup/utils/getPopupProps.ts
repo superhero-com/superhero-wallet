@@ -1,7 +1,6 @@
 import { v4 as genUuid } from 'uuid';
-import type { Browser } from 'webextension-polyfill';
-import { TxBuilder } from '@aeternity/aepp-sdk';
-import type { Dictionary, IPopupConfig } from '../../types';
+import { Tag, unpackTx, buildTx as rawBuildTx } from '@aeternity/aepp-sdk';
+import type { Dictionary, IPopupConfig, TxType } from '../../types';
 import { txParams, popupProps } from './testsConfig';
 import { CONNECTION_TYPES } from './index';
 import { IS_EXTENSION, POPUP_TYPE, RUNNING_IN_TESTS } from '../../lib/environment';
@@ -19,8 +18,13 @@ interface IPendingRequest {
 
 type PostMessageReturn = Promise<Partial<IPopupConfig> | null>;
 
-export function buildTx(txType: any) {
-  return TxBuilder.buildTx({ ...txParams[txType] }, txType);
+export function buildTx(txType: TxType) {
+  const params = {
+    // TODO: Fix typecasting by defining individual types of each param
+    ...txParams[txType] as any,
+    tag: Tag[txType],
+  };
+  return rawBuildTx(params);
 }
 
 const postMessage = (() => {
@@ -33,7 +37,7 @@ const postMessage = (() => {
     }
 
     if (!background) {
-      background = await (browser as Browser).runtime.connect({ name: CONNECTION_TYPES.POPUP });
+      background = await browser.runtime.connect({ name: CONNECTION_TYPES.POPUP });
       background.onMessage.addListener(({ uuid, res }: any) => {
         if (!pendingRequests[uuid]) {
           throw new Error(`Can't find request with id: ${uuid}`);
@@ -54,10 +58,10 @@ const postMessage = (() => {
 const postMessageTest = async ({ type }: PopupMessageData): PostMessageReturn => {
   switch (type) {
     case 'getProps': {
-      const { txType } = await (browser as Browser).storage.local.get('txType');
+      const { txType } = await browser.storage.local.get('txType');
       if (txType) {
         const props = popupProps.base as IPopupConfig;
-        props.transaction = buildTx(txType).txObject;
+        props.tx = unpackTx(buildTx(txType as any)) as any;
         return props;
       }
       return POPUP_TYPE ? popupProps[POPUP_TYPE] : {};

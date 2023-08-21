@@ -8,15 +8,16 @@
       <div class="text-description">
         {{ $t('pages.seed-phrase-settings.confirm-that-you-save-your-seed-phrase') }}
       </div>
-      <i18n
-        path="pages.seed-phrase-settings.compose-your-seed-phrase"
+      <i18n-t
+        keypath="pages.seed-phrase-settings.compose-your-seed-phrase"
         tag="div"
         class="text-description"
+        scope="global"
       >
         <strong>
           {{ $t('pages.seed-phrase-settings.in-correct-order') }}
         </strong>
-      </i18n>
+      </i18n-t>
 
       <div class="phraser">
         <SeedPhraseBadge
@@ -24,7 +25,7 @@
           :key="index"
           :text="word"
           :selected="selectedWordIds.includes(index)"
-          @click.native="onSelectWord(index)"
+          @click="onSelectWord(index)"
         />
       </div>
 
@@ -44,7 +45,7 @@
             :key="id"
             :text="mnemonicShuffled[id]"
             editable
-            @click.native="selectedWordIds.splice(index, 1)"
+            @click="selectedWordIds.splice(index, 1)"
           />
         </template>
       </div>
@@ -70,9 +71,11 @@ import {
   defineComponent,
   ref,
   computed,
-  watch,
-} from '@vue/composition-api';
+} from 'vue';
 import { shuffle } from 'lodash-es';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
@@ -86,13 +89,17 @@ export default defineComponent({
     FixedScreenFooter,
     BtnMain,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
+
     const selectedWordIds = ref<number[]>([]);
     const showNotification = ref<boolean>(false);
     const hasError = ref<boolean>(false);
-    const examplePhrase = ref([root.$t('pages.seedPhrase.first'), root.$t('pages.seedPhrase.second'), '...']);
+    const examplePhrase = ref([t('pages.seedPhrase.first'), t('pages.seedPhrase.second'), '...']);
 
-    const mnemonic = computed((): string => root.$store.state.mnemonic);
+    const mnemonic = computed((): string => store.state.mnemonic);
     const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
 
     function verifyLastStep() {
@@ -102,12 +109,12 @@ export default defineComponent({
       showNotification.value = true;
       hasError.value = mnemonic.value !== mnemonicSelected;
       if (mnemonic.value === mnemonicSelected) {
-        root.$store.commit('setBackedUpSeed');
+        store.commit('setBackedUpSeed');
       }
 
       setTimeout(() => {
         showNotification.value = false;
-        root.$router.push({ name: ROUTE_ACCOUNT });
+        router.push({ name: ROUTE_ACCOUNT });
       }, 3000);
     }
 
@@ -116,11 +123,6 @@ export default defineComponent({
         selectedWordIds.value.push(index);
       }
     }
-
-    watch(() => selectedWordIds.value, () => {
-      showNotification.value = false;
-      hasError.value = false;
-    });
 
     return {
       selectedWordIds,
