@@ -25,7 +25,6 @@
       <AccountCardTotalTokens
         v-if="account.protocol === PROTOCOL_AETERNITY"
         :current-account="account"
-        :selected="selected"
       />
     </template>
   </AccountCardBase>

@@ -13,6 +13,8 @@
       {
         disabled,
         hollow,
+        outlined,
+        selected,
       }
     ]"
     class="btn-base"
@@ -35,20 +37,24 @@ export const BTN_VARIANT = [
 
 export type BtnVariant = typeof BTN_VARIANT[number];
 
-export default defineComponent({
-  props: {
-    to: { type: [Object, String], default: null },
-    href: { type: String, default: null },
-    variant: {
-      type: String,
-      validator: (value: BtnVariant) => BTN_VARIANT.includes(value),
-      default: BTN_VARIANT[0],
-    },
-    bgColor: { type: String, default: null },
-    submit: Boolean,
-    disabled: Boolean,
-    hollow: Boolean,
+export const btnBaseProps = {
+  to: { type: [Object, String], default: null },
+  href: { type: String, default: null },
+  variant: {
+    type: String,
+    validator: (value: BtnVariant) => BTN_VARIANT.includes(value),
+    default: BTN_VARIANT[0],
   },
+  bgColor: { type: String, default: null },
+  submit: Boolean,
+  disabled: Boolean,
+  hollow: Boolean,
+  outlined: Boolean,
+  selected: Boolean,
+};
+
+export default defineComponent({
+  props: btnBaseProps,
   setup(props) {
     const component = computed(() => {
       switch (true) {
@@ -69,10 +75,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables' as *;
+@use '@/styles/variables' as *;
 
 .btn-base {
   --bg-color: #{$color-primary};
+  --outline-size: 0;
+  --outline-opacity: 0;
+  --outline-color: transparent;
 
   position: relative;
   z-index: 1;
@@ -83,16 +92,27 @@ export default defineComponent({
   user-select: none;
   transition: $transition-interactive;
 
-  &::before {
+  &::before,
+  &::after {
     content: '';
     position: absolute;
     z-index: -1;
     inset: 0;
     border-radius: inherit;
-    background-color: var(--screen-bg-color);
     transition: $transition-interactive;
+    will-change: opacity, box-shadow, background-color;
+  }
+
+  // The background layer
+  &::before {
+    background-color: var(--screen-bg-color);
     opacity: 0;
-    will-change: opacity;
+  }
+
+  // The outline layer
+  &::after {
+    opacity: var(--outline-opacity);
+    box-shadow: inset 0 0 0 var(--outline-size) var(--outline-color);
   }
 
   &:hover {
@@ -119,6 +139,30 @@ export default defineComponent({
   &.hollow {
     &:not(:hover) {
       background-color: transparent;
+    }
+  }
+
+  &.outlined {
+    --outline-color: #{$color-white};
+    --outline-size: 1px;
+    --outline-opacity: 0.2;
+
+    &:hover {
+      --outline-opacity: 0.3;
+    }
+
+    &:active {
+      --outline-size: 2px;
+    }
+  }
+
+  &.selected {
+    --outline-color: #{$color-white};
+    --outline-size: 1px;
+    --outline-opacity: 0.2;
+
+    &::before {
+      opacity: 0.6;
     }
   }
 

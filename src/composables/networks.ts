@@ -113,6 +113,7 @@ export function useNetworks() {
   return {
     networks,
     customNetworks,
+    defaultNetworks,
     activeNetwork,
     activeNetworkName,
     switchNetwork,

@@ -1,6 +1,6 @@
 <template>
   <Modal
-    class="aeternity-account-create"
+    class="account-create-modal"
     from-bottom
     has-close-button
     no-padding
@@ -8,13 +8,13 @@
     @close="resolve"
   >
     <div class="content-wrapper">
-      <h2 class="text-heading-2">
+      <h1 class="text-heading-1">
         {{
           isMultisig
             ? $t('modals.createAccount.titleMultisig')
             : $t('modals.createAccount.titleAeternityAccount')
         }}
-      </h2>
+      </h1>
 
       <p class="message">
         {{
@@ -50,10 +50,12 @@ import { defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOL_AETERNITY } from '@/constants';
 import { useConnection, useModals } from '@/composables';
-import BtnSubheader from '../buttons/BtnSubheader.vue';
-import Modal from '../Modal.vue';
-import Loader from '../Loader.vue';
-import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
+
+import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
+import Modal from '@/popup/components/Modal.vue';
+import Loader from '@/popup/components/Loader.vue';
+
+import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -99,9 +101,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/typography';
+@use '@/styles/typography';
 
-.aeternity-account-create {
+.account-create-modal {
   .content-wrapper {
     padding: 0 16px 32px;
   }
