@@ -240,7 +240,7 @@ export default defineComponent({
   color: variables.$color-white;
 
   .title {
-    @extend %face-sans-18-bold;
+    @extend %face-sans-18-medium;
 
     align-self: center;
     color: variables.$color-white;

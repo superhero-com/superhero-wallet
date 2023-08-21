@@ -1,6 +1,6 @@
 <template>
   <div class="account-swiper">
-    <swiper
+    <Swiper
       ref="customSwiper"
       class="swiper"
       :slides-per-view="1.1"
@@ -12,12 +12,13 @@
       <SwiperSlide
         v-for="(address, index) in addressList"
         :key="address"
+        :swiper-ref="customSwiper"
         :virtual-index="index"
         class="account-swiper-slide"
       >
         <AccountSwiperSlide
           :idx="index"
-          :selected="index === activeIdx"
+          :active="index === activeIdx"
           :to="to"
           :address="address"
           @slide="(newIndex) => setCurrentSlide(newIndex)"
@@ -28,7 +29,11 @@
           />
         </AccountSwiperSlide>
       </SwiperSlide>
-      <SwiperSlide class="account-swiper-slide">
+
+      <SwiperSlide
+        class="account-swiper-slide"
+        :swiper-ref="customSwiper"
+      >
         <AccountSwiperSlide
           hide-next
           @slide="() => setCurrentSlide(addressList.length - 1)"
@@ -36,7 +41,8 @@
           <AccountCardAdd :is-multisig="isMultisig" />
         </AccountSwiperSlide>
       </SwiperSlide>
-    </swiper>
+    </Swiper>
+
     <div class="account-swiper-bottom">
       <BulletSwitcher
         v-if="addressList"

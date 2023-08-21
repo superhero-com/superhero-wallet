@@ -1,6 +1,6 @@
 <template>
   <div class="form-select-options-header">
-    <span class="text-heading-4 title">{{ title }}</span>
+    <span class="text-heading-3 text-muted title">{{ title }}</span>
     <InputSearch
       v-if="optionsLength > SHOW_SEARCH_THRESHOLD"
       :value="value"
