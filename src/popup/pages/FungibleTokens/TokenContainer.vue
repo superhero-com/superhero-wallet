@@ -29,7 +29,7 @@
         :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
       />
       <BtnBox
-        v-if="isAe && isNodeMainnet && !IS_IOS"
+        v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
         :text="$t('common.buy')"
         :icon="BuyIcon"
         :href="activeAccountSimplexLink"
@@ -41,7 +41,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-else-if="isNodeMainnet || isNodeTestnet"
+        v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
         :text="$t('common.swap')"
         :icon="SwapIcon"
         :href="DEX_URL"
@@ -233,6 +233,7 @@ export default defineComponent({
       routeName,
       isMultisig,
       IS_IOS,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });
