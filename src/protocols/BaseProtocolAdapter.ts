@@ -21,7 +21,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getDefaultCoin(
     marketData: any,
-    convertedBalance?: number | BigNumber
+    convertedBalance?: number | BigNumber,
   ): ICoin;
 
   /**
@@ -35,7 +35,7 @@ export abstract class BaseProtocolAdapter {
    */
   abstract getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings;
 
-  abstract getBalance(address: string): Promise<string>;
+  abstract fetchBalance(address: string): Promise<string>;
 
   /**
    * Check whether the network has encountered this account.
@@ -50,13 +50,23 @@ export abstract class BaseProtocolAdapter {
    */
   abstract getHdWalletAccountFromMnemonicSeed(
     seed: Uint8Array,
-    accountIndex: number
+    accountIndex: number,
   ): IHdWalletAccount;
 
   /**
    * Discover accounts that have been used in the past
    * @param seed 12 word seed array buffer
-   * @returns Array of used accounts
+   * @returns total number of used accounts
    */
   abstract discoverAccounts(seed: Uint8Array): Promise<number>;
+
+  /**
+   * Spend coin
+   * @param options Protocol specific parameters
+   */
+  abstract spend(
+    amount: number,
+    recipient: string,
+    options: Record<string, any>,
+  ): Promise<{ hash: string }>;
 }

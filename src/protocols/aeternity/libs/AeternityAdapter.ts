@@ -1,6 +1,8 @@
 /* eslint-disable class-methods-use-this */
 import {
+  encode,
   Encoded,
+  Encoding,
   getHdWalletAccountFromSeed,
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
@@ -32,6 +34,7 @@ import {
   AE_SYMBOL,
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
+import { aettosToAe } from '../helpers';
 
 export class AeternityAdapter extends BaseProtocolAdapter {
   protocolName = AE_PROTOCOL_NAME;
@@ -105,11 +108,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return AE_NETWORK_DEFAULT_SETTINGS[networkType] as any;
   }
 
-  override async getBalance(address: Encoded.AccountAddress): Promise<string> {
+  override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
     const store = useStore();
     const { getAeSdk } = useAeSdk({ store });
     const sdk = await getAeSdk();
-    return sdk.getBalance(address);
+    const balanceInAettos = await sdk.getBalance(address);
+    return aettosToAe(balanceInAettos);
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
@@ -141,5 +145,19 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       }
     }
     return lastNotEmptyIdx;
+  }
+
+  override async spend(
+    amount: number,
+    recipient: string,
+    options: { payload: string },
+  ): Promise<{ hash: string }> {
+    const store = useStore();
+    const { getAeSdk } = useAeSdk({ store });
+    const aeSdk = await getAeSdk();
+    return aeSdk.spendWithCustomOptions(amount, recipient as any, {
+      payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
+      modal: false,
+    });
   }
 }
