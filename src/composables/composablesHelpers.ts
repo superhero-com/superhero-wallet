@@ -6,11 +6,8 @@ import {
   ref,
   watch,
 } from 'vue';
-import {
-  excludeFalsy,
-  getLocalStorageItem,
-  setLocalStorageItem,
-} from '@/utils';
+import { excludeFalsy } from '@/utils';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { useConnection } from './connection';
 import { useUi } from './ui';
 
@@ -25,8 +22,8 @@ interface ICreateStorageRefOptions<T> {
 }
 
 /**
- * Create a Vue ref with value synced in the Browser's storage
- * and scoped to active network.
+ * Create a Vue ref with value synced in the Browser's storage.
+ * Also allows to sync the state between the app and the extension background.
  * Inspired by `useStorage`: https://vueuse.org/core/useStorage/
  */
 export function useStorageRef<T = string | object | any[]>(
@@ -39,15 +36,25 @@ export function useStorageRef<T = string | object | any[]>(
   const storageKeys: string[] = [...Array.isArray(keys) ? keys : [keys]].filter(excludeFalsy);
 
   watch(state, (val) => {
-    setLocalStorageItem(storageKeys, serializer?.write(val) || val);
+    WalletStorage.set(storageKeys, serializer?.write(val) || val);
   }, { deep: true });
 
+  /**
+   * Whenever the app saves the state to browser storage the extension background picks this
+   * and synchronizes own state with the change.
+   */
+  WalletStorage.watch?.(keys, (val) => {
+    state.value = serializer?.read?.(val) || val;
+  });
+
   if (!isRestored) {
-    const restoredValue = getLocalStorageItem<T | null>(storageKeys);
-    state.value = (restoredValue)
-      ? serializer?.read(restoredValue) || restoredValue
-      : initialState;
-    isRestored = true;
+    (async () => {
+      const restoredValue = await WalletStorage.get<T | null>(storageKeys);
+      state.value = (restoredValue)
+        ? serializer?.read?.(restoredValue) || restoredValue
+        : initialState;
+      isRestored = true;
+    })();
   }
 
   return state;

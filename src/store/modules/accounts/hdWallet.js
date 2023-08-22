@@ -86,16 +86,18 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', { data });
     },
-    async signTransaction(context, {
+    async signTransaction({ dispatch, rootState, rootGetters }, {
       txBase64,
       options: { modal = true, app = null },
     }) {
-      const { nodeNetworkId } = useAeSdk({ store: context });
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await context.dispatch('confirmTxSigning', { txBase64, app });
+        await dispatch('confirmTxSigning', { txBase64, app });
       }
-      const signature = await context.dispatch(
+      const signature = await dispatch(
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
@@ -106,16 +108,18 @@ export default {
       );
       return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
-    async signTransactionFromAccount(context, {
+    async signTransactionFromAccount({ dispatch, rootState, rootGetters }, {
       txBase64,
       options: { modal = true, app = null, fromAccount },
     }) {
-      const { nodeNetworkId } = useAeSdk({ store: context });
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await context.dispatch('confirmTxSigning', { txBase64, app });
+        await dispatch('confirmTxSigning', { txBase64, app });
       }
-      const signature = await context.dispatch(
+      const signature = await dispatch(
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
