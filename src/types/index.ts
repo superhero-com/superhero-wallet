@@ -639,3 +639,5 @@ export interface TransferFormModel extends IFormModel {
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
+
+export type StorageKeysInput = string | string[];

@@ -15,6 +15,7 @@ import type {
   IDashboardTransaction,
   IPageableResponse,
   IRequestInitBodyParsed,
+  StorageKeysInput,
   Truthy,
 } from '@/types';
 import {
@@ -82,6 +83,16 @@ export function checkImageAvailability(url: string): Promise<boolean> {
 
 export function compareCaseInsensitive(str1?: string, str2?: string) {
   return str1?.toLocaleLowerCase() === str2?.toLocaleLowerCase();
+}
+
+/**
+ * Prefix all the storage keys and build the key string.
+ */
+export function composeStorageKeys(keys: StorageKeysInput): string {
+  return [
+    LOCAL_STORAGE_PREFIX,
+    ...Array.isArray(keys) ? keys : [keys],
+  ].join('_');
 }
 
 export function errorHasValidationKey(error: any, expectedKey: string): boolean {
