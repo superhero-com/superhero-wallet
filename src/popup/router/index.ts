@@ -32,12 +32,6 @@ import {
   ROUTE_INDEX,
   ROUTE_NOT_FOUND,
 } from './routeNames';
-import { routes } from './routes';
-import getPopupProps from '../utils/getPopupProps';
-import store from '../../store';
-import initSdk from '../../lib/wallet';
-import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
-import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
