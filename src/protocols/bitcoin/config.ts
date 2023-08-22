@@ -9,9 +9,9 @@ export const BTC_COINGECKO_COIN_ID = 'bitcoin';
 
 export const BTC_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://mainnet.btc.dev', // TODO
+    nodeUrl: 'https://blockstream.info/api',
   },
   [NETWORK_TYPE_TESTNET]: {
-    nodeUrl: 'https://testnet.btc.dev', // TODO
+    nodeUrl: 'https://blockstream.info/testnet/api',
   },
 };

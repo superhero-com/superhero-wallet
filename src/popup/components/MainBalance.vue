@@ -13,6 +13,7 @@ import {
   PropType,
 } from 'vue';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
 import { Protocol } from '../../types';
 
 export default defineComponent({
@@ -21,8 +22,12 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
+    const fractionPosition = {
+      [PROTOCOL_AETERNITY]: 2,
+      [PROTOCOL_BITCOIN]: 8,
+    };
     const balanceParts = computed(() => {
-      const [integer, fraction] = props.balance.toFixed(2).split('.');
+      const [integer, fraction] = props.balance.toFixed(fractionPosition[props.protocol]).split('.');
       return {
         integer: Number(integer).toLocaleString(),
         fraction,

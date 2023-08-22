@@ -32,16 +32,19 @@ import {
   PropType,
   ref,
 } from 'vue';
+import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { useModals } from '@/composables';
+import { useAccounts, useModals } from '@/composables';
 import type { TransferFormModel } from '@/types';
 import { toShiftedBigNumber } from '@/utils';
 import { PROTOCOL_BITCOIN } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import { BTC_SYMBOL, BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import BigNumber from 'bignumber.js';
 
 export default defineComponent({
   name: 'BtcTransferReview',
@@ -61,9 +64,12 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
-    const loading = ref<boolean>(false);
-
     const { openDefaultModal } = useModals();
+
+    const store = useStore();
+    const { activeAccount } = useAccounts({ store });
+
+    const loading = ref<boolean>(false);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function openTransactionFailedModal() {
@@ -75,9 +81,14 @@ export default defineComponent({
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function transfer({ amount, recipient, selectedAsset }: any) {
+      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
       try {
         loading.value = true;
-        // TODO - implement transfer method
+        const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
+          fee: 400, // TODO: Calculate Fee
+          ...activeAccount.value,
+        });
+        return hash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
