@@ -70,7 +70,7 @@ export default defineComponent({
   }
 
   .title {
-    @extend %face-sans-22-bold;
+    @extend %face-sans-22-semi-bold;
 
     margin-top: 16px;
   }

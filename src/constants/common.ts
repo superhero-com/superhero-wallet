@@ -379,3 +379,5 @@ export const TRANSFER_SEND_STEPS = {
   review: 'review',
   reviewTip: 'tip',
 } as const;
+
+export const DEFAULT_LOCALE = 'en-US';
