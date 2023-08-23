@@ -63,10 +63,10 @@ import { useModals } from '@/composables';
 import type { RejectCallback, ResolveCallback } from '../../../types';
 import { validateSeedLength, MODAL_READ_QR_CODE } from '../../utils';
 
-import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../form/FormTextarea.vue';
+import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -122,10 +122,9 @@ export default defineComponent({
         icon: 'critical',
       });
 
-      if (!scanResult) {
-        return;
+      if (scanResult) {
+        mnemonic.value = scanResult;
       }
-      mnemonic.value = scanResult;
     }
 
     return {
