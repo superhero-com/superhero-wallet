@@ -1,7 +1,10 @@
 <template>
   <TransferReceiveBase
     v-bind="$attrs"
-    :heading="isMultisig ? $t('modals.receiveMultisig.title') : $t('modals.receive.title')"
+    :heading="(isMultisig)
+      ? $t('modals.receiveMultisig.title')
+      : $t('modals.receive.title', { name: $t('modals.receive.funds') })
+    "
     :account-address="activeAccountAddress"
     :account-name="activeAccountName"
     :tokens="availableTokens"
