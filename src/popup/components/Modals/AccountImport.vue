@@ -118,11 +118,13 @@ export default defineComponent({
 
     async function openScanQrModal() {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: t('pages.send.scanAddress'),
+        title: t('pages.index.scanSeedPhrase'),
         icon: 'critical',
       });
 
-      if (!scanResult) return;
+      if (!scanResult) {
+        return;
+      }
       mnemonic.value = scanResult;
     }
 
