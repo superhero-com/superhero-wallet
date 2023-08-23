@@ -136,7 +136,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return lastNotEmptyIdx;
   }
 
-  async spend(
+  async constructAndSignTx(
     amount: number,
     recipient: string,
     options: {
@@ -145,7 +145,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: Buffer,
       secretKey: Buffer,
     },
-  ): Promise<{ hash: string } > {
+  ): Promise<any> {
     const { activeNetwork } = useNetworks();
 
     const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
@@ -182,7 +182,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       },
     );
 
-    if (amount + options.fee > totalBalance) {
+    if (amount + toSatoshi(options.fee) > totalBalance) {
       throw new Error('Insufficient balance');
     }
 
@@ -192,11 +192,28 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     });
     psbt.addOutput({
       address: options.address,
-      value: totalBalance - amountInSathoshi - options.fee,
+      value: totalBalance - amountInSathoshi - toSatoshi(options.fee),
     });
     await psbt.signAllInputs(new BitcoinTransactionSigner(options.secretKey, options.publicKey));
     await psbt.finalizeAllInputs();
-    const rawTx = psbt.extractTransaction().toHex();
+    const rawTx = psbt.extractTransaction();
+    return rawTx;
+  }
+
+  async spend(
+    amount: number,
+    recipient: string,
+    options: {
+      address: string,
+      fee: number,
+      publicKey: Buffer,
+      secretKey: Buffer,
+    },
+  ): Promise<{ hash: string }> {
+    const { activeNetwork } = useNetworks();
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+
+    const rawTx = (await this.constructAndSignTx(amount, recipient, options)).toHex();
 
     const requestOptions = {
       method: 'POST',

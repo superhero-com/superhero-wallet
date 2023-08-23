@@ -147,6 +147,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return lastNotEmptyIdx;
   }
 
+  async constructAndSignTx() {
+    // TODO
+  }
+
   override async spend(
     amount: number,
     recipient: string,

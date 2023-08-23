@@ -12,7 +12,10 @@
         </p>
       </RadioButton>
     </div>
-    <p class="completion-time">
+    <p
+      v-if="UNFINISHED_FEATURES"
+      class="completion-time"
+    >
       {{
         $t('modals.send.transactionWillBeCompleted', {
           time: secondsToRelativeTime(feeList[selectedIndex].time, true)
@@ -25,9 +28,9 @@
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
   PropType,
   ref,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -60,15 +63,20 @@ export default defineComponent({
       emit('changeFee', props.feeList[index].fee);
     }
 
-    onMounted(() => {
-      emit('changeFee', props.feeList[selectedIndex.value].fee);
-    });
+    watch(
+      () => props.feeList,
+      () => {
+        emit('changeFee', props.feeList[selectedIndex.value].fee);
+      },
+      { immediate: true },
+    );
 
     return {
       labels,
       selectedIndex,
       secondsToRelativeTime,
       handleInput,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });
