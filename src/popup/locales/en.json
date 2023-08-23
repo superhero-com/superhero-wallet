@@ -314,7 +314,8 @@
       "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
     "receive": {
-      "title": "Receive funds to public address",
+      "funds": "funds",
+      "title": "Receive {name} to public address",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
       "share": "Share",
