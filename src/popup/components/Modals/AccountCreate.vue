@@ -17,26 +17,12 @@
       </p>
 
       <BtnSubheader
-        :header="$t('common.aeternity')"
-        :subheader="$t('modals.createAccount.btnAeSubtitle')"
-        :icon="iconAe"
-        @click="createAeAccount"
-      />
-      <BtnSubheader
-        :header="$t('common.bitcoin')"
-        :subheader="$t('modals.createAccount.btnBtcSubtitle')"
-        :icon="iconBtc"
-        :disabled="!isOnline"
-        @click="createBtcAccount"
-      />
-      <!-- TODO Remove v-if, when dogecoin will supported -->
-      <BtnSubheader
-        v-if="false"
-        :header="$t('common.dogecoin')"
-        :subheader="$t('modals.createAccount.btnDogeSubtitle')"
-        :icon="iconDoge"
-        :disabled="!isOnline"
-        @click="createDogeAccount"
+        v-for="protocol in PROTOCOLS"
+        :key="protocol"
+        :header="getProtocolName(protocol)"
+        :subheader="$t('modals.createAccount.addProtocolAccount', { name: protocol })"
+        :protocol-icon="protocol"
+        @click="createAccount(protocol)"
       />
     </div>
 
@@ -46,19 +32,20 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
+import { useStore } from 'vuex';
+import type { Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
+  PROTOCOLS,
 } from '@/constants';
 import { useConnection, useModals } from '@/composables';
-import { useStore } from 'vuex';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
 import Loader from '@/popup/components/Loader.vue';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
-import iconAe from '../../../icons/coin/aeternity.svg?vue-component';
-import iconBtc from '../../../icons/coin/bitcoin.svg?vue-component';
-import iconDoge from '../../../icons/coin/dogecoin.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -67,7 +54,7 @@ export default defineComponent({
     BtnSubheader,
   },
   props: {
-    resolve: { type: Function as PropType<() => void>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
     const store = useStore();
@@ -75,43 +62,47 @@ export default defineComponent({
     const { openModal } = useModals();
     const loading = ref(false);
 
-    async function createAeAccount() {
-      await openModal(MODAL_AE_ACCOUNT_CREATE);
-      props.resolve();
-    }
-
-    async function createBtcAccount() {
+    async function createAccount(protocol: Protocol) {
       loading.value = true;
-      await store.dispatch('accounts/hdWallet/create', {
-        isRestored: false,
-        protocol: PROTOCOL_BITCOIN,
-      });
+
+      // TODO each of the blocks of this switch should be moved to the specific adapter
+      switch (protocol) {
+        case PROTOCOL_AETERNITY:
+          await openModal(MODAL_AE_ACCOUNT_CREATE);
+          break;
+
+        case PROTOCOL_BITCOIN:
+          await store.dispatch('accounts/hdWallet/create', {
+            isRestored: false,
+            protocol: PROTOCOL_BITCOIN,
+          });
+          break;
+
+        default:
+      }
       loading.value = false;
       props.resolve();
     }
 
-    async function createDogeAccount() {
-      props.resolve();
+    function getProtocolName(protocol: Protocol) {
+      return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
     return {
+      PROTOCOLS,
       PROTOCOL_AETERNITY,
       PROTOCOL_BITCOIN,
       isOnline,
-      iconAe,
-      iconBtc,
-      iconDoge,
       loading,
-      createAeAccount,
-      createBtcAccount,
-      createDogeAccount,
+      createAccount,
+      getProtocolName,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/typography';
+@use '@/styles/typography';
 
 .account-create {
   .content-wrapper {

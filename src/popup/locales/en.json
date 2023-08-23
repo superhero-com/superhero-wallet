@@ -44,9 +44,6 @@
     "you": "You",
     "verifying": "Verifying",
     "max": "MAX",
-    "aeternity": "æternity",
-    "bitcoin": "Bitcoin",
-    "dogecoin": "Dogecoin",
     "transferSpeed": {
       "fast": "Fast",
       "medium": "Medium",
@@ -131,9 +128,7 @@
       "msgMultisig": "Generate new multisig account address and add it to your wallet.",
       "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
       "btnSubtitle": "Derive another account from your seed",
-      "btnAeSubtitle": "Add æternity account",
-      "btnBtcSubtitle": "Add Bitcoin account",
-      "btnDogeSubtitle": "Add Dogecoin account"
+      "addProtocolAccount": "Add {name} account"
     },
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."
@@ -326,13 +321,13 @@
     },
     "send": {
       "sendTitle": "Send funds",
-      "sendBtc": "Send Bitcoin",
+      "sendAsset": "Send {name}",
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
-      "recipientPlaceholderBtc": "Enter Bitcoin public address",
+      "recipientPlaceholderProtocol": "Enter {name} public address",
       "transactionSpeed": "Transaction speed",
       "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
       "payload": "Payload"
@@ -512,8 +507,6 @@
     },
     "accounts": {
       "addAccount": "Add account",
-      "addAeternityAccount": "Add Aeternity account",
-      "addBitcoinAccount": "Add Bitcoin account",
       "searchAccountsPlaceholder": "Search for account",
       "addAccountDescription": "Add an account to your wallet to manage funds separately."
     },
