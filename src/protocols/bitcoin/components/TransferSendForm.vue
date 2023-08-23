@@ -9,12 +9,13 @@
     class="transfer-send-form"
   >
     <template #recipient>
-      <!--      TODO - set validation rules -->
       <TransferSendRecipient
         v-model.trim="formModel.address"
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
         :errors="errors"
-        :validation-rules="{}"
+        :validation-rules="{
+          name_registered_address: false,
+        }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -65,12 +66,17 @@ import {
   computed,
   defineComponent,
   nextTick,
+  onMounted,
+  onUnmounted,
   PropType,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
+import { toBitcoin } from 'satoshi-bitcoin';
+
+import { useNetworks } from '@/composables/networks';
 import {
   useAccounts,
   useBalances,
@@ -82,6 +88,7 @@ import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { PROTOCOL_BITCOIN } from '@/constants';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -92,6 +99,7 @@ import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vu
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
+import { fetchJson } from '@/utils';
 
 export default defineComponent({
   name: 'BtcTransferSendForm',
@@ -133,13 +141,12 @@ export default defineComponent({
       transferData: props.transferData,
     });
 
-    // TODO - fee set proper values
     const fee = ref(new BigNumber(0));
-    const feeList = [
-      { fee: new BigNumber(0.1), time: 3540 },
-      { fee: new BigNumber(0.2), time: 600 },
-      { fee: new BigNumber(0.3), time: 25 },
-    ];
+    const feeList = ref([
+      { fee: new BigNumber(0.00002), time: 3540 },
+      { fee: new BigNumber(0.00004), time: 600 },
+      { fee: new BigNumber(0.00005), time: 25 },
+    ]);
 
     const numericFee = computed(() => +fee.value.toFixed());
 
@@ -166,6 +173,54 @@ export default defineComponent({
         emit('success');
       }
     }
+
+    async function updateFeeList() {
+      const { activeNetwork } = useNetworks();
+      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+      const byteSize = (await bitcoinAdapter.constructAndSignTx(
+        +balance.value,
+        formModel.value.address! || activeAccount.value.address,
+        {
+          fee: 0,
+          ...activeAccount.value,
+        },
+      )).virtualSize();
+      const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+
+      const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
+      const feeStepFactor = new BigNumber(0.5);
+      const mediumFee = new BigNumber(Math.ceil(feeRate * byteSize));
+
+      feeList.value = [
+        {
+          fee: new BigNumber(toBitcoin(Math.ceil(mediumFee.minus(
+            mediumFee.times(feeStepFactor),
+          ).toNumber()))),
+          time: 3540,
+        },
+        { fee: new BigNumber(toBitcoin(mediumFee.toNumber())), time: 600 },
+        {
+          fee: new BigNumber(toBitcoin(Math.ceil(mediumFee.plus(
+            mediumFee.times(feeStepFactor),
+          ).toNumber()))),
+          time: 25,
+        },
+      ];
+    }
+
+    let polling: NodeJS.Timer | null = null;
+
+    onMounted(() => {
+      polling = setInterval(() => {
+        updateFeeList();
+      }, 5000);
+    });
+
+    onUnmounted(() => {
+      if (polling) {
+        clearInterval(polling);
+      }
+    });
 
     watch(
       hasError,

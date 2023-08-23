@@ -62,6 +62,12 @@ export abstract class BaseProtocolAdapter {
    */
   abstract discoverAccounts(seed: Uint8Array): Promise<number>;
 
+  abstract constructAndSignTx(
+    amount: number,
+    recipient: string,
+    options: Record<string, any>,
+  ): Promise<any>;
+
   /**
    * Spend coin
    * @param options Protocol specific parameters

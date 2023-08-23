@@ -58,8 +58,6 @@ export default defineComponent({
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
-    recipientAddress: { type: String, default: null },
-    amount: { type: Number, default: null },
   },
   setup(props) {
     const { t } = useI18n();
@@ -85,7 +83,7 @@ export default defineComponent({
       try {
         loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: 400, // TODO: Calculate Fee
+          fee: props.transferData.fee,
           ...activeAccount.value,
         });
         return hash;
