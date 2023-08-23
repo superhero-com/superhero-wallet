@@ -60,6 +60,7 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: $transition-interactive;
 
   .icon-wrapper-icon {
