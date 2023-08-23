@@ -48,7 +48,11 @@ import type {
   ITransactionsState,
   ITx,
 } from '@/types';
-import { TX_DIRECTION, TXS_PER_PAGE } from '@/constants';
+import {
+  PROTOCOL_AETERNITY,
+  TX_DIRECTION,
+  TXS_PER_PAGE,
+} from '@/constants';
 import {
   includesCaseInsensitive,
   pipe,
@@ -221,11 +225,15 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions({
-          limit: TXS_PER_PAGE,
-          recent,
-          address: currentAddress.value,
-        });
+        // TODO - remove that after rebasing with develop branch,
+        // and add logic to adapter in composable file.
+        if (activeAccount.value.protocol === PROTOCOL_AETERNITY) {
+          await fetchTransactions({
+            limit: TXS_PER_PAGE,
+            recent,
+            address: currentAddress.value,
+          });
+        }
       } finally {
         loading.value = false;
       }

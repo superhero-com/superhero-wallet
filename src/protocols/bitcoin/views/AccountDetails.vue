@@ -1,43 +1,30 @@
 <template>
-  <AccountDetailsBase class="account-details">
-    <template #balance>
-      <div class="text-center">
-        <h3>BTC</h3>
-        <p>This is a temporary component that uses the account base boilerplate.</p>
-      </div>
-    </template>
-
-    <template #buttons>
-      <BtnBox
-        text="Example button 1"
-      />
-      <BtnBox
-        text="Example button 2"
-      />
-    </template>
-
-    <template #navigation>
-      <!-- Create BTC navigation component and insert it here -->
-    </template>
-  </AccountDetailsBase>
+  <AccountDetailsBase class="account-details" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
-
+import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '@/popup/router/routeNames';
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
-import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
   components: {
     AccountDetailsBase,
-    BtnBox,
   },
+
   setup() {
-    return {
-    };
+    const route = useRoute();
+    const router = useRouter();
+
+    (() => {
+      // BTC have only one view (transaction list) in ACCOUNT DETAILS
+      if (route.name !== ROUTE_ACCOUNT_DETAILS_TRANSACTIONS) {
+        router.push({ name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS });
+      }
+    })();
   },
 });
 </script>
