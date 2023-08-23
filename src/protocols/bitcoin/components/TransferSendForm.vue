@@ -21,26 +21,26 @@
     </template>
 
     <template #amount>
-      <!--      TODO - set validation rules -->
       <TransferSendAmount
         v-model="formModel.amount"
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         readonly
         :protocol="PROTOCOL_BITCOIN"
-        :validation-rules="{}"
+        :validation-rules="{
+          max_value: max.toString(),
+        }"
         @asset-selected="handleAssetChange"
       >
-        <!--    TODO - set max amount for BTC -->
-        <!--        <template #label-after>-->
-        <!--          <BtnPlain-->
-        <!--            class="max-button"-->
-        <!--            :class="{ chosen: isMaxValue }"-->
-        <!--            @click="setMaxValue"-->
-        <!--          >-->
-        <!--            {{ $t('common.max') }}-->
-        <!--          </BtnPlain>-->
-        <!--        </template>-->
+        <template #label-after>
+          <BtnPlain
+            class="max-button"
+            :class="{ chosen: formModel.amount.toString() === max.toString() }"
+            @click="formModel.amount = max"
+          >
+            {{ $t('common.max') }}
+          </BtnPlain>
+        </template>
       </TransferSendAmount>
     </template>
 
@@ -149,6 +149,7 @@ export default defineComponent({
     ]);
 
     const numericFee = computed(() => +fee.value.toFixed());
+    const max = computed(() => balance.value.minus(fee.value));
 
     function setFee(value: BigNumber) {
       fee.value = value;
@@ -250,6 +251,7 @@ export default defineComponent({
       feeList,
       errors,
       balance,
+      max,
       clearPayload,
       openScanQrModal,
       handleAssetChange,
