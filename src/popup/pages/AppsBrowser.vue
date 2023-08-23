@@ -81,6 +81,7 @@ import {
   onUnmounted,
   onMounted,
   ref,
+  h,
 } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
@@ -95,8 +96,20 @@ import AppsBrowserListItem from '../components/AppsBrowserListItem.vue';
 import CloseIcon from '../../icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
 import GraffitiIcon from '../../icons/dapp/graffiti.svg?vue-component';
-import DEXIcon from '../../icons/dapp/SuperheroDEX.svg?vue-component';
-import SuperheroIcon from '../../icons/dapp/superhero.svg?vue-component';
+import SuperheroLogo from '../../icons/logo-small.svg?vue-component';
+
+const SuperheroIcon = h(
+  SuperheroLogo,
+  {
+    style: { color: '#1161fe' },
+  },
+);
+const DEXIcon = h(
+  SuperheroLogo,
+  {
+    style: { color: '#00FF9D' },
+  },
+);
 
 export default defineComponent({
   components: {

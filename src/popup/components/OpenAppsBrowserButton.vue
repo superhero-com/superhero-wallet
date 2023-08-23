@@ -37,3 +37,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.apps-browser {
+  opacity: 0.75;
+}
+</style>

@@ -72,6 +72,7 @@ export default {
 
   .card-icon {
     margin-right: 16px;
+    opacity: 0.85;
   }
 
   &-content {
