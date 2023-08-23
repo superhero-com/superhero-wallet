@@ -1,24 +1,6 @@
 <template>
   <AccountDetailsBase class="account-details">
-    <template #account-info>
-      <AccountInfo
-        :address="activeAccount.address"
-        :name="activeAccount.name"
-        :idx="activeAccount.idx"
-        can-copy-address
-      />
-    </template>
-
-    <template #balance>
-      <BalanceInfo
-        :balance="balanceNumeric"
-        horizontal-offline-message
-      />
-    </template>
-
     <template #buttons>
-      <OpenTransferReceiveModalButton />
-      <OpenTransferSendModalButton />
       <BtnBox
         v-if="isNodeMainnet && UNFINISHED_FEATURES"
         :icon="CreditCardIcon"
@@ -48,23 +30,18 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import {
   useAccounts,
-  useBalances,
   useConnection,
   useAeSdk,
 } from '@/composables';
 import { AE_DEX_URL } from '@/protocols/aeternity/config';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
-import AccountInfo from '@/popup/components/AccountInfo.vue';
-import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
-import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
 import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 
 import CreditCardIcon from '@/icons/credit-card.svg?vue-component';
@@ -75,11 +52,7 @@ export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
   components: {
     BtnBox,
-    OpenTransferSendModalButton,
-    OpenTransferReceiveModalButton,
     AccountDetailsNavigation,
-    BalanceInfo,
-    AccountInfo,
     AccountDetailsBase,
   },
   setup() {
@@ -94,10 +67,6 @@ export default defineComponent({
       activeAccountFaucetUrl,
     } = useAccounts({ store });
 
-    const { balance } = useBalances({ store });
-
-    const balanceNumeric = computed(() => balance.value.toNumber());
-
     return {
       CreditCardIcon,
       SwapIcon,
@@ -107,7 +76,6 @@ export default defineComponent({
       isOnline,
       isNodeMainnet,
       isNodeTestnet,
-      balanceNumeric,
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
