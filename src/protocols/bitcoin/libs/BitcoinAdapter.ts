@@ -49,6 +49,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  override getAmountPrecision(): number {
+    return BTC_COIN_PRECISION;
+  }
+
   override getCoinSymbol() {
     return BTC_SYMBOL;
   }
