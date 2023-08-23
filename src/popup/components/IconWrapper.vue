@@ -10,6 +10,7 @@
       :is="icon"
       v-if="icon"
       class="icon-wrapper-icon"
+      :class="{'icon-wrapper-fill': isFull}"
     />
     <ProtocolIcon
       v-else-if="protocolIcon"
@@ -43,6 +44,7 @@ export default defineComponent({
   },
   props: {
     icon: { type: Object as PropType<Component>, default: null },
+    isFull: { type: Boolean, default: false },
     isBoxed: Boolean,
     iconSize: iconSizeProp,
     protocolIcon: protocolIconProp,
@@ -67,6 +69,11 @@ export default defineComponent({
     width: var(--icon-size);
     height: var(--icon-size);
     color: inherit;
+  }
+
+  .icon-wrapper-fill {
+    width: 100%;
+    height: 100%;
   }
 
   &.is-boxed {

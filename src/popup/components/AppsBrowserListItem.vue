@@ -4,6 +4,7 @@
       v-if="appIcon"
       :icon="appIcon"
       class="app-image"
+      :is-full="true"
       is-boxed
     />
     <div
@@ -73,10 +74,5 @@ export default defineComponent({
     color: $color-white;
     opacity: 0.75;
   }
-}
-
-:deep(.icon-wrapper .icon-wrapper-icon) {
-  width: 100%;
-  height: 100%;
 }
 </style>
