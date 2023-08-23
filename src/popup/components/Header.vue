@@ -47,7 +47,7 @@
         <NetworkButton />
 
         <template v-if="isLoggedIn">
-          <OpenAppsBrowserButton />
+          <AppsBrowserBtn />
 
           <NotificationsIcon />
 
@@ -84,12 +84,12 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
-import OpenAppsBrowserButton from './OpenAppsBrowserButton.vue';
+import AppsBrowserBtn from './AppsBrowserBtn.vue';
 
 export default defineComponent({
   components: {
     NetworkButton,
-    OpenAppsBrowserButton,
+    AppsBrowserBtn,
     NotificationsIcon,
     BtnClose,
     BtnPlain,

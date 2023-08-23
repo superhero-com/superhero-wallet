@@ -78,7 +78,7 @@ export default defineComponent({
   props: {
     modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
-    avatarOnly: { type: Boolean, default: false },
+    avatarOnly: Boolean,
   },
   emits: ['update:modelValue'],
   setup() {

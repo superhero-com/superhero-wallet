@@ -19,11 +19,12 @@
           tag="span"
           scope="global"
         >
-          <a
-            @click="goToTerms"
+          <RouterLink
+            :to="{ name: ROUTE_TERMS }"
+            @click="reject()"
           >
             {{ $t('pages.titles.terms') }}
-          </a>
+          </RouterLink>
         </i18n-t>
         <span>{{ $t('pages.warningDappBrowser.warning2') }}</span>
       </div>
@@ -47,13 +48,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useRouter } from 'vue-router';
-import type { RejectCallback, ResolveCallback } from '../../../types';
-import Modal from '../Modal.vue';
-import BtnMain from '../buttons/BtnMain.vue';
-import IconBoxed from '../IconBoxed.vue';
-import WarningIcon from '../../../icons/warning.svg?vue-component';
-import { ROUTE_TERMS } from '../../router/routeNames';
+import type { RejectCallback, ResolveCallback } from '@/types';
+import { ROUTE_TERMS } from '@/popup/router/routeNames';
+import Modal from '@/popup/components/Modal.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import IconBoxed from '@/popup/components/IconBoxed.vue';
+import WarningIcon from '@/icons/warning.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -66,19 +66,13 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const router = useRouter();
-
     function confirm() {
       props.resolve();
     }
-    function goToTerms() {
-      props.reject();
-      router.push({ name: ROUTE_TERMS });
-    }
 
     return {
-      goToTerms,
       WarningIcon,
+      ROUTE_TERMS,
       confirm,
     };
   },

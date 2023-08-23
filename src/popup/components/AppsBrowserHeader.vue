@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="apps-browser-header"
-  >
+  <div class="apps-browser-header">
     <div
       v-if="selectedApp"
       class="left"
@@ -21,9 +19,7 @@
       />
     </div>
 
-    <div
-      class="title"
-    >
+    <div class="title">
       <Truncate
         v-if="!selectedApp"
         :str="$t('pages.titles.appsBrowser')"
@@ -66,25 +62,24 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { PROTOCOL_AETERNITY, MODAL_BOWSER_ACTIONS_DAPP, BROWSER_ACTIONS } from '@/constants';
-
-import {
-  ROUTE_ACCOUNT,
-  ROUTE_INDEX,
-  ROUTE_MORE,
-} from '../router/routeNames';
 import {
   useAccounts,
   useUi,
   useModals,
-} from '../../composables';
-import AccountSelector from './AccountSelector.vue';
-import Truncate from './Truncate.vue';
-import BtnIcon from './buttons/BtnIcon.vue';
-import BtnClose from './buttons/BtnClose.vue';
+} from '@/composables';
+import {
+  ROUTE_ACCOUNT,
+  ROUTE_INDEX,
+  ROUTE_MORE,
+} from '@/popup/router/routeNames';
+import AccountSelector from '@/popup/components/AccountSelector.vue';
+import Truncate from '@/popup/components/Truncate.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
+import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 
-import SecureIcon from '../../icons/secure-lock.svg?vue-component';
-import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
-import BackIcon from '../../icons/chevron.svg?vue-component';
+import SecureIcon from '@/icons/secure-lock.svg?vue-component';
+import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
+import BackIcon from '@/icons/chevron.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -95,14 +90,8 @@ export default defineComponent({
     AccountSelector,
   },
   props: {
-    selectedApp: {
-      type: Object,
-      required: true,
-    },
-    iFrame: {
-      type: Object,
-      required: true,
-    },
+    selectedApp: { type: Object, required: true },
+    iFrame: { type: Object, required: true },
   },
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
