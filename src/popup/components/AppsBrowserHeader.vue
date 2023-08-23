@@ -65,7 +65,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
-import { PROTOCOL_AETERNITY, MODAL_BOWSER_ACTIONS_DAPP } from '@/constants';
+import { PROTOCOL_AETERNITY, MODAL_BOWSER_ACTIONS_DAPP, BROWSER_ACTIONS } from '@/constants';
 
 import {
   ROUTE_ACCOUNT,
@@ -155,7 +155,7 @@ export default defineComponent({
           selectedApp: props.selectedApp,
         })
         .then((value) => {
-          if (value?.action === 'refresh') {
+          if (value?.action === BROWSER_ACTIONS.refresh) {
             emit('refresh');
           }
         }, () => {});

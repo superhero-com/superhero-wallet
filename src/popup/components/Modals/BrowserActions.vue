@@ -13,7 +13,6 @@
         :icon="RefreshIcon"
         @click="refreshIframeContent"
       />
-      <!-- TODO: define share action -->
       <BrowserActionItem
         v-if="false"
         :title="$t('dappActionBrowser.bookmark.title')"
@@ -31,19 +30,18 @@
     <template #footer>
       <BtnMain
         variant="muted"
+        :text="$t('common.cancel')"
         @click="reject"
-      >
-        {{ $t('common.cancel') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { IS_MOBILE_DEVICE } from '@/constants';
+import { BROWSER_ACTIONS, IS_MOBILE_DEVICE } from '@/constants';
+import { invokeDeviceShare } from '@/utils';
 import RefreshIcon from '@/icons/dapp/dapp-refresh.svg?vue-component';
 import ShareIcon from '@/icons/dapp/dapp-share.svg?vue-component';
 import FavoriteIcon from '@/icons/dapp/dapp-favorite.svg?vue-component';
@@ -64,14 +62,12 @@ export default defineComponent({
     iFrame: { type: Object, required: true },
   },
   setup(props) {
-    const store = useStore();
-
     async function refreshIframeContent() {
-      await props.resolve({ action: 'refresh' });
+      props.resolve({ action: BROWSER_ACTIONS.refresh });
     }
     async function shareIframeContent() {
-      await store.dispatch('share', { text: props.selectedApp.url });
-      await props.resolve({ action: 'share' });
+      await invokeDeviceShare(props.selectedApp.url);
+      props.resolve();
     }
 
     // TODO: bookmark function

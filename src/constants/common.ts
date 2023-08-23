@@ -386,3 +386,12 @@ export const TRANSFER_SEND_STEPS = {
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';
+
+/**
+ * @description List of all possible actions through the in-app browser.
+ */
+export const BROWSER_ACTIONS = {
+  refresh: 'refresh',
+  share: 'share',
+  favourite: 'favourite',
+} as const;
