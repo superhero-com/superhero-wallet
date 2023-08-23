@@ -11,6 +11,7 @@
 import {
   computed,
   defineComponent,
+  PropType,
 } from 'vue';
 import {
   PROTOCOL_AETERNITY,
@@ -30,7 +31,7 @@ export default defineComponent({
       required: true,
     },
     iconSize: {
-      type: String,
+      type: String as PropType<AllowedProtocolIconSize>,
       default: 'rg',
       validator: (val: AllowedProtocolIconSize) => SIZES.includes(val),
     },

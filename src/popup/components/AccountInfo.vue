@@ -37,9 +37,9 @@
         v-if="address && address.length"
         class="account-address"
       >
-        <ProtocolIconWrapper
+        <IconWrapper
           v-if="withProtocolIcon"
-          :protocol="protocol"
+          :protocol-icon="protocol"
           class="protocol-icon"
         />
         <CopyText
@@ -66,11 +66,11 @@ import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import ProtocolIconWrapper from './ProtocolIconWrapper.vue';
+import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   components: {
-    ProtocolIconWrapper,
+    IconWrapper,
     AddressTruncated,
     Avatar,
     Truncate,
