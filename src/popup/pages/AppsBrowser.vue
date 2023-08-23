@@ -26,6 +26,7 @@
           @keydown.enter.stop="
             customAppURL.length > 0 &&
               !errorMessage &&
+              !isWarningModalOpened &&
               onSelectApp({ url: customAppURL })
           "
         >
@@ -81,6 +82,7 @@ import {
   onMounted,
   ref,
   h,
+  computed,
 } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
@@ -146,7 +148,11 @@ export default defineComponent({
     let shareWalletInfoInterval : any;
 
     const { getAeSdk } = useAeSdk({ store });
-    const { openModal } = useModals();
+    const { openModal, modalsOpen } = useModals();
+
+    const isWarningModalOpened = computed(
+      () => !!modalsOpen.value.find((modal) => modal.name === MODAL_WARNING_DAPP_BROWSER),
+    );
 
     async function onAppLoaded() {
       if (!iframeRef.value || !selectedApp.value) return;
@@ -187,7 +193,11 @@ export default defineComponent({
 
     function onSelectApp(app: any) {
       openModal(MODAL_WARNING_DAPP_BROWSER).then(() => {
-        selectedApp.value = app;
+        const sanitizedUrl = app.url.startsWith('http://') || app.url.startsWith('https://')
+          ? app.url
+          : `https://${app.url}`;
+
+        selectedApp.value = { ...app, url: sanitizedUrl };
       }, () => { });
     }
 
@@ -221,6 +231,7 @@ export default defineComponent({
       CloseIcon,
       GlobeSmallIcon,
       back,
+      isWarningModalOpened,
     };
   },
 });
