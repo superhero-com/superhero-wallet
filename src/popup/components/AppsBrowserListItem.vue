@@ -17,15 +17,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
+import type { VueI18nTranslation } from 'vue-i18n';
 import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   name: 'AppsBrowserListItem',
   components: { IconWrapper },
   props: {
-    appTitle: { type: String, required: true },
-    appIcon: { type: Object, default: null },
+    appTitle: { type: String as PropType<string | VueI18nTranslation>, required: true },
+    appIcon: { type: Object as PropType<Object>, default: null },
   },
 });
 </script>
@@ -53,13 +54,14 @@ export default defineComponent({
       opacity: 1;
     }
   }
+
   .app-image {
     width: 88px;
     height: 88px;
     border-radius: 10px;
-    border: 1px solid $color-grey-border;
     opacity: 0.75;
-    box-shadow: 2px 2px 6px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: inset 2px 2px 6px 0 rgba($color-black, 0.4);
+    box-shadow: 2px 2px 6px 0 rgba($color-black, 0.4);
   }
 
   .app-title {

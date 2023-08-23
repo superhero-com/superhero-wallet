@@ -131,6 +131,8 @@ const DAPPS_LIST = [
   },
 ];
 
+const LOCAL_STORAGE_ITEM = 'selected-app';
+
 export default defineComponent({
   components: {
     AppsBrowserListItem,
@@ -187,7 +189,7 @@ export default defineComponent({
 
     function refresh() {
       if (!iframeRef.value || !selectedApp.value) return;
-      setLocalStorageItem(['selectedApp'], selectedApp.value);
+      setLocalStorageItem([LOCAL_STORAGE_ITEM], selectedApp.value);
       window.location.reload();
     }
 
@@ -207,10 +209,10 @@ export default defineComponent({
     }
 
     onMounted(() => {
-      const isAppSelected = getLocalStorageItem(['selectedApp']);
+      const isAppSelected = getLocalStorageItem([LOCAL_STORAGE_ITEM]);
       if (isAppSelected) {
         selectedApp.value = isAppSelected;
-        setLocalStorageItem(['selectedApp'], null);
+        setLocalStorageItem([LOCAL_STORAGE_ITEM], null);
       }
     });
 
@@ -242,9 +244,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .apps-browser {
-  --screen-padding-x: 8px;
-
-  padding-inline: var(--screen-padding-x);
   height: 100%;
 
   .input-url {

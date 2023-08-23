@@ -137,17 +137,20 @@ export default defineComponent({
       router.replace({ name: currentHomeRouteName.value });
     }
 
-    function openActions() {
-      openModal(MODAL_BOWSER_ACTIONS_DAPP,
-        {
-          iFrame: props.iFrame,
-          selectedApp: props.selectedApp,
-        })
-        .then((value) => {
-          if (value?.action === BROWSER_ACTIONS.refresh) {
-            emit('refresh');
-          }
-        }, () => {});
+    async function openActions() {
+      // eslint-disable-next-line no-useless-catch
+      try {
+        const value = await openModal(MODAL_BOWSER_ACTIONS_DAPP,
+          {
+            iFrame: props.iFrame,
+            selectedApp: props.selectedApp,
+          });
+        if (value?.action === BROWSER_ACTIONS.refresh) {
+          emit('refresh');
+        }
+      } catch (error) {
+        throw error;
+      }
     }
 
     return {
@@ -170,9 +173,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '@/styles/variables';
-@use '@/styles/typography';
-@use '@/styles/mixins';
+@use '../../styles/variables';
+@use '../../styles/typography';
+@use '../../styles/mixins';
 
 .apps-browser-header {
   --header-height: 40px;
@@ -185,7 +188,7 @@ export default defineComponent({
   z-index: variables.$z-index-header;
   height: calc(var(--header-height) + env(safe-area-inset-top));
   background-color: var(--screen-bg-color);
-  padding: env(safe-area-inset-top) 0;
+  padding: env(safe-area-inset-top) 8px 0 8px;
   width: 100%;
 
   @include mixins.mobile {
