@@ -22,7 +22,7 @@
           <a
             @click="goToTerms"
           >
-            Terms of Use
+            {{ $t('pages.titles.terms') }}
           </a>
         </i18n-t>
         <span>{{ $t('pages.warningDappBrowser.warning2') }}</span>
@@ -75,6 +75,7 @@ export default defineComponent({
       props.reject();
       router.push({ name: ROUTE_TERMS });
     }
+
     return {
       goToTerms,
       WarningIcon,
@@ -85,9 +86,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/mixins';
-@use '../../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .warning-dapp-browser {
   .icon-wrapper {

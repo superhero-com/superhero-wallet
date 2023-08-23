@@ -12,7 +12,6 @@
         v-model="customAppURL"
         name="customAppURL"
         :rules="{
-          required: true,
           url: customAppURL.length > 0 ? true : false,
         }"
       >
@@ -30,10 +29,10 @@
               onSelectApp({ url: customAppURL })
           "
         >
-          <template #after="{ focused }">
+          <template #after>
             <Component
               :is="GlobeSmallIcon"
-              v-if="!focused && customAppURL.length === 0"
+              v-if="customAppURL.length === 0"
             />
             <BtnIcon
               v-else
@@ -204,6 +203,7 @@ export default defineComponent({
         setLocalStorageItem(['selectedApp'], null);
       }
     });
+
     onUnmounted(() => {
       if (shareWalletInfoInterval) {
         clearInterval(shareWalletInfoInterval);
@@ -237,7 +237,7 @@ export default defineComponent({
   height: 100%;
 
   .input-url {
-    padding: 16px 8px;
+    margin: 16px 8px;
 
     .icon {
       width: 20px !important;

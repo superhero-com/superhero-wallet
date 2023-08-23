@@ -1,16 +1,14 @@
 <template>
   <BtnIcon
-    class="apps-browser"
+    class="open-apps-browser-button"
     data-cy="apps-browser-btn"
-    text="Browser"
     :icon="GlobeSmallIcon"
-    @click="openAppsBrowserScreen()"
+    :to="{ name: ROUTE_APPS_BROWSER }"
   />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
 import { ROUTE_APPS_BROWSER } from '../router/routeNames';
 
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -24,15 +22,9 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup() {
-    const router = useRouter();
-
-    function openAppsBrowserScreen() {
-      router.push({ name: ROUTE_APPS_BROWSER });
-    }
-
     return {
       GlobeSmallIcon,
-      openAppsBrowserScreen,
+      ROUTE_APPS_BROWSER,
     };
   },
 });
