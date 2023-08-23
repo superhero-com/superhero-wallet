@@ -2,7 +2,12 @@
 
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
-import { payments, networks } from 'bitcoinjs-lib';
+import {
+  payments,
+  networks,
+  Psbt,
+} from 'bitcoinjs-lib';
+import { toSatoshi, toBitcoin } from 'satoshi-bitcoin';
 import type {
   AdapterNetworkSettingList,
   ICoin,
@@ -11,8 +16,10 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
+import { useNetworks } from '@/composables/networks';
 import {
   MAXIMUM_ACCOUNTS_TO_DISCOVER,
+  NETWORK_TYPE_TESTNET,
   PROTOCOL_BITCOIN,
 } from '@/constants';
 import { tg } from '@/store/plugins/languages';
@@ -25,6 +32,8 @@ import {
   BTC_CONTRACT_ID,
   BTC_SYMBOL,
 } from '@/protocols/bitcoin/config';
+import { fetchJson } from '@/utils';
+import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
   protocolName = 'Bitcoin';
@@ -74,10 +83,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override async getBalance(address: string): Promise<string> {
-    // TODO: Implement this once the mdw is ready
-    return Promise.resolve('989983200000000000');
+  override async fetchBalance(address: string): Promise<string> {
+    const { activeNetwork } = useNetworks();
+
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+
+    // eslint-disable-next-line camelcase
+    const { chain_stats: { funded_txo_sum, spent_txo_sum } } = await fetchJson(`${nodeUrl}/address/${address}`);
+    return toBitcoin(Number(funded_txo_sum) - Number(spent_txo_sum)).toString();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -90,19 +103,22 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     seed: Uint8Array,
     accountIndex: number,
   ): IHdWalletAccount {
+    const { activeNetwork } = useNetworks();
+
+    const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
+    const pathCoinType = activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 1 : 0;
+
     const node = this.bip32.fromSeed(Buffer.from(seed));
-    const path = `m/84'/0'/${accountIndex}'/0/0`; // 44 for Legacy
+    const path = `m/84'/${pathCoinType}'/${accountIndex}'/0/0`; // 84 for Native-SegWit and 44 for Legacy
     const child = node.derivePath(path);
-    const { address } = payments.p2wpkh({ // p2pkh for Legacy
+    const { address } = payments.p2wpkh({ // p2wpkh for Native-Segwit and p2pkh for Legacy
       pubkey: child.publicKey,
-      // TODO: use bitcoin.networks.testnet once the network selection is ready
-      network: networks.bitcoin,
+      network,
     });
-    const secretKey = child.toWIF();
 
     return {
-      secretKey,
-      publicKey: child.publicKey!.toString('utf8'),
+      secretKey: child.privateKey as any,
+      publicKey: child.publicKey as any,
       address: address!,
     };
   }
@@ -118,5 +134,83 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       }
     }
     return lastNotEmptyIdx;
+  }
+
+  async spend(
+    amount: number,
+    recipient: string,
+    options: {
+      address: string,
+      fee: number,
+      publicKey: Buffer,
+      secretKey: Buffer,
+    },
+  ): Promise<{ hash: string } > {
+    const { activeNetwork } = useNetworks();
+
+    const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+
+    let totalBalance: number = 0;
+    const amountInSathoshi = toSatoshi(amount);
+
+    const psbt = new Psbt({ network });
+
+    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
+    const txFetchPromises = utxos.map(({ txid }: { txid: string }) => fetchJson(`${nodeUrl}/tx/${txid}`));
+    const txs = await Promise.all(txFetchPromises);
+
+    utxos.forEach(
+      ({ txid, vout, value }: {txid: string, vout: number, value: number}, index: number) => {
+        const tx = txs[index];
+
+        if (!(tx.vout[vout] && tx.vout[vout].scriptpubkey)) {
+          throw new Error('Missing data from the fetched input transactions');
+        }
+
+        const { scriptpubkey } = tx.vout[vout];
+
+        psbt.addInput({
+          hash: txid,
+          index: vout,
+          witnessUtxo: {
+            script: Buffer.from(scriptpubkey, 'hex'),
+            value,
+          },
+        });
+        totalBalance += value;
+      },
+    );
+
+    if (amount + options.fee > totalBalance) {
+      throw new Error('Insufficient balance');
+    }
+
+    psbt.addOutput({
+      address: recipient,
+      value: amountInSathoshi,
+    });
+    psbt.addOutput({
+      address: options.address,
+      value: totalBalance - amountInSathoshi - options.fee,
+    });
+    await psbt.signAllInputs(new BitcoinTransactionSigner(options.secretKey, options.publicKey));
+    await psbt.finalizeAllInputs();
+    const rawTx = psbt.extractTransaction().toHex();
+
+    const requestOptions = {
+      method: 'POST',
+      headers: new Headers({
+        'Content-Type': 'text/plain',
+      }),
+      body: rawTx,
+      redirect: 'follow' as RequestRedirect,
+    };
+
+    const transactionId = await fetch(`${nodeUrl}/tx`, requestOptions)
+      .then((response) => response.text());
+    return {
+      hash: transactionId,
+    };
   }
 }

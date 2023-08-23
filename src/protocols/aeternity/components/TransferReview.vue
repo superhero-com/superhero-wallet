@@ -80,11 +80,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import {
-  encode,
-  Encoding,
-  Tag,
-} from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import type { TransferFormModel, ITransaction } from '@/types';
 import {
   escapeSpecialChars,
@@ -93,7 +89,6 @@ import {
 } from '@/utils';
 import {
   useAccounts,
-  useAeSdk,
   useDeepLinkApi,
   useModals,
   useMultisigAccounts,
@@ -105,6 +100,7 @@ import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/c
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
@@ -146,7 +142,6 @@ export default defineComponent({
       updateMultisigAccounts,
     } = useMultisigAccounts({ store });
     const { getTippingContracts } = useTippingContracts({ store });
-    const { getAeSdk } = useAeSdk({ store });
     const { activeAccount } = useAccounts({ store });
 
     // TODO provide correct fee for the multisig
@@ -164,7 +159,6 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const aeSdk = await getAeSdk();
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -187,9 +181,9 @@ export default defineComponent({
             { waitMined: false, modal: false },
           ]);
         } else {
-          actionResult = await aeSdk.spendWithCustomOptions(amount, recipient, {
-            payload: encode(Buffer.from(props.transferData.payload), Encoding.Bytearray),
-            modal: false,
+          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
+          actionResult = await aeternityAdapter.spend(amount, recipient, {
+            payload: props.transferData.payload,
           });
         }
 

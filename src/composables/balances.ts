@@ -7,7 +7,6 @@ import type {
   IDefaultComposableOptions,
 } from '@/types';
 import { handleUnknownError, isNotFoundError } from '@/utils';
-import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   createPollingBasedOnMountedComponents,
@@ -18,7 +17,8 @@ import { createNetworkWatcher } from './networks';
 
 type Balances = Record<string, Balance>;
 
-const POLLING_INTERVAL = 3000;
+// TODO: Set it to 3000 once the own middleware is ready
+const POLLING_INTERVAL = 5000;
 const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
@@ -54,19 +54,18 @@ export function useBalances({ store }: IDefaultComposableOptions) {
       async ({
         address,
         protocol,
-      }) => ProtocolAdapterFactory.getAdapter(protocol).getBalance(address).catch((error) => {
+      }) => ProtocolAdapterFactory.getAdapter(protocol).fetchBalance(address).catch((error) => {
         if (!isNotFoundError(error)) {
           handleUnknownError(error);
         }
         return 0;
       }),
     );
-    const balancesAettos = await Promise.all(balancesPromises);
-
-    balances.value = balancesAettos.reduce(
+    const rawBalances = await Promise.all(balancesPromises);
+    balances.value = rawBalances.reduce(
       (acc, val, index) => ({
         ...acc,
-        [accounts.value[index].address]: new BigNumber(aettosToAe(val)),
+        [accounts.value[index].address]: BigNumber(val),
       }),
       {},
     );
