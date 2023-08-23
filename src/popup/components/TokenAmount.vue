@@ -44,10 +44,14 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
-import { calculateFontSize } from '@/utils';
+import {
+  calculateFontSize,
+  formatNumber,
+} from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
@@ -77,7 +81,13 @@ export default defineComponent({
       if (Number.isInteger(props.amount) || props.amount === 0) {
         return props.amount;
       }
-      return props.amount.toFixed((props.highPrecision || props.amount < 0.01) ? 9 : 2);
+      return formatNumber(props.amount,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: ProtocolAdapterFactory
+            .getAdapter(props.protocol)
+            .getAmountPrecision({ amount: props.amount, highPrecision: props.highPrecision }),
+        });
     });
 
     const amountFiat = computed(

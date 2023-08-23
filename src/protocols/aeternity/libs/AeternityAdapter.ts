@@ -36,6 +36,11 @@ import {
 } from '@/protocols/aeternity/config';
 import { aettosToAe } from '../helpers';
 
+interface IAmountDecimalPlaces {
+  highPrecision?: boolean;
+  amount?: number;
+}
+
 export class AeternityAdapter extends BaseProtocolAdapter {
   protocolName = AE_PROTOCOL_NAME;
 
@@ -72,6 +77,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.backendUrlLabel'),
     },
   ];
+
+  override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces): number {
+    return (highPrecision || (amount && amount < 0.01)) ? 9 : 2;
+  }
 
   override getCoinSymbol(getShort = false) {
     return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;

@@ -8,7 +8,11 @@ import type {
   Protocol,
   MarketData,
 } from '@/types';
-import { CURRENCIES, PROTOCOL_AETERNITY } from '@/constants';
+import {
+  CURRENCIES,
+  DEFAULT_LOCALE,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import {
   getLocalStorageItem,
   handleUnknownError,
@@ -115,7 +119,7 @@ export function useCurrencies({
    */
   function formatCurrency(value: number): string {
     return new Intl.NumberFormat(
-      navigator.language,
+      DEFAULT_LOCALE,
       { style: 'currency', currencyDisplay: 'narrowSymbol', currency: currentCurrencyCode.value },
     ).format(value);
   }
