@@ -8,10 +8,12 @@
       <BtnPill
         class="account-select"
         :class="{ 'avatar-only': avatarOnly }"
+        :avatar="avatarOnly"
         dense
       >
         <FormSelect
           v-bind="$attrs"
+          :avatar="avatarOnly"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
           :unstyled="!avatarOnly"
@@ -111,16 +113,6 @@ export default defineComponent({
 
     &.avatar-only {
       margin-bottom: 0;
-
-      &.btn-pill {
-        padding: 4px;
-        background-color: transparent;
-
-        & .button-plain {
-          width: 24px;
-          height: 24px;
-        }
-      }
     }
   }
 }

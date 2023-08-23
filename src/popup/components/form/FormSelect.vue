@@ -2,6 +2,7 @@
   <BtnPlain
     v-if="unstyled"
     class="form-select unstyled"
+    v-bind="$attrs"
     @click="openOptionsModal"
   >
     <slot
