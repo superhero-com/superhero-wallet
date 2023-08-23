@@ -21,7 +21,6 @@
         :background="daeppBrowserBackground"
         :icon="GlobeIcon"
         :to="{ name: ROUTE_APPS_BROWSER }"
-        :card-id="DASHBOARD_CARD_ID.daeppBrowser"
       />
       <DashboardCard
         v-if="isNodeMainnet && UNFINISHED_FEATURES"

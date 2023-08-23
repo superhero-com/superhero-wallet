@@ -84,7 +84,7 @@
       "button": "Back up now"
     },
     "daeppBrowserCard": {
-      "title": "Browse the AEcosystem",
+      "title": "Browse the æcosystem",
       "description": "Board Superhero wallet built-in browser to explore aeternity web 3.0 universe and discover new dapps.",
       "button": "Browse"
     },
@@ -481,7 +481,7 @@
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
       "multisigProposalDetails": "Multisig Tx proposal details",
-      "appsBrowser": "Browse the AEcosystem"
+      "appsBrowser": "Browse the æcosystem"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -1149,11 +1149,11 @@
       "reset": "Reset"
     },
     "appsBrowser": {
-      "popularApps": "Popular daepps",
+      "popularApps": "Popular æpps",
       "inputPlaceholder": "Enter URL"
     },
     "warningDappBrowser": {
-      "title": "You are going to visit a third-party website",
+      "title": "You are going to visit a \n third-party website",
       "warning": "Superhero wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
       "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
       "decline": "Decline"
