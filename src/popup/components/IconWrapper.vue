@@ -8,13 +8,19 @@
   >
     <Component
       :is="icon"
+      v-if="icon"
       class="icon-wrapper-icon"
+    />
+    <ProtocolIcon
+      v-else-if="protocolIcon"
+      :protocol="protocolIcon"
     />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, PropType, defineComponent } from 'vue';
+import ProtocolIcon from '@/popup/components/ProtocolIcon.vue';
 
 const ALLOWED_ICON_SIZES = ['rg', 'lg'] as const;
 
@@ -26,11 +32,20 @@ export const iconSizeProp = {
   validator: (val: IconSize) => ALLOWED_ICON_SIZES.includes(val),
 };
 
+export const protocolIconProp = {
+  type: String,
+  default: null,
+};
+
 export default defineComponent({
+  components: {
+    ProtocolIcon,
+  },
   props: {
-    icon: { type: Object as PropType<Component>, required: true },
+    icon: { type: Object as PropType<Component>, default: null },
     isBoxed: Boolean,
     iconSize: iconSizeProp,
+    protocolIcon: protocolIconProp,
   },
 });
 </script>

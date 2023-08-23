@@ -7,9 +7,10 @@
   >
     <div class="box">
       <IconWrapper
-        v-if="icon"
+        v-if="icon || protocolIcon"
         :icon="icon"
         :icon-size="iconSize"
+        :protocol-icon="protocolIcon"
         is-boxed
       />
 
@@ -23,7 +24,7 @@
 
 <script lang="ts">
 import { Component, PropType, defineComponent } from 'vue';
-import IconWrapper, { iconSizeProp } from '../IconWrapper.vue';
+import IconWrapper, { iconSizeProp, protocolIconProp } from '../IconWrapper.vue';
 import BtnBase, { btnBaseProps } from './BtnBase.vue';
 
 export default defineComponent({
@@ -36,6 +37,7 @@ export default defineComponent({
     subheader: { type: String, default: '' },
     icon: { type: Object as PropType<Component>, default: null },
     iconSize: iconSizeProp,
+    protocolIcon: protocolIconProp,
     ...btnBaseProps,
   },
 });

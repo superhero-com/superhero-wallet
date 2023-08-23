@@ -5,14 +5,14 @@
     :fee="numericFee"
     :fee-symbol="BTC_SYMBOL"
     :protocol="PROTOCOL_BITCOIN"
-    :custom-title="$t('modals.send.sendBtc')"
+    :custom-title="$t('modals.send.sendAsset', { name: BTC_COIN_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
       <!--      TODO - set validation rules -->
       <TransferSendRecipient
         v-model.trim="formModel.address"
-        :placeholder="$t('modals.send.recipientPlaceholderBtc')"
+        :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
         :errors="errors"
         :validation-rules="{}"
         @openQrModal="openScanQrModal"
@@ -78,7 +78,7 @@ import {
 import type {
   TransferFormModel,
 } from '@/types';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { PROTOCOL_BITCOIN } from '@/constants';
 
@@ -184,6 +184,7 @@ export default defineComponent({
     return {
       INFO_BOX_TYPES,
       BTC_SYMBOL,
+      BTC_COIN_NAME,
       PROTOCOL_BITCOIN,
       hasMultisigTokenWarning,
       formModel,
