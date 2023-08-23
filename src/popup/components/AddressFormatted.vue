@@ -1,6 +1,6 @@
 <template>
   <div class="address-formatted">
-    <template v-if="isAddress">
+    <template v-if="isAddress || splitAddress">
       <span
         v-for="(chunk, index) in addressChunks"
         :key="index"
@@ -21,6 +21,7 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     columnCount: { type: Number, default: 6 },
+    splitAddress: Boolean,
     alignRight: Boolean,
   },
   setup(props) {
@@ -31,6 +32,7 @@ export default defineComponent({
     }
 
     const isAddress = computed(() => {
+      // TODO - use validateHash to check for BTC addresses instead of 'splitAddress' prop
       const { valid, isName } = validateHash(props.address);
       return valid && !isName;
     });

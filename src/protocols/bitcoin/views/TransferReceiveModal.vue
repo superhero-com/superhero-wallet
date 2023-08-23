@@ -1,9 +1,10 @@
 <template>
   <TransferReceiveBase
     v-bind="$attrs"
-    heading="BTC receive modal temporary heading"
+    :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
     :protocol="PROTOCOL_BITCOIN"
+    disable-asset-selection
   />
 </template>
 
@@ -15,6 +16,7 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
 
@@ -30,6 +32,7 @@ export default defineComponent({
     return {
       PROTOCOL_BITCOIN,
       activeAccount,
+      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN).protocolName,
     };
   },
 });

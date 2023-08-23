@@ -41,6 +41,7 @@
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
               :address="accountAddressToDisplay"
+              :split-address="protocol === PROTOCOL_BITCOIN && !amount"
             />
           </Scrollable>
         </CopyText>
@@ -63,6 +64,7 @@
             :message="errorMessage"
             :selected-asset="selectedAsset"
             :readonly="disableAssetSelection"
+            :protocol="protocol"
             @asset-selected="handleAssetChange"
           />
         </Field>
@@ -107,7 +109,11 @@ import type {
   ResolveCallback,
   Protocol,
 } from '@/types';
-import { IS_MOBILE_DEVICE } from '@/constants';
+import {
+  IS_MOBILE_DEVICE,
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
+} from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy } from '@/composables';
 import { invokeDeviceShare } from '@/utils';
@@ -148,7 +154,7 @@ export default defineComponent({
     accountName: { type: String, default: null },
     tokens: { type: Object as PropType<ITokenList>, default: () => ({}) },
     disableAssetSelection: Boolean,
-    protocol: { type: String as PropType<Protocol>, default: null },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
   },
   setup(props) {
     const store = useStore();
@@ -207,12 +213,17 @@ export default defineComponent({
     }
 
     (() => {
-      if (props.tokenContractId && props.tokens[props.tokenContractId]) {
+      if (
+        !props.disableAssetSelection
+        && props.tokenContractId
+        && props.tokens[props.tokenContractId]
+      ) {
         handleAssetChange(props.tokens[props.tokenContractId]);
       }
     })();
 
     return {
+      PROTOCOL_BITCOIN,
       IS_MOBILE_DEVICE,
       ShareIcon,
       amount,
