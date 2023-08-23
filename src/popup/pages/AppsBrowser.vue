@@ -51,7 +51,7 @@
 
       <div class="apps-browser-list">
         <div
-          v-for="(app, index) in apps"
+          v-for="(app, index) in DAPPS_LIST"
           :key="index"
           class="apps-browser-card"
         >
@@ -87,16 +87,16 @@ import { useStore } from 'vuex';
 import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { Field } from 'vee-validate';
 import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
-import { useAeSdk, useModals } from '../../composables';
-import InputField from '../components/InputField.vue';
-import AppsBrowserHeader from '../components/AppsBrowserHeader.vue';
-import BtnIcon from '../components/buttons/BtnIcon.vue';
-import AppsBrowserListItem from '../components/AppsBrowserListItem.vue';
+import { useAeSdk, useModals } from '@/composables';
+import InputField from '@/popup/components/InputField.vue';
+import AppsBrowserHeader from '@/popup/components/AppsBrowserHeader.vue';
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
+import AppsBrowserListItem from '@/popup/components/AppsBrowserListItem.vue';
 
-import CloseIcon from '../../icons/circle-close.svg?vue-component';
-import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
-import GraffitiIcon from '../../icons/dapp/graffiti.svg?vue-component';
-import SuperheroLogo from '../../icons/logo-small.svg?vue-component';
+import CloseIcon from '@/icons/circle-close.svg?vue-component';
+import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
+import GraffitiIcon from '@/icons/dapp/graffiti.svg?vue-component';
+import SuperheroLogo from '@/icons/logo-small.svg?vue-component';
 
 const SuperheroIcon = h(
   SuperheroLogo,
@@ -104,12 +104,31 @@ const SuperheroIcon = h(
     style: { color: '#1161fe' },
   },
 );
+
 const DEXIcon = h(
   SuperheroLogo,
   {
     style: { color: '#00FF9D' },
   },
 );
+
+const DAPPS_LIST = [
+  {
+    title: 'Graffiti',
+    url: 'https://graffiti.aeternity.com',
+    icon: GraffitiIcon,
+  },
+  {
+    title: 'Superhero Social',
+    url: 'https://superhero.com',
+    icon: SuperheroIcon,
+  },
+  {
+    title: 'Dex',
+    url: 'https://aepp.dex.superhero.com/swap',
+    icon: DEXIcon,
+  },
+];
 
 export default defineComponent({
   components: {
@@ -121,24 +140,6 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-
-    const apps = [
-      {
-        title: 'Graffiti',
-        url: 'https://graffiti.aeternity.com',
-        icon: GraffitiIcon,
-      },
-      {
-        title: 'Superhero Social',
-        url: 'https://superhero.com',
-        icon: SuperheroIcon,
-      },
-      {
-        title: 'Dex',
-        url: 'https://dex.prd.aepps.com/swap',
-        icon: DEXIcon,
-      },
-    ];
 
     const selectedApp = ref();
     const iframeRef = ref();
@@ -213,7 +214,7 @@ export default defineComponent({
       refresh,
       iframeRef,
       customAppURL,
-      apps,
+      DAPPS_LIST,
       selectedApp,
       onSelectApp,
       onAppLoaded,
