@@ -1,16 +1,15 @@
 <template>
   <button class="apps-browser-list-item">
-    <IconWrapper
-      v-if="appIcon"
-      :icon="appIcon"
-      class="app-image"
-      :is-full="true"
-      is-boxed
-    />
     <div
-      v-else
-      class="app-image"
-    />
+      class="app-image-wrapper"
+    >
+      <IconWrapper
+        v-if="appIcon"
+        :icon="appIcon"
+        class="app-image"
+        is-full
+      />
+    </div>
     <div class="app-title">
       {{ appTitle }}
     </div>
@@ -45,34 +44,41 @@ export default defineComponent({
   margin-top: 4px;
 
   &:hover {
-    .app-image {
-      border-radius: 10px;
-      box-shadow: inset 0 0 0 1px $color-white;
-      opacity: 1;
+    cursor: pointer;
+
+    .app-image-wrapper {
+      background: $color-disabled;
     }
 
-    .app-title {
+    .app-title,
+    .app-image {
       opacity: 1;
     }
   }
 
-  .app-image {
+  .app-image-wrapper {
     width: 88px;
     height: 88px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: $color-bg-6;
     border-radius: 10px;
-    opacity: 0.75;
-    box-shadow: inset 2px 2px 6px 0 rgba($color-black, 0.4);
-    box-shadow: 2px 2px 6px 0 rgba($color-black, 0.4);
+  }
+
+  .app-image {
+    width: 40px;
+    height: 40px;
+    opacity: 0.85;
   }
 
   .app-title {
     padding: 4px 8px;
     font-size: 12px;
-    font-weight: 600;
     line-height: 16px;
     text-align: center;
     color: $color-white;
-    opacity: 0.75;
+    opacity: 0.7;
   }
 }
 </style>

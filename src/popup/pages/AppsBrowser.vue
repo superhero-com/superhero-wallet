@@ -98,13 +98,7 @@ import CloseIcon from '@/icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
 import GraffitiIcon from '@/icons/dapp/graffiti.svg?vue-component';
 import SuperheroLogo from '@/icons/logo-small.svg?vue-component';
-
-const SuperheroIcon = h(
-  SuperheroLogo,
-  {
-    style: { color: '#1161fe' },
-  },
-);
+import Governance from '@/icons/dapp/Governance.svg?vue-component';
 
 const DEXIcon = h(
   SuperheroLogo,
@@ -115,17 +109,17 @@ const DEXIcon = h(
 
 const DAPPS_LIST = [
   {
-    title: 'Graffiti',
+    title: 'Aeternity Governance',
+    url: 'https://governance.aeternity.com/',
+    icon: Governance,
+  },
+  {
+    title: 'Graffiti Aepp',
     url: 'https://graffiti.aeternity.com',
     icon: GraffitiIcon,
   },
   {
-    title: 'Superhero Social',
-    url: 'https://superhero.com',
-    icon: SuperheroIcon,
-  },
-  {
-    title: 'Dex',
+    title: 'Superhero DEX',
     url: 'https://aepp.dex.superhero.com/swap',
     icon: DEXIcon,
   },
