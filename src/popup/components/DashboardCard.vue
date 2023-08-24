@@ -6,8 +6,6 @@
     :background="background"
     :icon="icon"
     :card-id="cardId"
-    :bg-darken="bgDarken"
-    :bg-position="bgPosition"
   >
     <BtnMain
       class="card-button"
@@ -39,11 +37,6 @@ export default defineComponent({
     cardId: { type: String, default: null },
     to: { type: Object, default: null },
     icon: { type: Object, default: null },
-    bgDarken: { type: Boolean, default: false },
-    bgPosition: {
-      type: String,
-      default: null,
-    },
   },
 });
 </script>

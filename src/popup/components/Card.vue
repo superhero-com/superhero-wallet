@@ -6,7 +6,6 @@
       :class="{
         dense,
         disabled,
-        'card-darken': bgDarken
       }"
       :style="styleComponent"
     >
@@ -72,18 +71,12 @@ export default {
     disabled: Boolean,
     cardId: { type: String, default: null },
     icon: { type: Object, default: null },
-    bgDarken: { type: Boolean, default: false },
-    bgPosition: {
-      type: String,
-      default: null,
-    },
   },
   setup(props) {
     const hiddenCards = useState('hiddenCards');
 
     const styleComponent = computed(() => ({
       backgroundImage: props.background ? `url("${props.background}")` : null,
-      backgroundPosition: props.bgPosition ? props.bgPosition : null,
     }));
 
     const isVisible = computed(
