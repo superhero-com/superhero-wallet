@@ -275,7 +275,8 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
         ) {
           return b.confirmedBy.length - a.confirmedBy.length;
         }
-        if (b.balance && a.balance && !b.balance.minus(a.balance).isZero()) {
+        // TODO - check multisig accounts returning string
+        if (b.balance && a.balance && typeof b.balance !== 'string' && !b.balance.minus(a.balance).isZero()) {
           return b.balance.minus(a.balance).toNumber();
         }
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();

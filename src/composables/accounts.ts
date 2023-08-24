@@ -3,7 +3,6 @@ import { uniq } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
-  IAccountRaw,
   IDefaultComposableOptions,
   IFormSelectOption,
   Protocol,
@@ -16,7 +15,6 @@ import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 export function useAccounts({ store }: IDefaultComposableOptions) {
   // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
-  const accountsRaw = computed((): IAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => store.getters.accounts || []);
   const aeAccounts = computed(
     () => accounts.value.filter(({ protocol }) => protocol === PROTOCOL_AETERNITY),
@@ -74,7 +72,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   return {
     accounts,
-    accountsRaw,
     aeAccounts,
     accountsAddressList,
     accountsSelectOptions,

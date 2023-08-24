@@ -495,7 +495,7 @@
       "node-version": "Node version"
     },
     "account": {
-      "heading": "Account",
+      "heading": "account",
       "accountName": "Account name",
       "claim": "Claim Tip",
       "latestTransactions": "Latest transactions",

@@ -31,7 +31,7 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ idx + 1 }}
+        {{ getDefaultAccountLabel({ protocol: protocolName, idx }) }}
       </div>
       <div
         v-if="address && address.length"
@@ -58,9 +58,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import type { Protocol } from '@/types';
+import { getDefaultAccountLabel } from '@/utils';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
@@ -79,7 +87,7 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
-    protocol: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     avatarSize: { type: String, default: 'lg' },
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
@@ -96,8 +104,14 @@ export default defineComponent({
         .prepareUrlForAccount(props.address),
     );
 
+    const protocolName = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+    );
+
     return {
       explorerUrl,
+      protocolName,
+      getDefaultAccountLabel,
     };
   },
 });
