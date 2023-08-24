@@ -42,7 +42,7 @@ export function useTransferSendForm({
   const { openModal, openDefaultModal } = useModals();
   const { errors, validate } = useForm();
 
-  const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]) === 'error'));
+  const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
 
   function clearPayload() {
     formModel.value.payload = '';
