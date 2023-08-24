@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/aeternity/superhero-wallet/compare/v1.1.3...v1.1.4) (2023-08-21)
+
+
+### Maintenance
+
+* hide buy ae button ([da6a1c6](https://github.com/aeternity/superhero-wallet/commit/da6a1c6d787c8cac3a9a5392300ea842e61e3e87))
+* hide dex button on ios ([f093200](https://github.com/aeternity/superhero-wallet/commit/f093200afb1b8d594a223e792d2614783f58978f))
+
 ### [1.1.3](https://github.com/aeternity/superhero-wallet/compare/v1.1.2...v1.1.3) (2023-06-23)
 
 

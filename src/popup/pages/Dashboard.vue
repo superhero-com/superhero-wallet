@@ -13,7 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
-        v-if="isNodeMainnet && !IS_IOS"
+        v-if="isNodeMainnet && UNFINISHED_FEATURES"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
         :btn-text="$t('dashboard.buyCard.button')"
@@ -42,7 +42,6 @@
 import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
-import { IS_IOS } from '../../lib/environment';
 import { DASHBOARD_CARD_ID } from '../utils';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
 import { useAccounts, useAeSdk } from '../../composables';
@@ -84,7 +83,7 @@ export default defineComponent({
 
     return {
       DASHBOARD_CARD_ID,
-      IS_IOS,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ArrowSendIcon,
       ArrowReceiveIcon,

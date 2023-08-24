@@ -20,7 +20,7 @@
       <OpenTransferReceiveModalButton />
       <OpenTransferSendModalButton />
       <BtnBox
-        v-if="isNodeMainnet && !IS_IOS"
+        v-if="isNodeMainnet && UNFINISHED_FEATURES"
         :icon="CreditCardIcon"
         :text="$t('common.buy')"
         :href="activeAccountSimplexLink"
@@ -111,6 +111,7 @@ export default defineComponent({
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });

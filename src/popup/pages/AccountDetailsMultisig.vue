@@ -16,7 +16,7 @@
       <OpenTransferReceiveModalButton is-multisig />
       <OpenTransferSendModalButton is-multisig />
       <BtnBox
-        v-if="!IS_IOS"
+        v-if="UNFINISHED_FEATURES"
         :icon="CreditCardIcon"
         :text="$t('common.buy')"
         :href="simplexLink"
@@ -34,7 +34,6 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useMultisigAccounts } from '../../composables';
 import { buildSimplexLink } from '../utils';
-import { IS_IOS } from '../../lib/environment';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -70,7 +69,7 @@ export default defineComponent({
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,
-      IS_IOS,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });

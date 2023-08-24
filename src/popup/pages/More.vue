@@ -41,7 +41,7 @@
     </PanelItem>
 
     <PanelItem
-      v-if="isNodeMainnet && !IS_IOS"
+      v-if="isNodeMainnet && UNFINISHED_FEATURES"
       :href="SIMPLEX_URL"
       :title="$t('pages.fungible-tokens.buyAe')"
     >
@@ -83,7 +83,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { IS_IOS } from '../../lib/environment';
 import {
   BUG_REPORT_URL,
   DEX_URL,
@@ -123,7 +122,7 @@ export default defineComponent({
     return {
       BUG_REPORT_URL,
       DEX_URL,
-      IS_IOS,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       SIMPLEX_URL,
       activeAccountFaucetUrl,
       isNodeMainnet,
