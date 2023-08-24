@@ -15,11 +15,10 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
-        :icon="SwapIcon"
-        :text="$t('common.swap')"
-        :href="AE_DEX_URL"
-        :disabled="!isOnline"
+        v-if="isAeAccount && !IS_IOS && (isNodeMainnet || isNodeTestnet)"
+        :icon="GlobeSmallIcon"
+        :text="$t('common.browser')"
+        :to="{ name: ROUTE_APPS_BROWSER }"
       />
     </template>
 
@@ -30,9 +29,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
-import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
+import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS, PROTOCOL_AETERNITY } from '@/constants';
 import {
   useAccounts,
   useConnection,
@@ -47,6 +46,8 @@ import BtnBox from '@/popup/components/buttons/BtnBox.vue';
 import CreditCardIcon from '@/icons/credit-card.svg?vue-component';
 import SwapIcon from '@/icons/swap.svg?vue-component';
 import FaucetIcon from '@/icons/faucet.svg?vue-component';
+import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
+import { ROUTE_APPS_BROWSER } from '../../../popup/router/routeNames';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
@@ -67,10 +68,13 @@ export default defineComponent({
       activeAccountFaucetUrl,
     } = useAccounts({ store });
 
+    const isAeAccount = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+
     return {
       CreditCardIcon,
       SwapIcon,
       FaucetIcon,
+      GlobeSmallIcon,
       AE_DEX_URL,
       IS_IOS,
       isOnline,
@@ -79,7 +83,9 @@ export default defineComponent({
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      isAeAccount,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      ROUTE_APPS_BROWSER,
     };
   },
 });
