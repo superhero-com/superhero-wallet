@@ -36,7 +36,7 @@
           <BtnPlain
             class="max-button"
             :class="{ chosen: formModel.amount.toString() === max.toString() }"
-            @click="formModel.amount = max"
+            @click="formModel.amount = max.isPositive() ? max : 0"
           >
             {{ $t('common.max') }}
           </BtnPlain>
