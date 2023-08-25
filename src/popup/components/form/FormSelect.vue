@@ -11,15 +11,9 @@
     >
       {{ currentText }}
     </slot>
-    <ChevronDownIcon class="arrow-icon" />
-  </BtnPlain>
-  <BtnPlain
-    v-else-if="customStyle"
-    class="form-select custom-style"
-    @click="openOptionsModal"
-  >
-    <slot
-      name="custom-style"
+    <ChevronDownIcon
+      v-if="!hideArrow"
+      class="arrow-icon"
     />
   </BtnPlain>
   <InputField
@@ -74,9 +68,9 @@ export default defineComponent({
      */
     unstyled: Boolean,
     /**
-     * Decides if the UI can be completely changed
+     * Decides if the dropdown arrow is visible
      */
-    customStyle: Boolean,
+    hideArrow: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {

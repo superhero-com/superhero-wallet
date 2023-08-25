@@ -16,28 +16,23 @@
           :avatar="avatarOnly"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
-          :unstyled="!avatarOnly"
-          :custom-style="avatarOnly"
+          unstyled
+          :hide-arrow="avatarOnly"
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
           @update:modelValue="$emit('update:modelValue', $event)"
         >
           <template
-            v-if="!avatarOnly"
             #current-text="{ text }"
           >
-            <div>
+            <div v-if="!avatarOnly">
               <Truncate
                 class="account-select-text"
                 :str="text"
               />
             </div>
-          </template>
-          <template
-            v-if="avatarOnly"
-            #custom-style
-          >
             <Avatar
+              v-if="avatarOnly"
               :address="modelValue.toString()"
               size="sm"
             />
