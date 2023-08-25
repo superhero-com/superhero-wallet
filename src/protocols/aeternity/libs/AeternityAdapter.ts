@@ -78,6 +78,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  override getAccountPrefix() {
+    return `${Encoding.AccountAddress}_`;
+  }
+
   override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces): number {
     return (highPrecision || (amount && amount < 0.01)) ? 9 : 2;
   }

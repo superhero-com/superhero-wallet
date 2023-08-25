@@ -139,6 +139,7 @@ export default defineComponent({
       handleAssetChange,
     } = useTransferSendForm({
       transferData: props.transferData,
+      protocol: PROTOCOL_BITCOIN,
     });
 
     const fee = ref(new BigNumber(0));
