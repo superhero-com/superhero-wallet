@@ -1,13 +1,13 @@
 <template>
   <div
-    :key="currentAddress"
+    :key="activeAccount.address"
     class="transaction-list"
   >
     <InfiniteScroll
       class="list"
       data-cy="list"
       is-more-data
-      @loadMore="loadMore"
+      @loadMore="$emit('loadMore')"
     >
       <TransactionListItem
         v-for="transaction in filteredTransactions"
@@ -26,52 +26,36 @@
       v-else-if="!filteredTransactions.length"
       class="message"
     >
-      <p>
-        {{ $t('pages.recentTransactions.noTransactionsFound') }}
-      </p>
+      <p v-text="$t('pages.recentTransactions.noTransactionsFound')" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import {
+  PropType,
   computed,
   defineComponent,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 import type {
-  ITokenList,
-  ITransaction,
   ICommonTransaction,
-  ITx,
+  ITransaction,
 } from '@/types';
-import {
-  PROTOCOL_AETERNITY,
-  TX_DIRECTION,
-  TXS_PER_PAGE,
-} from '@/constants';
+import { TX_DIRECTION } from '@/constants';
 import {
   includesCaseInsensitive,
   pipe,
   sortTransactionsByDate,
 } from '@/utils';
-import { useGetter, useState } from '@/composables/vuex';
+import { useGetter } from '@/composables/vuex';
 import {
   useAccounts,
   useAeSdk,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
-  useTransactionList,
-  useUi,
-  useViewport,
 } from '@/composables';
-import { AE_CONTRACT_ID, AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
+import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   getMultisigTransaction,
@@ -93,33 +77,17 @@ export default defineComponent({
     AnimatedSpinner,
   },
   props: {
+    transactions: { type: Array as PropType<ICommonTransaction[]>, default: () => [] },
     tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
+    loading: Boolean,
   },
+  emits: ['loadMore'],
   setup(props) {
     const store = useStore();
     const { t } = useI18n();
-
-    const {
-      activeAccount,
-      accounts,
-    } = useAccounts({ store });
-
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store });
-
-    const {
-      getAccountAllTransactions,
-      getAccountTransactionsState,
-      fetchTransactions,
-    } = useTransactionList({ store });
-
-    const { isAppActive } = useUi();
-
-    const {
-      viewportElement,
-    } = useViewport();
+    const { accounts, activeAccount } = useAccounts({ store });
+    const { dexContracts } = useAeSdk({ store });
 
     const {
       searchPhrase,
@@ -127,51 +95,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { dexContracts } = useAeSdk({ store });
-
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
-
-    const loading = ref(false);
-    const isDestroyed = ref(false);
-
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-
     const getTxSymbol = useGetter('getTxSymbol');
-
-    const currentAddress = computed(() => props.isMultisig
-      ? activeMultisigAccount.value?.gaAccountId
-      : activeAccount.value.address);
-
-    const canLoadMore = computed(() => (
-      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
-    ));
-
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountAllTransactions(currentAddress.value!),
-      ...((props.isMultisig && pendingMultisigTransaction.value?.tx)
-        ? [pendingMultisigTransaction.value]
-        : []
-      ),
-    ]);
-
-    function isFungibleTokenTx(tx: ITx) {
-      return Object.keys(availableTokens.value).includes(tx.contractId);
-    }
-
-    function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
-      if (props.tokenContractId) {
-        return transactionList.filter((transaction) => {
-          const innerTx = getInnerTransaction(transaction.tx);
-
-          if (props.tokenContractId !== AE_CONTRACT_ID) {
-            return innerTx?.contractId === props.tokenContractId;
-          }
-
-          return !innerTx.contractId || !isFungibleTokenTx(innerTx);
-        });
-      }
-      return transactionList;
-    }
 
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {
@@ -222,85 +146,15 @@ export default defineComponent({
 
     const filteredTransactions = computed(
       () => pipe([
-        narrowTransactionsToDefinedToken,
         filterTransactionsByDisplayMode,
         filterTransactionsBySearchPhrase,
         sortTransactionsByDate,
-      ])(loadedTransactionList.value),
+      ])(props.transactions),
     );
 
-    async function fetchTransactionList(recent?: boolean) {
-      loading.value = true;
-      try {
-        // TODO - remove that after rebasing with develop branch,
-        // and add logic to adapter in composable file.
-        if (activeAccount.value.protocol === PROTOCOL_AETERNITY) {
-          await fetchTransactions(
-            TXS_PER_PAGE,
-            !!recent,
-            currentAddress.value!,
-          );
-        }
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function loadMore() {
-      if (!loading.value) {
-        await fetchTransactionList();
-      }
-    }
-
-    async function checkLoadMore() {
-      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
-        return;
-      }
-
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
-
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        await loadMore();
-      }
-    }
-
-    watch(displayMode, () => {
-      checkLoadMore();
-    });
-
-    watch(loading, async (val) => {
-      if (!val) {
-        await checkLoadMore();
-      }
-    });
-
-    let polling: NodeJS.Timer | null = null;
-
-    onMounted(() => {
-      loadMore();
-      polling = setInterval(() => {
-        if (isAppActive.value) {
-          fetchTransactionList(true);
-        }
-      }, 10000);
-    });
-
-    onUnmounted(() => {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    });
-
     return {
-      loading,
-      currentAddress,
+      activeAccount,
       filteredTransactions,
-      loadMore,
       getMultisigTransaction,
       getTransaction,
     };
