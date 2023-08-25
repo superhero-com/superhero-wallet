@@ -27,7 +27,7 @@
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
           item-title="address"
-          :options="accountsSelectOptions"
+          :options="aeAccountsSelectOptions"
           account-select
         />
         <Field
@@ -259,7 +259,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { accountsSelectOptions } = useAccounts({ store });
+    const { aeAccountsSelectOptions } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const errors = useFormErrors();
 
@@ -437,7 +437,7 @@ export default defineComponent({
       MULTISIG_CREATION_PHASES,
       STEPS,
       currentMultisigAccountId,
-      accountsSelectOptions,
+      aeAccountsSelectOptions,
       multisigAccount,
       multisigAccountCreationPhase,
       pendingMultisigCreationTxs,

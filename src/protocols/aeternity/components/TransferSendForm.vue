@@ -343,7 +343,7 @@ export default defineComponent({
       if (val) {
         store.commit(
           'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === val)?.idx,
+          accounts.value.find(({ address }) => address === val)?.globalIndex,
         );
         if (formModel.value.amount && amountField.value) {
           amountField.value.validate();
@@ -403,7 +403,7 @@ export default defineComponent({
           props.isMultisig
           && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
         ) {
-          store.commit('accounts/setActiveIdx', mySignerAccounts[0].idx);
+          store.commit('accounts/setActiveIdx', mySignerAccounts[0].globalIndex);
         }
 
         const { query } = route;

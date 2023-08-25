@@ -4,7 +4,12 @@
     class="account-details"
   >
     <div class="account-info-wrapper">
+      <slot
+        v-if="$slots['account-info']"
+        name="account-info"
+      />
       <AccountInfo
+        v-else
         :address="activeAccount.address"
         :name="activeAccount.name"
         :idx="activeAccount.idx"
@@ -18,23 +23,33 @@
       />
     </div>
     <div>
+      <slot
+        v-if="$slots.balance"
+        name="balance"
+      />
       <BalanceInfo
+        v-else
         :balance="balanceNumeric"
         :protocol="activeAccount.protocol"
         horizontal-offline-message
       />
 
       <div class="buttons">
-        <OpenTransferReceiveModalButton />
-        <OpenTransferSendModalButton />
-        <slot name="buttons" />
+        <template v-if="!withoutDefaultButtons">
+          <OpenTransferReceiveModalButton />
+          <OpenTransferSendModalButton />
+        </template>
+        <slot
+          v-if="$slots.buttons"
+          name="buttons"
+        />
       </div>
 
       <div class="header">
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName!"
+          :key="routeName"
           :show-filters="showFilters"
         />
       </div>
@@ -89,6 +104,9 @@ export default defineComponent({
     OpenTransferReceiveModalButton,
     TransactionAndTokenFilter,
     BtnClose,
+  },
+  props: {
+    withoutDefaultButtons: Boolean,
   },
   setup() {
     const route = useRoute();

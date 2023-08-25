@@ -160,6 +160,7 @@ export default defineComponent({
 
       padding-right: 8px;
       opacity: 0.6;
+      text-transform: capitalize;
       user-select: none;
     }
   }
