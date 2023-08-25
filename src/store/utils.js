@@ -10,7 +10,7 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accounts: { list, activeIdx, hdWallet: { nextAccountIdx } = {} } = {},
+  accounts: { list, activeIdx } = {},
   hiddenCards,
 }) => ({
   migrations,
@@ -24,6 +24,6 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accounts: { list, activeIdx, hdWallet: { nextAccountIdx } },
+  accounts: { list, activeIdx },
   hiddenCards,
 });

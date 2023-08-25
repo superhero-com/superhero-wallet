@@ -23,9 +23,6 @@ export default {
     type: ACCOUNT_HD_WALLET,
   },
 
-  state: {
-    nextAccountIdx: 1,
-  },
   actions: {
     async isAccountUsed(context, address) {
       const { getAeSdk } = useAeSdk({ store: context });
@@ -43,18 +40,20 @@ export default {
         });
       }
     },
-    create({ state, commit }, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
-      commit(
+    create(store, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
+      const { incrementProtocolNextAccountIdx, protocolNextAccountIdx } = useAccounts({ store });
+
+      store.commit(
         'accounts/add',
         {
-          idx: state.nextAccountIdx,
+          idx: protocolNextAccountIdx.value[protocol] || 0,
           type: ACCOUNT_HD_WALLET,
           isRestored,
           protocol,
         },
         { root: true },
       );
-      state.nextAccountIdx += 1;
+      incrementProtocolNextAccountIdx(protocol);
     },
     signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
       const { activeAccount, getAccountByAddress } = useAccounts({

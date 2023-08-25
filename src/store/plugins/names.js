@@ -34,7 +34,7 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
-  const { aeAccounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, activeAccount, aeNextAccountIdx } = useAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -252,9 +252,9 @@ export default (store) => {
   }, { immediate: true, deep: true });
 
   store.watch(
-    ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
-    async () => {
-      if (isMiddlewareReady.value) {
+    () => aeNextAccountIdx.value,
+    async (val, oldVal) => {
+      if (isMiddlewareReady.value && val !== oldVal) {
         await Promise.all([
           store.dispatch('names/fetchOwned').catch(() => {}),
           store.dispatch('names/setDefaults'),

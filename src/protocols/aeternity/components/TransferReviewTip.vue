@@ -30,7 +30,7 @@
           :str="activeAccount.name"
         />
         <div v-else>
-          {{ getDefaultAccountLabel({ idx: activeAccount.idx }) }}
+          {{ getDefaultAccountLabel({ protocolIdx: activeAccount.idx }) }}
         </div>
         <AddressTruncated
           show-explorer-link

@@ -31,7 +31,7 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ getDefaultAccountLabel({ protocol: protocolName, idx }) }}
+        {{ getDefaultAccountLabel({ protocol: protocolName, protocolIdx: idx }) }}
       </div>
       <div
         v-if="address && address.length"

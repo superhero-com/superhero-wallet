@@ -187,6 +187,7 @@ export interface IAccount extends IKeyPair, IAccountRaw {
   address: Encoded.AccountAddress;
   name?: string; // .chain
   protocol: Protocol;
+  globalIndex: number;
 }
 
 /**

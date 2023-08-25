@@ -24,7 +24,7 @@ export default (store) => {
   const { activeNetwork } = useNetworks();
   const { getAeSdk } = useAeSdk({ store });
   const { fetchFromMiddleware } = useMiddleware();
-  const { aeAccounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, activeAccount, aeNextAccountIdx } = useAccounts({ store });
   const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {
@@ -212,9 +212,11 @@ export default (store) => {
   );
 
   store.watch(
-    ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
-    async () => {
-      await store.dispatch('fungibleTokens/loadTokenBalances');
+    () => aeNextAccountIdx.value,
+    async (val, oldVal) => {
+      if (val !== oldVal) {
+        await store.dispatch('fungibleTokens/loadTokenBalances');
+      }
     },
   );
 };

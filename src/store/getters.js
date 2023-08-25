@@ -4,7 +4,6 @@ import { toShiftedBigNumber } from '@/utils';
 import {
   ACCOUNT_HD_WALLET,
   NODE_STATUS_CONNECTED,
-  PROTOCOLS,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -22,14 +21,15 @@ export default {
     return mnemonicToSeed(mnemonic);
   },
   accounts({ accounts: { list } }, getters) {
-    if (!getters.wallet) return [];
-
-    const protocolIdx = PROTOCOLS.reduce((acc, protocol) => ({ ...acc, [protocol]: 0 }), {});
+    if (!getters.wallet) {
+      return [];
+    }
 
     return list
       .map(({
         idx, type, protocol = PROTOCOL_AETERNITY, ...acc
-      }) => ({
+      }, index) => ({
+        globalIndex: index,
         idx,
         type,
         protocol,
@@ -37,8 +37,10 @@ export default {
         ...(type === ACCOUNT_HD_WALLET
           ? ProtocolAdapterFactory
             .getAdapter(protocol)
-            // eslint-disable-next-line no-plusplus
-            .getHdWalletAccountFromMnemonicSeed(getters.wallet, protocolIdx[protocol]++)
+            .getHdWalletAccountFromMnemonicSeed(
+              getters.wallet,
+              idx,
+            )
           : {}
         ),
       }))

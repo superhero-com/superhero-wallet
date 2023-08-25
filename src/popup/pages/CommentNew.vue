@@ -2,6 +2,7 @@
   <div class="comment-new">
     <AccountSelector
       v-model="creatorAddress"
+      :options="aeAccountsSelectOptions"
       @select="setActiveAccountByAddress"
     />
     <div class="comment-text">
@@ -71,7 +72,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
       activeAccount,
-      accountsSelectOptions,
+      aeAccountsSelectOptions,
       setActiveAccountByAddress,
     } = useAccounts({ store });
 
@@ -133,8 +134,8 @@ export default defineComponent({
     })();
 
     return {
-      accountsSelectOptions,
       creatorAddress,
+      aeAccountsSelectOptions,
       id,
       parentId,
       text,

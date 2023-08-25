@@ -104,12 +104,7 @@ export default defineComponent({
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store });
-    const {
-      accounts,
-      isLocalAccountAddress,
-    } = useAccounts({
-      store,
-    });
+    const { isLocalAccountAddress } = useAccounts({ store });
     const {
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
@@ -190,7 +185,6 @@ export default defineComponent({
 
     return {
       activeMultisigAccount,
-      accounts,
       isLocalAccountAddress,
       infoBox,
       pendingMultisigTxSortedSigners,

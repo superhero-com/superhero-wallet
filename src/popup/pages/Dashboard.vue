@@ -24,7 +24,7 @@
       />
 
       <DashboardCard
-        v-if="isNodeMainnet || isNodeTestnet"
+        v-if="(isNodeMainnet || isNodeTestnet) && activeAccount.protocol === PROTOCOL_AETERNITY"
         :title="$t('dashboard.nameCard.title')"
         :description="$t('dashboard.nameCard.description')"
         :btn-text="$t('dashboard.nameCard.button')"
@@ -42,7 +42,11 @@
 import { defineComponent } from 'vue';
 
 import { useStore } from 'vuex';
-import { DASHBOARD_CARD_ID, IS_IOS } from '@/constants';
+import {
+  DASHBOARD_CARD_ID,
+  IS_IOS,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '@/popup/router/routeNames';
 import { useAccounts, useAeSdk } from '@/composables';
 
@@ -75,6 +79,7 @@ export default defineComponent({
     const store = useStore();
 
     const {
+      activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
     } = useAccounts({ store });
@@ -82,6 +87,7 @@ export default defineComponent({
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     return {
+      PROTOCOL_AETERNITY,
       DASHBOARD_CARD_ID,
       IS_IOS,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
@@ -89,6 +95,7 @@ export default defineComponent({
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
+      activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
       buyBackground,
