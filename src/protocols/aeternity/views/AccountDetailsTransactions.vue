@@ -1,13 +1,14 @@
 <template>
-  <div class="transaction-list-wrapper">
+  <div class="account-details-transactions">
     <TransactionList
       v-if="isOnline"
       :loading="loading"
       :transactions="loadedTransactionList"
-      is-multisig
+      @load-more="loadMore()"
     />
     <MessageOffline
       v-else
+      class="offline-message"
       :text="$t('modals.accountDetails.transactionsNotAvailable')"
     />
   </div>
@@ -23,36 +24,35 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { ICommonTransaction } from '@/types';
+
+import { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
 import {
+  useAccounts,
   useConnection,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
   useTransactionAndTokenFilter,
   useTransactionList,
   useUi,
   useViewport,
 } from '@/composables';
 
-import MessageOffline from '../components/MessageOffline.vue';
-import TransactionList from '../components/TransactionList.vue';
+import MessageOffline from '@/popup/components/MessageOffline.vue';
+import TransactionList from '@/popup/components/TransactionList.vue';
 
 export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
   },
-  props: {
-    showFilters: Boolean,
-  },
   setup() {
+    let polling: NodeJS.Timer | null;
+
     const store = useStore();
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
     const { viewportElement } = useViewport();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeAccount } = useAccounts({ store });
 
     const {
       getAccountAllTransactions,
@@ -62,21 +62,16 @@ export default defineComponent({
 
     const { displayMode } = useTransactionAndTokenFilter();
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
-
     const loading = ref(false);
     const isDestroyed = ref(false);
 
-    const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
-
     const canLoadMore = computed(() => (
-      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
+      !!getAccountTransactionsState(activeAccount.value.address).nextPageUrl
     ));
 
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountAllTransactions(currentAddress.value!),
-      ...pendingMultisigTransaction.value ? [pendingMultisigTransaction.value] : [],
-    ]);
+    const loadedTransactionList = computed(
+      (): ICommonTransaction[] => getAccountAllTransactions(activeAccount.value.address!),
+    );
 
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
@@ -84,7 +79,7 @@ export default defineComponent({
         await fetchTransactions(
           TXS_PER_PAGE,
           !!recent,
-          currentAddress.value!,
+          activeAccount.value.address,
         );
       } finally {
         loading.value = false;
@@ -123,8 +118,6 @@ export default defineComponent({
       }
     });
 
-    let polling: NodeJS.Timer | null = null;
-
     onMounted(() => {
       loadMore();
       polling = setInterval(() => {
@@ -152,7 +145,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.transaction-list-wrapper {
+.account-details-transactions {
   --filter-top-offset: 175px;
 
   :deep(.filters) {
@@ -161,7 +154,7 @@ export default defineComponent({
   }
 
   .offline-message {
-    text-align: center;
+    margin-top: 40px;
   }
 }
 </style>
