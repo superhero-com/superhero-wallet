@@ -30,11 +30,12 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccounts } from '@/composables';
 import type { ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOL_BITCOIN } from '@/constants';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { satoshiToBtc } from '@/protocols/bitcoin/helpers';
+import { toBitcoin } from 'satoshi-bitcoin';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import BtcIcon from '@/icons/coin/bitcoin.svg';
@@ -51,7 +52,8 @@ export default defineComponent({
     const { activeAccount } = useAccounts({ store });
 
     const hash = route.params.hash as string;
-    const transactionOwner = route.params.transactionOwner as `bc${string}`;
+
+    const transactionOwner = route.params.transactionOwner as string;
 
     const transaction = ref<ITransaction>();
 
@@ -59,9 +61,9 @@ export default defineComponent({
       // TODO: link to the bitcoin explorer should be moved to the network settings
       () => `https://www.blockchain.com/explorer/transactions/btc/${transaction.value?.hash}`,
     );
-    const transactionFee = computed((): number => satoshiToBtc(transaction.value?.tx?.fee ?? 0));
+    const transactionFee = computed((): number => toBitcoin(transaction.value?.tx?.fee ?? 0));
     const totalAmount = computed((): number => transaction.value?.tx
-      ? satoshiToBtc(transaction.value.tx.fee + transaction.value.tx.amount)
+      ? toBitcoin(transaction.value.tx.fee + transaction.value.tx.amount)
       : 0);
 
     const direction = computed(() => activeAccount.value.address === transaction.value?.tx?.senderId
@@ -76,52 +78,13 @@ export default defineComponent({
       image: BtcIcon,
     }]);
 
-    async function getBtcTransactionByHash() { // suppose to have hash as param
-      return {
-        hash: '4f65fc1abfe32f8ed404dcde07a0a5b9fdd070611603167a56130bbd322085e8',
-        fee: 1153,
-        txIndex: 8181070991696226,
-        time: 1692168597,
-        blockIndex: 803415,
-        blockHeight: 803415,
-        inputs: [
-          {
-            prevOut: {
-              addr: 'bc1qcyxma4ww6axx4e8ctekl9rlyet6kl9ncheven7',
-              spent: true,
-              value: 2347000,
-            },
-          },
-        ],
-        out: [
-          {
-            spent: true,
-            value: 2345847,
-            addr: '1757VqqVDyXsUqjd1mwXEmWwFA6AqzaUdb',
-          },
-        ],
-        result: -2347000,
-        balance: 0,
-      };
-    }
-
     onMounted(async () => {
       try {
-        const rawTransaction = await getBtcTransactionByHash();
+        const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
         transaction.value = {
-          hash: rawTransaction.hash,
-          blockHeight: rawTransaction.blockHeight,
-          microTime: rawTransaction.time * 1000,
-          tx: {
-            amount: rawTransaction.out[0].value,
-            fee: rawTransaction.fee,
-            recipientId: rawTransaction.out[0].addr,
-            senderId: rawTransaction.inputs[0].prevOut.addr,
-            type: 'SpendTx', // TODO: consider to not being dependent on the ae types/structure for other coins than ae
-          },
+          ...await bitcoinAdapter.getTransactionByHash(hash),
           transactionOwner,
-          totalAmount: Math.abs(rawTransaction.result),
-        } as any;
+        };
       } catch (e) {
         router.push({ name: ROUTE_NOT_FOUND });
       }
@@ -132,7 +95,6 @@ export default defineComponent({
       PROTOCOL_BITCOIN,
       direction,
       explorerUrl,
-      getBtcTransactionByHash,
       hash,
       transaction,
       transactionFee,

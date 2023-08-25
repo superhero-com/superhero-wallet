@@ -352,13 +352,13 @@ export interface ITx {
   abiVersion?: number
   accountId?: Encoded.AccountAddress
   amount: number
-  arguments: TxArguments[];
+  arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: Encoded.AccountAddress
+  callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
   code?: string
   commitmentId?: any
-  contractId: Encoded.ContractAddress
+  contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
   fee: number
   function?: TxFunction
   gaId?: string; // Generalized Account ID

@@ -68,6 +68,13 @@ export abstract class BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any>;
 
+  abstract getTransactionByHash(hash: string): Promise<any>
+
+  abstract fetchTransactions(
+    address: string,
+    lastTxId?: string,
+  ): Promise<any>;
+
   /**
    * Spend coin
    * @param options Protocol specific parameters

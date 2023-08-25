@@ -33,6 +33,7 @@ import {
   BTC_SYMBOL,
 } from '@/protocols/bitcoin/config';
 import { fetchJson } from '@/utils';
+import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
@@ -138,6 +139,24 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       }
     }
     return lastNotEmptyIdx;
+  }
+
+  async fetchTransactions(address: string, lastTxId?: string) {
+    const { activeNetwork } = useNetworks();
+
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+    const rawTransactions = await fetchJson(lastTxId
+      ? `${nodeUrl}/address/${address}/txs/chain/${lastTxId}`
+      : `${nodeUrl}/address/${address}/txs`);
+    return rawTransactions.map((t: any) => normalizeTransactionStructure(t, address));
+  }
+
+  async getTransactionByHash(hash: string) { // it is not actually a hash it's an id
+    const { activeNetwork } = useNetworks();
+
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+    const rawTransaction = await fetchJson(`${nodeUrl}/tx/${hash}`);
+    return normalizeTransactionStructure(rawTransaction);
   }
 
   async constructAndSignTx(
