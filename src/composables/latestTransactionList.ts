@@ -9,7 +9,7 @@ import type { IDefaultComposableOptions } from '@/types';
 import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
 import { handleUnknownError, pipe, sortTransactionsByDate } from '@/utils';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
-import { useAccounts } from './accounts';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 import { useBalances } from './balances';
 import { useTransactionTx } from './transactionTx';
 import { useTransactionList } from './transactionList';
@@ -25,7 +25,7 @@ const { onNetworkChange } = createNetworkWatcher();
  * that wants to use this data.
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { aeAccounts } = useAccounts({ store });
+  const { aeAccounts } = useAeAccounts({ store });
   const { balancesTotal } = useBalances({ store });
   const { nodeNetworkId } = useAeSdk({ store });
 

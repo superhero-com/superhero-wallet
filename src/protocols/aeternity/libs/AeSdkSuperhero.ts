@@ -6,8 +6,8 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
-import { useAccounts } from '@/composables/accounts';
 import { AccountSuperhero } from '@/lib/accounts/superhero';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 
 /**
  * Custom fields in options, `modal` and `payload` for spend function.
@@ -37,17 +37,17 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   getAccounts() {
-    const { activeAccount } = useAccounts({ store: this.store });
+    const { lastActiveAeAccount } = useAeAccounts({ store: this.store });
     return ({
-      current: { [activeAccount.value.address]: {} },
+      current: { [lastActiveAeAccount.value.address]: {} },
       connected: {
       },
     });
   }
 
   addresses() {
-    const { accountsAddressList } = useAccounts({ store: this.store });
-    return accountsAddressList.value as Encoded.AccountAddress[];
+    const { aeAddressList } = useAeAccounts({ store: this.store });
+    return aeAddressList.value as Encoded.AccountAddress[];
   }
 
   spendWithCustomOptions(

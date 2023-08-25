@@ -7,14 +7,13 @@ import {
 } from '@/utils';
 import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/constants';
 import {
-  useAccounts,
   useAeSdk,
   useMiddleware,
   useModals,
   useTransactionList,
 } from '@/composables';
 import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeAccounts, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { tg } from './languages';
 
 export default (store) => {
@@ -39,7 +38,7 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
-  const { aeAccounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, lastActiveAeAccount } = useAeAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -58,7 +57,7 @@ export default (store) => {
         return defaults[`${address}-${nodeNetworkId.value}`];
       },
       getPreferred: ({ preferred }, { getDefault }) => (address) => {
-        if (activeAccount.value.address === address) {
+        if (lastActiveAeAccount.value.address === address) {
           return getDefault(address);
         }
         store.dispatch('names/setPreferred', address);

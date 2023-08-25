@@ -37,7 +37,7 @@ import {
   AE_NETWORK_TESTNET_ID,
   DEX_CONTRACTS,
 } from '@/protocols/aeternity/config';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeAccounts, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { useModals } from './modals';
 
@@ -53,7 +53,8 @@ let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk({ store }: IDefaultComposableOptions) {
   const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
-  const { isLoggedIn, activeAccount } = useAccounts({ store });
+  const { isLoggedIn } = useAccounts({ store });
+  const { lastActiveAeAccount } = useAeAccounts({ store });
   const { openModal } = useModals();
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
@@ -123,7 +124,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         if (!(await store.dispatch('permissions/requestAddressForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: lastActiveAeAccount.value.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
             : openModal(MODAL_CONFIRM_CONNECT, {
@@ -139,7 +140,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         ) {
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         }
-        return activeAccount.value.address;
+        return lastActiveAeAccount.value.address;
       },
       async onAskAccounts(aeppId: string) {
         const aepp = aeppInfo[aeppId];
@@ -148,7 +149,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         if (!(await store.dispatch('permissions/requestAllAddressesForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: lastActiveAeAccount.value.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_ACCOUNT_LIST)
             : openModal(MODAL_CONFIRM_ACCOUNT_LIST, {
@@ -164,8 +165,8 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         ) {
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         }
-        const { accountsAddressList } = useAccounts({ store });
-        return accountsAddressList.value;
+        const { aeAddressList } = useAeAccounts({ store });
+        return aeAddressList.value;
       },
     });
 

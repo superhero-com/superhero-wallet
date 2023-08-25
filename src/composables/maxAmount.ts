@@ -38,9 +38,9 @@ import {
 } from '@/protocols/aeternity/config';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
 
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
-import { useAccounts } from './accounts';
 
 export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
@@ -53,7 +53,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const { getAeSdk } = useAeSdk({ store });
   const { balance } = useBalances({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { lastActiveAeAccount } = useAeAccounts({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
@@ -107,13 +107,13 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           calldata = tokenInstance._calldata.encode(
             tokenInstance._name,
             'transfer',
-            [activeAccount.value.address, amount.toFixed()],
+            [lastActiveAeAccount.value.address, amount.toFixed()],
           );
         }
         fee.value = BigNumber(unpackTx(
           buildTx({
             tag: Tag.ContractCallTx,
-            callerId: activeAccount.value.address,
+            callerId: lastActiveAeAccount.value.address,
             contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
@@ -133,8 +133,8 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const minFee = BigNumber(unpackTx(
         buildTx({
           tag: Tag.SpendTx,
-          senderId: activeAccount.value.address,
-          recipientId: activeAccount.value.address,
+          senderId: lastActiveAeAccount.value.address,
+          recipientId: lastActiveAeAccount.value.address,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
@@ -154,7 +154,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (!tokenInstance) return;
       await getAeSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.balance(activeAccount.value.address)).decodedResult ?? 0,
+        (await tokenInstance.balance(lastActiveAeAccount.value.address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
@@ -162,7 +162,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       try {
         nonce.value = (await aeSdk.api
-          .getAccountByPubkey(activeAccount.value.address))?.nonce;
+          .getAccountByPubkey(lastActiveAeAccount.value.address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }

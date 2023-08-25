@@ -8,7 +8,7 @@ import {
   METHODS,
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
-import { useAccounts } from '@/composables/accounts';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 import { useModals } from '@/composables/modals';
 import {
   IN_FRAME,
@@ -29,8 +29,8 @@ export class AccountSuperhero extends AccountBase {
   constructor(store: Store<any>) {
     super();
     this.store = store;
-    const { activeAccount } = useAccounts({ store });
-    this.address = activeAccount.value.address as Encoded.AccountAddress;
+    const { lastActiveAeAccount } = useAeAccounts({ store });
+    this.address = lastActiveAeAccount.value.address as Encoded.AccountAddress;
   }
 
   signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
@@ -62,9 +62,9 @@ export class AccountSuperhero extends AccountBase {
   }
 
   sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
-    const { activeAccount } = useAccounts({ store: this.store });
+    const { lastActiveAeAccount } = useAeAccounts({ store: this.store });
     return IS_EXTENSION_BACKGROUND
-      ? sign(data, activeAccount.value.secretKey) as any
+      ? sign(data, lastActiveAeAccount.value.secretKey) as any
       : this.store.dispatch('accounts/sign', data, options);
   }
 

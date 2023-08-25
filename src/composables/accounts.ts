@@ -8,7 +8,6 @@ import type {
   IFormSelectOption,
   Protocol,
 } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
@@ -18,9 +17,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accountsRaw = computed((): IAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => store.getters.accounts || []);
-  const aeAccounts = computed(
-    () => accounts.value.filter(({ protocol }) => protocol === PROTOCOL_AETERNITY),
-  );
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
   const isLoggedIn = computed(
@@ -74,7 +70,6 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
 
   return {
     accounts,
-    aeAccounts,
     accountsAddressList,
     accountsSelectOptions,
     accountsRaw,

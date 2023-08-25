@@ -12,19 +12,19 @@ import {
   toShiftedBigNumber,
 } from '@/utils';
 import {
-  useAccounts,
   useMiddleware,
   useAeSdk,
   useNetworks,
   useTippingContracts,
 } from '@/composables';
 import { calculateSupplyAmount } from '@/protocols/aeternity/helpers';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 
 export default (store) => {
   const { activeNetwork } = useNetworks();
   const { getAeSdk } = useAeSdk({ store });
   const { fetchFromMiddleware } = useMiddleware();
-  const { aeAccounts, activeAccount } = useAccounts({ store });
+  const { aeAccounts, lastActiveAeAccount } = useAeAccounts({ store });
   const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {
@@ -35,7 +35,8 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      tokenBalances: (state, { getTokenBalance }) => getTokenBalance(activeAccount.value.address),
+      tokenBalances:
+      (state, { getTokenBalance }) => getTokenBalance(lastActiveAeAccount.value.address),
     },
     mutations: {
       setAvailableTokens(state, payload) {
@@ -103,7 +104,7 @@ export default (store) => {
         [contractId, amount],
       ) {
         const aeSdk = await getAeSdk();
-        const selectedToken = store.state.fungibleTokens.tokens?.[activeAccount.value.address]
+        const selectedToken = store.state.fungibleTokens.tokens?.[lastActiveAeAccount.value.address]
           ?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await aeSdk.initializeContract({
@@ -111,7 +112,7 @@ export default (store) => {
           address: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.allowance({
-          from_account: activeAccount.value.address,
+          from_account: lastActiveAeAccount.value.address,
           for_account: tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'),
         });
         const allowanceAmount = decodedResult !== undefined
@@ -144,7 +145,7 @@ export default (store) => {
             { decodedResult: totalSupply },
           ] = await Promise.all([
             tokenContract.balances(),
-            tokenContract.balance(activeAccount.value.address),
+            tokenContract.balance(lastActiveAeAccount.value.address),
             tokenContract.token0(),
             tokenContract.token1(),
             tokenContract.get_reserves(),

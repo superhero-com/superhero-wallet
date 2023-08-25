@@ -70,8 +70,9 @@ import {
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
 } from '@/constants';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 import { useState } from '../../../composables/vuex';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -97,7 +98,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccount } = useAccounts({ store });
+    const { lastActiveAeAccount } = useAeAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
 
     const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
@@ -128,7 +129,7 @@ export default defineComponent({
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-      activeAccount,
+      activeAccount: lastActiveAeAccount,
       sender,
       confirm,
       cancel,

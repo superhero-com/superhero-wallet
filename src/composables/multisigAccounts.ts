@@ -23,11 +23,10 @@ import {
   MULTISIG_SUPPORTED_CONTRACT_VERSION,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeAccounts, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
-import { useAccounts } from './accounts';
 
 const POLLING_INTERVAL = 7000;
 
@@ -66,7 +65,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { aeAccounts } = useAccounts({ store });
+  const { aeAccounts } = useAeAccounts({ store });
 
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
     ...multisigAccounts.value,

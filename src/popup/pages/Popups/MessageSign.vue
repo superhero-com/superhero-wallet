@@ -48,8 +48,9 @@
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
+import { useAeAccounts } from '@/protocols/aeternity/composables';
 import { RejectedByUserError } from '../../../lib/errors';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { usePopupProps } from '../../../composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -67,7 +68,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { lastActiveAeAccount } = useAeAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
 
     function cancel() {
@@ -79,7 +80,7 @@ export default defineComponent({
     });
 
     return {
-      activeAccount,
+      activeAccount: lastActiveAeAccount,
       popupProps,
       sender,
       cancel,
