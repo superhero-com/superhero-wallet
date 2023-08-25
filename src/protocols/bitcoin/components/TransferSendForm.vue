@@ -81,29 +81,35 @@ import {
   useAccounts,
   useBalances,
 } from '@/composables';
-import type {
-  TransferFormModel,
-} from '@/types';
-import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import type { TransferFormModel } from '@/types';
+import {
+  BTC_COIN_NAME,
+  BTC_SYMBOL,
+} from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-
 import { PROTOCOL_BITCOIN } from '@/constants';
+import {
+  executeAndSetInterval,
+  fetchJson,
+} from '@/utils';
+
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
-
 import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
+import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
-import { fetchJson, executeAndSetInterval } from '@/utils';
 
 export default defineComponent({
   name: 'BtcTransferSendForm',
   components: {
+    BtnPlain,
     TransactionSpeedPicker,
     DetailsItem,
     TransferSendAmount,

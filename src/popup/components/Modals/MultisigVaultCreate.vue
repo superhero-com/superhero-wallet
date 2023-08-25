@@ -180,11 +180,21 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Field, Form, useFormErrors } from 'vee-validate';
+import {
+  Field,
+  Form,
+  useFormErrors,
+} from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import { MODAL_READ_QR_CODE } from '@/constants';
-import { excludeFalsy, handleUnknownError } from '@/utils';
+import {
+  MODAL_READ_QR_CODE,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import {
+  excludeFalsy,
+  handleUnknownError,
+} from '@/utils';
 import type {
   ICreateMultisigAccount,
   ObjectValues,
@@ -198,10 +208,11 @@ import {
 } from '@/composables';
 import { validateHash } from '@/protocols/aeternity/helpers';
 import {
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   MULTISIG_CREATION_PHASES,
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
 } from '@/protocols/aeternity/config';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
@@ -324,7 +335,10 @@ export default defineComponent({
      */
     async function openScanQrModal(signerIndex: number) {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: t('pages.send.scanAddress'),
+        title: t(
+          'pages.send.scanAddress',
+          { protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY).protocolName },
+        ),
         icon: 'critical',
       });
 
