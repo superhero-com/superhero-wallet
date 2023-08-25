@@ -36,7 +36,8 @@ export default {
       const numberOfAccounts = await ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
         .discoverAccounts(wallet);
-      for (let i = 0; i <= numberOfAccounts; i += 1) {
+
+      for (let i = 0; i < numberOfAccounts; i += 1) {
         dispatch('create', {
           isRestored: true,
           protocol: PROTOCOL_AETERNITY,
