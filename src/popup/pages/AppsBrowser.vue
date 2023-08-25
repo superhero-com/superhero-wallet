@@ -141,6 +141,7 @@ export default defineComponent({
     const selectedApp = ref();
     const iframeRef = ref();
     const customAppURL = ref('');
+    const currentClientId = ref('');
     let shareWalletInfoInterval : any;
 
     const { getAeSdk } = useAeSdk({ store });
@@ -160,16 +161,17 @@ export default defineComponent({
         const connection = new BrowserWindowMessageConnection({
           target,
           origin: undefined,
-          debug: true,
         });
-        const clientId = sdk.addRpcClient(connection);
+        currentClientId.value = sdk.addRpcClient(connection);
 
-        sdk.shareWalletInfo(clientId);
+        sdk.shareWalletInfo(currentClientId.value);
 
         shareWalletInfoInterval = setInterval(
           () => {
             try {
-              sdk.shareWalletInfo(clientId);
+              if (sdk._clients.get(currentClientId.value)) {
+                sdk.shareWalletInfo(currentClientId.value);
+              }
             } catch (e) {
               handleUnknownError(e);
             }
@@ -197,9 +199,24 @@ export default defineComponent({
       }, () => { });
     }
 
-    function back() {
+    /**
+     * Clean up after the iframe is closed
+     */
+    async function onAppDisconnected() {
       selectedApp.value = null;
       customAppURL.value = '';
+
+      if (shareWalletInfoInterval) {
+        clearInterval(shareWalletInfoInterval);
+      }
+      if (currentClientId.value) {
+        const sdk = await getAeSdk();
+        sdk.removeRpcClient(currentClientId.value);
+      }
+    }
+
+    function back() {
+      onAppDisconnected();
     }
 
     onMounted(() => {
@@ -211,9 +228,7 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      if (shareWalletInfoInterval) {
-        clearInterval(shareWalletInfoInterval);
-      }
+      onAppDisconnected();
     });
 
     return {
