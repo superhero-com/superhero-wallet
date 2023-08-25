@@ -14,10 +14,7 @@ import type {
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
-import {
-  MAXIMUM_ACCOUNTS_TO_DISCOVER,
-  PROTOCOL_AETERNITY,
-} from '@/constants';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/store/plugins/languages';
@@ -35,6 +32,13 @@ import {
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
 import { aettosToAe } from '../helpers';
+
+/**
+ * Address gap limit is currently set to 5.
+ * If the software hits 5 unused addresses in a row,
+ * it expects there are no used addresses beyond this point and stops searching the address chain.
+*/
+const ADDRESS_GAP_LIMIT = 5;
 
 interface IAmountDecimalPlaces {
   highPrecision?: boolean;
@@ -145,14 +149,28 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override async discoverAccounts(seed: Uint8Array): Promise<number> {
     let lastNotEmptyIdx = 0;
-    // First Aeternity account is present in the state, hence index starts from 1
-    for (let i = 1; i < MAXIMUM_ACCOUNTS_TO_DISCOVER; i += 1) {
-      const account = this.getHdWalletAccountFromMnemonicSeed(seed, i);
-      // eslint-disable-next-line no-await-in-loop
-      if (await this.isAccountUsed(account.publicKey)) {
-        lastNotEmptyIdx = i - 1;
+    let lastIndex = 0;
+    let isAccountUsedArray: Boolean[] = [];
+
+    do {
+      try {
+        lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+        lastIndex += isAccountUsedArray.length;
+        // eslint-disable-next-line no-await-in-loop
+        isAccountUsedArray = await Promise.all(
+          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1)
+            // eslint-disable-next-line no-loop-func
+            .fill(0).map((x, i) => i + lastIndex).map((index) => this.isAccountUsed(
+              this.getHdWalletAccountFromMnemonicSeed(seed, index).publicKey,
+            )),
+        );
+      } catch (e) {
+        break;
       }
-    }
+    } while (!(
+      isAccountUsedArray.lastIndexOf(true) === -1
+      || isAccountUsedArray.filter((isAccountUsed) => !isAccountUsed).length === ADDRESS_GAP_LIMIT
+    ));
     return lastNotEmptyIdx;
   }
 
