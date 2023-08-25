@@ -13,6 +13,7 @@ export default defineComponent({
   props: {
     isMoreData: { type: Boolean, required: true },
   },
+  emits: ['loadMore'],
   setup(props, { emit }) {
     const { onViewportScroll } = useViewport();
 

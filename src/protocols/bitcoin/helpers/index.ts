@@ -1,3 +1,5 @@
+import { ITransaction } from '@/types';
+import { PROTOCOL_BITCOIN } from '@/constants';
 import { BTC_COIN_PRECISION } from '../config';
 
 export function satoshiToBtc(amount: number) {
@@ -7,18 +9,30 @@ export function satoshiToBtc(amount: number) {
 export function normalizeTransactionStructure(
   transaction: any,
   transactionOwner?: string,
-): any {
+): ITransaction {
+  const {
+    fee,
+    status,
+    txid,
+    vin,
+    vout,
+  } = transaction;
+
   return {
-    transactionOwner,
-    hash: transaction.txid, // TODO: we can go with additional field
-    microTime: transaction.status.block_time,
-    pending: !transaction.status.confirmed,
+    protocol: PROTOCOL_BITCOIN,
+    transactionOwner: transactionOwner as any,
+    hash: txid, // TODO: we can go with additional field
+    microTime: status.block_time * 1000,
+    pending: !status.confirmed,
     tx: {
-      amount: transaction.vout[0].value,
-      fee: transaction.fee,
-      senderId: transaction.vin[0].prevout.scriptpubkey_address,
-      recipientId: transaction.vout[0].scriptpubkey_address,
+      amount: satoshiToBtc(vout[0].value),
+      fee,
+      senderId: vin[0].prevout.scriptpubkey_address,
+      recipientId: vout[0].scriptpubkey_address,
       type: 'SpendTx', // TODO: create own types
+      arguments: [],
+      callerId: '' as any,
+      contractId: '' as any,
     },
   };
 }
