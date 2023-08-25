@@ -186,7 +186,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       },
     );
 
-    if (amount + toSatoshi(options.fee) > totalBalance) {
+    if (amountInSathoshi + toSatoshi(options.fee) > totalBalance) {
       throw new Error('Insufficient balance');
     }
 

@@ -33,10 +33,10 @@ import {
   ref,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAccounts, useModals } from '@/composables';
+import { useAccounts, useModals, useUi } from '@/composables';
 import type { TransferFormModel } from '@/types';
-import { toShiftedBigNumber } from '@/utils';
 import { PROTOCOL_BITCOIN } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -59,8 +59,10 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { t } = useI18n();
+    const router = useRouter();
+    const { homeRouteName } = useUi();
 
     const { openDefaultModal } = useModals();
 
@@ -83,7 +85,7 @@ export default defineComponent({
       try {
         loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: props.transferData.fee,
+          fee: props.transferData.fee?.toNumber(),
           ...activeAccount.value,
         });
         return hash;
@@ -97,25 +99,24 @@ export default defineComponent({
 
     async function submit(): Promise<void> {
       const {
-        amount: amountRaw,
+        amount,
         address: recipient,
         selectedAsset,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset) {
+      if (!amount || !recipient || !selectedAsset) {
         return;
       }
-
-      const amount = toShiftedBigNumber(amountRaw, selectedAsset.decimals);
-
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const hash = await transfer({
         amount,
         recipient,
         selectedAsset,
       });
+
       // TODO - redirect after transfer function will be ready
-      // router.push({ name: homeRouteName.value, query: { latestTxHash: hash } });
+      router.push({ name: homeRouteName.value });
+      emit('success');
     }
 
     return {

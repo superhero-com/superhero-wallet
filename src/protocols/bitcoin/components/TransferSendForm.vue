@@ -36,7 +36,7 @@
           <BtnPlain
             class="max-button"
             :class="{ chosen: formModel.amount.toString() === max.toString() }"
-            @click="formModel.amount = max"
+            @click="formModel.amount = max.isPositive() ? max : 0"
           >
             {{ $t('common.max') }}
           </BtnPlain>
@@ -99,7 +99,7 @@ import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vu
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
-import { fetchJson } from '@/utils';
+import { fetchJson, executeAndSetInterval } from '@/utils';
 
 export default defineComponent({
   name: 'BtcTransferSendForm',
@@ -179,7 +179,10 @@ export default defineComponent({
       const { activeNetwork } = useNetworks();
       const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
       const byteSize = (await bitcoinAdapter.constructAndSignTx(
-        +balance.value,
+        // TODO: changed to 0 because balance.value can differs
+        // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
+        // consider returning an actual amount in future
+        0,
         formModel.value.address! || activeAccount.value.address,
         {
           fee: 0,
@@ -212,7 +215,7 @@ export default defineComponent({
     let polling: NodeJS.Timer | null = null;
 
     onMounted(() => {
-      polling = setInterval(() => {
+      polling = executeAndSetInterval(() => {
         updateFeeList();
       }, 5000);
     });
