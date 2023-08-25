@@ -7,7 +7,7 @@
         v-slot="{ field, errorMessage }"
         name="amount"
         :rules="{
-          enough_ae: amountTotal.toString(),
+          enough_coin: amountTotal.toString(),
           required: true,
         }"
       >

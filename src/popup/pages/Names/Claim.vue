@@ -4,7 +4,7 @@
       v-slot="{ field, errorMessage }"
       name="name"
       :rules="{
-        enough_ae: totalNameClaimAmount.toString(),
+        enough_coin: totalNameClaimAmount.toString(),
         required: true,
         name: true,
         name_unregistered: true,

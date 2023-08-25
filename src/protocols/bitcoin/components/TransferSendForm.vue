@@ -28,7 +28,8 @@
         readonly
         :protocol="PROTOCOL_BITCOIN"
         :validation-rules="{
-          max_value: max.toString(),
+          ...+balance.minus(fee) > 0 ? { max_value: max.toString() } : {},
+          enough_coin: [fee.toString(), BTC_SYMBOL],
         }"
         @asset-selected="handleAssetChange"
       >

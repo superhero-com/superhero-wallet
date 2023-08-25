@@ -8,7 +8,7 @@ import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
-import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
+import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { tg } from './languages';
 
 defineRule('url', (url) => isUrlValid(url));
@@ -39,7 +39,7 @@ configure({
       max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
       max_value_vault: ({ rule }) => tg('validation.maxValueVault', [rule.params[0]]),
       max_len: ({ rule }) => tg('validation.maxLength', [rule.params[0]]),
-      enough_ae: () => tg('validation.enoughAe'),
+      enough_coin: ({ rule }) => tg('validation.enoughCoin', [rule.params[1] || AE_SYMBOL]),
       enough_ae_signer: () => tg('validation.enoughAeSigner'),
       not_token: () => tg('validation.notToken'),
       name_registered_address_or_url: () => tg('validation.invalidAddressChainUrl'),
@@ -129,9 +129,9 @@ export default (store) => {
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
 
-  defineRule('enough_ae', async (_, [arg]) => {
+  defineRule('enough_coin', async (_, arr) => {
     await updateBalances();
-    return balance.value.isGreaterThanOrEqualTo(arg);
+    return balance.value.isGreaterThanOrEqualTo(arr[0]);
   });
 
   defineRule('enough_ae_signer', async (_, [arg]) => {

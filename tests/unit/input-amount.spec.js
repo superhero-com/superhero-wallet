@@ -90,7 +90,7 @@ describe('InputAmount', () => {
         ...test.props,
       },
     });
-    defineRule('enough_ae', (_, [arg]) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg));
+    defineRule('enough_coin', (_, arg) => BigNumber(test.balance || maxBalance).isGreaterThanOrEqualTo(arg[0]));
 
     expect(wrapper.find('input').element.value).toBe(test.displayed.toString());
     expect(wrapper.find('[data-cy=select-asset]').text()).toBe(AE_SYMBOL);

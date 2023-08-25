@@ -84,7 +84,7 @@
         :protocol="PROTOCOL_AETERNITY"
         :validation-rules="{
           ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
-          ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_ae: fee.toString() },
+          ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_coin: fee.toString() },
           ...+balance.minus(fee) > 0 && isMultisig
             ? { max_value_vault: activeMultisigAccount?.balance.toString() }
             : {},
