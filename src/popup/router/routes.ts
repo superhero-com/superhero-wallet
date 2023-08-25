@@ -706,7 +706,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '/:pathMatch(.*)',
+    path: '/:pathMatch(.*)*',
     component: NotFound,
     props: true,
     meta: {
