@@ -372,7 +372,7 @@ export default defineComponent({
           executionCost.value = getAeFee(executionCostAettos);
 
           if (new BigNumber(balance).isLessThan(executionCostAettos)) {
-            error.value = t('validation.enoughAe');
+            error.value = t('validation.enoughCoin');
             return;
           }
           if (popupProps.value.tx?.contractId) {

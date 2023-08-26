@@ -21,7 +21,7 @@
         min_value_exclusive: 0,
         min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_ae: fee.toString(),
+        enough_coin: fee.toString(),
       }"
     >
       <InputAmount
