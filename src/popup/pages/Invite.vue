@@ -124,7 +124,7 @@ export default defineComponent({
         loading.value = false;
       }
 
-      store.commit('invites/add', secretKey);
+      store.commit('invites/add', Buffer.from(secretKey, 'hex').slice(0, 32));
       formModel.value.amount = '';
     }
 

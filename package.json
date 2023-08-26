@@ -63,6 +63,7 @@
     "satoshi-bitcoin": "^1.0.5",
     "swagger-client": "3.18.4",
     "swiper": "^6.8.4",
+    "tweetnacl": "^1.0.3",
     "uuid": "^8.3.2",
     "validator": "^13.7.0",
     "vee-validate": "^4.5.8",
