@@ -115,7 +115,7 @@ export default defineComponent({
   },
   props: {
     title: { type: String, default: tg('pages.send.reviewtx') },
-    senderLabel: { type: String, default: tg('pages.send.reviewtx') },
+    senderLabel: { type: String, default: tg('pages.send.sender') },
     amountLabel: { type: String, default: tg('common.amount') },
     baseTokenSymbol: { type: String, required: true },
     transferData: { type: Object as PropType<TransferFormModel>, required: true },

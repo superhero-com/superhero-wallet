@@ -1,12 +1,12 @@
 <template>
   <TransferReviewBase
-    :title="isMultisig ? $t('modals.multisigTxProposal.title') : null"
+    :title="isMultisig ? $t('modals.multisigTxProposal.title') : undefined"
     :without-subtitle="isMultisig"
-    :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : null"
+    :sender-label="isMultisig ? $t('modals.multisigTxProposal.signingAddress') : undefined"
     :base-token-symbol="AE_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
-    :avatar-name="isAddressChain ? transferData.address : null"
+    :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="isSelectedAssetAex9"
     :protocol="PROTOCOL_AETERNITY"
     class="transfer-review"

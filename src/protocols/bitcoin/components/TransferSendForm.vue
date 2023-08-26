@@ -13,9 +13,8 @@
         v-model.trim="formModel.address"
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
         :errors="errors"
-        :validation-rules="{
-          name_registered_address: false,
-        }"
+        :protocol="PROTOCOL_BITCOIN"
+        :validation-rules="{ address_btc: [activeNetwork.type] }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -37,7 +36,7 @@
           <BtnPlain
             class="max-button"
             :class="{ chosen: formModel.amount.toString() === max.toString() }"
-            @click="formModel.amount = max.isPositive() ? max : 0"
+            @click="setMaxAmount"
           >
             {{ $t('common.max') }}
           </BtnPlain>
@@ -87,16 +86,16 @@ import type {
 } from '@/types';
 import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { PROTOCOL_BITCOIN } from '@/constants';
 
+import { PROTOCOL_BITCOIN } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
-import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 
+import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import EditIcon from '@/icons/pencil.svg?vue-component';
 import DeleteIcon from '@/icons/trash.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
@@ -120,6 +119,7 @@ export default defineComponent({
   emits: ['update:transferData', 'success', 'error'],
   setup(props, { emit }) {
     const store = useStore();
+    const { activeNetwork } = useNetworks();
 
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
@@ -176,8 +176,11 @@ export default defineComponent({
       }
     }
 
+    function setMaxAmount() {
+      formModel.value.amount = max.value.isPositive() ? max.value.toString() : '0';
+    }
+
     async function updateFeeList() {
-      const { activeNetwork } = useNetworks();
       const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
       const byteSize = (await bitcoinAdapter.constructAndSignTx(
         // TODO: changed to 0 because balance.value can differs
@@ -249,6 +252,7 @@ export default defineComponent({
       hasMultisigTokenWarning,
       formModel,
       isUrlTippingEnabled,
+      activeNetwork,
       fee,
       numericFee,
       activeAccount,
@@ -264,6 +268,7 @@ export default defineComponent({
       DeleteIcon,
       PlusCircleIcon,
       submit,
+      setMaxAmount,
     };
   },
 });

@@ -44,6 +44,7 @@
     "you": "You",
     "verifying": "Verifying",
     "max": "MAX",
+    "tokens": "tokens",
     "transferSpeed": {
       "fast": "Fast",
       "medium": "Medium",
@@ -1149,8 +1150,9 @@
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "Invalid address or .chain name",
     "nameUnregistered": "This name has already been registered.",
-    "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
+    "notSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
+    "addressBtc": "Invalid BTC address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughCoin": "Not enough {0} balance",
