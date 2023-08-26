@@ -6,6 +6,7 @@
       v-slot="{ field }"
       ref="amountField"
       name="amount"
+      :model-value="modelValue"
       :rules="{
         required: true,
         min_value_exclusive: 0,
