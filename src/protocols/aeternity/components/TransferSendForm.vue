@@ -62,11 +62,13 @@
         v-model.trim="formModel.address"
         :errors="errors"
         :is-tip-url="isTipUrl"
-        :is-url-tipping-enabled="isUrlTippingEnabled"
+        :protocol="PROTOCOL_AETERNITY"
         :placeholder="(isUrlTippingEnabled)
           ? $t('modals.send.recipientPlaceholderUrl')
           : $t('modals.send.recipientPlaceholder')"
         :validation-rules="{
+          name_registered_address_or_url: isUrlTippingEnabled,
+          name_registered_address: !isUrlTippingEnabled,
           ...(isMultisig ? { not_same_as: multisigVaultAddress } : {}),
           token_to_an_address: [!isAe],
         }"

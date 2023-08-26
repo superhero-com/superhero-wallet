@@ -4,11 +4,13 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
-import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET } from '@/constants';
+import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { tg } from './languages';
 
 defineRule('url', (url) => isUrlValid(url));
@@ -32,8 +34,11 @@ configure({
       name: () => tg('validation.name'),
       name_registered_address: () => tg('validation.nameRegisteredAddress'),
       name_unregistered: () => tg('validation.nameUnregistered'),
-      not_same_as: () => tg('validation.notSameAs'),
+      not_same_as: ({ rule }) => (
+        tg('validation.notSameAs', [rule.params[1] === PROTOCOL_BITCOIN ? BTC_SYMBOL : tg('common.tokens')])
+      ),
       token_to_an_address: () => tg('validation.tokenToAnAddress'),
+      address_btc: () => tg('validation.addressBtc'),
       min_value: ({ rule }) => tg('validation.minValue', [rule.params[0]]),
       min_value_exclusive: ({ rule }) => tg('validation.minValueExclusive', [rule.params[0]]),
       max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
@@ -123,6 +128,8 @@ export default (store) => {
       || (isAensNameValid(value) && !isToken)
     ),
     { params: ['isToken'] });
+
+  defineRule('address_btc', (value, [network]) => isBtcAddressValid(value, network));
 
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!isAensNameValid(nameOrAddress)) return nameOrAddress !== comparedAddress;

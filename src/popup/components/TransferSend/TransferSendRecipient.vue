@@ -5,9 +5,7 @@
       name="address"
       :rules="{
         required: true,
-        not_same_as: activeAccount.address,
-        name_registered_address_or_url: isUrlTippingEnabled,
-        name_registered_address: !isUrlTippingEnabled,
+        not_same_as: [activeAccount.address, protocol],
         ...validationRules,
       }"
     >
@@ -48,6 +46,7 @@
 import {
   computed,
   defineComponent,
+  PropType,
 } from 'vue';
 import { useStore } from 'vuex';
 import { Field } from 'vee-validate';
@@ -58,7 +57,7 @@ import {
   useAccounts,
   useModals,
 } from '@/composables';
-import type { IInputMessage } from '@/types';
+import type { Protocol, IInputMessage } from '@/types';
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import InputField from '@/popup/components/InputField.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -73,9 +72,9 @@ export default defineComponent({
   },
   props: {
     isTipUrl: Boolean,
-    isUrlTippingEnabled: Boolean,
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, required: true },
     validationRules: {
       type: Object,
       default: () => {
