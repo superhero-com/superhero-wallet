@@ -86,7 +86,7 @@
     },
     "daeppBrowserCard": {
       "title": "Browse the æcosystem",
-      "description": "Board Superhero wallet built-in browser to explore aeternity web 3.0 universe and discover new dapps.",
+      "description": "Explore æpps from within your wallet with the new built-in browser.",
       "button": "Browse"
     },
     "buyCard": {
@@ -1155,7 +1155,7 @@
     },
     "warningDappBrowser": {
       "title": "You are going to visit a \n third-party website",
-      "warning": "Superhero wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning": "Superhero Wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
       "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
       "decline": "Decline"
     }
