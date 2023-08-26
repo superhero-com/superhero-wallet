@@ -32,6 +32,7 @@
       <AddressTruncated
         v-if="!chainName && address"
         :address="address"
+        :protocol="PROTOCOL_AETERNITY"
         class="address"
       />
       <Truncate
@@ -76,6 +77,7 @@ import {
   NOTIFICATION_TYPE_RETIP_ON_TIP,
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 
 import Avatar from './Avatar.vue';
@@ -152,6 +154,8 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
+      IS_MOBILE_DEVICE,
       createdAt,
       message,
       chainName,
@@ -162,7 +166,6 @@ export default defineComponent({
       isWallet,
       isSeedBackup,
       handleClick,
-      IS_MOBILE_DEVICE,
       initialStatus,
     };
   },

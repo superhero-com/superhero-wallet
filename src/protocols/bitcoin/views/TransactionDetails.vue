@@ -53,8 +53,10 @@ export default defineComponent({
     const transaction = ref<ITransaction>();
 
     const explorerUrl = computed(
-      // TODO: link to the bitcoin explorer should be moved to the network settings
-      () => `https://www.blockchain.com/explorer/transactions/btc/${transaction.value?.hash}`,
+      () => ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_BITCOIN)
+        .getExplorer()
+        .prepareUrlForHash(transaction.value?.hash),
     );
 
     const transactionFee = computed((): number => transaction.value?.tx?.fee ?? 0);

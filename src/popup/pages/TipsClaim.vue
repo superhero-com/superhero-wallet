@@ -4,6 +4,7 @@
       :address="activeAccount.address"
       :name="activeAccount.name"
       :idx="activeAccount.idx"
+      :protocol="activeAccount.protocol"
     />
 
     <div class="header">

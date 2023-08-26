@@ -35,6 +35,7 @@
       v-else
       class="address"
       :address="address"
+      :protocol="protocol"
     />
 
     <template #icon>
@@ -46,9 +47,8 @@
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue';
 import type { Protocol } from '@/types';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AddressTruncated from './AddressTruncated.vue';
 import Avatar from './Avatar.vue';
 import LinkButton from './LinkButton.vue';
@@ -81,10 +81,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-
     const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+      () => ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .getExplorer()
         .prepareUrlForAccount(props.address),
     );
 

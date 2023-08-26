@@ -49,6 +49,7 @@
         >
           <AddressTruncated
             :address="address"
+            :protocol="protocol"
             class="ae-address"
           />
         </CopyText>
@@ -65,8 +66,6 @@ import {
 } from 'vue';
 import type { Protocol } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
 
@@ -97,10 +96,10 @@ export default defineComponent({
     withProtocolIcon: Boolean,
   },
   setup(props) {
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-
     const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+      () => ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .getExplorer()
         .prepareUrlForAccount(props.address),
     );
 

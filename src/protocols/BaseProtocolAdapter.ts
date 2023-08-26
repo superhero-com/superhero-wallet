@@ -15,6 +15,8 @@ export abstract class BaseProtocolAdapter {
 
   abstract getAccountPrefix(): string;
 
+  abstract getExplorer(): any;
+
   abstract getAmountPrecision(args?: any): number;
 
   abstract getCoinSymbol(getShort: boolean): string;
