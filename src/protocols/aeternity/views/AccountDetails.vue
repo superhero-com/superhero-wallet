@@ -15,7 +15,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-if="isAeAccount && !IS_IOS && (isNodeMainnet || isNodeTestnet)"
+        v-if="isAeAccount && (isNodeMainnet || isNodeTestnet)"
         :icon="GlobeSmallIcon"
         :text="$t('common.browser')"
         :to="{ name: ROUTE_APPS_BROWSER }"
