@@ -91,10 +91,13 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const { activeNetwork } = useNetworks();
 
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
-
-    // eslint-disable-next-line camelcase
-    const { chain_stats: { funded_txo_sum, spent_txo_sum } } = await fetchJson(`${nodeUrl}/address/${address}`);
-    return toBitcoin(Number(funded_txo_sum) - Number(spent_txo_sum)).toString();
+    const {
+      chain_stats: { funded_txo_sum: chainFunded, spent_txo_sum: chainSpent },
+      mempool_stats: { funded_txo_sum: mempoolFunded, spent_txo_sum: mempoolSpent },
+    } = await fetchJson(`${nodeUrl}/address/${address}`);
+    return toBitcoin(
+      Number(chainFunded) - Number(chainSpent) + Number(mempoolFunded) - Number(mempoolSpent),
+    ).toString();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
