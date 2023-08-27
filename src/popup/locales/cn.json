@@ -259,7 +259,7 @@
       "addressLabel": "地址",
       "transactionLabel": "交易",
       "addressRequest": "aepp请求查看你的当前地址",
-      "transactionRequest": "aepp将会准备一笔交易，你负责确认。",
+      "transactionRequest": "aepp 可能会准备交易，您有责任进行确认。",
       "websiteRequestAccounts": "想要获取帐户地址",
       "addressesLabel": "地址",
       "addressesRequest": "aepp请求查看你的帐户地址"

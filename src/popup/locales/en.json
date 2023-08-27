@@ -592,7 +592,7 @@
       "confirmButton": "Accept",
       "transactionLabel": "Transaction",
       "addressRequest": "This aepp is requesting access to view your current account address.",
-      "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
+      "transactionRequest": "This aepp may prepare a transaction, you are in charge of confirming it.",
       "websiteRequestAccounts": "would like to get account addresses",
       "addressesLabel": "Addresses",
       "addressesRequest": "This aepp is requesting access to view your account addresses",
