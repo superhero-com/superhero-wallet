@@ -94,7 +94,10 @@ export function useTransferSendForm({
 
   async function openScanQrModal(tokenBalances: IToken[]) {
     const scanResult = await openModal(MODAL_READ_QR_CODE, {
-      title: t('pages.send.scanAddress'),
+      title: t(
+        'pages.send.scanAddress',
+        { protocolName: ProtocolAdapterFactory.getAdapter(protocol).protocolName },
+      ),
       icon: 'critical',
     });
     if (scanResult?.trim().charAt(0) === '{') {

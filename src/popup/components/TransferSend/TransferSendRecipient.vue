@@ -51,17 +51,20 @@ import {
 import { useStore } from 'vuex';
 import { Field } from 'vee-validate';
 
+import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
 
 import {
   useAccounts,
   useModals,
 } from '@/composables';
-import type { Protocol, IInputMessage } from '@/types';
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import InputField from '@/popup/components/InputField.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import { MODAL_RECIPIENT_INFO } from '@/constants';
+import {
+  MODAL_RECIPIENT_INFO,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 
 export default defineComponent({
   components: {
@@ -74,7 +77,7 @@ export default defineComponent({
     isTipUrl: Boolean,
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     validationRules: {
       type: Object,
       default: () => {
@@ -112,7 +115,7 @@ export default defineComponent({
     });
 
     function showRecipientHelp() {
-      openModal(MODAL_RECIPIENT_INFO);
+      openModal(MODAL_RECIPIENT_INFO, { protocol: props.protocol });
     }
 
     return {

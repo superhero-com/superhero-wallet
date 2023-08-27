@@ -9,20 +9,26 @@
     <template #msg>
       <div class="msg">
         <span class="sub-header">
-          {{ $t('modals.recipient.sub-header') }}
+          {{ isProtocolAe
+            ? $t('modals.recipient.ae-sub-header')
+            : $t('modals.recipient.sub-header', { protocolName })
+          }}
         </span>
-        <p>
+        <p :class="{ capitalize: !isProtocolAe }">
           <i18n-t
             keypath="modals.recipient.msg.publicAddress.msg"
             tag="div"
             scope="global"
           >
-            <strong class="title">
-              {{ $t('modals.recipient.msg.publicAddress.title') }}:
+            <strong
+              v-if="isProtocolAe"
+              class="title"
+            >
+              {{ $t('modals.recipient.msg.publicAddress.title') }}
             </strong>
           </i18n-t>
         </p>
-        <p>
+        <p v-if="isProtocolAe">
           <i18n-t
             keypath="modals.recipient.msg.chain.msg"
             tag="div"
@@ -34,7 +40,7 @@
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
           </i18n-t>
         </p>
-        <p v-if="UNFINISHED_FEATURES">
+        <p v-if="UNFINISHED_FEATURES && isProtocolAe">
           <i18n-t
             keypath="modals.readMore.msg"
             class="help"
@@ -60,9 +66,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
-import { ResolveCallback } from '@/types';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import {
+  Protocol,
+  ResolveCallback,
+} from '@/types';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -73,12 +88,20 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     close: { type: Function, default: null },
   },
-  setup() {
+  setup(props) {
+    const isProtocolAe = computed(() => props.protocol === PROTOCOL_AETERNITY);
+    const protocolName = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+    );
+
     return {
       AE_BLOG_CLAIM_TIP_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      protocolName,
+      isProtocolAe,
     };
   },
 });
@@ -107,6 +130,10 @@ export default defineComponent({
 
   .title {
     color: variables.$color-white;
+  }
+
+  .capitalize::first-letter {
+    text-transform: capitalize;
   }
 }
 </style>

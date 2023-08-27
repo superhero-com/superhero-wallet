@@ -224,11 +224,12 @@
     },
     "recipient": {
       "title": "Send cryptocurrency",
-      "sub-header": "to public address or .chain name",
+      "ae-sub-header": "to public address or .chain name",
+      "sub-header": "to public {protocolName} address",
       "msg": {
         "publicAddress": {
           "title": "Send to public address",
-          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_."
+          "msg": "{0} scan QR code or manually enter recipient’s account address."
         },
         "chain": {
           "title":"Send to .chain name",
@@ -315,8 +316,8 @@
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
       "share": "Share",
-      "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
-      "shareTextWithAmount": "{amount} AE has been requested. Send to æternity address: {address} Or send with Superhero Wallet: {walletLink}"
+      "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
+      "shareTextWithAmount": "{amount} {coinSymbol} has been requested. Send to {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}"
     },
     "receiveMultisig": {
       "title": "Receive funds to multisig vault"
@@ -864,7 +865,7 @@
       "to": "To",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan aeternity address",
+      "scanAddress": "Scan {protocolName} address",
       "error": "Invalid AE address or AENS name",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },

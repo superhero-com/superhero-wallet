@@ -121,6 +121,7 @@ import {
   AE_CONTRACT_ID,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import InputAmount from '../InputAmount.vue';
 import QrCode from '../QrCode.vue';
@@ -198,9 +199,26 @@ export default defineComponent({
     async function share() {
       const { address } = activeAccount.value;
       const walletLink = getAccountLink(address);
+      const { protocolName } = ProtocolAdapterFactory.getAdapter(props.protocol);
       const text = (amount.value && +amount.value > 0)
-        ? t('modals.receive.shareTextNoAmount', { address, walletLink })
-        : t('modals.receive.shareTextWithAmount', { address, walletLink, amount: amount.value });
+        ? t(
+          'modals.receive.shareTextNoAmount',
+          {
+            protocolName,
+            address,
+            walletLink,
+          },
+        )
+        : t(
+          'modals.receive.shareTextWithAmount',
+          {
+            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).getCoinSymbol(false),
+            protocolName,
+            address,
+            walletLink,
+            amount: amount.value,
+          },
+        );
       await invokeDeviceShare(text);
     }
 
