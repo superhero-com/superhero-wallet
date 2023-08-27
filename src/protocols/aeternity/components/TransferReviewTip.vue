@@ -30,7 +30,7 @@
           :str="activeAccount.name"
         />
         <div v-else>
-          {{ $t('pages.account.heading') }} {{ activeAccount.idx + 1 }}
+          {{ getDefaultAccountLabel({ protocolIdx: activeAccount.idx }) }}
         </div>
         <AddressTruncated
           show-explorer-link
@@ -75,10 +75,11 @@
 
 <script>
 import { useStore } from 'vuex';
-
 import { AGGREGATOR_URL } from '@/constants';
+
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
+import { getDefaultAccountLabel } from '@/utils';
 
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
@@ -147,6 +148,7 @@ export default {
     },
   },
   methods: {
+    getDefaultAccountLabel,
     submit() {
       if (!this.noteError) {
         this.$emit('success');

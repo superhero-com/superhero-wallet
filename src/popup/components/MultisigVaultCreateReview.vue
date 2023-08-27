@@ -6,7 +6,10 @@
 
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
-        <AccountSelector v-model="creatorAddress" />
+        <AccountSelector
+          v-model="creatorAddress"
+          :options="aeAccountsSelectOptions"
+        />
         <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
           keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
@@ -138,7 +141,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { accounts } = useAccounts({ store });
+    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
@@ -152,11 +155,11 @@ export default defineComponent({
     const { openModal } = useModals();
 
     const creatorAddress = ref<Encoded.AccountAddress>(
-      props.signers[0].address || accounts.value[0].address,
+      props.signers[0].address || aeAccounts.value[0].address,
     );
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
-      () => accounts.value.find(({ address }) => address === creatorAddress.value),
+      () => aeAccounts.value.find(({ address }) => address === creatorAddress.value),
     );
     const fee = computed(() => multisigAccountCreationFee.value);
     const callData = computed(
@@ -194,6 +197,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
+      aeAccountsSelectOptions,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,

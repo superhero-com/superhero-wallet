@@ -1,5 +1,8 @@
 <template>
-  <AccountDetailsBase v-if="activeMultisigAccount">
+  <AccountDetailsBase
+    v-if="activeMultisigAccount"
+    without-default-buttons
+  >
     <template #account-info>
       <AccountInfo
         :address="activeMultisigAccount.gaAccountId"

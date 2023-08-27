@@ -146,11 +146,21 @@ export async function fetchJson<T = any>(
 }
 
 /**
+ * Prepare human-readable name with protocol for an account.
+ * E.g.: `Æternity account 1`, `Bitcoin account 2`
+ */
+export function getDefaultAccountLabel(
+  { protocol, protocolIdx }: { protocol?: string, protocolIdx?: number },
+) {
+  return `${protocol || ''} ${tg('pages.account.heading')} ${(protocolIdx || 0) + 1}`;
+}
+
+/**
  * Prepare human-readable name from the user account object.
- * Eg.: `somehuman.chain`, `Account 2`
+ * E.g.: `somehuman.chain`, `Account 2`
  */
 export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return acc?.name || `${tg('pages.account.heading')} ${(acc?.idx || 0) + 1}`;
+  return acc?.name || getDefaultAccountLabel({ protocol: acc?.protocol, protocolIdx: acc?.idx });
 }
 
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {

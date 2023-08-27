@@ -29,7 +29,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
 
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 
@@ -133,7 +133,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    * Retrieve the addresses of proposal signatories that are present in the local wallet.
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
-    accounts.value.filter(
+    aeAccounts.value.filter(
       (_account) => pendingMultisigTxSigners.value.includes(_account.address),
     )
   ));
