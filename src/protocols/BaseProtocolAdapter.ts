@@ -13,6 +13,8 @@ import type {
 export abstract class BaseProtocolAdapter {
   abstract protocolName: string;
 
+  abstract getAccountPrefix(): string;
+
   abstract getAmountPrecision(args?: any): number;
 
   abstract getCoinSymbol(getShort: boolean): string;

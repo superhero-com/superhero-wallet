@@ -289,6 +289,7 @@ export default defineComponent({
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
+      protocol: PROTOCOL_AETERNITY,
     });
 
     const { max, fee } = useMaxAmount({ formModel, store });

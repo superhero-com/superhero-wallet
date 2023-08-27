@@ -9,6 +9,7 @@ import type {
   Dictionary,
   IAsset,
   IToken,
+  Protocol,
   TransferFormModel,
 } from '@/types';
 import { useModals } from '@/composables/modals';
@@ -19,6 +20,7 @@ import {
 } from '@/constants';
 import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
 import Logger from '@/lib/logger';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -28,11 +30,13 @@ type SelectedAssetValueFunction = (
 interface UseTransferSendFormParams {
   transferData: TransferFormModel;
   getSelectedAssetValue?: SelectedAssetValueFunction;
+  protocol: Protocol;
 }
 
 export function useTransferSendForm({
   transferData,
   getSelectedAssetValue,
+  protocol,
 }: UseTransferSendFormParams) {
   const formModel = ref(transferData);
   const invoiceId = ref(null);
@@ -137,7 +141,7 @@ export function useTransferSendForm({
       }
       updateFormModelValues([
         ...new URL(
-          scanResult.startsWith('ak_')
+          (scanResult.startsWith(ProtocolAdapterFactory.getAdapter(protocol).getAccountPrefix()))
             ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
             : scanResult,
         )

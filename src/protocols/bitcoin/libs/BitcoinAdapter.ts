@@ -49,6 +49,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  override getAccountPrefix() {
+    const { activeNetwork } = useNetworks();
+
+    return (activeNetwork.value.type === NETWORK_TYPE_TESTNET)
+      ? 'tb1q'
+      : 'bc1q';
+  }
+
   override getAmountPrecision(): number {
     return BTC_COIN_PRECISION;
   }
