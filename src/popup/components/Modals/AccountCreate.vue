@@ -20,7 +20,8 @@
         v-for="protocol in PROTOCOLS"
         :key="protocol"
         :header="getProtocolName(protocol)"
-        :subheader="$t('modals.createAccount.addProtocolAccount', { name: protocol })"
+        :subheader="$t(
+          'modals.createAccount.addProtocolAccount', { name: getProtocolName(protocol) })"
         :protocol-icon="protocol"
         @click="createAccount(protocol)"
       />
