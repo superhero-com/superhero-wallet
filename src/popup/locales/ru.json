@@ -343,7 +343,6 @@
       "seeTransactionExplorer": "See transaction in the explorer.",
       "scan": "Scan QR",
       "review": "Review",
-      "reviewtx": "Review Transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
