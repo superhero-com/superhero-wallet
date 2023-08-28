@@ -7,7 +7,7 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOL_BITCOIN, TX_DIRECTION } from '@/constants';
 import { toShiftedBigNumber } from '@/utils';
 import {
   AE_COIN_PRECISION,
@@ -18,6 +18,7 @@ import {
   getTransactionTokenInfoResolver,
   isTransactionAex9,
 } from '@/protocols/aeternity/helpers';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -52,6 +53,9 @@ export function useTransactionTokens({
   });
 
   const tokens = computed((): ITokenResolved[] => {
+    if (!transaction) {
+      return [];
+    }
     if (
       innerTx.value
       && transactionFunction.value
@@ -62,7 +66,13 @@ export function useTransactionTokens({
         availableTokens.value,
       ).tokens;
     }
-    if (!transaction) return [];
+    if (transaction.protocol === PROTOCOL_BITCOIN) {
+      return [{
+        ...innerTx.value || {},
+        symbol: BTC_SYMBOL,
+        isReceived: direction === TX_DIRECTION.received,
+      }];
+    }
 
     return [{
       ...innerTx.value || {},

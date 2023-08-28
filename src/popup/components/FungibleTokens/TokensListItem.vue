@@ -16,7 +16,7 @@
       <Tokens
         :tokens="[tokenData]"
         icon-size="lg"
-        full-ae-symbol
+        full-symbol
         bright
       />
       <TokenAmount

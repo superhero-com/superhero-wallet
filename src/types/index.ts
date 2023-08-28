@@ -404,6 +404,7 @@ export interface ITransaction {
   microTime?: number;
   pending: boolean;
   pendingTokenTx?: boolean;
+  protocol?: Protocol;
   rawTx?: any; // TODO find type
   tipUrl?: string;
   /**
