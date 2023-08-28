@@ -182,6 +182,14 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // TODO
   }
 
+  async getTransactionByHash(): Promise<any> {
+    // TODO
+  }
+
+  async fetchTransactions(): Promise<any> {
+    // TODO
+  }
+
   override async spend(
     amount: number,
     recipient: string,
