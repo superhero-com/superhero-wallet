@@ -124,8 +124,8 @@ export type IInputMessageRaw = string | IInputMessage;
  */
 export interface IToken {
   contractId: Encoded.ContractAddress
-    | typeof AE_CONTRACT_ID
-    | typeof BTC_CONTRACT_ID
+  | typeof AE_CONTRACT_ID
+  | typeof BTC_CONTRACT_ID
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -643,3 +643,11 @@ export interface TransferFormModel extends IFormModel {
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
 
 export type StorageKeysInput = string | string[];
+
+export interface IWalletInfo {
+  id: string;
+  name: string;
+  networkId: string;
+  origin: any;
+  type: any;
+}
