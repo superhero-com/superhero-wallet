@@ -22,9 +22,7 @@
           account-select
           @update:modelValue="$emit('update:modelValue', $event)"
         >
-          <template
-            #current-text="{ text }"
-          >
+          <template #current-text="{ text }">
             <div v-if="!avatarOnly">
               <Truncate
                 class="account-select-text"

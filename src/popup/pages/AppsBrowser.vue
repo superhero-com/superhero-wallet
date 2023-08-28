@@ -2,7 +2,7 @@
   <div class="apps-browser">
     <AppsBrowserHeader
       :selected-app="selectedApp"
-      :i-frame="iframeRef"
+      :iframe="iframeRef"
       @back="back()"
       @refresh="refresh()"
     />
@@ -33,7 +33,7 @@
           <template #after>
             <Component
               :is="GlobeSmallIcon"
-              v-if="customAppURL.length === 0"
+              v-if="!customAppURL.length"
             />
             <BtnIcon
               v-else
@@ -51,8 +51,8 @@
 
       <div class="apps-browser-list">
         <div
-          v-for="(app, index) in DAPPS_LIST"
-          :key="index"
+          v-for="app in DAPPS_LIST"
+          :key="app.title"
           class="apps-browser-card"
         >
           <AppsBrowserListItem
@@ -67,6 +67,7 @@
     <iframe
       v-else
       ref="iframeRef"
+      class="apps-browser-iframe"
       :src="selectedApp.url"
       @load="onAppLoaded()"
     />
@@ -134,7 +135,7 @@ export default defineComponent({
     const iframeRef = ref();
     const customAppURL = ref('');
     const currentClientId = ref('');
-    let shareWalletInfoInterval : any;
+    let shareWalletInfoInterval: any;
 
     const { getAeSdk } = useAeSdk({ store });
     const { openModal, modalsOpen } = useModals();
@@ -176,9 +177,10 @@ export default defineComponent({
     }
 
     function refresh() {
-      if (!iframeRef.value || !selectedApp.value) return;
-      setLocalStorageItem([LOCAL_STORAGE_ITEM], selectedApp.value);
-      window.location.reload();
+      if (iframeRef.value && selectedApp.value) {
+        setLocalStorageItem([LOCAL_STORAGE_ITEM], selectedApp.value);
+        window.location.reload();
+      }
     }
 
     function onSelectApp(app: any) {
@@ -203,7 +205,9 @@ export default defineComponent({
       }
       if (currentClientId.value) {
         const sdk = await getAeSdk();
-        sdk.removeRpcClient(currentClientId.value);
+        if (sdk._clients.get(currentClientId.value)) {
+          sdk.removeRpcClient(currentClientId.value);
+        }
       }
     }
 
@@ -275,7 +279,7 @@ export default defineComponent({
     line-height: 24px;
   }
 
-  iframe {
+  .apps-browser-iframe {
     width: 100%;
     height: 100%;
     border: none;

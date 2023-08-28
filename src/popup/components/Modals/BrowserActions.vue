@@ -59,7 +59,7 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedApp: { type: Object, required: true },
-    iFrame: { type: Object, required: true },
+    iframe: { type: Object, required: true },
   },
   setup(props) {
     async function refreshIframeContent() {

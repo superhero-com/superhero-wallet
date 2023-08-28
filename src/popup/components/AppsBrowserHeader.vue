@@ -61,7 +61,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
-import { PROTOCOL_AETERNITY, MODAL_BOWSER_ACTIONS_DAPP, BROWSER_ACTIONS } from '@/constants';
+import { MODAL_BOWSER_ACTIONS_DAPP, BROWSER_ACTIONS } from '@/constants';
 import {
   useAccounts,
   useUi,
@@ -91,7 +91,7 @@ export default defineComponent({
   },
   props: {
     selectedApp: { type: Object, required: true },
-    iFrame: { type: Object, required: true },
+    iframe: { type: Object, required: true },
   },
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
@@ -101,7 +101,7 @@ export default defineComponent({
 
     const { homeRouteName } = useUi();
     const {
-      accounts,
+      aeAccounts,
       isLoggedIn,
       activeAccount,
       setActiveAccountByAddress,
@@ -118,10 +118,7 @@ export default defineComponent({
       const url = new URL(props.selectedApp.url);
       return url.host;
     });
-    const aeAccountsSelectOptions = computed(() => {
-      const aeAccounts = accounts.value.filter(({ protocol }) => protocol === PROTOCOL_AETERNITY);
-      return prepareAccountSelectOptions(aeAccounts);
-    });
+    const aeAccountsSelectOptions = computed(() => prepareAccountSelectOptions(aeAccounts.value));
 
     const accountAddress = ref(unref(activeAccount.value.address));
 
@@ -142,7 +139,7 @@ export default defineComponent({
       try {
         const value = await openModal(MODAL_BOWSER_ACTIONS_DAPP,
           {
-            iFrame: props.iFrame,
+            iframe: props.iframe,
             selectedApp: props.selectedApp,
           });
         if (value?.action === BROWSER_ACTIONS.refresh) {

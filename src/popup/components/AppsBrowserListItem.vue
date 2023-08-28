@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { Component, defineComponent, PropType } from 'vue';
 import type { VueI18nTranslation } from 'vue-i18n';
 import IconWrapper from './IconWrapper.vue';
 
@@ -31,7 +31,7 @@ export default defineComponent({
   components: { IconWrapper },
   props: {
     appTitle: { type: String as PropType<string | VueI18nTranslation>, required: true },
-    appIcon: { type: Object as PropType<Object>, default: null },
+    appIcon: { type: Object as PropType<Component>, default: null },
     /**
      * App image name, should be located in src\icons\dapp
      */
