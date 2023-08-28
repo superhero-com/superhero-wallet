@@ -73,7 +73,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
     if (!IS_CORDOVA) {
-      next({ name: ROUTE_INDEX });
+      next({ name: ROUTE_NOT_FOUND });
       return;
     }
 
