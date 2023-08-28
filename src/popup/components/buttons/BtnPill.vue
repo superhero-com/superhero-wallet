@@ -2,7 +2,7 @@
   <BtnBase
     v-bind="$attrs"
     class="btn-pill"
-    :class="{ dense, static }"
+    :class="{ dense, static, avatar }"
     :to="to"
   >
     <slot>{{ text }}</slot>
@@ -11,6 +11,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+
 import BtnBase from './BtnBase.vue';
 
 export default defineComponent({
@@ -20,6 +21,7 @@ export default defineComponent({
   props: {
     to: { type: [String, Object], default: null },
     text: { type: String, default: null },
+    avatar: Boolean,
     dense: Boolean,
     static: Boolean,
   },
@@ -44,6 +46,11 @@ export default defineComponent({
 
   &.dense {
     padding-block: 0;
+  }
+
+  &.avatar {
+    padding: 4px;
+    background-color: transparent;
   }
 
   &.router-link-exact-active {

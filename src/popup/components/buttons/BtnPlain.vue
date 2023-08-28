@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :is="(to) ? 'RouterLink' : 'button'"
     class="button-plain"
-    :class="{ extend }"
+    :class="{ extend, avatar }"
     :to="to"
   >
     <slot>{{ text }}</slot>
@@ -16,6 +16,7 @@ export default {
     extend: Boolean,
     text: { type: String, default: null },
     to: { type: [Object, String], default: null },
+    avatar: Boolean,
   },
 };
 </script>
@@ -33,6 +34,11 @@ export default {
   cursor: pointer;
   user-select: none;
   transition: $transition-interactive;
+
+  &.avatar {
+    width: 24px;
+    height: 24px;
+  }
 
   &.extend {
     width: 100%;

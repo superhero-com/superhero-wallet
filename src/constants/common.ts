@@ -318,6 +318,8 @@ export const MODAL_RECIPIENT_INFO = 'recipient-info';
 export const MODAL_RESET_WALLET = 'reset-wallet';
 export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
+export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
+export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -362,6 +364,7 @@ export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
+  daeppBrowser: 'daeppBrowser',
 } as const;
 
 export const ALLOWED_ICON_STATUSES = [
@@ -383,3 +386,12 @@ export const TRANSFER_SEND_STEPS = {
 } as const;
 
 export const DEFAULT_LOCALE = 'en-US';
+
+/**
+ * @description List of all possible actions through the in-app browser.
+ */
+export const BROWSER_ACTIONS = {
+  refresh: 'refresh',
+  share: 'share',
+  favourite: 'favourite',
+} as const;

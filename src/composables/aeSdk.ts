@@ -116,7 +116,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       onDisconnect(aeppId: string) {
         delete aeppInfo[aeppId];
       },
-      async onSubscription(aeppId: string) {
+      async onSubscription(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
         const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
         const app = new App(url);
@@ -141,7 +141,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         }
         return activeAccount.value.address;
       },
-      async onAskAccounts(aeppId: string) {
+      async onAskAccounts(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
         const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
         const app = new App(url);

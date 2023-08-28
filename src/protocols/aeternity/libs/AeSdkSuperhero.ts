@@ -8,6 +8,7 @@ import {
 import { Store } from 'vuex';
 import { useAccounts } from '@/composables/accounts';
 import { AccountSuperhero } from '@/lib/accounts/superhero';
+import { IWalletInfo } from '@/types';
 
 /**
  * Custom fields in options, `modal` and `payload` for spend function.
@@ -56,5 +57,15 @@ export class AeSdkSuperhero extends AeSdkWallet {
     options: ISpendOptions,
   ): ReturnType<typeof sendTransaction> {
     return super.spend(amount, recipientId, options as any); // TODO: remove type casting once https://github.com/aeternity/aepp-sdk-js/issues/1791 is resolved
+  }
+
+  async getWalletInfo(): Promise<IWalletInfo> {
+    return {
+      id: this.id,
+      name: this.name,
+      networkId: await this.api.getNetworkId(),
+      origin: undefined as any,
+      type: this._type as any,
+    };
   }
 }

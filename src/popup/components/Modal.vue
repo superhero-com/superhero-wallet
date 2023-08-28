@@ -60,6 +60,7 @@
 
         <FixedScreenFooter
           v-if="$slots.footer"
+          v-bind="$attrs"
         >
           <slot name="footer" />
         </FixedScreenFooter>

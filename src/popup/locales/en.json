@@ -37,6 +37,7 @@
     "send": "Send",
     "smartContract": "Smart contract",
     "swap": "Swap",
+    "browser": "Browser",
     "title": "Superhero wallet",
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
@@ -82,6 +83,11 @@
       "title": "Back up your seed phrase",
       "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
       "button": "Back up now"
+    },
+    "daeppBrowserCard": {
+      "title": "Browse the æcosystem",
+      "description": "Explore æpps from within your wallet with the new built-in browser.",
+      "button": "Browse"
     },
     "buyCard": {
       "title": "Buy AE coin",
@@ -475,7 +481,8 @@
       "networkAdd": "Add custom network",
       "networkEdit": "Edit network",
       "notFound": "Feature not found",
-      "multisigProposalDetails": "Multisig Tx proposal details"
+      "multisigProposalDetails": "Multisig Tx proposal details",
+      "appsBrowser": "Browse the æcosystem"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -1141,8 +1148,32 @@
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
+    },
+    "appsBrowser": {
+      "popularApps": "Featured",
+      "inputPlaceholder": "Enter URL"
+    },
+    "warningDappBrowser": {
+      "title": "You are going to visit a \n third-party website",
+      "warning": "Superhero Wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
+      "decline": "Decline"
     }
   },
+  "dappActionBrowser": {
+    "refresh": {
+      "title": "Refresh",
+      "description": "Reload contents of the page"
+    },
+    "bookmark": {
+      "title": "Add bookmark",
+      "description": "Add this page to your favorites"
+    },
+    "share": {
+      "title": "Share",
+      "description": "Share this page with your contacts"
+    }
+},
   "validation": {
     "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
     "required": "This field is required",

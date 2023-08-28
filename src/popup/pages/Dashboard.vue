@@ -13,6 +13,14 @@
       <LatestTransactionsCard />
 
       <DashboardCard
+        :title="$t('dashboard.daeppBrowserCard.title')"
+        :description="$t('dashboard.daeppBrowserCard.description')"
+        :btn-text="$t('dashboard.daeppBrowserCard.button')"
+        :background="daeppBrowserBackground"
+        :icon="GlobeIcon"
+        :to="{ name: ROUTE_APPS_BROWSER }"
+      />
+      <DashboardCard
         v-if="isNodeMainnet && UNFINISHED_FEATURES"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
@@ -46,23 +54,24 @@ import {
   DASHBOARD_CARD_ID,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '@/popup/router/routeNames';
+import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
 import { useAccounts, useAeSdk } from '@/composables';
 
-import DashboardCard from '../components/DashboardCard.vue';
-import DashboardWrapper from '../components/DashboardWrapper.vue';
-import DashboardHeader from '../components/DashboardHeader.vue';
-import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
-import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
+import DashboardCard from '@/popup/components/DashboardCard.vue';
+import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
+import DashboardHeader from '@/popup/components/DashboardHeader.vue';
+import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
+import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
+import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
 
-import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
-import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
-import CardIcon from '../../icons/credit-card.svg?vue-component';
-import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
-
-import buyBackground from '../../image/dashboard/buy-ae.jpg';
-import chainNameBackground from '../../image/dashboard/chain-name.jpg';
+import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
+import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
+import CardIcon from '@/icons/credit-card.svg?vue-component';
+import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
+import buyBackground from '@/image/dashboard/buy-ae.jpg';
+import chainNameBackground from '@/image/dashboard/chain-name.jpg';
+import daeppBrowserBackground from '@/image/dashboard/aepp-browser.jpg';
+import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -90,15 +99,18 @@ export default defineComponent({
       DASHBOARD_CARD_ID,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+      ROUTE_APPS_BROWSER,
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
       activeAccount,
+      GlobeIcon,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
       buyBackground,
       chainNameBackground,
+      daeppBrowserBackground,
       isNodeMainnet,
       isNodeTestnet,
     };

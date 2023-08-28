@@ -2,6 +2,7 @@
   <BtnPlain
     v-if="unstyled"
     class="form-select unstyled"
+    v-bind="$attrs"
     @click="openOptionsModal"
   >
     <slot
@@ -10,7 +11,10 @@
     >
       {{ currentText }}
     </slot>
-    <ChevronDownIcon class="arrow-icon" />
+    <ChevronDownIcon
+      v-if="!hideArrow"
+      class="arrow-icon"
+    />
   </BtnPlain>
   <InputField
     v-else
@@ -63,6 +67,10 @@ export default defineComponent({
      * Decides if the input looks like a regular text instead of a form input element
      */
     unstyled: Boolean,
+    /**
+     * Decides if the dropdown arrow is visible
+     */
+    hideArrow: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {

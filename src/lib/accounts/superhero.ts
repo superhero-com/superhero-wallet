@@ -94,7 +94,7 @@ export class AccountSuperhero extends AccountBase {
       }
 
       return this.store.dispatch('accounts/signTransaction', {
-        txBase64: messageToHash(payload),
+        txBase64: payload,
         options: {
           ...options,
           modal: !permission,

@@ -28,6 +28,8 @@ import {
   MODAL_TRANSFER_SEND,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
+  MODAL_DAPP_BROWSER_ACTIONS,
+  MODAL_WARNING_DAPP_BROWSER,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -41,6 +43,8 @@ import AccountImport from '../components/Modals/AccountImport.vue';
 import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
+import ConfirmConnect from '../pages/Popups/Connect.vue';
+
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -54,8 +58,10 @@ import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
+import BrowserActions from '../components/Modals/BrowserActions.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -96,6 +102,7 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
+    component: ConfirmConnect,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
@@ -145,5 +152,11 @@ export default () => {
   });
   registerModal(MODAL_AE_ACCOUNT_CREATE, {
     component: AeternityAccountCreate,
+  });
+  registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
+    component: BrowserActions,
+  });
+  registerModal(MODAL_WARNING_DAPP_BROWSER, {
+    component: WarningDappBrowser,
   });
 };
