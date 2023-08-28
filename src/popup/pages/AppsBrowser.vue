@@ -81,7 +81,6 @@ import {
   onUnmounted,
   onMounted,
   ref,
-  h,
   computed,
 } from 'vue';
 import { useStore } from 'vuex';
@@ -97,15 +96,8 @@ import AppsBrowserListItem from '@/popup/components/AppsBrowserListItem.vue';
 import CloseIcon from '@/icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
 import GraffitiIcon from '@/icons/dapp/graffiti.svg?vue-component';
-import SuperheroLogo from '@/icons/logo-small.svg?vue-component';
 import Governance from '@/icons/dapp/Governance.svg?vue-component';
-
-const DEXIcon = h(
-  SuperheroLogo,
-  {
-    style: { color: '#00FF9D' },
-  },
-);
+import DEXIcon from '@/icons/dapp/SuperheroDEX.svg?vue-component';
 
 const DAPPS_LIST = [
   {
