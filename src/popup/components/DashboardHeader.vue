@@ -9,7 +9,7 @@
       :active-idx="activeIdx"
       :address-list="accountsAddressList"
       :to="{ name: ROUTE_ACCOUNT_DETAILS }"
-      @selectAccount="(index) => setActiveAccountByIdx(index)"
+      @selectAccount="(index) => setActiveAccountByGlobalIdx(index)"
     >
       <template #slide="{ index }">
         <AccountCard
@@ -43,7 +43,7 @@ export default defineComponent({
       accounts,
       accountsAddressList,
       activeIdx,
-      setActiveAccountByIdx,
+      setActiveAccountByGlobalIdx,
     } = useAccounts({ store });
 
     const { balancesTotal } = useBalances({ store });
@@ -54,7 +54,7 @@ export default defineComponent({
       accountsAddressList,
       activeIdx,
       balancesTotal,
-      setActiveAccountByIdx,
+      setActiveAccountByGlobalIdx,
     };
   },
 });

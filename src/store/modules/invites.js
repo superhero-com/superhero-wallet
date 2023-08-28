@@ -1,5 +1,6 @@
 import nacl from 'tweetnacl';
 import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useModals, useNetworks } from '@/composables';
 import { tg } from '../plugins/languages';
 
@@ -19,7 +20,7 @@ export default {
   actions: {
     async claim({ rootGetters, rootState }, secretKey) {
       const { activeNetwork } = useNetworks();
-      const { activeAccount } = useAccounts({
+      const { getLastActiveProtocolAccount } = useAccounts({
         store: { state: rootState, getters: rootGetters },
       });
       const aeSdk = new AeSdk({
@@ -31,7 +32,11 @@ export default {
         accounts: [new MemoryAccount(secretKey.length === SEED_LENGTH
           ? nacl.sign.keyPair.fromSeed(secretKey).secretKey : secretKey)],
       });
-      await aeSdk.transferFunds(1, activeAccount.value.address, { verify: false });
+      await aeSdk.transferFunds(
+        1,
+        getLastActiveProtocolAccount(PROTOCOL_AETERNITY).address,
+        { verify: false },
+      );
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;

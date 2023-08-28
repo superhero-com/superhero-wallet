@@ -39,6 +39,7 @@ import {
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { postJson } from '@/utils';
 import {
   useAccounts,
@@ -46,8 +47,8 @@ import {
   useDeepLinkApi,
   useModals,
 } from '@/composables';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import AccountSelector from '../components/AccountSelector.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -71,12 +72,12 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const {
-      activeAccount,
       aeAccountsSelectOptions,
+      getLastActiveProtocolAccount,
       setActiveAccountByAddress,
     } = useAccounts({ store });
 
-    const creatorAddress = ref(activeAccount.value.address);
+    const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
@@ -99,14 +100,14 @@ export default defineComponent({
 
     async function sendComment() {
       loading.value = true;
-      const aeSdk = await getAeSdk();
+
       try {
         const postToCommentApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/comment/api/`, { body });
 
         const responseChallenge = await postToCommentApi({
           tipId: id.value,
           text: text.value,
-          author: aeSdk.address,
+          author: creatorAddress.value,
           parentId: parentId.value,
         });
         const respondChallenge = await fetchRespondChallenge(responseChallenge);

@@ -16,7 +16,7 @@ export default {
 
   state: {
     list: [{
-      globalIndex: 0,
+      globalIdx: 0,
       idx: 0,
       showed: true,
       type: ACCOUNT_HD_WALLET,
