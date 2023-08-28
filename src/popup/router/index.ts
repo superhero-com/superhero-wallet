@@ -70,10 +70,19 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (to.name === ROUTE_APPS_BROWSER && activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-    setActiveAccountByIdx(0);
-    next({ name: ROUTE_APPS_BROWSER });
-    return;
+  if (to.name === ROUTE_APPS_BROWSER) {
+    // In-app browser is mobile-only
+    if (!IS_CORDOVA) {
+      next({ name: ROUTE_INDEX });
+      return;
+    }
+
+    // In-app browser only works with AE accounts
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+      setActiveAccountByIdx(0);
+      next({ name: ROUTE_APPS_BROWSER });
+      return;
+    }
   }
 
   const { isAeSdkReady } = useAeSdk({ store });
