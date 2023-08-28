@@ -5,7 +5,7 @@
 /* eslint-disable no-use-before-define */
 
 import { WatchSource, watch } from 'vue';
-import { defer } from 'lodash-es';
+import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
 import type {
@@ -15,6 +15,7 @@ import type {
   IDashboardTransaction,
   IPageableResponse,
   IRequestInitBodyParsed,
+  ITransaction,
   StorageKeysInput,
   Truthy,
 } from '@/types';
@@ -224,6 +225,13 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
     ...options,
     body: options?.body && JSON.stringify(options.body),
   });
+}
+
+export function removeDuplicatedTransactions(transactions: ITransaction[]) {
+  return uniqWith(
+    transactions,
+    (a, b) => (a.hash === b.hash && a.transactionOwner === b.transactionOwner),
+  );
 }
 
 export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {

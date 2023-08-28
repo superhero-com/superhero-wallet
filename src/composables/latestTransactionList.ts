@@ -3,11 +3,17 @@ import {
   ref,
   watch,
 } from 'vue';
-import { isEqual, uniqWith } from 'lodash-es';
+import { isEqual } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
-import type { IDefaultComposableOptions } from '@/types';
-import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
-import { handleUnknownError, pipe, sortTransactionsByDate } from '@/utils';
+import type { IDefaultComposableOptions, ITransaction } from '@/types';
+import { DASHBOARD_TRANSACTION_LIMIT, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
+import {
+  handleUnknownError,
+  pipe,
+  removeDuplicatedTransactions,
+  sortTransactionsByDate,
+} from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
@@ -25,7 +31,7 @@ const { onNetworkChange } = createNetworkWatcher();
  * that wants to use this data.
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { aeAccounts } = useAccounts({ store });
+  const { accounts } = useAccounts({ store });
   const { balancesTotal } = useBalances({ store });
   const { nodeNetworkId } = useAeSdk({ store });
 
@@ -34,10 +40,12 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     fetchTransactions,
   } = useTransactionList({ store });
 
+  const btcTransactions = ref<ITransaction[]>([]);
+
   const tokens = computed(() => store.state.fungibleTokens.tokens);
 
   const latestTransactions = computed(() => {
-    const allTransactions = Object.entries(transactions.value)
+    const aeTransactions = Object.entries(transactions.value)
       .map(([
         accountAddress,
         { loaded, pending }]) => [...(pending[nodeNetworkId.value!] || []), ...(loaded || [])]
@@ -53,19 +61,24 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
             ...tr,
             direction: direction.value,
           };
-        }));
+        }))
+      .flatMap((transaction) => transaction);
 
-    const allTransactionsFlat = allTransactions.flatMap((transaction) => transaction);
+    const allTransactions: ITransaction[] = [
+      ...aeTransactions,
+      ...btcTransactions.value,
+    ];
+
     return pipe([
-      (txs) => uniqWith(
-        txs,
-        (a, b) => (a.hash === b.hash && a.transactionOwner === b.transactionOwner),
-      ),
+      removeDuplicatedTransactions,
       sortTransactionsByDate,
-    ])(allTransactionsFlat)
+    ])(allTransactions)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
   });
 
+  /**
+   * TODO The logic here should be updated as it mixes different approaches for each protocol
+   */
   async function updateTransactionListData() {
     if (isTransactionListLoading.value) {
       return;
@@ -73,17 +86,31 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
 
     isTransactionListLoading.value = true;
 
-    await Promise.all(aeAccounts.value.map(async ({ address }) => {
-      try {
-        return (await fetchTransactions(
-          DASHBOARD_TRANSACTION_LIMIT,
-          true,
-          address,
-        ));
-      } catch (e) {
-        handleUnknownError(e);
-        return [];
+    const btcAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+
+    await Promise.all(accounts.value.map(async ({ address, protocol }) => {
+      switch (protocol) {
+        case PROTOCOL_AETERNITY:
+          try {
+            await fetchTransactions(
+              DASHBOARD_TRANSACTION_LIMIT,
+              true,
+              address,
+            );
+          } catch (error) {
+            handleUnknownError(error);
+          }
+          break;
+        case PROTOCOL_BITCOIN:
+          try {
+            btcTransactions.value = await btcAdapter.fetchTransactions(address);
+          } catch (error) {
+            handleUnknownError(error);
+          }
+          break;
+        default:
       }
+      return true;
     }));
 
     isTransactionListLoading.value = false;
