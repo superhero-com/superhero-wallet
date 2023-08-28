@@ -1,6 +1,9 @@
+import nacl from 'tweetnacl';
 import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { useAccounts, useModals, useNetworks } from '@/composables';
 import { tg } from '../plugins/languages';
+
+const SEED_LENGTH = 32;
 
 export default {
   namespaced: true,
@@ -24,7 +27,9 @@ export default {
           name: activeNetwork.value.name,
           instance: new Node(activeNetwork.value.protocols.aeternity.nodeUrl),
         }],
-        accounts: [new MemoryAccount(secretKey)],
+        // `secretKey` variable can be either seed or seed + public key (legacy)
+        accounts: [new MemoryAccount(secretKey.length === SEED_LENGTH
+          ? nacl.sign.keyPair.fromSeed(secretKey).secretKey : secretKey)],
       });
       await aeSdk.transferFunds(1, activeAccount.value.address, { verify: false });
     },

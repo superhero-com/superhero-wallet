@@ -71,6 +71,7 @@
 </template>
 
 <script lang="ts">
+import nacl from 'tweetnacl';
 import {
   computed,
   defineComponent,
@@ -116,7 +117,7 @@ export default defineComponent({
     Field,
   },
   props: {
-    secretKey: { type: String, required: true },
+    secretKey: { type: Buffer, required: true },
     createdAt: { type: Number, required: true },
   },
   setup(props, { emit }) {
@@ -139,17 +140,19 @@ export default defineComponent({
     const inviteLinkBalance = ref(0);
 
     const link = computed(() => {
-      // sg_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (encode(Buffer.from(props.secretKey, 'hex'), Encoding.Signature)).slice(3);
+      // nm_ prefix was chosen as a dummy to decode from base58Check
+      const secretKey = (encode(Buffer.from(props.secretKey), Encoding.Name)).slice(3);
       return new URL(
-        router
-          .resolve({ name: ROUTE_INVITE_CLAIM, params: { secretKey } })
-          .href.replace(/^#/, ''),
+        `${router
+          .resolve({ name: ROUTE_INVITE_CLAIM })
+          .href.replace(/^#/, '')}#${secretKey}`,
         APP_LINK_WEB,
       );
     });
 
-    const address = computed(() => getAddressFromPriv(props.secretKey));
+    const address = computed(() => getAddressFromPriv(
+      nacl.sign.keyPair.fromSeed(Buffer.from(props.secretKey)).secretKey,
+    ));
 
     function deleteItem() {
       store.commit('invites/delete', props.secretKey);

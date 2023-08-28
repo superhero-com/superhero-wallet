@@ -686,7 +686,7 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_INVITE_CLAIM,
-    path: '/invite/:secretKey',
+    path: '/invite/:secretKey?',
     component: InviteClaim,
     props: true,
     meta: {
