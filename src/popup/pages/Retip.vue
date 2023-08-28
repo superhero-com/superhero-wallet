@@ -123,7 +123,7 @@ export default defineComponent({
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
     const { marketData } = useCurrencies({ store });
-    const { activeAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const { balance } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
@@ -146,6 +146,7 @@ export default defineComponent({
         ? (formModel.value.selectedAsset as IToken).decimals
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
+      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
@@ -189,10 +190,10 @@ export default defineComponent({
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
-          transactionOwner: activeAccount.value.address,
+          transactionOwner: account.address,
           tx: {
             amount,
-            callerId: activeAccount.value.address,
+            callerId: account.address,
             contractId: tippingContract.$options.address!,
             type: Tag[Tag.ContractCallTx],
             function: 'retip',
@@ -201,7 +202,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+        upsertCustomPendingTransactionForAccount(account.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({

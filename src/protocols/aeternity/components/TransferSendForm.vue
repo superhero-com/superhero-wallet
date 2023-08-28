@@ -163,6 +163,7 @@ import { useRoute } from 'vue-router';
 import { Field } from 'vee-validate';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
+import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   AGGREGATOR_URL,
@@ -251,6 +252,8 @@ export default defineComponent({
     const {
       accounts,
       activeAccount,
+      setActiveAccountByGlobalIdx,
+      setActiveAccountByAddress,
       prepareAccountSelectOptions,
     } = useAccounts({ store });
 
@@ -337,14 +340,10 @@ export default defineComponent({
 
     /**
      * Used only for multisig - selects signing account.
-     * @param {string} val address of an account that will be selected
      */
-    function selectAccount(val: string) {
-      if (val) {
-        store.commit(
-          'accounts/setActiveIdx',
-          accounts.value.find(({ address }) => address === val)?.globalIndex,
-        );
+    function selectAccount(address: Encoded.AccountAddress) {
+      if (address) {
+        setActiveAccountByAddress(address);
         if (formModel.value.amount && amountField.value) {
           amountField.value.validate();
         }
@@ -403,7 +402,7 @@ export default defineComponent({
           props.isMultisig
           && !activeMultisigAccount.value?.signers.includes(activeAccount.value.address)
         ) {
-          store.commit('accounts/setActiveIdx', mySignerAccounts[0].globalIndex);
+          setActiveAccountByGlobalIdx(mySignerAccounts[0].globalIdx);
         }
 
         const { query } = route;

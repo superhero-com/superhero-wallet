@@ -6,9 +6,10 @@ import {
   Encoded,
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
+import type { IWalletInfo } from '@/types';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { AccountSuperhero } from '@/lib/accounts/AccountSuperhero';
 import { useAccounts } from '@/composables/accounts';
-import { AccountSuperhero } from '@/lib/accounts/superhero';
-import { IWalletInfo } from '@/types';
 
 /**
  * Custom fields in options, `modal` and `payload` for spend function.
@@ -38,17 +39,18 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   getAccounts() {
-    const { activeAccount } = useAccounts({ store: this.store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
+    const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
     return ({
-      current: { [activeAccount.value.address]: {} },
+      current: { [account.address]: {} },
       connected: {
       },
     });
   }
 
   addresses() {
-    const { accountsAddressList } = useAccounts({ store: this.store });
-    return accountsAddressList.value as Encoded.AccountAddress[];
+    const { aeAccounts } = useAccounts({ store: this.store });
+    return aeAccounts.value.map(({ address }) => address);
   }
 
   spendWithCustomOptions(

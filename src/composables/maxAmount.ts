@@ -28,6 +28,7 @@ import {
   handleUnknownError,
   isUrlValid,
 } from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
@@ -53,7 +54,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const { getAeSdk } = useAeSdk({ store });
   const { balance } = useBalances({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { getLastActiveProtocolAccount } = useAccounts({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
@@ -71,6 +72,10 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
     return selectedTokenBalance.value.toString();
   });
 
+  function getAccount() {
+    return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+  }
+
   watch(
     () => formModel.value,
     async (val) => {
@@ -79,6 +84,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       }
       const aeSdk = await getAeSdk();
       const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
+      const account = getAccount();
 
       if (!isAssetAe) {
         if (
@@ -107,13 +113,13 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           calldata = tokenInstance._calldata.encode(
             tokenInstance._name,
             'transfer',
-            [activeAccount.value.address, amount.toFixed()],
+            [account.address, amount.toFixed()],
           );
         }
         fee.value = BigNumber(unpackTx(
           buildTx({
             tag: Tag.ContractCallTx,
-            callerId: activeAccount.value.address,
+            callerId: account.address,
             contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
@@ -133,8 +139,8 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const minFee = BigNumber(unpackTx(
         buildTx({
           tag: Tag.SpendTx,
-          senderId: activeAccount.value.address,
-          recipientId: activeAccount.value.address,
+          senderId: account.address,
+          recipientId: account.address,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
@@ -154,7 +160,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (!tokenInstance) return;
       await getAeSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.balance(activeAccount.value.address)).decodedResult ?? 0,
+        (await tokenInstance.balance(getAccount().address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
@@ -162,7 +168,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       try {
         nonce.value = (await aeSdk.api
-          .getAccountByPubkey(activeAccount.value.address))?.nonce;
+          .getAccountByPubkey(getAccount().address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }

@@ -5,7 +5,7 @@ import {
   handleUnknownError,
   postJson,
 } from '@/utils';
-import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL } from '@/constants';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL, PROTOCOL_AETERNITY } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
@@ -39,7 +39,11 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
-  const { aeAccounts, activeAccount, aeNextAccountIdx } = useAccounts({ store });
+  const {
+    aeAccounts,
+    aeNextAccountIdx,
+    getLastActiveProtocolAccount,
+  } = useAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -58,7 +62,7 @@ export default (store) => {
         return defaults[`${address}-${nodeNetworkId.value}`];
       },
       getPreferred: ({ preferred }, { getDefault }) => (address) => {
-        if (activeAccount.value.address === address) {
+        if (getLastActiveProtocolAccount(PROTOCOL_AETERNITY).address === address) {
           return getDefault(address);
         }
         store.dispatch('names/setPreferred', address);

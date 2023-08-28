@@ -1,6 +1,7 @@
 import type {
   Class,
   Protocol,
+  ProtocolRecord,
 } from '@/types';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 
@@ -12,9 +13,9 @@ export const ProtocolAdapterFactory = (() => {
    * Registry of non instantiated classes.
    * Use the `addAdapter` instead of hardcoding the adapters here to avoid circular dependency.
    */
-  const protocolAdapterClassRegistry: Partial<Record<Protocol, Class<BaseProtocolAdapter>>> = {};
+  const protocolAdapterClassRegistry: ProtocolRecord<Class<BaseProtocolAdapter>> = {};
 
-  const protocolAdapterRegistry: Partial<Record<Protocol, BaseProtocolAdapter>> = {};
+  const protocolAdapterRegistry: ProtocolRecord<BaseProtocolAdapter> = {};
 
   function registerAdapter(protocol: Protocol, adapter: Class<BaseProtocolAdapter>) {
     protocolAdapterClassRegistry[protocol] = adapter;

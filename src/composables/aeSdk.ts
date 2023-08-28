@@ -30,6 +30,7 @@ import {
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_TESTS,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { showPopup } from '@/background/popupHandler';
 import {
@@ -53,7 +54,7 @@ let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk({ store }: IDefaultComposableOptions) {
   const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
-  const { isLoggedIn, activeAccount } = useAccounts({ store });
+  const { isLoggedIn, getLastActiveProtocolAccount } = useAccounts({ store });
   const { openModal } = useModals();
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
@@ -123,7 +124,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         if (!(await store.dispatch('permissions/requestAddressForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
             : openModal(MODAL_CONFIRM_CONNECT, {
@@ -139,7 +140,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         ) {
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         }
-        return activeAccount.value.address;
+        return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
       },
       async onAskAccounts(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
@@ -148,7 +149,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         if (!(await store.dispatch('permissions/requestAllAddressesForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_ACCOUNT_LIST)
             : openModal(MODAL_CONFIRM_ACCOUNT_LIST, {

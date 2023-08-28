@@ -10,6 +10,7 @@ import type {
   IDefaultComposableOptions,
   IFormSelectOption,
   Protocol,
+  ProtocolRecord,
 } from '@/types';
 import {
   PROTOCOL_AETERNITY,
@@ -22,29 +23,31 @@ import {
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 
-const isIdxInitialized = ref(false);
-const protocolNextAccountIdx = ref<Partial<Record<Protocol, number>>>(
+let isIdxInitialized = false;
+const protocolNextAccountIdx = ref<ProtocolRecord<number>>(
   // Aeternity starts from 1 as we have 1 account as default
   PROTOCOLS.reduce((acc, protocol) => ({ ...acc, [protocol]: 0, [PROTOCOL_AETERNITY]: 1 }), {}),
 );
+const protocolLastActiveGlobalIdx: ProtocolRecord<number> = {};
 
+/**
+ * TODO in the future the state of the accounts should be stored in this composable
+ */
 export function useAccounts({ store }: IDefaultComposableOptions) {
-  // TODO in the future the state of the accounts should be stored in this composable
   const activeIdx = computed((): number => store.state.accounts?.activeIdx || 0);
   const accountsRaw = computed((): IAccountRaw[] => store.state.accounts?.list || []);
   const accounts = computed((): IAccount[] => store.getters.accounts || []);
-  const aeAccounts = computed(
-    (): IAccount[] => accounts.value.filter(({ protocol }) => protocol === PROTOCOL_AETERNITY),
-  );
-  const protocolGroupedAccounts = computed(
-    (): Partial<Record<Protocol, IAccount[]>> => accounts.value.reduce(
+  const accountsGroupedByProtocol = computed(
+    () => accounts.value.reduce(
       (acc, account) => ({
         ...acc,
-        // @ts-ignore
         [account.protocol]: [...(acc?.[account.protocol] || []), account],
       }),
-      {},
+      {} as ProtocolRecord<IAccount[]>,
     ),
+  );
+  const aeAccounts = computed(
+    (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOL_AETERNITY] || [],
   );
 
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
@@ -52,11 +55,12 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
 
   const isLoggedIn = computed(
-    () => activeAccount.value && Object.keys(activeAccount.value).length > 0,
+    (): boolean => activeAccount.value && Object.keys(activeAccount.value).length > 0,
   );
   const aeNextAccountIdx = computed(
     (): number => protocolNextAccountIdx.value[PROTOCOL_AETERNITY] || 0,
   );
+
   /**
    * Accounts data formatted as the form select options
    */
@@ -68,11 +72,12 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       name: acc.name,
       idx: acc.idx,
       protocol: acc.protocol || PROTOCOL_AETERNITY,
-      globalIndex: acc.globalIndex,
+      globalIdx: acc.globalIdx,
     }));
   }
 
   const accountsSelectOptions = computed(() => prepareAccountSelectOptions(accounts.value));
+
   const aeAccountsSelectOptions = computed(() => prepareAccountSelectOptions(aeAccounts.value));
 
   const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
@@ -87,14 +92,24 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     return accounts.value.find((acc) => acc.address === address);
   }
 
-  function setActiveAccountByIdx(idx: number = 0) {
+  function getAccountByGlobalIdx(globalIdx: number): IAccount | undefined {
+    return accounts.value.find((acc) => acc.globalIdx === globalIdx);
+  }
+
+  function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
+    const account = getAccountByGlobalIdx(globalIdx);
+
     // TODO replace with updating local state after removing the Vuex
-    store.commit('accounts/setActiveIdx', +(accounts.value[idx].globalIndex || 0));
+    store.commit('accounts/setActiveIdx', account?.globalIdx || 0);
+
+    if (account) {
+      protocolLastActiveGlobalIdx[account.protocol] = account.globalIdx;
+    }
   }
 
   function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
     if (address) {
-      setActiveAccountByIdx(getAccountByAddress(address)?.globalIndex);
+      setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
     }
   }
 
@@ -109,8 +124,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     if (protocolNextAccountIdx.value[protocol] === undefined) {
       protocolNextAccountIdx.value[protocol] = 0;
     } else {
-      // @ts-ignore
-      protocolNextAccountIdx.value[protocol] += 1;
+      protocolNextAccountIdx.value[protocol]! += 1;
     }
   }
 
@@ -118,13 +132,25 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     protocolNextAccountIdx.value[protocol] = value;
   }
 
+  /**
+   * Access last used (or current) account of the protocol when accessing features
+   * related to protocol different than the current account is using.
+   */
+  function getLastActiveProtocolAccount(protocol: Protocol): IAccount | undefined {
+    const lastUsedGlobalIdx = protocolLastActiveGlobalIdx[protocol];
+    return (lastUsedGlobalIdx)
+      ? getAccountByGlobalIdx(lastUsedGlobalIdx)
+      : accounts.value.find((account) => account.protocol === protocol);
+  }
+
   (async () => {
-    if (!isIdxInitialized.value) {
+    if (!isIdxInitialized) {
       await watchUntilTruthy(() => store.state.isRestored);
-      Object.entries(protocolGroupedAccounts.value).forEach(([protocol, protocolAccounts]) => {
+      Object.entries(accountsGroupedByProtocol.value).forEach(([protocol, protocolAccounts]) => {
         setProtocolNextAccountIdx(protocolAccounts?.length || 0, protocol as Protocol);
       });
-      isIdxInitialized.value = true;
+      isIdxInitialized = true;
+      protocolLastActiveGlobalIdx[activeAccount.value.protocol] = activeAccount.value.globalIdx;
     }
   })();
 
@@ -147,7 +173,9 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     prepareAccountSelectOptions,
     isLocalAccountAddress,
     getAccountByAddress,
+    getAccountByGlobalIdx,
+    getLastActiveProtocolAccount,
     setActiveAccountByAddress,
-    setActiveAccountByIdx,
+    setActiveAccountByGlobalIdx,
   };
 }

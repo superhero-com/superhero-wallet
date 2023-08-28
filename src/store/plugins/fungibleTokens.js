@@ -24,7 +24,11 @@ export default (store) => {
   const { activeNetwork } = useNetworks();
   const { getAeSdk } = useAeSdk({ store });
   const { fetchFromMiddleware } = useMiddleware();
-  const { aeAccounts, activeAccount, aeNextAccountIdx } = useAccounts({ store });
+  const {
+    aeAccounts,
+    aeNextAccountIdx,
+    getLastActiveProtocolAccount,
+  } = useAccounts({ store });
   const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {
@@ -35,7 +39,10 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      tokenBalances: (state, { getTokenBalance }) => getTokenBalance(activeAccount.value.address),
+      tokenBalances: (state, { getTokenBalance }) => {
+        const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+        return getTokenBalance(account.address);
+      },
     },
     mutations: {
       setAvailableTokens(state, payload) {
@@ -103,7 +110,8 @@ export default (store) => {
         [contractId, amount],
       ) {
         const aeSdk = await getAeSdk();
-        const selectedToken = store.state.fungibleTokens.tokens?.[activeAccount.value.address]
+        const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]
           ?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
         const tokenContract = await aeSdk.initializeContract({
@@ -111,7 +119,7 @@ export default (store) => {
           address: selectedToken.contractId,
         });
         const { decodedResult } = await tokenContract.allowance({
-          from_account: activeAccount.value.address,
+          from_account: account.address,
           for_account: tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'),
         });
         const allowanceAmount = decodedResult !== undefined
@@ -130,6 +138,7 @@ export default (store) => {
       ) {
         try {
           const aeSdk = await getAeSdk();
+          const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
           const tokenContract = await aeSdk.initializeContract({
             aci: AedexV2PairACI,
             address,
@@ -144,7 +153,7 @@ export default (store) => {
             { decodedResult: totalSupply },
           ] = await Promise.all([
             tokenContract.balances(),
-            tokenContract.balance(activeAccount.value.address),
+            tokenContract.balance(account.address),
             tokenContract.token0(),
             tokenContract.token1(),
             tokenContract.get_reserves(),

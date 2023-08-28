@@ -28,7 +28,7 @@ export default {
       .map(({
         idx, type, protocol = PROTOCOL_AETERNITY, ...acc
       }, index) => ({
-        globalIndex: index,
+        globalIdx: index,
         idx,
         type,
         protocol,

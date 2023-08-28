@@ -69,9 +69,10 @@ import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
-import { useState } from '../../../composables/vuex';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { useState } from '@/composables/vuex';
+import { useAccounts, usePopupProps } from '@/composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -97,8 +98,10 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
 

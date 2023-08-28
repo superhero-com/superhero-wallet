@@ -18,6 +18,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_TX_SIGN,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { showPopup } from '@/background/popupHandler';
 
@@ -29,8 +30,8 @@ export class AccountSuperhero extends AccountBase {
   constructor(store: Store<any>) {
     super();
     this.store = store;
-    const { activeAccount } = useAccounts({ store });
-    this.address = activeAccount.value.address as Encoded.AccountAddress;
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    this.address = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
   }
 
   signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
@@ -62,9 +63,9 @@ export class AccountSuperhero extends AccountBase {
   }
 
   sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
-    const { activeAccount } = useAccounts({ store: this.store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
     return IS_EXTENSION_BACKGROUND
-      ? sign(data, activeAccount.value.secretKey) as any
+      ? sign(data, getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.secretKey) as any
       : this.store.dispatch('accounts/sign', data, options);
   }
 
