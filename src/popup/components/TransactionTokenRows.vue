@@ -16,7 +16,7 @@
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
-        full-ae-symbol
+        full-symbol
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}

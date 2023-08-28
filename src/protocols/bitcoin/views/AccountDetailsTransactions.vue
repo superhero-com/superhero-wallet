@@ -4,6 +4,7 @@
       v-if="isOnline"
       :transactions="transactions"
       :loading="loading"
+      @load-more="loadMoreTransactions()"
     />
     <MessageOffline
       v-else
@@ -14,12 +15,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  ref,
+} from 'vue';
+import { useStore } from 'vuex';
 
-import { useConnection } from '@/composables';
+import type { ITransaction } from '@/types';
+import { PROTOCOL_BITCOIN } from '@/constants';
+import { useAccounts, useConnection } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
+import { executeAndSetInterval } from '@/utils';
+import Logger from '@/lib/logger';
 
 export default defineComponent({
   components: {
@@ -27,15 +40,72 @@ export default defineComponent({
     MessageOffline,
   },
   setup() {
-    const { isOnline } = useConnection();
+    let pollingInterval: NodeJS.Timer;
 
-    const transactions = ref([]);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+
+    const store = useStore();
+    const { isOnline } = useConnection();
+    const { activeAccount } = useAccounts({ store });
+
+    const transactionsLatest = ref<ITransaction[]>([]);
+    const transactionsMore = ref<ITransaction[]>([]);
     const loading = ref(false);
+
+    const transactions = computed(() => [
+      ...transactionsLatest.value || [],
+      ...transactionsMore.value || [],
+    ]);
+
+    async function fetchTransactionList() {
+      if (!loading.value) {
+        try {
+          loading.value = true;
+          transactionsLatest.value = await adapter.fetchTransactions(activeAccount.value.address);
+        } catch (error: any) {
+          Logger.write(error);
+        } finally {
+          loading.value = false;
+        }
+      }
+    }
+
+    async function loadMoreTransactions() {
+      const latestTxId: string = (transactionsMore.value.length)
+        ? transactionsMore.value[transactionsMore.value.length - 1].hash
+        : transactionsLatest.value[transactionsLatest.value.length - 1].hash;
+
+      if (latestTxId) {
+        try {
+          const result = await adapter.fetchTransactions(activeAccount.value.address, latestTxId);
+          if (result?.length) {
+            transactionsMore.value = [...transactionsMore.value, result];
+          }
+        } catch (error: any) {
+          Logger.write(error);
+        }
+      }
+    }
+
+    onMounted(() => {
+      pollingInterval = executeAndSetInterval(() => {
+        fetchTransactionList();
+      }, 10000);
+    });
+
+    onUnmounted(() => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    });
 
     return {
       isOnline,
       transactions,
+      transactionsLatest,
+      transactionsMore,
       loading,
+      loadMoreTransactions,
     };
   },
 });
