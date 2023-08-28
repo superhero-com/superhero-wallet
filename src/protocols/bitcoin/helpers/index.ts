@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import { networks } from 'bitcoinjs-lib';
 import type { ITransaction } from '@/types';
@@ -16,6 +17,14 @@ export function isBtcAddressValid(address: string, networkType: string) {
   } catch (error) {
     return false;
   }
+}
+
+export function getTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
+  return new BigNumber(
+    transaction.tx?.amount || 0,
+  )
+    .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+    .toNumber();
 }
 
 export function normalizeTransactionStructure(
@@ -38,7 +47,7 @@ export function normalizeTransactionStructure(
     pending: !status.confirmed,
     tx: {
       amount: satoshiToBtc(vout[0].value),
-      fee,
+      fee: satoshiToBtc(fee),
       senderId: vin[0].prevout.scriptpubkey_address,
       recipientId: vout[0].scriptpubkey_address,
       type: 'SpendTx', // TODO: create own types
