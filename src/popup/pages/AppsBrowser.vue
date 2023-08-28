@@ -12,7 +12,7 @@
         v-model="customAppURL"
         name="customAppURL"
         :rules="{
-          url: customAppURL.length > 0 ? true : false,
+          url: customAppURL.length > 0,
         }"
       >
         <InputField
