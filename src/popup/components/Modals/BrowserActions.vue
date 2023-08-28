@@ -4,6 +4,7 @@
     from-bottom
     centered
     body-without-padding-bottom
+    no-padding-top
     @close="resolve"
   >
     <div class="info">
@@ -83,15 +84,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '@/styles/variables';
-@use '@/styles/mixins';
-@use '@/styles/typography';
-
-.browser-actions {
-  :deep(.fixed-screen-footer) {
-    padding-top: 0;
-  }
-}
-</style>

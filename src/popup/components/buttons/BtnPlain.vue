@@ -16,7 +16,7 @@ export default {
     extend: Boolean,
     text: { type: String, default: null },
     to: { type: [Object, String], default: null },
-    avatar: { type: Boolean, default: false },
+    avatar: Boolean,
   },
 };
 </script>

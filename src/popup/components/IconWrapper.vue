@@ -44,7 +44,7 @@ export default defineComponent({
   },
   props: {
     icon: { type: Object as PropType<Component>, default: null },
-    isFull: { type: Boolean, default: false },
+    isFull: Boolean,
     isBoxed: Boolean,
     iconSize: iconSizeProp,
     protocolIcon: protocolIconProp,

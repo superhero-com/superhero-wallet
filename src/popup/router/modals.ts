@@ -28,7 +28,7 @@ import {
   MODAL_TRANSFER_SEND,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
-  MODAL_BOWSER_ACTIONS_DAPP,
+  MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WARNING_DAPP_BROWSER,
 } from '@/constants';
 import { useModals } from '@/composables';
@@ -153,7 +153,7 @@ export default () => {
   registerModal(MODAL_AE_ACCOUNT_CREATE, {
     component: AeternityAccountCreate,
   });
-  registerModal(MODAL_BOWSER_ACTIONS_DAPP, {
+  registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
     component: BrowserActions,
   });
   registerModal(MODAL_WARNING_DAPP_BROWSER, {

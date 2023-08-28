@@ -23,19 +23,18 @@
 
 <script lang="ts">
 import { Component, defineComponent, PropType } from 'vue';
-import type { VueI18nTranslation } from 'vue-i18n';
 import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   name: 'AppsBrowserListItem',
   components: { IconWrapper },
   props: {
-    appTitle: { type: String as PropType<string | VueI18nTranslation>, required: true },
+    appTitle: { type: String, required: true },
     appIcon: { type: Object as PropType<Component>, default: null },
     /**
      * App image name, should be located in src\icons\dapp
      */
-    appImage: { type: String as PropType<string>, default: null },
+    appImage: { type: String, default: null },
   },
   setup() {
     function getImageUrl(name: string) {

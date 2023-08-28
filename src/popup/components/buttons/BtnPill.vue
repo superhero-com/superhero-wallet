@@ -21,7 +21,7 @@ export default defineComponent({
   props: {
     to: { type: [String, Object], default: null },
     text: { type: String, default: null },
-    avatar: { type: Boolean, default: false },
+    avatar: Boolean,
     dense: Boolean,
     static: Boolean,
   },

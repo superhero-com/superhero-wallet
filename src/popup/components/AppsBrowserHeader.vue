@@ -61,7 +61,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
-import { MODAL_BOWSER_ACTIONS_DAPP, BROWSER_ACTIONS } from '@/constants';
+import { MODAL_DAPP_BROWSER_ACTIONS, BROWSER_ACTIONS } from '@/constants';
 import {
   useAccounts,
   useUi,
@@ -137,7 +137,7 @@ export default defineComponent({
     async function openActions() {
       // eslint-disable-next-line no-useless-catch
       try {
-        const value = await openModal(MODAL_BOWSER_ACTIONS_DAPP,
+        const value = await openModal(MODAL_DAPP_BROWSER_ACTIONS,
           {
             iframe: props.iframe,
             selectedApp: props.selectedApp,
@@ -170,9 +170,9 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
-@use '../../styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .apps-browser-header {
   --header-height: 40px;
