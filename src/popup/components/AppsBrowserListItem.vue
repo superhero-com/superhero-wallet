@@ -9,6 +9,11 @@
         class="app-image"
         is-full
       />
+      <img
+        v-else-if="appImage"
+        :src="getImageUrl(appImage)"
+        class="app-image"
+      >
     </div>
     <div class="app-title">
       {{ appTitle }}
@@ -27,6 +32,20 @@ export default defineComponent({
   props: {
     appTitle: { type: String as PropType<string | VueI18nTranslation>, required: true },
     appIcon: { type: Object as PropType<Object>, default: null },
+    /**
+     * App image name, should be located in src\icons\dapp
+     */
+    appImage: { type: String as PropType<string>, default: null },
+  },
+  setup() {
+    function getImageUrl(name: string) {
+      // eslint-disable-next-line global-require, import/no-dynamic-require
+      return require(`@/icons/dapp/${name}`);
+    }
+
+    return {
+      getImageUrl,
+    };
   },
 });
 </script>
