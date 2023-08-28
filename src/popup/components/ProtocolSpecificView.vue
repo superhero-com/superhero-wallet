@@ -22,13 +22,15 @@
 import { PropType, defineAsyncComponent, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import type { Protocol, ProtocolView, ProtocolViewsConfig } from '@/types';
-import { DISTINCT_PROTOCOL_VIEWS } from '@/constants';
-import { useAccounts } from '@/composables';
+import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
+import { useAccounts, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
 
 import aeternityViews from '@/protocols/aeternity/views';
 import bitcoinViews from '@/protocols/bitcoin/views';
 
+import { useRoute } from 'vue-router';
+import { detectProtocolByOwner } from '@/utils';
 import InfoBox from './InfoBox.vue';
 
 /**
@@ -53,8 +55,17 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
-
-    const importViewComponent = views[activeAccount.value.protocol]?.[props.viewComponentName];
+    const { activeNetwork } = useNetworks();
+    const { params, meta } = useRoute();
+    const ownerProtocol = detectProtocolByOwner(
+      activeNetwork.value.type,
+      params.transactionOwner as string,
+    );
+    const importViewComponent = views[
+      meta.isMultisig
+        ? PROTOCOL_AETERNITY
+        : (ownerProtocol || activeAccount.value.protocol)
+    ]?.[props.viewComponentName];
 
     if (!importViewComponent) {
       Logger.write({
