@@ -31,6 +31,8 @@ import {
   AE_SYMBOL,
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { aettosToAe } from '../helpers';
 
 /**
@@ -84,6 +86,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override getAccountPrefix() {
     return `${Encoding.AccountAddress}_`;
+  }
+
+  override getExplorer(): any {
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+
+    return new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 
   override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces): number {

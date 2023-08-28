@@ -22,10 +22,15 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import type { Protocol } from '@/types';
 import { truncateAddress } from '@/utils';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
 import LinkButton from './LinkButton.vue';
@@ -37,14 +42,15 @@ export default defineComponent({
   },
   props: {
     address: { type: String, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     showExplorerLink: Boolean,
   },
   setup(props) {
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-
     const truncatedAddress = computed(() => truncateAddress(props.address));
     const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+      () => ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .getExplorer()
         .prepareUrlForAccount(props.address),
     );
 

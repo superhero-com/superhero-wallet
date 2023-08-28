@@ -12,6 +12,7 @@
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
+        :protocol="account.protocol"
         avatar-size="rg"
         avatar-borderless
         is-list-name

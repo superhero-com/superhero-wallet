@@ -27,6 +27,7 @@
         </FormSelect>
       </BtnPill>
       <AddressTruncated
+        :protocol="modelValue.protocol"
         show-explorer-link
         :address="modelValue.toString()"
       />

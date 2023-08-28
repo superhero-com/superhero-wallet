@@ -34,6 +34,8 @@ import {
 } from '@/protocols/bitcoin/config';
 import { fetchJson } from '@/utils';
 import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
+import { Blockstream } from '@/protocols/bitcoin/libs/Blockstream';
+import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetworkSettings';
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
@@ -56,6 +58,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return (activeNetwork.value.type === NETWORK_TYPE_TESTNET)
       ? 'tb1q'
       : 'bc1q';
+  }
+
+  override getExplorer(): any {
+    const { btcActiveNetworkPredefinedSettings } = useBtcNetworkSettings();
+
+    return new Blockstream(btcActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 
   override getAmountPrecision(): number {
