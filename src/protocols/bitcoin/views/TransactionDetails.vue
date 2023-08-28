@@ -27,15 +27,13 @@ import {
   ref,
   onMounted,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAccounts } from '@/composables';
 import type { ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOL_BITCOIN } from '@/constants';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { toBitcoin } from 'satoshi-bitcoin';
+import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import BtcIcon from '@/icons/coin/bitcoin.svg';
@@ -47,9 +45,6 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const store = useStore();
-
-    const { activeAccount } = useAccounts({ store });
 
     const hash = route.params.hash as string;
 
@@ -61,19 +56,21 @@ export default defineComponent({
       // TODO: link to the bitcoin explorer should be moved to the network settings
       () => `https://www.blockchain.com/explorer/transactions/btc/${transaction.value?.hash}`,
     );
-    const transactionFee = computed((): number => toBitcoin(transaction.value?.tx?.fee ?? 0));
+
+    const transactionFee = computed((): number => transaction.value?.tx?.fee ?? 0);
+
     const totalAmount = computed((): number => transaction.value?.tx
-      ? toBitcoin(transaction.value.tx.fee + transaction.value.tx.amount)
+      ? getTxAmountTotal(transaction.value, transaction.value.tx.recipientId === transactionOwner)
       : 0);
 
-    const direction = computed(() => activeAccount.value.address === transaction.value?.tx?.senderId
+    const direction = computed(() => transactionOwner === transaction.value?.tx?.senderId
       ? TX_DIRECTION.sent
       : TX_DIRECTION.received);
 
     const tokens = computed(() => [{
       amount: totalAmount.value,
       symbol: BTC_SYMBOL,
-      isReceived: false,
+      isReceived: direction.value === TX_DIRECTION.received,
       isAe: false,
       image: BtcIcon,
     }]);

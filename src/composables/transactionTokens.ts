@@ -19,6 +19,7 @@ import {
   isTransactionAex9,
 } from '@/protocols/aeternity/helpers';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -69,6 +70,7 @@ export function useTransactionTokens({
     if (transaction.protocol === PROTOCOL_BITCOIN) {
       return [{
         ...innerTx.value || {},
+        amount: getBitcoinTxAmountTotal(transaction, direction === TX_DIRECTION.received),
         symbol: BTC_SYMBOL,
         isReceived: direction === TX_DIRECTION.received,
       }];
