@@ -2,7 +2,7 @@
   <a
     :class="['link-button', variant, { underlined }]"
     :href="to"
-    target="blank"
+    target="_blank"
   >
     <slot />
     <span
