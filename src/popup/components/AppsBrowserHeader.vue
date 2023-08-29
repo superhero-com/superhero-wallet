@@ -31,7 +31,7 @@
       >
         <SecureIcon
           v-if="isSecure"
-          class="icon"
+          class="icon secure-lock"
         />
         {{ selectedAppHost }}
       </div>
@@ -234,6 +234,12 @@ export default defineComponent({
       align-items: center;
       gap: 2px;
       color: variables.$color-white;
+
+      .secure-lock {
+        height: 17px;
+        width: 17px;
+        opacity: 0.75;
+      }
     }
   }
 }
