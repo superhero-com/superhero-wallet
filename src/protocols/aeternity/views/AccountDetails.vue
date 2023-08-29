@@ -15,7 +15,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-if="isAeAccount && (isNodeMainnet || isNodeTestnet)"
+        v-if="isAeAccount && IS_CORDOVA && (isNodeMainnet || isNodeTestnet)"
         :icon="GlobeSmallIcon"
         :text="$t('common.browser')"
         :to="{ name: ROUTE_APPS_BROWSER }"
@@ -31,7 +31,12 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { useStore } from 'vuex';
-import { IS_IOS, PROTOCOL_VIEW_ACCOUNT_DETAILS, PROTOCOL_AETERNITY } from '@/constants';
+import {
+  IS_CORDOVA,
+  IS_IOS,
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import {
   useAccounts,
   useConnection,
@@ -76,6 +81,7 @@ export default defineComponent({
       FaucetIcon,
       GlobeSmallIcon,
       AE_DEX_URL,
+      IS_CORDOVA,
       IS_IOS,
       isOnline,
       isNodeMainnet,
