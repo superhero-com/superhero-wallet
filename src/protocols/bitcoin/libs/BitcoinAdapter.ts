@@ -267,7 +267,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
 
     const transactionId = await fetch(`${nodeUrl}/tx`, requestOptions)
-      .then((response) => response.text());
+      .then(async (response) => {
+        if (response.status !== 200) {
+          throw new Error(await response.text());
+        }
+        return response.text();
+      });
     return {
       hash: transactionId,
     };

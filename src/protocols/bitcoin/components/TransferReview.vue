@@ -72,11 +72,20 @@ export default defineComponent({
     const loading = ref<boolean>(false);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function openTransactionFailedModal() {
+    function openTransactionFailedModal(msg: string) {
       openDefaultModal({
         title: t('modals.transaction-failed.msg'),
         icon: 'critical',
+        msg,
       });
+    }
+
+    // TODO: replace that
+    // This is happening because of inner TemplateRenderer issue on parsing the blocksteam response
+    function HtmlEncode(content: string) {
+      const textAreaDiv = document.createElement('textarea');
+      textAreaDiv.textContent = content;
+      return textAreaDiv.innerHTML;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,8 +98,8 @@ export default defineComponent({
           ...activeAccount.value,
         });
         return hash;
-      } catch (error) {
-        openTransactionFailedModal();
+      } catch (error: any) {
+        openTransactionFailedModal(HtmlEncode(error.message));
         throw error;
       } finally {
         loading.value = false;
