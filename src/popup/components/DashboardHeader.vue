@@ -9,7 +9,7 @@
       :active-idx="activeIdx"
       :address-list="accountsAddressList"
       :to="{ name: ROUTE_ACCOUNT_DETAILS }"
-      @selectAccount="(index) => setActiveAccountByIdx(index)"
+      @selectAccount="(index) => setActiveAccountByGlobalIdx(index)"
     >
       <template #slide="{ index }">
         <AccountCard
@@ -22,7 +22,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
+import { useStore } from 'vuex';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
 import { useAccounts, useBalances } from '../../composables';
 
@@ -36,15 +37,16 @@ export default defineComponent({
     TotalWalletAmount,
     AccountCard,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
     const {
       accounts,
       accountsAddressList,
       activeIdx,
-      setActiveAccountByIdx,
-    } = useAccounts({ store: root.$store });
+      setActiveAccountByGlobalIdx,
+    } = useAccounts({ store });
 
-    const { balancesTotal } = useBalances({ store: root.$store });
+    const { balancesTotal } = useBalances({ store });
 
     return {
       ROUTE_ACCOUNT_DETAILS,
@@ -52,7 +54,7 @@ export default defineComponent({
       accountsAddressList,
       activeIdx,
       balancesTotal,
-      setActiveAccountByIdx,
+      setActiveAccountByGlobalIdx,
     };
   },
 });

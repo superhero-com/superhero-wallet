@@ -1,9 +1,14 @@
 <template>
-  <AccountDetailsBase v-if="activeMultisigAccount">
+  <AccountDetailsBase
+    v-if="activeMultisigAccount"
+    without-default-buttons
+  >
     <template #account-info>
       <AccountInfo
         :address="activeMultisigAccount.gaAccountId"
+        :protocol="PROTOCOL_AETERNITY"
         is-multisig
+        with-protocol-icon
         can-copy-address
       />
     </template>
@@ -30,9 +35,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
-import { useMultisigAccounts } from '../../composables';
-import { buildSimplexLink } from '../utils';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useMultisigAccounts } from '@/composables';
+import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -54,8 +61,9 @@ export default defineComponent({
     AccountInfo,
     AccountDetailsBase,
   },
-  setup(props, { root }) {
-    const { activeMultisigAccount } = useMultisigAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const simplexLink = computed(
       () => (activeMultisigAccount.value)
@@ -64,6 +72,7 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,

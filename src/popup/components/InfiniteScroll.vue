@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 import { useViewport } from '../../composables/viewport';
 
 export default defineComponent({
@@ -13,6 +13,7 @@ export default defineComponent({
   props: {
     isMoreData: { type: Boolean, required: true },
   },
+  emits: ['loadMore'],
   setup(props, { emit }) {
     const { onViewportScroll } = useViewport();
 

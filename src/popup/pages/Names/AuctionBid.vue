@@ -3,12 +3,22 @@
     <AuctionCard :name="name" />
 
     <div class="form">
-      <InputAmount
-        v-model="amount"
-        :error="!!amountError"
-        :message="amountError"
-        ae-only
-      />
+      <Field
+        v-slot="{ field, errorMessage }"
+        name="amount"
+        :rules="{
+          enough_coin: amountTotal.toString(),
+          required: true,
+        }"
+      >
+        <InputAmount
+          v-bind="field"
+          v-model="amount"
+          name="amount"
+          :message="amountError || errorMessage"
+          readonly
+        />
+      </Field>
       <div class="tx-details">
         <DetailsItem :label="$t('transaction.fee')">
           <template #value>
@@ -28,7 +38,7 @@
       </div>
 
       <BtnMain
-        :disabled="!!amountError || !amount"
+        :disabled="!!amountError || !amount || errorName"
         class="button"
         extend
         @click="bid"
@@ -41,16 +51,33 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
-import BigNumber from 'bignumber.js';
-import { IAuctionBid } from '../../../types';
-import { useModals, useSdk } from '../../../composables';
-import { useGetter } from '../../../composables/vuex';
 import {
-  AENS_BID_MIN_RATIO,
-  aeToAettos,
-  calculateNameClaimFee,
-} from '../../utils';
+  computed,
+  defineComponent,
+  ref,
+  PropType,
+} from 'vue';
+import BigNumber from 'bignumber.js';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import {
+  AensName,
+  buildTx,
+  unpackTx,
+  Tag,
+} from '@aeternity/aepp-sdk';
+import { useForm, useFieldError, Field } from 'vee-validate';
+
+import type { IAuctionBid } from '@/types';
+import { useModals, useAeSdk } from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
+import {
+  AE_AENS_BID_MIN_RATIO,
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
@@ -66,12 +93,19 @@ export default defineComponent({
     DetailsItem,
     TokenAmount,
     BtnMain,
+    Field,
   },
   props: {
-    name: { type: String, required: true },
+    name: { type: String as PropType<AensName>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
+    const { validate } = useForm();
+    const errorName = useFieldError('amount');
+
+    const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
 
     const loading = ref(false);
@@ -80,29 +114,44 @@ export default defineComponent({
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
 
     const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
-    const txFee = computed<BigNumber>(() => calculateNameClaimFee(props.name));
+    const txFee = computed<BigNumber>(
+      () => BigNumber(unpackTx(
+        buildTx({
+          tag: Tag.NameClaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          name: props.name,
+          nameSalt: 0,
+          nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
+        }) as any,
+        Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
+      ).fee).shiftedBy(-AE_COIN_PRECISION),
+    );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
-      const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
+      const minBid = highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO);
       return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
-        ? root.$t('pages.names.auctions.min-bid', { minBid })
+        ? t('pages.names.auctions.min-bid', { minBid })
         : null;
     });
 
     async function bid() {
-      const sdk = await getSdk();
+      if (!(await validate()).valid) {
+        return;
+      }
+      const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {
         loading.value = true;
-        await sdk.aensBid(props.name, aeToAettos(amount.value));
+        await aeSdk.aensBid(props.name, aeToAettos(amount.value));
         openDefaultModal({
-          msg: root.$t('pages.names.auctions.bid-added', { name: props.name }),
+          msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        root.$router.push({ name: 'auction-history', params: { name: props.name } });
+        router.push({ name: 'auction-history', params: { name: props.name } });
       } catch (error: any) {
         let msg = error.message;
         if (msg.includes('is not enough to execute')) {
-          msg = root.$t('pages.names.balance-error');
+          msg = t('pages.names.balance-error');
         }
         openDefaultModal({ msg });
       } finally {
@@ -115,6 +164,7 @@ export default defineComponent({
       amount,
       amountTotal,
       amountError,
+      errorName,
       txFee,
       bid,
     };

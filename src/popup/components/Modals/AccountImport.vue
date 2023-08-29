@@ -20,7 +20,17 @@
         :resizable="false"
         enter-submit
         @submit="importAccount"
-      />
+      >
+        <template #label-after>
+          <a
+            class="scan-button"
+            data-cy="scan-button"
+            @click="openScanQrModal"
+          >
+            <QrScanIcon />
+          </a>
+        </template>
+      </FormTextarea>
     </div>
 
     <template #footer>
@@ -44,29 +54,37 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
-import type { ResolveRejectCallback } from '../../../types';
-import { validateSeedLength } from '../../utils';
-import { useSdk } from '../../../composables';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import type { RejectCallback, ResolveCallback } from '@/types';
+import { MODAL_READ_QR_CODE } from '@/constants';
+import { isSeedLengthValid } from '@/utils';
+import { useModals } from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import FormTextarea from '../form/FormTextarea.vue';
+import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
     BtnMain,
     Modal,
     FormTextarea,
+    QrScanIcon,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveRejectCallback>, required: true },
-    reject: { type: Function as PropType<ResolveRejectCallback>, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
   },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const router = useRouter();
+    const { t } = useI18n();
+    const { openModal } = useModals();
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -82,28 +100,39 @@ export default defineComponent({
         .replace(/[^a-z ]/g, '')
         .trim();
 
-      if (!validateSeedLength(mnemonicParsed)) {
-        error.value = root.$t('pages.index.invalidSeed');
+      if (!isSeedLengthValid(mnemonicParsed)) {
+        error.value = t('pages.index.invalidSeed');
         return;
       }
       if (!mnemonicParsed || !validateMnemonic(mnemonicParsed)) {
-        error.value = root.$t('pages.index.accountNotFound');
+        error.value = t('pages.index.accountNotFound');
         return;
       }
-      root.$store.commit('setMnemonic', mnemonicParsed);
-      root.$store.commit('setBackedUpSeed');
+      store.commit('setMnemonic', mnemonicParsed);
+      store.commit('setBackedUpSeed');
       props.resolve();
       setTimeout(async () => {
-        await getSdk();
-        root.$store.dispatch('accounts/hdWallet/discover');
+        store.dispatch('accounts/hdWallet/discover');
       }, 100);
-      root.$router.push(root.$store.state.loginTargetLocation);
+      router.push(store.state.loginTargetLocation);
+    }
+
+    async function openScanQrModal() {
+      const scanResult = await openModal(MODAL_READ_QR_CODE, {
+        title: t('pages.index.scanSeedPhrase'),
+        icon: 'critical',
+      });
+
+      if (scanResult) {
+        mnemonic.value = scanResult;
+      }
     }
 
     return {
       mnemonic,
       error,
       importAccount,
+      openScanQrModal,
     };
   },
 });
@@ -131,6 +160,13 @@ export default defineComponent({
       margin-bottom: 24px;
       margin-top: 8px;
     }
+  }
+
+  .scan-button {
+    color: variables.$color-white;
+    display: block;
+    width: 32px;
+    height: 24px;
   }
 }
 </style>

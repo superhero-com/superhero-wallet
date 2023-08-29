@@ -1,23 +1,34 @@
 <template>
   <div class="claim">
-    <InputField
-      v-model="name"
-      v-validate="'required|name|name_unregistered'"
+    <Field
+      v-slot="{ field, errorMessage }"
       name="name"
-      class="chain-name"
-      :label="$t('pages.names.claim.register-name')"
-      :message="errors.first('name')"
-      :placeholder="$t('pages.names.claim.name-placeholder')"
+      :rules="{
+        enough_coin: totalNameClaimAmount.toString(),
+        required: true,
+        name: true,
+        name_unregistered: true,
+      }"
     >
-      <template #label-after>
-        <span class="chain-name-counter">
-          {{ name.length }}/{{ maxNameLength }}
-        </span>
-      </template>
-      <template #after>
-        <span class="aens-domain">{{ AENS_DOMAIN }}</span>
-      </template>
-    </InputField>
+      <InputField
+        v-bind="field"
+        v-model="name"
+        name="name"
+        class="chain-name"
+        :label="$t('pages.names.claim.register-name')"
+        :message="errorMessage"
+        :placeholder="$t('pages.names.claim.name-placeholder')"
+      >
+        <template #label-after>
+          <span class="chain-name-counter">
+            {{ name.length }}/{{ maxNameLength }}
+          </span>
+        </template>
+        <template #after>
+          <span class="aens-domain">{{ AE_AENS_DOMAIN }}</span>
+        </template>
+      </InputField>
+    </Field>
 
     <CheckBox v-model="autoExtend">
       <div class="auto-extend-label">
@@ -32,23 +43,24 @@
 
     <Loader v-if="loading" />
 
-    <i18n
-      path="pages.names.claim.short-names.message"
+    <i18n-t
+      keypath="pages.names.claim.short-names.message"
       tag="p"
       class="text-description explanation"
+      scope="global"
     >
       <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
-    </i18n>
+    </i18n-t>
 
     <BtnMain
       class="btn-register"
       extend
-      :disabled="!isSdkReady || !name || errors.any()"
+      :disabled="!isAeSdkReady || !name || errorName"
       @click="claim"
     >
       {{
         isNameValid
-          ? $t('pages.names.claim.button-price', [nameFee])
+          ? $t('pages.names.claim.button-price', [totalNameClaimAmount.toFixed(4)])
           : $t('pages.names.claim.button')
       }}
     </BtnMain>
@@ -56,22 +68,39 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from '@vue/composition-api';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
+import { defineComponent, ref, computed } from 'vue';
 import {
-  AETERNITY_COIN_PRECISION,
-  AENS_DOMAIN,
-  AENS_NAME_MAX_LENGTH,
-  AENS_NAME_AUCTION_MAX_LENGTH,
-  checkAensName,
-  convertToken,
-} from '../../utils';
-import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useSdk } from '../../../composables';
+  AensName,
+  buildTx,
+  commitmentHash,
+  getExecutionCost,
+  getMinimumNameFee,
+  Tag,
+  unpackTx,
+} from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useForm, useFieldError, Field } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
+import BigNumber from 'bignumber.js';
+
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
+import { useAccounts, useModals, useAeSdk } from '@/composables';
+import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import {
+  AE_COIN_PRECISION,
+  AE_AENS_DOMAIN,
+  AE_AENS_NAME_MAX_LENGTH,
+  AE_AENS_NAME_AUCTION_MAX_LENGTH,
+} from '@/protocols/aeternity/config';
+
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
 import BtnHelp from '../../components/buttons/BtnHelp.vue';
+
+const STUB_NAME_SALT = 4204563566073083;
 
 export default defineComponent({
   name: 'Claim',
@@ -80,52 +109,76 @@ export default defineComponent({
     CheckBox,
     BtnMain,
     BtnHelp,
+    Field,
   },
-  setup(props, { root }) {
+  setup() {
+    const router = useRouter();
+    const store = useStore();
+    const { validate } = useForm();
+    const errorName = useFieldError('name');
+    const { t } = useI18n();
+
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
-    const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
+    const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
-    const isNameValid = computed(() => name.value && checkAensName(`${name.value}${AENS_DOMAIN}`));
+    const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
+    const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
 
-    const nameFee = computed(() => convertToken(
-      TxBuilderHelper.getMinimumNameFee(`${name.value}${AENS_DOMAIN}`),
-      -AETERNITY_COIN_PRECISION,
-    ).toFixed(4));
+    const totalNameClaimAmount = computed(() => !name.value.length
+      ? BigNumber(0)
+      : BigNumber(unpackTx(
+          buildTx({
+            tag: Tag.NamePreclaimTx,
+            accountId: STUB_ADDRESS,
+            nonce: STUB_NONCE,
+            commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
+          }) as any,
+          Tag.NamePreclaimTx,
+      ).fee)
+        .plus(getExecutionCost(buildTx({
+          tag: Tag.NameClaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          name: fullName.value,
+          nameSalt: 0,
+          nameFee: getMinimumNameFee(fullName.value),
+        }) as any).toString())
+        .shiftedBy(-AE_COIN_PRECISION));
 
-    const { getSdk, isSdkReady } = useSdk({ store: root.$store });
+    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 
     async function claim() {
-      if (!await (root as any).$validator.validateAll()) return;
+      if (!(await validate()).valid) {
+        return;
+      }
 
       const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store: root.$store });
+      const { activeAccount } = useAccounts({ store });
 
-      const sdk = await getSdk();
-
-      const fullName = `${name.value}${AENS_DOMAIN}`;
-      const nameEntry = await sdk.api.getNameEntryByName(fullName).catch(() => false);
+      const aeSdk = await getAeSdk();
+      const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
 
       if (nameEntry) {
         openDefaultModal({
-          title: root.$t('modals.name-exist.msg'),
+          title: t('modals.name-exist.msg'),
         });
       } else {
         loading.value = true;
         let claimTxHash;
 
         try {
-          const { salt } = await sdk.aensPreclaim(fullName);
-          claimTxHash = (await sdk.aensClaim(fullName, salt, { waitMined: false })).hash;
+          const { salt } = await aeSdk.aensPreclaim(fullName.value);
+          claimTxHash = (await aeSdk.aensClaim(fullName.value, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            root.$store.commit('names/setPendingAutoExtendName', fullName);
+            store.commit('names/setPendingAutoExtendName', fullName.value);
           }
-          root.$router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
+          router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e: any) {
           let msg = e.message;
           if (msg.includes('is not enough to execute') || e.statusCode === 404) {
-            msg = root.$t('pages.names.balance-error');
+            msg = t('pages.names.balance-error');
           }
           openDefaultModal({
             icon: 'critical',
@@ -137,29 +190,30 @@ export default defineComponent({
         }
 
         try {
-          root.$store.dispatch('names/fetchOwned');
-          await sdk.poll(claimTxHash);
-          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.length) {
-            root.$store.dispatch('names/updatePointer', {
-              name: fullName,
+          store.dispatch('names/fetchOwned');
+          await aeSdk.poll(claimTxHash);
+          if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
+            store.dispatch('names/updatePointer', {
+              name: fullName.value,
               address: activeAccount.value.address,
             });
           }
         } catch (e: any) {
           openDefaultModal({ msg: e.message });
         } finally {
-          root.$store.dispatch('names/fetchOwned');
+          store.dispatch('names/fetchOwned');
         }
       }
     }
 
     return {
-      AENS_DOMAIN,
+      AE_AENS_DOMAIN,
       autoExtend,
       isNameValid,
-      isSdkReady,
+      isAeSdkReady,
       name,
-      nameFee,
+      totalNameClaimAmount,
+      errorName,
       loading,
       maxNameLength,
       claim,

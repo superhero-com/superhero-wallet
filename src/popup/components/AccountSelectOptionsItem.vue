@@ -12,6 +12,7 @@
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
+        :protocol="account.protocol"
         avatar-size="rg"
         avatar-borderless
         is-list-name
@@ -19,7 +20,7 @@
       />
       <TokenAmount
         :amount="balance"
-        :symbol="AETERNITY_SYMBOL"
+        :symbol="AE_SYMBOL"
         fiat-below
         class="token-amount"
         small
@@ -33,11 +34,12 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
-import { useBalances } from '../../composables';
-import { getAddressColor } from '../utils/avatar';
-import { AETERNITY_SYMBOL } from '../utils';
-import { IFormSelectOption } from '../../types';
+} from 'vue';
+import { useStore } from 'vuex';
+import type { IFormSelectOption } from '@/types';
+import { useBalances } from '@/composables';
+import { getAddressColor } from '@/utils';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -56,8 +58,9 @@ export default defineComponent({
     },
     value: { type: [String, Number], default: null },
   },
-  setup(props, { root }) {
-    const { getAccountBalance } = useBalances({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { getAccountBalance } = useBalances({ store });
 
     const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.account.address) }));
 
@@ -70,7 +73,7 @@ export default defineComponent({
     return {
       balance,
       bgColorStyle,
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
     };
   },
 });

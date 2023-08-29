@@ -25,7 +25,7 @@
     <span
       v-if="nameComponent !== str"
       class="domain"
-      v-text="AENS_DOMAIN"
+      v-text="AE_AENS_DOMAIN"
     />
   </div>
 </template>
@@ -38,8 +38,8 @@ import {
   watch,
   nextTick,
   onMounted,
-} from '@vue/composition-api';
-import { AENS_DOMAIN } from '../utils';
+} from 'vue';
+import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 export default defineComponent({
   props: {
@@ -52,8 +52,8 @@ export default defineComponent({
     const scroll = ref<HTMLDivElement>();
     const shouldScroll = ref(false);
 
-    const nameComponent = computed(() => props.str?.endsWith(AENS_DOMAIN)
-      ? props.str.replace(AENS_DOMAIN, '')
+    const nameComponent = computed(() => props.str?.endsWith(AE_AENS_DOMAIN)
+      ? props.str.replace(AE_AENS_DOMAIN, '')
       : props.str);
 
     const animationTranslate = ref<string>();
@@ -86,7 +86,7 @@ export default defineComponent({
     });
 
     return {
-      AENS_DOMAIN,
+      AE_AENS_DOMAIN,
       container,
       scroll,
       shouldScroll,

@@ -13,6 +13,15 @@
       <LatestTransactionsCard />
 
       <DashboardCard
+        v-if="IS_CORDOVA"
+        :title="$t('dashboard.daeppBrowserCard.title')"
+        :description="$t('dashboard.daeppBrowserCard.description')"
+        :btn-text="$t('dashboard.daeppBrowserCard.button')"
+        :background="daeppBrowserBackground"
+        :icon="GlobeIcon"
+        :to="{ name: ROUTE_APPS_BROWSER }"
+      />
+      <DashboardCard
         v-if="isNodeMainnet && UNFINISHED_FEATURES"
         :title="$t('dashboard.buyCard.title')"
         :description="$t('dashboard.buyCard.description')"
@@ -24,7 +33,7 @@
       />
 
       <DashboardCard
-        v-if="isNodeMainnet || isNodeTestnet"
+        v-if="(isNodeMainnet || isNodeTestnet) && activeAccount.protocol === PROTOCOL_AETERNITY"
         :title="$t('dashboard.nameCard.title')"
         :description="$t('dashboard.nameCard.description')"
         :btn-text="$t('dashboard.nameCard.button')"
@@ -39,26 +48,32 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
-import { DASHBOARD_CARD_ID } from '../utils';
-import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM } from '../router/routeNames';
-import { useAccounts, useSdk } from '../../composables';
+import { useStore } from 'vuex';
+import {
+  DASHBOARD_CARD_ID,
+  IS_CORDOVA,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+import { useAccounts, useAeSdk } from '@/composables';
 
-import DashboardCard from '../components/DashboardCard.vue';
-import DashboardWrapper from '../components/DashboardWrapper.vue';
-import DashboardHeader from '../components/DashboardHeader.vue';
-import OpenTransferReceiveModalButton from '../components/OpenTransferReceiveModalButton.vue';
-import OpenTransferSendModalButton from '../components/OpenTransferSendModalButton.vue';
-import LatestTransactionsCard from '../components/LatestTransactionsCard.vue';
+import DashboardCard from '@/popup/components/DashboardCard.vue';
+import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
+import DashboardHeader from '@/popup/components/DashboardHeader.vue';
+import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
+import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
+import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
 
-import ArrowReceiveIcon from '../../icons/arrow-receive.svg?vue-component';
-import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
-import CardIcon from '../../icons/credit-card.svg?vue-component';
-import MenuCardIcon from '../../icons/menu-card-fill.svg?vue-component';
-
-import buyBackground from '../../image/dashboard/buy-ae.jpg';
-import chainNameBackground from '../../image/dashboard/chain-name.jpg';
+import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
+import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
+import CardIcon from '@/icons/credit-card.svg?vue-component';
+import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
+import buyBackground from '@/image/dashboard/buy-ae.jpg';
+import chainNameBackground from '@/image/dashboard/chain-name.jpg';
+import daeppBrowserBackground from '@/image/dashboard/aepp-browser.jpg';
+import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -70,26 +85,35 @@ export default defineComponent({
     DashboardHeader,
     DashboardWrapper,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+
     const {
+      activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-    } = useAccounts({ store: root.$store });
+    } = useAccounts({ store });
 
-    const { isNodeMainnet, isNodeTestnet } = useSdk({ store: root.$store });
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     return {
+      PROTOCOL_AETERNITY,
       DASHBOARD_CARD_ID,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+      ROUTE_APPS_BROWSER,
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
+      activeAccount,
+      GlobeIcon,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
       buyBackground,
       chainNameBackground,
+      daeppBrowserBackground,
+      IS_CORDOVA,
       isNodeMainnet,
       isNodeTestnet,
     };

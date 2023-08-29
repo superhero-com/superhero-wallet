@@ -6,49 +6,54 @@
 
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
-        <AccountSelector v-model="creatorAddress" />
-        <i18n
+        <AccountSelector
+          v-model="creatorAddress"
+          :options="aeAccountsSelectOptions"
+        />
+        <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
-          path="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
+          keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
           tag="div"
           class="creator-error-message"
+          scope="global"
         >
-          <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
-        </i18n>
+          <span>{{ fee }} {{ AE_SYMBOL }}</span>
+        </i18n-t>
       </template>
     </DetailsItem>
 
-    <div class="review-details-row">
-      <DetailsItem :label="$t('multisig.authorizedSigners')">
-        <template #value>
-          <div class="authorized-signers">
-            <div
-              v-for="signer in signers"
-              :key="signer.address"
-              class="authorized-signers-row"
-            >
-              <AccountItem :address="signer.address" />
-              <DialogBox
-                v-if="isLocalAccountAddress(signer.address)"
-                dense
-                v-text="$t('common.you')"
-              />
-            </div>
-          </div>
-        </template>
-      </DetailsItem>
+    <DetailsItem :label="$t('multisig.consensus')">
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <ConsensusLabel
+        :confirmations-required="confirmationsRequired"
+        :signers="signers"
+        :default-confirmed-by="confirmationsRequired"
+      />
+    </DetailsItem>
 
-      <DetailsItem :label="$t('multisig.consensus')">
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <ConsensusLabel
-          :confirmations-required="confirmationsRequired"
-          :signers="signers"
-          :default-confirmed-by="confirmationsRequired"
-        />
-      </DetailsItem>
-    </div>
+    <DetailsItem :label="$t('multisig.authorizedSigners')">
+      <template #value>
+        <div class="authorized-signers">
+          <div
+            v-for="signer in signers"
+            :key="signer.address"
+            class="authorized-signers-row"
+          >
+            <AccountItem
+              :address="signer.address"
+              :protocol="PROTOCOL_AETERNITY"
+            />
+            <DialogBox
+              v-if="isLocalAccountAddress(signer.address)"
+              dense
+              v-text="$t('common.you')"
+            />
+          </div>
+        </div>
+      </template>
+    </DetailsItem>
 
     <LoadingIcon
       v-if="!fee || !callData || !creatorAccountFetched"
@@ -59,7 +64,7 @@
         <template #value>
           <TokenAmount
             :amount="fee"
-            :symbol="AETERNITY_SYMBOL"
+            :symbol="AE_SYMBOL"
           />
         </template>
       </DetailsItem>
@@ -89,23 +94,24 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
-import {
+} from 'vue';
+import { useStore } from 'vuex';
+import { Encoded } from '@aeternity/aepp-sdk';
+
+import type {
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
-} from '../../types';
-import {
-  AETERNITY_SYMBOL,
-  handleUnknownError,
-  MODAL_CONSENSUS_INFO,
-} from '../utils';
+} from '@/types';
+import { MODAL_CONSENSUS_INFO, PROTOCOL_AETERNITY } from '@/constants';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
-  useSdk,
-} from '../../composables';
+  useAeSdk,
+} from '@/composables';
 
 import AccountSelector from './AccountSelector.vue';
 import AccountItem from './AccountItem.vue';
@@ -132,26 +138,29 @@ export default defineComponent({
     phase: { type: String as PropType<IMultisigCreationPhase>, default: null },
     signers: { type: Array as PropType<ICreateMultisigAccount[]>, required: true },
     confirmationsRequired: { type: Number, required: true },
-    accountId: { type: String, required: true },
+    accountId: { type: String as PropType<Encoded.AccountAddress>, required: true },
   },
-  setup(props, { root }) {
-    const { accounts } = useAccounts({ store: root.$store });
+  setup(props) {
+    const store = useStore();
+    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store: root.$store });
-    const { isLocalAccountAddress } = useAccounts({ store: root.$store });
+    } = useMultisigAccountCreate({ store });
+    const { isLocalAccountAddress } = useAccounts({ store });
 
-    const { getSdk } = useSdk({ store: root.$store });
+    const { getAeSdk } = useAeSdk({ store });
 
     const { openModal } = useModals();
 
-    const creatorAddress = ref<string>(props.signers[0].address || accounts.value[0].address);
+    const creatorAddress = ref<Encoded.AccountAddress>(
+      props.signers[0].address || aeAccounts.value[0].address,
+    );
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
-      () => accounts.value.find(({ address }) => address === creatorAddress.value),
+      () => aeAccounts.value.find(({ address }) => address === creatorAddress.value),
     );
     const fee = computed(() => multisigAccountCreationFee.value);
     const callData = computed(
@@ -162,9 +171,13 @@ export default defineComponent({
     watch(creatorAddress, async (val, oldVal) => {
       if (val !== oldVal) {
         creatorAccountFetched.value = undefined;
-        const sdk = await getSdk();
+        const aeSdk = await getAeSdk();
         try {
-          creatorAccountFetched.value = await sdk.api.getAccountByPubkey(val) as IAccountFetched;
+          const rawAccount = await aeSdk.api.getAccountByPubkey(val);
+          creatorAccountFetched.value = {
+            ...rawAccount,
+            balance: rawAccount.balance.toString(),
+          };
         } catch (error) {
           handleUnknownError(error);
           creatorAccountFetched.value = {
@@ -184,7 +197,8 @@ export default defineComponent({
     }
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
+      aeAccountsSelectOptions,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,
@@ -193,6 +207,7 @@ export default defineComponent({
       callData,
       notEnoughBalanceToCreateMultisig,
       openConsensusInfoModal,
+      PROTOCOL_AETERNITY,
     };
   },
 });
@@ -217,11 +232,6 @@ export default defineComponent({
     span {
       font-weight: 500;
     }
-  }
-
-  .review-details-row {
-    display: flex;
-    gap: 20px;
   }
 
   .loading-icon {

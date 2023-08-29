@@ -1,0 +1,98 @@
+<template>
+  <AccountDetailsBase class="account-details">
+    <template #buttons>
+      <BtnBox
+        v-if="isNodeMainnet && UNFINISHED_FEATURES"
+        :icon="CreditCardIcon"
+        :text="$t('common.buy')"
+        :href="activeAccountSimplexLink"
+        :disabled="!isOnline"
+      />
+      <BtnBox
+        v-if="isNodeTestnet"
+        :icon="FaucetIcon"
+        :text="$t('common.faucet')"
+        :href="activeAccountFaucetUrl"
+      />
+      <BtnBox
+        v-if="isAeAccount && IS_CORDOVA && (isNodeMainnet || isNodeTestnet)"
+        :icon="GlobeSmallIcon"
+        :text="$t('common.browser')"
+        :to="{ name: ROUTE_APPS_BROWSER }"
+      />
+    </template>
+
+    <template #navigation>
+      <AccountDetailsNavigation />
+    </template>
+  </AccountDetailsBase>
+</template>
+
+<script lang="ts">
+import { defineComponent, computed } from 'vue';
+import { useStore } from 'vuex';
+import {
+  IS_CORDOVA,
+  IS_IOS,
+  PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import {
+  useAccounts,
+  useConnection,
+  useAeSdk,
+} from '@/composables';
+import { AE_DEX_URL } from '@/protocols/aeternity/config';
+
+import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
+import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
+import BtnBox from '@/popup/components/buttons/BtnBox.vue';
+
+import CreditCardIcon from '@/icons/credit-card.svg?vue-component';
+import SwapIcon from '@/icons/swap.svg?vue-component';
+import FaucetIcon from '@/icons/faucet.svg?vue-component';
+import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
+import { ROUTE_APPS_BROWSER } from '../../../popup/router/routeNames';
+
+export default defineComponent({
+  name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
+  components: {
+    BtnBox,
+    AccountDetailsNavigation,
+    AccountDetailsBase,
+  },
+  setup() {
+    const store = useStore();
+    const { isOnline } = useConnection();
+
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+
+    const {
+      activeAccount,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+    } = useAccounts({ store });
+
+    const isAeAccount = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+
+    return {
+      CreditCardIcon,
+      SwapIcon,
+      FaucetIcon,
+      GlobeSmallIcon,
+      AE_DEX_URL,
+      IS_CORDOVA,
+      IS_IOS,
+      isOnline,
+      isNodeMainnet,
+      isNodeTestnet,
+      activeAccount,
+      activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+      isAeAccount,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      ROUTE_APPS_BROWSER,
+    };
+  },
+});
+</script>

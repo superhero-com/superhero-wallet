@@ -41,10 +41,12 @@
 
     <LinkButton
       class="explorer-link"
-      :to="getExplorerPath(activeMultisigAccount.contractId)"
+      :to="activeMultisigAccountExplorerUrl"
     >
       {{ $t('multisig.explorerLink') }}
-      <ExternalLinkIcon class="external-icon" />
+      <template #icon>
+        <ExternalLinkIcon class="external-icon" />
+      </template>
     </LinkButton>
 
     <div class="row">
@@ -60,39 +62,37 @@
       />
     </div>
 
-    <div class="row">
-      <AuthorizedAccounts
-        :address-list="activeMultisigAccount.signers"
-      />
-      <DetailsItem
-        class="details-item"
-        :label="$t('multisig.consensus')"
-      >
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <template #value>
-          <ConsensusLabel
-            :confirmations-required="activeMultisigAccount.confirmationsRequired"
-            :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
-            :confirmed-by="activeMultisigAccount.confirmedBy"
-            :signers="activeMultisigAccount.signers"
-          />
-        </template>
-      </DetailsItem>
-    </div>
+    <DetailsItem
+      class="details-item"
+      :label="$t('multisig.consensus')"
+    >
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <template #value>
+        <ConsensusLabel
+          :confirmations-required="activeMultisigAccount.confirmationsRequired"
+          :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+          :confirmed-by="activeMultisigAccount.confirmedBy"
+          :signers="activeMultisigAccount.signers"
+        />
+      </template>
+    </DetailsItem>
+    <AuthorizedAccounts
+      :address-list="activeMultisigAccount.signers"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
   onBeforeUnmount,
-} from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
-import { MODAL_CONSENSUS_INFO } from '../utils';
-import { useModals, useMultisigAccounts } from '../../composables';
+  onMounted,
+} from 'vue';
+import { useStore } from 'vuex';
+import { MODAL_CONSENSUS_INFO } from '@/constants';
+import { useModals, useMultisigAccounts } from '@/composables';
 
 import DetailsItem from '../components/DetailsItem.vue';
 import AddressFormatted from '../components/AddressFormatted.vue';
@@ -116,14 +116,15 @@ export default defineComponent({
     DetailsItem,
     ExternalLinkIcon,
   },
-  setup(props, { root }) {
-    const getExplorerPath = useGetter('getExplorerPath');
+  setup() {
+    const store = useStore();
     const { openModal } = useModals();
     const {
       activeMultisigAccount,
+      activeMultisigAccountExplorerUrl,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store: root.$store });
+    } = useMultisigAccounts({ store });
 
     function openConsensusInfoModal() {
       openModal(MODAL_CONSENSUS_INFO);
@@ -135,7 +136,7 @@ export default defineComponent({
 
     return {
       activeMultisigAccount,
-      getExplorerPath,
+      activeMultisigAccountExplorerUrl,
       openConsensusInfoModal,
     };
   },
@@ -161,13 +162,8 @@ export default defineComponent({
   }
 
   .row {
-    display: grid;
-    grid-gap: 24px;
-    grid-template-columns: 208px auto;
-  }
-
-  .details-item {
-    width: 100%;
+    display: flex;
+    gap: 24px;
   }
 
   .explorer-link {
@@ -177,6 +173,8 @@ export default defineComponent({
     .external-icon {
       opacity: 1;
       color: rgba(variables.$color-white, 0.75);
+      width: 24px;
+      height: 24px;
     }
 
     &:active,

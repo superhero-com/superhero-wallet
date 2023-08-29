@@ -1,482 +1,437 @@
-{
-  "encoded_aci":{
-     "contract":{
-        "event":{
-           "variant":[
-              {
-                 "TxProposed":[
-                    "hash",
-                    "address",
-                    "int"
-                 ]
-              },
-              {
-                 "TxConfirmed":[
-                    "hash",
-                    "address"
-                 ]
-              },
-              {
-                 "TxRefused":[
-                    "hash",
-                    "address"
-                 ]
-              },
-              {
-                 "TxConsensusReached":[
-                    "hash"
-                 ]
-              },
-              {
-                 "TxConsensusLost":[
-                    "hash"
-                 ]
-              },
-              {
-                 "TxRevoked":[
-                    "hash",
-                    "address"
-                 ]
-              },
-              {
-                 "TxAuthorized":[
-                    "hash"
-                 ]
-              },
-              {
-                 "FeeProtectionDisabled":[
-                    "address"
-                 ]
-              }
-           ]
-        },
-        "functions":[
-           {
-              "arguments":[
-                 {
-                    "name":"confirmations_required",
-                    "type":"int"
-                 },
-                 {
-                    "name":"signers",
-                    "type":{
-                       "Set.set":[
-                          "address"
-                       ]
-                    }
-                 }
-              ],
-              "name":"init",
-              "payable":false,
-              "returns":"SimpleGAMultiSig.state",
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"nonce",
-                    "type":"int"
-                 }
-              ],
-              "name":"authorize",
-              "payable":false,
-              "returns":"bool",
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"tx_hash",
-                    "type":"hash"
-                 },
-                 {
-                    "name":"ttl",
-                    "type":"Chain.ttl"
-                 }
-              ],
-              "name":"propose",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"tx_hash",
-                    "type":"hash"
-                 }
-              ],
-              "name":"confirm",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"tx_hash",
-                    "type":"hash"
-                 }
-              ],
-              "name":"refuse",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"tx_hash",
-                    "type":"hash"
-                 }
-              ],
-              "name":"revoke",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-                 {
-                    "name":"fee_protection",
-                    "type":"SimpleGAMultiSig.fee_protection"
-                 }
-              ],
-              "name":"update_fee_protection",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"disable_fee_protection",
-              "payable":false,
-              "returns":{
-                 "tuple":[
-
-                 ]
-              },
-              "stateful":true
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"get_version",
-              "payable":false,
-              "returns":"string",
-              "stateful":false
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"is_fee_protection_enabled",
-              "payable":false,
-              "returns":"bool",
-              "stateful":false
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"get_fee_protection",
-              "payable":false,
-              "returns":{
-                 "option":[
-                    "SimpleGAMultiSig.fee_protection"
-                 ]
-              },
-              "stateful":false
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"get_nonce",
-              "payable":false,
-              "returns":"int",
-              "stateful":false
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"get_signers",
-              "payable":false,
-              "returns":{
-                 "list":[
-                    "address"
-                 ]
-              },
-              "stateful":false
-           },
-           {
-              "arguments":[
-
-              ],
-              "name":"get_consensus_info",
-              "payable":false,
-              "returns":"SimpleGAMultiSig.consensus_info",
-              "stateful":false
-           }
-        ],
-        "kind":"contract_main",
-        "name":"SimpleGAMultiSig",
-        "payable":false,
-        "state":{
-           "record":[
-              {
-                 "name":"signers",
-                 "type":{
-                    "Set.set":[
-                       "address"
-                    ]
-                 }
-              },
-              {
-                 "name":"confirmations_required",
-                 "type":"int"
-              },
-              {
-                 "name":"current_tx",
-                 "type":{
-                    "option":[
-                       "SimpleGAMultiSig.transaction"
-                    ]
-                 }
-              },
-              {
-                 "name":"fee_protection",
-                 "type":{
-                    "option":[
-                       "SimpleGAMultiSig.fee_protection"
-                    ]
-                 }
-              },
-              {
-                 "name":"fee_protection_enabled",
-                 "type":"bool"
-              },
-              {
-                 "name":"nonce",
-                 "type":"int"
-              },
-              {
-                 "name":"version",
-                 "type":"string"
-              }
-           ]
-        },
-        "type_defs":[
-           {
-              "name":"transaction",
-              "typedef":{
-                 "record":[
-                    {
-                       "name":"tx_hash",
-                       "type":"hash"
-                    },
-                    {
-                       "name":"expires_at",
-                       "type":"int"
-                    },
-                    {
-                       "name":"proposed_by",
-                       "type":"address"
-                    },
-                    {
-                       "name":"confirmed_by",
-                       "type":{
-                          "Set.set":[
-                             "address"
-                          ]
-                       }
-                    },
-                    {
-                       "name":"refused_by",
-                       "type":{
-                          "Set.set":[
-                             "address"
-                          ]
-                       }
-                    }
-                 ]
-              },
-              "vars":[
-
-              ]
-           },
-           {
-              "name":"consensus_info",
-              "typedef":{
-                 "record":[
-                    {
-                       "name":"tx_hash",
-                       "type":{
-                          "option":[
-                             "hash"
-                          ]
-                       }
-                    },
-                    {
-                       "name":"confirmations_required",
-                       "type":"int"
-                    },
-                    {
-                       "name":"confirmed_by",
-                       "type":{
-                          "list":[
-                             "address"
-                          ]
-                       }
-                    },
-                    {
-                       "name":"refused_by",
-                       "type":{
-                          "list":[
-                             "address"
-                          ]
-                       }
-                    },
-                    {
-                       "name":"has_consensus",
-                       "type":"bool"
-                    },
-                    {
-                       "name":"expiration_height",
-                       "type":"int"
-                    },
-                    {
-                       "name":"expired",
-                       "type":"bool"
-                    },
-                    {
-                       "name":"proposed_by",
-                       "type":{
-                          "option":[
-                             "address"
-                          ]
-                       }
-                    }
-                 ]
-              },
-              "vars":[
-
-              ]
-           },
-           {
-              "name":"fee_protection",
-              "typedef":{
-                 "record":[
-                    {
-                       "name":"max_fee",
-                       "type":"int"
-                    },
-                    {
-                       "name":"max_gasprice",
-                       "type":"int"
-                    }
-                 ]
-              },
-              "vars":[
-
-              ]
-           }
-        ]
-     }
+[
+  {
+      "namespace": {
+          "name": "ListInternal",
+          "typedefs": []
+      }
   },
-  "external_encoded_aci":[
-     {
-        "namespace":{
-           "name":"ListInternal",
-           "type_defs":[
-
-           ]
-        }
-     },
-     {
-        "namespace":{
-           "name":"List",
-           "type_defs":[
-
-           ]
-        }
-     },
-     {
-        "namespace":{
-           "name":"Option",
-           "type_defs":[
-
-           ]
-        }
-     },
-     {
-        "namespace":{
-           "name":"Pair",
-           "type_defs":[
-
-           ]
-        }
-     },
-     {
-        "namespace":{
-           "name":"Set",
-           "type_defs":[
+  {
+      "namespace": {
+          "name": "List",
+          "typedefs": []
+      }
+  },
+  {
+      "namespace": {
+          "name": "Option",
+          "typedefs": []
+      }
+  },
+  {
+      "namespace": {
+          "name": "Pair",
+          "typedefs": []
+      }
+  },
+  {
+      "namespace": {
+          "name": "Set",
+          "typedefs": [
               {
-                 "name":"set",
-                 "typedef":{
-                    "record":[
-                       {
-                          "name":"to_map",
-                          "type":{
-                             "map":[
-                                "'a",
-                                "unit"
-                             ]
+                  "name": "set",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "to_map",
+                              "type": {
+                                  "map": [
+                                      "'a",
+                                      "unit"
+                                  ]
+                              }
                           }
-                       }
-                    ]
-                 },
-                 "vars":[
-                    {
-                       "name":"'a"
-                    }
-                 ]
+                      ]
+                  },
+                  "vars": [
+                      {
+                          "name": "'a"
+                      }
+                  ]
               }
-           ]
-        }
-     },
-     {
-        "namespace":{
-           "name":"String",
-           "type_defs":[
-
-           ]
-        }
-     }
-  ],
-  "interface":"\n\n\n\nnamespace Set =\n  record set('a) = {to_map : map('a, unit)}\n\n\nmain contract SimpleGAMultiSig =\n  record state = {signers : Set.set(address),confirmations_required : int,current_tx : option(SimpleGAMultiSig.transaction),fee_protection : option(SimpleGAMultiSig.fee_protection),fee_protection_enabled : bool,nonce : int,version : string}\n  datatype event = TxProposed(hash, address, int) | TxConfirmed(hash, address) | TxRefused(hash, address) | TxConsensusReached(hash) | TxConsensusLost(hash) | TxRevoked(hash, address) | TxAuthorized(hash) | FeeProtectionDisabled(address)\n  record transaction = {tx_hash : hash,expires_at : int,proposed_by : address,confirmed_by : Set.set(address),refused_by : Set.set(address)}\n  record consensus_info = {tx_hash : option(hash),confirmations_required : int,confirmed_by : list(address),refused_by : list(address),has_consensus : bool,expiration_height : int,expired : bool,proposed_by : option(address)}\n  record fee_protection = {max_fee : int,max_gasprice : int}\n  stateful entrypoint init : (int, Set.set(address)) => SimpleGAMultiSig.state\n  stateful entrypoint authorize : (int) => bool\n  stateful entrypoint propose : (hash, Chain.ttl) => unit\n  stateful entrypoint confirm : (hash) => unit\n  stateful entrypoint refuse : (hash) => unit\n  stateful entrypoint revoke : (hash) => unit\n  stateful entrypoint update_fee_protection : (SimpleGAMultiSig.fee_protection) => unit\n  stateful entrypoint disable_fee_protection : () => unit\n  entrypoint get_version : () => string\n  entrypoint is_fee_protection_enabled : () => bool\n  entrypoint get_fee_protection : () => option(SimpleGAMultiSig.fee_protection)\n  entrypoint get_nonce : () => int\n  entrypoint get_signers : () => list(address)\n  entrypoint get_consensus_info : () => SimpleGAMultiSig.consensus_info\n"
-}
+          ]
+      }
+  },
+  {
+      "namespace": {
+          "name": "String",
+          "typedefs": []
+      }
+  },
+  {
+      "contract": {
+          "event": {
+              "variant": [
+                  {
+                      "TxProposed": [
+                          "hash",
+                          "address",
+                          "int"
+                      ]
+                  },
+                  {
+                      "TxConfirmed": [
+                          "hash",
+                          "address"
+                      ]
+                  },
+                  {
+                      "TxRefused": [
+                          "hash",
+                          "address"
+                      ]
+                  },
+                  {
+                      "TxConsensusReached": [
+                          "hash"
+                      ]
+                  },
+                  {
+                      "TxConsensusLost": [
+                          "hash"
+                      ]
+                  },
+                  {
+                      "TxRevoked": [
+                          "hash",
+                          "address"
+                      ]
+                  },
+                  {
+                      "TxAuthorized": [
+                          "hash"
+                      ]
+                  },
+                  {
+                      "FeeProtectionDisabled": [
+                          "address"
+                      ]
+                  }
+              ]
+          },
+          "functions": [
+              {
+                  "arguments": [
+                      {
+                          "name": "confirmations_required",
+                          "type": "int"
+                      },
+                      {
+                          "name": "signers",
+                          "type": {
+                              "Set.set": [
+                                  "address"
+                              ]
+                          }
+                      }
+                  ],
+                  "name": "init",
+                  "payable": false,
+                  "returns": "SimpleGAMultiSig.state",
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "nonce",
+                          "type": "int"
+                      }
+                  ],
+                  "name": "authorize",
+                  "payable": false,
+                  "returns": "bool",
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tx_hash",
+                          "type": "hash"
+                      },
+                      {
+                          "name": "ttl",
+                          "type": "Chain.ttl"
+                      }
+                  ],
+                  "name": "propose",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tx_hash",
+                          "type": "hash"
+                      }
+                  ],
+                  "name": "confirm",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tx_hash",
+                          "type": "hash"
+                      }
+                  ],
+                  "name": "refuse",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "tx_hash",
+                          "type": "hash"
+                      }
+                  ],
+                  "name": "revoke",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [
+                      {
+                          "name": "fee_protection",
+                          "type": "SimpleGAMultiSig.fee_protection"
+                      }
+                  ],
+                  "name": "update_fee_protection",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [],
+                  "name": "disable_fee_protection",
+                  "payable": false,
+                  "returns": {
+                      "tuple": []
+                  },
+                  "stateful": true
+              },
+              {
+                  "arguments": [],
+                  "name": "get_version",
+                  "payable": false,
+                  "returns": "string",
+                  "stateful": false
+              },
+              {
+                  "arguments": [],
+                  "name": "is_fee_protection_enabled",
+                  "payable": false,
+                  "returns": "bool",
+                  "stateful": false
+              },
+              {
+                  "arguments": [],
+                  "name": "get_fee_protection",
+                  "payable": false,
+                  "returns": {
+                      "option": [
+                          "SimpleGAMultiSig.fee_protection"
+                      ]
+                  },
+                  "stateful": false
+              },
+              {
+                  "arguments": [],
+                  "name": "get_nonce",
+                  "payable": false,
+                  "returns": "int",
+                  "stateful": false
+              },
+              {
+                  "arguments": [],
+                  "name": "get_signers",
+                  "payable": false,
+                  "returns": {
+                      "list": [
+                          "address"
+                      ]
+                  },
+                  "stateful": false
+              },
+              {
+                  "arguments": [],
+                  "name": "get_consensus_info",
+                  "payable": false,
+                  "returns": "SimpleGAMultiSig.consensus_info",
+                  "stateful": false
+              }
+          ],
+          "kind": "contract_main",
+          "name": "SimpleGAMultiSig",
+          "payable": false,
+          "state": {
+              "record": [
+                  {
+                      "name": "signers",
+                      "type": {
+                          "Set.set": [
+                              "address"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "confirmations_required",
+                      "type": "int"
+                  },
+                  {
+                      "name": "current_tx",
+                      "type": {
+                          "option": [
+                              "SimpleGAMultiSig.transaction"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "fee_protection",
+                      "type": {
+                          "option": [
+                              "SimpleGAMultiSig.fee_protection"
+                          ]
+                      }
+                  },
+                  {
+                      "name": "fee_protection_enabled",
+                      "type": "bool"
+                  },
+                  {
+                      "name": "nonce",
+                      "type": "int"
+                  },
+                  {
+                      "name": "version",
+                      "type": "string"
+                  }
+              ]
+          },
+          "typedefs": [
+              {
+                  "name": "transaction",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "tx_hash",
+                              "type": "hash"
+                          },
+                          {
+                              "name": "expires_at",
+                              "type": "int"
+                          },
+                          {
+                              "name": "proposed_by",
+                              "type": "address"
+                          },
+                          {
+                              "name": "confirmed_by",
+                              "type": {
+                                  "Set.set": [
+                                      "address"
+                                  ]
+                              }
+                          },
+                          {
+                              "name": "refused_by",
+                              "type": {
+                                  "Set.set": [
+                                      "address"
+                                  ]
+                              }
+                          }
+                      ]
+                  },
+                  "vars": []
+              },
+              {
+                  "name": "consensus_info",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "tx_hash",
+                              "type": {
+                                  "option": [
+                                      "hash"
+                                  ]
+                              }
+                          },
+                          {
+                              "name": "confirmations_required",
+                              "type": "int"
+                          },
+                          {
+                              "name": "confirmed_by",
+                              "type": {
+                                  "list": [
+                                      "address"
+                                  ]
+                              }
+                          },
+                          {
+                              "name": "refused_by",
+                              "type": {
+                                  "list": [
+                                      "address"
+                                  ]
+                              }
+                          },
+                          {
+                              "name": "has_consensus",
+                              "type": "bool"
+                          },
+                          {
+                              "name": "expiration_height",
+                              "type": "int"
+                          },
+                          {
+                              "name": "expired",
+                              "type": "bool"
+                          },
+                          {
+                              "name": "proposed_by",
+                              "type": {
+                                  "option": [
+                                      "address"
+                                  ]
+                              }
+                          }
+                      ]
+                  },
+                  "vars": []
+              },
+              {
+                  "name": "fee_protection",
+                  "typedef": {
+                      "record": [
+                          {
+                              "name": "max_fee",
+                              "type": "int"
+                          },
+                          {
+                              "name": "max_gasprice",
+                              "type": "int"
+                          }
+                      ]
+                  },
+                  "vars": []
+              }
+          ]
+      }
+  }
+]

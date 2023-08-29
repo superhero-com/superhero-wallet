@@ -1,46 +1,55 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import { Dictionary } from '../../types';
 import {
-  ROUTE_ACCOUNT,
-  ROUTE_INDEX,
-  ROUTE_NOT_FOUND,
-} from './routeNames';
-import { routes } from './routes';
-import getPopupProps from '../utils/getPopupProps';
-import store from '../../store';
-import initSdk from '../../lib/wallet';
+  createRouter,
+  RouteRecordRaw,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
+import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
+  IS_CORDOVA,
+  IS_WEB,
+  POPUP_TYPE,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  watchUntilTruthy,
   POPUP_TYPE_TX_SIGN,
-} from '../utils';
-import {
+  POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-  POPUP_TYPE,
-  IS_CORDOVA,
-  IS_WEB,
-} from '../../lib/environment';
-import { useAccounts } from '../../composables';
-import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { watchUntilTruthy } from '@/utils';
+import { getPopupProps } from '@/utils/getPopupProps';
+import store from '@/store';
+import initSdk from '@/lib/wallet';
+import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { useAccounts, usePopupProps, useAeSdk } from '@/composables';
+import { routes } from './routes';
+import {
+  ROUTE_ACCOUNT,
+  ROUTE_APPS_BROWSER,
+  ROUTE_INDEX,
+  ROUTE_NOT_FOUND,
+} from './routeNames';
 
-Vue.use(VueRouter);
-
-const router = new VueRouter({
-  routes,
-  mode: IS_WEB ? 'history' : 'hash',
-  scrollBehavior: (to, from, savedPosition) => savedPosition || { x: 0, y: 0 },
+const router = createRouter({
+  routes: routes as RouteRecordRaw[],
+  history: IS_WEB ? createWebHistory() : createWebHashHistory(),
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
 const lastRouteKey = 'last-path';
 
-const { isLoggedIn } = useAccounts({ store });
+const {
+  isLoggedIn,
+  activeAccount,
+  setActiveAccountByGlobalIdx,
+  getLastActiveProtocolAccount,
+} = useAccounts({ store });
+const { setPopupProps } = usePopupProps();
 
-RouteQueryActionsController.init(router);
+RouteQueryActionsController.init(router, isLoggedIn);
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
@@ -48,7 +57,7 @@ const unbind = router.beforeEach(async (to, from, next) => {
     (
       !RUNNING_IN_POPUP
       && to.name === ROUTE_INDEX
-      && (await browser?.storage.local.get(lastRouteKey))[lastRouteKey]
+      && ((await browser?.storage.local.get(lastRouteKey)) as any)[lastRouteKey]
     )
     || undefined,
   );
@@ -66,33 +75,56 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
-  if (!store.getters['sdkPlugin/sdk'] && !RUNNING_IN_POPUP) initSdk();
+  if (to.name === ROUTE_APPS_BROWSER) {
+    // In-app browser is mobile-only
+    if (!IS_CORDOVA) {
+      next({ name: ROUTE_NOT_FOUND });
+      return;
+    }
+
+    // In-app browser only works with AE accounts
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+      setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
+      next({ name: ROUTE_APPS_BROWSER });
+      return;
+    }
+  }
+
+  const { isAeSdkReady } = useAeSdk({ store });
+
+  if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
+    initSdk();
+  }
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
       [POPUP_TYPE_CONNECT]: 'connect',
+      [POPUP_TYPE_ACCOUNT_LIST]: 'account-list',
       [POPUP_TYPE_SIGN]: 'popup-sign-tx',
       [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
       [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
       [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
     }[POPUP_TYPE];
 
-    let params: Dictionary = {};
+    let popupProps: Dictionary = {};
 
     if (!Object.keys(to.params).length) {
-      params = await getPopupProps();
-      if (!params?.app) {
+      popupProps = await getPopupProps() as Dictionary;
+      if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;
       }
     }
 
     if (name !== to.name) {
-      next({ name, params });
+      setPopupProps(popupProps);
+      next({ name });
       return;
     }
   }
 
+  // @ts-ignore
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 

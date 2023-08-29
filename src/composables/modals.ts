@@ -1,22 +1,48 @@
-import Vue, { ComponentOptions } from 'vue';
-import { computed, ref } from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
-import { ResolveRejectCallback, StatusIconType } from '../types';
-import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
-import { IN_FRAME, IS_WEB } from '../lib/environment';
-import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
+import {
+  Component,
+  computed,
+  nextTick,
+  ref,
+} from 'vue';
+import type {
+  ProtocolView,
+  RejectCallback,
+  ResolveCallback,
+  StatusIconType,
+} from '@/types';
+import {
+  IN_FRAME,
+  IS_WEB,
+  MODAL_CONFIRM,
+  MODAL_DEFAULT,
+  MODAL_ERROR_LOG,
+} from '@/constants';
+import { handleUnknownError } from '@/utils';
+import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
+import { usePopupProps } from './popupProps';
 
+/**
+ * Settings used when registering the modal.
+ */
 interface IModalSettings {
-  component?: typeof Vue | ComponentOptions<Vue>;
+  component?: Component;
   showInPopupIfWebFrame?: boolean;
+  /**
+   * Usable only with `ProtocolSpecificView` passed to the `component` property.
+   */
+  viewComponentName?: ProtocolView;
 }
 
 interface IModalProps {
   [key: string]: any; // Props defined on the component's level
-  resolve?: ResolveRejectCallback;
-  reject?: ResolveRejectCallback;
+  resolve?: ResolveCallback;
+  reject?: RejectCallback;
+  show?: boolean;
 }
 
+/**
+ * Params passed to the modal when trying to open it.
+ */
 interface IOpenModalParams {
   name: string;
   key: number;
@@ -39,11 +65,11 @@ function registerModal(name: string, settings: IModalSettings) {
 
 /**
  * Composable that handles the logic of modal windows.
- * The modals opens in 2 ways:
+ * The modal opens in 2 ways:
  *
  * 1. If the app is working as an extension, mobile app or web app the modals opens
  *    as a stack of layers displayed above the actual app.
- * 2. If the app is open inside of a web iframe (eg. as a widget on the Superhero.com)
+ * 2. If the app is open inside a web iframe (e.g. as a widget on the Superhero.com)
  *    and the modal is registered with `showInPopupIfWebFrame` flag
  *    open separate browser window (popup) with the app covered with the modal
  *    taking whole space. Popup modal routes: router/webIframePopups.ts
@@ -61,7 +87,10 @@ export function useModals() {
 
   function closeModalByKey(key: number) {
     const idx = modalsOpenRaw.value.findIndex((modal) => modal.key === key);
-    modalsOpenRaw.value.splice(idx, 1);
+    modalsOpenRaw.value[idx].props.show = false;
+    nextTick(() => {
+      modalsOpenRaw.value.splice(idx, 1);
+    });
   }
 
   function openModal(name: string, props: IModalProps = {}): Promise<any> {
@@ -80,8 +109,21 @@ export function useModals() {
         name,
         key,
         inPopup,
-        props: { ...props, resolve, reject },
+        props: {
+          ...props, resolve, reject, show: true,
+        },
       });
+
+      /**
+       * These modals use the `usePopupProps` composable instead of props
+       * even if they are not opened in a popup
+      */
+      if (modalSettings.showInPopupIfWebFrame && !inPopup) {
+        const { setPopupProps } = usePopupProps();
+        setPopupProps({
+          ...props, resolve, reject,
+        });
+      }
 
       if (inPopup) {
         if (popupWindow) {
@@ -89,7 +131,7 @@ export function useModals() {
         }
 
         lastPopupPromise
-          .catch(() => {})
+          .catch(() => { })
           .finally(() => {
             popupWindow = window.open(
               `/${ROUTE_WEB_IFRAME_POPUP}/${name}`,
@@ -99,7 +141,9 @@ export function useModals() {
             if (!popupWindow) {
               reject(new Error("Can't show popup window"));
             } else {
-              popupWindow.popupProps = { ...props, resolve, reject };
+              popupWindow.popupProps = {
+                ...props, resolve, reject, show: true,
+              };
             }
           });
       }
@@ -114,13 +158,19 @@ export function useModals() {
   }
 
   function openDefaultModal(options: {
-    title?: string | TranslateResult;
-    msg?: string | TranslateResult;
+    title?: string;
+    msg?: string;
     icon?: StatusIconType;
-    buttonMessage?: string | TranslateResult;
+    buttonMessage?: string;
     textCenter?: boolean;
   }) {
     return openModal(MODAL_DEFAULT, options);
+  }
+
+  function openConfirmModal(options: {
+    msg?: string;
+  }) {
+    return openModal(MODAL_CONFIRM, options);
   }
 
   function openErrorModal(entry: Record<string, any>) {
@@ -132,6 +182,7 @@ export function useModals() {
     registerModal,
     openModal,
     openDefaultModal,
+    openConfirmModal,
     openErrorModal,
     closeModalByKey,
   };

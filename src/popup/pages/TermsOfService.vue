@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable max-len -->
   <div class="terms-of-service">
     <!-- header -->
     <p class="italic">
@@ -7,7 +8,7 @@
     <p class="italic">
       <b>Superhero.com LVC</b> reserves its right to modify and update these
       <b>TERMS OF USE</b> according to the policy and practice of the <b>company</b>. The new
-      version of thе <b>TERMS OF USE</b> becomes effective from the day it is announced on
+      version of the <b>TERMS OF USE</b> becomes effective from the day it is announced on
       <b>Our Superhero Wallet</b> unless stated otherwise.
     </p>
     <hr>
@@ -43,7 +44,12 @@
       <b>TERMS</b>, <b>YOU</b> are agreeing to be bound by the modifications. If you don’t agree to
       be bound by the modified <b>TERMS</b>, then you should discontinue any use of the
       <b>Wallet</b>. Please contact <b>Superhero</b> via an email to
-      <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>
+      <LinkButton
+        :to="`mailto:${CONTACT_EMAIL}`"
+        variant="simple"
+      >
+        {{ CONTACT_EMAIL }}
+      </LinkButton>
       for the provision of information about the steps for termination of your use. Please check the
       Effective Date above to determine if there have been any changes since <b>YOU</b> have last
       reviewed these <b>TERMS</b>.
@@ -53,28 +59,8 @@
       following:
     </p>
 
-    <div
-      v-for="(item, index) in details"
-      :key="index"
-    >
-      <p
-        class="accordion-item-title"
-        data-cy="accordion-item"
-        @click="toggleAccordionItem(index)"
-      >
-        <ChevronDownIcon
-          :class="['icon', { rotated: item.open }]"
-          data-cy="accordion-item-open"
-        />
-        <span>{{ item.title }}</span>
-      </p>
-      <div
-        v-if="index === 0"
-        v-show="item.open"
-        data-content="1"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    <AccordionItem :label="$t('pages.termsOfService.section1Title')">
+      <div>
         <p>
           1.1.
           <strong>Superhero.com Establishment (&ldquo;Superhero&rdquo;, &ldquo;we&rdquo;,
@@ -82,8 +68,13 @@
           </strong>) is a company with seat and registered
           address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
           communication related to the <strong>Superhero Wallet</strong>:
-          superherowallet@protonmail.com. <strong>Superhero</strong> is the company, which created
-          and developed <strong>Superhero Wallet</strong>.
+          <LinkButton
+            :to="`mailto:${CONTACT_EMAIL}`"
+            variant="simple"
+          >
+            {{ CONTACT_EMAIL }}
+          </LinkButton>.
+          <strong>Superhero</strong> is the company, which created and developed <strong>Superhero Wallet</strong>.
         </p>
         <p>
           1.2. &ldquo;<strong>USER</strong>&ldquo; or &ldquo;<strong>YOU</strong>&ldquo; means a
@@ -113,49 +104,55 @@
           1) the <strong>application</strong> can act &nbsp;as an add-on to the web browsers
           Firefox, Chrome, Brave and Opera and contributes to the browsers&rsquo; additional
           functionalities. For Firefox:
-          <a
-            :href="APP_LINK_FIREFOX"
-            target="_blank"
+          <LinkButton
+            :to="APP_LINK_FIREFOX"
+            variant="simple"
           >
             {{ APP_LINK_FIREFOX }}
-          </a>
+          </LinkButton>
           ; for Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            :href="APP_LINK_CHROME"
-            target="_blank"
+          <LinkButton
+            :to="APP_LINK_CHROME"
+            variant="simple"
           >
-            {{ APP_LINK_CHROME }}</a>;
+            {{ APP_LINK_CHROME }}
+          </LinkButton>;
         </p>
         <p>
           2) the <strong>application</strong> can be accessed and used from any Browser at the
           address:
-          <a
-            :href="APP_LINK_WEB"
-            target="_blank"
-          >{{ APP_LINK_WEB }}</a>;
+          <LinkButton
+            :to="APP_LINK_WEB"
+            variant="simple"
+          >
+            {{ APP_LINK_WEB }}
+          </LinkButton>;
         </p>
         <p>
           3) the <strong>application</strong> can be downloaded from Google Play and/or App Store.
           For Google Play:
-          <a
-            :href="APP_LINK_ANDROID"
-            target="_blank"
+          <LinkButton
+            :to="APP_LINK_ANDROID"
+            variant="simple"
           >
             {{ APP_LINK_ANDROID }}
-          </a>
+          </LinkButton>
           and for App Store:
-          <a
-            :href="APP_LINK_IOS"
-            target="_blank"
+          <LinkButton
+            :to="APP_LINK_IOS"
+            variant="simple"
           >
-            {{ APP_LINK_IOS }}</a>;
+            {{ APP_LINK_IOS }}
+          </LinkButton>;
         </p>
         <p>
           The results of the donations and comments are published on the website
-          <a
-            :href="AGGREGATOR_URL"
-            target="_blank"
-          >superhero.com</a> .
+          <LinkButton
+            :to="AGGREGATOR_URL"
+            variant="simple"
+          >
+            superhero.com
+          </LinkButton> .
         </p>
         <p>
           1.5<strong>. &ldquo;&AElig;id&ldquo;, &ldquo;&AElig;ternity token&rdquo;</strong> or
@@ -190,13 +187,10 @@
           alienation.
         </p>
       </div>
-      <div
-        v-if="index === 1"
-        v-show="item.open"
-        data-content="2"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section2Title')">
+      <div>
         <p><strong>2.1. The application </strong></p>
         <p>
           <strong>Superhero</strong> designed and built the <strong>application</strong> as a
@@ -277,10 +271,12 @@
         </p>
         <p>
           After that, the website -
-          <a
-            :href="AGGREGATOR_URL"
-            target="_blank"
-          >superhero.com</a>, reflects the
+          <LinkButton
+            :to="AGGREGATOR_URL"
+            variant="simple"
+          >
+            superhero.com
+          </LinkButton>, reflects the
           <strong>USERS&rsquo;</strong> donations and comments and gives the possibility for other
           <strong>USERS</strong> to actively donate and comment on the newsfeed of the Website.
         </p>
@@ -304,7 +300,12 @@
           or fiat currencies with <strong>&AElig; tokens</strong> through partnering third-party
           platforms. A full list of these platforms, you can see in our Superhero Tutorial. Our team
           is also ready to provide detailed information when contacted through email at
-          <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
+          <LinkButton
+            :to="`mailto:${CONTACT_EMAIL}`"
+            variant="simple"
+          >
+            {{ CONTACT_EMAIL }}
+          </LinkButton>.
         </p>
         <p>
           Please bear in mind that the third-party platforms may collect fees. They are unilaterally
@@ -384,13 +385,10 @@
           <strong>Superhero</strong> shall make such decisions at its own estimation.
         </p>
       </div>
-      <div
-        v-if="index === 2"
-        v-show="item.open"
-        data-content="3"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section3Title')">
+      <div>
         <p>
           The application gives two possibilities for identification of <strong>USERS</strong> as it
           follows:
@@ -474,19 +472,18 @@
         </p>
         <p>
           The <strong>name</strong> can also be used as your profile name on the Superhero website
-          <a
-            :href="AGGREGATOR_URL"
-            target="_blank"
-          >superhero.com</a>.
+          <LinkButton
+            :to="AGGREGATOR_URL"
+            variant="simple"
+          >
+            superhero.com
+          </LinkButton>.
         </p>
       </div>
-      <div
-        v-if="index === 3"
-        v-show="item.open"
-        data-content="4"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section4Title')">
+      <div>
         <p>
           As a <strong>USER</strong>, <strong>YOU</strong> agree to the following rules applicable
           for the<strong> Superhero Wallet</strong> :
@@ -531,13 +528,10 @@
           present article.
         </p>
       </div>
-      <div
-        v-if="index === 4"
-        v-show="item.open"
-        data-content="5"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section5Title')">
+      <div>
         <p>
           As mentioned above, the <strong>Wallet</strong> is only a software solution, which
           facilitates the interaction between <strong>USERS</strong> and the decentralized, public
@@ -602,43 +596,52 @@
         </p>
         <p>
           <strong><u>Access and Connectivity Disclaimer</u></strong>: The
-          <strong>application</strong> can be downloaded
-          or used from the following places:
+          <strong>application</strong> can be downloaded or used from the following places:
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
-          <a
-            :href="APP_LINK_FIREFOX"
-            target="_blank"
-          >{{ APP_LINK_FIREFOX }}</a>
+          <LinkButton
+            :to="APP_LINK_FIREFOX"
+            variant="simple"
+          >
+            {{ APP_LINK_FIREFOX }}
+          </LinkButton>
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            :href="APP_LINK_CHROME"
-            target="_blank"
-          >{{ APP_LINK_CHROME }}</a>;
+          <LinkButton
+            :to="APP_LINK_CHROME"
+            variant="simple"
+          >
+            {{ APP_LINK_CHROME }}
+          </LinkButton>;
         </p>
         <p>
           2) accessed from any Browser at the address:
-          <a
-            :href="APP_LINK_WEB"
-            target="_blank"
-          >{{ APP_LINK_WEB }}</a>
+          <LinkButton
+            :to="APP_LINK_WEB"
+            variant="simple"
+          >
+            {{ APP_LINK_WEB }}
+          </LinkButton>
           ;
         </p>
         <p>
           3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            :href="APP_LINK_ANDROID"
-            target="_blank"
-          >{{ APP_LINK_ANDROID }}</a>
+          <LinkButton
+            :to="APP_LINK_ANDROID"
+            variant="simple"
+          >
+            {{ APP_LINK_ANDROID }}
+          </LinkButton>
           and
         </p>
         <p>
           from App Store:
-          <a
-            :href="APP_LINK_IOS"
-            target="_blank"
-          >{{ APP_LINK_IOS }}</a>.
+          <LinkButton
+            :to="APP_LINK_IOS"
+            variant="simple"
+          >
+            {{ APP_LINK_IOS }}
+          </LinkButton>.
         </p>
         <p>
           Please bear in mind that the marketplaces for downloading are third-party owned and
@@ -762,13 +765,10 @@
           losses and/or damages resulted from the use of <strong>forks</strong>.
         </p>
       </div>
-      <div
-        v-if="index === 5"
-        v-show="item.open"
-        data-content="6"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section6Title')">
+      <div>
         <p>
           The <strong>Wallet</strong> does not collect any fees or taxes for its use
           <strong>application </strong>- it is free of charge. However, taxes and fees are payable
@@ -784,13 +784,10 @@
           solely responsible for their donations.
         </p>
       </div>
-      <div
-        v-if="index === 6"
-        v-show="item.open"
-        data-content="7"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section7Title')">
+      <div>
         <p>
           To send someone a tip, please make sure that <strong>YOU</strong> are no the URL that
           <strong>YOU</strong> want to tip or <strong>YOU</strong> have copied and pasted the right
@@ -821,13 +818,10 @@
           rules applicable for these third-party platforms.
         </p>
       </div>
-      <div
-        v-if="index === 7"
-        v-show="item.open"
-        data-content="8"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section8Title')">
+      <div>
         <p>
           The <strong>application</strong> is developed under the open-source, permissive free
           software ISC License (&ldquo;ISC&rdquo;). Under this license other developers have the
@@ -854,13 +848,10 @@
           USE OR PERFORMANCE OF THIS SOFTWARE.&rdquo;
         </p>
       </div>
-      <div
-        v-if="index === 8"
-        v-show="item.open"
-        data-content="9"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section9Title')">
+      <div>
         <p>
           The <strong>application</strong> is developed by <strong>Superhero. </strong>The
           <strong>application</strong> may display or include elements which are subject of
@@ -883,13 +874,10 @@
           according to article 8- <strong><u>LICENSE</u></strong>, of the present Terms.
         </p>
       </div>
-      <div
-        v-if="index === 9"
-        v-show="item.open"
-        data-content="10"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section10Title')">
+      <div>
         <p>
           <strong>USERS</strong> understand and accept <strong>the application</strong> can be
           periodically modified, updated, maintained or technically supported, which could to some
@@ -897,16 +885,19 @@
           <strong>application</strong> or could result in malfunction. In the latter case, if
           <strong>YOU</strong> as a <strong>USER</strong> notice any change in the
           <strong>tokens</strong>, settings, accounts or any other information on the application,
-          please contact superherowallet@protonmail.com for assistance.
+          please contact
+          <LinkButton
+            :to="`mailto:${CONTACT_EMAIL}`"
+            variant="simple"
+          >
+            {{ CONTACT_EMAIL }}
+          </LinkButton> for assistance.
         </p>
       </div>
-      <div
-        v-if="index === 10"
-        v-show="item.open"
-        data-content="11"
-        class="accordion-item-content"
-        data-cy="accordion-item-content"
-      >
+    </AccordionItem>
+
+    <AccordionItem :label="$t('pages.termsOfService.section11Title')">
+      <div>
         <p>
           These <strong>TERMS</strong> set forth the entire understanding and agreement as to the
           subject matter hereof and supersedes any and all prior discussions, agreements, and
@@ -929,15 +920,20 @@
         <p>
           For more information regarding our Services and the present <strong>TERMS</strong>, please
           do not hesitate to contact the <strong>Superhero</strong> team at:
-          superherowallet@protonmail.com.
+          <LinkButton
+            :to="`mailto:${CONTACT_EMAIL}`"
+            variant="simple"
+          >
+            {{ CONTACT_EMAIL }}
+          </LinkButton>.
         </p>
       </div>
-    </div>
+    </AccordionItem>
   </div>
 </template>
 
-<script>
-import ChevronDownIcon from '../../icons/chevron-down.svg?vue-component';
+<script lang="ts">
+import { defineComponent } from 'vue';
 import {
   APP_LINK_WEB,
   APP_LINK_CHROME,
@@ -945,29 +941,28 @@ import {
   APP_LINK_ANDROID,
   APP_LINK_IOS,
   AGGREGATOR_URL,
-} from '../utils/constants';
+  CONTACT_EMAIL,
+} from '@/constants';
+import AccordionItem from '../components/AccordionItem.vue';
+import LinkButton from '../components/LinkButton.vue';
 
-export default {
-  components: { ChevronDownIcon },
-  data() {
+export default defineComponent({
+  components: {
+    AccordionItem,
+    LinkButton,
+  },
+  setup() {
     return {
-      details: Object.entries(this.$t('pages.termsOfService'))
-        .filter(([k]) => /section[0-9]+Title/.test(k))
-        .map(([, title]) => ({ title, open: false })),
       APP_LINK_WEB,
       APP_LINK_CHROME,
       APP_LINK_FIREFOX,
       APP_LINK_ANDROID,
       APP_LINK_IOS,
       AGGREGATOR_URL,
+      CONTACT_EMAIL,
     };
   },
-  methods: {
-    toggleAccordionItem(index) {
-      this.details[index].open = !this.details[index].open;
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>
@@ -1001,37 +996,13 @@ export default {
     @extend %face-sans-20-regular;
   }
 
-  .accordion-item-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-block: 5px;
-    color: variables.$color-success;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    text-transform: uppercase;
-
-    .icon {
-      color: #6a8ebe;
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
-
-      &:not(.rotated) {
-        transform: rotate(-90deg);
-      }
-    }
-
-    span {
-      margin-right: auto;
-      color: variables.$color-success;
-    }
+  ul {
+    margin-bottom: 8px;
+    padding-left: 20px;
   }
 
-  .accordion-item-content {
-    font-size: 14px;
-    font-weight: 100;
+  .link-button {
+    display: inline;
   }
 }
 </style>

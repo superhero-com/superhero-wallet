@@ -3,25 +3,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from '@vue/composition-api';
-import { TxBuilderHelper } from '@aeternity/aepp-sdk';
-import { useModals, useSdk } from '../../composables';
+import { defineComponent, onMounted } from 'vue';
+import { decode } from '@aeternity/aepp-sdk';
+import { useStore } from 'vuex';
+import { useRouter, useRoute } from 'vue-router';
+import { useModals, useAeSdk } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
-  props: {
-    secretKey: { type: String, required: true },
-  },
-  setup(props, { root }) {
-    const { getSdk } = useSdk({ store: root.$store });
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
 
     onMounted(async () => {
-      await getSdk();
+      await getAeSdk();
 
       try {
-        // sg_ prefix was chosen as a dummy to decode from base58Check
-        await root.$store.dispatch('invites/claim', TxBuilderHelper.decode(`sg_${props.secretKey}`, 'sg'));
+        // nm_ prefix was chosen as a dummy to decode from base58Check
+        // The secretKey can be retrieved from the URL in two different ways:
+        // current: /invite#${secretKey}
+        // legacy: /invite/${secretKey}
+        await store.dispatch(
+          'invites/claim',
+          decode(`nm_${route.hash ? route.hash.replace('#', '') : route.fullPath.split('/').at(-1)}`),
+        );
         await openDefaultModal({
           msg: 'You have successfully claimed tokens by the invite link',
         });
@@ -32,12 +40,12 @@ export default defineComponent({
           });
           return;
         }
-        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
           return;
         }
         throw error;
       } finally {
-        await root.$router.push({ name: ROUTE_ACCOUNT });
+        await router.push({ name: ROUTE_ACCOUNT });
       }
     });
   },

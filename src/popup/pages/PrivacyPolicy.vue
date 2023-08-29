@@ -30,38 +30,43 @@
         </p>
         <p>
           1) downloaded as an add-on (extension) to Firefox:
-          <a
-            :href="APP_LINK_FIREFOX"
-            target="_blank"
-          >{{ APP_LINK_FIREFOX }}</a>
+          <LinkButton
+            :to="APP_LINK_FIREFOX"
+          >
+            {{ APP_LINK_FIREFOX }}
+          </LinkButton>
           ; to Chrome, Brave and Opera:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            :href="APP_LINK_CHROME"
-            target="_blank"
-          >{{ APP_LINK_CHROME }}</a>;
+          <LinkButton
+            :to="APP_LINK_CHROME"
+          >
+            {{ APP_LINK_CHROME }}
+          </LinkButton>;
         </p>
         <p>
           2) accessed from any Browser at the address:
-          <a
-            :href="APP_LINK_WEB"
-            target="_blank"
-          >{{ APP_LINK_WEB }}</a>
+          <LinkButton
+            :to="APP_LINK_WEB"
+          >
+            {{ APP_LINK_WEB }}
+          </LinkButton>
           ;
         </p>
         <p>
           3) downloaded from Google Play:&nbsp;&nbsp;&nbsp;&nbsp;
-          <a
-            :href="APP_LINK_ANDROID"
-            target="_blank"
-          >{{ APP_LINK_ANDROID }}</a>
+          <LinkButton
+            :to="APP_LINK_ANDROID"
+          >
+            {{ APP_LINK_ANDROID }}
+          </LinkButton>
           and
         </p>
         <p>
           from App Store:
-          <a
-            :href="APP_LINK_IOS"
-            target="_blank"
-          >{{ APP_LINK_IOS }}</a>.
+          <LinkButton
+            :to="APP_LINK_IOS"
+          >
+            {{ APP_LINK_IOS }}
+          </LinkButton>.
         </p>
         <p>
           If you have any questions regarding this <strong>Policy</strong>, please contact us at
@@ -338,7 +343,9 @@
         <p>
           To contact us with your questions or comments regarding this <strong>Policy</strong>,
           please email us at&nbsp;
-          <a href="mailto:superherowallet@protonmail.com">superherowallet@protonmail.com</a>.
+          <LinkButton to="mailto:superherowallet@protonmail.com">
+            superherowallet@protonmail.com
+          </LinkButton>.
         </p>
       </li>
     </ol>
@@ -352,9 +359,13 @@ import {
   APP_LINK_FIREFOX,
   APP_LINK_ANDROID,
   APP_LINK_IOS,
-} from '../utils/constants';
+} from '@/constants';
+import LinkButton from '@/popup/components/LinkButton.vue';
 
 export default {
+  components: {
+    LinkButton,
+  },
   data: () => ({
     APP_LINK_WEB,
     APP_LINK_CHROME,
@@ -376,6 +387,10 @@ export default {
   color: rgba(variables.$color-white, 0.85);
 
   @extend %face-sans-14-light;
+
+  .link-button {
+    display: inline;
+  }
 
   ol {
     list-style: upper-roman;

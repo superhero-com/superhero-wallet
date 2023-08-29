@@ -9,48 +9,47 @@
     <template #msg>
       <div class="msg">
         <span class="sub-header">
-          {{ $t('modals.recipient.sub-header') }}
+          {{ isProtocolAe
+            ? $t('modals.recipient.ae-sub-header')
+            : $t('modals.recipient.sub-header', { protocolName })
+          }}
         </span>
-        <p>
-          <i18n
-            path="modals.recipient.msg.publicAddress.msg"
+        <p :class="{ capitalize: !isProtocolAe }">
+          <i18n-t
+            keypath="modals.recipient.msg.publicAddress.msg"
             tag="div"
+            scope="global"
           >
-            <strong class="title">
-              {{ $t('modals.recipient.msg.publicAddress.title') }}:
+            <strong
+              v-if="isProtocolAe"
+              class="title"
+            >
+              {{ $t('modals.recipient.msg.publicAddress.title') }}
             </strong>
-          </i18n>
+          </i18n-t>
         </p>
-        <p>
-          <i18n
-            path="modals.recipient.msg.chain.msg"
+        <p v-if="isProtocolAe">
+          <i18n-t
+            keypath="modals.recipient.msg.chain.msg"
             tag="div"
+            scope="global"
           >
             <strong class="title">
               {{ $t('modals.recipient.msg.chain.title') }}:
             </strong>
             {{ $t('modals.recipient.msg.chain.linkTitle') }}
-          </i18n>
+          </i18n-t>
         </p>
-        <p>
-          <i18n
-            path="modals.recipient.msg.url.msg"
-            tag="div"
-          >
-            <strong class="title">
-              {{ $t('modals.recipient.msg.url.title') }}:
-            </strong>
-          </i18n>
-        </p>
-        <p v-if="UNFINISHED_FEATURES">
-          <i18n
-            path="modals.readMore.msg"
+        <p v-if="UNFINISHED_FEATURES && isProtocolAe">
+          <i18n-t
+            keypath="modals.readMore.msg"
             class="help"
+            scope="global"
           >
-            <a :href="BLOG_CLAIM_TIP_URL">
+            <a :href="AE_BLOG_CLAIM_TIP_URL">
               {{ $t('modals.readMore.linkTitle') }}
             </a>
-          </i18n>
+          </i18n-t>
         </p>
       </div>
     </template>
@@ -66,25 +65,46 @@
   </Default>
 </template>
 
-<script>
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import {
+  Protocol,
+  ResolveCallback,
+} from '@/types';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import { BLOG_CLAIM_TIP_URL } from '../../utils/constants';
 
-export default {
+export default defineComponent({
   components: {
     Default,
     BtnMain,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     close: { type: Function, default: null },
   },
-  data: () => ({
-    BLOG_CLAIM_TIP_URL,
-    UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-  }),
-};
+  setup(props) {
+    const isProtocolAe = computed(() => props.protocol === PROTOCOL_AETERNITY);
+    const protocolName = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+    );
+
+    return {
+      AE_BLOG_CLAIM_TIP_URL,
+      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      protocolName,
+      isProtocolAe,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>
@@ -110,6 +130,10 @@ export default {
 
   .title {
     color: variables.$color-white;
+  }
+
+  .capitalize::first-letter {
+    text-transform: capitalize;
   }
 }
 </style>

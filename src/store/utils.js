@@ -1,8 +1,5 @@
 export default ({
   migrations,
-  current,
-  transactions: { pending } = {},
-  userNetworks,
   names,
   languages,
   backedUpSeed,
@@ -12,13 +9,10 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accounts: { list, activeIdx, hdWallet: { nextAccountIdx } = {} } = {},
+  accounts: { list, activeIdx } = {},
   hiddenCards,
 }) => ({
   migrations,
-  current,
-  transactions: { pending, loaded: [], nextPageUrl: '' },
-  userNetworks,
   names,
   languages,
   backedUpSeed,
@@ -28,6 +22,6 @@ export default ({
   notificationSettings,
   permissions,
   fungibleTokens,
-  accounts: { list, activeIdx, hdWallet: { nextAccountIdx } },
+  accounts: { list, activeIdx },
   hiddenCards,
 });

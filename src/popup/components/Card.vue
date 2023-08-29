@@ -41,7 +41,9 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { computed } from 'vue';
+import { useState } from '../../composables/vuex';
+
 import BtnIcon from './buttons/BtnIcon.vue';
 import CloseIcon from '../../icons/times-circle.svg?vue-component';
 import IconWrapper from './IconWrapper.vue';
@@ -70,21 +72,25 @@ export default {
     cardId: { type: String, default: null },
     icon: { type: Object, default: null },
   },
-  data: () => ({
-    CloseIcon,
-  }),
-  computed: {
-    ...mapState(['hiddenCards']),
-    styleComponent() {
-      return {
-        backgroundImage: (this.background)
-          ? `url("${this.background}")`
-          : null,
-      };
-    },
-    isVisible() {
-      return !this.cardId || !this.hiddenCards || !this.hiddenCards.includes(this.cardId);
-    },
+  setup(props) {
+    const hiddenCards = useState('hiddenCards');
+
+    const styleComponent = computed(() => ({
+      backgroundImage: props.background ? `url("${props.background}")` : null,
+    }));
+
+    const isVisible = computed(
+      () => !(
+        props.cardId
+        && hiddenCards.value.includes(props.cardId)
+      ),
+    );
+
+    return {
+      CloseIcon,
+      styleComponent,
+      isVisible,
+    };
   },
 };
 </script>
@@ -95,6 +101,7 @@ export default {
 @use '../../styles/mixins';
 
 .card {
+  z-index: 1;
   position: relative;
   display: flex;
   align-items: flex-start;
@@ -107,6 +114,15 @@ export default {
   background-repeat: no-repeat;
   background-size: cover;
   transition: $transition-interactive;
+
+  &-darken::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-color: var(--screen-bg-color);
+    opacity: 0.7;
+  }
 
   .card-icon {
     color: $color-white;

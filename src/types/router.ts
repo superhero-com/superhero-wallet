@@ -1,5 +1,4 @@
-import { RawLocation, RouteConfig } from 'vue-router';
-import type { VueAnyComponent } from '.';
+import { RouteLocationRaw, RouteRecordRaw } from 'vue-router';
 
 export interface WalletRouteMeta {
   /**
@@ -7,52 +6,54 @@ export interface WalletRouteMeta {
    * the app header back arrow.
    * TODO: Temporary solution.
    */
-  backRoute?: RawLocation
+  backRoute?: RouteLocationRaw;
   /**
    * Decide if the app header should be hidden
    */
-  hideHeader?: boolean
+  hideHeader?: boolean;
   /**
    * Allow to see the page by unauthorized users
    */
-  ifNotAuth?: boolean
+  ifNotAuth?: boolean;
   /**
    * Only for unauthorized users
    */
-  ifNotAuthOnly?: boolean
-
+  ifNotAuthOnly?: boolean;
   /**
    * Decide if the page allows to edit the displayed data
    */
-  isEdit?: boolean
+  isEdit?: boolean;
   /**
-   * Decide of the route should be saved to browser's local storage
+   * Decide if the route should be saved to browser's local storage
    */
-  notPersist?: boolean
+  notPersist?: boolean;
   /**
    * Part of the translation string that point to the translated page title
    * 'pages.title[title]`
    */
-  title?: string
+  title?: string;
   /**
    * Decide if the header should display the logo and more button
    * or the back and close buttons.
    */
-  showHeaderNavigation?: boolean
+  showHeaderNavigation?: boolean;
+  /**
+   * Decide if the header should hide back button
+   */
+  hideBackButton?: boolean;
   /**
    * Decide if the scrollbar should be visible to the user
    * @default: false
    */
-  showScrollbar?: boolean
-  showFilterBar?: boolean
-  hideSearchBar?: boolean
-  hideFilterButton?: boolean
-  isMultisig?: boolean
-  directBackRoute?: boolean
+  showScrollbar?: boolean;
+  showFilterBar?: boolean;
+  hideSearchBar?: boolean;
+  hideFilterButton?: boolean;
+  isMultisig?: boolean;
+  directBackRoute?: boolean;
 }
 
-export type WalletAppRouteConfig = Omit<RouteConfig, 'meta'> & {
-  meta?: WalletRouteMeta
-  component?: VueAnyComponent,
-  children?: WalletAppRouteConfig[],
+export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {
+  meta?: WalletRouteMeta;
+  children?: WalletAppRouteConfig[];
 }

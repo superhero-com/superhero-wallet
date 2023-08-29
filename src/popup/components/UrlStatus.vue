@@ -17,10 +17,11 @@
 </template>
 
 <script>
-import Default from '../../icons/badges/default.svg?vue-component';
-import { MODAL_RECIPIENT_HELPER } from '../utils/constants';
-import { useModals } from '../../composables';
-import QuestionCircleIcon from '../../icons/question-circle-border.svg?vue-component';
+import { MODAL_RECIPIENT_HELPER } from '@/constants';
+import { useModals } from '@/composables';
+
+import Default from '@/icons/badges/default.svg?vue-component';
+import QuestionCircleIcon from '@/icons/question-circle-border.svg?vue-component';
 
 export default {
   components: {
@@ -44,13 +45,13 @@ export default {
     data() {
       switch (this.status) {
         case 'verified':
-          return { icon: 'success', content: this.$t('modals.verified') };
+          return { icon: 'success', content: this.$tm('modals.verified') };
         case 'blacklisted':
-          return { icon: 'alert', content: this.$t('modals.blacklisted') };
+          return { icon: 'alert', content: this.$tm('modals.blacklisted') };
         case 'not-secure':
-          return { icon: 'not-secure', content: this.$t('modals.not-secure') };
+          return { icon: 'not-secure', content: this.$tm('modals.not-secure') };
         case 'not-verified':
-          return { icon: 'warning', content: this.$t('modals.not-verified') };
+          return { icon: 'warning', content: this.$tm('modals.not-verified') };
         case 'default':
           return null;
         default:

@@ -1,15 +1,16 @@
 <template>
   <BtnBase
-    v-bind="$attrs"
+    v-bind="{ ...$attrs, ...$props }"
     class="button-subheader"
     extend
     variant="dark"
-    @click="$emit('click')"
   >
     <div class="box">
       <IconWrapper
-        v-if="icon"
+        v-if="icon || protocolIcon"
         :icon="icon"
+        :icon-size="iconSize"
+        :protocol-icon="protocolIcon"
         is-boxed
       />
 
@@ -21,11 +22,12 @@
   </BtnBase>
 </template>
 
-<script>
-import IconWrapper from '../IconWrapper.vue';
-import BtnBase from './BtnBase.vue';
+<script lang="ts">
+import { Component, PropType, defineComponent } from 'vue';
+import IconWrapper, { iconSizeProp, protocolIconProp } from '../IconWrapper.vue';
+import BtnBase, { btnBaseProps } from './BtnBase.vue';
 
-export default {
+export default defineComponent({
   components: {
     BtnBase,
     IconWrapper,
@@ -33,21 +35,25 @@ export default {
   props: {
     header: { type: String, default: '' },
     subheader: { type: String, default: '' },
-    icon: { type: Object, default: null },
+    icon: { type: Object as PropType<Component>, default: null },
+    iconSize: iconSizeProp,
+    protocolIcon: protocolIconProp,
+    ...btnBaseProps,
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-@use '../../../styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
 
 .button-subheader {
+  display: flex;
+  align-items: center;
   width: 100%;
-  min-height: 80px;
   margin-bottom: 16px;
-  padding: 6px 12px;
+  padding: 20px 12px;
   border-radius: variables.$border-radius-interactive;
   color: variables.$color-white;
 

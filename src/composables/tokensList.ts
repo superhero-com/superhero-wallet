@@ -1,16 +1,21 @@
 import BigNumber from 'bignumber.js';
-import { computed, Ref } from '@vue/composition-api';
+import { computed, Ref } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
+
 import type {
+  Balance,
+  IAsset,
+  ICoin,
+  IDefaultComposableOptions,
   IToken,
   ITokenList,
-  IDefaultComposableOptions,
-  ICoin,
-  IAsset,
-  Balance,
-} from '../types';
-import { AETERNITY_CONTRACT_ID } from '../popup/utils';
-import { useBalances } from './balances';
+} from '@/types';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { useCurrencies } from '@/composables/currencies';
 import { useMultisigAccounts } from './multisigAccounts';
+import { useBalances } from './balances';
 
 export interface UseTokensListOptions extends IDefaultComposableOptions {
   /**
@@ -39,7 +44,8 @@ export function useTokensList({
   searchTerm,
   isMultisig,
 }: UseTokensListOptions) {
-  const { balance, aeternityCoin } = useBalances({ store });
+  const { marketData } = useCurrencies({ store });
+  const { balance } = useBalances({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
 
   const availableTokens = computed<ITokenList>(() => (
@@ -58,17 +64,21 @@ export function useTokensList({
   /**
    * Returns the default aeternity meta information
    */
-  const aeToken = computed((): ICoin => ({
-    ...aeternityCoin.value,
-    convertedBalance: +aeTokenBalance.value,
-  }));
+  const aeToken = computed(
+    (): ICoin => ProtocolAdapterFactory
+      .getAdapter(PROTOCOL_AETERNITY)
+      .getDefaultCoin(marketData.value!, +aeTokenBalance.value),
+  );
 
   /**
    * Converts the token information object into an array and put the AE at the beginning
    */
   const allTokens = computed<IAsset[]>(() => {
     const tokens: IToken[] = Object.entries(availableTokens.value)
-      .map(([contractId, tokenData]) => ({ ...tokenData, contractId }));
+      .map(([contractId, tokenData]) => ({
+        ...tokenData,
+        contractId: contractId as Encoded.ContractAddress,
+      }));
 
     tokenBalances.value.forEach((singleBalance) => {
       const index = tokens.findIndex((token) => token.contractId === singleBalance?.contractId);
@@ -91,12 +101,12 @@ export function useTokensList({
     return allTokens.value
       .filter((token) => (
         !ownedOnly
-        || token.contractId === AETERNITY_CONTRACT_ID
+        || token.contractId === AE_CONTRACT_ID
         || tokenBalances.value.includes(token)
       ))
       .filter((token) => (
         !withBalanceOnly
-        || token.contractId === AETERNITY_CONTRACT_ID
+        || token.contractId === AE_CONTRACT_ID
         || (token.convertedBalance && +token.convertedBalance)
       ))
       .filter(({ symbol, name, contractId }) => (

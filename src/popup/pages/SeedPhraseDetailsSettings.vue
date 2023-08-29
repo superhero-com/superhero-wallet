@@ -25,20 +25,22 @@
       </BtnMain>
     </div>
 
-    <i18n
-      path="pages.seedPhrase.backUpYourSeedPhrase"
+    <i18n-t
+      keypath="pages.seedPhrase.backUpYourSeedPhrase"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <strong>{{ $t('pages.seedPhrase.inCorrectOrder') }}</strong>
-    </i18n>
-    <i18n
-      path="pages.seedPhrase.toBeSureYouGotItRight"
+    </i18n-t>
+    <i18n-t
+      keypath="pages.seedPhrase.toBeSureYouGotItRight"
       tag="p"
       class="text-description"
+      scope="global"
     >
       <strong>{{ $t('pages.seedPhrase.verifyYourSeedPhrase') }}</strong>
-    </i18n>
+    </i18n-t>
 
     <div class="buttons">
       <BtnMain
@@ -60,7 +62,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import { useCopy } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -72,13 +76,16 @@ export default defineComponent({
   components: {
     BtnMain,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+
     const { copy, copied } = useCopy();
-    const mnemonic = computed(() => root.$store.state.mnemonic);
+    const mnemonic = computed(() => store.state.mnemonic);
 
     function setBackedUpSeed() {
-      root.$store.commit('setBackedUpSeed');
-      root.$router.push({ name: ROUTE_ACCOUNT });
+      store.commit('setBackedUpSeed');
+      router.push({ name: ROUTE_ACCOUNT });
     }
 
     return {
@@ -110,7 +117,7 @@ export default defineComponent({
     box-shadow: 0 4px 8px 2px rgb(60 60 60 / 10%);
     box-sizing: border-box;
 
-    ::v-deep .content {
+    :deep(.content) {
       padding: 12px;
     }
 

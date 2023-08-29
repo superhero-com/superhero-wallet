@@ -6,10 +6,13 @@
     no-padding
     class="asset-selector"
     @close="reject()"
-    @opened="onModalOpen"
+    @open="onModalOpen"
   >
     <template #header>
-      <span class="text-heading-3 title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
+      <span
+        class="text-heading-3 text-muted title"
+        v-text="$t('pages.fungible-tokens.select-asset')"
+      />
       <InputSearch
         v-model="searchTerm"
         class="search-bar"
@@ -44,8 +47,9 @@ import {
   nextTick,
   PropType,
   ref,
-} from '@vue/composition-api';
-import type { IToken } from '../../../types';
+} from 'vue';
+import { useStore } from 'vuex';
+import type { IToken, RejectCallback, ResolveCallback } from '../../../types';
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
@@ -61,18 +65,19 @@ export default defineComponent({
     InputSearch,
   },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedToken: { type: Object as PropType<IToken | null>, default: null },
     showTokensWithBalance: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
     const { filteredTokens } = useTokensList({
-      store: root.$store,
+      store,
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });

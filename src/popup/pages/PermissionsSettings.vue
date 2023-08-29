@@ -1,17 +1,17 @@
 <template>
   <div class="permissions-settings">
-    <i18n
-      path="pages.permissions.description"
+    <i18n-t
+      keypath="pages.permissions.description"
       tag="div"
       class="text-description"
+      scope="global"
     >
-      <a
-        href="https://superhero.com/"
-        target="_blank"
+      <LinkButton
+        to="https://superhero.com/"
       >
         superhero.com
-      </a>
-    </i18n>
+      </LinkButton>
+    </i18n-t>
 
     <div class="hosts">
       <PanelItem
@@ -33,23 +33,29 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { useStore } from 'vuex';
+import { computed } from 'vue';
+
+import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 export default {
   components: {
+    LinkButton,
     PanelItem,
     BtnMain,
   },
-  data: () => ({
-    PlusIcon,
-  }),
-  computed: {
-    permissions() {
-      return Object.values(this.$store.state.permissions);
-    },
+  setup() {
+    const store = useStore();
+    const permissions = computed(() => Object.values(store.state.permissions));
+
+    return {
+      PlusIcon,
+      permissions,
+    };
   },
 };
 </script>

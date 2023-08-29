@@ -6,32 +6,32 @@ describe('Checkbox', () => {
     const wrapper = shallowMount(CheckBox);
     expect(wrapper.find('.checkbox-container').exists()).toBeTruthy();
   });
-  it('should emit function on click', async () => {
+  it('should emit function on change', async () => {
     const wrapper = shallowMount(CheckBox);
-    await wrapper.find('input').trigger('click');
+    await wrapper.find('input').trigger('change');
     await wrapper.vm.$nextTick();
-    expect(wrapper.emitted('input')).toBeTruthy();
+    expect(wrapper.emitted('update:modelValue')).toBeTruthy();
   });
-  [1, 'true', true].forEach((value) => it(`should be checked with truthy value [${value}]`, async () => {
+  [1, 'true', true].forEach((modelValue) => it(`should be checked with truthy value [${modelValue}]`, async () => {
     const wrapper = shallowMount(CheckBox, {
-      propsData: {
-        value,
+      props: {
+        modelValue,
       },
     });
     await wrapper.vm.$nextTick();
     expect(wrapper.find('.checkmark').classes()).toContain('checked');
   }));
-  [false, '', null, undefined, 0].forEach((value) => it(`should be unchecked with falsy value [${value}]`, () => {
+  [false, '', null, undefined, 0].forEach((modelValue) => it(`should be unchecked with falsy value [${modelValue}]`, () => {
     const wrapper = shallowMount(CheckBox, {
-      propsData: {
-        value,
+      props: {
+        modelValue,
       },
     });
     expect(wrapper.find('.checkmark').classes()).not.toContain('checked');
   }));
   it('should be disabled', async () => {
     const wrapper = shallowMount(CheckBox, {
-      propsData: {
+      props: {
         disabled: true,
       },
     });

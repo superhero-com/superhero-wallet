@@ -4,6 +4,7 @@
       :address="activeAccount.address"
       :name="activeAccount.name"
       :idx="activeAccount.idx"
+      :protocol="activeAccount.protocol"
     />
 
     <div class="header">
@@ -17,7 +18,7 @@
         :msg="$t('modals.verify.msg')"
         :option="{
           attrs: {
-            href: BLOG_CLAIM_TIP_URL,
+            href: AE_BLOG_CLAIM_TIP_URL,
             target: '_blank'
           },
         }"
@@ -32,7 +33,7 @@
     />
 
     <BtnMain
-      :disabled="!normalizedUrl || !tippingSupported"
+      :disabled="!normalizedUrl || !isTippingSupported"
       extend
       @click="claimTips"
     >
@@ -49,40 +50,50 @@ import {
   computed,
   ref,
   onMounted,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { isUrlValid, toURL } from '@/utils';
+import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/constants';
 import {
-  BLOG_CLAIM_TIP_URL,
-  MODAL_CLAIM_SUCCESS,
-  aettosToAe,
-  toURL,
-  validateTipUrl,
-} from '../utils';
-import { IS_EXTENSION } from '../../lib/environment';
-import { useAccounts, useModals, useTippingContracts } from '../../composables';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+  useAccounts,
+  useModals,
+  useAeSdk,
+  useTippingContracts,
+} from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
 import AccountInfo from '../components/AccountInfo.vue';
 
 export default defineComponent({
+  name: 'TipsClaim',
   components: {
     InputField,
     BtnMain,
     BtnHelp,
     AccountInfo,
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const { t } = useI18n();
+    const store = useStore();
+    const router = useRouter();
+
+    const { isTippingSupported } = useAeSdk({ store });
+    const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    const { getTippingContracts } = useTippingContracts({ store });
 
     const tipUrl = ref('');
     const loading = ref(false);
-    const tippingSupported = computed(() => root.$store.getters.tippingSupported);
 
     const normalizedUrl = computed(
-      () => validateTipUrl(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
+      () => isUrlValid(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
     );
 
     async function claimTips() {
@@ -100,29 +111,29 @@ export default defineComponent({
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await root.$store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
         await Promise.all([
-          root.$store.dispatch('cacheInvalidateOracle'),
-          root.$store.dispatch('cacheInvalidateTips'),
+          store.dispatch('cacheInvalidateOracle'),
+          store.dispatch('cacheInvalidateTips'),
         ]);
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
 
-        root.$router.push({ name: ROUTE_ACCOUNT });
+        router.push({ name: ROUTE_ACCOUNT });
       } catch (error: any) {
         const { error: errorMessage = '' } = error.response ? error.response.data : {};
         let msg;
         if (errorMessage.includes('MORE_ORACLES_NEEDED')) {
-          msg = root.$t('pages.claim.moreOracles');
+          msg = t('pages.claim.moreOracles');
         } else if (errorMessage.includes('URL_NOT_EXISTING')) {
-          msg = root.$t('pages.claim.urlNotExisting');
+          msg = t('pages.claim.urlNotExisting');
         } else if (
           errorMessage.includes('NO_ZERO_AMOUNT_PAYOUT')
           || error.message.includes('NO_ZERO_AMOUNT_PAYOUT')
         ) {
-          msg = root.$t('pages.claim.noZeroClaim');
+          msg = t('pages.claim.noZeroClaim');
         } else if (errorMessage.includes('ORACLE_SERVICE_CHECK_CLAIM_FAILED')) {
-          msg = root.$t('pages.claim.oracleFailed');
+          msg = t('pages.claim.oracleFailed');
         } else if (errorMessage) {
           msg = errorMessage;
         }
@@ -140,7 +151,7 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_EXTENSION && browser) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if (tab && validateTipUrl(tab.url)) {
+        if (tab?.url && isUrlValid(tab.url)) {
           tipUrl.value = tab.url;
         }
       }
@@ -152,8 +163,8 @@ export default defineComponent({
       loading,
       normalizedUrl,
       tipUrl,
-      tippingSupported,
-      BLOG_CLAIM_TIP_URL,
+      isTippingSupported,
+      AE_BLOG_CLAIM_TIP_URL,
     };
   },
 });
@@ -173,7 +184,7 @@ export default defineComponent({
     .help-button {
       margin-left: 8px;
 
-      ::v-deep .icon {
+      :deep(.icon) {
         width: 32px;
         height: 32px;
       }

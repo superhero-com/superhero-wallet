@@ -8,7 +8,7 @@
     </h2>
 
     <div class="error-msg">
-      {{ message }}...
+      {{ messageTruncated }}...
     </div>
     <div>
       <span>{{ $t('modals.error-log.sub-title') }}</span>
@@ -29,34 +29,52 @@
   </Modal>
 </template>
 
-<script>
+<script lang="ts">
+import { computed, defineComponent, PropType } from 'vue';
+import { useRouter } from 'vue-router';
+import type { RejectCallback, ResolveCallback } from '../../../types';
 import { RejectedByUserError } from '../../../lib/errors';
+import { ROUTE_DONATE_ERROR } from '../../router/routeNames';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
-export default {
-  components: { Modal, BtnMain },
+export default defineComponent({
+  components: {
+    Modal,
+    BtnMain,
+  },
   props: {
-    resolve: { type: Function, required: true },
-    reject: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
+    reject: { type: Function as PropType<RejectCallback>, required: true },
     entry: { type: Object, required: true },
   },
-  computed: {
-    message() {
-      const { message = '' } = this.entry.error;
+  setup(props) {
+    const router = useRouter();
+
+    const messageTruncated = computed(() => {
+      const { message = '' } = props.entry.error;
       return message.substr(0, 150);
-    },
+    });
+
+    function cancel() {
+      props.reject(new RejectedByUserError());
+    }
+
+    function createReport() {
+      props.resolve(true);
+      router.push({
+        name: ROUTE_DONATE_ERROR,
+        params: { entry: props.entry as any },
+      });
+    }
+
+    return {
+      messageTruncated,
+      cancel,
+      createReport,
+    };
   },
-  methods: {
-    cancel() {
-      this.reject(new RejectedByUserError());
-    },
-    createReport() {
-      this.resolve(true);
-      this.$router.push({ name: 'donate-error', params: { entry: this.entry } });
-    },
-  },
-};
+});
 </script>
 
 <style lang="scss" scoped>

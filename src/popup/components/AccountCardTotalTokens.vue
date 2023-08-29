@@ -2,7 +2,6 @@
   <div
     v-if="isOnline"
     class="account-card-total-tokens"
-    :class="{ selected }"
   >
     <div class="total-tokens">
       <span class="digit">
@@ -16,18 +15,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import { useConnection } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { IAccount } from '../../types';
+import { computed, defineComponent, PropType } from 'vue';
+import { IAccount } from '@/types';
+import { useConnection } from '@/composables';
+import { useGetter } from '@/composables/vuex';
 
 export default defineComponent({
   props: {
-    selected: Boolean,
-    currentAccount: {
-      type: Object as PropType<IAccount>,
-      required: true,
-    },
+    currentAccount: { type: Object as PropType<IAccount>, required: true },
   },
   setup(props) {
     const { isOnline } = useConnection();
@@ -48,20 +43,20 @@ export default defineComponent({
 
 .account-card-total-tokens {
   width: 100%;
-  opacity: 0.5;
 
   .total-tokens {
     @extend %face-sans-14-medium;
 
     line-height: 16px;
 
+    .digit {
+      display: inline-block;
+      margin-right: 4px;
+    }
+
     .wording {
       opacity: 0.85;
     }
-  }
-
-  &.selected {
-    opacity: 1;
   }
 }
 </style>

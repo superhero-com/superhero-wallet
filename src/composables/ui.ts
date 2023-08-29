@@ -1,14 +1,16 @@
-import { onBeforeUnmount, onMounted, ref } from '@vue/composition-api';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { ROUTE_ACCOUNT } from '../popup/router/routeNames';
 
 const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
 
 export function useUi() {
-  function setHomeRouteName(routeName: string, onChangeCallback: () => any) {
+  function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
       homeRouteName.value = routeName;
-      onChangeCallback();
+      if (onChangeCallback) {
+        onChangeCallback();
+      }
     }
   }
 

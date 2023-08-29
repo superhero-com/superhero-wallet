@@ -5,35 +5,44 @@ import {
   onBeforeUnmount,
   watch,
   Ref,
-} from '@vue/composition-api';
+} from 'vue';
 import BigNumber from 'bignumber.js';
-import { TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-
-import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
-import type {
-  IAsset,
-  IDefaultComposableOptions,
-} from '../types';
 import {
-  AETERNITY_COIN_PRECISION,
-  AETERNITY_CONTRACT_ID,
-  STUB_CONTRACT_ADDRESS,
+  buildTx,
+  Contract,
+  ContractMethodsBase,
+  encode,
+  Encoded,
+  Encoding,
+  Tag,
+  unpackTx,
+} from '@aeternity/aepp-sdk';
+
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
+import type {
+  IDefaultComposableOptions,
+  IFormModel,
+} from '@/types';
+import {
   executeAndSetInterval,
-  calculateFee,
-  validateTipUrl,
-  checkAensName,
   handleUnknownError,
-} from '../popup/utils';
-import { useSdk } from './sdk';
+  isUrlValid,
+} from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import {
+  STUB_CALLDATA,
+  STUB_CONTRACT_ADDRESS,
+} from '@/constants/stubs';
+import {
+  AE_COIN_PRECISION,
+  AE_CONTRACT_ID,
+} from '@/protocols/aeternity/config';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+
+import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
-export interface IFormModel {
-  amount?: string;
-  selectedAsset?: IAsset;
-  address?: string;
-  payload?: string;
-}
 export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
 }
@@ -43,88 +52,101 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  * considering the fee that needs to be paid.
  */
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
-  const { getSdk } = useSdk({ store });
+  const { getAeSdk } = useAeSdk({ store });
   const { balance } = useBalances({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { getLastActiveProtocolAccount } = useAccounts({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
   const fee = ref<BigNumber>(new BigNumber(0));
   const selectedTokenBalance = ref(new BigNumber(0));
-  const tokenInstance = ref<any>(null);
+  let tokenInstance: Contract<ContractMethodsBase> | null;
   const nonce = ref(0);
   const selectedAssetDecimals = ref(0);
 
   const max = computed(() => {
-    if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
+    if (balance.value && formModel.value?.selectedAsset?.contractId === AE_CONTRACT_ID) {
       const _max = balance.value.minus(fee.value);
       return (_max.isPositive() ? _max : 0).toString();
     }
     return selectedTokenBalance.value.toString();
   });
 
+  function getAccount() {
+    return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+  }
+
   watch(
     () => formModel.value,
     async (val) => {
-      if (!val?.selectedAsset) return;
-      const sdk = await getSdk();
+      if (!val?.selectedAsset) {
+        return;
+      }
+      const aeSdk = await getAeSdk();
+      const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
+      const account = getAccount();
 
-      if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+      if (!isAssetAe) {
         if (
-          !tokenInstance.value
-          || tokenInstance.value.deployInfo.address !== val.selectedAsset.contractId
+          !tokenInstance
+          || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
-          tokenInstance.value = await sdk.getContractInstance({
+          tokenInstance = await aeSdk.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
-            contractAddress: val.selectedAsset.contractId,
+            address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
       const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
-      const amount = new BigNumber(numericAmount).shiftedBy(AETERNITY_COIN_PRECISION);
+      const amount = new BigNumber(numericAmount).shiftedBy(AE_COIN_PRECISION);
 
       if (
-        val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+        !isAssetAe
         || (
-          val.address && !checkAensName(val.address) && validateTipUrl(val.address)
+          val.address && !isAensNameValid(val.address) && isUrlValid(val.address)
         )
       ) {
-        fee.value = calculateFee(
-          SCHEMA.TX_TYPE.contractCall, {
-            ...sdk.Ae.defaults,
-            ttl: 0,
-            nonce: nonce.value + 1,
-            amount,
-            callerId: activeAccount.value.address,
-            contractId: (val.address && validateTipUrl(val.address))
+        let calldata: Encoded.ContractBytearray = STUB_CALLDATA;
+        if (tokenInstance) {
+          calldata = tokenInstance._calldata.encode(
+            tokenInstance._name,
+            'transfer',
+            [account.address, amount.toFixed()],
+          );
+        }
+        fee.value = BigNumber(unpackTx(
+          buildTx({
+            tag: Tag.ContractCallTx,
+            callerId: account.address,
+            contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
-              : val.selectedAsset.contractId,
-          },
-        );
+              : val.selectedAsset.contractId as Encoded.ContractAddress,
+            amount: 0,
+            callData: calldata,
+            nonce: nonce.value,
+          }) as any,
+          Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
+        ).fee).shiftedBy(-AE_COIN_PRECISION);
         return;
       }
 
-      if (
-        val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
-        && tokenInstance.value
-      ) {
-        tokenInstance.value = null;
+      if (isAssetAe && tokenInstance) {
+        tokenInstance = null;
       }
 
-      const minFee: BigNumber = new BigNumber(TxBuilder.calculateMinFee('spendTx', {
-        gas: sdk.Ae.defaults.gas,
-        params: {
-          ...sdk.Ae.defaults,
-          senderId: activeAccount.value.address,
-          recipientId: activeAccount.value.address,
+      const minFee = BigNumber(unpackTx(
+        buildTx({
+          tag: Tag.SpendTx,
+          senderId: account.address,
+          recipientId: account.address,
           amount,
-          ttl: 0,
-          nonce: nonce.value + 1,
-          payload: val.payload,
-        },
-      })).shiftedBy(-AETERNITY_COIN_PRECISION);
+          payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
+          nonce: nonce.value,
+        }) as any,
+        Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
+      ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
     {
@@ -135,18 +157,18 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
 
   onMounted(() => {
     updateTokenBalanceInterval = executeAndSetInterval(async () => {
-      if (!tokenInstance.value) return;
-      await getSdk();
+      if (!tokenInstance) return;
+      await getAeSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.value.methods.balance(activeAccount.value.address)).decodedResult ?? 0,
+        (await tokenInstance.balance(getAccount().address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
     updateNonceInterval = executeAndSetInterval(async () => {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       try {
-        nonce.value = (await sdk.api
-          .getAccountByPubkey(activeAccount.value.address))?.nonce;
+        nonce.value = (await aeSdk.api
+          .getAccountByPubkey(getAccount().address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }

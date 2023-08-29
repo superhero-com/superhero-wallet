@@ -1,5 +1,5 @@
 <template>
-  <div :class="['switch-button', { disabled: disabled, active: !!value }]">
+  <div :class="['switch-button', { disabled: disabled, active: !!modelValue }]">
     <div class="label">
       {{ label }}
     </div>
@@ -17,17 +17,18 @@
 <script>
 export default {
   props: {
-    value: { type: Boolean },
+    modelValue: { type: Boolean },
     label: { type: String, default: '' },
     disabled: { type: Boolean, default: false },
   },
+  emits: ['update:modelValue'],
   computed: {
     active: {
       get() {
-        return this.value;
+        return this.modelValue;
       },
-      set(value) {
-        this.$emit('input', value);
+      set(modelValue) {
+        this.$emit('update:modelValue', modelValue);
       },
     },
   },

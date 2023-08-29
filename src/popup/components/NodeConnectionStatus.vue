@@ -19,17 +19,21 @@ import {
   defineComponent,
   ref,
   watch,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
-import { useAccounts, useConnection, useSdk } from '../../composables';
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import { useAccounts, useConnection, useAeSdk } from '../../composables';
 
 const CONNECTED_DISPLAY_TIME = 2000;
 
 export default defineComponent({
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const { t } = useI18n();
+
     const { isOnline } = useConnection();
-    const { isNodeConnecting, isNodeReady, isNodeError } = useSdk({ store: root.$store });
-    const { isLoggedIn } = useAccounts({ store: root.$store });
+    const { isNodeConnecting, isNodeReady, isNodeError } = useAeSdk({ store });
+    const { isLoggedIn } = useAccounts({ store });
 
     const justBeenConnected = ref(false);
 
@@ -48,15 +52,15 @@ export default defineComponent({
     const statusText = computed((): TranslateResult | null => {
       switch (true) {
         case !isOnline.value:
-          return root.$t('connectionStatus.offline');
+          return t('connectionStatus.offline');
         case !isLoggedIn.value:
           return null;
         case isNodeConnecting.value:
-          return root.$t('connectionStatus.node.connecting');
+          return t('connectionStatus.node.connecting');
         case justBeenConnected.value:
-          return root.$t('connectionStatus.node.connected');
+          return t('connectionStatus.node.connected');
         case isNodeError.value:
-          return root.$t('connectionStatus.node.error');
+          return t('connectionStatus.node.error');
         default:
           return null;
       }

@@ -2,19 +2,20 @@ import {
   ref,
   watch,
   computed,
-} from '@vue/composition-api';
+} from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import {
-  FUNCTION_TYPE_MULTISIG,
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-  handleUnknownError,
-} from '../popup/utils';
 import type {
   IAccount,
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   ITransaction,
-} from '../types';
+} from '@/types';
+import { handleUnknownError } from '@/utils';
+import {
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  TX_FUNCTIONS_MULTISIG,
+} from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
@@ -24,11 +25,11 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
-  const { getMiddleware } = useMiddleware({ store });
+  const { getMiddleware } = useMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
 
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 
@@ -46,14 +47,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * Current proposal signers.
    */
-  const pendingMultisigTxSigners = computed((): string[] => (
+  const pendingMultisigTxSigners = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.signers ?? []
   ));
 
   /**
    * The Signers who approved the current proposal.
    */
-  const pendingMultisigTxConfirmedBy = computed((): string[] => (
+  const pendingMultisigTxConfirmedBy = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.confirmedBy ?? []
   ));
 
@@ -67,14 +68,14 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   /**
    * The Signers who refused the current proposal.
    */
-  const pendingMultisigTxRefusedBy = computed((): string[] => (
+  const pendingMultisigTxRefusedBy = computed((): Encoded.AccountAddress[] => (
     activeMultisigAccount.value?.refusedBy ?? []
   ));
 
   /**
    * Sorted list of signatories, with confirmed signatories appearing first.
    */
-  const pendingMultisigTxSortedSigners = computed((): string[] => (
+  const pendingMultisigTxSortedSigners = computed((): Encoded.AccountAddress[] => (
     [...pendingMultisigTxSigners.value].sort(
       (a) => activeMultisigAccount.value?.confirmedBy.includes(a) ? -1 : 1,
     )
@@ -132,7 +133,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    * Retrieve the addresses of proposal signatories that are present in the local wallet.
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
-    accounts.value.filter(
+    aeAccounts.value.filter(
       (_account) => pendingMultisigTxSigners.value.includes(_account.address),
     )
   ));
@@ -159,7 +160,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.revoke
+    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
   ));
 
   /**
@@ -167,7 +168,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    */
   const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === FUNCTION_TYPE_MULTISIG.confirm
+    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
   ));
 
   /**

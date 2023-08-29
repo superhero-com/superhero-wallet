@@ -17,12 +17,17 @@
       >
     </span>
 
-    <slot class="radio-holder" />
+    <span
+      class="radio-holder"
+      :class="{ checked: value }"
+    >
+      <slot />
+    </span>
   </label>
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   props: {
@@ -99,6 +104,15 @@ export default defineComponent({
         height: 14px;
         opacity: 1;
       }
+    }
+  }
+
+  .radio-holder {
+    width: 100%;
+    opacity: 0.5;
+
+    &.checked {
+      opacity: 1;
     }
   }
 }

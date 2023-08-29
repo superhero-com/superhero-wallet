@@ -1,10 +1,33 @@
-import Vue from 'vue';
 import { mount } from '@vue/test-utils';
+import { i18n } from '../../src/store/plugins/languages';
 import AccountImport from '../../src/popup/components/Modals/AccountImport.vue';
 
-Object.assign(Vue.prototype, {
-  $t: () => 'locale-specific-text',
-});
+jest.mock('vuex', () => ({
+  useStore: jest.fn(() => ({
+    state: {
+      loginTargetLocation: null,
+    },
+    getters: {
+      accounts: () => [],
+    },
+    commit: jest.fn(),
+  })),
+  Store: jest.fn(() => ({
+    state: {
+      loginTargetLocation: null,
+    },
+    getters: {
+      accounts: () => [],
+    },
+    commit: jest.fn(),
+  })),
+}));
+
+jest.mock('vue-router', () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+  })),
+}));
 
 describe('ImportAccount', () => { // TODO: rewrite test
   [{
@@ -40,18 +63,15 @@ describe('ImportAccount', () => { // TODO: rewrite test
     correct: true,
   }].forEach((test) => it(test.name, async () => {
     const wrapper = mount(AccountImport, {
-      mocks: {
-        $store: {
-          commit: jest.fn(),
-          state: {
-            loginTargetLocation: null,
-          },
-        },
-        $router: {
-          push: jest.fn(),
+      global: {
+        plugins: [i18n],
+        mocks: {
+          t: () => 'locale-specific-text',
+          $t: () => 'locale-specific-text',
         },
       },
-      propsData: {
+      props: {
+        show: true,
         resolve: () => null,
         reject: () => null,
       },

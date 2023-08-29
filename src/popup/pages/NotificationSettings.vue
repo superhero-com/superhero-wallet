@@ -13,9 +13,9 @@
         :key="setting.type"
         :class="{ unchecked: !setting.checked }"
         :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
-        :value="setting.checked"
+        :model-value="setting.checked"
         :label="setting.text"
-        @input="toggleNotificationSetting(setting.type)"
+        @update:modelValue="toggleNotificationSetting(setting.type)"
       />
     </div>
   </div>
@@ -23,7 +23,7 @@
 
 <script>
 import { mapMutations, mapState } from 'vuex';
-import { NOTIFICATION_TYPE_WALLET } from '../utils/constants';
+import { NOTIFICATION_TYPE_WALLET } from '@/constants';
 import SwitchButton from '../components/SwitchButton.vue';
 
 export default {

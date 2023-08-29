@@ -46,8 +46,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
-import type { StatusIconType } from '../../../types';
+import { defineComponent, PropType } from 'vue';
+import type { ResolveCallback, StatusIconType } from '../../../types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';
@@ -63,7 +63,7 @@ export default defineComponent({
     IconBoxed,
   },
   props: {
-    resolve: { type: Function, required: true },
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
     close: { type: Function, default: null },
     title: { type: String, default: '' },
     msg: { type: String, default: '' },

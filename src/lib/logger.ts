@@ -1,33 +1,34 @@
 /* eslint-disable no-console */
-import Vue from 'vue';
 import { pick } from 'lodash-es';
-import { Browser } from 'webextension-polyfill';
 import { detect } from 'detect-browser';
+import { App } from 'vue';
+import { IS_PRODUCTION } from '@/constants';
 import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
 import { RejectedByUserError } from './errors';
 
 interface ILoggerOptions {
   background?: boolean;
+  app?: App;
 }
 
 export default class Logger {
   static background: boolean;
 
   static init(options: ILoggerOptions = {}) {
-    const { background = false } = options;
+    const { background = false, app } = options;
 
     Logger.background = background;
 
-    if (!background) {
-      Vue.config.errorHandler = (error, vm, info) => {
+    if (!background && app) {
+      app.config.errorHandler = (error, vm, info) => {
         console.error(error, info);
         if (error && error instanceof RejectedByUserError) {
           Logger.write({ message: error.toString(), info, type: 'vue-error' });
         }
       };
 
-      Vue.config.warnHandler = (message, vm, info) => {
+      app.config.warnHandler = (message, vm, info) => {
         console.warn(message, info);
       };
     }
@@ -67,10 +68,10 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = process.env.NODE_ENV !== 'production', ...error }) {
-    const { saveErrorLog } = await getState();
+  static async write({ modal = !IS_PRODUCTION, ...error }) {
+    const { saveErrorLog } = await getState() as any;
     if (!saveErrorLog) return;
-    const errorLog = await Logger.get();
+    const errorLog = await Logger.get() as any;
     const logEntry = {
       error: { ...pick(error, ['name', ...Object.getOwnPropertyNames(error)]) },
       appVersion: process.env.npm_package_version,
@@ -78,7 +79,7 @@ export default class Logger {
       platform: process.env.PLATFORM,
       time: Date.now(),
     };
-    (browser as Browser).storage.local.set({ errorLog: [...errorLog, logEntry] });
+    browser.storage.local.set({ errorLog: [...errorLog, logEntry] });
     if (!Logger.background && modal && error.message) {
       const { openErrorModal } = useModals();
       openErrorModal(logEntry);
@@ -86,7 +87,7 @@ export default class Logger {
   }
 
   static async get() {
-    const { errorLog = [] } = await (browser as Browser).storage.local.get('errorLog');
+    const { errorLog = [] } = await browser.storage.local.get('errorLog');
     return errorLog;
   }
 

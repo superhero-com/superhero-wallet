@@ -1,10 +1,13 @@
 <template>
-  <div class="transaction-list">
+  <div
+    :key="activeAccount.address"
+    class="transaction-list"
+  >
     <InfiniteScroll
       class="list"
       data-cy="list"
       is-more-data
-      @loadMore="loadMore"
+      @loadMore="$emit('loadMore')"
     >
       <TransactionListItem
         v-for="transaction in filteredTransactions"
@@ -12,7 +15,6 @@
         :transaction="getTransaction(transaction)"
         :multisig-transaction="getMultisigTransaction(transaction)"
         :is-multisig="isMultisig"
-        :data-cy="transaction.pending && 'pending-txs'"
       />
     </InfiniteScroll>
     <AnimatedSpinner
@@ -24,58 +26,49 @@
       v-else-if="!filteredTransactions.length"
       class="message"
     >
-      <p>
-        {{ $t('pages.recentTransactions.noTransactionsFound') }}
-      </p>
+      <p v-text="$t('pages.recentTransactions.noTransactionsFound')" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import {
+  PropType,
   computed,
   defineComponent,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-} from '@vue/composition-api';
+} from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import type {
+  ICommonTransaction,
+  ITransaction,
+} from '@/types';
+import { TX_DIRECTION } from '@/constants';
 import {
-  getTransaction,
-  getMultisigTransaction,
+  includesCaseInsensitive,
+  pipe,
+  sortTransactionsByDate,
+} from '@/utils';
+import { useGetter } from '@/composables/vuex';
+import {
+  useAccounts,
+  useAeSdk,
+  useTransactionAndTokenFilter,
+} from '@/composables';
+import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
+import {
   getInnerTransaction,
+  getMultisigTransaction,
   getOwnershipStatus,
+  getTransaction,
+  getTxDirection,
   getTxOwnerAddress,
   isTxDex,
-  sortTransactionsByDateCallback,
-  pipe,
-  TXS_PER_PAGE,
-  AETERNITY_CONTRACT_ID,
-  TX_DIRECTION,
-  TRANSACTION_OWNERSHIP_STATUS, includesCaseInsensitive,
-} from '../utils';
-import { useDispatch, useGetter, useState } from '../../composables/vuex';
-import {
-  useMultisigAccounts,
-  useTransactionAndTokenFilter,
-  useViewport,
-  useAccounts,
-  usePendingMultisigTransaction,
-  useUi,
-} from '../../composables';
+} from '@/protocols/aeternity/helpers';
 
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
-import {
-  IDexContracts,
-  ITokenList,
-  ITransaction,
-  ICommonTransaction,
-  ITransactionsState,
-  ITx,
-} from '../../types';
-import { i18n } from '../../store/plugins/languages';
 
 export default defineComponent({
   components: {
@@ -84,24 +77,17 @@ export default defineComponent({
     AnimatedSpinner,
   },
   props: {
+    transactions: { type: Array as PropType<ICommonTransaction[]>, default: () => [] },
     tokenContractId: { type: String, default: '' },
     isMultisig: Boolean,
+    loading: Boolean,
   },
-  setup(props, { root }) {
-    const {
-      activeAccount,
-      accounts,
-    } = useAccounts({ store: root.$store });
-
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store: root.$store });
-
-    const { isAppActive } = useUi();
-
-    const {
-      viewportElement,
-    } = useViewport();
+  emits: ['loadMore'],
+  setup(props) {
+    const store = useStore();
+    const { t } = useI18n();
+    const { accounts, activeAccount } = useAccounts({ store });
+    const { dexContracts } = useAeSdk({ store });
 
     const {
       searchPhrase,
@@ -109,53 +95,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
-
-    const loading = ref(false);
-    const isDestroyed = ref(false);
-
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-
-    const transactions = useState<ITransactionsState>('transactions');
     const getTxSymbol = useGetter('getTxSymbol');
-    const getTxDirection = useGetter('getTxDirection');
-    const getDexContracts = useGetter<IDexContracts>('getDexContracts');
-    const getAccountPendingTransactions = useGetter<ITransaction[]>('getAccountPendingTransactions');
-    const fetchTransactions = useDispatch('fetchTransactions');
-
-    const canLoadMore = computed(() => !!transactions.value.nextPageUrl);
-
-    const currentAddress = computed(() => props.isMultisig
-      ? activeMultisigAccount.value?.gaAccountId
-      : activeAccount.value.address);
-
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountPendingTransactions.value,
-      ...transactions.value.loaded,
-      ...((props.isMultisig && pendingMultisigTransaction.value?.tx)
-        ? [pendingMultisigTransaction.value]
-        : []
-      ),
-    ]);
-
-    function isFungibleTokenTx(tx: ITx) {
-      return Object.keys(availableTokens.value).includes(tx.contractId);
-    }
-
-    function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
-      if (props.tokenContractId) {
-        return transactionList.filter((transaction) => {
-          const innerTx = getInnerTransaction(transaction.tx);
-
-          if (props.tokenContractId !== AETERNITY_CONTRACT_ID) {
-            return innerTx?.contractId === props.tokenContractId;
-          }
-
-          return !innerTx.contractId || !isFungibleTokenTx(innerTx);
-        });
-      }
-      return transactionList;
-    }
 
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {
@@ -164,17 +104,18 @@ export default defineComponent({
 
         const txOwnerAddress = getTxOwnerAddress(innerTx);
 
-        const direction = getTxDirection.value(
+        const direction = getTxDirection(
           outerTx.payerId ? outerTx : innerTx,
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
-            !== TRANSACTION_OWNERSHIP_STATUS.current
+            !== AE_TRANSACTION_OWNERSHIP_STATUS.current
           ) && txOwnerAddress
-          ),
+          )
+          || activeAccount.value.address,
         );
 
-        const isDex = isTxDex(innerTx, getDexContracts.value);
+        const isDex = isTxDex(innerTx, dexContracts.value);
 
         switch (displayMode.value.key) {
           case FILTER_MODE.all:
@@ -186,7 +127,7 @@ export default defineComponent({
           case FILTER_MODE.in:
             return direction === TX_DIRECTION.received;
           default:
-            throw new Error(`${i18n.t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
+            throw new Error(`${t('pages.recentTransactions.unknownMode')} ${displayMode.value.key}`);
         }
       });
     }
@@ -203,86 +144,17 @@ export default defineComponent({
       );
     }
 
-    function sortTransactionListByDate(transactionList: ICommonTransaction[]) {
-      return transactionList.sort(sortTransactionsByDateCallback);
-    }
-
     const filteredTransactions = computed(
-      () => pipe<ICommonTransaction[]>([
-        narrowTransactionsToDefinedToken,
+      () => pipe([
         filterTransactionsByDisplayMode,
         filterTransactionsBySearchPhrase,
-        sortTransactionListByDate,
-      ])(loadedTransactionList.value),
+        sortTransactionsByDate,
+      ])(props.transactions),
     );
 
-    async function fetchTransactionList(recent?: boolean) {
-      loading.value = true;
-      try {
-        await fetchTransactions({
-          limit: TXS_PER_PAGE,
-          recent,
-          address: currentAddress.value,
-        });
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function loadMore() {
-      if (!loading.value) {
-        await fetchTransactionList();
-      }
-    }
-
-    async function checkLoadMore() {
-      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
-        return;
-      }
-
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
-
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        await loadMore();
-      }
-    }
-
-    watch(displayMode, () => {
-      checkLoadMore();
-    });
-
-    watch(loading, async (val) => {
-      if (!val) {
-        await checkLoadMore();
-      }
-    });
-
-    let polling: NodeJS.Timer | null = null;
-
-    onMounted(() => {
-      loadMore();
-      polling = setInterval(() => {
-        if (isAppActive.value) {
-          fetchTransactionList(true);
-        }
-      }, 10000);
-    });
-
-    onUnmounted(() => {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    });
-
     return {
-      loading,
+      activeAccount,
       filteredTransactions,
-      loadMore,
       getMultisigTransaction,
       getTransaction,
     };

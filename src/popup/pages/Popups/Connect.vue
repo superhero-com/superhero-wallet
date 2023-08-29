@@ -1,21 +1,22 @@
 <template>
   <Modal
+    show
     full-screen
     class="connect"
     data-cy="popup-aex2"
   >
     <TransactionInfo
       :custom-title="$t('pages.connectConfirm.title')"
-      :sender="{ name: appName, address: app.host, url: app.url }"
-      :recipient="accountExtended"
+      :sender="sender"
+      :recipient="activeAccount"
     />
 
     <div
       class="subtitle"
       data-cy="aepp"
     >
-      <span class="app-name">{{ appName }}</span>
-      ({{ app.host }}) {{ $t('pages.connectConfirm.websiteRequestconnect') }}
+      <span class="app-name">{{ sender.name }}</span>
+      ({{ sender.address }}) {{ $t('pages.connectConfirm.websiteRequestConnect') }}
     </div>
 
     <div class="permissions">
@@ -55,20 +56,23 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type {
-  IAccountLabeled,
-  IAppData,
-  IPermission,
-} from '../../../types';
-import { RejectedByUserError } from '../../../lib/errors';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  onUnmounted,
+} from 'vue';
+import { useStore } from 'vuex';
+import type { IPermission } from '@/types';
+import { RejectedByUserError } from '@/lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-} from '../../utils';
-import { useGetter, useState } from '../../../composables/vuex';
-import { useAccounts } from '../../../composables';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { useState } from '@/composables/vuex';
+import { useAccounts, usePopupProps } from '@/composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -83,7 +87,6 @@ export default defineComponent({
     CheckMark,
   },
   props: {
-    app: { type: Object as PropType<IAppData>, required: true },
     access: {
       type: Array,
       default: () => ([
@@ -91,40 +94,45 @@ export default defineComponent({
         POPUP_CONNECT_TRANSACTIONS_PERMISSION,
       ]),
     },
-    resolve: { type: Function as PropType<() => void>, required: true },
-    reject: { type: Function as PropType<(e: Error) => void>, required: true },
   },
-  setup(props, { root }) {
-    const { activeAccount } = useAccounts({ store: root.$store });
+  setup() {
+    const store = useStore();
 
-    const getExplorerPath = useGetter('getExplorerPath');
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { popupProps, sender, setPopupProps } = usePopupProps();
 
-    const permission = useState<IPermission>('permissions', props.app.host);
-    const appName = computed(() => permission.value?.name || props.app.name);
-    const accountExtended = computed((): IAccountLabeled => ({
-      ...activeAccount.value,
-      label: root.$t('transaction.overview.accountAddress'),
-      url: getExplorerPath.value(activeAccount.value.address),
-    }));
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+
+    const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
+
+    const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
 
     function confirm() {
-      root.$store.commit('permissions/addPermission', {
+      store.commit('permissions/addPermission', {
         ...PERMISSION_DEFAULTS,
-        ...props.app,
+        ...popupProps.value?.app,
         ...permission.value,
       });
-      props.resolve();
+      popupProps.value?.resolve();
     }
 
     function cancel() {
-      props.reject(new RejectedByUserError());
+      popupProps.value?.reject(new RejectedByUserError());
     }
+
+    onMounted(() => {
+      sender.value.name = appName.value;
+    });
+
+    onUnmounted(() => {
+      setPopupProps(null);
+    });
 
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-      appName,
-      accountExtended,
+      activeAccount,
+      sender,
       confirm,
       cancel,
     };

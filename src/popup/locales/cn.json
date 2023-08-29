@@ -94,43 +94,33 @@
       "msg": "发送你的错误报告时发生了某个问题。"
     },
     "confirmTransactionSign": {
-      "unknown": "Unknown",
-      "contract-create": "合约创建",
-      "aens": "AENS",
-      "payload": "附言",
       "recipientId": "接收者Id",
-      "code": "代码",
-      "callData": "呼叫数据",
-      "contractId": "合约Id",
       "commitmentId": "承诺Id",
-      "name": "名称",
       "nameFee": "名称费",
-      "nameSalt": "名称随机数",
       "nameId": "名称Id",
       "pointers": "指向者",
-      "sign-raw": "原生交易签名基于",
       "data-sign": "数字签名"
     }
   },
   "transaction": {
     "fee": "交易费",
     "type": {
-      "SpendTx": "花费",
-      "ContractCreateTx": "创建合约",
-      "ContractCallTx": "呼叫合约",
-      "NamePreclaimTx": "名称预申明",
-      "NameClaimTx": "申明名称",
-      "NameUpdateTx": "更新名称",
-      "NameTransferTx": "转移名称",
-      "NameRevokeTx": "撤销名称",
-      "OracleRegisterTx": "注册预言机",
-      "OracleExtendTx": "扩展预言机",
-      "OraclePostQueryTx": "查询预言机",
-      "OracleRespondTx": "响应预言机",
-      "ChannelCloseSoloTx": "单向关闭通道",
-      "ChannelSlashTx": "断开通道",
-      "ChannelSettleTx": "结算通道",
-      "ChannelSnapshotSoloTx": "单方面快照通道"
+      "spendTx": "花费",
+      "contractCreateTx": "创建合约",
+      "contractCallTx": "呼叫合约",
+      "namePreclaimTx": "名称预申明",
+      "nameClaimTx": "申明名称",
+      "nameUpdateTx": "更新名称",
+      "nameTransferTx": "转移名称",
+      "nameRevokeTx": "撤销名称",
+      "oracleRegisterTx": "注册预言机",
+      "oracleExtendTx": "扩展预言机",
+      "oraclePostQueryTx": "查询预言机",
+      "oracleRespondTx": "响应预言机",
+      "channelCloseSoloTx": "单向关闭通道",
+      "channelSlashTx": "断开通道",
+      "channelSettleTx": "结算通道",
+      "channelSnapshotSoloTx": "单方面快照通道"
     }
   },
   "pages": {
@@ -163,8 +153,7 @@
       "language": "语言",
       "security": "安全",
       "about": "关于",
-      "send-tips": "打赏",
-      "claim-tips": "领赏",
+      "sendTips": "打赏",
       "scanQr": "扫描二维码",
       "terms": "使用条款",
       "privacy": "隐私政策",
@@ -174,16 +163,15 @@
       "notifications": "通知",
       "names": "名称",
       "bidding": "出价",
-      "comment-new": "添加注释",
+      "commentNew": "添加注释",
       "home": "超级英雄之家",
-      "donate-error": "捐赠数据",
+      "donateError": "捐赠数据",
       "networks": "网络",
       "address": "发送地址",
       "allowances": "津贴",
-      "sign-message": "签名信息",
+      "signMessage": "签名信息",
       "invite": "邀请",
-      "save-errors-log": "保存错误日志",
-      "reset-wallet": "重置钱包"
+      "saveErrorsLog": "保存错误日志"
     },
     "about": {
       "heading": "关于",
@@ -221,6 +209,7 @@
       "noMobileClaim": "当前领取只能在桌面上进行。"
     },
     "claimTips": {
+      "title": "领赏",
       "urlToClaim": "为这个URL领取小费:"
     },
     "notFound": {
@@ -263,14 +252,14 @@
       "remaining-time": "剩余时间"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "想要连接到你的帐户",
+      "websiteRequestConnect": "想要连接到你的帐户",
       "websiteRequest": "网站请求查看你的当前地址。请确认当前网站可信。 ",
       "cancelButton": "拒绝",
       "confirmButton": "接受",
       "addressLabel": "地址",
       "transactionLabel": "交易",
       "addressRequest": "aepp请求查看你的当前地址",
-      "transactionRequest": "aepp将会准备一笔交易，你负责确认。",
+      "transactionRequest": "aepp 可能会准备交易，您有责任进行确认。",
       "websiteRequestAccounts": "想要获取帐户地址",
       "addressesLabel": "地址",
       "addressesRequest": "aepp请求查看你的帐户地址"
@@ -463,13 +452,13 @@
       "terms-of-use": "使用条款",
       "terms-with-quotes": "(„条款“)",
       "terms": "条款",
-      "sub-heading": "当前 {terms-of-use} 创建于2020年4月3日。",
-      "section0Content": "{superhero.com} 根据{公司}的政策和实践，保留更改{使用条款}的权力。当在{我们的超级英雄钱包}宣布时新版本的{使用条款}将正式生效,除非另有规定。",
+      "sub-heading": "当前 @:termsOfService.terms-of-use 创建于2020年4月3日。",
+      "section0Content": "@:termsOfService.superhero-com 根据 @:termsOfService.company 的政策和实践，保留更改 @:termsOfService.terms-of-use 的权力。当在 @:termsOfService.our-superhero-wallet 宣布时新版本的@:termsOfService.terms-of-use将正式生效,除非另有规定。",
       "superhero-com": "Superhero.com LVC",
       "company": "公司",
       "our-superhero-wallet": "我们的超级英雄钱包",
       "section01Content": "这个软件由SUPERHERO.COM LVC提供，没有任何形式的保证，明示或暗示,包括但不限于对适销性、特定用途的适用性和非侵权的保证。在任何情况下，作者都不对任何索赔、损害或其他责任负责，无论是在合同、侵权或其他行为中，还是由软件，软件的使用或其他交易引起的事情中。",
-      "section02Content": "这些{使用条款}{条款带引号}仅适用于{超级英雄钱包}(以下简称“{钱包}”或“{应用程序}”)和{网站扩展}上的所有可用内容。请确保您在使用{应用程序}之前仔细阅读了{条款}。否则，您使用了它，我们就认为这些动作暗示了同意{使用条款}。这些{使用术语}代表您、您所代表的法律实体、您注册的法律实体(统称为„{您}“)以及Superhero.com LVC或您对{超级英雄钱包的使用}{网站扩展}的使用达成约束性协议。",
+      "section02Content": "这些@:termsOfService.terms-of-use 条款带引号 仅适用于超级英雄钱包(以下简称“ @:termsOfService.wallet ”或“ @:termsOfService.application ”)和 @:termsOfService.website-extension 上的所有可用内容。请确保您在使用 @:termsOfService.application 之前仔细阅读了 @:termsOfService.terms 。否则，您使用了它，我们就认为这些动作暗示了同意@:termsOfService.terms-of-use。这些使用术语代表您、您所代表的法律实体、您注册的法律实体(统称为„您“)以及Superhero.com LVC或您对超级英雄钱包的使用 @:termsOfService.website-extension 的使用达成约束性协议。",
       "superHero-wallet": "超级英雄钱",
       "wallet": "钱包",
       "application": "应用程序",
@@ -478,7 +467,7 @@
       "superhero-we-us-with-quotes": "(“超级英雄”, “我们”, “我们”",
       "our-with-quotes": "“我们的”)",
       "section1Title": "1. 定义",
-      "section1Content": "1.1.Superhero.com(Superhero.com ”, “我们”, “我们”，“我们的”或“公司”)成立的是家公司，超级英雄钱包相关问题的邮箱联系地址是: superherowallet@protonmail.com。超级英雄钱包由Superhero.com公司创造。 \n 1.2. ​„使用者“或者„你“ 代表下载并使用超级英雄钱包网站扩展的自然人或法人。\n 1.3. „​区块链“代表记录清单，也称为区块，区块间以密码学方法相连。​这个技术允许大量的人对数据进行获取并达成共识，之后数据会被永久地记录下来了，没有中央权威的存在。用户可以在aeternity区块链上获取，创造，保存信息。分散式、分布式和公共的数字账本用于在验证器的帮助下以信息块的形式记录交易，这些信息是不能被逆向更改的。\n 1.4。“超级英雄钱包”(“钱包”或“应用程序”)是一个网站扩展，它允许支持者向内容创建者、事业、慈善机构、团体或普通个人发送价值，作为对贡献准确信息、相关见解和高质量内容的奖励。网站扩展是一个软件，作为一个附添加到网络浏览器Firefox并为浏览器提供附加功能。该应用程序可以在https://addons.mozilla.org/en-us/firefox/addon/superhero-wallet-extension/获取。捐款和评论的结果发布在https://superhero.com/网站上。\n 1.5。“验证者”是独立的自然人或实体，他们在任何方面都不属于Superhero.com的一部分。它们在系统中的功能包括模块的组成和在aeternal网络中传播这些模块。1.6 \n。“帐户地址”是用户公钥的散列版本，用于在应用程序中识别用户。1.7 \n。“密钥”表示唯一相关的用于加密和解密信息的随机数私钥和公钥。它们在系统中的功能包括区块的组成和在aeternity网络中对区块的广播。",
+      "section1Content": "1.1.Superhero.com(Superhero.com ”, “我们”, “我们”，“我们的”或“公司”)成立的是家公司，超级英雄钱包相关问题的邮箱联系地址是: superherowallet{'@'}protonmail.com。超级英雄钱包由Superhero.com公司创造。 \n 1.2. ​„使用者“或者„你“ 代表下载并使用超级英雄钱包网站扩展的自然人或法人。\n 1.3. „​区块链“代表记录清单，也称为区块，区块间以密码学方法相连。​这个技术允许大量的人对数据进行获取并达成共识，之后数据会被永久地记录下来了，没有中央权威的存在。用户可以在aeternity区块链上获取，创造，保存信息。分散式、分布式和公共的数字账本用于在验证器的帮助下以信息块的形式记录交易，这些信息是不能被逆向更改的。\n 1.4。“超级英雄钱包”(“钱包”或“应用程序”)是一个网站扩展，它允许支持者向内容创建者、事业、慈善机构、团体或普通个人发送价值，作为对贡献准确信息、相关见解和高质量内容的奖励。网站扩展是一个软件，作为一个附添加到网络浏览器Firefox并为浏览器提供附加功能。该应用程序可以在https://addons.mozilla.org/en-us/firefox/addon/superhero-wallet-extension/获取。捐款和评论的结果发布在https://superhero.com/网站上。\n 1.5。“验证者”是独立的自然人或实体，他们在任何方面都不属于Superhero.com的一部分。它们在系统中的功能包括模块的组成和在aeternal网络中传播这些模块。1.6 \n。“帐户地址”是用户公钥的散列版本，用于在应用程序中识别用户。1.7 \n。“密钥”表示唯一相关的用于加密和解密信息的随机数私钥和公钥。它们在系统中的功能包括区块的组成和在aeternity网络中对区块的广播。",
       "section2Title": "2.总则",
       "section2Content": "Superhero.com将这款应用程序设计并创建成一种加密货币钱包，用户可以通过它存储和发送Superhero.com代币，来向创建者、慈善机构、团体或普通个人进行捐赠，作为对贡献准确信息、相关见解和高质量内容的奖励。用户可以通过应用程序向不同的网站捐款。该应用程序会自动搜寻该网站的公开密码匙，以供捐款之用。捐款可以按照以下两种方式进行——用户可以给整个网站的所有者打赏，或者用户可以选择网站上写了新闻的特定创建者和作者给他们打赏代币。\n此后，https://superhero.com/网站反映了用户的捐赠和评论，并给予其他用户对本网站新闻供应中可获取的新闻进行积极捐赠和评论的可能性。\n用户可以浏览他们的转帐记录。钱包会显示用户的代币。用户负责资金的安全保管、收发。\n应用程序是为小额转帐而构建的。应用程序可以进行大容量的交易或存储，风险由用户自行承担。",
       "section3Title": "3. 用户识别",
@@ -493,7 +482,7 @@
       "section8Title": "8. 许可证",
       "section8Content": "该应用程序由Superhero.com创建、开发和运营。应用程序上的每个组件，包括但不限于在应用程序上显示的图标、商标和其他知识产权，均被视为Superhero.com的财产，受适用的知识产权法律保护。未经超级英雄明确同意，不得使用超级英雄的任何知识产权。\n未经Superhero.com事先明确书面同意，任何上述元素不得编辑、下载、复制、用于商业目的，不得以任何方式和/或任何媒介部分或全部发布和传播上述内容。\n超级英雄保留对侵犯知识产权的行为采取任何必要法律行动的权利。",
       "section9Title": "9. 知识产权",
-      "section9Content": "用户理解并接受应用程序可以定期进行修改、更新、维护或技术支持，这可能在一定程度上影响钱包的使用、应用程序的可视化呈现或可能导致故障。在后一种情况下，如果您作为用户注意到资金、设置、帐户或应用程序上的任何其他信息的变化，请联系superherowallet@protonmail.com寻求帮助。",
+      "section9Content": "用户理解并接受应用程序可以定期进行修改、更新、维护或技术支持，这可能在一定程度上影响钱包的使用、应用程序的可视化呈现或可能导致故障。在后一种情况下，如果您作为用户注意到资金、设置、帐户或应用程序上的任何其他信息的变化，请联系superherowallet{'@'}protonmail.com寻求帮助。",
       "section10Title": "10. 修改",
       "section10Content": "列支敦士登的立法和管辖权适用于本条款以外的问题。条款中一个或多个条款的无效并不会导致整个条款的无效。\n本隐私政策是本条款不可分割的一部分，应被视为具有强制性的补充文件。除非隐私政策中另有明确规定，本条款中的所有规则将保持有效。",
       "section11Title": "11. 最后条款"
@@ -602,6 +591,9 @@
       "close": "关闭",
       "claim": "拿回来",
       "insufficient-balance": "余额不足"
+    },
+    "resetWallet": {
+      "title": "重置钱包"
     }
   }
 }

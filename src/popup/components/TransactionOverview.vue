@@ -10,78 +10,89 @@
 </template>
 
 <script lang="ts">
-import { SCHEMA } from '@aeternity/aepp-sdk';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import {
   computed,
   defineComponent,
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { TranslateResult } from 'vue-i18n';
-import {
-  postJson,
-  TX_DIRECTION,
-  TX_FUNCTIONS,
-  TX_TYPE_MDW,
-} from '../utils';
-import { useMiddleware, useSdk, useTransactionTx } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import {
+} from 'vue';
+import { TranslateResult, useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import type {
   IAccount,
-  IAccountLabeled,
+  IAccountOverview,
   ITransaction,
   ITx,
-  TxType,
   TxFunction,
-} from '../../types';
+} from '@/types';
+import { postJson } from '@/utils';
+import { TX_DIRECTION } from '@/constants';
+import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import {
+  useAeSdk,
+  useMiddleware,
+  useTransactionTx,
+} from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+
 import TransactionInfo from './TransactionInfo.vue';
 
 interface TransactionData {
-  sender: IAccountLabeled
-  recipient: IAccountLabeled
+  sender: IAccountOverview
+  recipient: IAccountOverview
   title?: TranslateResult
   function?: TxFunction
 }
 
 export default defineComponent({
-  components: { TransactionInfo },
+  components: {
+    TransactionInfo,
+  },
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { t, tm } = useI18n();
+
+    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    const { getAeSdk } = useAeSdk({ store });
+    const { getMiddleware } = useMiddleware();
+
     const name = ref('');
-    const ownershipAccount = ref<IAccountLabeled | IAccount | {}>({});
+    const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
 
-    const getExplorerPath = useGetter('getExplorerPath');
-    const activeNetwork = useGetter('activeNetwork');
-    const getPreferred = useGetter('names/getPreferred');
-
-    const { getSdk } = useSdk({ store: root.$store });
-    const { getMiddleware } = useMiddleware({ store: root.$store });
+    const getPreferredName = useGetter('names/getPreferred');
 
     const {
       isDex,
-      txType,
+      outerTxTag,
+      innerTxTag,
       direction,
       getOwnershipAccount,
       innerTx,
     } = useTransactionTx({
-      store: root.$store,
+      store,
       tx: props.transaction.tx,
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    function getTransactionParty(address: string) {
+    function getTransactionParty(address: Encoded.AccountAddress): IAccountOverview {
       return {
         address,
-        label: root.$t('transaction.overview.accountAddress'),
-        url: getExplorerPath.value(address),
+        label: t('transaction.overview.accountAddress'),
+        url: (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+          .prepareUrlByHash(address),
       };
     }
 
     const preparedTransaction = computed((): TransactionData => {
-      const transactionTypes = root.$t('transaction.type') as Record<TxType, TranslateResult>;
+      const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
+      const aeScan = new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
 
       const {
         senderId,
@@ -90,28 +101,30 @@ export default defineComponent({
         callerId,
       } = innerTx.value;
 
-      switch (txType.value) {
-        case SCHEMA.TX_TYPE.spend:
+      switch (outerTxTag.value) {
+        case Tag.SpendTx:
           return {
             sender: {
               address: senderId,
-              name: getPreferred.value(senderId),
-              url: getExplorerPath.value(senderId),
-              label: root.$t('transaction.overview.accountAddress'),
+              name: getPreferredName.value(senderId),
+              url: aeScan.prepareUrlByHash(senderId),
+              label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
-              name: name.value || getPreferred.value(recipientId),
-              url: getExplorerPath.value(recipientId),
-              label: root.$t('transaction.overview.accountAddress'),
+              name: name.value || getPreferredName.value(recipientId),
+              url: aeScan.prepareUrlByHash(recipientId),
+              label: t('transaction.overview.accountAddress'),
             },
-            title: root.$t('transaction.type.spendTx'),
+            title: t('transaction.type.spendTx'),
           };
-        case SCHEMA.TX_TYPE.contractCall: {
-          const contract = {
+        case Tag.ContractCallTx: {
+          const contract: IAccountOverview = {
             address: contractId,
-            url: getExplorerPath.value(contractId),
-            label: root.$t(`transaction.overview.${isDex.value ? 'superheroDex' : 'contract'}`),
+            url: aeScan.prepareUrlByHash(contractId),
+            label: isDex.value
+              ? t('transaction.overview.superheroDex')
+              : t('common.smartContract'),
           };
 
           let transactionOwner;
@@ -137,63 +150,82 @@ export default defineComponent({
               : transactionReceiver,
             recipient: direction.value === TX_DIRECTION.received
               ? transactionOwner ?? ownershipAccount.value
-              : transactionReceiver,
-            title: root.$t('transaction.type.contractCallTx'),
+              : contract,
+            title: t('transaction.type.contractCallTx'),
             function: innerTx.value.function,
           };
         }
-        case SCHEMA.TX_TYPE.contractCreate:
+        case Tag.ContractCreateTx:
           return {
             sender: ownershipAccount.value,
             recipient: {
-              label: root.$t('transaction.overview.contractCreate'),
+              label: t('transaction.overview.contractCreate'),
             },
-            title: root.$t('transaction.type.contractCreateTx'),
+            title: t('transaction.type.contractCreateTx'),
           };
-        case SCHEMA.TX_TYPE.namePreClaim:
-        case SCHEMA.TX_TYPE.nameClaim:
-        case SCHEMA.TX_TYPE.nameBid:
-        case SCHEMA.TX_TYPE.nameUpdate:
+        case Tag.NamePreclaimTx:
+        case Tag.NameClaimTx:
+        case Tag.NameUpdateTx:
           return {
             sender: ownershipAccount.value,
             recipient: {
-              label: root.$t('transaction.overview.aens'),
+              label: t('transaction.overview.aens'),
             },
-            title: txType.value ? transactionTypes[txType.value] : undefined,
+            title: outerTxTag.value ? transactionTypes[outerTxTag.value] : undefined,
           };
-        case TX_TYPE_MDW.GAAttachTx: {
+        case Tag.PayingForTx: {
           return {
             sender: {
               address: innerTx.value.ownerId,
-              name: getPreferred.value(innerTx.value.ownerId),
-              url: getExplorerPath.value(innerTx.value.ownerId),
-              label: root.$t('multisig.multisigVault'),
+              name: getPreferredName.value(innerTx.value.ownerId),
+              url: aeScan.prepareUrlByHash(innerTx.value.ownerId),
+              label: t('multisig.multisigVault'),
             },
             recipient: {
-              label: root.$t('transaction.overview.smartContract'),
+              label: t('common.smartContract'),
               address: innerTx.value.contractId,
             },
           };
         }
+        case Tag.GaMetaTx: {
+          if (innerTxTag.value === Tag.SpendTx) {
+            return {
+              sender: {
+                address: senderId,
+                name: getPreferredName.value(senderId),
+                url: aeScan.prepareUrlByHash(senderId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              recipient: {
+                address: recipientId,
+                name: name.value || getPreferredName.value(recipientId),
+                url: aeScan.prepareUrlByHash(recipientId),
+                label: t('transaction.overview.accountAddress'),
+              },
+              title: t('transaction.type.spendTx'),
+            };
+          }
+        }
+        // eslint-disable-next-line no-fallthrough
         default:
-          throw new Error(`Unsupported transaction type ${txType.value}`);
+          throw new Error(`Unsupported transaction type ${outerTxTag.value}`);
       }
     });
 
-    async function decodeClaimTransactionAccount(): Promise<string> {
+    async function decodeClaimTransactionAccount(): Promise<Encoded.AccountAddress | undefined> {
       // eslint-disable-next-line camelcase
       const calldata = innerTx.value.callData || innerTx.value.call_data;
 
-      if (!(innerTx.value.contractId && calldata)) return '';
+      if (!(innerTx.value.contractId && calldata)) return undefined;
 
-      const sdk = await getSdk();
-      const { bytecode } = await sdk.getContractByteCode(innerTx.value.contractId);
-      // TODO: use sdk method on sdk 13 update
+      const aeSdk = await getAeSdk();
+      const { bytecode } = await aeSdk.getContractByteCode(innerTx.value.contractId);
+      // TODO: use method from aeSdk once calldata-js library supports decoding bytecode feature
       const txParams: ITx = await postJson(
-        `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+        `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
         { body: { bytecode, calldata } },
       );
-      if (!txParams) return '';
+      if (!txParams) return undefined;
 
       return txParams.arguments?.find((param: any) => param.type === 'address')?.value;
     }
@@ -218,7 +250,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/mixins';
+@use '@/styles/mixins';
 
 .tag-wrapper {
   @include mixins.flex(center, center);

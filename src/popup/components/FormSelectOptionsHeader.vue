@@ -1,18 +1,18 @@
 <template>
   <div class="form-select-options-header">
-    <span class="text-heading-3 title">{{ title }}</span>
+    <span class="text-heading-3 text-muted title">{{ title }}</span>
     <InputSearch
       v-if="optionsLength > SHOW_SEARCH_THRESHOLD"
       :value="value"
       :placeholder="searchPlaceholder || $t('common.search')"
       class="search-field"
-      @input="filterOptions"
+      @update:modelValue="filterOptions"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
 import type { TranslateResult } from 'vue-i18n';
 import InputSearch from './InputSearch.vue';
 
@@ -28,7 +28,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     function filterOptions(searchPhrase: string) {
-      emit('input', searchPhrase ? searchPhrase.toLowerCase() : '');
+      emit('update:modelValue', searchPhrase ? searchPhrase.toLowerCase() : '');
     }
 
     return {

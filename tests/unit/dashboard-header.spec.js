@@ -1,10 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
-import Vue from 'vue';
 import DashboardHeader from '../../src/popup/components/DashboardHeader.vue';
-import { NETWORK_TESTNET } from '../../src/popup/utils';
 
-Vue.use(Vuex);
+jest.mock('../../src/store/index.js', () => ({}));
 
 const store = new Vuex.Store({
   getters: {
@@ -16,7 +14,6 @@ const store = new Vuex.Store({
       idx: 1,
       showed: true,
     }],
-    activeNetwork: () => (NETWORK_TESTNET),
   },
   modules: {
     accounts: {
@@ -36,11 +33,13 @@ const store = new Vuex.Store({
 describe('Dashboard header', () => {
   it('should render', () => {
     const wrapper = shallowMount(DashboardHeader, {
-      store,
-      mocks: {
-        $route: {
-          meta: {
-            isMultisigPage: false,
+      global: {
+        plugins: [store],
+        mocks: {
+          $route: {
+            meta: {
+              isMultisigPage: false,
+            },
           },
         },
       },

@@ -4,6 +4,7 @@
     "addressCopied": "Copied",
     "ae": "AE",
     "all": "All",
+    "allAddresses": "All account addresses",
     "amount": "Amount",
     "balanceUnavailable": "Unable to load balance.",
     "buy": "Buy",
@@ -20,7 +21,9 @@
     "fundsAreSafe": "Keep calm! Your funds are safe with Superhero wallet.",
     "hashCopied": "Hash copied",
     "hours": "{n} hours | {n} hour | {n} hours",
+    "hoursShort": "{n} h",
     "minutes": "{n} minutes | {n} minute | {n} minutes",
+    "minutesShort": "{n} mins | {n} min | {n} mins",
     "next": "Next",
     "nonce": "Nonce",
     "of": "of",
@@ -30,14 +33,24 @@
     "receive": "Receive",
     "search": "Search",
     "seconds": "{n} seconds | {n} second | {n} seconds",
+    "secondsShort": "{n} s",
     "send": "Send",
     "smartContract": "Smart contract",
     "swap": "Swap",
+    "browser": "Browser",
+    "title": "Superhero wallet",
     "total": "Total",
     "totalMultisig": "Total in multisig vaults",
     "tx": "Tx",
     "you": "You",
-    "max": "MAX"
+    "verifying": "Verifying",
+    "max": "MAX",
+    "tokens": "tokens",
+    "transferSpeed": {
+      "fast": "Fast",
+      "medium": "Medium",
+      "slow": "Slow"
+    }
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",
@@ -70,6 +83,11 @@
       "title": "Back up your seed phrase",
       "description": "Make a copy of your seed phrase to be able to recover your wallet and avoid losing your funds.",
       "button": "Back up now"
+    },
+    "daeppBrowserCard": {
+      "title": "Browse the æcosystem",
+      "description": "Explore æpps from within your wallet with the new built-in browser.",
+      "button": "Browse"
     },
     "buyCard": {
       "title": "Buy AE coin",
@@ -109,6 +127,16 @@
     "waitingToBeSent": "Waiting to be sent..."
   },
   "modals": {
+    "createAccount": {
+      "title": "Add account",
+      "titleMultisig": "Add multisig vault",
+      "titleAeternityAccount": "Add æternity account",
+      "msg": "Please select blockchain to add an account address to.",
+      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
+      "msgAeternity": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
+      "btnSubtitle": "Derive another account from your seed",
+      "addProtocolAccount": "Add {name} account"
+    },
     "transaction-failed": {
       "msg": "We cannot process this transaction. Please, try again later."
     },
@@ -117,7 +145,7 @@
     },
     "payloadInfo": {
       "title": "Payload message",
-      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.<br /><br />Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
+      "msg": "A payload is an optional public message composed by the sender and sent to the recipient along with a blockchain transaction.{'<'}br /{'>'}{'<'}br /{'>'}Payload can be utilized as additional transaction identifier, destination tag (required by some centralized exchanges when depositing funds), or just to provide any extra information in free-form text."
     },
     "payloadForm": {
       "title": "Add payload (optional)",
@@ -151,12 +179,6 @@
       "title": "Insufficient funds",
       "msg": "You don’t have enough AE on your signing account to {action} this transaction."
     },
-    "createAccount": {
-      "titleMultisig": "Add multisig vault",
-      "msg": "Generate new account address to store, send and receive crypto currency on the æternity blockhain.",
-      "msgMultisig": "Generate new multisig account address and add it to your wallet.",
-      "btnSubtitle": "Derive another account from your seed"
-    },
     "createMultisigAccount": {
       "title": "Create new multisig vault",
       "btnText": "Create multisig vault",
@@ -166,7 +188,7 @@
       "signerInputPlaceholder": "Signer's account address",
       "addSigner": "Add Signer",
       "selectAccount": "Select an account",
-      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.<br /><br />As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
+      "addSignerHelpMsg": "Each multisig transaction needs to be confirmed by the signatures of a preset number of authorized accounts.{'<'}br /{'>'}{'<'}br /{'>'}As the creator of this multisig vault you can determine the authorized signers and set the consensus required for a transaction confirmation.",
       "consensusRequiredDesc": "Consensus required for tx confirmation:",
       "consensusRequiredContent": "of {0} signatures",
       "consensusRequiredHelpTitle": "Consensus required",
@@ -193,10 +215,10 @@
     "consensusInfo": {
       "title": "Multisig consensus",
       "subtitle": " X/Y of Z",
-      "firstPoint": "<strong>X =</strong> accounts that have already signed the transaction;",
-      "secondPoint": "<strong>Y =</strong> number of signatures required to approve the transaction;",
-      "thirdPoint": "<strong>Z =</strong> number of authorized signers.",
-      "description": "If <strong>X=Y</strong> the multisig consensus has been reached. The transaction proposal has been approved and the transaction can be sent by any of the authorized signers."
+      "firstPoint": "{'<'}strong{'>'}X ={'<'}/strong{'>'} accounts that have already signed the transaction;",
+      "secondPoint": "{'<'}strong{'>'}Y ={'<'}/strong{'>'} number of signatures required to approve the transaction;",
+      "thirdPoint": "{'<'}strong{'>'}Z ={'<'}/strong{'>'} number of authorized signers.",
+      "description": "If {'<'}strong{'>'}X=Y{'<'}/strong{'>'} the multisig consensus has been reached. The transaction proposal has been approved and the transaction can be sent by any of the authorized signers."
     },
     "removeAccount": {
       "title": "Are you sure you want to remove this account?",
@@ -208,20 +230,17 @@
     },
     "recipient": {
       "title": "Send cryptocurrency",
-      "sub-header": "to public address, .chain name or URL",
+      "ae-sub-header": "to public address or .chain name",
+      "sub-header": "to public {protocolName} address",
       "msg": {
         "publicAddress": {
           "title": "Send to public address",
-          "msg": "{0} scan QR code or manually enter recipient’s æccount address starting with ak_."
+          "msg": "{0} scan QR code or manually enter recipient’s account address."
         },
         "chain": {
           "title":"Send to .chain name",
           "linkTitle": "claim your own .chain name",
           "msg": "{0} AENS name is a human friendly nickname ending with .chain that points to recipient’s æccount. Before sending any funds make sure the recipient is still the name owner. You can also {1} and set a pointer to one of your public addresses!"
-        },
-        "url": {
-          "title": "Send to URL",
-          "msg": "{0} send cryptocurrency tip to any web page where æternity public address can be found. URL owners will be able to claim all tips accumulated as soon as they place their æccount address somewhere in the web page content."
         }
       }
     },
@@ -262,28 +281,13 @@
     "invalid-qr-code": {
       "msg": "The scanned QR code is invalid."
     },
-    "tip-mainnet-warning": {
-      "title": "Warning",
-      "msg": "Tip/Claim functionality works on the predefined networks."
-    },
     "confirmTransactionSign": {
-      "unknown": "Unknown",
-      "contract-create": "Contract create",
-      "aens": "AENS",
-      "payload": "Payload",
       "recipientId": "Recipient ID",
-      "code": "Code",
-      "callData": "Call data",
-      "contractId": "Contract ID",
       "commitmentId": "Commitment ID",
-      "name": "Name",
       "nameFee": "Name fee",
-      "nameSalt": "Name salt",
       "nameId": "Name ID",
       "pointers": "Pointers",
-      "sign-raw": "Sign raw transaction by",
-      "data-sign": "Data to sign",
-      "nonce": "Nonce"
+      "data-sign": "Data to sign"
     },
     "confirm-raw-sign": {
       "title": "Sign raw transaction",
@@ -306,30 +310,35 @@
     },
     "auctions-help": {
       "title": "Auctions and bidding",
-      "msg": "If your .chain name is <strong>12 characters or less</strong> – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.<br /><br />Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
+      "msg": "If your .chain name is {'<'}strong{'>'}12 characters or less{'<'}/strong{'>'} – you’ve got to bid for it in an auction. To win the bidding process, all you have to do is have the highest bid once the auction ends! If somebody outbids you – all of your funds are automatically returned.{'<'}br /{'>'}{'<'}br /{'>'}Auction periods and initial fees vary as the length of the name varies – the shorter the name, the higher the fee and longer the period."
     },
     "autoextend-help": {
       "title": "Autoextend name",
-      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.<br /><br /> Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.<br /><br /> Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
+      "msg": "In order to encourage the active usage of .chain names their ownership is limited in time by default.{'<'}br /{'>'}{'<'}br /{'>'} Selecting the auto-extend option guarantees that you will not lose the ownership of a .chain name.{'<'}br /{'>'}{'<'}br /{'>'} Your .chain name will be auto-extended at the cost of a simple name update transaction (under a penny as you are taking advantage of the super-low transaction fees of aeternity blockchain)"
     },
     "receive": {
-      "title": "Receive funds to public address",
+      "funds": "funds",
+      "title": "Receive {name} to public address",
       "requestAmount": "Request specific amount (optional)",
       "copied": "Copied!",
       "share": "Share",
-      "shareTextNoAmount": "My æternity address: {address} Or send with Superhero Wallet: {walletLink}",
-      "shareTextWithAmount": "{amount} AE has been requested. Send to æternity address: {address} Or send with Superhero Wallet: {walletLink}"
+      "shareTextNoAmount": "My {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}",
+      "shareTextWithAmount": "{amount} {coinSymbol} has been requested. Send to {protocolName} address: {address} Or send with Superhero Wallet: {walletLink}"
     },
     "receiveMultisig": {
       "title": "Receive funds to multisig vault"
     },
     "send": {
       "sendTitle": "Send funds",
+      "sendAsset": "Send {name}",
       "reviewTitle": "Review transaction",
       "successTitle": "Transaction successfully submitted",
       "recipientLabel": "Recipient",
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
+      "recipientPlaceholderProtocol": "Enter {name} public address",
+      "transactionSpeed": "Transaction speed",
+      "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
       "payload": "Payload"
     },
     "multisigTxProposal": {
@@ -340,7 +349,8 @@
       "signingAddress": "Signing address",
       "signingAccount": "Signing account",
       "fee": "Proposal transaction fee",
-      "proposeAndApprove": "Propose and approve"
+      "proposeAndApprove": "Propose and approve",
+      "tokenWarning": "Multisig transactions currently support AE coin only."
     },
     "wrongNetwork": {
       "title": "Network discrepancy",
@@ -374,7 +384,7 @@
       "spendTx": "Spend",
       "contractCreateTx": "Contract create",
       "contractCallTx": "Contract call",
-      "namePreClaimTx": "Preclaim name",
+      "namePreclaimTx": "Preclaim name",
       "nameClaimTx": "Claim name",
       "nameUpdateTx": "Update name",
       "nameTransferTx": "Transfer name",
@@ -394,22 +404,16 @@
       "sentTx": "Sending",
       "receivedTx": "Receiving",
       "multisigVaultCreated": "Multisig vault created",
-      "createMultisigVault": "Create Multisig Vault",
-      "propose": "Propose Tx",
-      "revoke": "Revoke Tx",
-      "refuse": "Disapprove Tx",
-      "confirm": "Approve Tx"
+      "createMultisigVault": "Create Multisig Vault"
     },
     "listType": {
       "sentTx": "Sent",
       "receivedTx": "Received",
-      "namePreClaimTx": "Name preclaimed",
+      "namePreclaimTx": "Name preclaimed",
       "nameClaimTx": "Name claimed",
       "nameUpdateTx": "Name updated",
       "nameTransferTx": "Name transferred",
       "nameRevokeTx": "Revoke name",
-      "provide_liquidity": "Liquidity provided",
-      "remove_liquidity": "Liquidity removed",
       "tipSent": "Tip sent",
       "tipReceived": "Tip received"
     },
@@ -427,13 +431,19 @@
       "out": "out",
       "in": "in"
     },
+    "function": {
+      "propose": "Propose Tx",
+      "revoke": "Revoke Tx",
+      "refuse": "Disapprove Tx",
+      "confirm": "Approve Tx",
+      "tip_token": "tip_token",
+      "retip_token": "retip_token"
+    },
     "overview": {
       "aens": "AENS",
       "contractCreate": "Contract create",
-      "contract": "Contract",
       "accountAddress": "Account address",
-      "superheroDex": "Superhero DEX",
-      "smartContract": "Smart contract"
+      "superheroDex": "Superhero DEX"
     },
     "returnType": {
       "abort": "Failed",
@@ -442,52 +452,37 @@
   },
   "pages": {
     "titles": {
-      "tx-history": "Tx history",
-      "balances": "Balances",
-      "accounts": "Accounts",
-      "tips": "Tips",
       "settings": "Wallet settings",
       "language": "Language",
-      "security": "Security",
       "about": "About",
-      "send-tip": "Send tip",
-      "claim-tips": "Claim tips",
-      "scanQr": "Scan QR",
+      "sendTip": "Send tip",
       "terms": "Terms of Use",
       "privacy": "Privacy Policy",
-      "importAccount": "Retrieve Existing Account",
-      "transactions": "Transaction History",
       "currency": "Currency",
       "notifications": "Notifications",
-      "notification-settings": "Notification Preference",
-      "names": "Names",
       "auction": "Bidding",
-      "name-auctions": "Name auctions",
-      "register-name": "Register name",
       "more": "More",
       "networks": "Network",
       "permissionsSettings": "Permissions",
       "permissionsEdit": "Edit permissions",
       "permissionsAdd": "Add permissions",
-      "comment-new": "Add comment",
-      "home": "Home",
-      "donate-error": "Donate Data",
+      "commentNew": "Add comment",
+      "donateError": "Donate Data",
       "address": "Send Address",
-      "allowances": "Allowances",
-      "sign-message": "Sign Message",
-      "sign-transaction": "Sign Transaction",
+      "signMessage": "Sign Message",
+      "signTransaction": "Sign Transaction",
       "invite": "Invite",
-      "tx-details": "Transaction details",
-      "token-details": "Token details",
-      "coin-details": "Coin details",
-      "wallet-home": "Wallet Home",
-      "save-errors-log": "Save error log",
-      "reset-wallet": "Reset wallet",
-      "seed-phrase": "Seed phrase",
-      "network-add": "Add custom network",
-      "network-edit": "Edit network",
-      "not-found": "Feature not found",
-      "multisigProposalDetails": "Multisig Tx proposal details"
+      "txDetails": "Transaction details",
+      "tokenDetails": "Token details",
+      "coinDetails": "Coin details",
+      "saveErrorsLog": "Save error log",
+      "resetWallet": "Reset wallet",
+      "seedPhrase": "Seed phrase",
+      "networkAdd": "Add custom network",
+      "networkEdit": "Edit network",
+      "notFound": "Feature not found",
+      "multisigProposalDetails": "Multisig Tx proposal details",
+      "appsBrowser": "Browse the æcosystem"
     },
     "errors-log-settings": {
       "description": "This will help us to identify what causes the errors. Thank you for being a fellow Superhero!"
@@ -505,7 +500,7 @@
       "node-version": "Node version"
     },
     "account": {
-      "heading": "Account",
+      "heading": "account",
       "accountName": "Account name",
       "claim": "Claim Tip",
       "latestTransactions": "Latest transactions",
@@ -545,6 +540,7 @@
       "noMobileClaim": "Claiming is currently only available on desktop."
     },
     "claimTips": {
+      "title": "Claim tips",
       "header": "You need to verify ownership of the URL before you can claim any tips.",
       "urlToClaim": "Claim tips from this URL:"
     },
@@ -586,20 +582,24 @@
       "backToAuctions": "Back to auctions",
       "bidding": "Bidding",
       "bidOn": "Bid on",
-      "requiredField": "This field is required",
       "current-highest-bid": "Current highest bid",
       "remaining-time": "Remaining Time",
       "ending-height": "Ending height"
     },
+    "accountListConfirm": {
+      "websiteRequestConnect": "would like to connect to your Superhero wallet.",
+      "addressesRequest": "This aepp is requesting access to view all of your account addresses.",
+      "message": "Make sure you trust the aepp provider before accepting the request."
+    },
     "connectConfirm": {
       "title": "Allow access",
-      "websiteRequestconnect": "would like to connect to your account.",
+      "websiteRequestConnect": "would like to connect to your account.",
       "websiteRequest": "This website is requesting access to view your current account address. Always make sure you trust the website you interact with. ",
       "cancelButton": "Deny",
       "confirmButton": "Accept",
       "transactionLabel": "Transaction",
       "addressRequest": "This aepp is requesting access to view your current account address.",
-      "transactionRequest": "This aepp will prepare a transaction, you are in charge of confirming it.",
+      "transactionRequest": "This aepp may prepare a transaction, you are in charge of confirming it.",
       "websiteRequestAccounts": "would like to get account addresses",
       "addressesLabel": "Addresses",
       "addressesRequest": "This aepp is requesting access to view your account addresses",
@@ -636,7 +636,6 @@
       "token-description": "Token Description",
       "community": "Community",
       "decimals": "Decimals",
-      "contract": "Contract",
       "available-supply": "Available supply",
       "total-supply": "Total supply",
       "max-supply": "Max supply",
@@ -758,7 +757,8 @@
       "importAccount": "Restore wallet",
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
-      "seedPlaceHolder": "Enter or paste your seed phrase here"
+      "seedPlaceHolder": "Enter or paste your seed phrase here",
+      "scanSeedPhrase": "Scan Seed Phrase"
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "How to connect from Ledger",
@@ -858,7 +858,7 @@
       "viewInExplorer": "View in explorer",
       "scan": "Scan QR",
       "review": "Review and send",
-      "reviewtx": "Review Transaction",
+      "reviewtx": "Review transaction",
       "checkalert": "Please check the information carefully.",
       "sender": "Sending address",
       "recipient": "Receiving address",
@@ -872,7 +872,7 @@
       "to": "To",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan aeternity address",
+      "scanAddress": "Scan {protocolName} address",
       "error": "Invalid AE address or AENS name",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },
@@ -906,13 +906,13 @@
       "terms-of-use": "Terms of use",
       "terms-with-quotes": "(„TERMS“)",
       "terms": "terms",
-      "sub-heading": "The present {terms-of-use} were created on 3 April 2020.",
-      "section0Content": "{superhero.com} reserves its right to modify and update these {terms-of-use} according to the policy and practice of the {company}. The new version of thе {terms-of-use} becomes effective from the day it is announced on {our-superhero-wallet} unless stated otherwise.",
+      "sub-heading": "The present @:termsOfService.terms-of-use were created on 3 April 2020.",
+      "section0Content": "@:termsOfService.superhero-com reserves its right to modify and update these @:termsOfService.terms-of-use according to the policy and practice of the @:termsOfService.company. The new version of thе @:termsOfService.terms-of-use becomes effective from the day it is announced on @:termsOfService.our-superhero-wallet unless stated otherwise.",
       "superhero-com": "Superhero.com LVC",
       "company": "company",
       "our-superhero-wallet": "Our Superhero Wallet",
       "section01Content": "THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
-      "section02Content": "These {terms-of-use} {terms-with-quotes} apply exclusively for the {superHero-wallet} (hereinafter referred to as the “{wallet}“ or the “{application}”) and all the content available on the {website-extension}. Please make sure that you have carefully read the {terms} before using the {application}. Otherwise, by using it, we consider these actions implicit agreement to the {terms-of-use}. These {terms-of-use} represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „{you}“) and Superhero.com LVC {superhero-we-us-with-quotes} or {our-with-quotes} in connection to your use of the {superHero-wallet} {website-extension}.",
+      "section02Content": "These @:termsOfService.terms-of-use @:termsOfService.terms-with-quotes apply exclusively for the @:termsOfService.superHero-wallet (hereinafter referred to as the “@:termsOfService.wallet“ or the “@:termsOfService.application”) and all the content available on the @:termsOfService.website-extension. Please make sure that you have carefully read the @:termsOfService.terms before using the @:termsOfService.application. Otherwise, by using it, we consider these actions implicit agreement to the @:termsOfService.terms-of-use. These @:termsOfService.terms-of-use represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „@:termsOfService.you“) and Superhero.com LVC @:termsOfService.superhero-we-us-with-quotes or @:termsOfService.our-with-quotes in connection to your use of the @:termsOfService.superHero-wallet @:termsOfService.website-extension.",
       "superHero-wallet": "Superhero Wallet",
       "wallet": "Wallet",
       "application": "application",
@@ -921,7 +921,7 @@
       "superhero-we-us-with-quotes": "(“Superhero”, “we”, “us”",
       "our-with-quotes": "“our”)",
       "section1Title": "1. Definitions",
-      "section1Content": "1.1. Superhero.com Establishment (Superhero.com ”, “we”, “us”, “our” or “the company”) ​is a company with email address for communication related to Superhero Wallet: superherowallet@protonmail.com. Superhero.com ​is the company, which created and developed Superhero Wallet​. \n 1.2. ​„USER“ or ​„YOU“ means a natural or legal person, who has downloaded and uses the Superhero Wallet ​website extension. \n 1.3. „​Blockchain​“ means the list of records, also known as ​blocks,​ which are linked with the method of cryptography. The technology allows large groups of people to connect and reach agreement on data, which is afterwards permanently recorded without the presence of central authority. ​USERS can access, create and save information on the aeternity blockchain. The decentralized, distributed and public digital ledger is used for the purpose of recording transactions in blocks of information with the help of ​Validators​, which cannot be altered retroactively. \n 1.4. Superhero Wallet​” (“​WALLET​” or “​the application​”) is a website extension, which allows supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The website extension is a piece of software which acts as an add-on to the web browser Firefox and contributes to the browser’s additional functionality. The application is available at: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . The results of the donations and comments are published on the website ​https://superhero.com/​ . \n 1.5. “​Validators​” are independent physical persons or entities, which are not in any way part of Superhero.com . ​Their function in the system includes responsibility for ​blocks constitution and broadcast of these ​blocks​ with the​ aeternity ​network. \n 1.6. “​Account address​” is a hashed version of the ​USER’s ​public key​, used to identify USERS​ on ​the application​. \n 1.7. “​Keys​” represent uniquely related private and public cryptographic keys of random numbers used for encryption and decryption of information.",
+      "section1Content": "1.1. Superhero.com Establishment (Superhero.com ”, “we”, “us”, “our” or “the company”) ​is a company with email address for communication related to Superhero Wallet: superherowallet{'@'}protonmail.com. Superhero.com ​is the company, which created and developed Superhero Wallet​. \n 1.2. ​„USER“ or ​„YOU“ means a natural or legal person, who has downloaded and uses the Superhero Wallet ​website extension. \n 1.3. „​Blockchain​“ means the list of records, also known as ​blocks,​ which are linked with the method of cryptography. The technology allows large groups of people to connect and reach agreement on data, which is afterwards permanently recorded without the presence of central authority. ​USERS can access, create and save information on the aeternity blockchain. The decentralized, distributed and public digital ledger is used for the purpose of recording transactions in blocks of information with the help of ​Validators​, which cannot be altered retroactively. \n 1.4. Superhero Wallet​” (“​WALLET​” or “​the application​”) is a website extension, which allows supporters to send value to content creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The website extension is a piece of software which acts as an add-on to the web browser Firefox and contributes to the browser’s additional functionality. The application is available at: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . The results of the donations and comments are published on the website ​https://superhero.com/​ . \n 1.5. “​Validators​” are independent physical persons or entities, which are not in any way part of Superhero.com . ​Their function in the system includes responsibility for ​blocks constitution and broadcast of these ​blocks​ with the​ aeternity ​network. \n 1.6. “​Account address​” is a hashed version of the ​USER’s ​public key​, used to identify USERS​ on ​the application​. \n 1.7. “​Keys​” represent uniquely related private and public cryptographic keys of random numbers used for encryption and decryption of information.",
       "section2Title": "2. GENERAL PROVISIONS",
       "section2Content": "Superhero.com ​designed and built ​the application as a cryptocurrency wallet through which ​USERS can store and send Superhero.com tokens for the purpose of conducting donations to creators, causes, charities, groups, or regular individuals online as a reward for contributing accurate information, relevant insights, quality content​. USERS can donate to different websites through the application. The application automatically searches for the public key of the website for the purpose of the donation. The donations can be oriented in two flows as it follows- ​USERS can tip the owner of the whole website or ​USERS can choose specific creators and authors on the website who have written the news to whom to send the tokens. \n After that, the website ​https://superhero.com/ reflects the ​USERS’ donations and comments and gives the possibility for other ​USERS to actively donate and comment on the news available on the newsfeed of the Website. \n USERS ​can browse through their transaction history. ​The Wallet displays the ​USER’s tokens​. ​USERS​ are in charge of the safe storage, sending and receiving of funds. \n The application is built for small transactions. High volume transactions or storage can be undertaken via the application at the ​USER’s​ own risk.",
       "section3Title": "3. USERS IDENTIFICATION",
@@ -937,7 +937,7 @@
       "section8Title": "8. LICENSE",
       "section8Content": "The application is created, developed and operated by Superhero.com ​. Each component on the application including but not limited to logos, trademarks and other intellectual property displayed on the application are considered a property of Superhero.com ​and are protected by the applicable intellectual property legislation. It is prohibited to use any intellectual property of Superhero.com ​before a prior explicit consent from the latter. \n None of the elements mentioned above can be edited, downloaded, reproduced, used for commercial purposes, distributed and transmitted in any manner and/or any medium whatsoever, partially or in whole, without the explicit prior written consent of Superhero.com. \n Superhero.com ​reserves its right to take any necessary legal action against intellectual property infringement.",
       "section9Title": "9. INTELLECTUAL PROPERTY RIGHTS",
-      "section9Content": "USERS understand and accept ​the application can be periodically modified, updated, maintained or technically supported, which could to some extent influence the use of the Wallet​, the visual representation of ​the application ​or could result in malfunction. In the latter case, if ​You as a ​USER notice any change in the funds, settings, accounts or any other information on the application, please superherowallet@protonmail.com​ for assistance.",
+      "section9Content": "USERS understand and accept ​the application can be periodically modified, updated, maintained or technically supported, which could to some extent influence the use of the Wallet​, the visual representation of ​the application ​or could result in malfunction. In the latter case, if ​You as a ​USER notice any change in the funds, settings, accounts or any other information on the application, please superherowallet{'@'}protonmail.com​ for assistance.",
       "section10Title": "10. MODIFICATIONS",
       "section10Content": "The legislation and jurisdiction of Liechtenstein is applied for the issues outstanding the present ​TERMS​. The invalidity of one or more clauses/ provisions in the ​TERMS does not lead to the invalidity of the whole agreement. \n The Privacy Policy is an inseparable part of the present ​TERMS and should be considered as a complementary document with compulsory character. Unless explicitly stated otherwise in the Privacy Policy, all rules from the ​TERMS​ apply respectively.",
       "section11Title": "11. FINAL PROVISIONS"
@@ -1067,10 +1067,12 @@
       "message": "Message"
     },
     "network": {
+      "connectToNetwork": "Connect to network",
+      "connectTo": "Connect to {name}",
+      "connectedTo": "Connected to {name}",
       "listLabel": "Choose between æternity’s Mainnet and Testnet or add custom node to connect to. Only add custom networks you trust to avoid malicious providers.",
       "formLabel": "Fill in the custom node details in the fields below. Make sure to add only trusted custom networks.",
       "thirdPartyDetails": "Network details below have been provided by a third party. Make sure you trust the network provider to avoid malicious behavior resulting in lose of funds.",
-      "url": "URL",
       "delete": "Delete",
       "middleware": "Middleware",
       "allNetworks": "Your networks",
@@ -1094,7 +1096,10 @@
         "networkExists": "Network with this name exist",
         "invalidHostname": "Invalid hostname",
         "enterName": "Enter network name"
-      }
+      },
+      "confirmDelete": "Are you sure you want to delete this custom network?",
+      "moreNetworks": "More",
+      "viewAndManage": "View and manage all networks"
     },
     "donate-error": {
       "error-report": "Error Report:",
@@ -1120,6 +1125,7 @@
     "permissions": {
       "login": "Don't ask for login requests",
       "message-sign": "Auto-sign messages",
+      "addressList": "Don't ask for list of all addresses",
       "daily-spending-limit": "Daily spending limit without asking",
       "transaction-sign": "Limit for spending without asking per day",
       "spent-today": "Spent today",
@@ -1135,26 +1141,53 @@
       "enter-url": "Enter URL",
       "always-ask": "always ask"
     },
-    "reset-wallet": {
+    "resetWallet": {
+      "title": "Reset wallet",
       "description": "This action will remove all accounts from your wallet and delete the extension storage.",
       "description2": "Make sure you have backed up your {0} before proceeding. This action cannot be undone!",
       "warning": "This action will remove all accounts from your wallet and delete the extension storage.\n This action cannot be undone!",
       "warningConfirm": "Are you sure you would like to proceed?",
       "reset": "Reset"
+    },
+    "appsBrowser": {
+      "popularApps": "Featured",
+      "inputPlaceholder": "Enter URL"
+    },
+    "warningDappBrowser": {
+      "title": "You are going to visit a \n third-party website",
+      "warning": "Superhero Wallet is not liable for failures in this or any other third-party website as stated in the Superhero wallet {0}.",
+      "warning2": "By interacting with this or any other third-party website you agree to be subject to its Terms and Privacy Policy.",
+      "decline": "Decline"
     }
   },
+  "dappActionBrowser": {
+    "refresh": {
+      "title": "Refresh",
+      "description": "Reload contents of the page"
+    },
+    "bookmark": {
+      "title": "Add bookmark",
+      "description": "Add this page to your favorites"
+    },
+    "share": {
+      "title": "Share",
+      "description": "Share this page with your contacts"
+    }
+},
   "validation": {
+    "formInvalid": "One or more fields above are not valid. Please review the information you entered.",
     "required": "This field is required",
     "url": "Invalid URL",
     "address": "Enter valid blockchain address or .chain name",
     "name": "Enter valid .chain name",
     "nameRegisteredAddress": "Invalid address or .chain name",
     "nameUnregistered": "This name has already been registered.",
-    "notSameAs": "Sender and receiver address are the same. You will send tokens to your own account.",
+    "notSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
+    "addressBtc": "Invalid BTC address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
-    "enoughAe": "Not enough AE balance",
+    "enoughCoin": "Not enough {0} balance",
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",

@@ -11,10 +11,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
-import { useConnection, useModals, usePendingMultisigTransaction } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { MODAL_TRANSFER_SEND } from '../utils';
+import { defineComponent, computed } from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { MODAL_TRANSFER_SEND } from '@/constants';
+import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
+import { useGetter } from '@/composables/vuex';
 
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
@@ -26,10 +28,13 @@ export default defineComponent({
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
+    const { t } = useI18n();
+
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store: root.$store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
     const isConnected = useGetter('isConnected');
 
@@ -41,8 +46,8 @@ export default defineComponent({
     }
 
     const subtitle = computed(() => (props.isMultisig)
-      ? root.$t('dashboard.proposeCard.description')
-      : root.$t('dashboard.sendCard.description'));
+      ? t('dashboard.proposeCard.description')
+      : t('dashboard.sendCard.description'));
 
     return {
       isOnline,

@@ -1,12 +1,11 @@
 <template>
   <div
-    :class="['account-card-base', { selected }]"
+    class="account-card-base"
+    :class="{ selected }"
     data-cy="account-card-base"
   >
     <div class="top">
-      <slot
-        name="top"
-      />
+      <slot name="top" />
     </div>
 
     <div class="middle">
@@ -20,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   props: {
@@ -40,14 +39,16 @@ export default defineComponent({
   text-decoration: none;
 
   &.selected {
-    .account-info,
-    .middle {
+    .top,
+    .middle,
+    .bottom {
       opacity: 1;
     }
   }
 
-  .account-info,
-  .middle {
+  .top,
+  .middle,
+  .bottom {
     opacity: 0.5;
   }
 

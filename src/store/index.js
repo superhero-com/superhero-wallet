@@ -1,13 +1,11 @@
-import Vue from 'vue';
 import Vuex from 'vuex';
+import { NODE_STATUS_CONNECTING } from '@/constants';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
-import sdkPlugin from './plugins/sdk';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
-import pendingTransactionHandler from './plugins/pendingTransactionHandler';
 import languagesPlugin from './plugins/languages';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
@@ -17,24 +15,11 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
-
-Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     isRestored: false,
     mnemonic: null,
-    current: {
-      network: NETWORK_DEFAULT.name,
-    },
-    userNetworks: [],
-    transactions: {
-      loaded: [],
-      nextPageUrl: '',
-      pending: {},
-      tipWithdrawnTransactions: [],
-    },
     nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
@@ -53,11 +38,9 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
-    sdkPlugin,
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
-    pendingTransactionHandler,
     languagesPlugin,
     veeValidate,
     pollAccountInfo,

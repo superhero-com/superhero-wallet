@@ -1,48 +1,55 @@
-import { computed } from '@vue/composition-api';
-import { MemoryAccount, Crypto, TxBuilder } from '@aeternity/aepp-sdk';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import multisigContract from '@aeternity/ga-multisig-contract/SimpleGAMultiSig.aes';
-// aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
-import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
-
 import {
-  fetchJson,
-  postJson,
-  handleUnknownError,
-} from '../popup/utils';
-import { useSdk } from './sdk';
-import { useMultisigAccounts } from './multisigAccounts';
-import { useTopHeaderData } from './topHeader';
+  AccountGeneralized,
+  hash,
+  unpackTx,
+  decode,
+  Tag,
+  encode,
+  Encoded,
+  Encoding,
+} from '@aeternity/aepp-sdk';
+
+// aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
+import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
+
 import type {
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
-  IMultisigFunctionTypes,
-  INetwork,
+  TxFunctionMultisig,
   IRawMultisigTx,
-  ITransaction,
-} from '../types';
+} from '@/types';
+import {
+  fetchJson,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
+import { MULTISIG_SIMPLE_GA_BYTECODE } from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeSdk } from './aeSdk';
+import { useMultisigAccounts } from './multisigAccounts';
+import { useTopHeaderData } from './topHeader';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
-  const { getDrySdk, getSdk } = useSdk({ store });
+  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk({ store });
   const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-
   async function buildSpendTx(
-    senderId: string,
-    recipientId: string,
-    amount: number,
-    payload: string,
+    senderId: Encoded.AccountAddress,
+    recipientId: Encoded.AccountAddress,
+    amount: string,
+    payload?: string,
   ) {
-    const sdk = await getSdk();
+    const aeSdk = await getAeSdk();
 
-    return sdk.spendTx({
+    return aeSdk.buildTx({
+      tag: Tag.SpendTx,
       senderId,
       recipientId,
       amount,
-      payload,
+      payload: encode(new TextEncoder().encode(payload), Encoding.Bytearray),
     });
   }
 
@@ -52,7 +59,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @returns returns transaction if exists or null
    */
   async function fetchTransactionByHash(txHash: string): Promise<IRawMultisigTx | null> {
-    return fetchJson(`${activeNetwork.value.multisigBackendUrl}/tx/${txHash}`)
+    return fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx/${txHash}`)
       .then((res) => res)
       .catch(handleUnknownError);
   }
@@ -79,7 +86,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
         ...activeMultisigAccount.value,
         totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
         hash: txHash,
-        tx: rawTx ? (TxBuilder.unpackTx(rawTx.tx)).tx : null,
+        tx: rawTx ? unpackTx(rawTx.tx) as any : undefined,
         isMultisigTransaction: true,
         microTime: rawTx ? new Date(rawTx.createdAt).getTime() : undefined,
       };
@@ -88,23 +95,23 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
   }
 
   async function postSpendTx(tx: string, txHash: string) {
-    return postJson(`${activeNetwork.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
+    return postJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/tx`, { body: { hash: txHash, tx } });
   }
 
-  async function proposeTx(spendTx: string, contractId: string) {
-    const [sdk, topBlockHeight] = await Promise.all([getSdk(), fetchCurrentTopBlockHeight()]);
+  async function proposeTx(spendTx: Encoded.Transaction, contractId: Encoded.ContractAddress) {
+    const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
 
-    const spendTxHash = new Uint8Array(Crypto.hash(
-      Buffer.concat([Buffer.from(sdk.getNetworkId()), decode(spendTx)]),
+    const spendTxHash = new Uint8Array(hash(
+      Buffer.concat([Buffer.from(nodeNetworkId.value!), decode(spendTx)]),
     ));
 
-    const gaContractRpc = await sdk.getContractInstance({
+    const gaContractRpc = await aeSdk.initializeContract({
       aci: SimpleGAMultiSigAci,
-      contractAddress: contractId,
+      address: contractId,
     });
 
-    await gaContractRpc.methods.propose.send(spendTxHash, {
+    await gaContractRpc.propose(spendTxHash, {
       FixedTTL: [expirationHeight],
     });
 
@@ -115,36 +122,45 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * Used to call contract methods (confirm|refuse|revoke)
    * (revoke): can only be used by the account who proposed this transaction
    * (refuse|confirm): any signer can use this action
-   * @param action IMultisigFunctionTypes
+   * @param action TxFunctionMultisig
    * @param contractId string
    * @param spendTxHash string
    * @returns result
    */
   async function callContractMethod(
-    action: IMultisigFunctionTypes,
-    contractId: string,
+    action: TxFunctionMultisig,
+    contractId: Encoded.ContractAddress,
     spendTxHash: string,
   ) {
-    const [sdk, topBlockHeight] = await Promise.all([getSdk(), fetchCurrentTopBlockHeight()]);
+    const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
-    const gaContractRpc = await sdk.getContractInstance({
+    const gaContractRpc = await aeSdk.initializeContract({
       aci: SimpleGAMultiSigAci,
-      contractAddress: contractId,
+      address: contractId,
     });
 
-    const result = await gaContractRpc.methods[action].send(spendTxHash, {
+    const result = await gaContractRpc[action](spendTxHash, {
       FixedTTL: [expirationHeight],
     });
 
     return result;
   }
 
-  async function sendTx(accountId: string, spendTx: string, nonce: number): Promise<ITransaction> {
-    const drySdk = await getDrySdk();
-    return drySdk.send(spendTx, {
-      // TODO: use aci after update to a newer sdk
-      authData: { source: multisigContract, args: [nonce] },
-      onAccount: MemoryAccount({ gaId: accountId }),
+  async function sendTx(
+    accountId: Encoded.AccountAddress,
+    spendTx: Encoded.Transaction,
+    nonce: number,
+  ): Promise<any> {
+    const dryAeSdk = await getDryAeSdk();
+    const gaContractRpc = await dryAeSdk.initializeContract({
+      aci: SimpleGAMultiSigAci,
+      bytecode: MULTISIG_SIMPLE_GA_BYTECODE,
+    });
+    return dryAeSdk.sendTransaction(spendTx, {
+      authData: {
+        callData: gaContractRpc._calldata.encode(gaContractRpc._name, 'authorize', [nonce]),
+      },
+      onAccount: new AccountGeneralized(accountId),
     });
   }
 

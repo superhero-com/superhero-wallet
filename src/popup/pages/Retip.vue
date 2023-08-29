@@ -13,20 +13,27 @@
       <a>{{ tip.url }}</a>
     </div>
 
-    <InputAmount
-      v-model="formModel.amount"
-      v-validate="{
+    <Field
+      v-slot="{ field, errorMessage}"
+      name="amount"
+      :rules="{
         required: true,
         min_value_exclusive: 0,
         min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_ae: fee.toString(),
+        enough_coin: fee.toString(),
       }"
-      name="amount"
-      class="amount-input"
-      ae-only
-      :message="validationStatus.msg || errors.first('amount')"
-    />
+    >
+      <InputAmount
+        v-bind="field"
+        v-model="formModel.amount"
+        name="amount"
+        class="amount-input"
+        readonly
+        :message="errorMessage"
+      />
+    </Field>
+
     <div
       v-if="tip.title"
       class="tip-note-preview"
@@ -37,7 +44,7 @@
     <BtnMain
       class="bottom-btn"
       extend
-      :disabled="!tippingSupported || validationStatus.error || $validator.errors.has('amount')"
+      :disabled="!isTippingSupported || errorAmount"
       @click="sendTip"
     >
       {{ $t('common.confirm') }}
@@ -60,25 +67,33 @@ import {
   onMounted,
   ref,
   computed,
-} from '@vue/composition-api';
-import { SCHEMA } from '@aeternity/aepp-sdk';
-import VueI18n from 'vue-i18n';
-import {
+} from 'vue';
+import { Tag } from '@aeternity/aepp-sdk';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import { Field, useFieldError } from 'vee-validate';
+import type {
+  IFormModel,
   IToken,
-  IPendingTransaction,
-  ISdk,
-} from '../../types';
-import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken } from '../utils';
+  ITransaction,
+} from '@/types';
+import { toShiftedBigNumber } from '@/utils';
 import {
+  useCurrencies,
   useDeepLinkApi,
   useMaxAmount,
-  IFormModel,
   useBalances,
   useModals,
   useAccounts,
   useTippingContracts,
-} from '../../composables';
+  useAeSdk,
+  useTransactionList,
+} from '@/composables';
+import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -92,52 +107,50 @@ export default defineComponent({
     UrlStatus,
     BtnMain,
     BalanceInfo,
+    Field,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const route = useRoute();
+    const { t } = useI18n();
+    const errorAmount = useFieldError();
+
     const formModel = ref<IFormModel>({
       amount: '',
     });
 
+    const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router: root.$router });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
-    const { getTippingContracts } = useTippingContracts({ store: root.$store });
+    const { marketData } = useCurrencies({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { balance } = useBalances({ store });
+    const { max, fee } = useMaxAmount({ formModel, store });
+    const { getTippingContracts } = useTippingContracts({ store });
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
 
-    const tipId = root.$route.query.id;
+    const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
       url: 'default',
       id: '',
     });
 
     const loading = ref<boolean>(false);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
-    const tippingSupported = useGetter('tippingSupported');
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
-    const validationStatus = computed<{
-      error: boolean, msg?: string | VueI18n.TranslateResult
-    }>(() => {
-      if (!sdk.value || !tippingSupported.value) {
-        return { error: true };
-      }
-      return { error: false };
-    });
-
     async function sendTip() {
-      const amount = convertToken(
-        +(formModel.value.amount || 0),
-        formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
-          ? (formModel.value.selectedAsset as IToken).decimals
-          : AETERNITY_COIN_PRECISION,
-      ).toNumber();
+      const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
+        ? (formModel.value.selectedAsset as IToken).decimals
+        : AE_COIN_PRECISION;
+      const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
+      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
-        const tippingContract = tipId.includes('_v2') || tipId.includes('_v3')
+        const tippingContract = tipId?.includes('_v2') || tipId?.includes('_v3')
           ? tippingV2
           : tippingV1;
         if (!tippingContract) {
@@ -147,9 +160,9 @@ export default defineComponent({
         if (
           tippingV2
           && formModel.value.selectedAsset?.contractId
-          && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+          && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
-          await root.$store.dispatch(
+          await store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
             [
               formModel.value.selectedAsset.contractId,
@@ -173,24 +186,27 @@ export default defineComponent({
             },
           );
         }
-        const transaction: IPendingTransaction = {
+        const transaction: ITransaction = {
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
+          transactionOwner: account.address,
           tx: {
             amount,
-            callerId: activeAccount.value.address,
-            contractId: tippingContract.$options.address,
-            type: SCHEMA.TX_TYPE.contractCall,
+            callerId: account.address,
+            contractId: tippingContract.$options.address!,
+            type: Tag[Tag.ContractCallTx],
             function: 'retip',
             selectedTokenContractId: formModel.value.selectedAsset?.contractId,
+            arguments: [],
+            fee: 0,
           },
         };
-        root.$store.dispatch('addPendingTransaction', transaction);
+        upsertCustomPendingTransactionForAccount(account.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
-          title: root.$t('modals.transaction-failed.msg'),
+          title: t('modals.transaction-failed.msg'),
           icon: 'critical',
         });
         error.payload = tip.value;
@@ -202,12 +218,14 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = aeternityCoin.value;
+      formModel.value.selectedAsset = ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData.value!, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
 
       try {
-        tip.value = await root.$store.dispatch('getCacheTip', tipId);
+        tip.value = await store.dispatch('getCacheTip', tipId);
       } catch (error: any) {
         error.payload = tipId;
         throw error;
@@ -220,14 +238,14 @@ export default defineComponent({
       formModel,
       loading,
       urlStatus,
-      validationStatus,
-      tippingSupported,
+      isTippingSupported,
       numericBalance,
       sendTip,
       max,
       fee,
       balance,
       openCallbackOrGoHome,
+      errorAmount,
     };
   },
 });

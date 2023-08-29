@@ -1,10 +1,11 @@
+import { IPopupConfig } from './src/types';
 import { ICordova } from './src/types/cordova';
 
-export {};
+export { };
 
 declare global {
   interface Window {
-    popupProps?: any
+    popupProps?: Partial<IPopupConfig>
     cordova?: ICordova
     StatusBar?: any // cordova-plugin-statusbar
     IonicDeeplink?: any

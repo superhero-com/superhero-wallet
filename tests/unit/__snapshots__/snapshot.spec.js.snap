@@ -13,155 +13,126 @@ exports[`Pages About 1`] = `
       <div
         class="name"
       >
-        
         locale-specific-text
-      
       </div>
-       
       <div
         class="value"
       >
-        
-        Superhero Wallet
-      
+         Superhero Wallet 
       </div>
     </div>
-     
     <a
-      class="table-item link"
+      class="link-button default table-item link"
       href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
       target="_blank"
     >
+      
       <div
         class="name"
       >
-        
         locale-specific-text
-      
       </div>
-       
       <div
         class="value"
       >
-        
-        a1c1c5a
-        
+        a1c1c5a 
         <svg />
       </div>
+      
+      <!--v-if-->
     </a>
-     
     <div
       class="table-item"
     >
       <div
         class="name"
       >
-        
         locale-specific-text
-      
       </div>
-       
       <div
         class="value"
       >
-        
-        v.version-specific-text
-      
+         v.version-specific-text
       </div>
     </div>
-     
     <div
       class="table-item"
     >
       <div
         class="name"
       >
-        
         locale-specific-text
-      
       </div>
-       
       <div
         class="value"
       >
-        
-        11.0.1
-      
+        13.0.0
       </div>
     </div>
-     
-    <!---->
+    <!--v-if-->
   </div>
-   
   <div
     class="additional-links"
   >
     <a
-      class="btn-base panel-item variant-dark"
+      class="panel-item variant-dark btn-base panel-item"
     >
+      
       <div
         class="panel-item-left"
       >
+        
         <svg />
-         
+        
         <div
           class="panel-item-title"
         >
-          
-      locale-specific-text
-    
+          locale-specific-text
         </div>
       </div>
-       
       <div
         class="panel-item-right"
       >
         <div
           class="panel-item-info"
-        >
-          
-      
-    
-        </div>
-         
+        />
+        
         <svg
           class="icon-indicator"
         />
+        
       </div>
+      
     </a>
-     
     <a
-      class="btn-base panel-item variant-dark"
+      class="panel-item variant-dark btn-base panel-item"
     >
+      
       <div
         class="panel-item-left"
       >
+        
         <svg />
-         
+        
         <div
           class="panel-item-title"
         >
-          
-      locale-specific-text
-    
+          locale-specific-text
         </div>
       </div>
-       
       <div
         class="panel-item-right"
       >
         <div
           class="panel-item-info"
-        >
-          
-      
-    
-        </div>
-         
+        />
+        
         <svg
           class="icon-indicator"
         />
+        
       </div>
+      
     </a>
   </div>
 </div>
@@ -169,7 +140,7 @@ exports[`Pages About 1`] = `
 
 exports[`Pages Index 1`] = `
 <div
-  class="index"
+  class="index extended-top-padding"
 >
   <div
     class="not-iframe"
@@ -177,124 +148,20 @@ exports[`Pages Index 1`] = `
     <svg
       class="superhero-logo"
     />
-     
     <div
       class="heading"
     >
       <span
         class="tag"
-        path="pages.index.heading.message"
+        keypath="pages.index.heading.message"
+        scope="global"
         tag="span"
       />
     </div>
-     
-    <div
-      class="platforms"
-    >
-      <div
-        class="heading"
-      >
-        
-        locale-specific-text
-      
-      </div>
-       
-      <div
-        class="web-icons-wrapper"
-      >
-        <div
-          class="web-icons"
-        >
-          <div
-            class="web-icons-title"
-          >
-            
-        locale-specific-text
-      
-          </div>
-           
-          <div
-            class="web-icons-platforms"
-          >
-            <a
-              class="platform-icon"
-              href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
-              target="_blank"
-            >
-              <img
-                alt="Firefox"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-             
-            <a
-              class="platform-icon"
-              href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
-              target="_blank"
-            >
-              <img
-                alt="Chrome"
-                class="platform-icon-image"
-                src=""
-              />
-            </a>
-          </div>
-        </div>
-         
-        <div
-          class="web-icons"
-        >
-          <div
-            class="web-icons-title"
-          >
-            
-        locale-specific-text
-      
-          </div>
-           
-          <div
-            class="web-icons-platforms"
-          >
-            <a
-              class="platform-icon"
-              href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
-              target="_blank"
-            >
-              <img
-                alt="App Store"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-             
-            <a
-              class="platform-icon"
-              href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
-              target="_blank"
-            >
-              <img
-                alt="Google Play"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-          </div>
-        </div>
-      </div>
-       
-      <div
-        class="footer"
-      >
-        
-        locale-specific-text
-      
-      </div>
-    </div>
+    <!--v-if-->
   </div>
-   
   <div
-    class="terms-agreement"
+    class="terms-agreement mobile"
   >
     <label
       class="checkbox-container"
@@ -303,56 +170,56 @@ exports[`Pages Index 1`] = `
       <input
         name=""
         type="checkbox"
-        value="true"
       />
-       
       <span
         class="checkmark checked"
       />
-       
       <div
         class="label-text checked"
       >
+        
         <span>
-          
-        locale-specific-text
-      
+          locale-specific-text
         </span>
+        
       </div>
     </label>
-     
     <a
       class="terms-of-use agreed"
       data-cy="terms"
     >
-      
       locale-specific-text
-    
     </a>
   </div>
-   
   <transition-stub
+    appear="false"
+    css="true"
     name="fade-transition"
+    persisted="false"
   >
     <div
       class="wallet-button-box"
     >
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -361,7 +228,6 @@ exports[`Pages Index 1`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -369,24 +235,28 @@ exports[`Pages Index 1`] = `
             </span>
           </div>
         </div>
+        
       </button>
-       
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -395,7 +265,6 @@ exports[`Pages Index 1`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -403,6 +272,7 @@ exports[`Pages Index 1`] = `
             </span>
           </div>
         </div>
+        
       </button>
     </div>
   </transition-stub>
@@ -419,20 +289,18 @@ exports[`Pages Index 2`] = `
     <svg
       class="superhero-logo"
     />
-     
     <div
       class="heading"
     >
       <span
         class="tag"
-        path="pages.index.heading.message"
+        keypath="pages.index.heading.message"
+        scope="global"
         tag="span"
       />
     </div>
-     
-    <!---->
+    <!--v-if-->
   </div>
-   
   <div
     class="terms-agreement mobile"
   >
@@ -443,56 +311,56 @@ exports[`Pages Index 2`] = `
       <input
         name=""
         type="checkbox"
-        value="true"
       />
-       
       <span
         class="checkmark checked"
       />
-       
       <div
         class="label-text checked"
       >
+        
         <span>
-          
-        locale-specific-text
-      
+          locale-specific-text
         </span>
+        
       </div>
     </label>
-     
     <a
       class="terms-of-use agreed"
       data-cy="terms"
     >
-      
       locale-specific-text
-    
     </a>
   </div>
-   
   <transition-stub
+    appear="false"
+    css="true"
     name="fade-transition"
+    persisted="false"
   >
     <div
       class="wallet-button-box"
     >
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -501,7 +369,6 @@ exports[`Pages Index 2`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -509,24 +376,28 @@ exports[`Pages Index 2`] = `
             </span>
           </div>
         </div>
+        
       </button>
-       
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -535,7 +406,6 @@ exports[`Pages Index 2`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -543,6 +413,7 @@ exports[`Pages Index 2`] = `
             </span>
           </div>
         </div>
+        
       </button>
     </div>
   </transition-stub>
@@ -553,11 +424,24 @@ exports[`Pages Index 3`] = `
 <div
   class="index extended-top-padding"
 >
-  <img
-    class="iframe-image"
-    src="../../icons/iframe/sendAndReceive.svg"
-  />
-   
+  <div
+    class="not-iframe"
+  >
+    <svg
+      class="superhero-logo"
+    />
+    <div
+      class="heading"
+    >
+      <span
+        class="tag"
+        keypath="pages.index.heading.message"
+        scope="global"
+        tag="span"
+      />
+    </div>
+    <!--v-if-->
+  </div>
   <div
     class="terms-agreement mobile"
   >
@@ -568,56 +452,56 @@ exports[`Pages Index 3`] = `
       <input
         name=""
         type="checkbox"
-        value="true"
       />
-       
       <span
         class="checkmark checked"
       />
-       
       <div
         class="label-text checked"
       >
+        
         <span>
-          
-        locale-specific-text
-      
+          locale-specific-text
         </span>
+        
       </div>
     </label>
-     
     <a
       class="terms-of-use agreed"
       data-cy="terms"
     >
-      
       locale-specific-text
-    
     </a>
   </div>
-   
   <transition-stub
+    appear="false"
+    css="true"
     name="fade-transition"
+    persisted="false"
   >
     <div
       class="wallet-button-box"
     >
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -626,7 +510,6 @@ exports[`Pages Index 3`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -634,24 +517,28 @@ exports[`Pages Index 3`] = `
             </span>
           </div>
         </div>
+        
       </button>
-       
       <button
-        class="btn-base button-subheader variant-dark"
+        class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
+        
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
             />
           </div>
-           
           <div
             class="message"
           >
@@ -660,7 +547,6 @@ exports[`Pages Index 3`] = `
             >
               locale-specific-text
             </span>
-             
             <span
               class="description"
             >
@@ -668,6 +554,7 @@ exports[`Pages Index 3`] = `
             </span>
           </div>
         </div>
+        
       </button>
     </div>
   </transition-stub>
@@ -683,7 +570,6 @@ exports[`Pages PrivacyPolicy 1`] = `
       The present Privacy Policy is effective since on 9th April 2020.
     </em>
   </p>
-   
   <ol
     class="policy-list"
   >
@@ -695,53 +581,40 @@ exports[`Pages PrivacyPolicy 1`] = `
           Introduction
         </strong>
       </h3>
-       
       <p>
         <strong>
-          Superhero.com Establishment (“Superhero”, “we”,
-          “us”, “our” 
+          Superhero.com Establishment (“Superhero”, “we”, “us”, “our” 
         </strong>
         or
         <strong>
-           “the company”
-        
+           “the company” 
         </strong>
-        ) is a company with seat and registered
-        address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for
-        communication related to the 
+        ) is a company with seat and registered address at: Dr. Grass Str. 12, 9490 Vaduz, Liechtenstein, with email address for communication related to the 
         <strong>
           Superhero Wallet
         </strong>
-        :
-        superherowallet@protonmail.com. 
+        : superherowallet@protonmail.com. 
         <strong>
           Superhero
         </strong>
-         is the company, which created
-        and developed 
+         is the company, which created and developed 
         <strong>
           Superhero Wallet
         </strong>
-        .
-      
+        . 
       </p>
-       
       <p>
         <strong>
           Superhero 
         </strong>
-        takes your privacy and the security of your information as a
-        
+        takes your privacy and the security of your information as a 
         <strong>
           USER
         </strong>
-         very seriously.   
-      
+         very seriously.    
       </p>
-       
       <p>
-        
-        This 
+         This 
         <strong>
           Privacy Policy
         </strong>
@@ -749,114 +622,101 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           Policy
         </strong>
-        ”) is applicable
-        for the 
+        ”) is applicable for the 
         <strong>
           Superhero 
         </strong>
-        developed software program
-        
+        developed software program 
         <strong>
           Superhero Wallet (
         </strong>
-        the
-        
+        the 
         <strong>
           “Wallet” 
         </strong>
-        or the
-        
+        or the 
         <strong>
           “application”), 
         </strong>
-        designed for end users, which allows
-        supporters to send value to content creators, causes, charities, groups or regular
-        individuals online as a reward for contributing accurate information, relevant insights,
-        quality content. The 
+        designed for end users, which allows supporters to send value to content creators, causes, charities, groups or regular individuals online as a reward for contributing accurate information, relevant insights, quality content. The 
         <strong>
           application
         </strong>
-         can be downloaded or used from the
-        following places:
-      
+         can be downloaded or used from the following places: 
       </p>
-       
       <p>
-        
-        1) downloaded as an add-on (extension) to Firefox:
-        
+         1) downloaded as an add-on (extension) to Firefox: 
         <a
+          class="link-button default"
           href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
           target="_blank"
         >
+          
           https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet
+          
+          <!--v-if-->
         </a>
-        
-        ; to Chrome, Brave and Opera:         
-        
+         ; to Chrome, Brave and Opera:          
         <a
+          class="link-button default"
           href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
           target="_blank"
         >
+          
           https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne
+          
+          <!--v-if-->
         </a>
-        ;
-      
+        ; 
       </p>
-       
       <p>
-        
-        2) accessed from any Browser at the address:
-        
+         2) accessed from any Browser at the address: 
         <a
+          class="link-button default"
           href="https://wallet.superhero.com"
           target="_blank"
         >
+          
           https://wallet.superhero.com
+          
+          <!--v-if-->
         </a>
-        
-        ;
-      
+         ; 
       </p>
-       
       <p>
-        
-        3) downloaded from Google Play:    
-        
+         3) downloaded from Google Play:     
         <a
+          class="link-button default"
           href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
           target="_blank"
         >
+          
           https://play.google.com/store/apps/details?id=com.superhero.cordova
+          
+          <!--v-if-->
         </a>
-        
-        and
-      
+         and 
       </p>
-       
       <p>
-        
-        from App Store:
-        
+         from App Store: 
         <a
+          class="link-button default"
           href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
           target="_blank"
         >
+          
           https://apps.apple.com/us/app/superhero-wallet/id1502786641
+          
+          <!--v-if-->
         </a>
-        .
-      
+        . 
       </p>
-       
       <p>
-        
-        If you have any questions regarding this 
+         If you have any questions regarding this 
         <strong>
           Policy
         </strong>
-        , please contact us at
-        superherowallet@protonmail.com. If you do not agree to the terms of this
-        
+        , please contact us at superherowallet@protonmail.com. If you do not agree to the terms of this 
         <strong>
           Policy
         </strong>
@@ -864,33 +724,26 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           the application
         </strong>
-        . 
-      
+        .  
       </p>
-       
       <p>
-        
-        Each time you use 
+         Each time you use 
         <strong>
           the application
         </strong>
-        , the current version of this
-        
+        , the current version of this 
         <strong>
           Policy
         </strong>
-         will apply. The new version of the
-        
+         will apply. The new version of the 
         <strong>
           Privacy Policy
         </strong>
-         becomes effective from the day it is announced publicly on
-        
+         becomes effective from the day it is announced publicly on 
         <strong>
           the application
         </strong>
-         unless stated otherwise. Accordingly, when
-        
+         unless stated otherwise. Accordingly, when 
         <strong>
           YOU
         </strong>
@@ -902,13 +755,11 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           YOU
         </strong>
-         should
-        check the date of this 
+         should check the date of this 
         <strong>
           Policy
         </strong>
-         (which appears at the top). If
-        
+         (which appears at the top). If 
         <strong>
           YOU
         </strong>
@@ -916,42 +767,32 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           application
         </strong>
-         after the changes
-        have been enforced, 
+         after the changes have been enforced, 
         <strong>
           We
         </strong>
-         shall consider this a given consent and acceptance
-        to the modified content. If 
+         shall consider this a given consent and acceptance to the modified content. If 
         <strong>
           YOU
         </strong>
-         do not agree to the new modifications,
-        please contact 
+         do not agree to the new modifications, please contact 
         <strong>
           Us
         </strong>
-         for further assistance via the above-mentioned in the
-        previous paragraph email address.
-      
+         for further assistance via the above-mentioned in the previous paragraph email address. 
       </p>
-       
       <p>
-        
-        All abbreviations and definitions of the 
+         All abbreviations and definitions of the 
         <strong>
           TERMS
         </strong>
-         shall be applicable for
-        the present 
+         shall be applicable for the present 
         <strong>
           Privacy Policy
         </strong>
-        .
-      
+        . 
       </p>
     </li>
-     
     <li
       class="second"
     >
@@ -960,74 +801,50 @@ exports[`Pages PrivacyPolicy 1`] = `
           Definitions
         </strong>
       </h3>
-       
       <p>
-        
-        For the purposes of this 
+         For the purposes of this 
         <strong>
           Privacy Policy
         </strong>
-        , the terms have the following
-        meaning:
-      
+        , the terms have the following meaning: 
       </p>
-       
       <ul>
         <li>
           <strong>
             „Data Controller“
           </strong>
-           means the person or body which, alone or
-          jointly with others, determines the purposes and means of the processing of personal
-          data;
-        
+           means the person or body which, alone or jointly with others, determines the purposes and means of the processing of personal data; 
         </li>
-         
         <li>
           <strong>
             „Personal Data“
           </strong>
-           means any information relating to an
-          identified or identifiable natural person – data subject
-          (‘
+           means any information relating to an identified or identifiable natural person – data subject (‘
           <strong>
             USER’
           </strong>
-          );
-        
+          ); 
         </li>
-         
         <li>
           <strong>
             „Processing“
           </strong>
-           means any operation or set of operations which
-          is performed on personal data;
-        
+           means any operation or set of operations which is performed on personal data; 
         </li>
-         
         <li>
           <strong>
             „Recipient“
           </strong>
-           means a natural or legal person, public
-          authority, agency or another body, to which the personal data are disclosed, whether a
-          third party or not;
-        
+           means a natural or legal person, public authority, agency or another body, to which the personal data are disclosed, whether a third party or not; 
         </li>
       </ul>
-       
       <p>
         <strong>
           „Personal data breach“
         </strong>
-         means a breach of security leading to
-        the accidental or unlawful destruction, loss, alteration, unauthorized disclosure of, or
-        access to, personal data transmitted, stored or otherwise processed.
-      
+         means a breach of security leading to the accidental or unlawful destruction, loss, alteration, unauthorized disclosure of, or access to, personal data transmitted, stored or otherwise processed. 
       </p>
     </li>
-     
     <li
       class="third"
     >
@@ -1036,23 +853,15 @@ exports[`Pages PrivacyPolicy 1`] = `
           Personal data collection disclaimer
         </strong>
       </h3>
-       
       <p>
         <strong>
-          Please bear in mind that once the information or personal data under any form is
-          submitted and written on the Æternity blockchain, it cannot be amended, corrected
-          or deleted. Superhero cannot change, restore, delete or amend in any way the
-          above-mentioned information and therefore, shall not be held liable in any way for the
-          collection of the information on the blockchain.
+          Please bear in mind that once the information or personal data under any form is submitted and written on the Æternity blockchain, it cannot be amended, corrected or deleted. Superhero cannot change, restore, delete or amend in any way the above-mentioned information and therefore, shall not be held liable in any way for the collection of the information on the blockchain.
         </strong>
       </p>
-       
       <p>
         <strong>
-          The Wallet is a software solution which facilitates the peer-to-peer transfer
-          of tokens between USERS and their interaction with Æternity blockchain.
+          The Wallet is a software solution which facilitates the peer-to-peer transfer of tokens between USERS and their interaction with Æternity blockchain.
         </strong>
-         
         <strong>
           USERS
         </strong>
@@ -1060,34 +869,27 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           Superhero
         </strong>
-         does not
-        determine the purposes and means of 
+         does not determine the purposes and means of 
         <strong>
           processing
         </strong>
-         of
-        
+         of 
         <strong>
           personal data
         </strong>
-         and does not conduct any
-        
+         and does not conduct any 
         <strong>
           processing
         </strong>
-         activities. Due to the decentralized character of the business
-        model, 
+         activities. Due to the decentralized character of the business model, 
         <strong>
           USERS
         </strong>
-         are solely responsible for the actions they conduct and the
-        information they provide. 
+         are solely responsible for the actions they conduct and the information they provide. 
         <strong>
           Superhero 
         </strong>
-        does not, independently or with
-        others, conduct any operations or set of operations which is performed on
-        
+        does not, independently or with others, conduct any operations or set of operations which is performed on 
         <strong>
           personal data
         </strong>
@@ -1095,16 +897,13 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           personal data
         </strong>
-         in connection to
-        the use of the 
+         in connection to the use of the 
         <strong>
           application.
         </strong>
       </p>
-       
       <p>
-        
-         The 
+          The 
         <strong>
           Wallet
         </strong>
@@ -1112,8 +911,7 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           blockchain
         </strong>
-         based application on
-        which an 
+         based application on which an 
         <strong>
           account address
         </strong>
@@ -1121,12 +919,10 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           account
         </strong>
-         
         <strong>
           name
         </strong>
-         can be claimed through the
-        
+         can be claimed through the 
         <strong>
           Æternity Naming System
         </strong>
@@ -1134,13 +930,10 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           USER
         </strong>
-         identification.
-      
+         identification. 
       </p>
-       
       <p>
-        
-        The 
+         The 
         <strong>
           account addresses
         </strong>
@@ -1148,20 +941,13 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           names
         </strong>
-         can be treated as
-        indirect identifiers. An indirect identifier is a value which cannot be used alone to
-        identify a data subject, however, could be identifying if combined with other indirect
-        identifiers.
-      
+         can be treated as indirect identifiers. An indirect identifier is a value which cannot be used alone to identify a data subject, however, could be identifying if combined with other indirect identifiers. 
       </p>
-       
       <p>
         <strong>
           The Æternity
         </strong>
-         network is a public and permissionless blockchain, in
-        which everyone can participate and validate (see definition for
-        
+         network is a public and permissionless blockchain, in which everyone can participate and validate (see definition for 
         <strong>
           Validator
         </strong>
@@ -1169,13 +955,11 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           TERMS OF USE
         </strong>
-        ).
-        
+        ). 
         <strong>
           USERS
         </strong>
-         understand and accept that all persons can see in the
-        
+         understand and accept that all persons can see in the 
         <strong>
           Wallet
         </strong>
@@ -1183,13 +967,11 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           blockchain
         </strong>
-         the indirect identifiers
-        related to transactions – namely 
+         the indirect identifiers related to transactions – namely 
         <strong>
           account addresses
         </strong>
-         and
-        
+         and 
         <strong>
           names
         </strong>
@@ -1197,29 +979,22 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           Æternity
         </strong>
-         
         <strong>
           Naming System
         </strong>
-        . The above-mentioned information might be used to identify
-        a natural person. Therefore, 
+        . The above-mentioned information might be used to identify a natural person. Therefore, 
         <strong>
           USERS
         </strong>
-         accept and agree that
-        
+         accept and agree that 
         <strong>
           Superhero
         </strong>
-         does not act in full capacity as
-        
+         does not act in full capacity as 
         <strong>
           Data Controller
         </strong>
-         in the meaning established in Regulation (EU) 2016/679 of
-        the European Parliament and of the Council of 27 April 2016 on the protection of natural
-        persons with regard to the processing of personal data and on the free movement of such
-        data (“
+         in the meaning established in Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data (“
         <strong>
           GDPR
         </strong>
@@ -1227,25 +1002,18 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           USERS
         </strong>
-         understand and accept
-        that by using the open-source blockchain technology incorporated in
-        
+         understand and accept that by using the open-source blockchain technology incorporated in 
         <strong>
           the application
         </strong>
-        , they provide their personal data- identifiable or
-        non-identifiable- to unlimited circle of persons and they bear the risk of these actions.
-      
+        , they provide their personal data- identifiable or non-identifiable- to unlimited circle of persons and they bear the risk of these actions. 
       </p>
-       
       <p>
-        
-        For more information about the 
+         For more information about the 
         <strong>
           account address
         </strong>
-         and
-        
+         and 
         <strong>
           name of account
         </strong>
@@ -1253,19 +1021,16 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           TERMS
         </strong>
-         of the
-        application- Article 3- 
+         of the application- Article 3- 
         <strong>
           <u>
             USERS IDENTIFICATION.
           </u>
         </strong>
       </p>
-       
       <p>
          
       </p>
-       
       <p>
         The 
         <strong>
@@ -1274,7 +1039,6 @@ exports[`Pages PrivacyPolicy 1`] = `
          does not use Cookies.
       </p>
     </li>
-     
     <li
       class="fourth"
     >
@@ -1283,7 +1047,6 @@ exports[`Pages PrivacyPolicy 1`] = `
           USERS personal data collection
         </strong>
       </h3>
-       
       <p>
         <strong>
           Superhero
@@ -1292,19 +1055,14 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           application
         </strong>
-         reserves
-        the right to process 
+         reserves the right to process 
         <strong>
           personal data
         </strong>
-         for technical support and maintenance
-        purposes.
-      
+         for technical support and maintenance purposes. 
       </p>
-       
       <p>
-        
-        During the use of our 
+         During the use of our 
         <strong>
           application
         </strong>
@@ -1312,18 +1070,15 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           USERS
         </strong>
-         may decide to
-        contact the team in relation to 
+         may decide to contact the team in relation to 
         <strong>
           application
         </strong>
-         support, connection problems,
-        questions, etc. The collection of the 
+         support, connection problems, questions, etc. The collection of the 
         <strong>
           personal data
         </strong>
-         is initiated by
-        
+         is initiated by 
         <strong>
           USERS
         </strong>
@@ -1331,43 +1086,32 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           personal data
         </strong>
-         to
-        include in the communication. Moreover, for the provision of support services,
-        
+         to include in the communication. Moreover, for the provision of support services, 
         <strong>
           USERS
         </strong>
-         might be asked to provide additional information.
-      
+         might be asked to provide additional information. 
       </p>
-       
       <p>
-        
-        The legal basis for 
+         The legal basis for 
         <strong>
           processing
         </strong>
-         is legitimate interest of
-        
+         is legitimate interest of 
         <strong>
           Superhero
         </strong>
-         – the provision of responses to your
-        questions/signals/requests with the purpose of the 
+         – the provision of responses to your questions/signals/requests with the purpose of the 
         <strong>
           Wallet
         </strong>
-         improvement.
-        The retention period is until the final provision of a response to the
-        
+         improvement. The retention period is until the final provision of a response to the 
         <strong>
           USER’s
         </strong>
-         signal/question/request.
-      
+         signal/question/request. 
       </p>
     </li>
-     
     <li
       class="fifth"
     >
@@ -1376,7 +1120,6 @@ exports[`Pages PrivacyPolicy 1`] = `
           Storage of personal data:
         </strong>
       </h3>
-       
       <p>
         <strong>
           We
@@ -1385,26 +1128,21 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           personal data
         </strong>
-         on the territory
-        of the European Economic Area. In case the 
+         on the territory of the European Economic Area. In case the 
         <strong>
           personal data
         </strong>
-         is transferred
-        to a country outside the EEA, 
+         is transferred to a country outside the EEA, 
         <strong>
           We
         </strong>
-         shall enforce all necessary measures for
-        the protection and guaranty of the 
+         shall enforce all necessary measures for the protection and guaranty of the 
         <strong>
           personal data’s
         </strong>
-         safety.
-      
+         safety. 
       </p>
     </li>
-     
     <li
       class="sixth"
     >
@@ -1413,23 +1151,19 @@ exports[`Pages PrivacyPolicy 1`] = `
           Your rights:
         </strong>
       </h3>
-       
       <p>
         <strong>
           YOU
         </strong>
          have the right to:
       </p>
-       
       <ul>
         <li>
-          
-          Request from 
+           Request from 
           <strong>
             Superhero 
           </strong>
-          access to the
-          
+          access to the 
           <strong>
             personal data
           </strong>
@@ -1437,29 +1171,22 @@ exports[`Pages PrivacyPolicy 1`] = `
           <strong>
             YOU
           </strong>
-           in a portable
-          format.
-        
+           in a portable format. 
         </li>
-         
         <li>
-          
-          Request from 
+           Request from 
           <strong>
             Superhero 
           </strong>
-          correction of any collected
-          
+          correction of any collected 
           <strong>
             personal data
           </strong>
-          . The information may include only your
-          
+          . The information may include only your 
           <strong>
             personal data
           </strong>
         </li>
-         
         <li>
           Receive a copy of your 
           <strong>
@@ -1467,15 +1194,12 @@ exports[`Pages PrivacyPolicy 1`] = `
           </strong>
            in electronic format.
         </li>
-         
         <li>
-          
-          “The right to be forgotten”- 
+           “The right to be forgotten”- 
           <strong>
             YOU
           </strong>
-           have the right to request
-          the deletion of your 
+           have the right to request the deletion of your 
           <strong>
             personal
           </strong>
@@ -1483,14 +1207,10 @@ exports[`Pages PrivacyPolicy 1`] = `
           <strong>
             data
           </strong>
-           at any time where
-          the retention of such data infringes relevant legislation (the right is not absolute).
-        
+           at any time where the retention of such data infringes relevant legislation (the right is not absolute). 
         </li>
-         
         <li>
-          
-          Receive information from 
+           Receive information from 
           <strong>
             Us
           </strong>
@@ -1498,49 +1218,35 @@ exports[`Pages PrivacyPolicy 1`] = `
           <strong>
             Our
           </strong>
-           activities in
-          connection to your 
+           activities in connection to your 
           <strong>
             personal data
           </strong>
-          , including the purposes of collection
-          and storage, the period of time for storage, the methods of collecting, the presence of
-          automated processing.
-        
+          , including the purposes of collection and storage, the period of time for storage, the methods of collecting, the presence of automated processing. 
         </li>
-         
         <li>
-          
-          Receive your 
+           Receive your 
           <strong>
             data
           </strong>
-           and transfer them to another
-          
+           and transfer them to another 
           <strong>
             controller
           </strong>
-          .
-        
+          . 
         </li>
-         
         <li>
           <strong>
             YOU
           </strong>
-           have the right to lodge a complaint with a supervisory authority,
-          in particular in the Member State of your habitual residence, place of work or place of
-          the alleged infringement if 
+           have the right to lodge a complaint with a supervisory authority, in particular in the Member State of your habitual residence, place of work or place of the alleged infringement if 
           <strong>
             YOU
           </strong>
-           consider that there is personal data
-          breach.
-        
+           consider that there is personal data breach. 
         </li>
       </ul>
     </li>
-     
     <li
       class="seventh"
     >
@@ -1549,56 +1255,35 @@ exports[`Pages PrivacyPolicy 1`] = `
           Sharing of Personal Information with Third Parties - Recipients
         </strong>
       </h3>
-       
       <p>
-        
-        We may disclose 
+         We may disclose 
         <strong>
           USERS’
         </strong>
-         identifiable personal information to third
-        parties – 
+         identifiable personal information to third parties – 
         <strong>
           recipients
         </strong>
-        , under special circumstances:
-      
+        , under special circumstances: 
       </p>
-       
       <ol
         class="sharing-terms"
       >
         <li>
-          
-          to comply with a legal requirement, judicial proceeding, court order, or
-          legal process served on 
+           to comply with a legal requirement, judicial proceeding, court order, or legal process served on 
           <strong>
             Superhero 
           </strong>
-          or its affiliates,
-        
+          or its affiliates, 
         </li>
-         
         <li>
-          
-          to investigate a possible crime, such as fraud or identity theft;
-        
+           to investigate a possible crime, such as fraud or identity theft; 
         </li>
-         
         <li>
-          
-          to Public Authorities in accordance with their legal obligation for the
-          exercise of their official mission, such as tax and customs authorities, financial
-          investigation units, independent administrative authorities, or financial marker
-          authorities responsible for supervision of securities markets;
-        
+           to Public Authorities in accordance with their legal obligation for the exercise of their official mission, such as tax and customs authorities, financial investigation units, independent administrative authorities, or financial marker authorities responsible for supervision of securities markets; 
         </li>
-         
         <li>
-          
-          in connection with the sale, purchase, business transition under any
-          form, merger, dissolution, reorganization, liquidation of
-          
+           in connection with the sale, purchase, business transition under any form, merger, dissolution, reorganization, liquidation of 
           <strong>
             Superhero
           </strong>
@@ -1606,44 +1291,32 @@ exports[`Pages PrivacyPolicy 1`] = `
           <strong>
             We
           </strong>
-           may have to disclose the information
-          
+           may have to disclose the information 
           <strong>
             YOU
           </strong>
-           have given us to the successor, who is part of the transition,
-        
+           have given us to the successor, who is part of the transition, 
         </li>
-         
         <li>
-          
-          when 
+           when 
           <strong>
             WE
           </strong>
-           believe it is necessary to protect the rights,
-          property, or safety of 
+           believe it is necessary to protect the rights, property, or safety of 
           <strong>
             Superhero 
           </strong>
-          or other persons, or
-        
+          or other persons, or 
         </li>
-         
         <li>
-          
-          as otherwise required or permitted by law, including any contractual
-          obligations of
-          
+           as otherwise required or permitted by law, including any contractual obligations of 
           <strong>
             Superhero
           </strong>
-          .
-        
+          . 
         </li>
       </ol>
     </li>
-     
     <li
       class="eighth"
     >
@@ -1652,48 +1325,37 @@ exports[`Pages PrivacyPolicy 1`] = `
           Children and Privacy
         </strong>
       </h3>
-       
       <ul>
         <li>
           <strong>
             Superhero
           </strong>
-           does not process information of persons under the age of
-          obtaining full legal capacity (in most countries 18 years old) due to the character of
-          the 
+           does not process information of persons under the age of obtaining full legal capacity (in most countries 18 years old) due to the character of the 
           <strong>
             Wallet
           </strong>
-          .
-        
+          . 
         </li>
-         
         <li>
           <strong>
             Superhero
           </strong>
-           will immediately delete any
-          
+           will immediately delete any 
           <strong>
             personal data
           </strong>
-           referring to persons under the age of full legal
-          capacity if 
+           referring to persons under the age of full legal capacity if 
           <strong>
             Superhero
           </strong>
-           receives such information.
-        
+           receives such information. 
         </li>
-         
         <li>
-          
-          We are not liable in any way if 
+           We are not liable in any way if 
           <strong>
             YOU
           </strong>
-           provide false information about
-          your age or use the 
+           provide false information about your age or use the 
           <strong>
             application
           </strong>
@@ -1701,13 +1363,10 @@ exports[`Pages PrivacyPolicy 1`] = `
           <strong>
             YOU
           </strong>
-           have
-          turned the above-mentioned age.
-        
+           have turned the above-mentioned age. 
         </li>
       </ul>
     </li>
-     
     <li
       class="ninth"
     >
@@ -1716,11 +1375,8 @@ exports[`Pages PrivacyPolicy 1`] = `
           Measures for protection
         </strong>
       </h3>
-       
       <p>
-        
-        We undertake all necessary technological, technical and organizational measures to protect
-        your 
+         We undertake all necessary technological, technical and organizational measures to protect your 
         <strong>
           personal data
         </strong>
@@ -1728,23 +1384,16 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           personal data
         </strong>
-         is stored on
-        protected servers with a strictly controlled access.
-      
+         is stored on protected servers with a strictly controlled access. 
       </p>
-       
       <p>
-        
-        Some of the above-mentioned information is stored in such a form that could not be used to
-        identify 
+         Some of the above-mentioned information is stored in such a form that could not be used to identify 
         <strong>
           YOU
         </strong>
-         directly.
-      
+         directly. 
       </p>
     </li>
-     
     <li
       class="tenth"
     >
@@ -1753,15 +1402,12 @@ exports[`Pages PrivacyPolicy 1`] = `
           Breach measures
         </strong>
       </h3>
-       
       <p>
-        
-        In case of 
+         In case of 
         <strong>
           breach
         </strong>
-         in the software, disruptive interference in the
-        
+         in the software, disruptive interference in the 
         <strong>
           Wallet
         </strong>
@@ -1769,19 +1415,15 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           Æternity
         </strong>
-         Network, malware, spyware,
-        virus attacks and any other harmful cyber-attacks, 
+         Network, malware, spyware, virus attacks and any other harmful cyber-attacks, 
         <strong>
           We
         </strong>
-         will undertake
-        every possible action in an appropriate and timely manner, to avoid any material or
-        non-material damage to 
+         will undertake every possible action in an appropriate and timely manner, to avoid any material or non-material damage to 
         <strong>
           USERS
         </strong>
-        . As soon as
-        
+        . As soon as 
         <strong>
           Superhero
         </strong>
@@ -1789,26 +1431,21 @@ exports[`Pages PrivacyPolicy 1`] = `
         <strong>
           breach
         </strong>
-        ,
-        
+        , 
         <strong>
           USERS
         </strong>
-         and the competent authorities will be notified immediately.
-        
+         and the competent authorities will be notified immediately. 
         <strong>
           YOU
         </strong>
-         may be asked to follow certain instructions for prevention of
-        
+         may be asked to follow certain instructions for prevention of 
         <strong>
           breaches
         </strong>
-        .
-      
+        . 
       </p>
     </li>
-     
     <li
       class="eleventh"
     >
@@ -1817,23 +1454,23 @@ exports[`Pages PrivacyPolicy 1`] = `
           How Do I contact Æternity?
         </strong>
       </h3>
-       
       <p>
-        
-        To contact us with your questions or comments regarding this 
+         To contact us with your questions or comments regarding this 
         <strong>
           Policy
         </strong>
-        ,
-        please email us at 
-        
+        , please email us at  
         <a
+          class="link-button default"
           href="mailto:superherowallet@protonmail.com"
+          target="_blank"
         >
-          superherowallet@protonmail.com
+          
+           superherowallet@protonmail.com 
+          
+          <!--v-if-->
         </a>
-        .
-      
+        . 
       </p>
     </li>
   </ol>
@@ -1842,242 +1479,481 @@ exports[`Pages PrivacyPolicy 1`] = `
 
 exports[`Pages TermsOfService 1`] = `
 <div
-  class="terms-of-service"
+  data-v-app=""
 >
-  <p
-    class="italic"
+  
+  <!-- eslint-disable max-len -->
+  <div
+    class="terms-of-service"
   >
-    
-    The present 
-    <b>
-      TERMS OF USE
-    </b>
-     are effective since 9th April 2020.
-  
-  </p>
-   
-  <p
-    class="italic"
-  >
-    <b>
-      Superhero.com LVC
-    </b>
-     reserves its right to modify and update these
-    
-    <b>
-      TERMS OF USE
-    </b>
-     according to the policy and practice of the 
-    <b>
-      company
-    </b>
-    . The new
-    version of thе 
-    <b>
-      TERMS OF USE
-    </b>
-     becomes effective from the day it is announced on
-    
-    <b>
-      Our Superhero Wallet
-    </b>
-     unless stated otherwise.
-  
-  </p>
-   
-  <hr />
-   
-  <p
-    class="bolder"
-  >
-    
-    THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-    PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
-    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-  
-  </p>
-   
-  <p>
-    
-    These 
-    <b>
-      TERMS OF USE („TERMS“)
-    </b>
-     apply exclusively for the
-    
-    <b>
-      Superhero Wallet
-    </b>
-     (hereinafter referred to as the “
-    <b>
-      Wallet
-    </b>
-    ” or the
-    “
-    <b>
-      application
-    </b>
-    ”) and all the content available on the website extension. Please make sure
-    that you have carefully read the 
-    <b>
-      TERMS
-    </b>
-     before using the 
-    <b>
-      application
-    </b>
-    . Otherwise,
-    by using it, we consider these actions implicit agreement to the 
-    <b>
-      TERMS OF USE
-    </b>
-    . These
-    
-    <b>
-      TERMS OF USE
-    </b>
-     represent a binding agreement between you, the legal entity you represent
-    and the legal entity that registered you (collectively „
-    <b>
-      YOU
-    </b>
-    “) and
-    
-    <b>
-      Superhero.com LVC (“Superhero”, “we”, “us”
-    </b>
-     or 
-    <b>
-      “our”)
-    </b>
-     in connection to your use
-    of the 
-    <b>
-      Superhero Wallet application.
-    </b>
-    .
-  
-  </p>
-   
-  <p>
-    
-    Please, do not use the application provided by 
-    <b>
-      Superhero
-    </b>
-    , if you do not agree to the
-    
-    <b>
-      TERMS
-    </b>
-     applied within this document.
-  
-  </p>
-   
-  <p>
-    <b>
-      WE
-    </b>
-     preserve our right to modify the 
-    <b>
-      TERMS
-    </b>
-     at any time in our sole discretion.
-    
-    <b>
-      USERS
-    </b>
-     will be notified of such changes by posting information for the new Effective
-    Date of the 
-    <b>
-      TERMS
-    </b>
-     on the 
-    <b>
-      application
-    </b>
-    . 
-    <b>
-      YOU
-    </b>
-     may be required to read and
-    accept the updated 
-    <b>
-      TERMS
-    </b>
-     in order to continue your use of the 
-    <b>
-      Wallet
-    </b>
-    . If
-    
-    <b>
-      YOU
-    </b>
-     continue to use the 
-    <b>
-      Wallet
-    </b>
-     after a notification for the amended
-    
-    <b>
-      TERMS
-    </b>
-    , 
-    <b>
-      YOU
-    </b>
-     are agreeing to be bound by the modifications. If you don’t agree to
-    be bound by the modified 
-    <b>
-      TERMS
-    </b>
-    , then you should discontinue any use of the
-    
-    <b>
-      Wallet
-    </b>
-    . Please contact 
-    <b>
-      Superhero
-    </b>
-     via an email to
-    
-    <a
-      href="mailto:superherowallet@protonmail.com"
+    <!-- header -->
+    <p
+      class="italic"
     >
-      superherowallet@protonmail.com
-    </a>
-    
-    for the provision of information about the steps for termination of your use. Please check the
-    Effective Date above to determine if there have been any changes since 
-    <b>
-      YOU
-    </b>
-     have last
-    reviewed these 
-    <b>
-      TERMS
-    </b>
-    .
+       The present 
+      <b>
+        TERMS OF USE
+      </b>
+       are effective since 9th April 2020. 
+    </p>
+    <p
+      class="italic"
+    >
+      <b>
+        Superhero.com LVC
+      </b>
+       reserves its right to modify and update these 
+      <b>
+        TERMS OF USE
+      </b>
+       according to the policy and practice of the 
+      <b>
+        company
+      </b>
+      . The new version of the 
+      <b>
+        TERMS OF USE
+      </b>
+       becomes effective from the day it is announced on 
+      <b>
+        Our Superhero Wallet
+      </b>
+       unless stated otherwise. 
+    </p>
+    <hr />
+    <p
+      class="bolder"
+    >
+       THE SOFTWARE IS PROVIDED BY SUPERHERO.COM LVC “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
+    </p>
+    <p>
+       These 
+      <b>
+        TERMS OF USE („TERMS“)
+      </b>
+       apply exclusively for the 
+      <b>
+        Superhero Wallet
+      </b>
+       (hereinafter referred to as the “
+      <b>
+        Wallet
+      </b>
+      ” or the “
+      <b>
+        application
+      </b>
+      ”) and all the content available on the website extension. Please make sure that you have carefully read the 
+      <b>
+        TERMS
+      </b>
+       before using the 
+      <b>
+        application
+      </b>
+      . Otherwise, by using it, we consider these actions implicit agreement to the 
+      <b>
+        TERMS OF USE
+      </b>
+      . These 
+      <b>
+        TERMS OF USE
+      </b>
+       represent a binding agreement between you, the legal entity you represent and the legal entity that registered you (collectively „
+      <b>
+        YOU
+      </b>
+      “) and 
+      <b>
+        Superhero.com LVC (“Superhero”, “we”, “us”
+      </b>
+       or 
+      <b>
+        “our”)
+      </b>
+       in connection to your use of the 
+      <b>
+        Superhero Wallet application.
+      </b>
+      . 
+    </p>
+    <p>
+       Please, do not use the application provided by 
+      <b>
+        Superhero
+      </b>
+      , if you do not agree to the 
+      <b>
+        TERMS
+      </b>
+       applied within this document. 
+    </p>
+    <p>
+      <b>
+        WE
+      </b>
+       preserve our right to modify the 
+      <b>
+        TERMS
+      </b>
+       at any time in our sole discretion. 
+      <b>
+        USERS
+      </b>
+       will be notified of such changes by posting information for the new Effective Date of the 
+      <b>
+        TERMS
+      </b>
+       on the 
+      <b>
+        application
+      </b>
+      . 
+      <b>
+        YOU
+      </b>
+       may be required to read and accept the updated 
+      <b>
+        TERMS
+      </b>
+       in order to continue your use of the 
+      <b>
+        Wallet
+      </b>
+      . If 
+      <b>
+        YOU
+      </b>
+       continue to use the 
+      <b>
+        Wallet
+      </b>
+       after a notification for the amended 
+      <b>
+        TERMS
+      </b>
+      , 
+      <b>
+        YOU
+      </b>
+       are agreeing to be bound by the modifications. If you don’t agree to be bound by the modified 
+      <b>
+        TERMS
+      </b>
+      , then you should discontinue any use of the 
+      <b>
+        Wallet
+      </b>
+      . Please contact 
+      <b>
+        Superhero
+      </b>
+       via an email to 
+      <a
+        class="link-button simple"
+        href="mailto:superherowallet@protonmail.com"
+        target="_blank"
+      >
+        
+        superherowallet@protonmail.com
+        
+        <!--v-if-->
+      </a>
+       for the provision of information about the steps for termination of your use. Please check the Effective Date above to determine if there have been any changes since 
+      <b>
+        YOU
+      </b>
+       have last reviewed these 
+      <b>
+        TERMS
+      </b>
+      . 
+    </p>
+    <p
+      class="italic underline"
+    >
+       Once you agree to the 
+      <b>
+        TERMS OF USE
+      </b>
+      , we consider this an explicit consent to the following: 
+    </p>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+    <div
+      class="accordion-item"
+    >
+      <a
+        class="accordion-label"
+        data-cy="accordion-item-label"
+      >
+        <svg
+          class="accordion-label-chevron"
+        />
+        <span
+          class="accordion-label-text"
+        >
+          locale-specific-text
+        </span>
+      </a>
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
+  </div>
   
-  </p>
-   
-  <p
-    class="italic underline"
-  >
-    
-    Once you agree to the 
-    <b>
-      TERMS OF USE
-    </b>
-    , we consider this an explicit consent to the
-    following:
-  
-  </p>
-   
 </div>
 `;

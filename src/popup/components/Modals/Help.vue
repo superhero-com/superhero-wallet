@@ -1,7 +1,7 @@
 <template>
   <Default
-    :icon="icon || 'info'"
     v-bind="$attrs"
+    :icon="icon || 'info'"
   >
     <template #msg>
       <TemplateRenderer

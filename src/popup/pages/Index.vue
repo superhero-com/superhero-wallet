@@ -14,16 +14,17 @@
     >
       <SuperheroLogoIcon class="superhero-logo" />
       <div class="heading">
-        <i18n
-          path="pages.index.heading.message"
+        <i18n-t
+          keypath="pages.index.heading.message"
           tag="span"
           class="tag"
+          scope="global"
         >
           <span class="receive">{{ $t('pages.index.heading.receive') }}</span>
           <span class="store">{{ $t('pages.index.heading.store') }}</span>
           <span class="send">{{ $t('pages.index.heading.send') }}</span>
           <span class="aeternity-name">{{ $t('pages.index.heading.aeternityBlockchain') }}</span>
-        </i18n>
+        </i18n-t>
       </div>
 
       <Platforms v-if="IS_WEB">
@@ -80,13 +81,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api';
+import { defineComponent, ref } from 'vue';
 import { generateMnemonic } from '@aeternity/bip39';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import {
-  IS_WEB, IN_FRAME, IS_MOBILE_DEVICE,
-} from '../../lib/environment';
-import { MODAL_ACCOUNT_IMPORT } from '../utils';
-import { useModals } from '../../composables';
+  IN_FRAME,
+  IS_MOBILE_DEVICE,
+  IS_WEB,
+  MODAL_ACCOUNT_IMPORT,
+} from '@/constants';
+import { useModals } from '@/composables';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -102,14 +107,16 @@ export default defineComponent({
     BtnSubheader,
     Platforms,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
     const { openModal } = useModals();
 
     const termsAgreed = ref(false);
 
     async function createWallet() {
-      root.$store.commit('setMnemonic', generateMnemonic());
-      root.$router.push(root.$store.state.loginTargetLocation);
+      store.commit('setMnemonic', generateMnemonic());
+      router.push(store.state.loginTargetLocation);
     }
 
     async function importWallet() {

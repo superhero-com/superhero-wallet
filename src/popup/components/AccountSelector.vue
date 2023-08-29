@@ -1,39 +1,55 @@
 <template>
   <div class="account-selector">
-    <Avatar :address="value" />
+    <Avatar
+      v-if="!avatarOnly"
+      :address="modelValue.toString()"
+    />
     <div>
       <BtnPill
         class="account-select"
+        :class="{ 'avatar-only': avatarOnly }"
+        :avatar="avatarOnly"
         dense
       >
         <FormSelect
-          :value="value"
+          v-bind="$attrs"
+          :avatar="avatarOnly"
+          :model-value="modelValue"
           :options="options || accountsSelectOptions"
           unstyled
+          :hide-arrow="avatarOnly"
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
-          v-on="$listeners"
+          @update:modelValue="$emit('update:modelValue', $event)"
         >
           <template #current-text="{ text }">
-            <div>
+            <div v-if="!avatarOnly">
               <Truncate
                 class="account-select-text"
                 :str="text"
               />
             </div>
+            <Avatar
+              v-if="avatarOnly"
+              :address="modelValue.toString()"
+              size="sm"
+            />
           </template>
         </FormSelect>
       </BtnPill>
       <AddressTruncated
+        v-if="!avatarOnly"
+        :protocol="modelValue.protocol"
         show-explorer-link
-        :address="value"
+        :address="modelValue.toString()"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from '@vue/composition-api';
+import { defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { useAccounts } from '../../composables';
 import type { IFormSelectOption } from '../../types';
 
@@ -55,11 +71,15 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    value: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
+    avatarOnly: Boolean,
   },
-  setup(props, { root }) {
-    const { accountsSelectOptions } = useAccounts({ store: root.$store });
+  emits: ['update:modelValue'],
+  setup() {
+    const store = useStore();
+
+    const { accountsSelectOptions } = useAccounts({ store });
 
     return { accountsSelectOptions };
   },
@@ -83,6 +103,10 @@ export default defineComponent({
     margin-bottom: 4px;
     margin-left: -3px; // Compensate roundness
     color: $color-white;
+
+    &.avatar-only {
+      margin-bottom: 0;
+    }
   }
 }
 </style>

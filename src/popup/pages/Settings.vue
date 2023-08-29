@@ -29,24 +29,24 @@
     />
     <PanelItem
       :to="{ name: 'settings-errors-log' }"
-      :title="$t('pages.titles.save-errors-log')"
+      :title="$t('pages.titles.saveErrorsLog')"
       :info="saveErrorLog ? 'On' : 'Off'"
     />
     <PanelItem
       :to="{ name: 'settings-reset-wallet' }"
-      :title="$t('pages.titles.reset-wallet')"
+      :title="$t('pages.titles.resetWallet')"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
-import type { INetwork } from '../../types';
-import { useGetter, useState } from '../../composables/vuex';
-import { useCurrencies } from '../../composables';
-import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
+import { computed, defineComponent } from 'vue';
+import { useStore } from 'vuex';
+import { useState } from '@/composables/vuex';
+import { useCurrencies, useNetworks } from '@/composables';
+import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
 
-import PanelItem from '../components/PanelItem.vue';
+import PanelItem from '@/popup/components/PanelItem.vue';
 
 export default defineComponent({
   name: 'Settings',
@@ -54,9 +54,10 @@ export default defineComponent({
     PanelItem,
   },
   setup() {
-    const { currentCurrencyInfo } = useCurrencies();
+    const store = useStore();
+    const { currentCurrencyInfo } = useCurrencies({ store });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { activeNetwork } = useNetworks();
     const saveErrorLog = useState('saveErrorLog');
 
     const activeCurrency = computed(

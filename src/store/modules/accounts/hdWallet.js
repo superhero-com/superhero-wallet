@@ -1,13 +1,20 @@
-import { Crypto, TxBuilder, SCHEMA } from '@aeternity/aepp-sdk';
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
-import { useModals } from '../../../composables';
+import {
+  sign,
+  unpackTx,
+  Tag,
+  decode,
+  buildTx,
+} from '@aeternity/aepp-sdk';
+
+import { useAccounts, useAeSdk, useModals } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
-  getHdWalletAccount,
-  isTxOfASupportedType,
-} from '../../../popup/utils';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   namespaced: true,
@@ -16,51 +23,61 @@ export default {
     type: ACCOUNT_HD_WALLET,
   },
 
-  state: {
-    nextAccountIdx: 1,
-  },
   actions: {
-    async isAccountUsed({ rootGetters }, address) {
-      return rootGetters['sdkPlugin/sdk'].api.getAccountByPubkey(address).then(() => true, () => false);
+    async isAccountUsed(context, address) {
+      const { getAeSdk } = useAeSdk({ store: context });
+      const aeSdk = await getAeSdk();
+      return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
-    async discover({ state, rootGetters, dispatch }) {
-      let lastNotEmptyIdx = 0;
-      let account;
-      // eslint-disable-next-line no-plusplus
-      for (let nextIdx = state.nextAccountIdx; nextIdx <= 5; nextIdx++) {
-        account = getHdWalletAccount(rootGetters.wallet, nextIdx);
-        // eslint-disable-next-line no-await-in-loop
-        if (await dispatch('isAccountUsed', account.address)) lastNotEmptyIdx = nextIdx;
-      }
-      // eslint-disable-next-line no-plusplus
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i++) {
-        dispatch('create', true);
+    async discover({ rootGetters: { wallet }, dispatch }) {
+      const numberOfAccounts = await ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
+        .discoverAccounts(wallet);
+
+      for (let i = 0; i < numberOfAccounts; i += 1) {
+        dispatch('create', {
+          isRestored: true,
+          protocol: PROTOCOL_AETERNITY,
+        });
       }
     },
-    create({ state, commit }, isRestored = false) {
-      commit(
+    create(store, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
+      const { incrementProtocolNextAccountIdx, protocolNextAccountIdx } = useAccounts({ store });
+
+      store.commit(
         'accounts/add',
-        { idx: state.nextAccountIdx, type: ACCOUNT_HD_WALLET, isRestored },
+        {
+          idx: protocolNextAccountIdx.value[protocol] || 0,
+          type: ACCOUNT_HD_WALLET,
+          isRestored,
+          protocol,
+        },
         { root: true },
       );
-      state.nextAccountIdx += 1;
+      incrementProtocolNextAccountIdx(protocol);
     },
-    signWithoutConfirmation({ rootGetters: { accounts, account } }, { data, opt }) {
-      const { secretKey } = opt && opt.fromAccount
-        ? accounts.find(({ address }) => address === opt.fromAccount)
-        : account;
-      return Crypto.sign(data, secretKey);
+    signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
+      const { activeAccount, getAccountByAddress } = useAccounts({
+        store: { state: rootState, getters: rootGetters },
+      });
+      const { secretKey, protocol } = (options?.fromAccount)
+        ? getAccountByAddress(options.fromAccount)
+        : activeAccount.value;
+
+      if (protocol === PROTOCOL_AETERNITY) {
+        return sign(data, Buffer.from(secretKey, 'hex'));
+      }
+
+      throw new Error('Unsupported protocol');
     },
-    async confirmRawDataSigning(context, { data, app }) {
+    async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();
-      await openModal(MODAL_CONFIRM_RAW_SIGN, { data, app });
-    },
-    async confirmTxSigning({ dispatch }, { encodedTx, app }) {
-      if (!isTxOfASupportedType(encodedTx)) {
-        await dispatch('confirmRawDataSigning', { data: encodedTx, app });
+
+      if (!isTxOfASupportedType(txBase64)) {
+        await openModal(MODAL_CONFIRM_RAW_SIGN, { data: txBase64, app });
         return;
       }
-      const txObject = TxBuilder.unpackTx(encodedTx, true).tx;
+      const txObject = unpackTx(txBase64);
 
       const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
         ...txObject,
@@ -68,45 +85,59 @@ export default {
       }, { root: true });
 
       if (!checkTransactionSignPermission) {
-        const { openModal } = useModals();
-        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { transaction: txObject });
+        await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },
-    sign({ dispatch }, data) {
-      return dispatch('signWithoutConfirmation', { data });
+    sign({ dispatch }, { data, options }) {
+      return dispatch('signWithoutConfirmation', { data, options });
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction({ dispatch, rootState, rootGetters }, {
       txBase64,
-      opt: { modal = true, app = null },
+      options: { modal = true, app = null, fromAccount },
     }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
-      }
-      const signature = await dispatch(
-        'signWithoutConfirmation',
-        { data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]) },
-      );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
-    },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
-      txBase64,
-      opt: { modal = true, app = null, fromAccount },
-    }) {
-      const sdk = rootGetters['sdkPlugin/sdk'];
-      const encodedTx = decode(txBase64, 'tx');
-      if (modal) {
-        await dispatch('confirmTxSigning', { encodedTx, app });
+        await dispatch('confirmTxSigning', { txBase64, app });
       }
       const signature = await dispatch(
         'signWithoutConfirmation',
         {
-          data: Buffer.concat([Buffer.from(sdk.getNetworkId()), Buffer.from(encodedTx)]),
-          opt: { fromAccount },
+          data: Buffer.concat([
+            Buffer.from(nodeNetworkId.value),
+            Buffer.from(encodedTx),
+          ]),
+          options: {
+            fromAccount,
+          },
         },
       );
-      return TxBuilder.buildTx({ encodedTx, signatures: [signature] }, SCHEMA.TX_TYPE.signed).tx;
+      return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
+    },
+    async signTransactionFromAccount({ dispatch, rootState, rootGetters }, {
+      txBase64,
+      options: { modal = true, app = null, fromAccount },
+    }) {
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
+      const encodedTx = decode(txBase64, 'tx');
+      if (modal) {
+        await dispatch('confirmTxSigning', { txBase64, app });
+      }
+      const signature = await dispatch(
+        'signWithoutConfirmation',
+        {
+          data: Buffer.concat([
+            Buffer.from(nodeNetworkId.value),
+            Buffer.from(encodedTx),
+          ]),
+          options: { fromAccount },
+        },
+      );
+      return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
   },
 };

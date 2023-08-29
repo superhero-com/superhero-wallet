@@ -5,28 +5,35 @@
         <NewInviteLink class="section-title-icon" />
         {{ $t('pages.invite.generate-link') }}
       </p>
-      <InputAmount
+      <Field
+        v-slot="{ field, errorMessage }"
         v-model="formModel.amount"
-        v-validate="{
+        name="amount"
+        :rules="{
           min_value_exclusive: 0,
           ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-          enough_ae: fee.toString(),
+          enough_coin: fee.toString(),
         }"
-        class="amount"
-        name="amount"
-        :label="$t('pages.invite.tip-attached')"
-        :message="errors.first('amount')"
-        ae-only
-        :selected-asset="formModel.selectedAsset"
-        @asset-selected="(val) => formModel.selectedAsset = val"
-      />
-      <BtnMain
-        extend
-        :disabled="!formModel.amount || !!errors.first('amount')"
-        @click="generate"
       >
-        {{ $t('pages.invite.generate') }}
-      </BtnMain>
+        <InputAmount
+          v-bind="field"
+          :model-value="formModel.amount"
+          class="amount"
+          name="amount"
+          :label="$t('pages.invite.tip-attached')"
+          :message="errorMessage"
+          readonly
+          :selected-asset="formModel.selectedAsset"
+          @asset-selected="(val) => formModel.selectedAsset = val"
+        />
+        <BtnMain
+          extend
+          :disabled="!formModel.amount || !!errorMessage"
+          @click="generate"
+        >
+          {{ $t('pages.invite.generate') }}
+        </BtnMain>
+      </Field>
     </div>
     <div
       v-if="invites.length > 0"
@@ -38,8 +45,8 @@
       </p>
       <InviteItem
         v-for="link in invites"
+        v-bind="link ?? null"
         :key="link.secretKey"
-        v-bind="link"
         @loading="(val) => (loading = val)"
       />
     </div>
@@ -48,15 +55,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from '@vue/composition-api';
-import { Crypto, AmountFormatter } from '@aeternity/aepp-sdk';
+import { defineComponent, ref } from 'vue';
+import { Field } from 'vee-validate';
+import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
+import { useStore } from 'vuex';
+import type { IFormModel } from '@/types';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useState } from '../../composables/vuex';
 import {
   useBalances,
-  useSdk,
+  useAeSdk,
   useMaxAmount,
-  IFormModel,
+  useCurrencies,
 } from '../../composables';
 
 import InputAmount from '../components/InputAmount.vue';
@@ -72,38 +84,47 @@ export default defineComponent({
     InviteItem,
     InviteIcon,
     NewInviteLink,
+    Field,
   },
-  setup(props, { root }) {
+  setup() {
+    const store = useStore();
     const loading = ref(false);
 
-    const { getSdk } = useSdk({ store: root.$store });
-    const { balance, aeternityCoin } = useBalances({ store: root.$store });
+    const { marketData } = useCurrencies({ store });
+    const { getAeSdk } = useAeSdk({ store });
+    const { balance } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
-      amount: '', selectedAsset: aeternityCoin.value,
+      amount: '',
+      selectedAsset: ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData.value!, +balance.value),
     });
 
-    const { max, fee } = useMaxAmount({ formModel, store: root.$store });
+    const { max, fee } = useMaxAmount({ formModel, store });
 
     const invites = useState('invites', 'invites');
 
     async function generate() {
       loading.value = true;
-      const { publicKey, secretKey } = Crypto.generateKeyPair();
+      const { publicKey, secretKey } = generateKeyPair();
 
       try {
-        const sdk = await getSdk();
-        await sdk.spend(formModel.value.amount, publicKey, {
-          denomination: AmountFormatter.AE_AMOUNT_FORMATS.AE,
-        });
+        const aeSdk = await getAeSdk();
+        await aeSdk.spend(
+          formModel.value.amount || 0,
+          publicKey,
+          // @ts-ignore
+          { denomination: AE_AMOUNT_FORMATS.AE },
+        );
       } catch (error) {
-        if (await root.$store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
+        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
         loading.value = false;
       }
 
-      root.$store.commit('invites/add', secretKey);
+      store.commit('invites/add', Buffer.from(secretKey, 'hex').slice(0, 32));
       formModel.value.amount = '';
     }
 

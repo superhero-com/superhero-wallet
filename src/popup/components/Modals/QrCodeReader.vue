@@ -52,9 +52,10 @@
 
 <script>
 import { mapMutations } from 'vuex';
-import { RejectedByUserError } from '../../../lib/errors';
-import { IS_EXTENSION, IS_CORDOVA } from '../../../lib/environment';
-import { handleUnknownError, openInNewWindow } from '../../utils';
+import { IS_EXTENSION, IS_CORDOVA } from '@/constants';
+import { handleUnknownError, openInNewWindow } from '@/utils';
+import { RejectedByUserError } from '@/lib/errors';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import QrScanIcon from '../../../icons/qr-scan.svg?vue-component';
@@ -149,7 +150,7 @@ export default {
     }
     this.cameraAllowed = true;
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.stopReading();
   },
   methods: {
@@ -167,7 +168,7 @@ export default {
 
           window.QRScanner.scan((error, text) => (!error && text ? resolve(text) : reject(error)));
           window.QRScanner.show();
-          ['body', '#app'].forEach((s) => {
+          ['body', '#app', '.app-wrapper'].forEach((s) => {
             document.querySelector(s).style = 'background: transparent';
           });
 
@@ -181,7 +182,7 @@ export default {
     },
     async stopReading() {
       if (this.mobile) {
-        ['body', '#app'].forEach((s) => {
+        ['body', '#app', '.app-wrapper'].forEach((s) => {
           document.querySelector(s).style = 'background: #141414';
         });
         await window.QRScanner.pausePreview();

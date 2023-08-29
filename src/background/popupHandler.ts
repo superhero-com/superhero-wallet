@@ -1,14 +1,11 @@
 import { v4 as uuid } from 'uuid';
-import { Browser } from 'webextension-polyfill';
-import { Dictionary } from '../types';
+import type { Dictionary } from '@/types';
 import {
-  isTxOfASupportedType,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_RAW_SIGN,
-} from '../popup/utils';
-
-declare const browser: Browser;
+} from '@/constants';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
 const popups: Dictionary = {};
 
@@ -18,6 +15,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
   const id = uuid();
   const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
   const tabs = await browser.tabs.query({ active: true });
+  // @ts-ignore
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL as string);
     if (
@@ -29,7 +27,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
   });
 
   const extUrl = browser.runtime.getURL('./index.html');
-  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params?.tx, true);
+  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params.tx);
   const popupType = isRawSign ? POPUP_TYPE_RAW_SIGN : type;
   const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
 
@@ -53,7 +51,7 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
           host,
         },
         ...(params?.message && { message: params.message }),
-        ...(params?.txObject && !isRawSign && { transaction: params.txObject.params }),
+        ...(params?.txObject && !isRawSign && { tx: params.txObject, txBase64: params.tx }),
         ...(isRawSign && { data: params.tx }),
       },
     };

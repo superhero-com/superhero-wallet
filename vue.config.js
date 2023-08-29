@@ -1,8 +1,10 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const commitHash = require('child_process').execSync('git rev-parse HEAD || echo dev').toString().trim();
 const EventHooksPlugin = require('event-hooks-webpack-plugin');
 const fs = require('fs-extra');
+const { version: sdkVersion } = require('./node_modules/@aeternity/aepp-sdk/package.json');
 
 // eslint-disable-next-line camelcase
 const { npm_package_version, PLATFORM, NODE_ENV } = process.env;
@@ -76,6 +78,12 @@ module.exports = {
     config.plugin('define').tap((options) => {
       const definitions = { ...options[0] };
 
+      Object.assign(definitions, {
+        __VUE_I18N_FULL_INSTALL__: JSON.stringify(true),
+        __INTLIFY_PROD_DEVTOOLS__: JSON.stringify(false),
+        __VUE_I18N_LEGACY_API__: JSON.stringify(false),
+      });
+
       Object.entries(definitions['process.env']).forEach(([k, v]) => {
         definitions[`process.env.${k}`] = v;
       });
@@ -94,10 +102,28 @@ module.exports = {
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
       definitions['process.env.IS_CORDOVA'] = IS_CORDOVA;
+      definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
 
       return [definitions];
     }).end();
+
+    config
+      .plugin('node-polyfill')
+      .use(NodePolyfillPlugin)
+      .tap(() => [{
+        includeAliases: ['stream', 'Buffer'],
+      }]).end();
+
     if (PLATFORM === 'extension') {
+      config.module.rule('i18nTest')
+        .test(/\.json$/)
+        .include
+        .add(path.resolve(__dirname, './src/popup/locales'))
+        .end()
+        .type('javascript/auto')
+        .use('@intlify/vue-i18n-loader')
+        .loader('@intlify/vue-i18n-loader');
+
       config.plugin('copy')
         .use(CopyWebpackPlugin, [{
           patterns: [
@@ -124,38 +150,34 @@ module.exports = {
       config.module.rules.delete('provide-webextension-polyfill');
       config.plugins.delete('extension-reloader');
     }
+
     config.resolve.alias
-      .delete('@')
       .set('core-js-pure', 'core-js')
-      .set('lodash', 'lodash-es')
-      .parent.parent
-      .module
-      .rule('aes')
+      .set('lodash', 'lodash-es');
+
+    config.module.rule('aes')
       .test(/\.aes$/)
       .use('raw-loader')
       .loader('raw-loader')
       .end();
 
     config.module.rule('svg')
-      .uses.clear().end()
+      .set('type', 'javascript/auto')
+      .uses.clear()
+      .end()
       .oneOf('vue-component')
       .resourceQuery(/vue-component/)
-      .use('babel-loader')
-      .loader('babel-loader')
-      .options({ configFile: false, presets: ['@babel/preset-env'] })
+      .use('vue-loader')
+      .loader('vue-loader')
       .end()
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
+      .use('custom-svg-loader')
+      .loader(path.resolve(__dirname, './custom-svg-loader.js'))
       .options({
         svgo: {
           plugins: [{
-            addClassesToSVGElement: {
-              type: 'full',
-              fn(data, options, extra) {
-                const svg = data.content[0];
-                svg.class.add('icon', path.basename(extra.path, '.svg'));
-                return data;
-              },
+            name: 'addClassesToSVGElement',
+            params: {
+              classNames: ['icon'],
             },
           }],
         },
@@ -164,8 +186,11 @@ module.exports = {
       .end()
       .oneOf('skip-optimize')
       .resourceQuery(/skip-optimize/)
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
+      .use('vue-loader')
+      .loader('vue-loader')
+      .end()
+      .use('custom-svg-loader')
+      .loader(path.resolve(__dirname, './custom-svg-loader.js'))
       .options({ svgo: false })
       .end()
       .end()
@@ -182,6 +207,7 @@ module.exports = {
       .use('svgo-loader')
       .loader('svgo-loader')
       .end();
+
     return config;
   },
 

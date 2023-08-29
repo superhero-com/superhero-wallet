@@ -139,17 +139,18 @@
 import {
   computed,
   defineComponent,
+  nextTick,
   ref,
   watch,
-} from '@vue/composition-api';
-import {
-  MODAL_CONFIRM,
-  blocksToRelativeTime,
-  checkAddressOrChannel,
-  readValueFromClipboard,
-} from '../utils';
-import { useAccounts, useModals, useTopHeaderData } from '../../composables';
-import { IName } from '../../types';
+} from 'vue';
+import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
+import { IName } from '@/types';
+import { IS_CORDOVA, IS_EXTENSION, MODAL_CONFIRM } from '@/constants';
+import Logger from '@/lib/logger';
+import { blocksToRelativeTime } from '@/utils';
+import { useAccounts, useModals, useTopHeaderData } from '@/composables';
+import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -181,10 +182,12 @@ export default defineComponent({
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { topBlockHeight } = useTopHeaderData({ store: root.$store });
+    const { activeAccount } = useAccounts({ store });
+    const { t } = useI18n();
+    const { topBlockHeight } = useTopHeaderData({ store });
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -192,7 +195,7 @@ export default defineComponent({
     const error = ref(false);
     const pointerInput = ref();
 
-    const nameEntry = computed<IName | null>(() => root.$store.getters['names/get'](props.name));
+    const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
     const isDefault = computed(() => activeAccount.value.name === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
@@ -203,6 +206,28 @@ export default defineComponent({
       || Object.values(nameEntry.value?.pointers || {})[0]
     ));
 
+    async function readValueFromClipboard(): Promise<string | undefined> {
+      if (!process.env.UNFINISHED_FEATURES) {
+        return undefined;
+      }
+      let value = '';
+
+      if (IS_CORDOVA) {
+        value = await new Promise((...args) => window.cordova!.plugins!.clipboard.paste(...args));
+      } else if (IS_EXTENSION) {
+        value = await browser!.runtime.sendMessage({ method: 'paste' });
+      } else {
+        try {
+          value = await navigator.clipboard.readText();
+        } catch (e: any) {
+          if (!e.message.includes('Read permission denied.')) {
+            Logger.write(e);
+          }
+        }
+      }
+      return value;
+    }
+
     async function insertValueFromClipboard() {
       newPointer.value = (await readValueFromClipboard()) || '';
     }
@@ -211,7 +236,7 @@ export default defineComponent({
       expand.value = true;
       showInput.value = !showInput.value;
       if (showInput.value) {
-        root.$nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
+        nextTick(() => pointerInput.value.$el.getElementsByClassName('input')[0].focus());
       }
     }
 
@@ -221,7 +246,7 @@ export default defineComponent({
     }
 
     async function setDefault() {
-      await root.$store.dispatch('names/setDefault', {
+      await store.dispatch('names/setDefault', {
         address: activeAccount.value.address,
         name: props.name,
       });
@@ -231,11 +256,11 @@ export default defineComponent({
       if (!props.autoExtend) {
         await openModal(MODAL_CONFIRM, {
           icon: 'info',
-          title: root.$t('modals.autoextend-help.title'),
-          msg: root.$t('modals.autoextend-help.msg'),
+          title: t('modals.autoextend-help.title'),
+          msg: t('modals.autoextend-help.msg'),
         });
       }
-      root.$store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+      store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
     }
 
     async function setPointer() {
@@ -243,7 +268,7 @@ export default defineComponent({
         error.value = true;
         return;
       }
-      root.$store.dispatch('names/updatePointer', {
+      store.dispatch('names/updatePointer', {
         name: props.name,
         address: newPointer.value,
         type: 'update',
@@ -394,14 +419,14 @@ export default defineComponent({
       }
     }
 
-    .details-item ::v-deep .value {
+    .details-item :deep(.value) {
       color: variables.$color-grey-light;
     }
 
     > .details-item {
       margin: 8px 0;
 
-      ::v-deep .value {
+      :deep(.value) {
         @extend %face-mono-10-medium;
 
         letter-spacing: 0;
@@ -426,7 +451,7 @@ export default defineComponent({
       .details-item {
         flex: 1;
 
-        ::v-deep .value .secondary {
+        :deep(.value .secondary) {
           color: variables.$color-grey-dark;
           margin-left: -2px;
         }

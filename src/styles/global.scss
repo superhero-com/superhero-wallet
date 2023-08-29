@@ -15,11 +15,13 @@
 }
 
 html,
-body {
+body,
+#app {
   height: var(--height);
 }
 
-body {
+body,
+#app {
   margin: 0;
   background-color: $color-black;
 
@@ -131,7 +133,7 @@ hr {
   }
 
   &-heading-1 {
-    @extend %face-sans-18-medium;
+    @extend %face-sans-19-regular;
 
     margin-bottom: 18px;
     color: $color-white;
@@ -146,8 +148,12 @@ hr {
   }
 
   &-heading-3 {
-    @extend %face-sans-15-medium;
+    @extend %face-sans-15-bold;
 
+    color: $color-white;
+  }
+
+  &-muted {
     color: rgba($color-white, 0.75);
   }
 

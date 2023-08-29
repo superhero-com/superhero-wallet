@@ -1,20 +1,35 @@
-import Vue from 'vue';
+import { watch } from 'vue';
 import BigNumber from 'bignumber.js';
 import { isEmpty } from 'lodash-es';
 
-import FungibleTokenFullInterfaceACI from '../../lib/contracts/FungibleTokenFullInterfaceACI.json';
-import AedexV2PairACI from '../../lib/contracts/AedexV2PairACI.json';
-import ZeitTokenACI from '../../lib/contracts/FungibleTokenFullACI.json';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
+import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
+import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 import {
-  convertToken,
-  handleUnknownError,
-  calculateSupplyAmount,
   fetchAllPages,
-} from '../../popup/utils';
-import { useMiddleware } from '../../composables';
+  handleUnknownError,
+  toShiftedBigNumber,
+} from '@/utils';
+import {
+  useAccounts,
+  useMiddleware,
+  useAeSdk,
+  useNetworks,
+  useTippingContracts,
+} from '@/composables';
+import { calculateSupplyAmount } from '@/protocols/aeternity/helpers';
 
 export default (store) => {
-  const { fetchFromMiddleware } = useMiddleware({ store });
+  const { activeNetwork } = useNetworks();
+  const { getAeSdk } = useAeSdk({ store });
+  const { fetchFromMiddleware } = useMiddleware();
+  const {
+    aeAccounts,
+    aeNextAccountIdx,
+    getLastActiveProtocolAccount,
+  } = useAccounts({ store });
+  const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {
     namespaced: true,
@@ -24,9 +39,10 @@ export default (store) => {
     },
     getters: {
       getTokenBalance: ({ tokens }) => (address) => tokens?.[address]?.tokenBalances || [],
-      tokenBalances: (
-        state, { getTokenBalance }, rootState, { account: { address } },
-      ) => getTokenBalance(address),
+      tokenBalances: (state, { getTokenBalance }) => {
+        const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+        return getTokenBalance(account.address);
+      },
     },
     mutations: {
       setAvailableTokens(state, payload) {
@@ -37,7 +53,7 @@ export default (store) => {
         state.transactions = {};
       },
       addTokenBalance(state, tokens) {
-        Vue.set(state, 'tokens', { ...state.tokens, ...tokens });
+        state.tokens = { ...state.tokens, ...tokens };
       },
     },
     actions: {
@@ -55,25 +71,22 @@ export default (store) => {
         return commit('setAvailableTokens', availableTokens);
       },
       async loadTokenBalances({
-        rootGetters: { accounts },
         state: { availableTokens },
         commit,
       }) {
         const newBalances = {};
-        await Promise.all(accounts.map(async ({ address }) => {
+        await Promise.all(aeAccounts.value.map(async ({ address }) => {
           try {
             if (isEmpty(availableTokens)) return;
             const tokens = await fetchAllPages(
               () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
               fetchFromMiddleware,
             );
-
             if (isEmpty(tokens) || typeof tokens !== 'object') return;
-
             const balances = tokens.map(({ amount, contract_id: contractId }) => {
               const token = availableTokens[contractId];
               if (!token) return null;
-              const balance = convertToken(amount, -token.decimals);
+              const balance = toShiftedBigNumber(amount, -token.decimals);
               const convertedBalance = balance.toFixed(2);
               const objectStructure = {
                 ...token,
@@ -83,7 +96,6 @@ export default (store) => {
                 balance,
                 convertedBalance,
               };
-
               return objectStructure;
             });
             newBalances[address] = { tokenBalances: balances };
@@ -94,37 +106,42 @@ export default (store) => {
         commit('addTokenBalance', newBalances);
       },
       async createOrChangeAllowance(
-        { rootGetters: { activeNetwork, account, 'sdkPlugin/sdk': sdk } },
+        _,
         [contractId, amount],
       ) {
-        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]?.tokenBalances
+        const aeSdk = await getAeSdk();
+        const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+        const selectedToken = store.state.fungibleTokens.tokens?.[account.address]
+          ?.tokenBalances
           ?.find((t) => t?.contractId === contractId);
-        const tokenContract = await sdk.getContractInstance({
+        const tokenContract = await aeSdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
-          contractAddress: selectedToken.contractId,
+          address: selectedToken.contractId,
         });
-        const { decodedResult } = await tokenContract.methods.allowance({
+        const { decodedResult } = await tokenContract.allowance({
           from_account: account.address,
-          for_account: activeNetwork.tipContractV2.replace('ct_', 'ak_'),
+          for_account: tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'),
         });
         const allowanceAmount = decodedResult !== undefined
           ? new BigNumber(decodedResult)
             .multipliedBy(-1)
-            .plus(convertToken(amount, selectedToken.decimals))
+            .plus(toShiftedBigNumber(amount, selectedToken.decimals))
             .toNumber()
-          : convertToken(amount, selectedToken.decimals).toFixed();
+          : toShiftedBigNumber(amount, selectedToken.decimals).toFixed();
         return tokenContract.methods[
           decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
-        ](activeNetwork.tipContractV2.replace('ct_', 'ak_'), allowanceAmount);
+        ](tippingContractAddresses.value.tippingV2.replace('ct_', 'ak_'), allowanceAmount);
       },
       async getContractTokenPairs(
-        { state: { availableTokens }, rootGetters: { account, 'sdkPlugin/sdk': sdk } },
-        contractAddress,
+        { state: { availableTokens } },
+        address,
       ) {
         try {
-          const tokenContract = await sdk.getContractInstance({
+          const aeSdk = await getAeSdk();
+          const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+          const tokenContract = await aeSdk.initializeContract({
             aci: AedexV2PairACI,
-            contractAddress,
+            address,
           });
 
           const [
@@ -135,12 +152,12 @@ export default (store) => {
             { decodedResult: reserves },
             { decodedResult: totalSupply },
           ] = await Promise.all([
-            tokenContract.methods.balances(),
-            tokenContract.methods.balance(account.address),
-            tokenContract.methods.token0(),
-            tokenContract.methods.token1(),
-            tokenContract.methods.get_reserves(),
-            tokenContract.methods.total_supply(),
+            tokenContract.balances(),
+            tokenContract.balance(account.address),
+            tokenContract.token0(),
+            tokenContract.token1(),
+            tokenContract.get_reserves(),
+            tokenContract.total_supply(),
           ]);
 
           return {
@@ -166,35 +183,35 @@ export default (store) => {
           return {};
         }
       },
-      async transfer(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
-        [contractId, toAccount, amount, option],
-      ) {
-        const tokenContract = await sdk.getContractInstance({
+      async transfer(_, [address, toAccount, amount, option]) {
+        const aeSdk = await getAeSdk();
+        const tokenContract = await aeSdk.initializeContract({
           aci: FungibleTokenFullInterfaceACI,
-          contractAddress: contractId,
+          address,
         });
-        return tokenContract.methods.transfer(toAccount, amount.toFixed(), option);
+        return tokenContract.transfer(toAccount, amount.toFixed(), option);
       },
-      async burnTriggerPoS(
-        { rootGetters: { 'sdkPlugin/sdk': sdk } },
-        [contractId, amount, posAddress, invoiceId, option],
-      ) {
-        const tokenContract = await sdk.getContractInstance({
+      async burnTriggerPoS(_, [address, amount, posAddress, invoiceId, option]) {
+        const aeSdk = await getAeSdk();
+        const tokenContract = await aeSdk.initializeContract({
           aci: ZeitTokenACI,
-          contractAddress: contractId,
+          address,
         });
-        return tokenContract.methods.burn_trigger_pos(
+        return tokenContract.burn_trigger_pos(
           amount.toFixed(), posAddress, invoiceId, option,
         );
       },
     },
   });
 
-  store.watch(
-    (state, { activeNetwork }) => activeNetwork,
+  watch(
+    activeNetwork,
     async (network, oldNetwork) => {
-      if (network?.middlewareUrl === oldNetwork?.middlewareUrl) return;
+      const newMiddlewareUrl = network.protocols[PROTOCOL_AETERNITY].middlewareUrl;
+      const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOL_AETERNITY]?.middlewareUrl;
+      if (newMiddlewareUrl === oldMiddlewareUrl) {
+        return;
+      }
       store.commit('fungibleTokens/resetTokensAndTransactions');
 
       await store.dispatch('fungibleTokens/loadAvailableTokens');
@@ -204,9 +221,11 @@ export default (store) => {
   );
 
   store.watch(
-    ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
-    async () => {
-      await store.dispatch('fungibleTokens/loadTokenBalances');
+    () => aeNextAccountIdx.value,
+    async (val, oldVal) => {
+      if (val !== oldVal) {
+        await store.dispatch('fungibleTokens/loadTokenBalances');
+      }
     },
   );
 };

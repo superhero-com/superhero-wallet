@@ -20,7 +20,7 @@
     transition: opacity 150ms ease-out;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }
@@ -31,7 +31,7 @@
     transition: opacity 300ms ease-out;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
   }
@@ -43,7 +43,7 @@
     transition: all 400ms;
   }
 
-  &-enter,
+  &-enter-from,
   &-leave-to {
     opacity: 0;
     position: absolute;

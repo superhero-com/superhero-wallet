@@ -91,43 +91,33 @@
       "msg": "Hubo un problema enviando tu reporte de error"
     },
     "confirmTransactionSign": {
-      "unknown": "Desconocido",
-      "contract-create": "Crear contrato",
-      "aens": "AENS",
-      "payload": "Carga útil",
       "recipientId": "Id del Receptor",
-      "code": "Código",
-      "callData": "Llamar data",
-      "contractId": "Id del Contrato",
       "commitmentId": "Id de la Entrega",
-      "name": "Nombre",
       "nameFee": "Comisión por el Nombre",
-      "nameSalt": "Nombre Salt",
       "nameId": "Id del Nombre",
       "pointers": "Apuntadores",
-      "sign-raw": "Firmar transacción sin procesar por",
       "data-sign": "Firmar Datar"
     }
   },
   "transaction": {
     "fee": "Comision de Transacción",
     "type": {
-      "SpendTx": "Gastar",
-      "ContractCreateTx": "Contrato creado",
-      "ContractCallTx": "Llamar contrato",
-      "NamePreclaimTx": "Preclamar nombre",
-      "NameClaimTx": "Reclamar nombre",
-      "NameUpdateTx": "Actualizar nombre",
-      "NameTransferTx": "Transferir nombre",
-      "NameRevokeTx": "Revocar nombre",
-      "OracleRegisterTx": "Registrar oráculo",
-      "OracleExtendTx": "Extender oráculo",
-      "OraclePostQueryTx": "Consulta Post del oráculo",
-      "OracleRespondTx": "Respuesta oráculo",
-      "ChannelCloseSoloTx": "Cierre de canal Solo",
-      "ChannelSlashTx": "Slash channel",
-      "ChannelSettleTx": "Establecer canal",
-      "ChannelSnapshotSoloTx": "Instantánea (snapchot) del canal Solo"
+      "spendTx": "Gastar",
+      "contractCreateTx": "Contrato creado",
+      "contractCallTx": "Llamar contrato",
+      "namePreclaimTx": "Preclamar nombre",
+      "nameClaimTx": "Reclamar nombre",
+      "nameUpdateTx": "Actualizar nombre",
+      "nameTransferTx": "Transferir nombre",
+      "nameRevokeTx": "Revocar nombre",
+      "oracleRegisterTx": "Registrar oráculo",
+      "oracleExtendTx": "Extender oráculo",
+      "oraclePostQueryTx": "Consulta Post del oráculo",
+      "oracleRespondTx": "Respuesta oráculo",
+      "channelCloseSoloTx": "Cierre de canal Solo",
+      "channelSlashTx": "Slash channel",
+      "channelSettleTx": "Establecer canal",
+      "channelSnapshotSoloTx": "Instantánea (snapchot) del canal Solo"
     }
   },
   "pages": {
@@ -158,8 +148,7 @@
       "language": "Idioma",
       "security": "Securidad",
       "about": "Acerca",
-      "send-tips": "Enviar Propinas",
-      "claim-tips": "Reclamar Propinas",
+      "sendTips": "Enviar Propinas",
       "scanQr": "Scanear QR",
       "terms": "Términos de Uso",
       "privacy": "Política de Privacidad",
@@ -169,12 +158,12 @@
       "notifications": "Notificaciones",
       "names": "Nombres",
       "bidding": "Subastar",
-      "comment-new": "Agregar comentario",
+      "commentNew": "Agregar comentario",
       "home": "Superhero Inicio",
-      "donate-error": "Donar Data",
+      "donateError": "Donar Data",
       "address": "Dirección de Envio",
       "allowances": "Asignaciones",
-      "sign-message": "Firmar Mensaje"
+      "signMessage": "Firmar Mensaje"
     },
     "about": {
       "heading": "Acerca de",
@@ -213,6 +202,7 @@
       "noMobileClaim": "Actualmente los reclamos solo están disponibles en el escritorio (desktop)."
     },
     "claimTips": {
+      "title": "Reclamar Propinas",
       "urlToClaim": "Reclamar propinas para esta URL:"
     },
     "notFound": {
@@ -255,7 +245,7 @@
       "remaining-time": "Tiempo restante"
     },
     "connectConfirm": {
-      "websiteRequestconnect": "le gustaría conectarse a su cuenta",
+      "websiteRequestConnect": "le gustaría conectarse a su cuenta",
       "websiteRequest": "Este sitio web está solicitando acceso para ver tu dirección de cuenta actual. Siempre asegúrate que confías en el sitio web con el que interactúas. ",
       "cancelButton": "Denegar",
       "confirmButton": "Aceptar",
@@ -453,13 +443,13 @@
       "terms-of-use": "Términos de uso",
       "terms-with-quotes": "(„TÉRMINOS“)",
       "terms": "términos",
-      "sub-heading": "los presentes {terms-of-use} fueron creados el 3 de Abril de 2020.",
-      "section0Content": "{superhero.com} se reserva el derecho de modificar y a actualizar estos {terms-of-use} de acuerdo a  la política y práctica de la {company}. La nueva versión de {terms-of-use} se hace efectiva desde el día que es anunciada en {our-superhero-wallet} a menos que se establezca otra cosa.",
+      "sub-heading": "los presentes @:termsOfService.terms-of-use fueron creados el 3 de Abril de 2020.",
+      "section0Content": "@:termsOfService.superhero-com se reserva el derecho de modificar y a actualizar estos @:termsOfService.terms-of-use de acuerdo a  la política y práctica de la @:termsOfService.company. La nueva versión de @:termsOfService.terms-of-use se hace efectiva desde el día que es anunciada en @:termsOfService.our-superhero-wallet a menos que se establezca otra cosa.",
       "superhero-com": "Superhero.com LVC",
       "company": "compañia",
       "our-superhero-wallet": "Nuestra Billetera Superhero",
       "section01Content": "EL SOFTWARE PROVISTO POR SUPERHERO.COM LVC “ES TAL COMO ES” SIN NINGÚN TIPO DE GARANTÍA, EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A LAS GARANTÍAS DE MERCANTILIDAD, ADECUACIÓN PARA UN PROPÓSIYO PARTICULAR Y NO INFRINGENTE. LOS AUTORES EN NINGPUN CASO SERÁN RESPONSABLES DE CUALQUEIR RECLAMO, DAÑOS U OTRAS RESPONSABILIDAD, YA SEA EN UNA ACCIÓN CONTRACTUAL, TORT O DE OTRA MANERA, DERIVADA, FUERA DE O EN RELACIÓN CON EL SOFTWARE O EL USO U OTRAS OFERTAS EN EL SOFTWARE.",
-      "section02Content": "Estos {terms-of-use} {terms-with-quotes} aplican exclusivamente para la {superHero-wallet} (de acá en adelante se referirá a ella como la “{wallet}“ o la “{application}”) y todo el contenido disponible en la {website-extension}. Por favor asegúrate que haz leiodo cuidadosamente los {terms} antes de usar la {application}. Por otro lado, al usarla, nosotros consideramos que estas acciones implican una aceptación de los {terms-of-use}. Estos {terms-of-use} representan un acuerdo implícito entre tú, la entidad legal que representas y la entidad legal que te registró (colectivamente „{you}“) y Superhero.com LVC {superhero-we-us-with-quotes} o {our-with-quotes} en conexión a tu uso de la {website-extension} {superHero-wallet} .",
+      "section02Content": "Estos @:termsOfService.terms-of-use @:termsOfService.terms-with-quotes aplican exclusivamente para la @:termsOfService.superHero-wallet (de acá en adelante se referirá a ella como la “@:termsOfService.wallet“ o la “@:termsOfService.application”) y todo el contenido disponible en la @:termsOfService.website-extension. Por favor asegúrate que haz leiodo cuidadosamente los @:termsOfService.terms antes de usar la @:termsOfService.application. Por otro lado, al usarla, nosotros consideramos que estas acciones implican una aceptación de los @:termsOfService.terms-of-use. Estos @:termsOfService.terms-of-use representan un acuerdo implícito entre tú, la entidad legal que representas y la entidad legal que te registró (colectivamente „@:termsOfService.you“) y Superhero.com LVC @:termsOfService.superhero-we-us-with-quotes o @:termsOfService.our-with-quotes en conexión a tu uso de la @:termsOfService.website-extension @:termsOfService.superHero-wallet .",
       "superHero-wallet": "Billetera Superhero",
       "wallet": "Billetera",
       "application": "aplicación",
@@ -468,7 +458,7 @@
       "superhero-we-us-with-quotes": "(“Superhero”, “nosotros”, “nos”",
       "our-with-quotes": "“nuestra”)",
       "section1Title": "1. Definiciones",
-      "section1Content": "1.1. Superhero.com Establishment (“Superhero.com ”, “nos”, “nosotros”, “nuestra” o “la compañía”) ​es una compañía con correo electrónico para comunicaciones relacionadas con la billetera Superhero: superherowallet@protonmail.com. Superhero.com ​es la compañía que creó y desarrollo la  Billetera Superhero​. \n 1.2. El ​„USUARIO“ or ​„TÚ“ representa a una persona natural o legal que ha descargado y usa la ​extensión de sitio web Billetera Superhero . \n 1.3. „​Blockchain​“ representa la lista de archivos, también conocidos como ​bloques,​ los cuales estÁn enlazados con un método criptográfico. La tecnología permite que grandes grupos de personas se conecten y alcancen un consenso en la data, la cual posteriormente queda permanentemente grabada sin la presencia de una autoridad central. ​LOS USUARIOS pueden acceder, crear y guardar información en la blockchain aeternity. El registro digital descentralizado, distribuido y público es usado con el propósito de registrar transacciones en bloques de información con la ayuda de ​Validadores​, las cuales no pueden alterarse retroactivamente. \n 1.4. Billetera Superhero ​” (“​BILLETERA​” o “​la aplicación​”) es una extensión de sitio web, la cual permite a los seguidores enviar valor a los creadores de contenido, a causas, a caridades, a grupos o a individuos regulare en línea como recompensa por contribuir con información precisa, hechos relevantes, calidad de contenido. La extensión de sitio web es una pieza de software que actúa como una adiciÓn del navegador web Firefox y contribuye con la funcionalidad adicional del navegador. La aplicación esta disponible en: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . El resultado de donaciones y comentarios están publicados en el sitio web ​https://superhero.com/​ . \n 1.5. “​Validadores​” son entes o personas físicas independientes, que de ninguna manera no son parte de Superhero.com. ​Su información en el sistema incluye la responsabilidad en la ​constitución de bloques y la transmisión de estos ​bloques​ con la red aeternity ​. \n 1.6. “​Dirección de la Cuenta​” es la versión hasheada de la ​clave pública​ del ​USUARIO , y es usada para identificar USUARIOS​ en ​la aplicación​. \n 1.7. “​Llaves​” representan la relación única de las llaves criptográficas pública y privada con números al azar usados para la encriptación y desencriptación de información.",
+      "section1Content": "1.1. Superhero.com Establishment (“Superhero.com ”, “nos”, “nosotros”, “nuestra” o “la compañía”) ​es una compañía con correo electrónico para comunicaciones relacionadas con la billetera Superhero: superherowallet{'@'}protonmail.com. Superhero.com ​es la compañía que creó y desarrollo la  Billetera Superhero​. \n 1.2. El ​„USUARIO“ or ​„TÚ“ representa a una persona natural o legal que ha descargado y usa la ​extensión de sitio web Billetera Superhero . \n 1.3. „​Blockchain​“ representa la lista de archivos, también conocidos como ​bloques,​ los cuales estÁn enlazados con un método criptográfico. La tecnología permite que grandes grupos de personas se conecten y alcancen un consenso en la data, la cual posteriormente queda permanentemente grabada sin la presencia de una autoridad central. ​LOS USUARIOS pueden acceder, crear y guardar información en la blockchain aeternity. El registro digital descentralizado, distribuido y público es usado con el propósito de registrar transacciones en bloques de información con la ayuda de ​Validadores​, las cuales no pueden alterarse retroactivamente. \n 1.4. Billetera Superhero ​” (“​BILLETERA​” o “​la aplicación​”) es una extensión de sitio web, la cual permite a los seguidores enviar valor a los creadores de contenido, a causas, a caridades, a grupos o a individuos regulare en línea como recompensa por contribuir con información precisa, hechos relevantes, calidad de contenido. La extensión de sitio web es una pieza de software que actúa como una adiciÓn del navegador web Firefox y contribuye con la funcionalidad adicional del navegador. La aplicación esta disponible en: https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet-extension/ . El resultado de donaciones y comentarios están publicados en el sitio web ​https://superhero.com/​ . \n 1.5. “​Validadores​” son entes o personas físicas independientes, que de ninguna manera no son parte de Superhero.com. ​Su información en el sistema incluye la responsabilidad en la ​constitución de bloques y la transmisión de estos ​bloques​ con la red aeternity ​. \n 1.6. “​Dirección de la Cuenta​” es la versión hasheada de la ​clave pública​ del ​USUARIO , y es usada para identificar USUARIOS​ en ​la aplicación​. \n 1.7. “​Llaves​” representan la relación única de las llaves criptográficas pública y privada con números al azar usados para la encriptación y desencriptación de información.",
       "section2Title": "2. PROVISIONES GENERALES",
       "section2Content": "Superhero.com ​diseñó y construyó ​la aplicación como una billetera de criptoactivos a través de la cual los ​USUARIOS pueden almacenar y enviar tokens Superhero.com con el propósito de realizar donaciones a creadores, causas, caridades, grupos o individuos regulares en línea como una recompensa por contribuir con información precisa, hechos relevantes, contenido de calidad​. Los USUARIOS pueden donar a diferentes sitios web a través de la aplicación. La aplicación busca automaticamente la llave pública del sitio web con el propósito de la donación. Las donaciones pueden ser orientadas en dos flujos de la siguiente manera- ​los USUARIOS puedes dar propina al propietario de todo el sitio web o los ​USUARIOS pueden enviar tokens a creadores específicos o a autores en un sitio web que hayan escrito la noticia que quieren recompensar. \n Después de eso, el sitio web ​https://superhero.com/ reflejará la donación y comentarios del ​USUARIO y da la posibilidad para que otros ​USUARIOS puedan donar y comentar en las noticias disponibles en la cartelera del Sitio wen. \n Los USUARIOS ​pueden navegar por su historial de transacciones. ​La Billetera muestra los ​tokens del USUARIO​. Los ​USUARIOS​ están a cargo de la custodia, del envio y de la recepción segura de sus fondos. \n La aplicación está hecha para transacciones pequeñas. Un volumen alto de transacciones o su almacenamiento pueden realizarse a través de la aplicación bajo el propio riesgo del ​USUARIO​.",
       "section3Title": "3. IDENTIFICACIÓN DEL USUARIO",
@@ -484,7 +474,7 @@
       "section8Title": "8. LICENCIA",
       "section8Content": "La aplicación está creada, desarrollada y operada por Superhero.com ​. Cada componente en la aplicación incluyendo pero no limitado logos, marcas comerciales y otra propiedad intelectual mostrada en al aplicación son considerados como propiedad de Superhero.com ​y están protegidos por la legislación de propiedad intelectual aplicable. Está prohibido el uso de cualquier propiedad intelectual de Superhero.com ​antes de tener el consentimiento explícito de este Superhero.com. \n Ninguno de los elementos mencionados arriba puede ser editado, descargado, reproducido y usado para propósitos comerciales, distribuido y transmitido de ninguna manera y/o medio ya sea, parcial o totalmente, sin el previo consentimiento explícito y por escrito de Superhero.com. \n Superhero.com ​se reserva el derecho para tomar cualquier acción legal necesaria contra infracciones a la propiedad intelectual.",
       "section9Title": "9. DERECHOS DE PROPIEDAD INTELECTUAL",
-      "section9Content": "Los USUARIOS entienden y aceptan que ​la aplicacion puede ser periódicamente modificada, actualizada, mantenida o sometida a soporte técnico, lo cual podría influir de alguna manera en el uso de la Billetera​, en la representación visual de ​la aplicaión ​o podría resultar en un mal funcionamiento. En este último caso, si ​tú como un ​USUARIO notas cualquier cambio en los fondos, ajustes, cuentas o en cualquier otra información en la aplicación, por favor escribe a superherowallet@protonmail.com​ solicitando asistencia.",
+      "section9Content": "Los USUARIOS entienden y aceptan que ​la aplicacion puede ser periódicamente modificada, actualizada, mantenida o sometida a soporte técnico, lo cual podría influir de alguna manera en el uso de la Billetera​, en la representación visual de ​la aplicaión ​o podría resultar en un mal funcionamiento. En este último caso, si ​tú como un ​USUARIO notas cualquier cambio en los fondos, ajustes, cuentas o en cualquier otra información en la aplicación, por favor escribe a superherowallet{'@'}protonmail.com​ solicitando asistencia.",
       "section10Title": "10. MODIFICACIONES",
       "section10Content": "Se fija la legislación y jurisdicción de Liechtenstein para los temas relacionados a los presentes ​TÉRMINOS​. La  invalidez de una o más cláusulas/provisiones en los ​TÉRMINOS no conlleva a la invalidez de todo el acuerdo. \n La Política de Privacidad es una parte inseparable de los presentes ​TÉRMINOS y debería ser considerada como un documento complementario con carácter compulsorio. Al no ser declarado explícitamente en la Política de Privacidad, todas las reglas de los ​TÉRMINOS​ se aplican respectivamente.",
       "section11Title": "11. PROVISIONES FINALES"

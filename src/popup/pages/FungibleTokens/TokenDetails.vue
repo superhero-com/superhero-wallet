@@ -20,7 +20,7 @@
     />
     <DetailsRow
       v-if="tokenData.contractId && !isAe"
-      :label="$t('pages.token-details.contract')"
+      :label="$t('common.smartContract')"
     >
       <template #text>
         <AddressTruncated
@@ -113,13 +113,12 @@
       :label="$t('pages.token-details.chart')"
     >
       <template #text>
-        <a
-          :href="DEX_URL"
-          target="_blank"
+        <LinkButton
+          :to="AE_DEX_URL"
         >
           {{ displayDexUrl }}
           <ExternalLink />
-        </a>
+        </LinkButton>
       </template>
     </DetailsRow>
     <DetailsRow
@@ -161,18 +160,19 @@ import {
   computed,
   defineComponent,
   PropType,
-} from '@vue/composition-api';
+} from 'vue';
+import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
-import type { IAsset, IToken } from '../../../types';
+import type { IAsset, IToken } from '@/types';
 import {
-  AETERNITY_CONTRACT_ID,
-  DEX_URL,
   amountRounded,
-  convertToken,
   formatNumber,
-} from '../../utils';
-import { useCurrencies } from '../../../composables';
+  toShiftedBigNumber,
+} from '@/utils';
+import { useCurrencies } from '@/composables';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
+import LinkButton from '@/popup/components/LinkButton.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressTruncated from '../../components/AddressTruncated.vue';
 import Tokens from '../../components/Tokens.vue';
@@ -185,6 +185,7 @@ export default defineComponent({
     AddressTruncated,
     Tokens,
     ExternalLink,
+    LinkButton,
   },
   props: {
     contractId: { type: String, default: null },
@@ -193,11 +194,12 @@ export default defineComponent({
     tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
   },
   setup(props) {
-    const { formatCurrency } = useCurrencies();
+    const store = useStore();
+    const { formatCurrency } = useCurrencies({ store });
 
-    const displayDexUrl = DEX_URL.replace('https://', '');
+    const displayDexUrl = AE_DEX_URL.replace('https://', '');
 
-    const isAe = computed(() => props.tokenData.contractId === AETERNITY_CONTRACT_ID);
+    const isAe = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
 
     const poolShare = computed(() => {
       if (!props.tokenPairs || !props.tokenPairs.balance || !props.tokenPairs.totalSupply) {
@@ -208,11 +210,11 @@ export default defineComponent({
     });
 
     const getPooledTokenAmount = (token: any) => amountRounded(
-      convertToken(token.amount, -token.decimals),
+      toShiftedBigNumber(token.amount, -token.decimals),
     );
 
     return {
-      DEX_URL,
+      AE_DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
       displayDexUrl,
       isAe,

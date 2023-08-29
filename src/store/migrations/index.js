@@ -6,6 +6,7 @@ import addFungibleTokensNewFields from './03-add-fungible-tokens-new-fields';
 import addNamesNewFields from './04-add-names-new-fields';
 import changeTransactionsStructure from './05-change-transactions-structure';
 import changeTransactionsStructure2 from './06-change-transactions-structure-2';
+import changeInviteLinksFormat from './07-change-invite-links-format';
 
 registerMigration(collectState);
 registerMigration(setDefaultNames);
@@ -14,5 +15,6 @@ registerMigration(addFungibleTokensNewFields);
 registerMigration(addNamesNewFields);
 registerMigration(changeTransactionsStructure);
 registerMigration(changeTransactionsStructure2);
+registerMigration(changeInviteLinksFormat);
 
 export default runMigrations;

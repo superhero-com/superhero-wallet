@@ -16,11 +16,11 @@
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
-        full-ae-symbol
+        full-symbol
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ amountRounded(tokenAmount(token)) }}
+        {{ isRounded ? tokenAmount(token) : amountRounded(tokenAmount(token)) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -31,18 +31,22 @@
 
 <script lang="ts">
 import {
-  computed, defineComponent, PropType, ref,
-} from '@vue/composition-api';
+  computed,
+  defineComponent,
+  PropType,
+  ref,
+} from 'vue';
+import { useStore } from 'vuex';
+import type { ITokenResolved, ITransaction } from '@/types';
 import {
   amountRounded,
-  convertToken,
-  truncateString,
   calculateFontSize,
-  AETERNITY_SYMBOL,
-  TX_DIRECTION,
-} from '../utils';
-import { useTransactionTokens } from '../../composables';
-import type { ITokenResolved, ITransaction } from '../../types';
+  toShiftedBigNumber,
+  truncateString,
+} from '@/utils';
+import { TX_DIRECTION } from '@/constants';
+import { useTransactionTokens } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import Tokens from './Tokens.vue';
 
@@ -56,13 +60,15 @@ export default defineComponent({
     direction: { type: String, default: '' },
     error: Boolean,
     isAllowance: Boolean,
+    isRounded: Boolean,
   },
-  setup(props, { root }) {
+  setup(props) {
+    const store = useStore();
     const localTokens = ref();
 
     if (!props.extTokens && !!props.transaction) {
       const { tokens } = useTransactionTokens({
-        store: root.$store,
+        store,
         transaction: props.transaction,
         direction: props.direction,
         isAllowance: props.isAllowance,
@@ -80,11 +86,11 @@ export default defineComponent({
 
     function tokenAmount(token: ITokenResolved) {
       return token.decimals
-        ? convertToken(token.amount || 0, -token.decimals)
+        ? toShiftedBigNumber(token.amount || 0, -token.decimals)
         : token.amount;
     }
 
-    const getTokenName = (token: ITokenResolved) => token?.isAe ? AETERNITY_SYMBOL : token.symbol;
+    const getTokenName = (token: ITokenResolved) => token?.isAe ? AE_SYMBOL : token.symbol;
 
     return {
       filteredTokens,
