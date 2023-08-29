@@ -55,7 +55,7 @@ export function useCurrencies({
   store,
   selectedProtocol = PROTOCOL_AETERNITY, // TODO - remove default value & make the protocol required
 }: UseCurrenciesOptions) {
-  const { protocolsInUse } = useAccounts({ store });
+  const { protocolsInUse, isLoggedIn } = useAccounts({ store });
   const minTipAmount = computed(() => 0.01 / (currencyRates.value?.[selectedProtocol].usd || 1));
   const currentCurrencyRate = computed(
     (): number => currencyRates.value?.[selectedProtocol]?.[currentCurrencyCode.value] || 0,
@@ -72,7 +72,7 @@ export function useCurrencies({
 
   async function loadCoinsData() {
     try {
-      await watchUntilTruthy(() => store.state.isRestored);
+      await watchUntilTruthy(isLoggedIn);
 
       const fetchedMarketData = await CoinGecko.fetchCoinMarketData(
         getCoinGeckoCoinIdList(),
@@ -80,9 +80,10 @@ export function useCurrencies({
       ) || [];
 
       const convertedMarketData = fetchedMarketData.reduce(
-        (o, currentValue, index) => {
-          const protocol = protocolsInUse.value[index];
-          return { ...o, [protocol]: currentValue };
+        (o, coinMarketData) => {
+          // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
+          const protocol = coinMarketData.id;
+          return { ...o, [protocol]: coinMarketData };
         },
         {},
       );

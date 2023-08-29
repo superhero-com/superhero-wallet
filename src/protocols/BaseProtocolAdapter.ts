@@ -4,6 +4,7 @@ import type {
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
+  MarketData,
   NetworkTypeDefault,
 } from '@/types';
 
@@ -26,7 +27,7 @@ export abstract class BaseProtocolAdapter {
   abstract getDefaultAssetContractId(): string;
 
   abstract getDefaultCoin(
-    marketData: any,
+    marketData: MarketData,
     convertedBalance?: number | BigNumber,
   ): ICoin;
 

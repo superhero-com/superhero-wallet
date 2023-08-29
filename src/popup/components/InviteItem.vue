@@ -132,7 +132,7 @@ export default defineComponent({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY)
-        .getDefaultCoin(marketData, +balance.value),
+        .getDefaultCoin(marketData.value!, +balance.value),
     });
     const { max } = useMaxAmount({ formModel, store });
 
