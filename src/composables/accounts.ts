@@ -22,13 +22,14 @@ import {
 } from '@/utils';
 import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { useStorageRef } from './composablesHelpers';
 
 let isIdxInitialized = false;
 const protocolNextAccountIdx = ref<ProtocolRecord<number>>(
   // Aeternity starts from 1 as we have 1 account as default
   PROTOCOLS.reduce((acc, protocol) => ({ ...acc, [protocol]: 0, [PROTOCOL_AETERNITY]: 1 }), {}),
 );
-const protocolLastActiveGlobalIdx: ProtocolRecord<number> = {};
+const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>({}, 'protocol-last-active-account-idx');
 
 /**
  * TODO in the future the state of the accounts should be stored in this composable
@@ -103,7 +104,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     store.commit('accounts/setActiveIdx', account?.globalIdx || 0);
 
     if (account) {
-      protocolLastActiveGlobalIdx[account.protocol] = account.globalIdx;
+      protocolLastActiveGlobalIdx.value[account.protocol] = account.globalIdx;
     }
   }
 
@@ -137,7 +138,10 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
    * related to protocol different than the current account is using.
    */
   function getLastActiveProtocolAccount(protocol: Protocol): IAccount | undefined {
-    const lastUsedGlobalIdx = protocolLastActiveGlobalIdx[protocol];
+    if (activeAccount.value.protocol === protocol) {
+      return activeAccount.value;
+    }
+    const lastUsedGlobalIdx = protocolLastActiveGlobalIdx.value[protocol];
     return (lastUsedGlobalIdx)
       ? getAccountByGlobalIdx(lastUsedGlobalIdx)
       : accounts.value.find((account) => account.protocol === protocol);
@@ -149,8 +153,11 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       Object.entries(accountsGroupedByProtocol.value).forEach(([protocol, protocolAccounts]) => {
         setProtocolNextAccountIdx(protocolAccounts?.length || 0, protocol as Protocol);
       });
+
       isIdxInitialized = true;
-      protocolLastActiveGlobalIdx[activeAccount.value.protocol] = activeAccount.value.globalIdx;
+
+      protocolLastActiveGlobalIdx
+        .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
     }
   })();
 
