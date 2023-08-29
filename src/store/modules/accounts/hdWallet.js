@@ -88,12 +88,12 @@ export default {
         await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },
-    sign({ dispatch }, data) {
-      return dispatch('signWithoutConfirmation', { data });
+    sign({ dispatch }, { data, options }) {
+      return dispatch('signWithoutConfirmation', { data, options });
     },
     async signTransaction({ dispatch, rootState, rootGetters }, {
       txBase64,
-      options: { modal = true, app = null },
+      options: { modal = true, app = null, fromAccount },
     }) {
       const { nodeNetworkId } = useAeSdk({
         store: { state: rootState, getters: rootGetters },
@@ -109,6 +109,9 @@ export default {
             Buffer.from(nodeNetworkId.value),
             Buffer.from(encodedTx),
           ]),
+          options: {
+            fromAccount,
+          },
         },
       );
       return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });

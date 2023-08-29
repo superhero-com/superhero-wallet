@@ -45,7 +45,13 @@ export class AccountSuperhero extends AccountBase {
         { ...options, origin: options.aeppOrigin },
       );
     }
-    return this.store.dispatch('accounts/signTransaction', { txBase64, options });
+    return this.store.dispatch('accounts/signTransaction', {
+      txBase64,
+      options: {
+        fromAccount: this.address,
+        ...options,
+      },
+    });
   }
 
   async signMessage(message: string, options: any): Promise<Uint8Array> {
@@ -59,14 +65,20 @@ export class AccountSuperhero extends AccountBase {
         { ...options, origin: options.aeppOrigin },
       );
     }
-    return this.sign(messageToHash(message), options);
+    return this.sign(messageToHash(message), { fromAccount: this.address, ...options });
   }
 
   sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
     const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
     return IS_EXTENSION_BACKGROUND
       ? sign(data, getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.secretKey) as any
-      : this.store.dispatch('accounts/sign', data, options);
+      : this.store.dispatch('accounts/sign', {
+        data,
+        options: {
+          fromAccount: this.address,
+          ...options,
+        },
+      });
   }
 
   async fgPermissionCheckAndSign(method: any, payload: any, options: any, origin?: string) {
@@ -91,12 +103,13 @@ export class AccountSuperhero extends AccountBase {
             },
           });
         }
-        return this.sign(messageToHash(payload), options);
+        return this.sign(messageToHash(payload), { fromAccount: this.address, ...options });
       }
 
       return this.store.dispatch('accounts/signTransaction', {
         txBase64: payload,
         options: {
+          fromAccunt: this.address,
           ...options,
           modal: !permission,
           app,
@@ -135,11 +148,12 @@ export class AccountSuperhero extends AccountBase {
       ))
     ) {
       if (method === METHODS.signMessage) {
-        return this.store.dispatch('accounts/sign', messageToHash(payload));
+        return this.store.dispatch('accounts/sign', { data: messageToHash(payload), options: { fromAccount: this.address } });
       }
       return this.store.dispatch('accounts/signTransaction', {
         txBase64: payload,
         options: {
+          fromAccount: this.address,
           ...options,
           modal: false,
           host: options.origin,

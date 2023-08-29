@@ -137,7 +137,7 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -210,7 +210,9 @@ export default defineComponent({
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
-    const { activeAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     const { popupProps, setPopupProps } = usePopupProps();
 
@@ -360,7 +362,7 @@ export default defineComponent({
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(activeAccount.value.address).catch((err) => {
+          const balance = await sdk.getBalance(activeAccount!.address).catch((err) => {
             if (!isNotFoundError(err)) {
               handleUnknownError(err);
             }
