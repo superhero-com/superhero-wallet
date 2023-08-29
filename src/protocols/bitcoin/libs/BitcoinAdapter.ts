@@ -6,8 +6,9 @@ import {
   payments,
   networks,
   Psbt,
+  Transaction,
 } from 'bitcoinjs-lib';
-import { toSatoshi, toBitcoin } from 'satoshi-bitcoin';
+import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 import type {
   AdapterNetworkSettingList,
   ICoin,
@@ -178,8 +179,18 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return normalizeTransactionStructure(rawTransaction);
   }
 
+  /**
+   * Construct and sign raw bitcoin transaction
+   * @param amountInBtc
+   * @param recipient
+   * @param options.address Sender address
+   * @param options.fee Transaction Fee
+   * @param options.publicKey Public key of the sender
+   * @param options.secretKey Secret key of the sender associated with address and the public key
+   * @returns Transaction
+   */
   async constructAndSignTx(
-    amount: number,
+    amountInBtc: number,
     recipient: string,
     options: {
       address: string,
@@ -187,59 +198,99 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: Buffer,
       secretKey: Buffer,
     },
-  ): Promise<any> {
+  ): Promise<Transaction> {
     const { activeNetwork } = useNetworks();
 
     const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
-    let totalBalance: number = 0;
-    const amountInSathoshi = toSatoshi(amount);
-
     const psbt = new Psbt({ network });
 
+    // Fetch all the Unspent transaction outputs
     const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
-    const txFetchPromises = utxos.map(({ txid }: { txid: string }) => fetchJson(`${nodeUrl}/tx/${txid}`));
-    const txs = await Promise.all(txFetchPromises);
 
-    utxos.forEach(
-      ({ txid, vout, value }: {txid: string, vout: number, value: number}, index: number) => {
-        const tx = txs[index];
+    /**
+     * Fetch raw transaction in hex of only confirmed UTXOs.
+     * Filter UTXos from mempool/unconfirmed
+     */
+    const fetchHexPromises = utxos
+      .map(async ({ txid, vout, value }: { txid: string, vout: number, value: number }) => {
+        const rawTransactionBody = await fetch(`${nodeUrl}/tx/${txid}/hex`);
+        return {
+          txid,
+          vout, // Output vector index
+          value, // Amount
+          transactionInHex: await rawTransactionBody.text(),
+        };
+      });
 
-        if (!(tx.vout[vout] && tx.vout[vout].scriptpubkey)) {
-          throw new Error('Missing data from the fetched input transactions');
-        }
+    const utxoDetails = await Promise.all(fetchHexPromises);
 
-        const { scriptpubkey } = tx.vout[vout];
+    const amountInSatoshi = toSatoshi(amountInBtc);
+    const feeInSatoshi = toSatoshi(options.fee);
+    let totalBalance: number = 0;
+    let hasSufficientBalance = false;
 
+    // eslint-disable-next-line no-restricted-syntax
+    for (const {
+      txid, vout, value, transactionInHex,
+    } of utxoDetails) {
+      /**
+       * Use minimum number of UTXOs for this transaction
+       * TODO: Select minimum number of UTXOs based on the amount and the input size
+       */
+      if (hasSufficientBalance) {
+        break;
+      }
+
+      const parsedTransaction = Transaction.fromHex(transactionInHex);
+      const input = parsedTransaction.outs.at(vout);
+      const isSegwit = parsedTransaction.hasWitnesses();
+
+      if (isSegwit) {
         psbt.addInput({
           hash: txid,
           index: vout,
           witnessUtxo: {
-            script: Buffer.from(scriptpubkey, 'hex'),
+            script: input!.script,
             value,
           },
         });
-        totalBalance += value;
-      },
-    );
+      } else {
+        psbt.addInput({
+          hash: txid,
+          index: vout,
+          nonWitnessUtxo: Buffer.from(transactionInHex, 'hex'),
+        });
+      }
 
-    if (amountInSathoshi + toSatoshi(options.fee) > totalBalance) {
+      totalBalance += value;
+      if (totalBalance >= amountInSatoshi + feeInSatoshi) {
+        hasSufficientBalance = true;
+      }
+    }
+
+    if (!hasSufficientBalance) {
       throw new Error('Insufficient balance');
     }
 
+    // Add recipient output
     psbt.addOutput({
       address: recipient,
-      value: amountInSathoshi,
+      value: amountInSatoshi,
     });
-    psbt.addOutput({
-      address: options.address,
-      value: totalBalance - amountInSathoshi - toSatoshi(options.fee),
-    });
+
+    // Transfer the rest of the balance back to the senders address
+    if (totalBalance - amountInSatoshi - feeInSatoshi > 0) {
+      psbt.addOutput({
+        address: options.address,
+        value: totalBalance - amountInSatoshi - feeInSatoshi,
+      });
+    }
+
     await psbt.signAllInputs(new BitcoinTransactionSigner(options.secretKey, options.publicKey));
     await psbt.finalizeAllInputs();
-    const rawTx = psbt.extractTransaction();
-    return rawTx;
+    return psbt.extractTransaction();
   }
 
   async spend(
@@ -255,14 +306,15 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
-    const rawTx = (await this.constructAndSignTx(amount, recipient, options)).toHex();
+    const rawTransaction = (await this.constructAndSignTx(amount, recipient, options)).toHex();
 
+    // Broadcast raw transaction
     const requestOptions = {
       method: 'POST',
       headers: new Headers({
         'Content-Type': 'text/plain',
       }),
-      body: rawTx,
+      body: rawTransaction,
       redirect: 'follow' as RequestRedirect,
     };
 

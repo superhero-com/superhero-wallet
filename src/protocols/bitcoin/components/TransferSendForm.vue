@@ -52,16 +52,20 @@
     <template
       #extra
     >
-      <DetailsItem
-        :label="$t('modals.send.transactionSpeed')"
+      <div
+        v-show="activeNetwork.type !== NETWORK_TYPE_TESTNET"
       >
-        <template #value>
-          <TransactionSpeedPicker
-            :fee-list="feeList"
-            @changeFee="(value) => setFee(value)"
-          />
-        </template>
-      </DetailsItem>
+        <DetailsItem
+          :label="$t('modals.send.transactionSpeed')"
+        >
+          <template #value>
+            <TransactionSpeedPicker
+              :fee-list="feeList"
+              @changeFee="(value) => setFee(value)"
+            />
+          </template>
+        </DetailsItem>
+      </div>
     </template>
   </TransferSendFormBase>
 </template>
@@ -219,7 +223,14 @@ export default defineComponent({
           ).toNumber()))),
           time: 3540,
         },
-        { fee: new BigNumber(toBitcoin(mediumFee.toNumber())), time: 600 },
+        {
+          fee: new BigNumber(toBitcoin(
+            // Double the fee for the testnet to match relay fee.
+            // TODO: Revisit this along with fee calculation
+            mediumFee.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2.0 : 1.0),
+          )),
+          time: 600,
+        },
         {
           fee: new BigNumber(toBitcoin(Math.ceil(mediumFee.plus(
             mediumFee.times(feeStepFactor),
