@@ -250,6 +250,7 @@ export default defineComponent({
 
 .apps-browser {
   height: 100%;
+  overflow: hidden;
 
   .input-url {
     margin: 16px 8px;
@@ -280,9 +281,14 @@ export default defineComponent({
   }
 
   .apps-browser-iframe {
+    --header-height: 40px;
+
     width: 100%;
     height: 100%;
+    overflow: hidden;
     border: none;
+    margin-top: calc(-1 * (var(--header-height) + env(safe-area-inset-top)));
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top));
   }
 }
 </style>
