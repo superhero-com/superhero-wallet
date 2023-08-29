@@ -1,8 +1,9 @@
 <template>
   <a
     :class="['link-button', variant, { underlined }]"
-    :href="to"
+    :href="IS_CORDOVA ? undefined : to"
     target="_blank"
+    @click.prevent="IS_CORDOVA ? onClick() : undefined"
   >
     <slot />
     <span
@@ -18,6 +19,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+
+import { IS_CORDOVA } from '@/constants';
 
 export const LINK_BUTTON_VARIANT = [
   'default',
@@ -35,6 +38,21 @@ export default defineComponent({
       validator: (value: LinkButtonVariant) => LINK_BUTTON_VARIANT.includes(value),
       default: LINK_BUTTON_VARIANT[0],
     },
+  },
+  setup(props) {
+    function onClick() {
+      if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
+        window.cordova.InAppBrowser.open(props.to, '_system');
+      } else {
+        window.open(props.to, '_blank');
+      }
+    }
+
+    return {
+      LINK_BUTTON_VARIANT,
+      IS_CORDOVA,
+      onClick,
+    };
   },
 });
 </script>
