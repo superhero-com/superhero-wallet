@@ -27,8 +27,13 @@
         readonly
         :protocol="PROTOCOL_BITCOIN"
         :validation-rules="{
-          ...+balance.minus(fee) > 0 ? { max_value: max.toString() } : {},
+          ...+balance.minus(fee) > 0
+            ? { max_value: max.toString() }
+            : {},
           enough_coin: [fee.toString(), BTC_SYMBOL],
+          ...activeNetwork.type === NETWORK_TYPE_TESTNET
+            ? {}
+            : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
         }"
         @asset-selected="handleAssetChange"
       >
@@ -85,9 +90,10 @@ import type { TransferFormModel } from '@/types';
 import {
   BTC_COIN_NAME,
   BTC_SYMBOL,
+  DUST_AMOUNT,
 } from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import { NETWORK_TYPE_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
 import {
   executeAndSetInterval,
   fetchJson,
@@ -255,7 +261,9 @@ export default defineComponent({
       INFO_BOX_TYPES,
       BTC_SYMBOL,
       BTC_COIN_NAME,
+      DUST_AMOUNT,
       PROTOCOL_BITCOIN,
+      NETWORK_TYPE_TESTNET,
       hasMultisigTokenWarning,
       formModel,
       isUrlTippingEnabled,
@@ -276,6 +284,7 @@ export default defineComponent({
       PlusCircleIcon,
       submit,
       setMaxAmount,
+      toBitcoin,
     };
   },
 });
