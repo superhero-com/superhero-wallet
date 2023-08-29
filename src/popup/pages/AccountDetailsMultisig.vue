@@ -8,6 +8,7 @@
         :address="activeMultisigAccount.gaAccountId"
         :protocol="PROTOCOL_AETERNITY"
         is-multisig
+        with-protocol-icon
         can-copy-address
       />
     </template>
