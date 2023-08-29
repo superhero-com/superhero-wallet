@@ -49,7 +49,6 @@ export default async function initSdk() {
       try {
         aeSdkBlocked = true;
         await resetNode(oldValue, newValue);
-        store.commit('initTransactions');
       } finally {
         aeSdkBlocked = false;
       }
