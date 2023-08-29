@@ -10,7 +10,10 @@
           :key="address"
           class="account-row"
         >
-          <AccountItem :address="address" />
+          <AccountItem
+            :address="address"
+            :protocol="PROTOCOL_AETERNITY"
+          />
           <DialogBox
             v-if="isLocalAccountAddress(address)"
             class="dialog"
@@ -27,6 +30,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts } from '../../composables';
 
 import DetailsItem from './DetailsItem.vue';
@@ -53,6 +57,7 @@ export default defineComponent({
 
     return {
       isLocalAccountAddress,
+      PROTOCOL_AETERNITY,
     };
   },
 });

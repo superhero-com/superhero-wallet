@@ -22,37 +22,38 @@
       </template>
     </DetailsItem>
 
-    <div class="review-details-row">
-      <DetailsItem :label="$t('multisig.authorizedSigners')">
-        <template #value>
-          <div class="authorized-signers">
-            <div
-              v-for="signer in signers"
-              :key="signer.address"
-              class="authorized-signers-row"
-            >
-              <AccountItem :address="signer.address" />
-              <DialogBox
-                v-if="isLocalAccountAddress(signer.address)"
-                dense
-                v-text="$t('common.you')"
-              />
-            </div>
-          </div>
-        </template>
-      </DetailsItem>
+    <DetailsItem :label="$t('multisig.consensus')">
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <ConsensusLabel
+        :confirmations-required="confirmationsRequired"
+        :signers="signers"
+        :default-confirmed-by="confirmationsRequired"
+      />
+    </DetailsItem>
 
-      <DetailsItem :label="$t('multisig.consensus')">
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <ConsensusLabel
-          :confirmations-required="confirmationsRequired"
-          :signers="signers"
-          :default-confirmed-by="confirmationsRequired"
-        />
-      </DetailsItem>
-    </div>
+    <DetailsItem :label="$t('multisig.authorizedSigners')">
+      <template #value>
+        <div class="authorized-signers">
+          <div
+            v-for="signer in signers"
+            :key="signer.address"
+            class="authorized-signers-row"
+          >
+            <AccountItem
+              :address="signer.address"
+              :protocol="PROTOCOL_AETERNITY"
+            />
+            <DialogBox
+              v-if="isLocalAccountAddress(signer.address)"
+              dense
+              v-text="$t('common.you')"
+            />
+          </div>
+        </div>
+      </template>
+    </DetailsItem>
 
     <LoadingIcon
       v-if="!fee || !callData || !creatorAccountFetched"
@@ -102,7 +103,7 @@ import type {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '@/types';
-import { MODAL_CONSENSUS_INFO } from '@/constants';
+import { MODAL_CONSENSUS_INFO, PROTOCOL_AETERNITY } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { handleUnknownError } from '@/utils';
 import {
@@ -206,6 +207,7 @@ export default defineComponent({
       callData,
       notEnoughBalanceToCreateMultisig,
       openConsensusInfoModal,
+      PROTOCOL_AETERNITY,
     };
   },
 });
@@ -230,11 +232,6 @@ export default defineComponent({
     span {
       font-weight: 500;
     }
-  }
-
-  .review-details-row {
-    display: flex;
-    gap: 20px;
   }
 
   .loading-icon {
