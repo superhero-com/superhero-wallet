@@ -3,17 +3,16 @@
     class="transaction-info-details-party"
     :class="{ recipient: isRecipient }"
   >
-    <a
+    <LinkButton
       v-if="txParty.url || !isRecipient"
-      :href="txParty.url"
-      target="_blank"
+      :to="txParty.url"
       class="name"
     >
       <Truncate
         :right="isRecipient"
         :str="txParty.name || txParty.label || $t('common.fellowSuperhero')"
       />
-    </a>
+    </LinkButton>
     <span
       v-else-if="txParty.wallet"
       class="wallet"
@@ -50,11 +49,13 @@ import type { IAccountOverview } from '@/types';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
+import LinkButton from './LinkButton.vue';
 
 export default defineComponent({
   components: {
     AddressFormatted,
     CopyText,
+    LinkButton,
     Truncate,
   },
   props: {

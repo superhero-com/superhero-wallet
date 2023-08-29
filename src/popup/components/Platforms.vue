@@ -7,26 +7,24 @@
       v-if="IS_MOBILE_DEVICE"
       class="mobile-web-icons"
     >
-      <a
-        :href="APP_LINK_IOS"
-        target="_blank"
+      <LinkButton
+        :to="APP_LINK_IOS"
       >
         <img
           :class="{ grey: !IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/app-store-mobile.svg"
           alt="App Store"
         >
-      </a>
-      <a
-        :href="APP_LINK_ANDROID"
-        target="_blank"
+      </LinkButton>
+      <LinkButton
+        :to="APP_LINK_ANDROID"
       >
         <img
           :class="{ grey: IS_IOS || !IS_MOBILE_DEVICE }"
           src="../../icons/platforms/google-play-mobile.svg"
           alt="Google Play"
         >
-      </a>
+      </LinkButton>
     </div>
     <div
       v-else
@@ -87,10 +85,11 @@ import {
   IS_IOS,
   IS_MOBILE_DEVICE,
 } from '@/constants';
+import LinkButton from '@/popup/components/LinkButton.vue';
 import PlatformIcon from './PlatformIcon.vue';
 
 export default {
-  components: { PlatformIcon },
+  components: { PlatformIcon, LinkButton },
   data: () => ({
     IS_MOBILE_DEVICE,
     IS_IOS,

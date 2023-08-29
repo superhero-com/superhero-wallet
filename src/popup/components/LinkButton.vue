@@ -25,6 +25,7 @@ import { IS_CORDOVA } from '@/constants';
 export const LINK_BUTTON_VARIANT = [
   'default',
   'muted',
+  'simple',
 ] as const;
 
 export type LinkButtonVariant = typeof LINK_BUTTON_VARIANT[number];
@@ -68,7 +69,14 @@ export default defineComponent({
   display: inline-flex;
   gap: 4px;
   align-items: center;
-  color: variables.$color-success;
+
+  &.default {
+    color: variables.$color-success;
+  }
+
+  &.simple {
+    gap: 0;
+  }
 
   .link-icon {
     display: flex;

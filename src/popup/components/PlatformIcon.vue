@@ -1,7 +1,6 @@
 <template>
-  <a
-    :href="to"
-    target="_blank"
+  <LinkButton
+    :to="to"
     class="platform-icon"
   >
     <img
@@ -10,13 +9,17 @@
       :src="src"
       :alt="alt"
     >
-  </a>
+  </LinkButton>
 </template>
 
 <script>
 import { defineComponent } from 'vue';
+import LinkButton from '@/popup/components/LinkButton.vue';
 
 export default defineComponent({
+  components: {
+    LinkButton,
+  },
   props: {
     to: { type: String, required: true },
     src: { type: String, required: true },

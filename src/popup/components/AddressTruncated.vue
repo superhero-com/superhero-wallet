@@ -11,7 +11,6 @@
     <LinkButton
       v-if="showExplorerLink"
       :to="explorerUrl"
-      target="_blank"
       class="external-link"
     >
       <template #icon>
