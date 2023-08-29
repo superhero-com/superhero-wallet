@@ -41,7 +41,12 @@ const router = createRouter({
 
 const lastRouteKey = 'last-path';
 
-const { isLoggedIn, activeAccount, setActiveAccountByGlobalIdx } = useAccounts({ store });
+const {
+  isLoggedIn,
+  activeAccount,
+  setActiveAccountByGlobalIdx,
+  getLastActiveProtocolAccount,
+} = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router, isLoggedIn);
@@ -79,7 +84,8 @@ router.beforeEach(async (to, from, next) => {
 
     // In-app browser only works with AE accounts
     if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-      setActiveAccountByGlobalIdx(0);
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+      setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
       next({ name: ROUTE_APPS_BROWSER });
       return;
     }
