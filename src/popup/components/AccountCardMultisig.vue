@@ -6,6 +6,7 @@
         :protocol="PROTOCOL_AETERNITY"
         is-multisig
         avatar-borderless
+        with-protocol-icon
       />
     </template>
 
