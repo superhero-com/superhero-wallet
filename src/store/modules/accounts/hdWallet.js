@@ -60,10 +60,15 @@ export default {
       const { activeAccount, getAccountByAddress } = useAccounts({
         store: { state: rootState, getters: rootGetters },
       });
-      const { secretKey } = (options?.fromAccount)
+      const { secretKey, protocol } = (options?.fromAccount)
         ? getAccountByAddress(options.fromAccount)
         : activeAccount.value;
-      return sign(data, Buffer.from(secretKey, 'hex'));
+
+      if (protocol === PROTOCOL_AETERNITY) {
+        return sign(data, Buffer.from(secretKey, 'hex'));
+      }
+
+      throw new Error('Unsupported protocol');
     },
     async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();
