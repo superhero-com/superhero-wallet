@@ -62,27 +62,25 @@
       />
     </div>
 
-    <div class="row">
-      <AuthorizedAccounts
-        :address-list="activeMultisigAccount.signers"
-      />
-      <DetailsItem
-        class="details-item"
-        :label="$t('multisig.consensus')"
-      >
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <template #value>
-          <ConsensusLabel
-            :confirmations-required="activeMultisigAccount.confirmationsRequired"
-            :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
-            :confirmed-by="activeMultisigAccount.confirmedBy"
-            :signers="activeMultisigAccount.signers"
-          />
-        </template>
-      </DetailsItem>
-    </div>
+    <DetailsItem
+      class="details-item"
+      :label="$t('multisig.consensus')"
+    >
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <template #value>
+        <ConsensusLabel
+          :confirmations-required="activeMultisigAccount.confirmationsRequired"
+          :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+          :confirmed-by="activeMultisigAccount.confirmedBy"
+          :signers="activeMultisigAccount.signers"
+        />
+      </template>
+    </DetailsItem>
+    <AuthorizedAccounts
+      :address-list="activeMultisigAccount.signers"
+    />
   </div>
 </template>
 
@@ -164,13 +162,8 @@ export default defineComponent({
   }
 
   .row {
-    display: grid;
-    grid-gap: 24px;
-    grid-template-columns: 208px auto;
-  }
-
-  .details-item {
-    width: 100%;
+    display: flex;
+    gap: 24px;
   }
 
   .explorer-link {
