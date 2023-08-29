@@ -1,5 +1,5 @@
-import { isTransactionAex9 } from '../../../src/popup/utils';
-import { transactions } from '../../../src/popup/utils/testsConfig';
+import { STUB_TRANSACTIONS } from '../../../src/constants/stubs';
+import { isTransactionAex9 } from '../../../src/protocols/aeternity/helpers';
 
 const tests = ({
   changeAllowance, createAllowance, transfer, pendingTransfer,
@@ -23,7 +23,7 @@ const tests = ({
 ];
 
 describe('isTransactionAex9', () => {
-  tests(transactions).forEach(({ transaction, result }) => it(
+  tests(STUB_TRANSACTIONS).forEach(({ transaction, result }) => it(
     `should return correct result for ${transaction.tx.type}: ${transaction.tx.function}`,
     () => expect(isTransactionAex9(transaction)).toBe(result),
   ));

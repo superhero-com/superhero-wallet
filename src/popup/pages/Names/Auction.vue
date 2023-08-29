@@ -30,7 +30,8 @@ import {
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { aettosToAe, executeAndSetInterval } from '../../utils';
+import { executeAndSetInterval } from '@/utils';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useMiddleware, useUi } from '../../../composables';
 
 import Tabs from '../../components/tabs/Tabs.vue';
@@ -51,7 +52,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { getMiddleware } = useMiddleware({ store });
+    const { getMiddleware } = useMiddleware();
     const { isAppActive } = useUi();
 
     const loading = ref(true);

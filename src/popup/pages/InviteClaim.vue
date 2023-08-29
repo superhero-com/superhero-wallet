@@ -6,17 +6,15 @@
 import { defineComponent, onMounted } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useModals, useAeSdk } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
-  props: {
-    secretKey: { type: String, required: true },
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
+    const route = useRoute();
     const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
 
@@ -24,8 +22,14 @@ export default defineComponent({
       await getAeSdk();
 
       try {
-        // sg_ prefix was chosen as a dummy to decode from base58Check
-        await store.dispatch('invites/claim', decode(`sg_${props.secretKey}`));
+        // nm_ prefix was chosen as a dummy to decode from base58Check
+        // The secretKey can be retrieved from the URL in two different ways:
+        // current: /invite#${secretKey}
+        // legacy: /invite/${secretKey}
+        await store.dispatch(
+          'invites/claim',
+          decode(`nm_${route.hash ? route.hash.replace('#', '') : route.fullPath.split('/').at(-1)}`),
+        );
         await openDefaultModal({
           msg: 'You have successfully claimed tokens by the invite link',
         });

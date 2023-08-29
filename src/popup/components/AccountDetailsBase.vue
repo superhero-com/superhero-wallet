@@ -4,25 +4,52 @@
     class="account-details"
   >
     <div class="account-info-wrapper">
-      <slot name="account-info" />
-
+      <slot
+        v-if="$slots['account-info']"
+        name="account-info"
+      />
+      <AccountInfo
+        v-else
+        :address="activeAccount.address"
+        :name="activeAccount.name"
+        :idx="activeAccount.idx"
+        :protocol="activeAccount.protocol"
+        can-copy-address
+        with-protocol-icon
+      />
       <BtnClose
         class="close-button"
         :to="{ name: homeRouteName }"
       />
     </div>
     <div>
-      <slot name="balance" />
+      <slot
+        v-if="$slots.balance"
+        name="balance"
+      />
+      <BalanceInfo
+        v-else
+        :balance="balanceNumeric"
+        :protocol="activeAccount.protocol"
+        horizontal-offline-message
+      />
 
       <div class="buttons">
-        <slot name="buttons" />
+        <template v-if="!withoutDefaultButtons">
+          <OpenTransferReceiveModalButton />
+          <OpenTransferSendModalButton />
+        </template>
+        <slot
+          v-if="$slots.buttons"
+          name="buttons"
+        />
       </div>
 
       <div class="header">
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName!"
+          :key="routeName"
           :show-filters="showFilters"
         />
       </div>
@@ -52,27 +79,40 @@ import {
 } from 'vue';
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
+import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/constants';
+
 import {
-  EXTENSION_HEIGHT,
-} from '../utils';
-import {
+  useAccounts,
+  useBalances,
   useTransactionAndTokenFilter,
   useUi,
-} from '../../composables';
-import { IS_CORDOVA } from '../../lib/environment';
-
+} from '@/composables';
+import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
+import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
+import BalanceInfo from '@/popup/components/BalanceInfo.vue';
+import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import TransactionAndTokenFilter from './TransactionAndTokenFilter.vue';
 
 export default defineComponent({
   name: 'AccountDetailsBase',
   components: {
+    AccountInfo,
+    BalanceInfo,
+    OpenTransferSendModalButton,
+    OpenTransferReceiveModalButton,
     TransactionAndTokenFilter,
     BtnClose,
   },
+  props: {
+    withoutDefaultButtons: Boolean,
+  },
   setup() {
     const route = useRoute();
+    const store = useStore();
 
+    const { activeAccount } = useAccounts({ store });
     const ACCOUNT_INFO_HEIGHT = 120;
     const BALANCE_AND_ACTIONS_HEIGHT = 280;
     const accountDetailsElem = ref<HTMLElement>();
@@ -83,6 +123,10 @@ export default defineComponent({
     const { resetFilter } = useTransactionAndTokenFilter();
 
     const { homeRouteName } = useUi();
+
+    const { balance } = useBalances({ store });
+
+    const balanceNumeric = computed(() => balance.value.toNumber());
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => accountDetailsElem.value?.parentElement,
@@ -150,6 +194,8 @@ export default defineComponent({
       showFilters,
       accountDetailsElem,
       routeName,
+      balanceNumeric,
+      activeAccount,
     };
   },
 });

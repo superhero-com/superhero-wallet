@@ -27,7 +27,7 @@
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
           item-title="address"
-          :options="accountsSelectOptions"
+          :options="aeAccountsSelectOptions"
           account-select
         />
         <Field
@@ -180,29 +180,39 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Field, Form, useFormErrors } from 'vee-validate';
+import {
+  Field,
+  Form,
+  useFormErrors,
+} from 'vee-validate';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   MODAL_READ_QR_CODE,
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-  MULTISIG_CREATION_PHASES,
-  validateHash,
-  handleUnknownError,
-  excludeFalsy,
-} from '../../utils';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import {
+  excludeFalsy,
+  handleUnknownError,
+} from '@/utils';
+import type {
   ICreateMultisigAccount,
   ObjectValues,
-} from '../../../types';
-import { ROUTE_MULTISIG_DETAILS_INFO } from '../../router/routeNames';
+} from '@/types';
+import { ROUTE_MULTISIG_DETAILS_INFO } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
   useMultisigAccounts,
-} from '../../../composables';
+} from '@/composables';
+import { validateHash } from '@/protocols/aeternity/helpers';
+import {
+  MULTISIG_CREATION_PHASES,
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+} from '@/protocols/aeternity/config';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
@@ -249,7 +259,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { accountsSelectOptions } = useAccounts({ store });
+    const { aeAccountsSelectOptions } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const errors = useFormErrors();
 
@@ -325,7 +335,10 @@ export default defineComponent({
      */
     async function openScanQrModal(signerIndex: number) {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: t('pages.send.scanAddress'),
+        title: t(
+          'pages.send.scanAddress',
+          { protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY).protocolName },
+        ),
         icon: 'critical',
       });
 
@@ -424,7 +437,7 @@ export default defineComponent({
       MULTISIG_CREATION_PHASES,
       STEPS,
       currentMultisigAccountId,
-      accountsSelectOptions,
+      aeAccountsSelectOptions,
       multisigAccount,
       multisigAccountCreationPhase,
       pendingMultisigCreationTxs,

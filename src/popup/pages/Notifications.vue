@@ -28,10 +28,11 @@ import {
   nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
+import { IS_EXTENSION } from '@/constants';
+
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
-import { IS_EXTENSION } from '../../lib/environment';
 
 export default defineComponent({
   name: 'Notifications',

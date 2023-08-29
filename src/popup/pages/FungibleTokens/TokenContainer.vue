@@ -44,7 +44,7 @@
         v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
         :text="$t('common.swap')"
         :icon="SwapIcon"
-        :href="DEX_URL"
+        :href="AE_DEX_URL"
       />
     </div>
 
@@ -93,12 +93,8 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, ITokenList } from '../../../types';
-import {
-  AETERNITY_CONTRACT_ID,
-  DEX_URL,
-  isContract,
-} from '../../utils';
+import type { IToken, ITokenList } from '@/types';
+import { IS_IOS, PROTOCOL_AETERNITY } from '@/constants';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -106,15 +102,17 @@ import {
   ROUTE_MULTISIG_COIN_DETAILS,
   ROUTE_TOKEN,
   ROUTE_TOKEN_DETAILS,
-} from '../../router/routeNames';
+} from '@/popup/router/routeNames';
 import {
   useAccounts,
-  useCurrencies,
   useAeSdk,
+  useCurrencies,
   useTokensList,
-} from '../../../composables';
-import { useState, useGetter } from '../../../composables/vuex';
-import { IS_IOS } from '../../../lib/environment';
+} from '@/composables';
+import { useState, useGetter } from '@/composables/vuex';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { isContract } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -155,17 +153,17 @@ export default defineComponent({
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
     } = useAccounts({ store });
-    const { aeternityData } = useCurrencies();
     const { aeTokenBalance } = useTokensList({
       store,
       isMultisig: isMultisig.value,
     });
+    const { marketData } = useCurrencies({ store });
 
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = route.params.id as Encoded.ContractAddress | typeof AETERNITY_CONTRACT_ID;
-    const isAe = contractId === AETERNITY_CONTRACT_ID;
+    const contractId = route.params.id as Encoded.ContractAddress | typeof AE_CONTRACT_ID;
+    const isAe = contractId === AE_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
     const transactionRouteName = isCoin ? ROUTE_COIN : ROUTE_TOKEN;
@@ -197,10 +195,9 @@ export default defineComponent({
 
     const tokenData = computed((): IToken => {
       if (isAe) {
-        return {
-          ...aeternityData.value!,
-          convertedBalance: aeTokenBalance.value.toNumber(),
-        };
+        return ProtocolAdapterFactory
+          .getAdapter(PROTOCOL_AETERNITY)
+          .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
       }
       return tokenBalances.value.find(
         (token) => token.contractId === contractId,
@@ -223,11 +220,10 @@ export default defineComponent({
     });
 
     return {
+      AE_DEX_URL,
       BuyIcon,
       SwapIcon,
       FaucetIcon,
-      DEX_URL,
-      AETERNITY_CONTRACT_ID,
       fungibleToken,
       contractId,
       isAe,

@@ -9,7 +9,10 @@
     @open="onModalOpen"
   >
     <template #header>
-      <span class="text-heading-3 title">{{ $t('pages.fungible-tokens.select-asset') }}</span>
+      <span
+        class="text-heading-3 text-muted title"
+        v-text="$t('pages.fungible-tokens.select-asset')"
+      />
       <InputSearch
         v-model="searchTerm"
         class="search-bar"

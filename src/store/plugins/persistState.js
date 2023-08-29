@@ -1,11 +1,11 @@
 import { cloneDeep, isEqual } from 'lodash-es';
-import stateReducer from '../utils';
+import stateReducer from '@/store/utils';
 import {
   PLATFORM,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
   IS_FIREFOX,
-} from '../../lib/environment';
+} from '@/constants';
 
 const KEY = 'state';
 

@@ -51,7 +51,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
-          ae-only
+          readonly
         />
         <div class="centered-buttons">
           <BtnMain
@@ -71,6 +71,7 @@
 </template>
 
 <script lang="ts">
+import nacl from 'tweetnacl';
 import {
   computed,
   defineComponent,
@@ -87,15 +88,21 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { APP_LINK_WEB, formatDate } from '../utils';
-import { ROUTE_INVITE_CLAIM } from '../router/routeNames';
+import type { IFormModel } from '@/types';
+import { formatDate } from '@/utils';
 import {
-  IFormModel,
+  APP_LINK_WEB,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
+import {
   useBalances,
   useMaxAmount,
   useAeSdk,
-} from '../../composables';
+  useCurrencies,
+} from '@/composables';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import TokenAmount from './TokenAmount.vue';
 import InputAmount from './InputAmount.vue';
 import BtnMain from './buttons/BtnMain.vue';
@@ -110,19 +117,22 @@ export default defineComponent({
     Field,
   },
   props: {
-    secretKey: { type: String, required: true },
+    secretKey: { type: Buffer, required: true },
     createdAt: { type: Number, required: true },
   },
   setup(props, { emit }) {
     const store = useStore();
     const router = useRouter();
 
+    const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
-    const { aeternityCoin } = useBalances({ store });
+    const { balance } = useBalances({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',
-      selectedAsset: aeternityCoin.value,
+      selectedAsset: ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData.value!, +balance.value),
     });
     const { max } = useMaxAmount({ formModel, store });
 
@@ -130,17 +140,19 @@ export default defineComponent({
     const inviteLinkBalance = ref(0);
 
     const link = computed(() => {
-      // sg_ prefix was chosen as a dummy to decode from base58Check
-      const secretKey = (encode(Buffer.from(props.secretKey, 'hex'), Encoding.Signature)).slice(3);
+      // nm_ prefix was chosen as a dummy to decode from base58Check
+      const secretKey = (encode(Buffer.from(props.secretKey), Encoding.Name)).slice(3);
       return new URL(
-        router
-          .resolve({ name: ROUTE_INVITE_CLAIM, params: { secretKey } })
-          .href.replace(/^#/, ''),
+        `${router
+          .resolve({ name: ROUTE_INVITE_CLAIM })
+          .href.replace(/^#/, '')}#${secretKey}`,
         APP_LINK_WEB,
       );
     });
 
-    const address = computed(() => getAddressFromPriv(props.secretKey));
+    const address = computed(() => getAddressFromPriv(
+      nacl.sign.keyPair.fromSeed(Buffer.from(props.secretKey)).secretKey,
+    ));
 
     function deleteItem() {
       store.commit('invites/delete', props.secretKey);

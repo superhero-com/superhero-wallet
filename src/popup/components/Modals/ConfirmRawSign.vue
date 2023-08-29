@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('modals.confirm-raw-sign.title')"
       :sender="sender"
-      :recipient="activeAccountExtended"
+      :recipient="activeAccount"
     />
 
     <div
@@ -81,7 +81,7 @@ export default defineComponent({
   setup() {
     const { popupProps, sender, setPopupProps } = usePopupProps();
     const store = useStore();
-    const { activeAccountExtended } = useAccounts({ store });
+    const { activeAccount } = useAccounts({ store });
 
     const dataAsString = computed(
       (): string => (typeof popupProps.value?.data === 'string')
@@ -104,7 +104,7 @@ export default defineComponent({
     return {
       confirm,
       cancel,
-      activeAccountExtended,
+      activeAccount,
       dataAsString,
       sender,
     };

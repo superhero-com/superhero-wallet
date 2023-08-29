@@ -1,7 +1,7 @@
 import { times } from 'lodash-es';
 import { BrowserWindowMessageConnection } from '@aeternity/aepp-sdk';
-import { executeAndSetInterval, handleUnknownError } from '../popup/utils';
-import { AeSdkSupehero } from './AeSdkSupehero';
+import { executeAndSetInterval, handleUnknownError } from '@/utils';
+import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 
 const POLLING_INTERVAL = 3000;
 
@@ -21,7 +21,7 @@ export const FramesConnection = (() => {
     ];
   }
 
-  function init(aeSdk: AeSdkSupehero) {
+  function init(aeSdk: AeSdkSuperhero) {
     initialized = true;
     clearInterval(baseIntervalId);
 

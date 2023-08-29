@@ -1,24 +1,25 @@
 import { watch } from 'vue';
 import {
+  fetchAllPages,
+  fetchJson,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
+import { AUTO_EXTEND_NAME_BLOCKS_INTERVAL, PROTOCOL_AETERNITY } from '@/constants';
+import {
+  useAccounts,
+  useAeSdk,
   useMiddleware,
   useModals,
-  useAeSdk,
-  useAccounts,
   useTransactionList,
 } from '@/composables';
-import {
-  AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
-  fetchJson,
-  postJson,
-  checkAddress,
-  checkAensName,
-  fetchAllPages,
-  isInsufficientBalanceError,
-  handleUnknownError,
-} from '../../popup/utils';
+import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { tg } from './languages';
 
 export default (store) => {
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
+
   const {
     nodeNetworkId,
     getAeSdk,
@@ -30,7 +31,7 @@ export default (store) => {
     getMiddleware,
     getMiddlewareRef,
     fetchFromMiddlewareCamelCased,
-  } = useMiddleware({ store });
+  } = useMiddleware();
 
   const {
     fetchPendingTransactions,
@@ -38,7 +39,11 @@ export default (store) => {
 
   const { openDefaultModal } = useModals();
 
-  const { accounts, activeAccount } = useAccounts({ store });
+  const {
+    aeAccounts,
+    aeNextAccountIdx,
+    getLastActiveProtocolAccount,
+  } = useAccounts({ store });
 
   store.registerModule('names', {
     namespaced: true,
@@ -57,7 +62,7 @@ export default (store) => {
         return defaults[`${address}-${nodeNetworkId.value}`];
       },
       getPreferred: ({ preferred }, { getDefault }) => (address) => {
-        if (activeAccount.value.address === address) {
+        if (getLastActiveProtocolAccount(PROTOCOL_AETERNITY).address === address) {
           return getDefault(address);
         }
         store.dispatch('names/setPreferred', address);
@@ -122,7 +127,7 @@ export default (store) => {
 
         const middleware = await getMiddleware();
         const names = await Promise.all(
-          accounts.value.map(({ address }) => Promise.all([
+          aeAccounts.value.map(({ address }) => Promise.all([
             fetchPendingNameClaimTransactions(address),
             fetchAllPages(
               () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
@@ -188,20 +193,20 @@ export default (store) => {
         }
       },
       async setDefaults(
-        { rootGetters: { activeNetwork }, commit },
+        { commit },
       ) {
-        await Promise.all(accounts.value.map(async ({ address }) => {
+        await Promise.all(aeAccounts.value.map(async ({ address }) => {
           const response = await fetchJson(
-            `${activeNetwork.backendUrl}/profile/${address}`,
+            `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
           ).catch(() => {});
           commit('setDefault', { address, name: response?.preferredChainName });
         }));
       },
       async setDefault(
-        { commit, rootGetters: { activeNetwork } },
+        { commit },
         { name, address },
       ) {
-        const response = await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+        const response = await postJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`, {
           body: {
             preferredChainName: name,
           },
@@ -209,14 +214,14 @@ export default (store) => {
 
         const respondChallenge = await fetchRespondChallenge(response);
 
-        await postJson(`${activeNetwork.backendUrl}/profile/${address}`, {
+        await postJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`, {
           body: respondChallenge,
         });
         commit('setDefault', { name, address });
       },
       async getAddress(context, id) {
         if (checkAddress(id)) return id;
-        if (checkAensName(id)) {
+        if (isAensNameValid(id)) {
           const middleware = await getMiddleware();
           const { info: nameEntry } = await middleware.getName(id);
           return nameEntry.pointers?.accountPubkey;
@@ -224,10 +229,9 @@ export default (store) => {
         return '';
       },
       async setPreferred({
-        rootGetters: { activeNetwork },
         commit,
       }, address) {
-        const response = await fetchJson(`${activeNetwork.backendUrl}/profile/${address}`).catch(() => {});
+        const response = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`).catch(() => {});
         if (response?.preferredChainName) {
           commit('setPreferred', { address, name: response?.preferredChainName });
         } else {
@@ -256,9 +260,9 @@ export default (store) => {
   }, { immediate: true, deep: true });
 
   store.watch(
-    ({ accounts: { hdWallet: { nextAccountIdx } } }) => nextAccountIdx,
-    async () => {
-      if (isMiddlewareReady.value) {
+    () => aeNextAccountIdx.value,
+    async (val, oldVal) => {
+      if (isMiddlewareReady.value && val !== oldVal) {
         await Promise.all([
           store.dispatch('names/fetchOwned').catch(() => {}),
           store.dispatch('names/setDefaults'),

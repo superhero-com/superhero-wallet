@@ -4,16 +4,33 @@ import {
   nextTick,
   ref,
 } from 'vue';
-import { TranslateResult } from 'vue-i18n';
-import { RejectCallback, ResolveCallback, StatusIconType } from '../types';
-import { handleUnknownError, MODAL_DEFAULT, MODAL_ERROR_LOG } from '../popup/utils';
-import { IN_FRAME, IS_WEB } from '../lib/environment';
-import { ROUTE_WEB_IFRAME_POPUP } from '../popup/router/routeNames';
+import type {
+  ProtocolView,
+  RejectCallback,
+  ResolveCallback,
+  StatusIconType,
+} from '@/types';
+import {
+  IN_FRAME,
+  IS_WEB,
+  MODAL_CONFIRM,
+  MODAL_DEFAULT,
+  MODAL_ERROR_LOG,
+} from '@/constants';
+import { handleUnknownError } from '@/utils';
+import { ROUTE_WEB_IFRAME_POPUP } from '@/popup/router/routeNames';
 import { usePopupProps } from './popupProps';
 
+/**
+ * Settings used when registering the modal.
+ */
 interface IModalSettings {
   component?: Component;
   showInPopupIfWebFrame?: boolean;
+  /**
+   * Usable only with `ProtocolSpecificView` passed to the `component` property.
+   */
+  viewComponentName?: ProtocolView;
 }
 
 interface IModalProps {
@@ -23,6 +40,9 @@ interface IModalProps {
   show?: boolean;
 }
 
+/**
+ * Params passed to the modal when trying to open it.
+ */
 interface IOpenModalParams {
   name: string;
   key: number;
@@ -138,13 +158,19 @@ export function useModals() {
   }
 
   function openDefaultModal(options: {
-    title?: string | TranslateResult;
-    msg?: string | TranslateResult;
+    title?: string;
+    msg?: string;
     icon?: StatusIconType;
-    buttonMessage?: string | TranslateResult;
+    buttonMessage?: string;
     textCenter?: boolean;
   }) {
     return openModal(MODAL_DEFAULT, options);
+  }
+
+  function openConfirmModal(options: {
+    msg?: string;
+  }) {
+    return openModal(MODAL_CONFIRM, options);
   }
 
   function openErrorModal(entry: Record<string, any>) {
@@ -156,6 +182,7 @@ export function useModals() {
     registerModal,
     openModal,
     openDefaultModal,
+    openConfirmModal,
     openErrorModal,
     closeModalByKey,
   };

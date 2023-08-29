@@ -24,8 +24,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import { MODAL_TRANSFER_SEND } from '../utils';
-import { useModals } from '../../composables';
+import { MODAL_TRANSFER_SEND } from '@/constants';
+import { useModals } from '@/composables';
 
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';

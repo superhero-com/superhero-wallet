@@ -1,39 +1,48 @@
 import BigNumber from 'bignumber.js';
 import getters from '../../../src/store/getters';
-import { transactions } from '../../../src/popup/utils/testsConfig';
-import { TX_DIRECTION, AETERNITY_COIN_PRECISION, STUB_TOKEN_CONTRACT_ADDRESS } from '../../../src/popup/utils';
+import { TX_DIRECTION } from '../../../src/constants';
+import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
+import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
 
 const TEST_TOKEN_DECIMALS = 12;
 
 const tests = [{
-  transaction: transactions.payForGaAttach,
-  resultSent: new BigNumber(transactions.payForGaAttach.tx.fee)
-    .plus(transactions.payForGaAttach.tx.tx.tx.fee).shiftedBy(-AETERNITY_COIN_PRECISION),
+  transaction: STUB_TRANSACTIONS.payForGaAttach,
+  resultSent: new BigNumber(STUB_TRANSACTIONS.payForGaAttach.tx.fee)
+    .plus(STUB_TRANSACTIONS.payForGaAttach.tx.tx.tx.fee).shiftedBy(-AE_COIN_PRECISION),
   resultReceived: 0,
 }, {
-  transaction: transactions.gaMetaSpend,
-  resultSent: new BigNumber(transactions.gaMetaSpend.tx.tx.tx.amount)
-    .plus(transactions.gaMetaSpend.tx.tx.tx.fee)
-    .plus(transactions.gaMetaSpend.tx.fee)
-    .shiftedBy(-AETERNITY_COIN_PRECISION),
-  resultReceived: new BigNumber(transactions.gaMetaSpend.tx.tx.tx.amount)
-    .shiftedBy(-AETERNITY_COIN_PRECISION),
+  transaction: STUB_TRANSACTIONS.gaMetaSpend,
+  resultSent: new BigNumber(STUB_TRANSACTIONS.gaMetaSpend.tx.tx.tx.amount)
+    .plus(STUB_TRANSACTIONS.gaMetaSpend.tx.tx.tx.fee)
+    .plus(STUB_TRANSACTIONS.gaMetaSpend.tx.fee)
+    .shiftedBy(-AE_COIN_PRECISION),
+  resultReceived: new BigNumber(STUB_TRANSACTIONS.gaMetaSpend.tx.tx.tx.amount)
+    .shiftedBy(-AE_COIN_PRECISION),
 }, {
-  transaction: transactions.nameClaim,
-  resultSent: new BigNumber(transactions.nameClaim.tx.fee)
-    .plus(transactions.nameClaim.tx.nameFee).shiftedBy(-AETERNITY_COIN_PRECISION),
+  transaction: STUB_TRANSACTIONS.nameClaim,
+  resultSent: new BigNumber(STUB_TRANSACTIONS.nameClaim.tx.fee)
+    .plus(STUB_TRANSACTIONS.nameClaim.tx.nameFee).shiftedBy(-AE_COIN_PRECISION),
 },
-...[transactions.spend, transactions.tip, transactions.retip, transactions.claim]
+...[
+  STUB_TRANSACTIONS.spend,
+  STUB_TRANSACTIONS.tip,
+  STUB_TRANSACTIONS.retip,
+  STUB_TRANSACTIONS.claim,
+]
   .map((transaction) => ({
     transaction,
     resultSent: new BigNumber(transaction.tx.amount)
       .plus(transaction.tx.fee)
-      .shiftedBy(-AETERNITY_COIN_PRECISION),
-    resultReceived: new BigNumber(transaction.tx.amount).shiftedBy(-AETERNITY_COIN_PRECISION),
+      .shiftedBy(-AE_COIN_PRECISION),
+    resultReceived: new BigNumber(transaction.tx.amount).shiftedBy(-AE_COIN_PRECISION),
   })),
 ...[
-  transactions.transfer, transactions.createAllowance,
-  transactions.changeAllowance, transactions.tipToken, transactions.retipToken,
+  STUB_TRANSACTIONS.transfer,
+  STUB_TRANSACTIONS.createAllowance,
+  STUB_TRANSACTIONS.changeAllowance,
+  STUB_TRANSACTIONS.tipToken,
+  STUB_TRANSACTIONS.retipToken,
 ].map((transaction) => ({
   transaction,
   resultSent: new BigNumber(transaction.tx.arguments[transaction.tx.arguments.length - 1].value)

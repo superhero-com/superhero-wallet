@@ -3,8 +3,10 @@
     <template #top>
       <AccountInfo
         :address="account.gaAccountId"
+        :protocol="PROTOCOL_AETERNITY"
         is-multisig
         avatar-borderless
+        with-protocol-icon
       />
     </template>
 
@@ -30,6 +32,7 @@ import {
   PropType,
 } from 'vue';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
 import AccountInfo from './AccountInfo.vue';
@@ -65,8 +68,9 @@ export default defineComponent({
     );
 
     return {
-      isPendingAccount,
+      PROTOCOL_AETERNITY,
       ROUTE_MULTISIG_DETAILS,
+      isPendingAccount,
     };
   },
 });

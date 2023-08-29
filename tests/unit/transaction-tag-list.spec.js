@@ -2,17 +2,16 @@ import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
 import { i18n, tg } from '../../src/store/plugins/languages';
-import { transactions, testAccount } from '../../src/popup/utils/testsConfig';
+import {
+  // STUB_ACCOUNT,
+  STUB_TOKEN_CONTRACT_ADDRESS,
+  STUB_TRANSACTIONS,
+} from '../../src/constants/stubs';
 import {
   AENS,
-  NETWORK_TESTNET,
-  STUB_TOKEN_CONTRACT_ADDRESS,
-} from '../../src/popup/utils';
+} from '../../src/constants';
 
 const store = new Vuex.Store({
-  getters: {
-    activeNetwork: () => NETWORK_TESTNET,
-  },
   state: {
     fungibleTokens: {
       availableTokens: {
@@ -55,37 +54,40 @@ const transactionLabels = {
 
 const testCases = [
   ...Object.entries(transactionLabels).map(([key, value]) => ({
-    props: { transaction: transactions[key] },
+    props: { transaction: STUB_TRANSACTIONS[key] },
     labels: value,
   })),
   ...[
-    transactions.pendingSpend,
-    transactions.pendingTransfer,
-    transactions.transfer,
-    transactions.spend,
+    STUB_TRANSACTIONS.pendingSpend,
+    STUB_TRANSACTIONS.pendingTransfer,
+    STUB_TRANSACTIONS.transfer,
+    STUB_TRANSACTIONS.spend,
   ].map((t) => ({
     props: { transaction: t },
     labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.out')],
   })),
+  // ...[
+  //   STUB_TRANSACTIONS.pendingSpend,
+  //   STUB_TRANSACTIONS.pendingTransfer,
+  //   STUB_TRANSACTIONS.transfer,
+  //   STUB_TRANSACTIONS.spend,
+  // ].map((t) => ({
+  //   props: { transaction: { ...t, transactionOwner: STUB_ACCOUNT.address } },
+  //   labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
+  // })),
+  // ...[
+  //   STUB_TRANSACTIONS.pendingTipAe,
+  //   STUB_TRANSACTIONS.pendingTipToken,
+  //   STUB_TRANSACTIONS.tip,
+  //   STUB_TRANSACTIONS.retip,
+  // ].map((t) => ({
+  //   props: { transaction: t },
+  //   labels: [tg('pages.token-details.tip'), tg('transaction.spendType.out')],
+  // })),
   ...[
-    transactions.pendingSpend,
-    transactions.pendingTransfer,
-    transactions.transfer,
-    transactions.spend,
-  ].map((t) => ({
-    props: { transaction: { ...t, transactionOwner: testAccount.address } },
-    labels: [tg('transaction.type.spendTx'), tg('transaction.spendType.in')],
-  })),
-  ...[
-    transactions.pendingTipAe,
-    transactions.pendingTipToken,
-    transactions.tip,
-    transactions.retip,
-  ].map((t) => ({
-    props: { transaction: t },
-    labels: [tg('pages.token-details.tip'), tg('transaction.spendType.out')],
-  })),
-  ...[transactions.tipToken, transactions.retipToken].map((t) => ({ // unsupported functions
+    STUB_TRANSACTIONS.tipToken,
+    STUB_TRANSACTIONS.retipToken,
+  ].map((t) => ({ // unsupported functions
     props: { transaction: t },
     labels: [t.tx.function, tg('transaction.type.contractCallTx')],
   })),

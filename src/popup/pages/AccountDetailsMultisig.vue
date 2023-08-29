@@ -1,9 +1,14 @@
 <template>
-  <AccountDetailsBase v-if="activeMultisigAccount">
+  <AccountDetailsBase
+    v-if="activeMultisigAccount"
+    without-default-buttons
+  >
     <template #account-info>
       <AccountInfo
         :address="activeMultisigAccount.gaAccountId"
+        :protocol="PROTOCOL_AETERNITY"
         is-multisig
+        with-protocol-icon
         can-copy-address
       />
     </template>
@@ -32,8 +37,9 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useMultisigAccounts } from '../../composables';
-import { buildSimplexLink } from '../utils';
+import { useMultisigAccounts } from '@/composables';
+import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -66,6 +72,7 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,

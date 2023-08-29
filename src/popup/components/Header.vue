@@ -47,6 +47,8 @@
         <NetworkButton />
 
         <template v-if="isLoggedIn">
+          <AppsBrowserBtn v-if="IS_CORDOVA" />
+
           <NotificationsIcon />
 
           <BtnIcon
@@ -65,6 +67,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { IS_CORDOVA } from '@/constants';
 import { WalletRouteMeta } from '../../types';
 import {
   ROUTE_ACCOUNT,
@@ -82,10 +85,12 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
+import AppsBrowserBtn from './AppsBrowserBtn.vue';
 
 export default defineComponent({
   components: {
     NetworkButton,
+    AppsBrowserBtn,
     NotificationsIcon,
     BtnClose,
     BtnPlain,
@@ -178,6 +183,7 @@ export default defineComponent({
       ThreeDotsIcon,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
+      IS_CORDOVA,
       isLoggedIn,
       showHeaderNavigation,
       isLogoDisabled,

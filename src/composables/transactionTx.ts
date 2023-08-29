@@ -1,39 +1,43 @@
 import { computed, ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
-  IAccountOverview,
+  IAccount,
   IDefaultComposableOptions,
-  INetwork,
   ITokenList,
   ITx,
   ObjectValues,
   TxFunctionRaw,
   TxType,
-} from '../types';
+} from '@/types';
 import {
-  TRANSACTION_OWNERSHIP_STATUS,
-  TX_DIRECTION,
-  TX_FUNCTIONS_MULTISIG,
-  TX_FUNCTION_TRANSLATIONS,
-  TX_FUNCTIONS,
-  TX_TYPE_TRANSLATIONS,
-  TX_TYPE_LIST_TRANSLATIONS,
+  includes,
+  getTxFunctionLabel,
+  getTxTypeLabel,
+  getTxTypeListLabel,
+} from '@/utils';
+import { TX_DIRECTION } from '@/constants';
+import {
+  AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
+  TX_FUNCTIONS,
+  TX_FUNCTIONS_MULTISIG,
+} from '@/protocols/aeternity/config';
+import {
   getInnerTransaction,
   getOwnershipStatus,
   getTxDirection,
-  getTxTag,
   getTxOwnerAddress,
-  includes,
+  getTxTag,
   isContainingNestedTx,
   isTxDex,
   isTxFunctionDexAddLiquidity,
   isTxFunctionDexAllowance,
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
-} from '../popup/utils';
+} from '@/protocols/aeternity/helpers';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
+import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
   tx?: ITx;
@@ -46,13 +50,13 @@ export function useTransactionTx({
   externalAddress,
 }: UseTransactionOptions) {
   const { dexContracts } = useAeSdk({ store });
-  const { accounts, activeAccount, activeAccountExtended } = useAccounts({ store });
+  const { accounts, activeAccount } = useAccounts({ store });
+  const { tippingContractAddresses } = useTippingContracts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
@@ -70,31 +74,25 @@ export function useTransactionTx({
    * Transaction TX type value converted into human readable label
    * displayed on the transaction details page.
    */
-  const txTypeLabel = computed((): string => {
-    const translateFunc = (txType.value) ? TX_TYPE_TRANSLATIONS[txType.value] : null;
-    return translateFunc ? translateFunc() : '';
-  });
+  const txTypeLabel = computed((): string => txType.value ? getTxTypeLabel(txType.value) : '');
 
   /**
    * Transaction TX type value converted into human readable label
    * displayed on the transaction lists.
    */
   const txTypeListLabel = computed((): string => {
-    const translateFunc = (txType.value)
-      ? TX_TYPE_LIST_TRANSLATIONS[txType.value]
-      : null;
-    return translateFunc ? translateFunc() : txTypeLabel.value;
+    const listTranslation = (txType.value) ? getTxTypeListLabel(txType.value) : '';
+    return listTranslation ?? txTypeLabel.value;
   });
 
   /**
    * Transaction TX function value converted into human readable label
    */
-  const txFunctionLabel = computed((): string => {
-    const translateFunc = (outerTx.value?.function)
-      ? TX_FUNCTION_TRANSLATIONS[outerTx.value.function as TxFunctionRaw]
-      : null;
-    return translateFunc ? translateFunc() : '';
-  });
+  const txFunctionLabel = computed(
+    (): string => (outerTx.value?.function)
+      ? getTxFunctionLabel(outerTx.value.function as TxFunctionRaw)
+      : '',
+  );
 
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
 
@@ -128,7 +126,7 @@ export function useTransactionTx({
     innerTx.value?.contractId
     && innerTx.value?.function
     && includes(
-      [activeNetwork.value.tipContractV1, activeNetwork.value.tipContractV2!],
+      [tippingContractAddresses.value.tippingV1!, tippingContractAddresses.value.tippingV2!],
       innerTx.value.contractId,
     )
     && includes(
@@ -159,7 +157,7 @@ export function useTransactionTx({
         outerTx.value?.payerId ? outerTx.value : innerTx.value,
         externalAddress
         || (
-          ownershipStatus.value !== TRANSACTION_OWNERSHIP_STATUS.current
+          ownershipStatus.value !== AE_TRANSACTION_OWNERSHIP_STATUS.current
           && txOwnerAddress.value
         )
         || activeAccount.value.address,
@@ -175,22 +173,22 @@ export function useTransactionTx({
     ownerAddress.value = address;
   }
 
-  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
+  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccount {
     switch (ownershipStatus.value) {
-      case TRANSACTION_OWNERSHIP_STATUS.current:
-        return activeAccountExtended.value;
-      case TRANSACTION_OWNERSHIP_STATUS.subAccount: {
+      case AE_TRANSACTION_OWNERSHIP_STATUS.current:
+        return activeAccount.value;
+      case AE_TRANSACTION_OWNERSHIP_STATUS.subAccount: {
         const { accountId, callerId } = innerTx.value || {};
 
         return accounts.value.find(({ address }) => [accountId, callerId].includes(address))!;
       }
       default: {
-        const address = externalOwnerAddress || txOwnerAddress.value;
+        const address = externalOwnerAddress || txOwnerAddress.value!;
 
         return {
           name: getPreferredName.value(address) || '',
           address,
-        };
+        } as IAccount; // TODO establish the required return type for the function
       }
     }
   }

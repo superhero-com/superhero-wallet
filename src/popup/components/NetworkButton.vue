@@ -1,10 +1,10 @@
 <template>
   <BtnPill
-    :to="{ name: ROUTE_NETWORK_SETTINGS }"
     class="network-button"
     with-hover-effects
     dense
     hollow
+    @click.prevent="openNetworkSwitcherModal()"
   >
     <div
       class="circle"
@@ -20,10 +20,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import type { INetwork } from '../../types';
-import { useGetter } from '../../composables/vuex';
-import { useConnection, useAeSdk } from '../../composables';
-import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
+import { MODAL_NETWORK_SWITCHER } from '@/constants';
+import {
+  useConnection,
+  useAeSdk,
+  useNetworks,
+  useModals,
+} from '@/composables';
 
 import BtnPill from './buttons/BtnPill.vue';
 
@@ -34,15 +37,20 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { isOnline } = useConnection();
+    const { activeNetwork } = useNetworks();
+    const { openModal } = useModals();
     const { isNodeReady, isNodeError } = useAeSdk({ store });
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+
+    function openNetworkSwitcherModal() {
+      return openModal(MODAL_NETWORK_SWITCHER);
+    }
 
     return {
       isOnline,
       isNodeReady,
       isNodeError,
       activeNetwork,
-      ROUTE_NETWORK_SETTINGS,
+      openNetworkSwitcherModal,
     };
   },
 });

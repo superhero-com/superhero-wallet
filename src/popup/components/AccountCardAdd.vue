@@ -1,5 +1,5 @@
 <template>
-  <button
+  <BtnBase
     class="account-card-add"
     @click="openCreateAccountModal()"
   >
@@ -18,18 +18,20 @@
           : $t('pages.accounts.addAccountDescription')
       }}
     </span>
-  </button>
+  </BtnBase>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_ACCOUNT_CREATE } from '../utils';
-import { useModals } from '../../composables';
+import { MODAL_ACCOUNT_CREATE } from '@/constants';
+import { useModals } from '@/composables';
 
+import BtnBase from '@/popup/components/buttons/BtnBase.vue';
 import PlusCircle from '../../icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
+    BtnBase,
     PlusCircle,
   },
   props: {

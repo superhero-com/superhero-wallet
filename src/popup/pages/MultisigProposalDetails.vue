@@ -35,7 +35,9 @@
             underlined
           >
             {{ $t('pages.transactionDetails.explorer') }}
-            <ExternalLink />
+            <template #icon>
+              <ExternalLink />
+            </template>
           </LinkButton>
         </div>
         <div class="data-grid">
@@ -100,7 +102,7 @@
 
           <PayloadDetails
             v-if="multisigTx"
-            :payload="getPayload({ tx: multisigTx }, true)"
+            :payload="getTransactionPayload(multisigTx)"
           />
 
           <div class="span-3-columns">
@@ -142,7 +144,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.gasPrice)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -159,7 +161,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(multisigTx.fee)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -171,7 +173,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.fee)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
               />
             </template>
           </DetailsItem>
@@ -184,7 +186,7 @@
             <template #value>
               <TokenAmount
                 :amount="+aettosToAe(totalSpent)"
-                :symbol="AETERNITY_SYMBOL"
+                :symbol="AE_SYMBOL"
                 high-precision
               />
             </template>
@@ -272,33 +274,34 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
 
-import {
-  formatDate,
-  formatTime,
-  aettosToAe,
-  splitAddress,
-  AETERNITY_SYMBOL,
-  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  TX_FUNCTIONS_MULTISIG,
-  getPayload,
-  blocksToRelativeTime,
-  isInsufficientBalanceError,
-} from '../utils';
 import type {
   IGAMetaTx,
   TxFunctionMultisig,
   ITransaction,
   ITx,
-} from '../../types';
+} from '@/types';
+import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/constants';
+import {
+  blocksToRelativeTime,
+  formatDate,
+  formatTime,
+  splitAddress,
+} from '@/utils';
 import {
   useAccounts,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
   useModals,
-} from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+} from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
+import {
+  aettosToAe,
+  getTransactionPayload,
+  isInsufficientBalanceError,
+} from '@/protocols/aeternity/helpers';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -514,14 +517,14 @@ export default defineComponent({
     onBeforeUnmount(stopFetchingAdditionalInfo);
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,
       transaction,
       totalSpent,
       getTxSymbol,
-      getPayload,
+      getTransactionPayload,
       splitAddress,
       aettosToAe,
       formatDate,

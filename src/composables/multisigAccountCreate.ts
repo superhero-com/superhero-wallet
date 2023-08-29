@@ -15,16 +15,18 @@ import type {
   IMultisigAccount,
   IMultisigCreationPhase,
   IRawMultisigAccount,
-} from '../types';
-import { useAeSdk } from './aeSdk';
+} from '@/types';
+import { DEFAULT_WAITING_HEIGHT } from '@/constants';
+import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import {
-  DEFAULT_WAITING_HEIGHT,
   MULTISIG_CREATION_PHASES,
   MULTISIG_SIMPLE_GA_BYTECODE,
-  SUPPORTED_MULTISIG_CONTRACT_VERSION,
+  MULTISIG_SUPPORTED_CONTRACT_VERSION,
+} from '@/protocols/aeternity/config';
+import {
   aettosToAe,
-} from '../popup/utils';
-import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
+} from '@/protocols/aeternity/helpers';
+import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
 
@@ -208,7 +210,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         proposedBy: '' as any,
         refusedBy: [],
         txHash: undefined, // set from propose
-        version: SUPPORTED_MULTISIG_CONTRACT_VERSION,
+        version: MULTISIG_SUPPORTED_CONTRACT_VERSION,
         expirationHeight: 0,
         signerId: signers[0],
         height: -1,

@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('pages.popupMessageSign.title')"
       :sender="sender"
-      :recipient="activeAccountExtended"
+      :recipient="activeAccount"
     />
 
     <div
@@ -48,8 +48,9 @@
 <script lang="ts">
 import { defineComponent, onUnmounted } from 'vue';
 import { useStore } from 'vuex';
-import { RejectedByUserError } from '../../../lib/errors';
-import { useAccounts, usePopupProps } from '../../../composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { RejectedByUserError } from '@/lib/errors';
+import { useAccounts, usePopupProps } from '@/composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -67,8 +68,10 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const { activeAccountExtended } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     function cancel() {
       popupProps.value?.reject(new RejectedByUserError());
@@ -79,7 +82,7 @@ export default defineComponent({
     });
 
     return {
-      activeAccountExtended,
+      activeAccount,
       popupProps,
       sender,
       cancel,
@@ -89,8 +92,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .message-sign {
   .transaction-info {

@@ -4,7 +4,10 @@
     data-cy="balance-info"
   >
     <template v-if="isOnline">
-      <AeBalance :balance="balance" />
+      <MainBalance
+        :balance="balance"
+        :protocol="protocol"
+      />
       <div class="display-value">
         {{ currencyFormatted }}
       </div>
@@ -19,22 +22,31 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { useConnection, useCurrencies } from '../../composables';
-import AeBalance from './AeBalance.vue';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import { useStore } from 'vuex';
+import type { Protocol } from '@/types';
+import { useConnection, useCurrencies } from '@/composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import MainBalance from './MainBalance.vue';
 import MessageOffline from './MessageOffline.vue';
 
 export default defineComponent({
   components: {
-    AeBalance,
+    MainBalance,
     MessageOffline,
   },
   props: {
     balance: { type: Number, required: true },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     horizontalOfflineMessage: Boolean,
   },
   setup(props) {
-    const { getFormattedFiat } = useCurrencies();
+    const store = useStore();
+    const { getFormattedFiat } = useCurrencies({ store, selectedProtocol: props.protocol });
     const { isOnline } = useConnection();
 
     const currencyFormatted = computed(() => getFormattedFiat(props.balance));

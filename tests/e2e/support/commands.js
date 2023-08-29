@@ -2,14 +2,18 @@ import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import { mnemonicToSeed } from '@aeternity/bip39';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
-import { STUB_CURRENCY, testAccount } from '../../../src/popup/utils/testsConfig';
+import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
 import {
   formatDate,
   formatTime,
+} from '../../../src/utils';
+import {
   LOCAL_STORAGE_PREFIX,
-  NETWORK_ID_TESTNET,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
-} from '../../../src/popup/utils';
+} from '../../../src/constants';
+import {
+  AE_NETWORK_MAINNET_ID,
+} from '../../../src/protocols/aeternity/config';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 import runMigrations from '../../../src/store/migrations';
 
@@ -19,7 +23,7 @@ export async function getLoginState({
   name,
   network,
 }) {
-  const { mnemonic, address } = testAccount;
+  const { mnemonic, address } = STUB_ACCOUNT;
   const account = {
     address,
     privateKey: mnemonicToSeed(mnemonic).toString('hex'),
@@ -31,7 +35,7 @@ export async function getLoginState({
     backedUpSeed,
     current: { network: network || 'Testnet' },
     balance,
-    ...(name && { names: { defaults: { [`${account.address}-${NETWORK_ID_TESTNET}`]: name } } }),
+    ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
   };
 }
 
@@ -39,7 +43,7 @@ export function preparePendingTransactionToLocalStorage(pendingTransaction) {
   const { address } = testAccount;
 
   return {
-    [address]: { loaded: [], pending: { [NETWORK_ID_TESTNET]: [pendingTransaction] } },
+    [address]: { loaded: [], pending: { [AE_NETWORK_MAINNET_ID]: [pendingTransaction] } },
   };
 }
 
@@ -104,7 +108,7 @@ Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = 
       const localStorageKey = [
         LOCAL_STORAGE_PREFIX,
         TRANSACTIONS_LOCAL_STORAGE_KEY,
-        NETWORK_ID_TESTNET,
+        AE_NETWORK_MAINNET_ID,
       ].join('_');
 
       // eslint-disable-next-line no-param-reassign
@@ -135,7 +139,7 @@ Cypress.Commands.add('openTip', () => {
     .should('be.visible');
 });
 
-Cypress.Commands.add('openWithdraw', () => {
+Cypress.Commands.add('openSendModal', () => {
   cy.get('[data-cy=send]').click();
 });
 
@@ -238,40 +242,43 @@ Cypress.Commands.add('openNetworks', () => {
     .urlEquals('/more/settings/networks');
 });
 
-Cypress.Commands.add('enterNetworkDetails', (network, url, middleware, compiler) => {
+/**
+ * For the values of the `data-cy` for particular fields please go to `AeternityAdapter`
+ * and look for `testId` within the `networkSettings`.
+ */
+Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl, compilerUrl) => {
   cy.get('[data-cy=network-form]')
     .should('be.visible')
-    .get('[data-cy=network] input')
+    .getInputByTestId('network-name')
     .clear()
-    .type(network)
-    .get('[data-cy=url] input')
+    .type(name)
+    .getInputByTestId('ae-node-url')
     .clear()
-    .type(url)
-    .get('[data-cy=middleware] input')
+    .type(nodeUrl)
+    .getInputByTestId('ae-middleware-url')
     .clear()
-    .type(middleware)
-    .get('[data-cy=compiler] input')
+    .type(middlewareUrl)
+    .getInputByTestId('ae-compiler-url')
     .clear()
-    .type(compiler);
+    .type(compilerUrl);
 });
 
-Cypress.Commands.add('addNetwork', (network, url, middleware, compiler) => {
+Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl, compilerUrl) => {
   cy.get('[data-cy=to-add]')
     .click()
-    .getByTestId('connect')
+    .getByTestId('btn-add-network')
     .should('be.visible')
-    .buttonShouldBeDisabled('[data-cy=connect]')
-    .enterNetworkDetails(network, url, middleware, compiler)
-    .getByTestId('connect')
+    .enterNetworkDetails(name, nodeUrl, middlewareUrl, compilerUrl)
+    .getByTestId('btn-add-network')
     .click()
     .getByTestId('networks')
     .should('be.visible')
-    .get('[data-cy=network-name]')
-    .should('contain', network)
-    .get('[data-cy=network-url]')
-    .should('contain', url)
-    .get('[data-cy=network-middleware]')
-    .should('contain', middleware);
+    .getInputByTestId('network-name')
+    .should('contain', name)
+    .getInputByTestId('ae-node-url')
+    .should('contain', nodeUrl)
+    .getInputByTestId('ae-middleware-url')
+    .should('contain', middlewareUrl);
 });
 
 Cypress.Commands.add('openTransactions', () => {

@@ -4,6 +4,7 @@
       :address="activeAccount.address"
       :name="activeAccount.name"
       :idx="activeAccount.idx"
+      :protocol="activeAccount.protocol"
     />
 
     <div class="header">
@@ -17,7 +18,7 @@
         :msg="$t('modals.verify.msg')"
         :option="{
           attrs: {
-            href: BLOG_CLAIM_TIP_URL,
+            href: AE_BLOG_CLAIM_TIP_URL,
             target: '_blank'
           },
         }"
@@ -53,21 +54,18 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import {
-  BLOG_CLAIM_TIP_URL,
-  MODAL_CLAIM_SUCCESS,
-  aettosToAe,
-  toURL,
-  validateTipUrl,
-} from '../utils';
-import { IS_EXTENSION } from '../../lib/environment';
+import { isUrlValid, toURL } from '@/utils';
+import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/constants';
 import {
   useAccounts,
   useModals,
   useAeSdk,
   useTippingContracts,
-} from '../../composables';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+} from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -95,7 +93,7 @@ export default defineComponent({
     const loading = ref(false);
 
     const normalizedUrl = computed(
-      () => validateTipUrl(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
+      () => isUrlValid(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
     );
 
     async function claimTips() {
@@ -153,7 +151,7 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_EXTENSION && browser) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if (tab?.url && validateTipUrl(tab.url)) {
+        if (tab?.url && isUrlValid(tab.url)) {
           tipUrl.value = tab.url;
         }
       }
@@ -166,7 +164,7 @@ export default defineComponent({
       normalizedUrl,
       tipUrl,
       isTippingSupported,
-      BLOG_CLAIM_TIP_URL,
+      AE_BLOG_CLAIM_TIP_URL,
     };
   },
 });

@@ -1,9 +1,10 @@
+import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import { METHODS } from '@aeternity/aepp-sdk';
-import { IN_FRAME } from './environment';
+import { IN_FRAME } from '@/constants';
+import { useMiddleware, useAeSdk, useNetworks } from '@/composables';
 import store from '../store';
 import { FramesConnection } from './FramesConnection';
-import { useMiddleware, useAeSdk } from '../composables';
 
 let aeSdkBlocked = false;
 
@@ -29,9 +30,9 @@ if (IN_FRAME) {
 }
 
 export default async function initSdk() {
+  const { activeNetwork } = useNetworks();
   const { getAeSdk, resetNode } = useAeSdk({ store });
-
-  const { getMiddleware } = useMiddleware({ store });
+  const { getMiddleware } = useMiddleware();
 
   const [aeSdk] = await Promise.all([getAeSdk(), getMiddleware()]);
 
@@ -39,8 +40,8 @@ export default async function initSdk() {
     FramesConnection.init(aeSdk);
   }
 
-  store.watch(
-    (state, getters) => getters.activeNetwork,
+  watch(
+    activeNetwork,
     async (newValue, oldValue) => {
       if (aeSdkBlocked || isEqual(newValue, oldValue)) {
         return;

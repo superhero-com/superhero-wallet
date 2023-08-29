@@ -137,32 +137,37 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
+import { TX_DIRECTION } from '@/constants';
 import {
+  fetchJson,
+  handleUnknownError,
+  isNotFoundError,
+  postJson,
+  toShiftedBigNumber,
+} from '@/utils';
+import {
+  useAccounts,
+  useAeSdk,
+  usePopupProps,
+  useTransactionTx,
+} from '@/composables';
+import { useGetter, useState } from '@/composables/vuex';
+import {
+  AE_SYMBOL,
   DEX_TRANSACTION_TAGS,
   DEX_PROVIDE_LIQUIDITY,
   DEX_REMOVE_LIQUIDITY,
-  AETERNITY_SYMBOL,
-  TX_DIRECTION,
-  convertToken,
-  isTransactionAex9,
+} from '@/protocols/aeternity/config';
+import {
   getAeFee,
-  fetchJson,
-  postJson,
-  handleUnknownError,
-  isNotFoundError,
+  getTransactionTokenInfoResolver,
+  isTransactionAex9,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
   isTxFunctionDexMaxSpent,
   isTxFunctionDexMinReceived,
-} from '@/popup/utils';
-import { transactionTokenInfoResolvers } from '@/popup/utils/transactionTokenInfoResolvers';
-import {
-  usePopupProps,
-  useAeSdk,
-  useTransactionTx,
-  useAccounts,
-} from '@/composables';
-import { useGetter, useState } from '@/composables/vuex';
+} from '@/protocols/aeternity/helpers';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -202,6 +207,8 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const { t } = useI18n();
+
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
     const { activeAccount } = useAccounts({ store });
 
@@ -227,7 +234,6 @@ export default defineComponent({
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
-    const activeNetwork = useGetter('activeNetwork');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const transactionWrapped = computed(
@@ -279,13 +285,13 @@ export default defineComponent({
       return token || {};
     });
 
-    const tokenAmount = computed((): number => +convertToken(
+    const tokenAmount = computed((): number => +toShiftedBigNumber(
       swapTokenAmountData.value.amount || 0,
       -(swapTokenAmountData.value.decimals || 0),
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isAe ? AETERNITY_SYMBOL : swapTokenAmountData.value.symbol,
+      () => swapTokenAmountData.value.isAe ? AE_SYMBOL : swapTokenAmountData.value.symbol,
     );
 
     const completeTransaction = computed(
@@ -301,7 +307,7 @@ export default defineComponent({
         return [singleToken.value];
       }
       const functionName = camelCase(txParams.function) as TxFunctionParsed;
-      const resolver = transactionTokenInfoResolvers[functionName];
+      const resolver = getTransactionTokenInfoResolver(functionName);
       if (!resolver) {
         return [];
       }
@@ -366,7 +372,7 @@ export default defineComponent({
           executionCost.value = getAeFee(executionCostAettos);
 
           if (new BigNumber(balance).isLessThan(executionCostAettos)) {
-            error.value = t('validation.enoughAe');
+            error.value = t('validation.enoughCoin');
             return;
           }
           if (popupProps.value.tx?.contractId) {
@@ -395,13 +401,13 @@ export default defineComponent({
           const [
             { bytecode },
           ] = await Promise.all([
-            fetchJson(`${activeNetwork.value.url}/v3/contracts/${popupProps.value.tx.contractId}/code`),
+            fetchJson(`${aeActiveNetworkSettings.value.nodeUrl}/v3/contracts/${popupProps.value.tx.contractId}/code`),
             // aeSdk is needed to establish the `networkId` and the dex contracts for the network
             getAeSdk(),
           ]);
 
           const txParams: ITx = await postJson(
-            `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+            `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
             { body: { bytecode, calldata: popupProps.value.tx.callData } },
           );
           txFunction.value = txParams.function as TxFunctionRaw;
@@ -447,7 +453,7 @@ export default defineComponent({
 
     return {
       AnimatedSpinner,
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
       TX_FIELDS_TO_DISPLAY,
       error,
       executionCost,

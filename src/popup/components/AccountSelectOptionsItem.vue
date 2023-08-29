@@ -12,6 +12,7 @@
         :address="account.address"
         :name="account.name"
         :idx="account.idx"
+        :protocol="account.protocol"
         avatar-size="rg"
         avatar-borderless
         is-list-name
@@ -19,7 +20,7 @@
       />
       <TokenAmount
         :amount="balance"
-        :symbol="AETERNITY_SYMBOL"
+        :symbol="AE_SYMBOL"
         fiat-below
         class="token-amount"
         small
@@ -35,10 +36,10 @@ import {
   PropType,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useBalances } from '../../composables';
-import { getAddressColor } from '../utils/avatar';
-import { AETERNITY_SYMBOL } from '../utils';
-import { IFormSelectOption } from '../../types';
+import type { IFormSelectOption } from '@/types';
+import { useBalances } from '@/composables';
+import { getAddressColor } from '@/utils';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -72,7 +73,7 @@ export default defineComponent({
     return {
       balance,
       bgColorStyle,
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
     };
   },
 });

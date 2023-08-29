@@ -2,6 +2,7 @@
   <BtnPlain
     v-if="unstyled"
     class="form-select unstyled"
+    v-bind="$attrs"
     @click="openOptionsModal"
   >
     <slot
@@ -10,7 +11,10 @@
     >
       {{ currentText }}
     </slot>
-    <ChevronDownIcon class="arrow-icon" />
+    <ChevronDownIcon
+      v-if="!hideArrow"
+      class="arrow-icon"
+    />
   </BtnPlain>
   <InputField
     v-else
@@ -30,7 +34,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '../../utils';
+import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '@/constants';
 import type { IFormSelectOption } from '../../../types';
 import { useModals } from '../../../composables';
 
@@ -63,6 +67,10 @@ export default defineComponent({
      * Decides if the input looks like a regular text instead of a form input element
      */
     unstyled: Boolean,
+    /**
+     * Decides if the dropdown arrow is visible
+     */
+    hideArrow: Boolean,
   },
   emits: ['select', 'update:modelValue'],
   setup(props, { emit }) {

@@ -1,14 +1,20 @@
 <template>
-  <div :class="['fixed-screen-footer', { mobile: IS_MOBILE_DEVICE }]">
+  <div
+    :class="['fixed-screen-footer',
+             { mobile: IS_MOBILE_DEVICE }, { noPaddingTop: noPaddingTop }]"
+  >
     <slot />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IS_MOBILE_DEVICE } from '../../lib/environment';
+import { IS_MOBILE_DEVICE } from '@/constants';
 
 export default defineComponent({
+  props: {
+    noPaddingTop: Boolean,
+  },
   setup() {
     return {
       IS_MOBILE_DEVICE,
@@ -27,6 +33,10 @@ export default defineComponent({
   justify-content: center;
   gap: 8px;
   padding: 24px;
+
+  &.noPaddingTop {
+    padding-top: 0;
+  }
 
   &.mobile {
     margin-bottom: 20px;

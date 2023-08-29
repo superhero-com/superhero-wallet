@@ -7,7 +7,7 @@
         v-slot="{ field, errorMessage }"
         name="amount"
         :rules="{
-          enough_ae: amountTotal.toString(),
+          enough_coin: amountTotal.toString(),
           required: true,
         }"
       >
@@ -16,7 +16,7 @@
           v-model="amount"
           name="amount"
           :message="amountError || errorMessage"
-          ae-only
+          readonly
         />
       </Field>
       <div class="tx-details">
@@ -69,16 +69,15 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useForm, useFieldError, Field } from 'vee-validate';
 
-import { useModals, useAeSdk } from '../../../composables';
-import type { IAuctionBid } from '../../../types';
-import { useGetter } from '../../../composables/vuex';
+import type { IAuctionBid } from '@/types';
+import { useModals, useAeSdk } from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
-  AENS_BID_MIN_RATIO,
-  AETERNITY_COIN_PRECISION,
-  aeToAettos,
-  STUB_ADDRESS,
-  STUB_NONCE,
-} from '../../utils';
+  AE_AENS_BID_MIN_RATIO,
+  AE_COIN_PRECISION,
+} from '@/protocols/aeternity/config';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
@@ -123,14 +122,14 @@ export default defineComponent({
           nonce: STUB_NONCE,
           name: props.name,
           nameSalt: 0,
-          nameFee: aeToAettos(highestBid.value.multipliedBy(AENS_BID_MIN_RATIO).toString()),
+          nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
         }) as any,
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-      ).fee).shiftedBy(-AETERNITY_COIN_PRECISION),
+      ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
     const amountTotal = computed(() => txFee.value.plus(amount.value || 0));
     const amountError = computed(() => {
-      const minBid = highestBid.value.multipliedBy(AENS_BID_MIN_RATIO);
+      const minBid = highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO);
       return (amount.value !== '' && minBid.isGreaterThanOrEqualTo(+amount.value))
         ? t('pages.names.auctions.min-bid', { minBid })
         : null;

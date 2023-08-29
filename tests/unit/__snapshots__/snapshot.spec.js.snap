@@ -22,10 +22,11 @@ exports[`Pages About 1`] = `
       </div>
     </div>
     <a
-      class="table-item link"
+      class="link-button default table-item link"
       href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
       target="_blank"
     >
+      
       <div
         class="name"
       >
@@ -37,6 +38,8 @@ exports[`Pages About 1`] = `
         a1c1c5a 
         <svg />
       </div>
+      
+      <!--v-if-->
     </a>
     <div
       class="table-item"
@@ -137,7 +140,7 @@ exports[`Pages About 1`] = `
 
 exports[`Pages Index 1`] = `
 <div
-  class="index"
+  class="index extended-top-padding"
 >
   <div
     class="not-iframe"
@@ -155,101 +158,10 @@ exports[`Pages Index 1`] = `
         tag="span"
       />
     </div>
-    <div
-      class="platforms"
-    >
-      <div
-        class="heading"
-      >
-        
-        locale-specific-text
-        
-      </div>
-      <div
-        class="web-icons-wrapper"
-      >
-        <div
-          class="web-icons"
-        >
-          <div
-            class="web-icons-title"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="web-icons-platforms"
-          >
-            <a
-              class="platform-icon"
-              href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
-              target="_blank"
-            >
-              <img
-                alt="Firefox"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-            <a
-              class="platform-icon"
-              href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
-              target="_blank"
-            >
-              <img
-                alt="Chrome"
-                class="platform-icon-image"
-                src=""
-              />
-            </a>
-          </div>
-        </div>
-        <div
-          class="web-icons"
-        >
-          <div
-            class="web-icons-title"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="web-icons-platforms"
-          >
-            <a
-              class="platform-icon"
-              href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
-              target="_blank"
-            >
-              <img
-                alt="App Store"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-            <a
-              class="platform-icon"
-              href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
-              target="_blank"
-            >
-              <img
-                alt="Google Play"
-                class="platform-icon-image grey"
-                src=""
-              />
-            </a>
-          </div>
-        </div>
-      </div>
-      <div
-        class="footer"
-      >
-        
-        locale-specific-text
-        
-      </div>
-    </div>
+    <!--v-if-->
   </div>
   <div
-    class="terms-agreement"
+    class="terms-agreement mobile"
   >
     <label
       class="checkbox-container"
@@ -292,13 +204,17 @@ exports[`Pages Index 1`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -325,13 +241,17 @@ exports[`Pages Index 1`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -425,13 +345,17 @@ exports[`Pages Index 2`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -458,13 +382,17 @@ exports[`Pages Index 2`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -496,9 +424,24 @@ exports[`Pages Index 3`] = `
 <div
   class="index extended-top-padding"
 >
-  <img
-    class="iframe-image"
-  />
+  <div
+    class="not-iframe"
+  >
+    <svg
+      class="superhero-logo"
+    />
+    <div
+      class="heading"
+    >
+      <span
+        class="tag"
+        keypath="pages.index.heading.message"
+        scope="global"
+        tag="span"
+      />
+    </div>
+    <!--v-if-->
+  </div>
   <div
     class="terms-agreement mobile"
   >
@@ -543,13 +486,17 @@ exports[`Pages Index 3`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="generate-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -576,13 +523,17 @@ exports[`Pages Index 3`] = `
         class="button-subheader variant-dark btn-base button-subheader"
         data-cy="import-wallet"
         extend=""
+        header="locale-specific-text"
+        icon="[object Object]"
+        iconsize="rg"
+        subheader="locale-specific-text"
       >
         
         <div
           class="box"
         >
           <div
-            class="icon-wrapper is-boxed"
+            class="icon-wrapper icon-size-rg is-boxed"
           >
             <svg
               class="icon-wrapper-icon"
@@ -696,47 +647,67 @@ exports[`Pages PrivacyPolicy 1`] = `
       <p>
          1) downloaded as an add-on (extension) to Firefox: 
         <a
+          class="link-button default"
           href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
           target="_blank"
         >
+          
           https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet
+          
+          <!--v-if-->
         </a>
          ; to Chrome, Brave and Opera:          
         <a
+          class="link-button default"
           href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
           target="_blank"
         >
+          
           https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne
+          
+          <!--v-if-->
         </a>
         ; 
       </p>
       <p>
          2) accessed from any Browser at the address: 
         <a
+          class="link-button default"
           href="https://wallet.superhero.com"
           target="_blank"
         >
+          
           https://wallet.superhero.com
+          
+          <!--v-if-->
         </a>
          ; 
       </p>
       <p>
          3) downloaded from Google Play:     
         <a
+          class="link-button default"
           href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
           target="_blank"
         >
+          
           https://play.google.com/store/apps/details?id=com.superhero.cordova
+          
+          <!--v-if-->
         </a>
          and 
       </p>
       <p>
          from App Store: 
         <a
+          class="link-button default"
           href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
           target="_blank"
         >
+          
           https://apps.apple.com/us/app/superhero-wallet/id1502786641
+          
+          <!--v-if-->
         </a>
         . 
       </p>
@@ -1490,9 +1461,14 @@ exports[`Pages PrivacyPolicy 1`] = `
         </strong>
         , please email us at  
         <a
+          class="link-button default"
           href="mailto:superherowallet@protonmail.com"
+          target="_blank"
         >
-          superherowallet@protonmail.com
+          
+           superherowallet@protonmail.com 
+          
+          <!--v-if-->
         </a>
         . 
       </p>
@@ -1674,9 +1650,14 @@ exports[`Pages TermsOfService 1`] = `
       </b>
        via an email to 
       <a
+        class="link-button simple"
         href="mailto:superherowallet@protonmail.com"
+        target="_blank"
       >
+        
         superherowallet@protonmail.com
+        
+        <!--v-if-->
       </a>
        for the provision of information about the steps for termination of your use. Please check the Effective Date above to determine if there have been any changes since 
       <b>

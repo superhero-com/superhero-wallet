@@ -5,9 +5,20 @@
   >
     <span
       v-if="!noIcons"
-      class="icons"
+      class="icon"
     >
+      <!--
+        TODO: Find out better way of displaying coin icons related to protocols
+      -->
+      <ProtocolIcon
+        v-if="imgToken?.symbol === BTC_SYMBOL"
+        class="icon-image"
+        :protocol="PROTOCOL_BITCOIN"
+        :icon-size="iconSize"
+      />
       <img
+        v-else
+        class="icon-image"
         :src="imgToken.image || getTokenPlaceholderUrl(imgToken)"
         :class="{ 'with-border': !imgToken.image }"
         :title="imgToken.symbol"
@@ -18,9 +29,8 @@
       <span
         v-if="fromToken"
         class="symbol"
-      >
-        {{ truncateString(fromToken.symbol) }}
-      </span>
+        v-text="truncateString(fromToken?.name ?? fromToken?.symbol)"
+      />
       <span
         v-if="fromToken && toToken"
         class="separator"
@@ -30,34 +40,41 @@
       <span
         v-if="toToken"
         class="symbol"
-      >
-        {{ truncateString(toToken.symbol) }}
-      </span>
+        v-text="truncateString(toToken?.name ?? toToken?.symbol)"
+      />
     </span>
   </span>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { ITokenResolved } from '../../types';
+import type { ITokenResolved } from '@/types';
+import { PROTOCOL_BITCOIN } from '@/constants';
 import {
-  AETERNITY_COIN_NAME,
-  AETERNITY_COIN_SYMBOL,
-  AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
-  AVATAR_URL,
   truncateString as truncateStringFactory,
-} from '../utils';
-import AeIcon from '../../icons/tokens/ae.svg';
+} from '@/utils';
+import {
+  AE_AVATAR_URL,
+  AE_COIN_SYMBOL,
+  AE_CONTRACT_ID,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
+import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
+
+import AeIcon from '@/icons/tokens/ae.svg';
+import ProtocolIcon from './ProtocolIcon.vue';
 
 const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
 
 export type AllowedTokenIconSize = typeof SIZES[number];
 
 export default defineComponent({
+  components: {
+    ProtocolIcon,
+  },
   props: {
     /**
-     * transactionTokenInfoResolvers []
+     * Array of tokens that is returned by the transactionTokenInfoResolvers
      */
     tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
@@ -69,7 +86,7 @@ export default defineComponent({
     },
     vertical: Boolean,
     noIcons: Boolean,
-    fullAeSymbol: Boolean,
+    fullSymbol: Boolean,
     bright: Boolean,
   },
   setup(props) {
@@ -89,22 +106,25 @@ export default defineComponent({
     }
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
-      return `${AVATAR_URL}${token.contractId}`;
+      return `${AE_AVATAR_URL}${token.contractId}`;
     }
 
+    /**
+     * TODO These transformations should be performed by the adapters based on asset protocol
+     */
     function mapToken(token: ITokenResolved): ITokenResolved {
-      let { image, symbol } = token;
+      let { image } = token;
       let name = token.symbol;
 
-      if (token.isAe || token.contractId === AETERNITY_CONTRACT_ID) {
+      if (token.isAe || token.contractId === AE_CONTRACT_ID) {
         image = AeIcon;
-        symbol = props.fullAeSymbol ? AETERNITY_COIN_SYMBOL : AETERNITY_SYMBOL;
-        name = AETERNITY_COIN_NAME;
+        name = props.fullSymbol ? AE_COIN_SYMBOL : AE_SYMBOL;
+      } else if (token.symbol === BTC_SYMBOL) {
+        name = props.fullSymbol ? BTC_COIN_NAME : BTC_SYMBOL;
       }
 
       return {
         ...token,
-        symbol,
         name,
         image,
       };
@@ -119,6 +139,8 @@ export default defineComponent({
     ));
 
     return {
+      PROTOCOL_BITCOIN,
+      BTC_SYMBOL, // TODO this components should not have any protocol specific logic
       fromToken,
       toToken,
       imgToken,
@@ -147,14 +169,26 @@ export default defineComponent({
 
   &,
   .symbols,
-  .icons {
+  .icon {
     display: inline-flex;
     align-items: center;
     align-self: center;
   }
 
-  .icons {
+  .icon {
     user-select: none;
+
+    .icon-image {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      border-radius: calc(var(--icon-size) / 2);
+      vertical-align: middle;
+      margin-right: 4px;
+
+      &.with-border {
+        border: 0.25px solid rgba(variables.$color-white, 0.75);
+      }
+    }
   }
 
   .symbol {
@@ -183,18 +217,6 @@ export default defineComponent({
     --icon-size: 30px;
   }
 
-  img {
-    width: var(--icon-size);
-    height: var(--icon-size);
-    border-radius: calc(var(--icon-size) / 2);
-    vertical-align: middle;
-    margin-right: 4px;
-
-    &.with-border {
-      border: 0.25px solid rgba(variables.$color-white, 0.75);
-    }
-  }
-
   &.vertical {
     flex-direction: column;
 
@@ -206,10 +228,10 @@ export default defineComponent({
       }
     }
 
-    .icons {
+    .icon {
       margin-bottom: 8px;
 
-      img {
+      .icon-image {
         width: 44px;
         height: 44px;
         margin: 0;

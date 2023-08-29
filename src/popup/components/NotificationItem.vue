@@ -32,6 +32,7 @@
       <AddressTruncated
         v-if="!chainName && address"
         :address="address"
+        :protocol="PROTOCOL_AETERNITY"
         class="address"
       />
       <Truncate
@@ -63,7 +64,11 @@
 import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import type { INotification } from '@/types';
+import { relativeTimeTo } from '@/utils';
 import {
+  IS_EXTENSION,
+  IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_CLAIM_OF_RETIP,
   NOTIFICATION_TYPE_CLAIM_OF_TIP,
@@ -72,10 +77,9 @@ import {
   NOTIFICATION_TYPE_RETIP_ON_TIP,
   NOTIFICATION_TYPE_TIP_ON_COMMENT,
   NOTIFICATION_TYPE_WALLET,
-  relativeTimeTo,
-} from '../utils';
-import { IS_EXTENSION, IS_MOBILE_DEVICE } from '../../lib/environment';
-import { INotification } from '../../types';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
 import Truncate from './Truncate.vue';
@@ -150,6 +154,8 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
+      IS_MOBILE_DEVICE,
       createdAt,
       message,
       chainName,
@@ -160,7 +166,6 @@ export default defineComponent({
       isWallet,
       isSeedBackup,
       handleClick,
-      IS_MOBILE_DEVICE,
       initialStatus,
     };
   },

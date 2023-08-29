@@ -1,36 +1,40 @@
-/*
-  eslint-disable
-    camelcase,
-    no-unused-vars,
-*/
+/* eslint-disable camelcase */
 
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import {
-  ContractMethodsBase,
   Encoded,
   Node,
   Tag,
 } from '@aeternity/aepp-sdk';
-import type { CoinGeckoMarketResponse } from '../lib/CoinGecko';
 import {
-  AETERNITY_COIN_ID,
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
-  MULTISIG_CREATION_PHASES,
   POPUP_TYPES,
-  TX_FUNCTIONS_MULTISIG,
+  TRANSFER_SEND_STEPS,
+} from '@/constants';
+import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
+import type { RejectedByUserError } from '@/lib/errors';
+import {
+  AE_CONTRACT_ID,
+  MULTISIG_CREATION_PHASES,
   TX_FUNCTIONS,
+  TX_FUNCTIONS_MULTISIG,
   TX_RETURN_TYPES,
-} from '../popup/utils';
-import { RejectedByUserError } from '../lib/errors';
+} from '@/protocols/aeternity/config';
+import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import { Protocol } from './protocols';
 
 export * from './cordova';
-export * from './router';
 export * from './filter';
 export * from './forms';
+export * from './networks';
+export * from './protocols';
+export * from './router';
+
+export type Class<T> = new (...args: unknown[]) => T
 
 export type Dictionary<T = any> = Record<string, T>;
 
@@ -92,8 +96,14 @@ export interface IAppData {
 }
 
 export interface IWallet {
-  privateKey: any;
+  secretKey: any;
   chainCode: any;
+}
+
+export interface IHdWalletAccount {
+  publicKey: string;
+  secretKey: string;
+  address: string,
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -113,7 +123,9 @@ export type IInputMessageRaw = string | IInputMessage;
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: Encoded.ContractAddress | typeof AETERNITY_COIN_ID;
+  contractId: Encoded.ContractAddress
+  | typeof AE_CONTRACT_ID
+  | typeof BTC_CONTRACT_ID
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -128,6 +140,9 @@ export interface IToken {
   value?: string; // TODO copy of the contractId, maybe we should remove it
 }
 
+/**
+ * In most cases it's the result of firing one of the `TransactionResolvers`.
+ */
 export interface ITokenResolved extends Partial<IToken> {
   amount?: number;
   isAe?: boolean;
@@ -157,19 +172,22 @@ export type AeternityAccountType = 'hd-wallet';
  * Simplified account structure stored it in the local storage
  * or fetched when discovering the accounts.
  */
-export interface IAeternityAccountRaw {
+export interface IAccountRaw {
   idx: number;
   showed: boolean;
   type: AeternityAccountType;
   isRestored: boolean;
+  protocol: Protocol;
 }
 
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IKeyPair, IAeternityAccountRaw {
+export interface IAccount extends IKeyPair, IAccountRaw {
   address: Encoded.AccountAddress;
-  name: string; // .chain
+  name?: string; // .chain
+  protocol: Protocol;
+  globalIdx: number;
 }
 
 /**
@@ -182,6 +200,7 @@ export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'
   balance: string;
 }
 
+// TODO This interface is too loose. Empty object should not be valid.
 export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   // TODO: use a proper type for an address since it can be a url
   address?: Encoded.AccountAddress | string;
@@ -228,35 +247,6 @@ export interface IRawMultisigAccount {
   multisigAccountCreationEncodedCallData?: Encoded.ContractBytearray;
   signedAttachTx?: Encoded.Transaction;
   rawTx?: Encoded.Transaction;
-}
-
-export interface INetworkBase {
-  /**
-   * Node backend URL
-   */
-  url: string;
-  /**
-   * Unique name provided by the user
-   */
-  name: string;
-  middlewareUrl: string;
-  /**
-   * TODO: Replace with different way of differentiating the networks
-   */
-  networkId: string;
-  compilerUrl: string;
-  /**
-   * Tipping backend URL
-   */
-  backendUrl: string;
-  index?: number;
-}
-
-export interface INetwork extends INetworkBase {
-  explorerUrl: string
-  tipContractV1: Encoded.ContractAddress
-  tipContractV2?: Encoded.ContractAddress
-  multisigBackendUrl: string
 }
 
 export interface IPermission {
@@ -309,7 +299,7 @@ export interface ICurrency {
   symbol: string;
 }
 
-export type CurrencyRates = Record<CurrencyCode, number>;
+export type CurrencyRates = Record<Protocol, Record<CurrencyCode, number>>;
 
 export interface TxArguments {
   type: 'address' | 'contract' | 'tuple' | 'list' | 'bool' | 'string' | 'int';
@@ -363,13 +353,13 @@ export interface ITx {
   abiVersion?: number
   accountId?: Encoded.AccountAddress
   amount: number
-  arguments: TxArguments[];
+  arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
   call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: Encoded.AccountAddress
+  callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
   code?: string
   commitmentId?: any
-  contractId: Encoded.ContractAddress
+  contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
   fee: number
   function?: TxFunction
   gaId?: string; // Generalized Account ID
@@ -414,6 +404,7 @@ export interface ITransaction {
   microTime?: number;
   pending: boolean;
   pendingTokenTx?: boolean;
+  protocol?: Protocol;
   rawTx?: any; // TODO find type
   tipUrl?: string;
   /**
@@ -630,22 +621,33 @@ export interface IDefaultComposableOptions {
 
 export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
 
-export interface TippingV1ContractApi extends ContractMethodsBase {
-  unclaimed_for_url: (url: string) => string;
-  tip: (recipientId: Encoded.AccountAddress, note: string) => void;
-  retip: (tipId: number) => void;
+export interface IFormModel {
+  amount?: string;
+  selectedAsset?: IAsset;
+  address?: Encoded.AccountAddress;
+  payload?: string;
 }
 
-export interface TippingV2ContractApi extends TippingV1ContractApi {
-  tip_token: (
-    recipientId: Encoded.AccountAddress,
-    note: string,
-    contractId: Encoded.ContractAddress,
-    amount: string
-  ) => Encoded.TxHash;
-  retip_token: (
-    id: number,
-    contactId: Encoded.ContractAddress,
-    amount: number
-  ) => Encoded.TxHash;
+export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER_SEND_STEPS.review
+export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
+
+export interface TransferFormModel extends IFormModel {
+  fee?: BigNumber
+  total?: number
+  invoiceContract?: any
+  invoiceId?: any
+  note?: string
+  payload: string
+}
+
+export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
+
+export type StorageKeysInput = string | string[];
+
+export interface IWalletInfo {
+  id: string;
+  name: string;
+  networkId: string;
+  origin: any;
+  type: any;
 }

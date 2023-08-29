@@ -5,17 +5,17 @@ import {
 } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import {
-  TX_FUNCTIONS_MULTISIG,
-  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
-  handleUnknownError,
-} from '../popup/utils';
 import type {
   IAccount,
   IActiveMultisigTransaction,
   IDefaultComposableOptions,
   ITransaction,
-} from '../types';
+} from '@/types';
+import { handleUnknownError } from '@/utils';
+import {
+  MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
+  TX_FUNCTIONS_MULTISIG,
+} from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
@@ -25,11 +25,11 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
-  const { getMiddleware } = useMiddleware({ store });
+  const { getMiddleware } = useMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
 
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 
@@ -133,7 +133,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
    * Retrieve the addresses of proposal signatories that are present in the local wallet.
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
-    accounts.value.filter(
+    aeAccounts.value.filter(
       (_account) => pendingMultisigTxSigners.value.includes(_account.address),
     )
   ));

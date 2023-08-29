@@ -30,14 +30,13 @@
   </div>
 </template>
 
-<script>
-import {
-  defineComponent,
-} from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { BUG_REPORT_URL } from '@/constants';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
 import NotFoundImage from '../../image/not-found.jpg';
 import BugIcon from '../../icons/bug.svg?vue-component';
-import { BUG_REPORT_URL } from '../utils';
 
 export default defineComponent({
   components: { BtnMain, BugIcon },
@@ -71,7 +70,7 @@ export default defineComponent({
   }
 
   .title {
-    @extend %face-sans-22-bold;
+    @extend %face-sans-22-semi-bold;
 
     margin-top: 16px;
   }

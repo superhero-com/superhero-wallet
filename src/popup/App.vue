@@ -39,8 +39,9 @@
       <Component
         v-bind="props"
         :is="component"
-        v-for="({ component, key, props }) in modalsOpen"
+        v-for="({ component, key, props, viewComponentName }) in modalsOpen"
         :key="key"
+        :view-component-name="viewComponentName"
       />
     </div>
   </div>
@@ -58,13 +59,10 @@ import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
+import { watchUntilTruthy } from '@/utils';
 import {
-  NOTIFICATION_DEFAULT_SETTINGS,
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
-  watchUntilTruthy,
-} from '@/popup/utils';
-import {
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
@@ -72,8 +70,9 @@ import {
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
+  NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
-} from '@/lib/environment';
+} from '@/constants';
 import {
   useAccounts,
   useConnection,
@@ -105,7 +104,7 @@ export default defineComponent({
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
-    const { loadAeternityData } = useCurrencies({ withoutPolling: true });
+    const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLDivElement>();
@@ -194,7 +193,7 @@ export default defineComponent({
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([
-          loadAeternityData(),
+          loadCoinsData(),
           fetchAndSetChainNames(),
           setNotificationSettings(),
         ]);

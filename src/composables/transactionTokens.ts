@@ -6,16 +6,20 @@ import type {
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
-} from '../types';
+} from '@/types';
+import { PROTOCOL_BITCOIN, TX_DIRECTION } from '@/constants';
+import { toShiftedBigNumber } from '@/utils';
 import {
-  AETERNITY_SYMBOL,
-  AETERNITY_COIN_PRECISION,
-  TX_DIRECTION,
-  convertToken,
-  isTransactionAex9,
+  AE_COIN_PRECISION,
+  AE_SYMBOL,
+} from '@/protocols/aeternity/config';
+import {
   getInnerTransaction,
-} from '../popup/utils';
-import { transactionTokenInfoResolvers } from '../popup/utils/transactionTokenInfoResolvers';
+  getTransactionTokenInfoResolver,
+  isTransactionAex9,
+} from '@/protocols/aeternity/helpers';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -44,12 +48,15 @@ export function useTransactionTokens({
       const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
 
       // TODO this line needs refactoring in TransactionResolver
-      return transactionTokenInfoResolvers[functionName];
+      return getTransactionTokenInfoResolver(functionName);
     }
     return null;
   });
 
   const tokens = computed((): ITokenResolved[] => {
+    if (!transaction) {
+      return [];
+    }
     if (
       innerTx.value
       && transactionFunction.value
@@ -60,19 +67,26 @@ export function useTransactionTokens({
         availableTokens.value,
       ).tokens;
     }
-    if (!transaction) return [];
+    if (transaction.protocol === PROTOCOL_BITCOIN) {
+      return [{
+        ...innerTx.value || {},
+        amount: getBitcoinTxAmountTotal(transaction, direction === TX_DIRECTION.received),
+        symbol: BTC_SYMBOL,
+        isReceived: direction === TX_DIRECTION.received,
+      }];
+    }
 
     return [{
       ...innerTx.value || {},
       amount: isAllowance
-        ? convertToken(innerTx.value?.fee || 0, -AETERNITY_COIN_PRECISION)
+        ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
         : getTxAmountTotal.value(transaction, direction),
-      symbol: isAllowance ? AETERNITY_SYMBOL : getTxSymbol.value(transaction),
+      symbol: isAllowance ? AE_SYMBOL : getTxSymbol.value(transaction),
       isReceived: direction === TX_DIRECTION.received,
       isAe:
         isAllowance
         || (
-          getTxSymbol.value(transaction) === AETERNITY_SYMBOL
+          getTxSymbol.value(transaction) === AE_SYMBOL
           && !isTransactionAex9(transaction)
         ),
     }];

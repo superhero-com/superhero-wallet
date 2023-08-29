@@ -52,14 +52,15 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { blocksToRelativeTime, getAeFee } from '../../utils';
 import type {
   IActiveAuction,
   ObjectValues,
   IFilters,
   IFilterInputPayload,
-} from '../../../types';
-import { useTopHeaderData } from '../../../composables';
+} from '@/types';
+import { blocksToRelativeTime } from '@/utils';
+import { useTopHeaderData } from '@/composables';
+import { getAeFee } from '@/protocols/aeternity/helpers';
 
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';

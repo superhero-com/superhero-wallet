@@ -4,34 +4,34 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router';
-import { Dictionary } from '../../types';
-import {
-  ROUTE_ACCOUNT,
-  ROUTE_INDEX,
-  ROUTE_NOT_FOUND,
-} from './routeNames';
-import { routes } from './routes';
-import getPopupProps from '../utils/getPopupProps';
-import store from '../../store';
-import initSdk from '../../lib/wallet';
+import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
-  watchUntilTruthy,
+  IS_CORDOVA,
+  IS_WEB,
+  POPUP_TYPE,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
-} from '../utils';
-import {
   RUNNING_IN_POPUP,
-  POPUP_TYPE,
-  IS_CORDOVA,
-  IS_WEB,
-} from '../../lib/environment';
-import { useAccounts, usePopupProps, useAeSdk } from '../../composables';
-import { RouteQueryActionsController } from '../../lib/RouteQueryActionsController';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { watchUntilTruthy } from '@/utils';
+import { getPopupProps } from '@/utils/getPopupProps';
+import store from '@/store';
+import initSdk from '@/lib/wallet';
+import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { useAccounts, usePopupProps, useAeSdk } from '@/composables';
+import { routes } from './routes';
+import {
+  ROUTE_ACCOUNT,
+  ROUTE_APPS_BROWSER,
+  ROUTE_INDEX,
+  ROUTE_NOT_FOUND,
+} from './routeNames';
 
 const router = createRouter({
   routes: routes as RouteRecordRaw[],
@@ -41,7 +41,12 @@ const router = createRouter({
 
 const lastRouteKey = 'last-path';
 
-const { isLoggedIn } = useAccounts({ store });
+const {
+  isLoggedIn,
+  activeAccount,
+  setActiveAccountByGlobalIdx,
+  getLastActiveProtocolAccount,
+} = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
 RouteQueryActionsController.init(router, isLoggedIn);
@@ -68,6 +73,22 @@ router.beforeEach(async (to, from, next) => {
       next({ name: ROUTE_INDEX });
     }
     return;
+  }
+
+  if (to.name === ROUTE_APPS_BROWSER) {
+    // In-app browser is mobile-only
+    if (!IS_CORDOVA) {
+      next({ name: ROUTE_NOT_FOUND });
+      return;
+    }
+
+    // In-app browser only works with AE accounts
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+      setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
+      next({ name: ROUTE_APPS_BROWSER });
+      return;
+    }
   }
 
   const { isAeSdkReady } = useAeSdk({ store });

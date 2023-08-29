@@ -3,22 +3,24 @@ import {
   ref,
   watch,
 } from 'vue';
-import { isEqual, uniqWith } from 'lodash-es';
+import { isEqual } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
-
-import { IDefaultComposableOptions } from '@/types';
+import type { IDefaultComposableOptions, ITransaction } from '@/types';
+import { DASHBOARD_TRANSACTION_LIMIT, PROTOCOL_AETERNITY, PROTOCOL_BITCOIN } from '@/constants';
 import {
-  DASHBOARD_TRANSACTION_LIMIT,
-  MDW_TO_NODE_APPROX_DELAY_TIME,
-  sortTransactionsByDateCallback,
   handleUnknownError,
-} from '../popup/utils';
+  pipe,
+  removeDuplicatedTransactions,
+  sortTransactionsByDate,
+} from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
-import { createNetworkWatcher } from './composablesHelpers';
 import { useTransactionTx } from './transactionTx';
 import { useTransactionList } from './transactionList';
 import { useAeSdk } from './aeSdk';
+import { createNetworkWatcher } from './networks';
 
 const isTransactionListLoading = ref(false);
 
@@ -38,10 +40,12 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     fetchTransactions,
   } = useTransactionList({ store });
 
+  const btcTransactions = ref<ITransaction[]>([]);
+
   const tokens = computed(() => store.state.fungibleTokens.tokens);
 
   const latestTransactions = computed(() => {
-    const allTransactions = Object.entries(transactions.value)
+    const aeTransactions = Object.entries(transactions.value)
       .map(([
         accountAddress,
         { loaded, pending }]) => [...(pending[nodeNetworkId.value!] || []), ...(loaded || [])]
@@ -57,15 +61,24 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
             ...tr,
             direction: direction.value,
           };
-        }));
+        }))
+      .flatMap((transaction) => transaction);
 
-    return uniqWith(allTransactions.flatMap((transaction) => transaction), (a, b) => (
-      a.hash === b.hash && a.transactionOwner === b.transactionOwner
-    ))
-      .sort(sortTransactionsByDateCallback)
+    const allTransactions: ITransaction[] = [
+      ...aeTransactions,
+      ...btcTransactions.value,
+    ];
+
+    return pipe([
+      removeDuplicatedTransactions,
+      sortTransactionsByDate,
+    ])(allTransactions)
       .slice(0, DASHBOARD_TRANSACTION_LIMIT);
   });
 
+  /**
+   * TODO The logic here should be updated as it mixes different approaches for each protocol
+   */
   async function updateTransactionListData() {
     if (isTransactionListLoading.value) {
       return;
@@ -73,17 +86,31 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
 
     isTransactionListLoading.value = true;
 
-    await Promise.all(accounts.value.map(async ({ address }) => {
-      try {
-        return (await fetchTransactions(
-          DASHBOARD_TRANSACTION_LIMIT,
-          true,
-          address,
-        ));
-      } catch (e) {
-        handleUnknownError(e);
-        return [];
+    const btcAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+
+    await Promise.all(accounts.value.map(async ({ address, protocol }) => {
+      switch (protocol) {
+        case PROTOCOL_AETERNITY:
+          try {
+            await fetchTransactions(
+              DASHBOARD_TRANSACTION_LIMIT,
+              true,
+              address,
+            );
+          } catch (error) {
+            handleUnknownError(error);
+          }
+          break;
+        case PROTOCOL_BITCOIN:
+          try {
+            btcTransactions.value = await btcAdapter.fetchTransactions(address);
+          } catch (error) {
+            handleUnknownError(error);
+          }
+          break;
+        default:
       }
+      return true;
     }));
 
     isTransactionListLoading.value = false;
@@ -97,7 +124,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     balancesTotal,
     (val, oldVal) => {
       if (val !== oldVal) {
-        setTimeout(() => updateTransactionListData(), MDW_TO_NODE_APPROX_DELAY_TIME);
+        setTimeout(() => updateTransactionListData(), AE_MDW_TO_NODE_APPROX_DELAY_TIME);
       }
     },
     { immediate: true },
@@ -113,7 +140,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     { deep: true },
   );
 
-  onNetworkChange(store, () => {
+  onNetworkChange(() => {
     updateTransactionListData();
   });
 

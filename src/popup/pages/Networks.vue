@@ -12,7 +12,9 @@
         v-for="network in networks"
         :key="network.name"
         :network="network"
+        :is-active="network.name === activeNetwork.name"
         @selectNetwork="switchNetwork"
+        @deleteNetwork="deleteCustomNetwork"
       />
     </div>
 
@@ -30,12 +32,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useDispatch, useGetter } from '../../composables/vuex';
-import { ROUTE_NETWORK_ADD } from '../router/routeNames';
+import { useNetworks } from '@/composables';
+import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
 
-import NetworkRow from '../components/NetworkRow.vue';
-import BtnMain from '../components/buttons/BtnMain.vue';
-import PlusCircleIcon from '../../icons/plus-circle.svg?vue-component';
+import NetworkRow from '@/popup/components/NetworkRow.vue';
+import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import PlusCircleIcon from '@/icons/plus-circle.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -43,23 +45,29 @@ export default defineComponent({
     NetworkRow,
   },
   setup() {
-    const networks = useGetter('networks');
-    const switchNetwork = useDispatch('switchNetwork');
-
-    return {
+    const {
+      activeNetwork,
       networks,
       switchNetwork,
+      deleteCustomNetwork,
+    } = useNetworks();
+
+    return {
+      activeNetwork,
+      networks,
       PlusCircleIcon,
       ROUTE_NETWORK_ADD,
+      switchNetwork,
+      deleteCustomNetwork,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/mixins';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .networks {
   padding: var(--screen-padding-x);

@@ -2,6 +2,7 @@
 import { pick } from 'lodash-es';
 import { detect } from 'detect-browser';
 import { App } from 'vue';
+import { IS_PRODUCTION } from '@/constants';
 import { getState } from '../store/plugins/persistState';
 import { useModals } from '../composables';
 import { RejectedByUserError } from './errors';
@@ -67,7 +68,7 @@ export default class Logger {
     };
   }
 
-  static async write({ modal = process.env.NODE_ENV !== 'production', ...error }) {
+  static async write({ modal = !IS_PRODUCTION, ...error }) {
     const { saveErrorLog } = await getState() as any;
     if (!saveErrorLog) return;
     const errorLog = await Logger.get() as any;

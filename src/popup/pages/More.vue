@@ -14,6 +14,7 @@
       <PanelItem
         :to="{ name: 'tips-claim' }"
         :title="$t('pages.claimTips.title')"
+        :disabled="!isAccountAe"
         data-cy="tips-claim"
       >
         <template #icon>
@@ -23,6 +24,7 @@
       <PanelItem
         :to="{ name: 'invite' }"
         :title="$t('pages.titles.invite')"
+        :disabled="!isAccountAe"
         data-cy="invite"
       >
         <template #icon>
@@ -42,7 +44,7 @@
 
     <PanelItem
       v-if="isNodeMainnet && UNFINISHED_FEATURES"
-      :href="SIMPLEX_URL"
+      :href="AE_SIMPLEX_URL"
       :title="$t('pages.fungible-tokens.buyAe')"
     >
       <template #icon>
@@ -60,7 +62,7 @@
     </PanelItem>
 
     <PanelItem
-      :href="DEX_URL"
+      :href="AE_DEX_URL"
       :title="$t('pages.more.dex')"
     >
       <template #icon>
@@ -81,14 +83,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import {
-  BUG_REPORT_URL,
-  DEX_URL,
-  SIMPLEX_URL,
-} from '../utils/constants';
-import { useAccounts, useAeSdk } from '../../composables';
+import { BUG_REPORT_URL, PROTOCOL_AETERNITY } from '@/constants';
+import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
+import { useAccounts, useAeSdk } from '@/composables';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -116,17 +115,20 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccountFaucetUrl } = useAccounts({ store });
+    const { activeAccount, activeAccountFaucetUrl } = useAccounts({ store });
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
+    const isAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+
     return {
+      AE_DEX_URL,
+      AE_SIMPLEX_URL,
       BUG_REPORT_URL,
-      DEX_URL,
       UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-      SIMPLEX_URL,
       activeAccountFaucetUrl,
       isNodeMainnet,
       isNodeTestnet,
+      isAccountAe,
     };
   },
 });

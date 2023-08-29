@@ -1,4 +1,4 @@
-import { toURL } from '../../../src/popup/utils';
+import { toURL } from '../../../src/utils';
 
 describe('toURL', () => {
   [

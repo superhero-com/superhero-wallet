@@ -37,18 +37,27 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { useCurrencies } from '../../composables';
 import {
-  AETERNITY_SYMBOL,
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import { useStore } from 'vuex';
+import type { Protocol } from '@/types';
+import {
   calculateFontSize,
-} from '../utils';
+  formatNumber,
+} from '@/utils';
+import { useCurrencies } from '@/composables';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
     label: { type: String, default: null },
-    symbol: { type: String, default: AETERNITY_SYMBOL },
+    symbol: { type: String, default: AE_SYMBOL },
     aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
     hideFiat: Boolean,
@@ -58,15 +67,27 @@ export default defineComponent({
     highPrecision: Boolean,
     dynamicSizing: Boolean,
     small: Boolean,
+    // TODO - make required & remove default
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
   },
   setup(props) {
-    const { getFormattedAndRoundedFiat } = useCurrencies();
+    const store = useStore();
+    const { getFormattedAndRoundedFiat } = useCurrencies({
+      selectedProtocol: props.protocol,
+      store,
+    });
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {
         return props.amount;
       }
-      return props.amount.toFixed((props.highPrecision || props.amount < 0.01) ? 9 : 2);
+      return formatNumber(props.amount,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: ProtocolAdapterFactory
+            .getAdapter(props.protocol)
+            .getAmountPrecision({ amount: props.amount, highPrecision: props.highPrecision }),
+        });
     });
 
     const amountFiat = computed(

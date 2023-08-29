@@ -20,22 +20,25 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import {
-  postJson,
-  TX_DIRECTION,
-  TX_FUNCTIONS,
-} from '../utils';
-import { AeScan } from '../../lib/AeScan';
-import { useMiddleware, useAeSdk, useTransactionTx } from '../../composables';
-import { useGetter } from '../../composables/vuex';
-import {
+import type {
   IAccount,
   IAccountOverview,
   ITransaction,
   ITx,
   TxFunction,
-  INetwork,
-} from '../../types';
+} from '@/types';
+import { postJson } from '@/utils';
+import { TX_DIRECTION } from '@/constants';
+import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import {
+  useAeSdk,
+  useMiddleware,
+  useTransactionTx,
+} from '@/composables';
+import { useGetter } from '@/composables/vuex';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+
 import TransactionInfo from './TransactionInfo.vue';
 
 interface TransactionData {
@@ -46,7 +49,9 @@ interface TransactionData {
 }
 
 export default defineComponent({
-  components: { TransactionInfo },
+  components: {
+    TransactionInfo,
+  },
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
@@ -54,14 +59,14 @@ export default defineComponent({
     const store = useStore();
     const { t, tm } = useI18n();
 
+    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    const { getAeSdk } = useAeSdk({ store });
+    const { getMiddleware } = useMiddleware();
+
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
     const getPreferredName = useGetter('names/getPreferred');
-
-    const { getAeSdk } = useAeSdk({ store });
-    const { getMiddleware } = useMiddleware({ store });
 
     const {
       isDex,
@@ -77,17 +82,17 @@ export default defineComponent({
     });
 
     function getTransactionParty(address: Encoded.AccountAddress): IAccountOverview {
-      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
       return {
         address,
         label: t('transaction.overview.accountAddress'),
-        url: aeScan.prepareUrlByHash(address),
+        url: (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
+          .prepareUrlByHash(address),
       };
     }
 
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
-      const aeScan = new AeScan(activeNetwork.value.explorerUrl);
+      const aeScan = new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
 
       const {
         senderId,
@@ -217,7 +222,7 @@ export default defineComponent({
       const { bytecode } = await aeSdk.getContractByteCode(innerTx.value.contractId);
       // TODO: use method from aeSdk once calldata-js library supports decoding bytecode feature
       const txParams: ITx = await postJson(
-        `${activeNetwork.value.compilerUrl}/decode-calldata/bytecode`,
+        `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
         { body: { bytecode, calldata } },
       );
       if (!txParams) return undefined;
@@ -245,7 +250,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-@use '../../styles/mixins';
+@use '@/styles/mixins';
 
 .tag-wrapper {
   @include mixins.flex(center, center);

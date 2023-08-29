@@ -3,17 +3,16 @@
     class="transaction-info-details-party"
     :class="{ recipient: isRecipient }"
   >
-    <a
+    <LinkButton
       v-if="txParty.url || !isRecipient"
-      :href="txParty.url"
-      target="_blank"
+      :to="txParty.url"
       class="name"
     >
       <Truncate
         :right="isRecipient"
         :str="txParty.name || txParty.label || $t('common.fellowSuperhero')"
       />
-    </a>
+    </LinkButton>
     <span
       v-else-if="txParty.wallet"
       class="wallet"
@@ -25,7 +24,7 @@
       class="name"
       :class="{ aens: txParty.aens }"
     >
-      {{ txParty.label }}
+      {{ txParty.label || $t('transaction.overview.accountAddress') }}
     </span>
     <CopyText
       v-if="txParty.address"
@@ -45,15 +44,18 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { IAccountOverview } from '../../types';
+import type { IAccountOverview } from '@/types';
+
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressFormatted from './AddressFormatted.vue';
+import LinkButton from './LinkButton.vue';
 
 export default defineComponent({
   components: {
     AddressFormatted,
     CopyText,
+    LinkButton,
     Truncate,
   },
   props: {
@@ -67,8 +69,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .transaction-info-details-party {
   $padding-edge: 4px;

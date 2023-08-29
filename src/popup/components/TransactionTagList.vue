@@ -18,22 +18,19 @@ import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import { useTransactionTx } from '../../composables';
-import {
-  INetwork,
+import { useTippingContracts, useTransactionTx } from '@/composables';
+import type {
   ITokenList,
   ITransaction,
-} from '../../types';
+} from '@/types';
+import { excludeFalsy, includes } from '@/utils';
 import {
   AENS,
   DEX,
   TX_DIRECTION,
-  TX_FUNCTIONS,
-  TX_TAGS_AENS,
-  excludeFalsy,
-  includes,
-  isTxFunctionDexPool,
-} from '../utils';
+} from '@/constants';
+import { TX_FUNCTIONS, TX_TAGS_AENS } from '@/protocols/aeternity/config';
+import { isTxFunctionDexPool } from '@/protocols/aeternity/helpers';
 
 import TransactionTag from './TransactionTag.vue';
 
@@ -49,6 +46,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { t } = useI18n();
+
     const {
       direction,
       innerTx,
@@ -64,7 +62,8 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+    const { tippingContractAddresses } = useTippingContracts({ store });
+
     const availableTokens = computed<ITokenList>(
       () => store.state.fungibleTokens.availableTokens,
     );
@@ -81,7 +80,8 @@ export default defineComponent({
         return [];
       }
 
-      const { tipContractV1, tipContractV2 } = activeNetwork.value;
+      const { tippingV1, tippingV2 } = tippingContractAddresses.value;
+
       const arr: string[] = [];
 
       if (outerTxTag.value === Tag.GaMetaTx) {
@@ -113,18 +113,19 @@ export default defineComponent({
             ? t('transaction.dexType.pool')
             : t('common.swap'),
         );
+      } else if (props.transaction.claim) {
+        arr.push(
+          t('pages.token-details.tip'),
+          t('transaction.spendType.in'),
+        );
       } else if (
-        (
-          innerTx.value.contractId
-          && [tipContractV1, tipContractV2].includes(innerTx.value.contractId)
-          && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
-        ) || props.transaction.claim
+        innerTx.value.contractId
+        && [tippingV1, tippingV2].includes(innerTx.value.contractId)
+        && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
       ) {
         arr.push(
           t('pages.token-details.tip'),
-          props.transaction.claim
-            ? t('transaction.spendType.in')
-            : t('transaction.spendType.out'),
+          t('transaction.spendType.out'),
         );
       } else if (
         outerTxTag.value === Tag.PayingForTx

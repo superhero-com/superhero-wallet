@@ -21,7 +21,7 @@
         min_value_exclusive: 0,
         min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_ae: fee.toString(),
+        enough_coin: fee.toString(),
       }"
     >
       <InputAmount
@@ -29,7 +29,7 @@
         v-model="formModel.amount"
         name="amount"
         class="amount-input"
-        ae-only
+        readonly
         :message="errorMessage"
       />
     </Field>
@@ -73,23 +73,27 @@ import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
-import {
+import type {
+  IFormModel,
   IToken,
   ITransaction,
-} from '../../types';
-import { AETERNITY_COIN_PRECISION, AETERNITY_CONTRACT_ID } from '../utils/constants';
-import { convertToken } from '../utils';
+} from '@/types';
+import { toShiftedBigNumber } from '@/utils';
 import {
+  useCurrencies,
   useDeepLinkApi,
   useMaxAmount,
-  IFormModel,
   useBalances,
   useModals,
   useAccounts,
   useTippingContracts,
   useAeSdk,
   useTransactionList,
-} from '../../composables';
+} from '@/composables';
+import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -118,9 +122,10 @@ export default defineComponent({
 
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts({ store });
+    const { marketData } = useCurrencies({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
-    const { balance, aeternityCoin } = useBalances({ store });
+    const { balance } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
@@ -137,12 +142,11 @@ export default defineComponent({
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     async function sendTip() {
-      const amount = convertToken(
-        +(formModel.value.amount || 0),
-        formModel.value.selectedAsset?.contractId !== AETERNITY_CONTRACT_ID
-          ? (formModel.value.selectedAsset as IToken).decimals
-          : AETERNITY_COIN_PRECISION,
-      ).toNumber();
+      const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
+        ? (formModel.value.selectedAsset as IToken).decimals
+        : AE_COIN_PRECISION;
+      const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
+      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
       loading.value = true;
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
@@ -156,7 +160,7 @@ export default defineComponent({
         if (
           tippingV2
           && formModel.value.selectedAsset?.contractId
-          && formModel.value.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+          && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
           await store.dispatch(
             'fungibleTokens/createOrChangeAllowance',
@@ -186,10 +190,10 @@ export default defineComponent({
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
-          transactionOwner: activeAccount.value.address,
+          transactionOwner: account.address,
           tx: {
             amount,
-            callerId: activeAccount.value.address,
+            callerId: account.address,
             contractId: tippingContract.$options.address!,
             type: Tag[Tag.ContractCallTx],
             function: 'retip',
@@ -198,7 +202,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+        upsertCustomPendingTransactionForAccount(account.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({
@@ -214,7 +218,9 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      formModel.value.selectedAsset = aeternityCoin.value;
+      formModel.value.selectedAsset = ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getDefaultCoin(marketData.value!, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
 

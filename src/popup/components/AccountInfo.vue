@@ -31,12 +31,17 @@
         data-cy="account-name-number"
         class="account-name"
       >
-        {{ $t('pages.account.heading') }} {{ idx + 1 }}
+        {{ getDefaultAccountLabel({ protocol: protocolName, protocolIdx: idx }) }}
       </div>
       <div
         v-if="address && address.length"
         class="account-address"
       >
+        <IconWrapper
+          v-if="withProtocolIcon"
+          :protocol-icon="protocol"
+          class="protocol-icon"
+        />
         <CopyText
           data-cy="copy"
           :value="address"
@@ -44,6 +49,7 @@
         >
           <AddressTruncated
             :address="address"
+            :protocol="protocol"
             class="ae-address"
           />
         </CopyText>
@@ -53,17 +59,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { AeScan } from '../../lib/AeScan';
-import { useGetter } from '../../composables/vuex';
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import type { Protocol } from '@/types';
+import { getDefaultAccountLabel } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
+import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   components: {
+    IconWrapper,
     AddressTruncated,
     Avatar,
     Truncate,
@@ -72,22 +86,31 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     avatarSize: { type: String, default: 'lg' },
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
+    withProtocolIcon: Boolean,
   },
   setup(props) {
-    const activeNetwork = useGetter('activeNetwork');
-
     const explorerUrl = computed(
-      () => (new AeScan(activeNetwork.value.explorerUrl)).prepareUrlForAccount(props.address),
+      () => ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .getExplorer()
+        .prepareUrlForAccount(props.address),
+    );
+
+    const protocolName = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
     );
 
     return {
       explorerUrl,
+      protocolName,
+      getDefaultAccountLabel,
     };
   },
 });
@@ -142,6 +165,16 @@ export default defineComponent({
         height: 22px;
         margin-left: 2px;
       }
+    }
+  }
+
+  .account-address {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    .protocol-icon {
+      margin-right: 6px;
     }
   }
 

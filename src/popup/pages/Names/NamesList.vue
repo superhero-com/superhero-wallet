@@ -23,8 +23,8 @@
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
-import type { IName } from '../../../types';
-import { executeAndSetInterval } from '../../utils';
+import type { IName } from '@/types';
+import { executeAndSetInterval } from '@/utils';
 import { useDispatch, useState } from '../../../composables/vuex';
 import { useAccounts, useUi } from '../../../composables';
 import NameItem from '../../components/NameItem.vue';

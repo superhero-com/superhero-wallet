@@ -1,15 +1,16 @@
 import { Component, VNode, h } from 'vue';
-import { usePopupProps } from '../../composables';
-import { WalletAppRouteConfig } from '../../types';
-import { IN_POPUP, IS_WEB } from '../../lib/environment';
-import { RejectedByUserError } from '../../lib/errors';
+import { WalletAppRouteConfig } from '@/types';
 import {
+  IN_POPUP,
+  IS_WEB,
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
-} from '../utils';
+} from '@/constants';
+import { usePopupProps } from '../../composables';
+import { RejectedByUserError } from '../../lib/errors';
 import { ROUTE_WEB_IFRAME_POPUP } from './routeNames';
 
 import ConfirmConnect from '../pages/Popups/Connect.vue';

@@ -44,7 +44,9 @@
       :to="activeMultisigAccountExplorerUrl"
     >
       {{ $t('multisig.explorerLink') }}
-      <ExternalLinkIcon class="external-icon" />
+      <template #icon>
+        <ExternalLinkIcon class="external-icon" />
+      </template>
     </LinkButton>
 
     <div class="row">
@@ -60,27 +62,25 @@
       />
     </div>
 
-    <div class="row">
-      <AuthorizedAccounts
-        :address-list="activeMultisigAccount.signers"
-      />
-      <DetailsItem
-        class="details-item"
-        :label="$t('multisig.consensus')"
-      >
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <template #value>
-          <ConsensusLabel
-            :confirmations-required="activeMultisigAccount.confirmationsRequired"
-            :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
-            :confirmed-by="activeMultisigAccount.confirmedBy"
-            :signers="activeMultisigAccount.signers"
-          />
-        </template>
-      </DetailsItem>
-    </div>
+    <DetailsItem
+      class="details-item"
+      :label="$t('multisig.consensus')"
+    >
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <template #value>
+        <ConsensusLabel
+          :confirmations-required="activeMultisigAccount.confirmationsRequired"
+          :has-pending-transaction="activeMultisigAccount.hasPendingTransaction"
+          :confirmed-by="activeMultisigAccount.confirmedBy"
+          :signers="activeMultisigAccount.signers"
+        />
+      </template>
+    </DetailsItem>
+    <AuthorizedAccounts
+      :address-list="activeMultisigAccount.signers"
+    />
   </div>
 </template>
 
@@ -91,8 +91,8 @@ import {
   onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import { MODAL_CONSENSUS_INFO } from '../utils';
-import { useModals, useMultisigAccounts } from '../../composables';
+import { MODAL_CONSENSUS_INFO } from '@/constants';
+import { useModals, useMultisigAccounts } from '@/composables';
 
 import DetailsItem from '../components/DetailsItem.vue';
 import AddressFormatted from '../components/AddressFormatted.vue';
@@ -162,13 +162,8 @@ export default defineComponent({
   }
 
   .row {
-    display: grid;
-    grid-gap: 24px;
-    grid-template-columns: 208px auto;
-  }
-
-  .details-item {
-    width: 100%;
+    display: flex;
+    gap: 24px;
   }
 
   .explorer-link {

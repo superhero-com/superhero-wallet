@@ -1,6 +1,10 @@
+import nacl from 'tweetnacl';
 import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
-import { useAccounts, useModals } from '../../composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAccounts, useModals, useNetworks } from '@/composables';
 import { tg } from '../plugins/languages';
+
+const SEED_LENGTH = 32;
 
 export default {
   namespaced: true,
@@ -15,17 +19,24 @@ export default {
   },
   actions: {
     async claim({ rootGetters, rootState }, secretKey) {
-      const { activeAccount } = useAccounts({
+      const { activeNetwork } = useNetworks();
+      const { getLastActiveProtocolAccount } = useAccounts({
         store: { state: rootState, getters: rootGetters },
       });
       const aeSdk = new AeSdk({
         nodes: [{
-          name: rootGetters.activeNetwork.name,
-          instance: new Node(rootGetters.activeNetwork.url),
+          name: activeNetwork.value.name,
+          instance: new Node(activeNetwork.value.protocols.aeternity.nodeUrl),
         }],
-        accounts: [new MemoryAccount(secretKey)],
+        // `secretKey` variable can be either seed or seed + public key (legacy)
+        accounts: [new MemoryAccount(secretKey.length === SEED_LENGTH
+          ? nacl.sign.keyPair.fromSeed(secretKey).secretKey : secretKey)],
       });
-      await aeSdk.transferFunds(1, activeAccount.value.address, { verify: false });
+      await aeSdk.transferFunds(
+        1,
+        getLastActiveProtocolAccount(PROTOCOL_AETERNITY).address,
+        { verify: false },
+      );
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;

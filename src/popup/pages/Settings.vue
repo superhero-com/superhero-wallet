@@ -41,12 +41,12 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import type { INetwork } from '../../types';
-import { useGetter, useState } from '../../composables/vuex';
-import { useCurrencies } from '../../composables';
-import { ROUTE_NETWORK_SETTINGS } from '../router/routeNames';
+import { useStore } from 'vuex';
+import { useState } from '@/composables/vuex';
+import { useCurrencies, useNetworks } from '@/composables';
+import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
 
-import PanelItem from '../components/PanelItem.vue';
+import PanelItem from '@/popup/components/PanelItem.vue';
 
 export default defineComponent({
   name: 'Settings',
@@ -54,9 +54,10 @@ export default defineComponent({
     PanelItem,
   },
   setup() {
-    const { currentCurrencyInfo } = useCurrencies();
+    const store = useStore();
+    const { currentCurrencyInfo } = useCurrencies({ store });
 
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { activeNetwork } = useNetworks();
     const saveErrorLog = useState('saveErrorLog');
 
     const activeCurrency = computed(

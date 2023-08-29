@@ -1,11 +1,14 @@
 import { mount, RouterLinkStub } from '@vue/test-utils';
+import Vuex from 'vuex';
 import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
 import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
-import * as environment from '../../src/lib/environment';
+import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
+
+const store = new Vuex.Store({ state: {}, getters: {} });
 
 beforeEach(() => {
   jest.resetModules();
@@ -16,7 +19,7 @@ afterAll(() => {
   process.env = OLD_ENV;
 });
 
-jest.mock('../../src/lib/environment', () => ({
+jest.mock('../../src/constants/environment', () => ({
   __esModule: true,
   IS_WEB: null,
   IN_FRAME: null,
@@ -29,10 +32,6 @@ jest.mock('../../src/composables', () => ({
   useModals: jest.fn(() => ({
     openModal: jest.fn(),
   })),
-}));
-jest.mock('vuex', () => ({
-  useStore: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
-  Store: jest.fn(() => ({ getters: { activeNetwork: () => {} } })),
 }));
 jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({})),
@@ -87,8 +86,8 @@ describe.each(testCases)('Pages', (test) => {
 
     const wrapper = mount(test.page, {
       global: {
+        plugins: [store],
         mocks: {
-          $store: { getters: { activeNetwork: () => {} } },
           $t: () => 'locale-specific-text',
           $tm: () => 'locale-specific-text',
         },

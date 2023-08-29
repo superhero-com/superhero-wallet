@@ -6,21 +6,15 @@ import {
   buildTx,
 } from '@aeternity/aepp-sdk';
 
-import { useAccounts, useModals, useAeSdk } from '../../../composables';
+import { useAccounts, useAeSdk, useModals } from '@/composables';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
-  getHdWalletAccount,
-  isTxOfASupportedType,
-} from '../../../popup/utils';
-
-/**
- * Address gap limit is currently set to 5.
- * If the software hits 5 unused addresses in a row,
- * it expects there are no used addresses beyond this point and stops searching the address chain.
-*/
-const ADDRESS_GAP_LIMIT = 5;
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   namespaced: true,
@@ -29,60 +23,52 @@ export default {
     type: ACCOUNT_HD_WALLET,
   },
 
-  state: {
-    nextAccountIdx: 1,
-  },
   actions: {
     async isAccountUsed(context, address) {
       const { getAeSdk } = useAeSdk({ store: context });
       const aeSdk = await getAeSdk();
       return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
-    async discover({ state, rootGetters, dispatch }) {
-      let lastNotEmptyIdx = 0;
-      let lastIndex = 0;
-      let isAccountUsedArray = [];
+    async discover({ rootGetters: { wallet }, dispatch }) {
+      const numberOfAccounts = await ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
+        .discoverAccounts(wallet);
 
-      do {
-        try {
-          lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
-          lastIndex += isAccountUsedArray.length;
-          // eslint-disable-next-line no-await-in-loop
-          isAccountUsedArray = await Promise.all(
-            Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1)
-              // eslint-disable-next-line no-loop-func
-              .fill().map((x, i) => i + lastIndex).map((index) => dispatch(
-                'isAccountUsed',
-                getHdWalletAccount(rootGetters.wallet, index).address,
-              )),
-          );
-        } catch (e) {
-          break;
-        }
-      } while (!(
-        isAccountUsedArray.lastIndexOf(true) === -1
-        || isAccountUsedArray.filter((isAccountUsed) => !isAccountUsed).length === ADDRESS_GAP_LIMIT
-      ));
-      for (let i = state.nextAccountIdx; i <= lastNotEmptyIdx; i += 1) {
-        dispatch('create', true);
+      for (let i = 0; i < numberOfAccounts; i += 1) {
+        dispatch('create', {
+          isRestored: true,
+          protocol: PROTOCOL_AETERNITY,
+        });
       }
     },
-    create({ state, commit }, isRestored = false) {
-      commit(
+    create(store, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
+      const { incrementProtocolNextAccountIdx, protocolNextAccountIdx } = useAccounts({ store });
+
+      store.commit(
         'accounts/add',
-        { idx: state.nextAccountIdx, type: ACCOUNT_HD_WALLET, isRestored },
+        {
+          idx: protocolNextAccountIdx.value[protocol] || 0,
+          type: ACCOUNT_HD_WALLET,
+          isRestored,
+          protocol,
+        },
         { root: true },
       );
-      state.nextAccountIdx += 1;
+      incrementProtocolNextAccountIdx(protocol);
     },
     signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
       const { activeAccount, getAccountByAddress } = useAccounts({
         store: { state: rootState, getters: rootGetters },
       });
-      const { secretKey } = (options?.fromAccount)
+      const { secretKey, protocol } = (options?.fromAccount)
         ? getAccountByAddress(options.fromAccount)
         : activeAccount.value;
-      return sign(data, secretKey);
+
+      if (protocol === PROTOCOL_AETERNITY) {
+        return sign(data, Buffer.from(secretKey, 'hex'));
+      }
+
+      throw new Error('Unsupported protocol');
     },
     async confirmTxSigning({ dispatch }, { txBase64, app }) {
       const { openModal } = useModals();
@@ -105,10 +91,13 @@ export default {
     sign({ dispatch }, data) {
       return dispatch('signWithoutConfirmation', { data });
     },
-    async signTransaction({ dispatch, rootGetters }, {
+    async signTransaction({ dispatch, rootState, rootGetters }, {
       txBase64,
       options: { modal = true, app = null },
     }) {
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
         await dispatch('confirmTxSigning', { txBase64, app });
@@ -117,17 +106,20 @@ export default {
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
-            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(nodeNetworkId.value),
             Buffer.from(encodedTx),
           ]),
         },
       );
       return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
     },
-    async signTransactionFromAccount({ dispatch, rootGetters }, {
+    async signTransactionFromAccount({ dispatch, rootState, rootGetters }, {
       txBase64,
       options: { modal = true, app = null, fromAccount },
     }) {
+      const { nodeNetworkId } = useAeSdk({
+        store: { state: rootState, getters: rootGetters },
+      });
       const encodedTx = decode(txBase64, 'tx');
       if (modal) {
         await dispatch('confirmTxSigning', { txBase64, app });
@@ -136,7 +128,7 @@ export default {
         'signWithoutConfirmation',
         {
           data: Buffer.concat([
-            Buffer.from(rootGetters.activeNetwork.networkId),
+            Buffer.from(nodeNetworkId.value),
             Buffer.from(encodedTx),
           ]),
           options: { fromAccount },

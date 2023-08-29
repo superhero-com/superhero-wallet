@@ -1,37 +1,50 @@
 import {
-  MODAL_DEFAULT,
   MODAL_ACCOUNT_CREATE,
+  MODAL_AE_ACCOUNT_CREATE,
   MODAL_ACCOUNT_IMPORT,
+  MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_ASSET_SELECTOR,
   MODAL_CLAIM_SUCCESS,
   MODAL_CONFIRM,
-  MODAL_CONFIRM_TRANSACTION_SIGN,
-  MODAL_CONFIRM_RAW_SIGN,
-  MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
+  MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
+  MODAL_CONSENSUS_INFO,
+  MODAL_DEFAULT,
   MODAL_ERROR_LOG,
   MODAL_FORM_SELECT_OPTIONS,
   MODAL_HELP,
-  MODAL_READ_QR_CODE,
   MODAL_MESSAGE_SIGN,
-  MODAL_TRANSFER_RECEIVE,
-  MODAL_RESET_WALLET,
-  MODAL_TRANSFER_SEND,
-  MODAL_RECIPIENT_INFO,
-  MODAL_RECIPIENT_HELPER,
-  MODAL_CONSENSUS_INFO,
-  MODAL_PAYLOAD_FORM,
-  MODAL_MULTISIG_VAULT_CREATE,
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  MODAL_ACCOUNT_SELECT_OPTIONS,
-} from '../utils/constants';
-import { useModals } from '../../composables';
+  MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_NETWORK_SWITCHER,
+  MODAL_PAYLOAD_FORM,
+  MODAL_READ_QR_CODE,
+  MODAL_RECIPIENT_HELPER,
+  MODAL_RECIPIENT_INFO,
+  MODAL_RESET_WALLET,
+  MODAL_TRANSFER_RECEIVE,
+  MODAL_TRANSFER_SEND,
+  PROTOCOL_VIEW_TRANSFER_RECEIVE,
+  PROTOCOL_VIEW_TRANSFER_SEND,
+  MODAL_DAPP_BROWSER_ACTIONS,
+  MODAL_WARNING_DAPP_BROWSER,
+} from '@/constants';
+import { useModals } from '@/composables';
+
+import AeternityAccountCreate from '@/protocols/aeternity/views/AccountCreateModal.vue';
+import NetworkSwitcherModal from '@/popup/components/Modals/NetworkSwitcherModal.vue';
 
 import Default from '../components/Modals/Default.vue';
+import ProtocolSpecificView from '../components/ProtocolSpecificView.vue';
 import AccountCreate from '../components/Modals/AccountCreate.vue';
 import AccountImport from '../components/Modals/AccountImport.vue';
+import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
 import ClaimSuccess from '../components/Modals/ClaimSuccess.vue';
 import Confirm from '../components/Modals/Confirm.vue';
+import ConfirmConnect from '../pages/Popups/Connect.vue';
+
 import ErrorLog from '../components/Modals/ErrorLog.vue';
 import FormSelectOptions from '../components/Modals/FormSelectOptions.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
@@ -39,17 +52,16 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
-import TransferReceive from '../components/Modals/TransferReceive.vue';
 import ResetWallet from '../components/Modals/ResetWallet.vue';
-import TransferSend from '../components/Modals/TransferSend.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
+import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
-import AccountSelectOptions from '../components/Modals/AccountSelectOptions.vue';
+import BrowserActions from '../components/Modals/BrowserActions.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -90,6 +102,7 @@ export default () => {
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_CONNECT, {
+    component: ConfirmConnect,
     showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_ACCOUNT_LIST, {
@@ -103,10 +116,12 @@ export default () => {
     component: QrCodeReader,
   });
   registerModal(MODAL_TRANSFER_RECEIVE, {
-    component: TransferReceive,
+    component: ProtocolSpecificView,
+    viewComponentName: PROTOCOL_VIEW_TRANSFER_RECEIVE,
   });
   registerModal(MODAL_TRANSFER_SEND, {
-    component: TransferSend,
+    component: ProtocolSpecificView,
+    viewComponentName: PROTOCOL_VIEW_TRANSFER_SEND,
   });
   registerModal(MODAL_ASSET_SELECTOR, {
     component: AssetSelector,
@@ -131,5 +146,17 @@ export default () => {
   });
   registerModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
     component: MultisigProposalConfirmActions,
+  });
+  registerModal(MODAL_NETWORK_SWITCHER, {
+    component: NetworkSwitcherModal,
+  });
+  registerModal(MODAL_AE_ACCOUNT_CREATE, {
+    component: AeternityAccountCreate,
+  });
+  registerModal(MODAL_DAPP_BROWSER_ACTIONS, {
+    component: BrowserActions,
+  });
+  registerModal(MODAL_WARNING_DAPP_BROWSER, {
+    component: WarningDappBrowser,
   });
 };

@@ -1,47 +1,52 @@
 import BigNumber from 'bignumber.js';
-import { generateHDWallet as generateHdWallet } from '@aeternity/hd-wallet/src';
 import { mnemonicToSeed } from '@aeternity/bip39';
+import { toShiftedBigNumber } from '@/utils';
 import {
-  AETERNITY_SYMBOL,
   ACCOUNT_HD_WALLET,
-  NETWORK_MAINNET,
-  NETWORK_TESTNET,
   NODE_STATUS_CONNECTED,
+  PROTOCOL_AETERNITY,
   TX_DIRECTION,
-  convertToken,
+} from '@/constants';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import {
   aettosToAe,
   categorizeContractCallTxObject,
-  getHdWalletAccount,
-} from '../popup/utils';
+} from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default {
   wallet({ mnemonic }) {
     if (!mnemonic) return null;
-    return generateHdWallet(mnemonicToSeed(mnemonic));
+    return mnemonicToSeed(mnemonic);
   },
   accounts({ accounts: { list } }, getters) {
-    if (!getters.wallet) return [];
+    if (!getters.wallet) {
+      return [];
+    }
+
     return list
-      .map(({ idx, type, ...acc }) => ({
+      .map(({
+        idx, type, protocol = PROTOCOL_AETERNITY, ...acc
+      }, index) => ({
+        globalIdx: index,
         idx,
         type,
+        protocol,
         ...acc,
-        ...(type === ACCOUNT_HD_WALLET ? getHdWalletAccount(getters.wallet, idx) : {}),
+        ...(type === ACCOUNT_HD_WALLET
+          ? ProtocolAdapterFactory
+            .getAdapter(protocol)
+            .getHdWalletAccountFromMnemonicSeed(
+              getters.wallet,
+              idx,
+            )
+          : {}
+        ),
       }))
       .map(({ ...account }) => ({
         ...account,
         name: getters['names/getDefault'](account.address),
       }));
-  },
-  networks({ userNetworks }) {
-    return [
-      NETWORK_MAINNET,
-      NETWORK_TESTNET,
-      ...userNetworks.map((network, index) => ({ index, ...network })),
-    ].reduce((acc, n) => ({ ...acc, [n.name]: n }), {});
-  },
-  activeNetwork({ current: { network } }, { networks }) {
-    return networks[network];
   },
   isConnected({ nodeStatus }) {
     return nodeStatus === NODE_STATUS_CONNECTED;
@@ -49,14 +54,14 @@ export default {
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    return availableTokens[contractCallData?.token]?.symbol || AETERNITY_SYMBOL;
+    return availableTokens[contractCallData?.token]?.symbol || AE_SYMBOL;
   },
   getTxAmountTotal: (
     { fungibleTokens: { availableTokens } },
   ) => (transaction, direction = TX_DIRECTION.sent) => {
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens[contractCallData.token]) {
-      return +convertToken(
+      return +toShiftedBigNumber(
         contractCallData.amount,
         -availableTokens[contractCallData.token].decimals,
       );

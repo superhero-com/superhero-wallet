@@ -18,31 +18,31 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import FungibleTokenFullInterfaceACI from '../lib/contracts/FungibleTokenFullInterfaceACI.json';
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type {
-  IAsset,
   IDefaultComposableOptions,
-} from '../types';
+  IFormModel,
+} from '@/types';
 import {
-  AETERNITY_COIN_PRECISION,
-  AETERNITY_CONTRACT_ID,
+  executeAndSetInterval,
+  handleUnknownError,
+  isUrlValid,
+} from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
-  executeAndSetInterval,
-  validateTipUrl,
-  checkAensName,
-  handleUnknownError,
-} from '../popup/utils';
+} from '@/constants/stubs';
+import {
+  AE_COIN_PRECISION,
+  AE_CONTRACT_ID,
+} from '@/protocols/aeternity/config';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
+
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
-export interface IFormModel {
-  amount?: string;
-  selectedAsset?: IAsset;
-  address?: Encoded.AccountAddress;
-  payload?: string;
-}
 export interface MaxAmountOptions extends IDefaultComposableOptions {
   formModel: Ref<IFormModel>
 }
@@ -54,7 +54,7 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const { getAeSdk } = useAeSdk({ store });
   const { balance } = useBalances({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { getLastActiveProtocolAccount } = useAccounts({ store });
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;
@@ -65,54 +65,62 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const selectedAssetDecimals = ref(0);
 
   const max = computed(() => {
-    if (balance.value && formModel.value?.selectedAsset?.contractId === AETERNITY_CONTRACT_ID) {
+    if (balance.value && formModel.value?.selectedAsset?.contractId === AE_CONTRACT_ID) {
       const _max = balance.value.minus(fee.value);
       return (_max.isPositive() ? _max : 0).toString();
     }
     return selectedTokenBalance.value.toString();
   });
 
+  function getAccount() {
+    return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+  }
+
   watch(
     () => formModel.value,
     async (val) => {
-      if (!val?.selectedAsset) return;
+      if (!val?.selectedAsset) {
+        return;
+      }
       const aeSdk = await getAeSdk();
+      const isAssetAe = val.selectedAsset.contractId === AE_CONTRACT_ID;
+      const account = getAccount();
 
-      if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID) {
+      if (!isAssetAe) {
         if (
           !tokenInstance
           || tokenInstance.$options.address !== val.selectedAsset.contractId
         ) {
           tokenInstance = await aeSdk.initializeContract({
             aci: FungibleTokenFullInterfaceACI,
-            address: val.selectedAsset.contractId,
+            address: val.selectedAsset.contractId as Encoded.ContractAddress,
           });
         }
         selectedAssetDecimals.value = val.selectedAsset.decimals!;
       }
 
       const numericAmount = (val.amount && +val.amount > 0) ? val.amount : 0;
-      const amount = new BigNumber(numericAmount).shiftedBy(AETERNITY_COIN_PRECISION);
+      const amount = new BigNumber(numericAmount).shiftedBy(AE_COIN_PRECISION);
 
       if (
-        val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID
+        !isAssetAe
         || (
-          val.address && !checkAensName(val.address) && validateTipUrl(val.address)
+          val.address && !isAensNameValid(val.address) && isUrlValid(val.address)
         )
       ) {
         let calldata: Encoded.ContractBytearray = STUB_CALLDATA;
-        if (val.selectedAsset.contractId !== AETERNITY_CONTRACT_ID && tokenInstance) {
+        if (tokenInstance) {
           calldata = tokenInstance._calldata.encode(
             tokenInstance._name,
             'transfer',
-            [activeAccount.value.address, amount.toFixed()],
+            [account.address, amount.toFixed()],
           );
         }
         fee.value = BigNumber(unpackTx(
           buildTx({
             tag: Tag.ContractCallTx,
-            callerId: activeAccount.value.address,
-            contractId: val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
+            callerId: account.address,
+            contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
             amount: 0,
@@ -120,28 +128,25 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
             nonce: nonce.value,
           }) as any,
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-        ).fee).shiftedBy(-AETERNITY_COIN_PRECISION);
+        ).fee).shiftedBy(-AE_COIN_PRECISION);
         return;
       }
 
-      if (
-        val.selectedAsset.contractId === AETERNITY_CONTRACT_ID
-        && tokenInstance
-      ) {
+      if (isAssetAe && tokenInstance) {
         tokenInstance = null;
       }
 
       const minFee = BigNumber(unpackTx(
         buildTx({
           tag: Tag.SpendTx,
-          senderId: activeAccount.value.address,
-          recipientId: activeAccount.value.address,
+          senderId: account.address,
+          recipientId: account.address,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
         }) as any,
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
-      ).fee).shiftedBy(-AETERNITY_COIN_PRECISION);
+      ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;
     },
     {
@@ -155,7 +160,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       if (!tokenInstance) return;
       await getAeSdk();
       selectedTokenBalance.value = new BigNumber(
-        (await tokenInstance.balance(activeAccount.value.address)).decodedResult ?? 0,
+        (await tokenInstance.balance(getAccount().address)).decodedResult ?? 0,
       ).shiftedBy(-selectedAssetDecimals.value);
     }, 1000);
 
@@ -163,7 +168,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       try {
         nonce.value = (await aeSdk.api
-          .getAccountByPubkey(activeAccount.value.address))?.nonce;
+          .getAccountByPubkey(getAccount().address))?.nonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }

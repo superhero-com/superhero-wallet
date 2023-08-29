@@ -97,7 +97,7 @@
             name="transactionSignLimit"
             label=" "
             :selected-asset="selectedAsset"
-            ae-only
+            readonly
           />
         </Field>
 
@@ -159,11 +159,13 @@ import {
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
-import { AETERNITY_CONTRACT_ID, AETERNITY_SYMBOL, PERMISSION_DEFAULTS } from '../utils';
-import { IPermission } from '../../types';
-import { useBalances, useCurrencies } from '../../composables';
-import { useState } from '../../composables/vuex';
-import { ROUTE_NOT_FOUND } from '../router/routeNames';
+
+import type { IPermission } from '@/types';
+import { PERMISSION_DEFAULTS } from '@/constants';
+import { useBalances, useCurrencies } from '@/composables';
+import { useState } from '@/composables/vuex';
+import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmount.vue';
@@ -188,7 +190,7 @@ export default defineComponent({
     const { validate, setValues } = useForm();
 
     const { balance } = useBalances({ store });
-    const { currentCurrencyRate } = useCurrencies();
+    const { currentCurrencyRate } = useCurrencies({ store });
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;
@@ -200,8 +202,8 @@ export default defineComponent({
     const permissions = useState<Record<string, IPermission>>('permissions');
 
     const selectedAsset = computed(() => ({
-      contractId: AETERNITY_CONTRACT_ID,
-      symbol: AETERNITY_SYMBOL,
+      contractId: AE_CONTRACT_ID,
+      symbol: AE_SYMBOL,
       currentPrice: currentCurrencyRate.value,
     }));
 

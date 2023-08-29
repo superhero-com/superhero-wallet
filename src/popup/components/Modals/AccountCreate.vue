@@ -3,40 +3,29 @@
     class="account-create"
     from-bottom
     has-close-button
+    no-padding
     centered
     @close="resolve"
   >
-    <h2 class="text-heading-2">
-      {{
-        isMultisig
-          ? $t('modals.createAccount.titleMultisig')
-          : $t('pages.accounts.addAccount')
-      }}
-    </h2>
+    <div class="content-wrapper ">
+      <h2 class="text-heading-1">
+        {{ $t('modals.createAccount.title') }}
+      </h2>
 
-    <p class="message">
-      {{
-        isMultisig
-          ? $t('modals.createAccount.msgMultisig')
-          : $t('modals.createAccount.msg')
-      }}
-    </p>
+      <p class="message">
+        {{ $t('modals.createAccount.msg') }}
+      </p>
 
-    <BtnSubheader
-      v-if="!isMultisig"
-      :header="$t('pages.accounts.addAccount')"
-      :subheader="$t('modals.createAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      :disabled="!isOnline"
-      @click="createPlainAccount()"
-    />
-    <BtnSubheader
-      :header="$t('modals.createMultisigAccount.btnText')"
-      :subheader="$t('modals.createMultisigAccount.btnSubtitle')"
-      :icon="PlusCircleIcon"
-      :disabled="!isOnline"
-      @click="createMultisigAccount()"
-    />
+      <BtnSubheader
+        v-for="protocol in PROTOCOLS"
+        :key="protocol"
+        :header="getProtocolName(protocol)"
+        :subheader="$t(
+          'modals.createAccount.addProtocolAccount', { name: getProtocolName(protocol) })"
+        :protocol-icon="protocol"
+        @click="createAccount(protocol)"
+      />
+    </div>
 
     <Loader v-if="loading" />
   </Modal>
@@ -45,62 +34,87 @@
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
 import { useStore } from 'vuex';
-import { MODAL_MULTISIG_VAULT_CREATE } from '../../utils';
-import { useConnection, useModals } from '../../../composables';
+import type { Protocol, ResolveCallback } from '@/types';
+import {
+  MODAL_AE_ACCOUNT_CREATE,
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
+  PROTOCOLS,
+} from '@/constants';
+import { useConnection, useModals } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
+import Loader from '@/popup/components/Loader.vue';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
-import Loader from '../Loader.vue';
-import PlusCircleIcon from '../../../icons/plus-circle-fill.svg?vue-component';
 
 export default defineComponent({
   components: {
+    Loader,
     Modal,
     BtnSubheader,
-    Loader,
   },
   props: {
-    resolve: { type: Function as PropType<() => void>, required: true },
-    isMultisig: Boolean,
+    resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
     const store = useStore();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-
     const loading = ref(false);
 
-    async function createPlainAccount() {
+    async function createAccount(protocol: Protocol) {
       loading.value = true;
-      await store.dispatch('accounts/hdWallet/create');
+
+      // TODO each of the blocks of this switch should be moved to the specific adapter
+      switch (protocol) {
+        case PROTOCOL_AETERNITY:
+          await openModal(MODAL_AE_ACCOUNT_CREATE);
+          break;
+
+        case PROTOCOL_BITCOIN:
+          await store.dispatch('accounts/hdWallet/create', {
+            isRestored: false,
+            protocol: PROTOCOL_BITCOIN,
+          });
+          break;
+
+        default:
+      }
       loading.value = false;
       props.resolve();
     }
 
-    async function createMultisigAccount() {
-      await openModal(MODAL_MULTISIG_VAULT_CREATE);
-      props.resolve();
+    function getProtocolName(protocol: Protocol) {
+      return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
     return {
-      PlusCircleIcon,
+      PROTOCOLS,
+      PROTOCOL_AETERNITY,
+      PROTOCOL_BITCOIN,
       isOnline,
       loading,
-      createPlainAccount,
-      createMultisigAccount,
+      createAccount,
+      getProtocolName,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/typography';
+@use '@/styles/typography';
 
 .account-create {
+  .content-wrapper {
+    padding: 0 16px 32px;
+  }
+
   .message {
     @extend %face-sans-16-medium;
 
+    padding-inline: inherit;
     line-height: 24px;
-    max-width: 280px;
     margin: 0 auto 36px;
   }
 }

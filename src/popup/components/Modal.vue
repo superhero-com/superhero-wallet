@@ -60,6 +60,7 @@
 
         <FixedScreenFooter
           v-if="$slots.footer"
+          v-bind="$attrs"
         >
           <slot name="footer" />
         </FixedScreenFooter>
@@ -80,7 +81,7 @@ import {
   onBeforeUnmount,
   onMounted,
 } from 'vue';
-import { IS_FIREFOX, IS_EXTENSION } from '../../lib/environment';
+import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
 

@@ -83,9 +83,9 @@ import type {
   RejectCallback,
   ResolveCallback,
   StatusIconType,
-} from '../../../types';
-import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '../../../composables';
-import { TX_FUNCTIONS_MULTISIG } from '../../utils';
+} from '@/types';
+import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
+import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';

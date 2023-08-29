@@ -1,20 +1,24 @@
 import { computed, ref, watch } from 'vue';
 import type {
   IDefaultComposableOptions,
-  INetwork,
   INotification,
   INotificationSetting,
   NotificationStatus,
-} from '../types';
+} from '@/types';
+import {
+  fetchJson,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
 import {
   NOTIFICATION_STATUS_CREATED,
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPE_WALLET,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-  fetchJson,
-  postJson,
-} from '../popup/utils';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
@@ -35,13 +39,12 @@ export function useNotifications({
   requirePolling = false,
   store,
 }: UseNotificationsOptions) {
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { fetchRespondChallenge } = useAeSdk({ store });
   const { activeAccount } = useAccounts({ store });
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);
-
-  const activeNetwork = computed((): INetwork => store.getters.activeNetwork);
   const notificationSettings = computed(
     (): INotificationSetting[] => store.state.notificationSettings,
   );
@@ -74,12 +77,25 @@ export function useNotifications({
   );
 
   async function fetchAllNotifications(): Promise<INotification[]> {
-    const fetchUrl = `${activeNetwork.value.backendUrl}/notification/user/${activeAccount.value.address}`;
-    const responseChallenge = await fetchJson(fetchUrl);
-    const respondChallenge = await fetchRespondChallenge(responseChallenge);
-    const url = new URL(fetchUrl);
-    Object.entries(respondChallenge).forEach(([key, value]) => url.searchParams.append(key, value));
-    return await fetchJson(url.toString()) || [];
+    // TODO: Remove this condition once global filter is ready
+    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+      return [];
+    }
+
+    try {
+      const fetchUrl = `${aeActiveNetworkSettings.value.backendUrl}/notification/user/${activeAccount.value.address}`;
+      const responseChallenge = await fetchJson(fetchUrl);
+      const respondChallenge = await fetchRespondChallenge(responseChallenge);
+      const url = new URL(fetchUrl);
+      Object.entries(respondChallenge).forEach(
+        ([key, value]) => url.searchParams.append(key, value),
+      );
+      const result = await fetchJson(url.toString());
+      return !result || result.err ? [] : result;
+    } catch (e) {
+      handleUnknownError(e);
+      return [];
+    }
   }
 
   async function modifyNotifications(
@@ -89,7 +105,7 @@ export function useNotifications({
     if (!ids.length) {
       return;
     }
-    const postToNotificationApi = async (body: any) => postJson(`${activeNetwork.value.backendUrl}/notification`, { body });
+    const postToNotificationApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/notification`, { body });
     const responseChallenge = await postToNotificationApi({
       ids,
       status,

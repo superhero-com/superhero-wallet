@@ -9,10 +9,9 @@
           Superhero Wallet
         </div>
       </div>
-      <a
+      <LinkButton
         class="table-item link"
-        :href="`${COMMIT_URL}${commitHash}`"
-        target="_blank"
+        :to="`${AE_COMMIT_URL}${commitHash}`"
       >
         <div class="name">
           {{ $t('pages.about.commit') }}
@@ -21,7 +20,7 @@
           {{ commitHash.slice(0, 7) }}
           <Github />
         </div>
-      </a>
+      </LinkButton>
       <div class="table-item">
         <div class="name">
           {{ $t('pages.about.software-version') }}
@@ -38,33 +37,31 @@
           {{ sdkVersion }}
         </div>
       </div>
-      <template v-if="activeNetwork && mdwStatus">
-        <a
+      <template v-if="aeActiveNetworkSettings && middlewareStatus">
+        <LinkButton
           class="table-item link"
-          target="_blank"
-          :href="`${activeNetwork.middlewareUrl}/status`"
+          :to="`${middlewareUrl}/status`"
         >
           <div class="name">
             {{ $t('pages.about.middleware-version') }}
           </div>
           <div class="value">
-            {{ mdwStatus.mdwVersion }}
+            {{ middlewareStatus.mdwVersion }}
             <ExternalLink class="compensate-icon-margin" />
           </div>
-        </a>
-        <a
+        </LinkButton>
+        <LinkButton
           class="table-item link"
-          target="_blank"
-          :href="`${activeNetwork.middlewareUrl}/status`"
+          :to="`${middlewareUrl}/status`"
         >
           <div class="name">
             {{ $t('pages.about.node-version') }}
           </div>
           <div class="value">
-            {{ mdwStatus.nodeVersion }}
+            {{ middlewareStatus.nodeVersion }}
             <ExternalLink class="compensate-icon-margin" />
           </div>
-        </a>
+        </LinkButton>
       </template>
     </div>
 
@@ -90,13 +87,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-import type { IMiddlewareStatus, INetwork } from '../../types';
-import { BUG_REPORT_URL, AGGREGATOR_URL, COMMIT_URL } from '../utils/constants';
-import { useMiddleware } from '../../composables';
-import { useGetter } from '../../composables/vuex';
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+} from 'vue';
+import type { IMiddlewareStatus } from '@/types';
+import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
+import { useMiddleware } from '@/composables';
+import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
+import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '../components/PanelItem.vue';
 import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
@@ -104,38 +107,42 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
+    LinkButton,
     PanelItem,
     Terms,
     Github,
     ExternalLink,
   },
   setup() {
-    const store = useStore();
-    const { fetchMiddlewareStatus } = useMiddleware({ store });
-    const mdwStatus = ref<IMiddlewareStatus>();
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    const { fetchMiddlewareStatus } = useMiddleware();
+
+    const middlewareStatus = ref<IMiddlewareStatus>();
+
+    const middlewareUrl = computed(() => aeActiveNetworkSettings.value.middlewareUrl);
 
     onMounted(async () => {
-      mdwStatus.value = await fetchMiddlewareStatus();
+      middlewareStatus.value = await fetchMiddlewareStatus();
     });
 
     return {
       BUG_REPORT_URL,
       AGGREGATOR_URL,
-      COMMIT_URL,
+      AE_COMMIT_URL,
+      aeActiveNetworkSettings,
       extensionVersion: process.env.npm_package_version,
       commitHash: process.env.COMMIT_HASH,
       sdkVersion: process.env.SDK_VERSION,
-      mdwStatus,
-      activeNetwork,
+      middlewareStatus,
+      middlewareUrl,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .about {
   --screen-padding-x: 8px;

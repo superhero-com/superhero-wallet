@@ -1,4 +1,5 @@
 import Vuex from 'vuex';
+import { NODE_STATUS_CONNECTING } from '@/constants';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
@@ -14,16 +15,11 @@ import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
 import veeValidate from './plugins/veeValidate';
-import { NETWORK_DEFAULT, NODE_STATUS_CONNECTING } from '../popup/utils/constants';
 
 export default new Vuex.Store({
   state: {
     isRestored: false,
     mnemonic: null,
-    current: {
-      network: NETWORK_DEFAULT.name,
-    },
-    userNetworks: [],
     nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,

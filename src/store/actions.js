@@ -1,36 +1,32 @@
 import {
   fetchJson,
   postJson,
-} from '../popup/utils';
+} from '@/utils';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 export default {
-  switchNetwork({ commit }, payload) {
-    commit('switchNetwork', payload);
+  async claimTips(_, { url, address }) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return postJson(`${aeActiveNetworkSettings.value.backendUrl}/claim/submit`, { body: { url, address } });
   },
-  async claimTips({ getters: { activeNetwork } }, { url, address }) {
-    return postJson(`${activeNetwork.backendUrl}/claim/submit`, { body: { url, address } });
+  async cacheInvalidateOracle() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/invalidate/oracle`);
   },
-  async cacheInvalidateOracle({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/oracle`);
+  async cacheInvalidateTips() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/invalidate/tips`);
   },
-  async cacheInvalidateTips({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/invalidate/tips`);
+  async donateError(_, error) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return postJson(`${aeActiveNetworkSettings.value.backendUrl}/errorreport`, { body: error });
   },
-  async donateError({ getters: { activeNetwork } }, error) {
-    return postJson(`${activeNetwork.backendUrl}/errorreport`, { body: error });
+  async getCacheChainNames() {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/cache/chainnames`);
   },
-  async getCacheChainNames({ getters: { activeNetwork } }) {
-    return fetchJson(`${activeNetwork.backendUrl}/cache/chainnames`);
-  },
-  async getCacheTip({ getters: { activeNetwork } }, id) {
-    return fetchJson(`${activeNetwork.backendUrl}/tips/single/${id}`);
-  },
-  async share(_, options) {
-    await (process.env.IS_CORDOVA
-      ? new Promise((resolve) => window.plugins.socialsharing.shareW3C(
-        options,
-        ({ app }) => app && resolve(),
-      ))
-      : navigator.share(options));
+  async getCacheTip(_, id) {
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    return fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/tips/single/${id}`);
   },
 };

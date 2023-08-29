@@ -6,7 +6,10 @@
 
     <DetailsItem :label="$t('multisig.creatingAccount')">
       <template #value>
-        <AccountSelector v-model="creatorAddress" />
+        <AccountSelector
+          v-model="creatorAddress"
+          :options="aeAccountsSelectOptions"
+        />
         <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"
           keypath="modals.createMultisigAccount.errorNotEnoughBalanceToCreateVault"
@@ -14,42 +17,43 @@
           class="creator-error-message"
           scope="global"
         >
-          <span>{{ fee }} {{ AETERNITY_SYMBOL }}</span>
+          <span>{{ fee }} {{ AE_SYMBOL }}</span>
         </i18n-t>
       </template>
     </DetailsItem>
 
-    <div class="review-details-row">
-      <DetailsItem :label="$t('multisig.authorizedSigners')">
-        <template #value>
-          <div class="authorized-signers">
-            <div
-              v-for="signer in signers"
-              :key="signer.address"
-              class="authorized-signers-row"
-            >
-              <AccountItem :address="signer.address" />
-              <DialogBox
-                v-if="isLocalAccountAddress(signer.address)"
-                dense
-                v-text="$t('common.you')"
-              />
-            </div>
-          </div>
-        </template>
-      </DetailsItem>
+    <DetailsItem :label="$t('multisig.consensus')">
+      <template #label>
+        <BtnHelp @help="openConsensusInfoModal" />
+      </template>
+      <ConsensusLabel
+        :confirmations-required="confirmationsRequired"
+        :signers="signers"
+        :default-confirmed-by="confirmationsRequired"
+      />
+    </DetailsItem>
 
-      <DetailsItem :label="$t('multisig.consensus')">
-        <template #label>
-          <BtnHelp @help="openConsensusInfoModal" />
-        </template>
-        <ConsensusLabel
-          :confirmations-required="confirmationsRequired"
-          :signers="signers"
-          :default-confirmed-by="confirmationsRequired"
-        />
-      </DetailsItem>
-    </div>
+    <DetailsItem :label="$t('multisig.authorizedSigners')">
+      <template #value>
+        <div class="authorized-signers">
+          <div
+            v-for="signer in signers"
+            :key="signer.address"
+            class="authorized-signers-row"
+          >
+            <AccountItem
+              :address="signer.address"
+              :protocol="PROTOCOL_AETERNITY"
+            />
+            <DialogBox
+              v-if="isLocalAccountAddress(signer.address)"
+              dense
+              v-text="$t('common.you')"
+            />
+          </div>
+        </div>
+      </template>
+    </DetailsItem>
 
     <LoadingIcon
       v-if="!fee || !callData || !creatorAccountFetched"
@@ -60,7 +64,7 @@
         <template #value>
           <TokenAmount
             :amount="fee"
-            :symbol="AETERNITY_SYMBOL"
+            :symbol="AE_SYMBOL"
           />
         </template>
       </DetailsItem>
@@ -94,22 +98,20 @@ import {
 import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import {
+import type {
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
-} from '../../types';
-import {
-  AETERNITY_SYMBOL,
-  handleUnknownError,
-  MODAL_CONSENSUS_INFO,
-} from '../utils';
+} from '@/types';
+import { MODAL_CONSENSUS_INFO, PROTOCOL_AETERNITY } from '@/constants';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
   useModals,
   useMultisigAccountCreate,
   useAeSdk,
-} from '../../composables';
+} from '@/composables';
 
 import AccountSelector from './AccountSelector.vue';
 import AccountItem from './AccountItem.vue';
@@ -140,7 +142,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { accounts } = useAccounts({ store });
+    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
@@ -154,11 +156,11 @@ export default defineComponent({
     const { openModal } = useModals();
 
     const creatorAddress = ref<Encoded.AccountAddress>(
-      props.signers[0].address || accounts.value[0].address,
+      props.signers[0].address || aeAccounts.value[0].address,
     );
     const creatorAccountFetched = ref<IAccountFetched>();
     const creatorAccount = computed(
-      () => accounts.value.find(({ address }) => address === creatorAddress.value),
+      () => aeAccounts.value.find(({ address }) => address === creatorAddress.value),
     );
     const fee = computed(() => multisigAccountCreationFee.value);
     const callData = computed(
@@ -195,7 +197,8 @@ export default defineComponent({
     }
 
     return {
-      AETERNITY_SYMBOL,
+      AE_SYMBOL,
+      aeAccountsSelectOptions,
       creatorAddress,
       creatorAccount,
       creatorAccountFetched,
@@ -204,6 +207,7 @@ export default defineComponent({
       callData,
       notEnoughBalanceToCreateMultisig,
       openConsensusInfoModal,
+      PROTOCOL_AETERNITY,
     };
   },
 });
@@ -228,11 +232,6 @@ export default defineComponent({
     span {
       font-weight: 500;
     }
-  }
-
-  .review-details-row {
-    display: flex;
-    gap: 20px;
   }
 
   .loading-icon {

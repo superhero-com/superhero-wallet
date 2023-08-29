@@ -2,28 +2,31 @@ import { computed, ref } from 'vue';
 import { uniqBy } from 'lodash-es';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
-// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import BigNumber from 'bignumber.js';
-import SimpleGAMultiSigAci from '../lib/contracts/SimpleGAMultiSigACI.json';
-import {
-  AETERNITY_COIN_PRECISION,
-  SUPPORTED_MULTISIG_CONTRACT_VERSION,
-  fetchJson,
-  handleUnknownError,
-  convertToken,
-  getLocalStorageItem,
-  setLocalStorageItem,
-} from '../popup/utils';
-import { createPollingBasedOnMountedComponents } from './composablesHelpers';
+// aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
+import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import type {
   IDefaultComposableOptions,
-  INetwork,
   IMultisigAccount,
   IMultisigConsensus,
   IMultisigAccountResponse,
-} from '../types';
+} from '@/types';
+import {
+  fetchJson,
+  getLocalStorageItem,
+  handleUnknownError,
+  setLocalStorageItem,
+  toShiftedBigNumber,
+} from '@/utils';
+import {
+  AE_COIN_PRECISION,
+  MULTISIG_SUPPORTED_CONTRACT_VERSION,
+} from '@/protocols/aeternity/config';
+import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
-import { AeScan } from '../lib/AeScan';
 import { useAccounts } from './accounts';
 
 const POLLING_INTERVAL = 7000;
@@ -61,10 +64,10 @@ const isAdditionalInfoNeeded = ref(false);
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
+  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { accounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts({ store });
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
     ...multisigAccounts.value,
     ...pendingMultisigAccounts.value,
@@ -77,7 +80,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
 
   const activeMultisigAccountExplorerUrl = computed(
     () => (activeMultisigAccount.value)
-      ? (new AeScan(activeNetwork.value.explorerUrl))
+      ? (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
         .prepareUrlByHash(activeMultisigAccount.value.contractId)
       : null,
   );
@@ -165,8 +168,8 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
      */
     let rawMultisigData: IMultisigAccountResponse[] = [];
     try {
-      await Promise.all(accounts.value.map(async ({ address }) => rawMultisigData.push(
-        ...(await fetchJson(`${activeNetwork.value.multisigBackendUrl}/${address}`)),
+      await Promise.all(aeAccounts.value.map(async ({ address }) => rawMultisigData.push(
+        ...(await fetchJson(`${aeActiveNetworkPredefinedSettings.value.multisigBackendUrl}/${address}`)),
       )));
     } catch {
       // TODO: handle failure in multisig loading
@@ -180,7 +183,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
       return (
         account.hasPendingTransaction
         && account.signers.some((signer) => (
-          accounts.value.map(({ address }) => address).includes(signer)
+          aeAccounts.value.map(({ address }) => address).includes(signer)
           && !account.confirmedBy.includes(signer)
         ))
       );
@@ -191,7 +194,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
      */
     const result: IMultisigAccount[] = (await Promise.all(
       rawMultisigData
-        .filter(({ version }) => version === SUPPORTED_MULTISIG_CONTRACT_VERSION)
+        .filter(({ version }) => version === MULTISIG_SUPPORTED_CONTRACT_VERSION)
         .map(async ({
           contractId,
           gaAccountId,
@@ -241,7 +244,7 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
               gaAccountId,
               nonce: Number(nonce.decodedResult),
               signers: signers.decodedResult,
-              balance: convertToken(balance, -AETERNITY_COIN_PRECISION),
+              balance: toShiftedBigNumber(balance, -AE_COIN_PRECISION),
               hasPendingTransaction,
               txHash: txHash ? Buffer.from(txHash).toString('hex') : undefined,
             };

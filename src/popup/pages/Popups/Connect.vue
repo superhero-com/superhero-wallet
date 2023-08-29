@@ -8,7 +8,7 @@
     <TransactionInfo
       :custom-title="$t('pages.connectConfirm.title')"
       :sender="sender"
-      :recipient="activeAccountExtended"
+      :recipient="activeAccount"
     />
 
     <div
@@ -63,15 +63,16 @@ import {
   onUnmounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { IPermission } from '../../../types';
-import { RejectedByUserError } from '../../../lib/errors';
+import type { IPermission } from '@/types';
+import { RejectedByUserError } from '@/lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-} from '../../utils';
-import { useState } from '../../../composables/vuex';
-import { useAccounts, usePopupProps } from '../../../composables';
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { useState } from '@/composables/vuex';
+import { useAccounts, usePopupProps } from '@/composables';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -97,8 +98,10 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccountExtended } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
     const { popupProps, sender, setPopupProps } = usePopupProps();
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
 
@@ -128,7 +131,7 @@ export default defineComponent({
     return {
       POPUP_CONNECT_ADDRESS_PERMISSION,
       POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-      activeAccountExtended,
+      activeAccount,
       sender,
       confirm,
       cancel,

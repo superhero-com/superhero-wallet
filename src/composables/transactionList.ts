@@ -1,25 +1,28 @@
 import { orderBy, uniqBy } from 'lodash-es';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   ITransaction,
   ITransactionsState,
   IAccountTransactionsState,
   IDefaultComposableOptions,
-} from '../types';
-import { useMiddleware } from './middleware';
+} from '@/types';
 import {
-  AEX9_TRANSFER_EVENT,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TX_DIRECTION,
+} from '@/constants';
+import {
   fetchJson,
   getLocalStorageItem,
   setLocalStorageItem,
-} from '../popup/utils';
+} from '@/utils';
+import JsonBig from '@/lib/json-big';
+import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+
 import { useAccounts } from './accounts';
-import JsonBig from '../lib/json-big';
+import { useMiddleware } from './middleware';
 import { useAeSdk } from './aeSdk';
-import { INetwork } from '../types';
 
 const transactions = ref<IAccountTransactionsState>({});
 
@@ -60,13 +63,13 @@ const setTransactionsNextPage = (address: Encoded.AccountAddress, url: string) =
 };
 
 export function useTransactionList({ store }: IDefaultComposableOptions) {
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
   const { isLoggedIn, accounts } = useAccounts({ store });
   const {
     fetchFromMiddlewareCamelCased,
     getMiddleware,
-  } = useMiddleware({ store });
+  } = useMiddleware();
 
   function getAccountAllTransactions(address: Encoded.AccountAddress) {
     if (!isLoggedIn) {
@@ -173,7 +176,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     try {
       await getAeSdk();
       const response = await fetchJson(
-        `${activeNetwork.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? '&limit=5' : ''}`,
+        `${aeActiveNetworkSettings.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? '&limit=5' : ''}`,
       );
       if (response.message) {
         return [];

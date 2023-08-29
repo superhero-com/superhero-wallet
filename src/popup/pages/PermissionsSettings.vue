@@ -6,12 +6,11 @@
       class="text-description"
       scope="global"
     >
-      <a
-        href="https://superhero.com/"
-        target="_blank"
+      <LinkButton
+        to="https://superhero.com/"
       >
         superhero.com
-      </a>
+      </LinkButton>
     </i18n-t>
 
     <div class="hosts">
@@ -34,16 +33,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useStore } from 'vuex';
 import { computed } from 'vue';
 
+import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 export default {
   components: {
+    LinkButton,
     PanelItem,
     BtnMain,
   },

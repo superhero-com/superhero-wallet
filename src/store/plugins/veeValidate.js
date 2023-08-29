@@ -4,22 +4,20 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
+import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
+import { isNotFoundError, isUrlValid } from '@/utils';
+import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
+import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { tg } from './languages';
-import {
-  isNotFoundError,
-  getAddressByNameEntry,
-  checkAensName,
-  validateTipUrl,
-  isValidURL,
-} from '../../popup/utils';
-import { AENS_DOMAIN } from '../../popup/utils/constants';
-import { useBalances, useCurrencies, useAeSdk } from '../../composables';
 
-defineRule('url', (url) => isValidURL(url));
+defineRule('url', (url) => isUrlValid(url));
 defineRule('required', required);
-defineRule('account', (value) => isAddressValid(value) || checkAensName(value));
+defineRule('account', (value) => isAddressValid(value) || isAensNameValid(value));
 defineRule('account_address', (value) => isAddressValid(value, Encoding.AccountAddress));
-defineRule('name', (value) => checkAensName(`${value}${AENS_DOMAIN}`));
+defineRule('name', (value) => isAensNameValid(`${value}${AE_AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
 defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
@@ -36,14 +34,17 @@ configure({
       name: () => tg('validation.name'),
       name_registered_address: () => tg('validation.nameRegisteredAddress'),
       name_unregistered: () => tg('validation.nameUnregistered'),
-      not_same_as: () => tg('validation.notSameAs'),
+      not_same_as: ({ rule }) => (
+        tg('validation.notSameAs', [rule.params[1] === PROTOCOL_BITCOIN ? BTC_SYMBOL : tg('common.tokens')])
+      ),
       token_to_an_address: () => tg('validation.tokenToAnAddress'),
+      address_btc: () => tg('validation.addressBtc'),
       min_value: ({ rule }) => tg('validation.minValue', [rule.params[0]]),
       min_value_exclusive: ({ rule }) => tg('validation.minValueExclusive', [rule.params[0]]),
       max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
       max_value_vault: ({ rule }) => tg('validation.maxValueVault', [rule.params[0]]),
       max_len: ({ rule }) => tg('validation.maxLength', [rule.params[0]]),
-      enough_ae: () => tg('validation.enoughAe'),
+      enough_coin: ({ rule }) => tg('validation.enoughCoin', [rule.params[1] || AE_SYMBOL]),
       enough_ae_signer: () => tg('validation.enoughAeSigner'),
       not_token: () => tg('validation.notToken'),
       name_registered_address_or_url: () => tg('validation.invalidAddressChainUrl'),
@@ -57,7 +58,7 @@ configure({
 
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
-  const { minTipAmount } = useCurrencies({ withoutPolling: true });
+  const { minTipAmount } = useCurrencies({ store, withoutPolling: true });
   const { getAeSdk } = useAeSdk({ store });
 
   const NAME_STATES = {
@@ -117,25 +118,27 @@ export default (store) => {
 
   defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
 
-  defineRule('name_registered_address', (value) => (checkAensName(value)
+  defineRule('name_registered_address', (value) => (isAensNameValid(value)
     ? checkNameRegisteredAddress(value)
     : isAddressValid(value)));
 
   defineRule('token_to_an_address',
     (value, [isToken]) => (
-      !checkAensName(value)
-      || (checkAensName(value) && !isToken)
+      !isAensNameValid(value)
+      || (isAensNameValid(value) && !isToken)
     ),
     { params: ['isToken'] });
 
+  defineRule('address_btc', (value, [network]) => isBtcAddressValid(value, network));
+
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
-    if (!checkAensName(nameOrAddress)) return nameOrAddress !== comparedAddress;
+    if (!isAensNameValid(nameOrAddress)) return nameOrAddress !== comparedAddress;
     return checkName(NAME_STATES.NOT_SAME)(nameOrAddress, [comparedAddress]);
   });
 
-  defineRule('enough_ae', async (_, [arg]) => {
+  defineRule('enough_coin', async (_, arr) => {
     await updateBalances();
-    return balance.value.isGreaterThanOrEqualTo(arg);
+    return balance.value.isGreaterThanOrEqualTo(arr[0]);
   });
 
   defineRule('enough_ae_signer', async (_, [arg]) => {
@@ -143,11 +146,14 @@ export default (store) => {
     return balance.value.isGreaterThanOrEqualTo(arg);
   });
 
-  defineRule('name_registered_address_or_url', (value) => (checkAensName(value)
+  defineRule('name_registered_address_or_url', (value) => (isAensNameValid(value)
     ? checkNameRegisteredAddress(value)
-    : isAddressValid(value) || validateTipUrl(value)));
+    : isAddressValid(value) || isUrlValid(value)));
 
   defineRule('invalid_hostname', (value) => {
+    if (!value) {
+      return true;
+    }
     try {
       const _url = new URL(value);
       return !!_url.hostname;
@@ -165,11 +171,14 @@ export default (store) => {
     computesRequired: true,
   });
 
-  defineRule('network_exists', (name, [index, networks]) => {
-    const networkWithSameName = networks[name];
+  defineRule('network_exists', (name, customNetworks) => {
+    const networkWithSameName = customNetworks[name];
     return (
-      !networkWithSameName
-      || (index !== undefined && networkWithSameName?.index === index)
+      ![NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET].includes(name)
+      && (
+        !networkWithSameName
+        || (index !== undefined && networkWithSameName?.index === index)
+      )
     );
   });
 };

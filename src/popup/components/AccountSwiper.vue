@@ -1,6 +1,6 @@
 <template>
   <div class="account-swiper">
-    <swiper
+    <Swiper
       ref="customSwiper"
       class="swiper"
       :slides-per-view="1.1"
@@ -12,12 +12,13 @@
       <SwiperSlide
         v-for="(address, index) in addressList"
         :key="address"
+        :swiper-ref="customSwiper"
         :virtual-index="index"
         class="account-swiper-slide"
       >
         <AccountSwiperSlide
           :idx="index"
-          :selected="index === activeIdx"
+          :active="index === activeIdx"
           :to="to"
           :address="address"
           @slide="(newIndex) => setCurrentSlide(newIndex)"
@@ -28,7 +29,11 @@
           />
         </AccountSwiperSlide>
       </SwiperSlide>
-      <SwiperSlide class="account-swiper-slide">
+
+      <SwiperSlide
+        class="account-swiper-slide"
+        :swiper-ref="customSwiper"
+      >
         <AccountSwiperSlide
           hide-next
           @slide="() => setCurrentSlide(addressList.length - 1)"
@@ -36,7 +41,8 @@
           <AccountCardAdd :is-multisig="isMultisig" />
         </AccountSwiperSlide>
       </SwiperSlide>
-    </swiper>
+    </Swiper>
+
     <div class="account-swiper-bottom">
       <BulletSwitcher
         v-if="addressList"
@@ -63,13 +69,13 @@ import {
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore, { Virtual } from 'swiper';
+import { getAddressColor } from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
 import BulletSwitcher from './BulletSwitcher.vue';
 import ToggleMultisigButton from './ToggleMultisigButton.vue';
-
-import { getAddressColor } from '../utils/avatar';
 
 SwiperCore.use([Virtual]);
 
@@ -127,6 +133,7 @@ export default defineComponent({
 
     return {
       IS_CORDOVA: process.env.IS_CORDOVA,
+      PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
       swiper,

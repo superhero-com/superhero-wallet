@@ -1,7 +1,10 @@
 /* eslint no-param-reassign: ['error', { 'ignorePropertyModificationsFor': ['state'] }] */
 
+import {
+  ACCOUNT_HD_WALLET,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import hdWallet from './hdWallet';
-import { ACCOUNT_HD_WALLET } from '../../../popup/utils';
 
 // TODO: modules file is an object, because previously it contained more than one module,
 // should be improved in the future
@@ -13,7 +16,11 @@ export default {
 
   state: {
     list: [{
-      idx: 0, showed: true, type: ACCOUNT_HD_WALLET,
+      globalIdx: 0,
+      idx: 0,
+      showed: true,
+      type: ACCOUNT_HD_WALLET,
+      protocol: PROTOCOL_AETERNITY,
     }],
     activeIdx: 0,
   },
@@ -39,15 +46,19 @@ export default {
         ...account,
       });
       if (!account.isRestored) {
-        state.activeIdx = account.idx;
+        state.activeIdx = state.list.length - 1;
       }
     },
     remove(state, idx) {
-      if (state.activeIdx === state.list.length) state.activeIdx = 0;
+      if (state.activeIdx === state.list.length) {
+        state.activeIdx = 0;
+      }
       delete state.list[idx];
     },
     toggleShowed(state, idx) {
-      if (state.activeIdx === idx) state.activeIdx = 0;
+      if (state.activeIdx === idx) {
+        state.activeIdx = 0;
+      }
       state.list[idx].showed = !state.list[idx].showed;
     },
   },

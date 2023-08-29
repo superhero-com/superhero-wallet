@@ -1,6 +1,7 @@
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { CurrencyRates } from '../types';
-import { CURRENCIES, fetchJson } from '../popup/utils';
+import { CurrencyRates } from '@/types';
+import { CURRENCIES } from '@/constants';
+import { fetchJson } from '@/utils';
 
 export interface CoinGeckoMarketResponse {
   ath: number;
@@ -46,15 +47,17 @@ export class CoinGecko {
    * Obtain all the coin market data (price, market cap, volume, etc...)
    */
   static async fetchCoinMarketData(
-    coinId: string,
+    coinIds: string,
     currencyCode: string,
-  ): Promise<CoinGeckoMarketResponse | null> {
+  ): Promise<CoinGeckoMarketResponse[] | null> {
     try {
-      const [marketData] = (await CoinGecko.fetchFromApi<any[]>('/coins/markets', {
-        ids: coinId,
+      const marketData = (await CoinGecko.fetchFromApi<any[]>('/coins/markets', {
+        ids: coinIds,
         vs_currency: currencyCode,
       })) || [];
-      return marketData ? camelCaseKeysDeep(marketData) as CoinGeckoMarketResponse : null;
+      return (marketData)
+        ? camelCaseKeysDeep(marketData) as CoinGeckoMarketResponse[]
+        : null;
     } catch (error) {
       return null;
     }
@@ -63,12 +66,12 @@ export class CoinGecko {
   /**
    * Obtain all the coin rates for the currencies used in the app.
    */
-  static async fetchCoinCurrencyRates(coinId: string): Promise<CurrencyRates | null> {
+  static async fetchCoinCurrencyRates(coinIds: string): Promise<CurrencyRates | null> {
     try {
       return (await CoinGecko.fetchFromApi('/simple/price', {
-        ids: coinId,
+        ids: coinIds,
         vs_currencies: CURRENCIES.map(({ code }) => code).join(','),
-      }) as any)[coinId];
+      }) as any);
     } catch (error) {
       return null;
     }

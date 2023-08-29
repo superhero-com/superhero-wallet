@@ -8,48 +8,53 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
 } from '@aeternity/aepp-sdk';
-import { AeSdkSupehero } from '../lib/AeSdkSupehero';
 import type {
   IDefaultComposableOptions,
   INetwork,
   IResponseChallenge,
   IRespondChallenge,
-} from '../types';
-import { App } from '../store/modules/permissions';
+} from '@/types';
+import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
+import { FramesConnection } from '@/lib/FramesConnection';
+import { App } from '@/store/modules/permissions';
+import { watchUntilTruthy } from '@/utils';
 import {
   IN_FRAME,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
-  RUNNING_IN_TESTS,
-} from '../lib/environment';
-import {
-  DEX_CONTRACTS,
-  MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_ACCOUNT_LIST,
-  NETWORK_ID_MAINNET,
-  NETWORK_ID_TESTNET,
+  MODAL_CONFIRM_CONNECT,
   NODE_STATUS_CONNECTED,
   NODE_STATUS_CONNECTING,
   NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
-  watchUntilTruthy,
-} from '../popup/utils';
-import { showPopup } from '../background/popupHandler';
+  RUNNING_IN_TESTS,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
+import { showPopup } from '@/background/popupHandler';
+import {
+  AE_NETWORK_MAINNET_ID,
+  AE_NETWORK_TESTNET_ID,
+  DEX_CONTRACTS,
+} from '@/protocols/aeternity/config';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
-import { FramesConnection } from '../lib/FramesConnection';
 import { useModals } from './modals';
 
-let aeSdk: AeSdkSupehero;
-let dryAeSdk: AeSdk;
+let aeSdk: AeSdkSuperhero;
 let aeSdkBlocked = false;
+let storedNetworkName: string;
 const isAeSdkReady = ref(false);
-let aeSdkCurrentNetwork: INetwork;
 const nodeNetworkId = ref<string>();
 const aeppInfo: Record<string, any> = {};
 
+let dryAeSdk: AeSdk;
+let dryAeSdkCurrentNodeNetworkId: string;
+
 export function useAeSdk({ store }: IDefaultComposableOptions) {
-  const { isLoggedIn, activeAccount } = useAccounts({ store });
+  const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
+  const { isLoggedIn, getLastActiveProtocolAccount } = useAccounts({ store });
   const { openModal } = useModals();
 
   const nodeStatus = computed((): string => store.state.nodeStatus);
@@ -58,9 +63,8 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
   const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
   const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
 
-  const activeNetwork = computed<INetwork>(() => store.getters.activeNetwork);
-  const isNodeMainnet = computed(() => nodeNetworkId.value === NETWORK_ID_MAINNET);
-  const isNodeTestnet = computed(() => nodeNetworkId.value === NETWORK_ID_TESTNET);
+  const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
+  const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
   const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
 
   const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));
@@ -96,13 +100,13 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       watchUntilTruthy(() => store.state.isRestored),
       watchUntilTruthy(isLoggedIn),
     ]);
-    aeSdkCurrentNetwork = activeNetwork.value;
-    const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+    storedNetworkName = activeNetworkName.value;
+    const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
-    aeSdk = new AeSdkSupehero(store, {
+    aeSdk = new AeSdkSuperhero(store, {
       name: 'Superhero',
       nodes: [{
-        name: activeNetwork.value.name,
+        name: activeNetworkName.value,
         instance: nodeInstance!,
       }],
       id: 'Superhero Wallet',
@@ -113,14 +117,14 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       onDisconnect(aeppId: string) {
         delete aeppInfo[aeppId];
       },
-      async onSubscription(aeppId: string) {
+      async onSubscription(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
         const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
         const app = new App(url);
         if (!(await store.dispatch('permissions/requestAddressForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
             : openModal(MODAL_CONFIRM_CONNECT, {
@@ -136,16 +140,16 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         ) {
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         }
-        return activeAccount.value.address;
+        return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
       },
-      async onAskAccounts(aeppId: string) {
+      async onAskAccounts(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
         const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
         const app = new App(url);
         if (!(await store.dispatch('permissions/requestAllAddressesForHost', {
           host: app.host.host,
           name: app.host.hostname,
-          address: activeAccount.value.address,
+          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
           connectionPopupCb: () => IS_EXTENSION_BACKGROUND
             ? showPopup(app.host.href, POPUP_TYPE_ACCOUNT_LIST)
             : openModal(MODAL_CONFIRM_ACCOUNT_LIST, {
@@ -178,7 +182,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    * Get the aeSdk instance. For now the SDK state is asynchronous.
    * TODO: this probably could be replaced with a computed prop.
    */
-  async function getAeSdk(): Promise<AeSdkSupehero> {
+  async function getAeSdk(): Promise<AeSdkSuperhero> {
     if (aeSdkBlocked) {
       await watchUntilTruthy(isAeSdkReady);
     } else if (!aeSdk) {
@@ -193,20 +197,22 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    */
   async function getDryAeSdk(): Promise<AeSdk> {
     if (!dryAeSdk) {
-      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
+      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
       dryAeSdk = new AeSdk({
         nodes: [{
-          name: activeNetwork.value.name,
+          name: activeNetworkName.value,
           instance: nodeInstance!,
         }],
       });
+      dryAeSdkCurrentNodeNetworkId = await nodeInstance?.getNetworkId()!;
       return dryAeSdk;
     }
     const networkId = await dryAeSdk.api.getNetworkId();
-    if (activeNetwork.value.networkId !== networkId) {
-      dryAeSdk.pool.delete(aeSdkCurrentNetwork.name);
-      const nodeInstance = await createNodeInstance(activeNetwork.value.url);
-      dryAeSdk.addNode(activeNetwork.value.name, nodeInstance!, true);
+    if (dryAeSdkCurrentNodeNetworkId !== networkId) {
+      dryAeSdk.pool.delete(storedNetworkName);
+      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
+      dryAeSdk.addNode(activeNetworkName.value, nodeInstance!, true);
+      dryAeSdkCurrentNodeNetworkId = networkId;
     }
     return dryAeSdk;
   }
@@ -227,7 +233,11 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
     aeSdk.pool.delete(oldNetwork.name);
-    aeSdk.addNode(newNetwork.name, (await createNodeInstance(newNetwork.url))!, true);
+    aeSdk.addNode(
+      newNetwork.name,
+      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
+      true,
+    );
   }
 
   return {

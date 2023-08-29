@@ -1,19 +1,31 @@
 <template>
   <a
     :class="['link-button', variant, { underlined }]"
-    :href="to"
-    target="blank"
+    :href="IS_CORDOVA ? undefined : to"
+    target="_blank"
+    @click="onClick"
   >
     <slot />
+    <span
+      v-if="$slots.icon"
+      class="link-icon"
+    >
+      <slot
+        name="icon"
+      />
+    </span>
   </a>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import { IS_CORDOVA } from '@/constants';
+
 export const LINK_BUTTON_VARIANT = [
   'default',
   'muted',
+  'simple',
 ] as const;
 
 export type LinkButtonVariant = typeof LINK_BUTTON_VARIANT[number];
@@ -27,6 +39,20 @@ export default defineComponent({
       validator: (value: LinkButtonVariant) => LINK_BUTTON_VARIANT.includes(value),
       default: LINK_BUTTON_VARIANT[0],
     },
+  },
+  setup(props) {
+    function onClick(event: any) {
+      if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
+        window.cordova.InAppBrowser.open(props.to, '_system');
+        event.preventDefault();
+      }
+    }
+
+    return {
+      LINK_BUTTON_VARIANT,
+      IS_CORDOVA,
+      onClick,
+    };
   },
 });
 </script>
@@ -42,30 +68,47 @@ export default defineComponent({
   display: inline-flex;
   gap: 4px;
   align-items: center;
-  color: variables.$color-success;
 
-  :deep(svg) {
-    width: 24px;
-    height: 24px;
-    opacity: 0.44;
-    color: variables.$color-white;
+  &.default {
+    color: variables.$color-success;
+  }
+
+  &.simple {
+    gap: 0;
+  }
+
+  .link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    :deep(svg) {
+      width: 24px;
+      height: 24px;
+      opacity: 0.44;
+      color: variables.$color-white;
+    }
   }
 
   &:hover {
     color: variables.$color-success-hover;
 
-    svg {
-      opacity: 1;
-      color: variables.$color-success;
+    .link-icon {
+      svg {
+        opacity: 1;
+        color: variables.$color-success;
+      }
     }
   }
 
   &:active {
     opacity: 0.7;
 
-    svg {
-      opacity: 0.7;
-      color: variables.$color-success;
+    .link-icon {
+      svg {
+        opacity: 0.7;
+        color: variables.$color-success;
+      }
     }
   }
 
@@ -73,16 +116,20 @@ export default defineComponent({
     text-decoration: none;
     color: rgba(variables.$color-white, 0.75);
 
-    svg {
-      opacity: 1;
-      color: rgba(variables.$color-white, 0.75);
+    .link-icon {
+      svg {
+        opacity: 1;
+        color: rgba(variables.$color-white, 0.75);
+      }
     }
 
     &:hover {
       color: variables.$color-white;
 
-      svg {
-        color: variables.$color-white;
+      .link-icon {
+        svg {
+          color: variables.$color-white;
+        }
       }
     }
   }

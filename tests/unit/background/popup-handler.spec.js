@@ -1,10 +1,10 @@
 import { showPopup, getPopup, removePopup } from '../../../src/background/popupHandler';
 import {
-  DEX_URL,
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
-} from '../../../src/popup/utils';
+} from '../../../src/constants';
+import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
 const mockCreate = jest.fn(() => true);
 const mockGetUrl = jest.fn((text) => text);
@@ -52,7 +52,7 @@ const testCases = [{
     connection: {
       port: {
         sender: {
-          url: DEX_URL,
+          url: AE_DEX_URL,
         },
       },
     },
@@ -85,7 +85,7 @@ describe('popupHandler', () => {
       const call = mockCreate.mock.calls[index][0];
       const queryParams = Object.fromEntries(new URLSearchParams(call.url.split('?')[1]).entries());
       expect(queryParams.type).toEqual(resultType);
-      expect(queryParams.url).toEqual(`${connectedAepp ? DEX_URL : testAeppUrl}/`);
+      expect(queryParams.url).toEqual(`${connectedAepp ? AE_DEX_URL : testAeppUrl}/`);
       expect(getPopup(queryParams.id).props[propsField]).toBeTruthy();
       removePopup(queryParams.id);
       expect(getPopup(queryParams.id)).toBeFalsy();

@@ -4,7 +4,7 @@
       v-slot="{ field, errorMessage }"
       name="name"
       :rules="{
-        enough_ae: totalNameClaimAmount.toString(),
+        enough_coin: totalNameClaimAmount.toString(),
         required: true,
         name: true,
         name_unregistered: true,
@@ -25,7 +25,7 @@
           </span>
         </template>
         <template #after>
-          <span class="aens-domain">{{ AENS_DOMAIN }}</span>
+          <span class="aens-domain">{{ AE_AENS_DOMAIN }}</span>
         </template>
       </InputField>
     </Field>
@@ -84,17 +84,17 @@ import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
+import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
+import { useAccounts, useModals, useAeSdk } from '@/composables';
+import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
+import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import {
-  AETERNITY_COIN_PRECISION,
-  AENS_DOMAIN,
-  AENS_NAME_MAX_LENGTH,
-  AENS_NAME_AUCTION_MAX_LENGTH,
-  checkAensName,
-  STUB_ADDRESS,
-  STUB_NONCE,
-} from '../../utils';
-import { ROUTE_ACCOUNT_DETAILS_NAMES } from '../../router/routeNames';
-import { useAccounts, useModals, useAeSdk } from '../../../composables';
+  AE_COIN_PRECISION,
+  AE_AENS_DOMAIN,
+  AE_AENS_NAME_MAX_LENGTH,
+  AE_AENS_NAME_AUCTION_MAX_LENGTH,
+} from '@/protocols/aeternity/config';
+
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -121,10 +121,10 @@ export default defineComponent({
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
-    const maxNameLength = AENS_NAME_MAX_LENGTH - AENS_DOMAIN.length;
+    const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
-    const fullName = computed((): AensName => `${name.value}${AENS_DOMAIN}`);
-    const isNameValid = computed(() => name.value && checkAensName(fullName.value));
+    const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
+    const isNameValid = computed(() => name.value && isAensNameValid(fullName.value));
 
     const totalNameClaimAmount = computed(() => !name.value.length
       ? BigNumber(0)
@@ -145,7 +145,7 @@ export default defineComponent({
           nameSalt: 0,
           nameFee: getMinimumNameFee(fullName.value),
         }) as any).toString())
-        .shiftedBy(-AETERNITY_COIN_PRECISION));
+        .shiftedBy(-AE_COIN_PRECISION));
 
     const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
 
@@ -192,7 +192,7 @@ export default defineComponent({
         try {
           store.dispatch('names/fetchOwned');
           await aeSdk.poll(claimTxHash);
-          if (AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
+          if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
             store.dispatch('names/updatePointer', {
               name: fullName.value,
               address: activeAccount.value.address,
@@ -207,7 +207,7 @@ export default defineComponent({
     }
 
     return {
-      AENS_DOMAIN,
+      AE_AENS_DOMAIN,
       autoExtend,
       isNameValid,
       isAeSdkReady,
