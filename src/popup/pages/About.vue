@@ -9,10 +9,9 @@
           Superhero Wallet
         </div>
       </div>
-      <a
+      <LinkButton
         class="table-item link"
-        :href="`${AE_COMMIT_URL}${commitHash}`"
-        target="_blank"
+        :to="`${AE_COMMIT_URL}${commitHash}`"
       >
         <div class="name">
           {{ $t('pages.about.commit') }}
@@ -21,7 +20,7 @@
           {{ commitHash.slice(0, 7) }}
           <Github />
         </div>
-      </a>
+      </LinkButton>
       <div class="table-item">
         <div class="name">
           {{ $t('pages.about.software-version') }}
@@ -39,10 +38,9 @@
         </div>
       </div>
       <template v-if="aeActiveNetworkSettings && middlewareStatus">
-        <a
+        <LinkButton
           class="table-item link"
-          target="_blank"
-          :href="`${middlewareUrl}/status`"
+          :to="`${middlewareUrl}/status`"
         >
           <div class="name">
             {{ $t('pages.about.middleware-version') }}
@@ -51,11 +49,10 @@
             {{ middlewareStatus.mdwVersion }}
             <ExternalLink class="compensate-icon-margin" />
           </div>
-        </a>
-        <a
+        </LinkButton>
+        <LinkButton
           class="table-item link"
-          target="_blank"
-          :href="`${middlewareUrl}/status`"
+          :to="`${middlewareUrl}/status`"
         >
           <div class="name">
             {{ $t('pages.about.node-version') }}
@@ -64,7 +61,7 @@
             {{ middlewareStatus.nodeVersion }}
             <ExternalLink class="compensate-icon-margin" />
           </div>
-        </a>
+        </LinkButton>
       </template>
     </div>
 
@@ -102,6 +99,7 @@ import { useMiddleware } from '@/composables';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
+import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '../components/PanelItem.vue';
 import Terms from '../../icons/terms.svg?vue-component';
 import Github from '../../icons/github.svg?vue-component';
@@ -109,6 +107,7 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
+    LinkButton,
     PanelItem,
     Terms,
     Github,

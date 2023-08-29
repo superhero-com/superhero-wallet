@@ -113,13 +113,12 @@
       :label="$t('pages.token-details.chart')"
     >
       <template #text>
-        <a
-          :href="AE_DEX_URL"
-          target="_blank"
+        <LinkButton
+          :to="AE_DEX_URL"
         >
           {{ displayDexUrl }}
           <ExternalLink />
-        </a>
+        </LinkButton>
       </template>
     </DetailsRow>
     <DetailsRow
@@ -162,6 +161,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
+import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '@/types';
 import {
@@ -172,7 +172,7 @@ import {
 import { useCurrencies } from '@/composables';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
-import { useStore } from 'vuex';
+import LinkButton from '@/popup/components/LinkButton.vue';
 import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
 import AddressTruncated from '../../components/AddressTruncated.vue';
 import Tokens from '../../components/Tokens.vue';
@@ -185,6 +185,7 @@ export default defineComponent({
     AddressTruncated,
     Tokens,
     ExternalLink,
+    LinkButton,
   },
   props: {
     contractId: { type: String, default: null },

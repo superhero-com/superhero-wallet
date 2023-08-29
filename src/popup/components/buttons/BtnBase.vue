@@ -18,6 +18,7 @@
       }
     ]"
     class="btn-base"
+    @click="onClick"
   >
     <slot />
   </Component>
@@ -25,6 +26,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+
+import { IS_CORDOVA } from '@/constants';
 
 export const BTN_VARIANT = [
   'primary',
@@ -64,9 +67,18 @@ export default defineComponent({
       }
     });
 
+    function onClick(event: any) {
+      if (IS_CORDOVA && window.cordova?.InAppBrowser?.open && props.href) {
+        window.cordova.InAppBrowser.open(props.href, '_system');
+        event.preventDefault();
+      }
+    }
+
     const bgColorStyle = computed(() => props.bgColor ? { '--bg-color': props.bgColor } : null);
 
     return {
+      IS_CORDOVA,
+      onClick,
       component,
       bgColorStyle,
     };

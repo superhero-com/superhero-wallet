@@ -22,10 +22,11 @@ exports[`Pages About 1`] = `
       </div>
     </div>
     <a
-      class="table-item link"
+      class="link-button default table-item link"
       href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
       target="_blank"
     >
+      
       <div
         class="name"
       >
@@ -37,6 +38,8 @@ exports[`Pages About 1`] = `
         a1c1c5a 
         <svg />
       </div>
+      
+      <!--v-if-->
     </a>
     <div
       class="table-item"
@@ -644,47 +647,67 @@ exports[`Pages PrivacyPolicy 1`] = `
       <p>
          1) downloaded as an add-on (extension) to Firefox: 
         <a
+          class="link-button default"
           href="https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet"
           target="_blank"
         >
+          
           https://addons.mozilla.org/en-US/firefox/addon/superhero-wallet
+          
+          <!--v-if-->
         </a>
          ; to Chrome, Brave and Opera:          
         <a
+          class="link-button default"
           href="https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne"
           target="_blank"
         >
+          
           https://chrome.google.com/webstore/detail/superhero/mnhmmkepfddpifjkamaligfeemcbhdne
+          
+          <!--v-if-->
         </a>
         ; 
       </p>
       <p>
          2) accessed from any Browser at the address: 
         <a
+          class="link-button default"
           href="https://wallet.superhero.com"
           target="_blank"
         >
+          
           https://wallet.superhero.com
+          
+          <!--v-if-->
         </a>
          ; 
       </p>
       <p>
          3) downloaded from Google Play:     
         <a
+          class="link-button default"
           href="https://play.google.com/store/apps/details?id=com.superhero.cordova"
           target="_blank"
         >
+          
           https://play.google.com/store/apps/details?id=com.superhero.cordova
+          
+          <!--v-if-->
         </a>
          and 
       </p>
       <p>
          from App Store: 
         <a
+          class="link-button default"
           href="https://apps.apple.com/us/app/superhero-wallet/id1502786641"
           target="_blank"
         >
+          
           https://apps.apple.com/us/app/superhero-wallet/id1502786641
+          
+          <!--v-if-->
         </a>
         . 
       </p>
@@ -1438,9 +1461,14 @@ exports[`Pages PrivacyPolicy 1`] = `
         </strong>
         , please email us at  
         <a
+          class="link-button default"
           href="mailto:superherowallet@protonmail.com"
+          target="_blank"
         >
-          superherowallet@protonmail.com
+          
+           superherowallet@protonmail.com 
+          
+          <!--v-if-->
         </a>
         . 
       </p>
@@ -1622,9 +1650,14 @@ exports[`Pages TermsOfService 1`] = `
       </b>
        via an email to 
       <a
+        class="link-button simple"
         href="mailto:superherowallet@protonmail.com"
+        target="_blank"
       >
+        
         superherowallet@protonmail.com
+        
+        <!--v-if-->
       </a>
        for the provision of information about the steps for termination of your use. Please check the Effective Date above to determine if there have been any changes since 
       <b>
