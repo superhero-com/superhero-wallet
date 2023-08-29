@@ -13,6 +13,7 @@
       <LatestTransactionsCard />
 
       <DashboardCard
+        v-if="IS_CORDOVA"
         :title="$t('dashboard.daeppBrowserCard.title')"
         :description="$t('dashboard.daeppBrowserCard.description')"
         :btn-text="$t('dashboard.daeppBrowserCard.button')"
@@ -52,6 +53,7 @@ import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import {
   DASHBOARD_CARD_ID,
+  IS_CORDOVA,
   PROTOCOL_AETERNITY,
 } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
@@ -111,6 +113,7 @@ export default defineComponent({
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
+      IS_CORDOVA,
       isNodeMainnet,
       isNodeTestnet,
     };
