@@ -73,7 +73,7 @@ export default defineComponent({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
         .getAdapter(PROTOCOL_BITCOIN)
-        .getDefaultCoin(marketData, +balance.value),
+        .getDefaultCoin(marketData.value!, +balance.value),
       payload: '',
     });
 

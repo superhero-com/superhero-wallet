@@ -261,7 +261,7 @@ export default defineComponent({
     function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY)
-        .getDefaultCoin(marketData, +balance.value);
+        .getDefaultCoin(marketData.value!, +balance.value);
 
       if (tokenContractId) {
         if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(tokenContractId)) {

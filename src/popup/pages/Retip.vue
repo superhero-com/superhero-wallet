@@ -219,7 +219,7 @@ export default defineComponent({
       loading.value = true;
       formModel.value.selectedAsset = ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY)
-        .getDefaultCoin(marketData, +balance.value);
+        .getDefaultCoin(marketData.value!, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
 

@@ -67,7 +67,7 @@ export function useTokensList({
   const aeToken = computed(
     (): ICoin => ProtocolAdapterFactory
       .getAdapter(PROTOCOL_AETERNITY)
-      .getDefaultCoin(marketData, +aeTokenBalance.value),
+      .getDefaultCoin(marketData.value!, +aeTokenBalance.value),
   );
 
   /**

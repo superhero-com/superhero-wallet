@@ -197,7 +197,7 @@ export default defineComponent({
       if (isAe) {
         return ProtocolAdapterFactory
           .getAdapter(PROTOCOL_AETERNITY)
-          .getDefaultCoin(marketData, aeTokenBalance.value.toNumber());
+          .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
       }
       return tokenBalances.value.find(
         (token) => token.contractId === contractId,

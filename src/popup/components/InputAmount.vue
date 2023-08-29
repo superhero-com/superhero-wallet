@@ -107,7 +107,7 @@ export default defineComponent({
 
     const defaultCoin = computed(() => ProtocolAdapterFactory
       .getAdapter(props.protocol)
-      .getDefaultCoin(marketData, +balance.value));
+      .getDefaultCoin(marketData.value!, +balance.value));
 
     const currentAsset = computed((): IAsset => props.selectedAsset || defaultCoin.value);
     const isDefaultAsset = computed(
