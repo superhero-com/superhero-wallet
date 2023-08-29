@@ -3,7 +3,7 @@
     :class="['link-button', variant, { underlined }]"
     :href="IS_CORDOVA ? undefined : to"
     target="_blank"
-    @click.prevent="IS_CORDOVA ? onClick() : undefined"
+    @click="onClick"
   >
     <slot />
     <span
@@ -41,11 +41,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    function onClick() {
+    function onClick(event: any) {
       if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
         window.cordova.InAppBrowser.open(props.to, '_system');
-      } else {
-        window.open(props.to, '_blank');
+        event.preventDefault();
       }
     }
 
