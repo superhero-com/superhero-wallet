@@ -8,6 +8,7 @@ import {
 } from '../../../src/utils';
 import {
   PROTOCOL_AETERNITY,
+  STORAGE_KEYS,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/constants';
 import {
@@ -17,14 +18,12 @@ import { CoinGecko } from '../../../src/lib/CoinGecko';
 import runMigrations from '../../../src/store/migrations';
 
 export async function getLoginState({
-  backedUpSeed,
   balance,
   name,
   network,
 }) {
   return {
     ...(await runMigrations()),
-    backedUpSeed,
     current: { network: network || 'Testnet' },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
@@ -93,21 +92,24 @@ Cypress.Commands.add('mockExternalRequests', () => {
 Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
   if (isMockingExternalRequests) cy.mockExternalRequests();
 
+  const { isSeedBackedUp = false, pendingTransaction } = options;
+
   cy.openPopup(async (contentWindow) => {
     const dataToBeStored = {
       state: await getLoginState(options),
-      [prepareStorageKey(['mnemonic'])]: STUB_ACCOUNT.mnemonic,
-      [prepareStorageKey(['accounts-raw'])]: [{
+      [prepareStorageKey([STORAGE_KEYS.mnemonic])]: STUB_ACCOUNT.mnemonic,
+      [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
         idx: 0,
         protocol: PROTOCOL_AETERNITY,
         isRestored: true,
         type: 'hd-wallet',
       }],
+      [prepareStorageKey([STORAGE_KEYS.otherSettings])]: { isSeedBackedUp },
       [prepareStorageKey([
         TRANSACTIONS_LOCAL_STORAGE_KEY,
         AE_NETWORK_MAINNET_ID,
-      ])]: (options.pendingTransaction)
-        ? preparePendingTransactionToLocalStorage(options.pendingTransaction)
+      ])]: (pendingTransaction)
+        ? preparePendingTransactionToLocalStorage(pendingTransaction)
         : null,
     };
 

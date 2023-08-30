@@ -69,7 +69,6 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { validateMnemonic } from '@aeternity/bip39';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { MODAL_READ_QR_CODE } from '@/constants';
@@ -99,15 +98,13 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
     const { discoverAccounts, setMnemonic } = useAccounts();
     const { openModal } = useModals();
-    const { loginTargetLocation } = useUi();
+    const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);
-
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
 
@@ -133,7 +130,7 @@ export default defineComponent({
 
       discovering.value = true;
       setMnemonic(mnemonicParsed);
-      store.commit('setBackedUpSeed');
+      setBackedUpSeed(false);
       await discoverAccounts();
       props.resolve();
       router.push(loginTargetLocation.value);

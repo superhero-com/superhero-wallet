@@ -22,7 +22,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
-import { useStorageRef } from './composablesHelpers';
+import { useStorageRef } from './storageRef';
 
 let isInitialized = false;
 

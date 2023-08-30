@@ -10,13 +10,4 @@ export default {
   setChainNames(state, payload) {
     state.chainNames = payload;
   },
-  setBackedUpSeed(state) {
-    state.backedUpSeed = true;
-  },
-  setSaveErrorLog(state, saveErrorLog) {
-    state.saveErrorLog = saveErrorLog;
-  },
-  hideCard(state, name) {
-    state.hiddenCards.push(name);
-  },
 };

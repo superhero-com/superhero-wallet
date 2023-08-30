@@ -48,17 +48,15 @@
           <BtnMain
             class="button"
             extend
+            :text="$t('pages.seedPhrase.verifySeed')"
             :to="{ name: 'settings-seed-phrase-verify' }"
-          >
-            {{ $t('pages.seedPhrase.verifySeed') }}
-          </BtnMain>
+          />
           <BtnMain
             variant="muted"
             extend
-            @click="setBackedUpSeed"
-          >
-            {{ $t('pages.seedPhrase.doneThis') }}
-          </BtnMain>
+            :text="$t('pages.seedPhrase.doneThis')"
+            @click="markSeedPhraseAsBackedUp()"
+          />
         </div>
       </div>
     </IonContent>
@@ -67,11 +65,17 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useAccounts, useCopy } from '@/composables';
+import {
+  useAccounts,
+  useCopy,
+  useNotifications,
+  useUi,
+} from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
@@ -84,14 +88,20 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
+    const store = useStore();
 
+    const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
     const { mnemonic } = useAccounts();
+    const { removeIsSeedBackedUpNotification } = useNotifications({
+      store,
+      requirePolling: false,
+    });
 
-    function setBackedUpSeed() {
-      store.commit('setBackedUpSeed');
+    function markSeedPhraseAsBackedUp() {
+      setBackedUpSeed(true);
+      removeIsSeedBackedUpNotification();
       router.push({ name: ROUTE_ACCOUNT });
     }
 
@@ -101,7 +111,7 @@ export default defineComponent({
       copy,
       copied,
       mnemonic,
-      setBackedUpSeed,
+      markSeedPhraseAsBackedUp,
     };
   },
 });

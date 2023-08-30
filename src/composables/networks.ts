@@ -14,8 +14,8 @@ import {
 } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { tg } from '@/popup/plugins/i18n';
-import { useStorageRef } from './composablesHelpers';
 import { useModals } from './modals';
+import { useStorageRef } from './storageRef';
 
 const defaultNetworks: INetwork[] = [];
 

@@ -172,6 +172,11 @@ export function useNotifications({
     markAsReadSuperhero();
   }
 
+  function removeIsSeedBackedUpNotification() {
+    notificationsWallet.value = notificationsWallet.value
+      .filter(({ isSeedBackup }) => !isSeedBackup);
+  }
+
   if (requirePolling) {
     watch(() => notificationsFiltered.value, () => {
       loadMoreNotifications();
@@ -211,5 +216,6 @@ export function useNotifications({
     loadMoreNotifications,
     markAsReadAll,
     addWalletNotification,
+    removeIsSeedBackedUpNotification,
   };
 }

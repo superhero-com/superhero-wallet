@@ -77,11 +77,11 @@ import {
   computed,
 } from 'vue';
 import { shuffle } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useAccounts } from '@/composables';
+import { useAccounts, useNotifications, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -99,11 +99,16 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
+    const store = useStore();
     const { t } = useI18n();
 
+    const { setBackedUpSeed } = useUi();
     const { mnemonic } = useAccounts();
+    const { removeIsSeedBackedUpNotification } = useNotifications({
+      store,
+      requirePolling: false,
+    });
 
     const selectedWordIds = ref<number[]>([]);
     const showNotification = ref<boolean>(false);
@@ -119,7 +124,8 @@ export default defineComponent({
       showNotification.value = true;
       hasError.value = mnemonic.value !== mnemonicSelected;
       if (mnemonic.value === mnemonicSelected) {
-        store.commit('setBackedUpSeed');
+        setBackedUpSeed(true);
+        removeIsSeedBackedUpNotification();
       }
 
       setTimeout(() => {

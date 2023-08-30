@@ -11,10 +11,10 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
 import {
   createPollingBasedOnMountedComponents,
-  useStorageRef,
 } from './composablesHelpers';
 import { useAccounts } from './accounts';
 import { createNetworkWatcher } from './networks';
+import { useStorageRef } from './storageRef';
 
 type Balances = Record<string, Balance>;
 

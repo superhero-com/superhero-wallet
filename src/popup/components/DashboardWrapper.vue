@@ -13,7 +13,7 @@
       <slot name="widgets" />
 
       <DashboardCard
-        v-if="!backedUpSeed"
+        v-if="!isSeedBackedUp"
         :title="$t('dashboard.backUpCard.title')"
         :description="$t('dashboard.backUpCard.description')"
         :btn-text="$t('dashboard.backUpCard.button')"
@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useState } from '../../composables/vuex';
+import { useUi } from '@/composables';
 
 import DashboardCard from './DashboardCard.vue';
 
@@ -42,10 +42,10 @@ export default defineComponent({
     DashboardCard,
   },
   setup() {
-    const backedUpSeed = useState('backedUpSeed');
+    const { isSeedBackedUp } = useUi();
 
     return {
-      backedUpSeed,
+      isSeedBackedUp,
       WarningTriangleIcon,
     };
   },
