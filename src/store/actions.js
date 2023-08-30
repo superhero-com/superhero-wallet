@@ -1,4 +1,3 @@
-import { Share } from '@capacitor/share';
 import {
   fetchJson,
   postJson,
