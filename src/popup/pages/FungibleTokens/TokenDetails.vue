@@ -164,6 +164,7 @@ import {
 import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '@/types';
+import { UNFINISHED_FEATURES } from '@/constants';
 import {
   amountRounded,
   formatNumber,
@@ -215,7 +216,7 @@ export default defineComponent({
 
     return {
       AE_DEX_URL,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
       displayDexUrl,
       isAe,
       poolShare,

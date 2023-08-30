@@ -1,5 +1,6 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
+import { UNFINISHED_FEATURES } from '@/constants';
 import initDeeplinkHandler from './deeplinkHandler';
 import * as wallet from './wallet';
 import Logger from '../lib/logger';
@@ -23,7 +24,7 @@ browser.runtime.onMessage.addListener(async (msg) => {
     return isLoggedIn.value;
   }
 
-  if (process.env.UNFINISHED_FEATURES && method === 'paste') {
+  if (UNFINISHED_FEATURES && method === 'paste') {
     let result = '';
     const textarea = document.createElement('textarea');
     document.body.appendChild(textarea);

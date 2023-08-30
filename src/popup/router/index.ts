@@ -18,6 +18,7 @@ import {
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
   PROTOCOL_AETERNITY,
+  UNFINISHED_FEATURES,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -77,7 +78,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
-    if (!IS_CORDOVA) {
+    if (!IS_CORDOVA && !UNFINISHED_FEATURES) {
       next({ name: ROUTE_NOT_FOUND });
       return;
     }

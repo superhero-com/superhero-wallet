@@ -15,7 +15,7 @@
         :href="activeAccountFaucetUrl"
       />
       <BtnBox
-        v-if="isAeAccount && IS_CORDOVA && (isNodeMainnet || isNodeTestnet)"
+        v-if="IS_CORDOVA && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
         :icon="GlobeSmallIcon"
         :text="$t('common.browser')"
         :to="{ name: ROUTE_APPS_BROWSER }"
@@ -29,13 +29,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import {
   IS_CORDOVA,
   IS_IOS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_AETERNITY,
+  UNFINISHED_FEATURES,
 } from '@/constants';
 import {
   useAccounts,
@@ -43,6 +43,7 @@ import {
   useAeSdk,
 } from '@/composables';
 import { AE_DEX_URL } from '@/protocols/aeternity/config';
+import { ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
@@ -52,7 +53,6 @@ import CreditCardIcon from '@/icons/credit-card.svg?vue-component';
 import SwapIcon from '@/icons/swap.svg?vue-component';
 import FaucetIcon from '@/icons/faucet.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
-import { ROUTE_APPS_BROWSER } from '../../../popup/router/routeNames';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
@@ -73,25 +73,22 @@ export default defineComponent({
       activeAccountFaucetUrl,
     } = useAccounts({ store });
 
-    const isAeAccount = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
-
     return {
+      UNFINISHED_FEATURES,
+      ROUTE_APPS_BROWSER,
+      AE_DEX_URL,
+      IS_CORDOVA,
+      IS_IOS,
       CreditCardIcon,
       SwapIcon,
       FaucetIcon,
       GlobeSmallIcon,
-      AE_DEX_URL,
-      IS_CORDOVA,
-      IS_IOS,
       isOnline,
       isNodeMainnet,
       isNodeTestnet,
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
-      isAeAccount,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
-      ROUTE_APPS_BROWSER,
     };
   },
 });

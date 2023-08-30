@@ -94,7 +94,7 @@ import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { IToken, ITokenList } from '@/types';
-import { IS_IOS, PROTOCOL_AETERNITY } from '@/constants';
+import { IS_IOS, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -220,6 +220,8 @@ export default defineComponent({
     });
 
     return {
+      UNFINISHED_FEATURES,
+      IS_IOS,
       AE_DEX_URL,
       BuyIcon,
       SwapIcon,
@@ -240,8 +242,6 @@ export default defineComponent({
       convertedBalance,
       routeName,
       isMultisig,
-      IS_IOS,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });
