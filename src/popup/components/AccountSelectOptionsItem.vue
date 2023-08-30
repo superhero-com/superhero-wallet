@@ -14,6 +14,7 @@
         avatar-size="rg"
         avatar-borderless
         is-list-name
+        show-protocol-icon
         class="account-info"
       />
       <TokenAmount

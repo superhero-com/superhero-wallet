@@ -1,9 +1,29 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <DashboardWrapper class="dashboard">
-        <template #header>
-          <DashboardHeader />
+      <DashboardBase
+        class="dashboard"
+        :accounts="accounts"
+        :accounts-select-options="accountsSelectOptions"
+        :active-account-address="activeAccount.address"
+        :active-idx="activeAccountGlobalIdx"
+        :balances-total="accountsTotalBalance"
+        @select-account="setActiveAccountByAddress"
+      >
+        <template #swiper>
+          <AccountSwiper
+            :active-idx="activeAccountGlobalIdx"
+            :address-list="accountsAddressList"
+            :to="{ name: ROUTE_ACCOUNT_DETAILS }"
+            @select-account="(index) => setActiveAccountByGlobalIdx(index)"
+          >
+            <template #slide="{ index }">
+              <AccountCard
+                :account="accounts[index]"
+                :selected="index === activeAccountGlobalIdx"
+              />
+            </template>
+          </AccountSwiper>
         </template>
 
         <template #buttons>
@@ -47,7 +67,7 @@
             variant="purple"
           />
         </template>
-      </DashboardWrapper>
+      </DashboardBase>
     </IonContent>
   </IonPage>
 </template>
@@ -67,17 +87,23 @@ import {
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
 } from '@/constants';
-import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+import {
+  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
+  ROUTE_APPS_BROWSER,
+} from '@/popup/router/routeNames';
 import {
   useAccounts,
   useAeSdk,
+  useBalances,
   useDeepLinkApi,
 } from '@/composables';
-import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
+import AccountCard from '@/popup/components/AccountCard.vue';
+import AccountSwiper from '@/popup/components/AccountSwiper.vue';
+import DashboardBase from '@/popup/components/DashboardBase.vue';
 import DashboardCard from '@/popup/components/DashboardCard.vue';
-import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
-import DashboardHeader from '@/popup/components/DashboardHeader.vue';
 import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
 import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vue';
@@ -85,11 +111,12 @@ import LatestTransactionsCard from '@/popup/components/LatestTransactionsCard.vu
 import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import CardIcon from '@/icons/credit-card.svg?vue-component';
+import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
+
 import buyBackground from '@/image/dashboard/buy-ae.jpg';
 import chainNameBackground from '@/image/dashboard/chain-name.jpg';
 import daeppBrowserBackground from '@/image/dashboard/aepp-browser.jpg';
-import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -98,18 +125,30 @@ export default defineComponent({
     LatestTransactionsCard,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
-    DashboardHeader,
-    DashboardWrapper,
+    DashboardBase,
+    AccountCard,
+    AccountSwiper,
     IonPage,
     IonContent,
   },
   setup() {
     const route = useRoute();
 
-    const { activeAccount } = useAccounts();
+    const {
+      accounts,
+      accountsAddressList,
+      accountsSelectOptions,
+      activeAccount,
+      activeAccountGlobalIdx,
+      setActiveAccountByGlobalIdx,
+      setActiveAccountByAddress,
+    } = useAccounts();
+
+    const { accountsTotalBalance } = useBalances();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
+    const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
     watch(
@@ -122,24 +161,35 @@ export default defineComponent({
     );
 
     return {
+      IS_MOBILE_APP,
       PROTOCOL_AETERNITY,
       DASHBOARD_CARD_ID,
       UNFINISHED_FEATURES,
+      ROUTE_ACCOUNT_DETAILS,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ROUTE_APPS_BROWSER,
-      IS_MOBILE_APP,
+
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
-      MenuCardIcon,
       GlobeIcon,
+      MenuCardIcon,
+
+      accounts,
+      accountsAddressList,
+      accountsSelectOptions,
+      accountsTotalBalance,
       activeAccount,
       activeAccountSimplexLink,
+      activeAccountFaucetUrl,
+      activeAccountGlobalIdx,
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
       isNodeMainnet,
       isNodeTestnet,
+      setActiveAccountByGlobalIdx,
+      setActiveAccountByAddress,
     };
   },
 });

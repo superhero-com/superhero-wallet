@@ -41,8 +41,6 @@ export default defineComponent({
 
   color: variables.$color-white;
   line-height: 18px;
-  margin-bottom: 12px;
-  margin-left: 24px;
 
   .label {
     @extend %face-sans-14-medium;

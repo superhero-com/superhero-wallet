@@ -25,7 +25,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
+import { RouteLocationNamedRaw } from 'vue-router';
 
 import { IS_MOBILE_APP } from '@/constants';
 
@@ -41,7 +42,7 @@ export const BTN_VARIANT = [
 export type BtnVariant = typeof BTN_VARIANT[number];
 
 export const btnBaseProps = {
-  to: { type: [Object, String], default: null },
+  to: { type: Object as PropType<RouteLocationNamedRaw>, default: null },
   href: { type: String, default: null },
   variant: {
     type: String,

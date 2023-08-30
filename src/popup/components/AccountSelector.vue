@@ -24,17 +24,19 @@
           @update:modelValue="$emit('update:modelValue', $event)"
         >
           <template #current-text="{ text }">
-            <div v-if="!avatarOnly">
-              <Truncate
-                class="account-select-text"
-                :str="text"
+            <slot>
+              <div v-if="!avatarOnly">
+                <Truncate
+                  class="account-select-text"
+                  :str="text"
+                />
+              </div>
+              <Avatar
+                v-if="avatarOnly"
+                :address="modelValue.toString()"
+                size="sm"
               />
-            </div>
-            <Avatar
-              v-if="avatarOnly"
-              :address="modelValue.toString()"
-              size="sm"
-            />
+            </slot>
           </template>
         </FormSelect>
       </BtnPill>
@@ -73,7 +75,7 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    modelValue: { type: [String, Number], default: null },
+    modelValue: { type: [String, Number], default: '' },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
     avatarOnly: Boolean,
   },
