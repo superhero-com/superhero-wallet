@@ -121,7 +121,10 @@ export default defineComponent({
     addressList: { type: Array as PropType<string[]>, required: true },
     isMultisig: Boolean,
   },
-  emits: ['select-account'],
+  emits: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    'select-account': (idx: number) => true,
+  },
   setup(props, { emit }) {
     const customSwiper = ref();
     const currentIdx = ref(0);

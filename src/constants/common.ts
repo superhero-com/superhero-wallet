@@ -362,7 +362,7 @@ export const INPUT_MESSAGE_STATUSES = {
   error: 'error',
 } as const;
 
-export const DASHBOARD_CARD_ID = {
+export const DASHBOARD_CARD_ID: Record<string, string | null> = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',

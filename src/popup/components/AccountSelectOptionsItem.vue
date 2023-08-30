@@ -11,10 +11,11 @@
     >
       <AccountInfo
         :account="account"
+        class="account-info"
         avatar-size="rg"
         avatar-borderless
         is-list-name
-        class="account-info"
+        show-protocol-icon
       />
       <TokenAmount
         :amount="balance"
@@ -37,9 +38,10 @@ import {
 import type { IFormSelectOption } from '@/types';
 import { useAccounts, useBalances } from '@/composables';
 import { getAddressColor } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import TokenAmount from './TokenAmount.vue';

@@ -37,7 +37,7 @@ export default defineComponent({
     background: { type: String, default: null },
     variant: { type: String as PropType<BtnVariant>, default: 'secondary' },
     href: { type: String, default: null },
-    cardId: { type: String, default: null },
+    cardId: { type: String as PropType<string | null>, default: null },
     to: { type: Object, default: null },
     icon: { type: Object, default: null },
   },
