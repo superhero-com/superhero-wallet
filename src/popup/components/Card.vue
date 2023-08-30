@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
 import { useUi } from '@/composables';
 
 import BtnIcon from './buttons/BtnIcon.vue';
@@ -58,7 +58,7 @@ export default defineComponent({
     text: { type: String, required: true },
     description: { type: String, required: true },
     background: { type: String, default: null },
-    cardId: { type: String, default: null },
+    cardId: { type: String as PropType<string | null>, default: null },
     icon: { type: Object, default: null },
     dense: Boolean,
     disabled: Boolean,

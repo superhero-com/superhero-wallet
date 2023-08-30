@@ -71,6 +71,7 @@
     "notVerified": "Not verified"
   },
   "dashboard": {
+    "selectAccount": "Select active account",
     "receiveCard": {
       "description": "from existing wallet",
       "descriptionMultisig": "to multisig vault"

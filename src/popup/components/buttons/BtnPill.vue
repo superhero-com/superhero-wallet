@@ -3,7 +3,6 @@
     v-bind="$attrs"
     class="btn-pill"
     :class="{ dense, static, avatar }"
-    :to="to"
   >
     <slot>{{ text }}</slot>
   </BtnBase>
@@ -19,7 +18,6 @@ export default defineComponent({
     BtnBase,
   },
   props: {
-    to: { type: [String, Object], default: null },
     text: { type: String, default: null },
     avatar: Boolean,
     dense: Boolean,
