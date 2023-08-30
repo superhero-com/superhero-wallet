@@ -19,6 +19,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { Browser } from '@capacitor/browser';
 
 import { IS_MOBILE_APP } from '@/constants';
 
@@ -41,9 +42,9 @@ export default defineComponent({
     },
   },
   setup(props) {
-    function onClick(event: any) {
-      if (IS_MOBILE_APP && window.cordova?.InAppBrowser?.open) {
-        window.cordova.InAppBrowser.open(props.to, '_system');
+    async function onClick(event: any) {
+      if (IS_MOBILE_APP) {
+        await Browser.open({ url: props.to, windowName: '_system' });
         event.preventDefault();
       }
     }

@@ -28,6 +28,7 @@
 import { computed, defineComponent } from 'vue';
 
 import { IS_MOBILE_APP } from '@/constants';
+import { Browser } from '@capacitor/browser';
 
 export const BTN_VARIANT = [
   'primary',
@@ -67,9 +68,9 @@ export default defineComponent({
       }
     });
 
-    function onClick(event: any) {
-      if (IS_MOBILE_APP && window.cordova?.InAppBrowser?.open && props.href) {
-        window.cordova.InAppBrowser.open(props.href, '_system');
+    async function onClick(event: any) {
+      if (IS_MOBILE_APP && props.href) {
+        await Browser.open({ url: props.href, windowName: '_system' });
         event.preventDefault();
       }
     }

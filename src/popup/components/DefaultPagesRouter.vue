@@ -9,7 +9,7 @@ import { defineComponent, onMounted, onUpdated } from 'vue';
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import { useUi } from '@/composables';
-import { RUNNING_IN_TESTS } from '../../lib/environment';
+import { RUNNING_IN_TESTS } from '@/constants';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
