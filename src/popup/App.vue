@@ -118,7 +118,7 @@ export default defineComponent({
     const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
-    const { initVisibilityListeners, qrScannerOpen } = useUi();
+    const { isSeedBackedUp, qrScannerOpen, initVisibilityListeners } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts();
     const { addWalletNotification } = useNotifications({ store });
@@ -183,7 +183,7 @@ export default defineComponent({
 
     async function verifyBackedUpSeed() {
       await watchUntilTruthy(isRestored);
-      if (!store.state.backedUpSeed) {
+      if (!isSeedBackedUp.value) {
         addWalletNotification({
           title: t('pages.account.secureYourAccount'),
           text: t('pages.account.seedNotification'),

@@ -46,8 +46,7 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useState } from '@/composables/vuex';
-import { useCurrencies, useNetworks } from '@/composables';
+import { useCurrencies, useNetworks, useUi } from '@/composables';
 import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
@@ -62,8 +61,7 @@ export default defineComponent({
   setup() {
     const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
-
-    const saveErrorLog = useState('saveErrorLog');
+    const { saveErrorLog } = useUi();
 
     const activeCurrency = computed(
       () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,

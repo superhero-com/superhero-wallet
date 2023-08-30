@@ -33,47 +33,38 @@
         <BtnIcon
           icon-variant="light"
           :icon="CloseIcon"
-          @click="$store.commit('hideCard', cardId)"
+          @click="setCardHidden(cardId)"
         />
       </div>
     </div>
   </transition>
 </template>
 
-<script>
-import { computed } from 'vue';
-import { useState } from '../../composables/vuex';
+<script lang="ts">
+import { computed, defineComponent } from 'vue';
+import { useUi } from '@/composables';
 
 import BtnIcon from './buttons/BtnIcon.vue';
 import CloseIcon from '../../icons/times-circle.svg?vue-component';
 import IconWrapper from './IconWrapper.vue';
 
-export default {
+export default defineComponent({
   name: 'Card',
   components: {
     BtnIcon,
     IconWrapper,
   },
   props: {
-    text: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    background: {
-      type: String,
-      default: null,
-    },
-    dense: Boolean,
-    disabled: Boolean,
+    text: { type: String, required: true },
+    description: { type: String, required: true },
+    background: { type: String, default: null },
     cardId: { type: String, default: null },
     icon: { type: Object, default: null },
+    dense: Boolean,
+    disabled: Boolean,
   },
   setup(props) {
-    const hiddenCards = useState('hiddenCards');
+    const { hiddenCards, setCardHidden } = useUi();
 
     const styleComponent = computed(() => ({
       backgroundImage: props.background ? `url("${props.background}")` : null,
@@ -90,9 +81,11 @@ export default {
       CloseIcon,
       styleComponent,
       isVisible,
+      hiddenCards,
+      setCardHidden,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -15,7 +15,7 @@ describe('Tests cases for notifications page and icon', () => {
   });
 
   it('Do not have backup seed notification', () => {
-    cy.login({ backedUpSeed: true, network: 'Mainnet' })
+    cy.login({ isSeedBackedUp: true, network: 'Mainnet' })
       .get('[data-cy=notifications-btn]')
       .find('[data-cy=badge-text]')
       .should('not.exist');

@@ -1,6 +1,5 @@
 import { METHODS } from '@aeternity/aepp-sdk';
 import type {
-  Dictionary,
   ICurrency,
   INotificationSetting,
   IPermission,
@@ -137,7 +136,7 @@ export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
  * List of string keys used to save app data in user's device (local/browser storage).
  * Doing any change to the existing values would require creating migration.
  */
-export const STORAGE_KEYS: Dictionary<string> = {
+export const STORAGE_KEYS = {
   mnemonic: 'mnemonic',
   accountsRaw: 'accounts-raw',
   activeAccountGlobalIdx: 'active-account-global-idx',
@@ -145,6 +144,9 @@ export const STORAGE_KEYS: Dictionary<string> = {
   balances: 'balances',
   customNetworks: 'custom-networks',
   activeNetworkName: 'active-network-name',
+  hiddenCards: 'hidden-cards',
+  otherSettings: 'other-settings',
+  errorLog: 'error-log',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
