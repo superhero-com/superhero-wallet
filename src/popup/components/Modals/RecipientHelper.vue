@@ -32,7 +32,9 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import type { ResolveCallback } from '@/types';
+import { UNFINISHED_FEATURES } from '@/constants';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
+
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -52,7 +54,7 @@ export default defineComponent({
   setup() {
     return {
       AE_BLOG_CLAIM_TIP_URL,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
     };
   },
 });

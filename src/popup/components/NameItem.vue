@@ -146,7 +146,12 @@ import {
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IName } from '@/types';
-import { IS_CORDOVA, IS_EXTENSION, MODAL_CONFIRM } from '@/constants';
+import {
+  IS_CORDOVA,
+  IS_EXTENSION,
+  MODAL_CONFIRM,
+  UNFINISHED_FEATURES,
+} from '@/constants';
 import Logger from '@/lib/logger';
 import { blocksToRelativeTime } from '@/utils';
 import { useAccounts, useModals, useTopHeaderData } from '@/composables';
@@ -207,7 +212,7 @@ export default defineComponent({
     ));
 
     async function readValueFromClipboard(): Promise<string | undefined> {
-      if (!process.env.UNFINISHED_FEATURES) {
+      if (!UNFINISHED_FEATURES) {
         return undefined;
       }
       let value = '';
@@ -282,7 +287,7 @@ export default defineComponent({
     });
 
     return {
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
       expand,
       newPointer,
       showInput,

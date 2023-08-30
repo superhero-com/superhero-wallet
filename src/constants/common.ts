@@ -364,7 +364,7 @@ export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
-  daeppBrowser: 'daeppBrowser',
+  daeppBrowser: null, // Closing this card is disabled due to stakeholders decision
 } as const;
 
 export const ALLOWED_ICON_STATUSES = [

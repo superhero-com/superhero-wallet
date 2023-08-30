@@ -37,6 +37,7 @@ import BigNumber from 'bignumber.js';
 
 import RadioButton from '@/popup/components/RadioButton.vue';
 import { secondsToRelativeTime } from '@/utils';
+import { UNFINISHED_FEATURES } from '@/constants';
 
 type FeeItem = {
   fee: BigNumber,
@@ -72,11 +73,11 @@ export default defineComponent({
     );
 
     return {
+      UNFINISHED_FEATURES,
       labels,
       selectedIndex,
       secondsToRelativeTime,
       handleInput,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });

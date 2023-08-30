@@ -85,7 +85,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { BUG_REPORT_URL, PROTOCOL_AETERNITY } from '@/constants';
+import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { useAccounts, useAeSdk } from '@/composables';
 
@@ -124,7 +124,7 @@ export default defineComponent({
       AE_DEX_URL,
       AE_SIMPLEX_URL,
       BUG_REPORT_URL,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
       activeAccountFaucetUrl,
       isNodeMainnet,
       isNodeTestnet,
