@@ -8,13 +8,12 @@
           class="subtitle"
           scope="global"
         >
-          <a
+          <LinkButton
             :href="AGGREGATOR_URL"
-            target="_blank"
             class="link"
           >
             {{ $t('pages.notifications.superhero') }}
-          </a>
+          </LinkButton>
         </i18n-t>
       </template>
     </ModalHeader>
@@ -81,6 +80,7 @@ import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
 import { getDefaultAccountLabel } from '@/utils';
 
+import LinkButton from '@/popup/components/LinkButton.vue';
 import ModalHeader from '@/popup/components/ModalHeader.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
@@ -92,6 +92,7 @@ export default {
   name: 'TransferReviewTip',
   components: {
     AddressTruncated,
+    LinkButton,
     ModalHeader,
     TokenAmount,
     FormTextarea,
