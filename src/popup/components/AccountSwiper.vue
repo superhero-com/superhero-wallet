@@ -54,7 +54,31 @@
         @change="setCurrentSlide"
       />
 
-      <ToggleMultisigButton :is-multisig="isMultisig" />
+      <div
+        v-if="accounts.length > 1"
+        class="dashboard-header-info"
+      >
+        <BtnPill
+          class="account-select-btn"
+          hollow
+        >
+          <FormSelect
+            :default-text="$t('dashboard.selectAccount')"
+            :model-value="activeAccount.address"
+            class="account-select-input"
+            unstyled
+            account-select
+            @update:model-value="(address: string) => $emit('select-account', address)"
+          >
+            <template #current-text>
+              <div class="account-number">
+                <span class="account-number-current">{{ activeIdx + 1 }}</span>
+                / {{ accounts.length }}
+              </div>
+            </template>
+          </FormSelect>
+        </BtnPill>
+      </div>
     </div>
   </div>
 </template>
@@ -70,27 +94,31 @@ import {
   watch,
 } from 'vue';
 import { RouteLocationNamedRaw } from 'vue-router';
-import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Virtual } from 'swiper/modules';
+
 import { getAddressColor } from '@/utils';
-import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAccounts } from '@/composables';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
 import BulletSwitcher from './BulletSwitcher.vue';
-import ToggleMultisigButton from './ToggleMultisigButton.vue';
+import BtnPill from './buttons/BtnPill.vue';
+import FormSelect from './form/FormSelect.vue';
 
 SwiperCore.use([Virtual]);
 
 export default defineComponent({
   components: {
-    ToggleMultisigButton,
     BulletSwitcher,
     AccountSwiperSlide,
     Swiper,
     SwiperSlide,
     AccountCardAdd,
+    BtnPill,
+    FormSelect,
   },
   props: {
     activeIdx: { type: Number, required: true },
@@ -103,6 +131,7 @@ export default defineComponent({
     'select-account': (idx: number) => undefined,
   },
   setup(props, { emit }) {
+    const { activeAccount, accounts } = useAccounts();
     const customSwiper = ref();
     const currentIdx = ref(0);
 
@@ -141,10 +170,12 @@ export default defineComponent({
     });
 
     return {
-      IS_MOBILE_APP,
       PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
+      activeAccount,
+      accounts,
+      swiper,
       getAccountColor,
       onSlideChange,
       setCurrentSlide,
@@ -158,13 +189,37 @@ export default defineComponent({
 </style>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
+@use '@/styles/mixins';
+@use '@/styles/typography';
 
 .account-swiper {
   .account-swiper-bottom {
-    @include mixins.flex(space-between, center, row);
-
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding-inline: var(--screen-padding-x);
+  }
+
+  .dashboard-header-info {
+    display: flex;
+    align-items: flex-end;
+
+    .account-select-btn {
+      padding: 0;
+      margin-left: auto;
+    }
+
+    .account-select-input {
+      padding: 4px 10px;
+    }
+
+    .account-number {
+      @extend %face-sans-14-medium;
+
+      margin-right: 2px;
+      opacity: 0.4;
+      line-height: 1;
+    }
   }
 }
 </style>

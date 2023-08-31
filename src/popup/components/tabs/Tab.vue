@@ -2,9 +2,14 @@
   <BtnPlain
     v-bind="$attrs"
     class="tab"
-    :class="[ active, exactPath ? 'exact' : 'not-exact' ]"
+    :class="[
+      { active },
+      exactPath ? 'exact' : 'not-exact',
+    ]"
     :text="text"
-  />
+  >
+    <slot />
+  </BtnPlain>
 </template>
 
 <script lang="ts">
