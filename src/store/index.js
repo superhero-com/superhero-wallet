@@ -1,5 +1,4 @@
 import Vuex from 'vuex';
-import { NODE_STATUS_CONNECTING } from '@/constants';
 import getters from './getters';
 import mutations from './mutations';
 import actions from './actions';
@@ -20,7 +19,6 @@ export default new Vuex.Store({
   state: {
     isRestored: false,
     mnemonic: null,
-    nodeStatus: NODE_STATUS_CONNECTING,
     notificationSettings: [],
     chainNames: null,
     migrations: {},

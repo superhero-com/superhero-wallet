@@ -32,15 +32,15 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { isOnline } = useConnection();
-    const { isNodeConnecting, isNodeReady, isNodeError } = useAeSdk({ store });
+    const { isAeNodeConnecting, isAeNodeReady, isAeNodeError } = useAeSdk({ store });
     const { isLoggedIn } = useAccounts({ store });
 
     const justBeenConnected = ref(false);
 
-    const isError = computed(() => !isOnline.value || isNodeError.value);
+    const isError = computed(() => !isOnline.value || isAeNodeError.value);
 
     // Display "Connected" message for a while after connecting to node.
-    watch(isNodeReady, (val) => {
+    watch(isAeNodeReady, (val) => {
       justBeenConnected.value = val;
       if (val) {
         setTimeout(() => {
@@ -55,11 +55,11 @@ export default defineComponent({
           return t('connectionStatus.offline');
         case !isLoggedIn.value:
           return null;
-        case isNodeConnecting.value:
+        case isAeNodeConnecting.value:
           return t('connectionStatus.node.connecting');
         case justBeenConnected.value:
           return t('connectionStatus.node.connected');
-        case isNodeError.value:
+        case isAeNodeError.value:
           return t('connectionStatus.node.error');
         default:
           return null;
