@@ -67,10 +67,6 @@ export const NETWORK_NAME_MAX_LENGTH = 15;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
 
-export const NODE_STATUS_CONNECTING = 'connecting';
-export const NODE_STATUS_CONNECTED = 'connected';
-export const NODE_STATUS_ERROR = 'error';
-
 export const TXS_PER_PAGE = 30;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 

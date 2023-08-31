@@ -22,7 +22,7 @@
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="!isConnected || primaryButtonDisabled"
+        :disabled="primaryButtonDisabled"
         :icon="(showSendButton && hideArrowSendIcon) ? ArrowSendIcon : null"
         :text="primaryButtonText"
         data-cy="next-step-button"
@@ -41,7 +41,6 @@ import {
 import type { TransferSendStep } from '@/types';
 import { useI18n } from 'vue-i18n';
 
-import { useGetter } from '@/composables/vuex';
 import { TRANSFER_SEND_STEPS } from '@/constants';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import Modal from '../Modal.vue';
@@ -64,8 +63,6 @@ export default defineComponent({
   setup(props) {
     const { t } = useI18n();
 
-    const isConnected = useGetter<boolean>('isConnected');
-
     const showEditButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
       TRANSFER_SEND_STEPS.reviewTip,
@@ -84,7 +81,6 @@ export default defineComponent({
     });
 
     return {
-      isConnected,
       primaryButtonText,
       showEditButton,
       showSendButton,

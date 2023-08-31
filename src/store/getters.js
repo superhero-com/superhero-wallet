@@ -3,7 +3,6 @@ import { mnemonicToSeed } from '@aeternity/bip39';
 import { toShiftedBigNumber } from '@/utils';
 import {
   ACCOUNT_HD_WALLET,
-  NODE_STATUS_CONNECTED,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -47,9 +46,6 @@ export default {
         ...account,
         name: getters['names/getDefault'](account.address),
       }));
-  },
-  isConnected({ nodeStatus }) {
-    return nodeStatus === NODE_STATUS_CONNECTED;
   },
   getTxSymbol: ({ fungibleTokens: { availableTokens } }) => (transaction) => {
     if (transaction.pendingTokenTx) return availableTokens[transaction.tx.contractId]?.symbol;

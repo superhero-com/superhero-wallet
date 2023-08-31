@@ -8,7 +8,7 @@
     :proceed-to-next-step="proceedToNextStep"
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
-    :primary-button-disabled="error || !transferData.address|| !transferData.amount"
+    :primary-button-disabled="isPrimaryButtonDisabled"
     @close="resolve"
   >
     <template #content>
@@ -43,19 +43,22 @@ import type {
 
 import { Encoded } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
 import { useState } from '@/composables/vuex';
 
-import TransferSendBase from '@/popup/components/Modals/TransferSendBase.vue';
 import {
   PROTOCOL_AETERNITY,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
-import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 import { isUrlValid } from '@/utils';
+import { useAeSdk } from '@/composables';
+import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
+
+import TransferSendBase from '@/popup/components/Modals/TransferSendBase.vue';
+import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
-import TransferSendForm from '../components/TransferSendForm.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_SEND,
@@ -70,6 +73,8 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
+    const store = useStore();
+    const { isAeNodeReady } = useAeSdk({ store });
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStepExtended>(TRANSFER_SEND_STEPS.form);
@@ -88,6 +93,13 @@ export default defineComponent({
       !isAddressChain.value
         && transferData.value.address
         && isUrlValid(transferData.value.address)
+    ));
+
+    const isPrimaryButtonDisabled = computed(() => (
+      error.value
+      || !isAeNodeReady.value
+      || !transferData.value.address
+      || !transferData.value.amount
     ));
 
     const customPrimaryButtonText = computed(() => {
@@ -163,6 +175,7 @@ export default defineComponent({
       currentStepConfig,
       isAddressChain,
       isAddressUrl,
+      isPrimaryButtonDisabled,
       customPrimaryButtonText,
       proceedToNextStep,
       editTransfer,
