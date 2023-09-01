@@ -60,6 +60,8 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
     address: { type: String as PropType<Encoded.AccountAddress>, default: null },
+    amount: { type: String, default: '' },
+    payload: { type: String, default: '' },
   },
   setup(props) {
     const store = useStore();
@@ -70,11 +72,11 @@ export default defineComponent({
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      amount: '',
+      amount: props.amount,
       selectedAsset: ProtocolAdapterFactory
         .getAdapter(PROTOCOL_BITCOIN)
         .getDefaultCoin(marketData.value!, +balance.value),
-      payload: '',
+      payload: props.payload,
     });
 
     function proceedToNextStep() {

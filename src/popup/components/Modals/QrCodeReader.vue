@@ -55,7 +55,7 @@ import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { mapMutations } from 'vuex';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
-import { RejectedByUserError } from '@/lib/errors';
+import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -103,6 +103,7 @@ export default {
                 openInNewWindow(
                   browser.extension.getURL('./CameraRequestPermission.html'),
                 );
+                this.reject(new NoUserMediaPermissionError());
                 reject();
               }
               if (navigator.mediaDevices?.getUserMedia) {

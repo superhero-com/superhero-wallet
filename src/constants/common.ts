@@ -382,6 +382,7 @@ export const ALLOWED_ICON_STATUSES = [
 ] as const;
 
 export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';
+export const TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY = 'transfer-send-data';
 
 export const TRANSFER_SEND_STEPS = {
   form: 'form',
