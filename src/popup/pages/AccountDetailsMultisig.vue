@@ -7,7 +7,7 @@
       >
         <template #account-info>
           <AccountInfo
-            :address="activeMultisigAccount.gaAccountId"
+            :account="convertMultisigAccountToAccount(activeMultisigAccount)"
             :protocol="PROTOCOL_AETERNITY"
             is-multisig
             with-protocol-icon
@@ -47,7 +47,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
-import { buildSimplexLink } from '@/protocols/aeternity/helpers';
+import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -87,6 +87,7 @@ export default defineComponent({
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,
+      convertMultisigAccountToAccount,
     };
   },
 });

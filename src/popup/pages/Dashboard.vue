@@ -129,17 +129,19 @@ export default defineComponent({
       UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ROUTE_APPS_BROWSER,
+      IS_MOBILE_APP,
+
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
-      activeAccount,
       GlobeIcon,
+
+      activeAccount,
       activeAccountSimplexLink,
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
-      IS_MOBILE_APP,
       isNodeMainnet,
       isNodeTestnet,
     };

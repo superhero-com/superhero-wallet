@@ -1,7 +1,6 @@
 import { computed, ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
-  IAccount,
   IDefaultComposableOptions,
   ITokenList,
   ITx,
@@ -173,7 +172,7 @@ export function useTransactionTx({
     ownerAddress.value = address;
   }
 
-  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccount {
+  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): any {
     switch (ownershipStatus.value) {
       case AE_TRANSACTION_OWNERSHIP_STATUS.current:
         return activeAccount.value;
@@ -188,7 +187,7 @@ export function useTransactionTx({
         return {
           name: getPreferredName.value(address) || '',
           address,
-        } as IAccount; // TODO establish the required return type for the function
+        } as any; // TODO establish the required return type for the function
       }
     }
   }

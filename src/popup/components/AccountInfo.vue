@@ -5,7 +5,7 @@
   >
     <Avatar
       class="avatar"
-      :address="address"
+      :address="account.address"
       :name="name"
       :size="avatarSize"
       :borderless="avatarBorderless"
@@ -17,9 +17,8 @@
       <div
         v-if="isMultisig"
         class="account-name"
-      >
-        {{ $t('multisig.multisigVault') }}
-      </div>
+        v-text="$t('multisig.multisigVault')"
+      />
       <div
         v-else-if="name"
         class="account-name-truncated"
@@ -30,26 +29,25 @@
         v-else
         data-cy="account-name-number"
         class="account-name"
-      >
-        {{ getDefaultAccountLabel({ protocol: protocolName, protocolIdx: idx }) }}
-      </div>
+        v-text="getDefaultAccountLabel(account)"
+      />
       <div
-        v-if="address && address.length"
+        v-if="account.address?.length"
         class="account-address"
       >
         <IconWrapper
           v-if="withProtocolIcon"
-          :protocol-icon="protocol"
+          :protocol-icon="account.protocol"
           class="protocol-icon"
         />
         <CopyText
           data-cy="copy"
-          :value="address"
+          :value="account.address"
           :disabled="!canCopyAddress"
         >
           <AddressTruncated
-            :address="address"
-            :protocol="protocol"
+            :address="account.address"
+            :protocol="account.protocol"
             class="ae-address"
           />
         </CopyText>
@@ -64,7 +62,8 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { Protocol } from '@/types';
+import { useStore } from 'vuex';
+import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -83,11 +82,8 @@ export default defineComponent({
     CopyText,
   },
   props: {
-    address: { type: String, required: true },
-    name: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, required: true },
+    account: { type: Object as PropType<Partial<IAccount>>, required: true },
     avatarSize: { type: String, default: 'lg' },
-    idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,
     isMultisig: Boolean,
     avatarBorderless: Boolean,
@@ -95,20 +91,23 @@ export default defineComponent({
     withProtocolIcon: Boolean,
   },
   setup(props) {
-    const explorerUrl = computed(
-      () => ProtocolAdapterFactory
-        .getAdapter(props.protocol)
-        .getExplorer()
-        .prepareUrlForAccount(props.address),
-    );
+    const store = useStore();
+    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string;
 
-    const protocolName = computed(
-      () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
+    const name = computed(() => getDefaultName(props.account.address));
+
+    const explorerUrl = computed(
+      () => (props.account.protocol)
+        ? ProtocolAdapterFactory
+          .getAdapter(props.account.protocol)
+          .getExplorer()
+          .prepareUrlForAccount(props.account.address!)
+        : '',
     );
 
     return {
+      name,
       explorerUrl,
-      protocolName,
       getDefaultAccountLabel,
     };
   },

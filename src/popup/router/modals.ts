@@ -53,7 +53,7 @@ import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import QrCodeReader from '../components/Modals/QrCodeReader.vue';
 import Help from '../components/Modals/Help.vue';
 import AssetSelector from '../components/Modals/AssetSelector.vue';
-import ResetWallet from '../components/Modals/ResetWallet.vue';
+import ResetWallet from '../components/Modals/ResetWalletModal.vue';
 import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';

@@ -66,12 +66,12 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
-import { useCopy } from '../../composables';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+import { useAccounts, useCopy } from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import CopyOutlined from '../../icons/copy-outlined.svg?vue-component';
 import CheckSuccessCircle from '../../icons/check-success-circle.svg?vue-component';
@@ -88,7 +88,7 @@ export default defineComponent({
     const router = useRouter();
 
     const { copy, copied } = useCopy();
-    const mnemonic = computed(() => store.state.mnemonic);
+    const { mnemonic } = useAccounts({ store });
 
     function setBackedUpSeed() {
       store.commit('setBackedUpSeed');

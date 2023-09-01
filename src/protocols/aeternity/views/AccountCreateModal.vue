@@ -39,21 +39,18 @@
         :disabled="!isOnline"
         @click="createMultisigAccount()"
       />
-
-      <Loader v-if="loading" />
     </div>
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOL_AETERNITY } from '@/constants';
-import { useConnection, useModals } from '@/composables';
+import { useAccounts, useConnection, useModals } from '@/composables';
 
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
-import Loader from '@/popup/components/Loader.vue';
 
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 
@@ -61,7 +58,6 @@ export default defineComponent({
   components: {
     Modal,
     BtnSubheader,
-    Loader,
   },
   props: {
     resolve: { type: Function as PropType<() => void>, required: true },
@@ -69,18 +65,15 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { addRawAccount } = useAccounts({ store });
     const { isOnline } = useConnection();
     const { openModal } = useModals();
 
-    const loading = ref(false);
-
     async function createPlainAccount() {
-      loading.value = true;
-      await store.dispatch('accounts/hdWallet/create', {
+      addRawAccount({
         isRestored: false,
         protocol: PROTOCOL_AETERNITY,
       });
-      loading.value = false;
       props.resolve();
     }
 
@@ -92,7 +85,6 @@ export default defineComponent({
     return {
       PlusCircleIcon,
       isOnline,
-      loading,
       createPlainAccount,
       createMultisigAccount,
     };

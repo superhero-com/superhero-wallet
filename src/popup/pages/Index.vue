@@ -91,7 +91,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { generateMnemonic } from '@aeternity/bip39';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { IonPage, IonContent } from '@ionic/vue';
@@ -101,8 +100,10 @@ import {
   IS_WEB,
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
+  PROTOCOL_AETERNITY,
 } from '@/constants';
 import {
+  useAccounts,
   useModals,
   useUi,
 } from '@/composables';
@@ -126,13 +127,18 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const router = useRouter();
+    const { addRawAccount, setGeneratedMnemonic } = useAccounts({ store });
     const { openModal } = useModals();
     const { loginTargetLocation } = useUi();
 
     const termsAgreed = ref(false);
 
     async function createWallet() {
-      store.commit('setMnemonic', generateMnemonic());
+      setGeneratedMnemonic();
+      addRawAccount({
+        isRestored: false,
+        protocol: PROTOCOL_AETERNITY,
+      });
       router.push(loginTargetLocation.value);
     }
 

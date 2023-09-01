@@ -10,9 +10,6 @@ export default {
   setChainNames(state, payload) {
     state.chainNames = payload;
   },
-  setMnemonic(state, payload) {
-    state.mnemonic = payload;
-  },
   setBackedUpSeed(state) {
     state.backedUpSeed = true;
   },

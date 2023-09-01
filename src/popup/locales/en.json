@@ -768,7 +768,8 @@
       "accountNotFound": "Account not found. Please check again your seed phrase.",
       "invalidSeed": "Your seed phrase should consist of 12 words or more separated by spaces.",
       "seedPlaceHolder": "Enter or paste your seed phrase here",
-      "scanSeedPhrase": "Scan Seed Phrase"
+      "scanSeedPhrase": "Scan Seed Phrase",
+      "restoringAccounts": "Restoring accounts..."
     },
     "ledgerSetup": {
       "ledgerConnectSetup": "How to connect from Ledger",

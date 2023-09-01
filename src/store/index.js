@@ -17,7 +17,6 @@ import veeValidate from './plugins/veeValidate';
 export default new Vuex.Store({
   state: {
     isRestored: false,
-    mnemonic: null,
     notificationSettings: [],
     chainNames: null,
     migrations: {},

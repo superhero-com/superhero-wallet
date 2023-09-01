@@ -16,7 +16,7 @@
           <PanelItem
             :to="{ name: 'tips-claim' }"
             :title="$t('pages.claimTips.title')"
-            :disabled="!isAccountAe"
+            :disabled="!isActiveAccountAe"
             data-cy="tips-claim"
           >
             <template #icon>
@@ -26,7 +26,7 @@
           <PanelItem
             :to="{ name: 'invite' }"
             :title="$t('pages.titles.giftCards')"
-            :disabled="!isAccountAe"
+            :disabled="!isActiveAccountAe"
             data-cy="invite"
           >
             <template #icon>
@@ -122,10 +122,10 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccount, activeAccountFaucetUrl, isActiveAccountAe } = useAccounts({ store });
+    const { activeAccount, activeAccountFaucetUrl } = useAccounts({ store });
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
-    const isAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
 
     return {
       AE_DEX_URL,
@@ -136,7 +136,6 @@ export default defineComponent({
       isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
-      isAccountAe,
     };
   },
 });

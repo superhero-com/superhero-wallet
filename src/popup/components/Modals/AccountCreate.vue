@@ -41,7 +41,7 @@ import {
   PROTOCOL_BITCOIN,
   PROTOCOLS,
 } from '@/constants';
-import { useConnection, useModals } from '@/composables';
+import { useAccounts, useConnection, useModals } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import Loader from '@/popup/components/Loader.vue';
@@ -59,6 +59,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
+    const { addRawAccount } = useAccounts({ store });
     const { isOnline } = useConnection();
     const { openModal } = useModals();
     const loading = ref(false);
@@ -73,7 +74,7 @@ export default defineComponent({
           break;
 
         case PROTOCOL_BITCOIN:
-          await store.dispatch('accounts/hdWallet/create', {
+          addRawAccount({
             isRestored: false,
             protocol: PROTOCOL_BITCOIN,
           });

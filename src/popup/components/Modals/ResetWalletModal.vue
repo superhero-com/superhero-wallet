@@ -37,11 +37,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { RejectCallback, ResolveCallback } from '../../../types';
-import { useDispatch } from '../../../composables/vuex';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import type { RejectCallback, ResolveCallback } from '@/types';
+import { useAccounts } from '@/composables';
+import { ROUTE_INDEX } from '@/popup/router/routeNames';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import IconBoxed from '../IconBoxed.vue';
+
 import ResetWalletIcon from '../../../icons/reset-wallet.svg?vue-component';
 
 export default defineComponent({
@@ -55,11 +60,14 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const reset = useDispatch('reset');
+    const store = useStore();
+    const router = useRouter();
+    const { resetAccounts } = useAccounts({ store });
 
     async function onReset() {
-      await props.resolve();
-      await reset();
+      resetAccounts();
+      props.resolve();
+      router.push({ name: ROUTE_INDEX });
     }
 
     return {

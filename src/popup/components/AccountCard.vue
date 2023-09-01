@@ -5,10 +5,7 @@
   >
     <template #top>
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
-        :protocol="account.protocol"
+        :account="account"
         avatar-borderless
         with-protocol-icon
       />
