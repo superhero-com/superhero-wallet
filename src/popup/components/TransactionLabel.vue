@@ -85,7 +85,7 @@ import {
   ITransaction,
 } from '@/types';
 import { TX_DIRECTION } from '@/constants';
-import { getAccountNameToDisplay } from '@/utils';
+import { getDefaultAccountLabel } from '@/utils';
 import {
   TX_FUNCTIONS,
   TX_RETURN_TYPE_ABORT,
@@ -112,7 +112,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { accounts, activeAccount } = useAccounts({ store });
+    const { activeAccount, getAccountByAddress } = useAccounts({ store });
     const { t } = useI18n();
 
     const {
@@ -134,6 +134,8 @@ export default defineComponent({
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+
+    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
 
     const label = computed((): {
       text: string;
@@ -196,9 +198,10 @@ export default defineComponent({
       return { text, customPending, hasComma };
     });
 
-    const ownerName = computed(() => getAccountNameToDisplay(
-      accounts.value.find((acc) => acc.address === props.transaction.transactionOwner),
-    ));
+    const ownerName = computed(() => {
+      const accountFound = getAccountByAddress(props.transaction.transactionOwner!);
+      return getDefaultName(accountFound?.address) || getDefaultAccountLabel(accountFound);
+    });
 
     const errorTypeName = computed((): string | null => {
       switch (props.transaction.tx.returnType) {

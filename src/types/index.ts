@@ -38,6 +38,12 @@ export type Class<T> = new (...args: unknown[]) => T
 
 export type Dictionary<T = any> = Record<string, T>;
 
+/**
+ * Makes selected properties optional.
+ * @example `Optional<{ foo: string, bar: number }, 'foo'>`
+ */
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
 export type Truthy<T> = T extends false | '' | 0 | null | undefined ? never : T;
 
 /**
@@ -165,8 +171,7 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
  */
 export type IAsset = ICoin | IToken;
 
-export type AccountKind = 'basic'; // TODO establish other possible values
-export type AeternityAccountType = 'hd-wallet';
+export type AccountType = 'hd-wallet';
 
 /**
  * Simplified account structure stored it in the local storage
@@ -174,8 +179,7 @@ export type AeternityAccountType = 'hd-wallet';
  */
 export interface IAccountRaw {
   idx: number;
-  showed: boolean;
-  type: AeternityAccountType;
+  type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
 }
@@ -185,8 +189,6 @@ export interface IAccountRaw {
  */
 export interface IAccount extends IKeyPair, IAccountRaw {
   address: Encoded.AccountAddress;
-  name?: string; // .chain
-  protocol: Protocol;
   globalIdx: number;
 }
 
@@ -207,6 +209,7 @@ export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
+  name?: string;
   label?: TranslateResult;
   wallet?: string; // Is the whole Wallet is being accessed by an Aepp
 }

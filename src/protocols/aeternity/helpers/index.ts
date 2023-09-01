@@ -19,6 +19,7 @@ import type {
   ICommonTransaction,
   IDexContracts,
   IGAAttachTx,
+  IMultisigAccount,
   INameEntryFetched,
   ITransaction,
   ITx,
@@ -26,7 +27,7 @@ import type {
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import { HASH_REGEX, TX_DIRECTION } from '@/constants';
+import { HASH_REGEX, PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
 import {
   compareCaseInsensitive,
   errorHasValidationKey,
@@ -48,12 +49,6 @@ import {
 
 export * from './transactionTokenInfoResolvers';
 
-export function buildSimplexLink(address: string) {
-  const link = new URL(AE_SIMPLEX_URL);
-  link.searchParams.set('wallet_address', address);
-  return link.toString();
-}
-
 export function aeToAettos(value: number | string) {
   return formatAmount(value.toString(), {
     denomination: AE_AMOUNT_FORMATS.AE,
@@ -66,6 +61,12 @@ export function aettosToAe(value: number | string) {
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
   });
+}
+
+export function buildSimplexLink(address: string) {
+  const link = new URL(AE_SIMPLEX_URL);
+  link.searchParams.set('wallet_address', address);
+  return link.toString();
 }
 
 export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
@@ -122,6 +123,17 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
     default:
       return null;
   }
+}
+
+export function convertMultisigAccountToAccount(
+  multisigAccount: IMultisigAccount,
+): Partial<IAccount> {
+  return {
+    address: multisigAccount.gaAccountId,
+    idx: 0,
+    protocol: PROTOCOL_AETERNITY,
+    globalIdx: 0,
+  };
 }
 
 export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {

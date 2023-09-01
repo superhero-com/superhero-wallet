@@ -5,7 +5,7 @@ import {
   Encoding,
   getHdWalletAccountFromSeed,
 } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
+import { Store, useStore } from 'vuex';
 
 import type {
   AdapterNetworkSettingList,
@@ -42,6 +42,8 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
+  store: Store<any> | undefined;
+
   protocolName = AE_PROTOCOL_NAME;
 
   networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
@@ -69,6 +71,13 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.backendUrlLabel'),
     },
   ];
+
+  getStore(): Store<any> {
+    if (!this.store) {
+      this.store = useStore();
+    }
+    return this.store;
+  }
 
   override getAccountPrefix() {
     return `${Encoding.AccountAddress}_`;
@@ -111,16 +120,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     };
   }
 
-  getNetworkSettings() {
+  override getNetworkSettings() {
     return this.networkSettings;
   }
 
-  getNetworkTypeDefaultValues(networkType: NetworkTypeDefault) {
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault) {
     return AE_NETWORK_DEFAULT_SETTINGS[networkType] as any;
   }
 
   override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
-    const store = useStore();
+    const store = this.getStore();
     const { getAeSdk } = useAeSdk({ store });
     const sdk = await getAeSdk();
     const balanceInAettos = await sdk.getBalance(address);
@@ -128,10 +137,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
-    const store = useStore();
-    const { getAeSdk } = useAeSdk({ store });
-    const aeSdk = await getAeSdk();
-    return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    const store = this.getStore();
+    const { getDryAeSdk } = useAeSdk({ store });
+
+    const aeSdk = await getDryAeSdk();
+    const result = await aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
+    return result;
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -153,15 +164,15 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     );
   }
 
-  async constructAndSignTx() {
+  override async constructAndSignTx() {
     // TODO
   }
 
-  async getTransactionByHash(): Promise<any> {
+  override async getTransactionByHash(): Promise<any> {
     // TODO
   }
 
-  async fetchTransactions(): Promise<any> {
+  override async fetchTransactions(): Promise<any> {
     // TODO
   }
 
@@ -170,7 +181,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: { payload: string },
   ): Promise<{ hash: string }> {
-    const store = useStore();
+    const store = this.getStore();
     const { getAeSdk } = useAeSdk({ store });
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(amount, recipient as any, {

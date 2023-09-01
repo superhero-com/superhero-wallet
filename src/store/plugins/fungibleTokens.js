@@ -26,7 +26,6 @@ export default (store) => {
   const { fetchFromMiddleware } = useMiddleware();
   const {
     aeAccounts,
-    aeNextAccountIdx,
     getLastActiveProtocolAccount,
   } = useAccounts({ store });
   const { tippingContractAddresses } = useTippingContracts({ store });
@@ -220,10 +219,11 @@ export default (store) => {
     { immediate: true },
   );
 
-  store.watch(
-    () => aeNextAccountIdx.value,
+  // Fetch balances whenever new account is added
+  watch(
+    aeAccounts,
     async (val, oldVal) => {
-      if (val !== oldVal) {
+      if (val.length !== oldVal.length) {
         await store.dispatch('fungibleTokens/loadTokenBalances');
       }
     },

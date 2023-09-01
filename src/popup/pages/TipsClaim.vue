@@ -1,10 +1,7 @@
 <template>
   <div class="tips-claim">
     <AccountInfo
-      :address="activeAccount.address"
-      :name="activeAccount.name"
-      :idx="activeAccount.idx"
-      :protocol="activeAccount.protocol"
+      :account="activeAccount"
     />
 
     <div class="header">
@@ -34,11 +31,10 @@
 
     <BtnMain
       :disabled="!normalizedUrl || !isTippingSupported"
+      :text="$t('common.confirm')"
       extend
-      @click="handleClaimTips"
-    >
-      {{ $t('common.confirm') }}
-    </BtnMain>
+      @click="handleClaimTips()"
+    />
 
     <Loader v-if="loading" />
   </div>
@@ -63,10 +59,11 @@ import {
   useTippingContracts,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
-
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
+
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';

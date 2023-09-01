@@ -190,7 +190,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount, activeAccountName } = useAccounts({ store });
     const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData({ store });
 
@@ -201,7 +201,7 @@ export default defineComponent({
     const pointerInput = ref();
 
     const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
-    const isDefault = computed(() => activeAccount.value.name === props.name);
+    const isDefault = computed(() => activeAccountName.value === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
       (): boolean => nameEntry.value?.pointers?.accountPubkey === activeAccount.value.address,

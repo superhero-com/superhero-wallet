@@ -6,15 +6,12 @@ import InputAmount from '../../src/popup/components/InputAmount.vue';
 import veeValidate from '../../src/store/plugins/veeValidate';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 import { PROTOCOL_AETERNITY } from '../../src/constants';
-import { STUB_ACCOUNT } from '../../src/constants/stubs';
 
 const maxBalance = 10000;
 
 const store = new Vuex.Store({
   plugins: [veeValidate],
   getters: {
-    account: () => STUB_ACCOUNT,
-    accounts: () => [STUB_ACCOUNT],
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),
   },

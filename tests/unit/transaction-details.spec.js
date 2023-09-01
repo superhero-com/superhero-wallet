@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Loader from '../../src/popup/components/Loader.vue';
 import TransactionDetails from '../../src/protocols/aeternity/views/TransactionDetails.vue';
-import { STUB_ACCOUNT } from '../../src/constants/stubs';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
@@ -127,7 +126,7 @@ function mountComponent() {
         },
       },
       accounts: {
-        list: [{ idx: 0, showed: true, type: 'hd-wallet' }],
+        list: [{ idx: 0, type: 'hd-wallet' }],
       },
     },
     getters: {
@@ -135,8 +134,6 @@ function mountComponent() {
       getTxSymbol: () => () => AE_SYMBOL,
       getTxAmountTotal: () => () => 1,
       isTransactionAex9: () => () => true,
-      account: () => STUB_ACCOUNT,
-      accounts: () => [STUB_ACCOUNT],
       wallet: () => {},
     },
   });

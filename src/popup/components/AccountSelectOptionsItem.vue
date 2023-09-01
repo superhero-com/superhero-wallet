@@ -9,10 +9,7 @@
       :class="{ selected: account.address === value }"
     >
       <AccountInfo
-        :address="account.address"
-        :name="account.name"
-        :idx="account.idx"
-        :protocol="account.protocol"
+        :account="account"
         avatar-size="rg"
         avatar-borderless
         is-list-name

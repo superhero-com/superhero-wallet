@@ -10,10 +10,7 @@
       />
       <AccountInfo
         v-else
-        :address="activeAccount.address"
-        :name="activeAccount.name"
-        :idx="activeAccount.idx"
-        :protocol="activeAccount.protocol"
+        :account="activeAccount"
         can-copy-address
         with-protocol-icon
       />

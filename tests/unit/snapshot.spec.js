@@ -26,6 +26,9 @@ jest.mock('../../src/constants/environment', () => ({
   IS_MOBILE_DEVICE: false,
 }));
 jest.mock('../../src/composables', () => ({
+  useAccounts: jest.fn(() => ({
+    accounts: [],
+  })),
   useMiddleware: jest.fn(() => ({
     fetchMiddlewareStatus: jest.fn(),
   })),
