@@ -7,6 +7,7 @@
       ref="amountField"
       name="amount"
       :model-value="modelValue"
+      :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
         min_value_exclusive: 0,

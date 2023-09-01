@@ -177,6 +177,12 @@ export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
   return result ? JSON.parse(result) : undefined;
 }
 
+export function removeLocalStorageItem(keys: string[]) {
+  return window.localStorage.removeItem(
+    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+  );
+}
+
 /**
  * TODO: Probably we need to replace this with Logger.write
  */

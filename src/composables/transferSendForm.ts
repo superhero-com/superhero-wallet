@@ -17,10 +17,12 @@ import {
   APP_LINK_WEB,
   IS_PRODUCTION,
   MODAL_READ_QR_CODE,
+  TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY,
 } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName, setLocalStorageItem } from '@/utils';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { NoUserMediaPermissionError } from '@/lib/errors';
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -92,14 +94,31 @@ export function useTransferSendForm({
     };
   }
 
+  /**
+   * Save form data on local storage to restore it
+   * e.g. after extension closes & opens window to ask camera permission
+   */
+  function saveFormDataOnLocalStorage() {
+    setLocalStorageItem([TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY], formModel.value);
+  }
+
   async function openScanQrModal(tokenBalances: IToken[]) {
-    const scanResult = await openModal(MODAL_READ_QR_CODE, {
+    let scanResult: string | null = '';
+    scanResult = await openModal(MODAL_READ_QR_CODE, {
       title: t(
         'pages.send.scanAddress',
         { protocolName: ProtocolAdapterFactory.getAdapter(protocol).protocolName },
       ),
       icon: 'critical',
-    });
+    }).then(
+      (result: string) => result,
+      (error: Error) => {
+        if (error instanceof NoUserMediaPermissionError) {
+          saveFormDataOnLocalStorage();
+        }
+        return null;
+      },
+    );
     if (scanResult?.trim().charAt(0) === '{') {
       let parsedScanResult: any = null;
       try {

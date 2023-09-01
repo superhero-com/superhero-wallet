@@ -69,6 +69,8 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
     tokenContractId: { type: String, default: null },
     address: { type: String as PropType<Encoded.AccountAddress>, default: null },
+    amount: { type: String, default: '' },
+    payload: { type: String, default: '' },
     isMultisig: Boolean,
   },
   setup(props) {
@@ -80,9 +82,9 @@ export default defineComponent({
     const currentStep = ref<TransferSendStepExtended>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
-      amount: '',
+      amount: props.amount,
       selectedAsset: undefined,
-      payload: '',
+      payload: props.payload,
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');

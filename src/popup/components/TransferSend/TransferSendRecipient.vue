@@ -3,6 +3,8 @@
     <Field
       v-slot="{ field }"
       name="address"
+      :model-value="modelValue"
+      :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
         not_same_as: [activeAccount.address, protocol],
@@ -85,7 +87,7 @@ export default defineComponent({
     },
     errors: { type: Object, required: true },
   },
-  emits: ['openQrModal'],
+  emits: ['openQrModal', 'update:modelValue'],
   setup(props) {
     const store = useStore();
 
