@@ -41,7 +41,6 @@ export default (store) => {
 
   const {
     aeAccounts,
-    aeNextAccountIdx,
     getLastActiveProtocolAccount,
   } = useAccounts({ store });
 
@@ -259,10 +258,11 @@ export default (store) => {
     }
   }, { immediate: true, deep: true });
 
-  store.watch(
-    () => aeNextAccountIdx.value,
+  // Fetch names whenever new account is added
+  watch(
+    aeAccounts,
     async (val, oldVal) => {
-      if (isMiddlewareReady.value && val !== oldVal) {
+      if (isMiddlewareReady.value && val.length !== oldVal.length) {
         await Promise.all([
           store.dispatch('names/fetchOwned').catch(() => {}),
           store.dispatch('names/setDefaults'),

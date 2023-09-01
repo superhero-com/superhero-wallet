@@ -35,6 +35,7 @@ import {
 import { tg } from '@/store/plugins/languages';
 import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
 import { isAddressValid } from '@aeternity/aepp-sdk';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 /**
  * Round the number to calculated amount of decimals.
@@ -158,18 +159,14 @@ export async function fetchJson<T = any>(
  * Prepare human-readable name with protocol for an account.
  * E.g.: `Æternity account 1`, `Bitcoin account 2`
  */
-export function getDefaultAccountLabel(
-  { protocol, protocolIdx }: { protocol?: string, protocolIdx?: number },
-) {
-  return `${protocol || ''} ${tg('pages.account.heading')} ${(protocolIdx || 0) + 1}`;
-}
-
-/**
- * Prepare human-readable name from the user account object.
- * E.g.: `somehuman.chain`, `Account 2`
- */
-export function getAccountNameToDisplay(acc: IAccount | undefined) {
-  return acc?.name || getDefaultAccountLabel({ protocol: acc?.protocol, protocolIdx: acc?.idx });
+export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}): string {
+  return [
+    (protocol) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
+    tg('pages.account.heading'),
+    (idx || 0) + 1,
+  ]
+    .filter(excludeFalsy)
+    .join(' ');
 }
 
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {

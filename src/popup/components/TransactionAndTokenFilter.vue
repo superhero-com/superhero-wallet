@@ -43,6 +43,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   useAccounts,
   useTransactionAndTokenFilter,
@@ -72,7 +73,7 @@ export default defineComponent({
     } = useTransactionAndTokenFilter();
 
     const { viewportElement } = useViewport();
-    const { isActiveAccountAe } = useAccounts({ store });
+    const { activeAccount } = useAccounts({ store });
 
     const scrollTopThreshold = 140;
     const maxHeight = ref(0);
@@ -80,6 +81,8 @@ export default defineComponent({
     const inputIsFocused = ref(false);
     const transactionFilterEl = ref<HTMLDivElement>();
     const resizeObserver = ref<ResizeObserver>();
+
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
 
     const openHeight = computed(() => (
       props.showFilters

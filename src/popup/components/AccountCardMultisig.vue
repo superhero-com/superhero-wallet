@@ -2,8 +2,7 @@
   <AccountCardBase :selected="selected">
     <template #top>
       <AccountInfo
-        :address="account.gaAccountId"
-        :protocol="PROTOCOL_AETERNITY"
+        :account="convertMultisigAccountToAccount(account)"
         is-multisig
         avatar-borderless
         with-protocol-icon
@@ -35,17 +34,17 @@ import {
   PropType,
 } from 'vue';
 import { useStore } from 'vuex';
+import type { IMultisigAccount } from '@/types';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
+import { useMultisigAccounts } from '@/composables';
+import { ROUTE_MULTISIG_DETAILS } from '@/popup/router/routeNames';
+import { convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
 import AccountCardConsensus from './AccountCardConsensus.vue';
 import AccountCardBase from './AccountCardBase.vue';
 import AccountCardSyncing from './AccountCardSyncing.vue';
-
-import type { IMultisigAccount } from '../../types';
-import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -74,6 +73,7 @@ export default defineComponent({
       PROTOCOL_AETERNITY,
       ROUTE_MULTISIG_DETAILS,
       isPendingAccount,
+      convertMultisigAccountToAccount,
     };
   },
 });

@@ -153,6 +153,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async discoverAccounts(seed: Uint8Array): Promise<number> {
     return defaultAccountDiscovery(
       this.isAccountUsed,
