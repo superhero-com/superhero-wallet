@@ -37,6 +37,7 @@ export default defineComponent({
 </script>
 <style scoped>
   .account-ion-content {
+    overflow: hidden;
     background-color: #191919;
   }
 </style>

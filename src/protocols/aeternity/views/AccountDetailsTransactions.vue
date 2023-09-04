@@ -3,7 +3,10 @@
     <ion-content
       class="ion-padding"
     >
-      <div class="account-details-transactions">
+      <div
+        ref="innerScrollElem"
+        class="account-details-transactions"
+      >
         <TransactionList
           v-if="isOnline"
           :loading="loading"
@@ -30,7 +33,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
 
 import type { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
@@ -41,6 +44,7 @@ import {
   useTransactionList,
   useUi,
   useViewport,
+  useScrollConfig,
 } from '@/composables';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -63,12 +67,15 @@ export default defineComponent({
 
     let polling: NodeJS.Timer | null;
 
+    const FIXED_SCROLL_HEIGHT = 120;
+
     const store = useStore();
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
     const { viewportElement } = useViewport();
     const { activeAccount } = useAccounts({ store });
+    const { setScrollConf } = useScrollConfig();
 
     const {
       getAccountAllTransactions,
@@ -78,9 +85,14 @@ export default defineComponent({
 
     const { displayMode } = useTransactionAndTokenFilter();
 
+    const innerScrollElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
     const loading = ref(false);
     const isDestroyed = ref(false);
 
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => innerScrollElem.value?.parentElement,
+    );
     const canLoadMore = computed(() => (
       !!getAccountTransactionsState(activeAccount.value.address).nextPageUrl
     ));
@@ -134,7 +146,19 @@ export default defineComponent({
       }
     });
 
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+      },
+    );
+
     onMounted(() => {
+      if (innerScrollElem.value && appInnerElem.value) {
+        appInnerElem.value.addEventListener('scroll', () => {
+          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+        });
+      }
       loadMore();
       polling = setInterval(() => {
         if (isAppActive.value) {
@@ -150,11 +174,16 @@ export default defineComponent({
       isDestroyed.value = true;
     });
 
+    onIonViewWillLeave(() => {
+      setScrollConf(false);
+    });
+
     return {
       isOnline,
       loading,
       loadedTransactionList,
       loadMore,
+      innerScrollElem,
     };
   },
 });
