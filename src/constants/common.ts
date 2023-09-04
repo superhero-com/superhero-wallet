@@ -36,6 +36,13 @@ export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_TRANSFER_SEND,
 ] as const;
 
+/**
+ * Address gap limit is currently set to 5.
+ * If the software hits 5 unused addresses in a row,
+ * it expects there are no used addresses beyond this point and stops searching the address chain.
+*/
+export const ADDRESS_GAP_LIMIT = 5;
+
 export const SEED_LENGTH = 12;
 export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 

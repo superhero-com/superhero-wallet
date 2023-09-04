@@ -12,6 +12,7 @@ import {
   MODAL_CONFIRM_RAW_SIGN,
   MODAL_CONFIRM_TRANSACTION_SIGN,
   PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -30,16 +31,19 @@ export default {
       return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
     },
     async discover({ rootGetters: { wallet }, dispatch }) {
-      const numberOfAccounts = await ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY) // Discover only aeternity accounts for now
-        .discoverAccounts(wallet);
-
-      for (let i = 0; i < numberOfAccounts; i += 1) {
-        dispatch('create', {
-          isRestored: true,
-          protocol: PROTOCOL_AETERNITY,
-        });
-      }
+      const accountsToRecover = await Promise.all(
+        PROTOCOLS.map(async (protocol) => (
+          await ProtocolAdapterFactory.getAdapter(protocol)
+        ).discoverAccounts(wallet)),
+      );
+      PROTOCOLS.forEach((protocol, idx) => {
+        for (let i = protocol === PROTOCOL_AETERNITY ? 1 : 0; i <= accountsToRecover[idx]; i += 1) {
+          dispatch('create', {
+            isRestored: true,
+            protocol,
+          });
+        }
+      });
     },
     create(store, { isRestored = false, protocol = PROTOCOL_AETERNITY }) {
       const { incrementProtocolNextAccountIdx, protocolNextAccountIdx } = useAccounts({ store });
