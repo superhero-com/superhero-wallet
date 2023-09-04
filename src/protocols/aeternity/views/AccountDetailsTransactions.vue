@@ -3,7 +3,10 @@
     <ion-content
       class="ion-padding"
     >
-      <div class="account-details-transactions">
+      <div
+        ref="innerScrollElem"
+        class="account-details-transactions"
+      >
         <TransactionList
           v-if="isOnline"
           :loading="loading"
@@ -27,9 +30,10 @@ import {
   onMounted,
   onUnmounted,
   ref,
+  watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
 
 import type { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
@@ -38,6 +42,7 @@ import {
   useConnection,
   useTransactionList,
   useUi,
+  useScrollConfig,
 } from '@/composables';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -60,11 +65,14 @@ export default defineComponent({
 
     let polling: NodeJS.Timer | null;
 
+    const FIXED_SCROLL_HEIGHT = 120;
+
     const store = useStore();
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
     const { activeAccount } = useAccounts({ store });
+    const { setScrollConf } = useScrollConfig();
 
     const {
       getAccountAllTransactions,
@@ -72,6 +80,8 @@ export default defineComponent({
       fetchTransactions,
     } = useTransactionList({ store });
 
+    const innerScrollElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
     const loading = ref(false);
     const isDestroyed = ref(false);
 
@@ -102,6 +112,13 @@ export default defineComponent({
       }
     }
 
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+      },
+    );
+
     onMounted(() => {
       fetchTransactionList();
       polling = setInterval(() => {
@@ -118,11 +135,16 @@ export default defineComponent({
       isDestroyed.value = true;
     });
 
+    onIonViewWillLeave(() => {
+      setScrollConf(false);
+    });
+
     return {
       isOnline,
       loading,
       loadedTransactionList,
       loadMore,
+      innerScrollElem,
     };
   },
 });
