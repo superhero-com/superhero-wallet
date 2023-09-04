@@ -130,7 +130,7 @@ export function useTransactionTx({
       innerTx.value.contractId,
     )
     && includes(
-      [TX_FUNCTIONS.tip, TX_FUNCTIONS.retip],
+      [TX_FUNCTIONS.tip, TX_FUNCTIONS.retip, TX_FUNCTIONS.claim],
       innerTx.value.function,
     )
   ));
