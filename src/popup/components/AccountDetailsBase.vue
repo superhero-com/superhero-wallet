@@ -1,6 +1,5 @@
 <template>
   <div
-    ref="accountDetailsElem"
     class="account-details"
   >
     <div class="account-info-wrapper">
@@ -69,19 +68,18 @@ import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
-  ref,
   watch,
 } from 'vue';
-import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { EXTENSION_HEIGHT, IS_MOBILE_APP } from '@/constants';
+import { IS_MOBILE_APP } from '@/constants';
 
 import {
   useAccounts,
   useBalances,
   useTransactionAndTokenFilter,
   useUi,
+  useScrollConfig,
 } from '@/composables';
 import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
@@ -109,14 +107,10 @@ export default defineComponent({
     const store = useStore();
 
     const { activeAccount } = useAccounts({ store });
-    const ACCOUNT_INFO_HEIGHT = 120;
-    const BALANCE_AND_ACTIONS_HEIGHT = 280;
-    const accountDetailsElem = ref<HTMLElement>();
-    const appInnerScrollTop = ref<number>(0);
-    const clientHeight = ref<number>(0);
-    const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
 
     const { resetFilter } = useTransactionAndTokenFilter();
+
+    const { scrollConf } = useScrollConfig();
 
     const { homeRouteName } = useUi();
 
@@ -124,41 +118,15 @@ export default defineComponent({
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 
-    const appInnerElem = computed<HTMLElement | null | undefined>(
-      () => accountDetailsElem.value?.parentElement,
-    );
-
     const routeName = computed(() => route.name);
 
-    const showFilters = computed<boolean>(() => (
-      clientHeight.value > initialClientHeight.value
-        && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
+    const showFilters = computed<boolean | any>(() => (
+      scrollConf.value
     ));
-
-    const resizeObserver = new ResizeObserver(debounce((entries) => {
-      if (!(Array.isArray(entries) && entries.length)) {
-        return;
-      }
-
-      const newClientHeight = entries[0].target.clientHeight;
-
-      const totalHeight = clientHeight.value + BALANCE_AND_ACTIONS_HEIGHT + ACCOUNT_INFO_HEIGHT;
-
-      if (
-        newClientHeight
-          && (
-            totalHeight < newClientHeight
-            || newClientHeight <= initialClientHeight.value
-          )
-      ) {
-        clientHeight.value = newClientHeight;
-      }
-    }, 100));
 
     watch(
       () => route,
       () => {
-        clientHeight.value = 0;
         resetFilter();
       },
     );
@@ -169,14 +137,6 @@ export default defineComponent({
           color: '#191919',
         });
       }
-      if (accountDetailsElem.value && appInnerElem.value) {
-        resizeObserver.observe(accountDetailsElem.value);
-        initialClientHeight.value = appInnerElem.value.clientHeight;
-        appInnerElem.value.addEventListener('scroll', () => {
-          appInnerScrollTop.value = accountDetailsElem?.value?.parentElement?.scrollTop ?? 0;
-          clientHeight.value = accountDetailsElem?.value?.clientHeight ?? 0;
-        });
-      }
     });
 
     onBeforeUnmount(() => {
@@ -185,14 +145,11 @@ export default defineComponent({
           color: '#141414',
         });
       }
-
-      resizeObserver.disconnect();
     });
 
     return {
       homeRouteName,
       showFilters,
-      accountDetailsElem,
       routeName,
       balanceNumeric,
       activeAccount,
@@ -207,7 +164,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 :deep(.ion-padding) {
-  background-color: #191919;
+  background-color: variables.$color-bg-4;
 }
 
 .account-details {
@@ -216,7 +173,7 @@ export default defineComponent({
   --screen-bg-color: #{variables.$color-bg-modal};
   --header-height: 64px;
 
-  background-color: #191919;
+  background-color: variables.$color-bg-4;
   border-radius: variables.$border-radius-app;
   min-height: 100%;
   height: 100%;
@@ -229,7 +186,8 @@ export default defineComponent({
   }
 
   .account-info-wrapper {
-    position: sticky;
+    position: fixed;
+    width: 100%;
     top: env(safe-area-inset-top);
     z-index: 2;
     display: flex;
@@ -260,7 +218,7 @@ export default defineComponent({
   }
 
   .balance-info {
-    padding-top: calc(8px + env(safe-area-inset-top));
+    padding-top: 5em;
   }
 
   .buttons {
