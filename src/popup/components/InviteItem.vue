@@ -172,7 +172,7 @@ export default defineComponent({
     async function claim() {
       emit('loading', true);
       try {
-        await store.dispatch('invites/claim', props.secretKey);
+        await store.dispatch('invites/claim', Buffer.from(props.secretKey));
         await updateBalance();
       } catch (error) {
         if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {

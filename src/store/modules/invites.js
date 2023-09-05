@@ -12,7 +12,10 @@ export default {
     invites: [],
   },
   mutations: {
-    add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
+    add: ({ invites }, secretKey) => invites.unshift({
+      secretKey: secretKey.toJSON(),
+      createdAt: Date.now(),
+    }),
     delete(state, secretKey) {
       state.invites = state.invites.filter((invite) => invite.secretKey !== secretKey);
     },
