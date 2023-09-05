@@ -129,7 +129,7 @@ export default defineComponent({
       address: () => t('pages.titles.address'),
       signMessage: () => t('pages.titles.signMessage'),
       signTransaction: () => t('pages.titles.signTransaction'),
-      invite: () => t('pages.titles.invite'),
+      giftCards: () => t('pages.titles.giftCards'),
       txDetails: () => t('pages.titles.txDetails'),
       tokenDetails: () => t('pages.titles.tokenDetails'),
       coinDetails: () => t('pages.titles.coinDetails'),

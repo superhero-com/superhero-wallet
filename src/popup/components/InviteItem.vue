@@ -71,7 +71,6 @@
 </template>
 
 <script lang="ts">
-import nacl from 'tweetnacl';
 import {
   computed,
   defineComponent,
@@ -83,11 +82,12 @@ import { Field } from 'vee-validate';
 import {
   AE_AMOUNT_FORMATS,
   encode,
-  getAddressFromPriv,
   Encoding,
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+
+import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import type { IFormModel } from '@/types';
 import { formatDate } from '@/utils';
 import {
@@ -96,6 +96,7 @@ import {
 } from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
+  useAccounts,
   useBalances,
   useMaxAmount,
   useAeSdk,
@@ -127,6 +128,7 @@ export default defineComponent({
     const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
     const { balance } = useBalances({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -150,9 +152,7 @@ export default defineComponent({
       );
     });
 
-    const address = computed(() => getAddressFromPriv(
-      nacl.sign.keyPair.fromSeed(Buffer.from(props.secretKey)).secretKey,
-    ));
+    const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
     function deleteItem() {
       store.commit('invites/delete', props.secretKey);
@@ -172,7 +172,11 @@ export default defineComponent({
     async function claim() {
       emit('loading', true);
       try {
-        await store.dispatch('invites/claim', Buffer.from(props.secretKey));
+        await store.dispatch('invites/claim', {
+          secretKey: Buffer.from(props.secretKey),
+          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address,
+          isMax: true,
+        });
         await updateBalance();
       } catch (error) {
         if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {

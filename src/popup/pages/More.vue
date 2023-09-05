@@ -23,7 +23,7 @@
       </PanelItem>
       <PanelItem
         :to="{ name: 'invite' }"
-        :title="$t('pages.titles.invite')"
+        :title="$t('pages.titles.giftCards')"
         :disabled="!isAccountAe"
         data-cy="invite"
       >

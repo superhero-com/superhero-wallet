@@ -26,6 +26,7 @@ defineRule('name', (value) => isAensNameValid(`${value}${AE_AENS_DOMAIN}`));
 defineRule('min_value', (value, [arg]) => BigNumber(value).isGreaterThanOrEqualTo(arg));
 defineRule('min_value_exclusive', (value, [arg]) => value && BigNumber(value).isGreaterThan(arg));
 defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
+defineRule('max_redeem', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
 defineRule('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 defineRule('max_len', (value, [maxLength]) => value && value.length <= maxLength);
 
@@ -47,6 +48,7 @@ configure({
       min_value: ({ rule }) => tg('validation.minValue', [rule.params[0]]),
       min_value_exclusive: ({ rule }) => tg('validation.minValueExclusive', [rule.params[0]]),
       max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
+      max_redeem: ({ rule }) => tg('validation.maxRedeem', [rule.params[0]]),
       max_value_vault: ({ rule }) => tg('validation.maxValueVault', [rule.params[0]]),
       max_len: ({ rule }) => tg('validation.maxLength', [rule.params[0]]),
       enough_coin: ({ rule }) => tg('validation.enoughCoin', [rule.params[1] || AE_SYMBOL]),

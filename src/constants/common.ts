@@ -323,6 +323,7 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
+export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';

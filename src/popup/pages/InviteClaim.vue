@@ -1,13 +1,11 @@
-<template>
-  <Loader />
-</template>
-
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
-import { useModals, useAeSdk } from '../../composables';
+
+import { MODAL_CLAIM_GIFT_CARD } from '@/constants';
+import { useModals } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -15,23 +13,18 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
-    const { getAeSdk } = useAeSdk({ store });
-    const { openDefaultModal } = useModals();
+    const { openDefaultModal, openModal } = useModals();
 
     onMounted(async () => {
-      await getAeSdk();
+      router.push({ name: ROUTE_ACCOUNT });
 
       try {
         // nm_ prefix was chosen as a dummy to decode from base58Check
         // The secretKey can be retrieved from the URL in two different ways:
         // current: /invite#${secretKey}
         // legacy: /invite/${secretKey}
-        await store.dispatch(
-          'invites/claim',
-          decode(`nm_${route.hash ? route.hash.replace('#', '') : route.fullPath.split('/').at(-1)}`),
-        );
-        await openDefaultModal({
-          msg: 'You have successfully claimed tokens by the invite link',
+        await openModal(MODAL_CLAIM_GIFT_CARD, {
+          secretKey: decode(`nm_${route.hash ? route.hash.replace('#', '') : route.fullPath.split('/').at(-1)}`),
         });
       } catch (error: any) {
         if (error.message === 'Invalid checksum') {
@@ -44,10 +37,11 @@ export default defineComponent({
           return;
         }
         throw error;
-      } finally {
-        await router.push({ name: ROUTE_ACCOUNT });
       }
     });
+  },
+  render() {
+    return null as any;
   },
 });
 </script>
