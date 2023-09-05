@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MODAL_ACCOUNT_CREATE } from '@/constants';
+import { MODAL_ACCOUNT_CREATE, MODAL_AE_ACCOUNT_CREATE } from '@/constants';
 import { useModals } from '@/composables';
 
 import BtnBase from '@/popup/components/buttons/BtnBase.vue';
@@ -41,9 +41,11 @@ export default defineComponent({
     const { openModal } = useModals();
 
     function openCreateAccountModal() {
-      openModal(MODAL_ACCOUNT_CREATE, {
-        isMultisig: props.isMultisig,
-      });
+      if (props.isMultisig) {
+        openModal(MODAL_AE_ACCOUNT_CREATE, { isMultisig: props.isMultisig });
+      } else {
+        openModal(MODAL_ACCOUNT_CREATE);
+      }
     }
 
     return {
