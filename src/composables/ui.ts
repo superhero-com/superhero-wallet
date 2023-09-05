@@ -5,6 +5,7 @@ import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
+const qrScannerOpen = ref(false);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -18,6 +19,10 @@ export function useUi() {
 
   function setLoginTargetLocation(location: RouteLocationRaw) {
     loginTargetLocation.value = location;
+  }
+
+  function setQrScanner(open: boolean) {
+    qrScannerOpen.value = open;
   }
 
   function handleVisibilityChange() {
@@ -39,8 +44,10 @@ export function useUi() {
     homeRouteName,
     isAppActive,
     loginTargetLocation,
+    qrScannerOpen,
     initVisibilityListeners,
     setHomeRouteName,
     setLoginTargetLocation,
+    setQrScanner,
   };
 }

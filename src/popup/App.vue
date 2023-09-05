@@ -54,7 +54,6 @@ import {
   computed,
   defineComponent,
   onBeforeMount,
-  nextTick,
   onMounted,
   ref,
   watch,
@@ -62,8 +61,8 @@ import {
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { TransferFormModel, WalletRouteMeta } from '@/types';
-import { getLocalStorageItem, removeLocalStorageItem, watchUntilTruthy } from '@/utils';
+import { WalletRouteMeta } from '@/types';
+import { watchUntilTruthy } from '@/utils';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
@@ -77,8 +76,6 @@ import {
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
-  TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY,
-  MODAL_TRANSFER_SEND,
 } from '@/constants';
 import {
   useAccounts,
@@ -90,6 +87,8 @@ import {
   useViewport,
 } from '@/composables';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
+import { useTransferSendHandler } from '@/composables/transferSendHandler';
+
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
 import Close from '@/icons/close.svg?vue-component';
@@ -111,19 +110,18 @@ export default defineComponent({
     const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
-    const { initVisibilityListeners } = useUi();
-    const { modalsOpen, openModal } = useModals();
+    const { initVisibilityListeners, qrScannerOpen } = useUi();
+    const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
     const { initViewport } = useViewport();
+    const { restore: restoreTransferSendForm } = useTransferSendHandler();
 
     const innerElement = ref<HTMLDivElement>();
-    const transferSendData = ref<TransferFormModel | null>();
 
     const isRestored = computed(() => store.state.isRestored);
     const backedUpSeed = computed(() => store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -191,21 +189,6 @@ export default defineComponent({
       }
     });
 
-    const unwatch = watch(transferSendData, (val) => {
-      if (val) {
-        // setTimeout is required because
-        // the modal will not open if called immediately
-        setTimeout(() => {
-          openModal(MODAL_TRANSFER_SEND, {
-            isMultisig: routeMeta.value?.isMultisig,
-            tokenContractId: transferSendData.value?.selectedAsset?.contractId,
-            ...transferSendData.value,
-          });
-        }, 100);
-        nextTick(() => unwatch());
-      }
-    }, { immediate: true });
-
     watch(() => route.fullPath, () => {
       if (innerElement.value) {
         innerElement.value.scrollTop = 0;
@@ -240,15 +223,7 @@ export default defineComponent({
 
       watchConnectionStatus();
 
-      if (IS_EXTENSION) {
-        transferSendData.value = getLocalStorageItem(
-          [TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY],
-        );
-        if (!transferSendData.value) {
-          unwatch();
-        }
-        removeLocalStorageItem([TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY]);
-      }
+      restoreTransferSendForm();
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([

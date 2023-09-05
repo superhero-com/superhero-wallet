@@ -18,12 +18,12 @@ import {
   APP_LINK_WEB,
   IS_PRODUCTION,
   MODAL_READ_QR_CODE,
-  TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY,
 } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName, setLocalStorageItem } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { NoUserMediaPermissionError } from '@/lib/errors';
+import { useTransferSendHandler } from './transferSendHandler';
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -41,13 +41,14 @@ export function useTransferSendForm({
   getSelectedAssetValue,
   protocol,
 }: UseTransferSendFormParams) {
-  const formModel = ref(transferData);
+  const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
   const invoiceContract = ref(null);
 
   const { t } = useI18n();
   const { openModal, openDefaultModal } = useModals();
   const { errors, validate, validateField } = useForm();
+  const { save: saveFormData } = useTransferSendHandler();
 
   const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
 
@@ -98,31 +99,22 @@ export function useTransferSendForm({
     Object.keys(updatedValues).forEach((field) => validateField(field));
   }
 
-  /**
-   * Save form data on local storage to restore it
-   * e.g. after extension closes & opens window to ask camera permission
-   */
-  function saveFormDataOnLocalStorage() {
-    setLocalStorageItem([TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY], formModel.value);
-  }
-
   async function openScanQrModal(tokenBalances: IToken[]) {
     let scanResult: string | null = '';
     scanResult = await openModal(MODAL_READ_QR_CODE, {
       title: t(
         'pages.send.scanAddress',
-        { protocolName: ProtocolAdapterFactory.getAdapter(protocol).protocolName },
+        { assetName: (formModel.value.selectedAsset as IToken)?.name },
       ),
       icon: 'critical',
     }).then(
       (result: string) => result,
-      (error: Error) => {
-        if (error instanceof NoUserMediaPermissionError) {
-          saveFormDataOnLocalStorage();
-        }
-        return null;
-      },
-    );
+    ).catch((error: Error) => {
+      if (error instanceof NoUserMediaPermissionError) {
+        saveFormData(formModel.value as TransferFormModel);
+      }
+      return null;
+    });
     if (scanResult?.trim().charAt(0) === '{') {
       let parsedScanResult: any = null;
       try {
