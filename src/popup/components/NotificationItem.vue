@@ -67,6 +67,7 @@ import { useI18n } from 'vue-i18n';
 import type { INotification } from '@/types';
 import { relativeTimeTo } from '@/utils';
 import {
+  IS_CORDOVA,
   IS_EXTENSION,
   IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
@@ -146,7 +147,11 @@ export default defineComponent({
     function handleClick() {
       if (props.notification.path) {
         if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
-          window.open(props.notification.path, IS_MOBILE_DEVICE ? '_self' : '_blank');
+          if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
+            window.cordova.InAppBrowser.open(props.notification.path, '_system');
+          } else {
+            window.open(props.notification.path, '_blank');
+          }
         } else {
           router.push(props.notification.path);
         }

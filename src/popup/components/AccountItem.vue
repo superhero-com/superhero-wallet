@@ -1,7 +1,6 @@
 <template>
   <LinkButton
     :to="explorerUrl"
-    target="_blank"
     class="account-item"
     variant="muted"
   >
