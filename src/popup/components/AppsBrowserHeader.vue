@@ -59,7 +59,6 @@ import {
   unref,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { MODAL_DAPP_BROWSER_ACTIONS, BROWSER_ACTIONS } from '@/constants';
 import {
@@ -80,6 +79,7 @@ import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import SecureIcon from '@/icons/secure-lock.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 import BackIcon from '@/icons/chevron.svg?vue-component';
+import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
   components: {
@@ -96,7 +96,7 @@ export default defineComponent({
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
     const store = useStore();
-    const router = useRouter();
+    const ionRouter = useIonRouter();
     const { openModal } = useModals();
 
     const { homeRouteName } = useUi();
@@ -131,7 +131,7 @@ export default defineComponent({
     }
 
     function close() {
-      router.replace({ name: currentHomeRouteName.value });
+      ionRouter.navigate(`/${currentHomeRouteName.value}`, 'back', 'push');
     }
 
     async function openActions() {
