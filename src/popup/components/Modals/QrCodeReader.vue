@@ -32,11 +32,10 @@
       </div>
     </div>
     <template
-      v-if="mobile"
+      v-if="IS_MOBILE_APP"
       #footer
     >
       <BtnMain
-        v-if="mobile"
         :text="$t('modals.qrCodeReader.settings')"
         @click="openSettings"
       />
@@ -82,7 +81,6 @@ export default defineComponent({
     reject: { type: Function, required: true },
   },
   setup(props) {
-    const mobile = IS_MOBILE_APP;
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
     const cameraStatus = ref<PermissionState>(
       IS_MOBILE_APP ? 'granted' : 'denied',
@@ -106,7 +104,7 @@ export default defineComponent({
     }
 
     function stopReading() {
-      if (mobile) {
+      if (IS_MOBILE_APP) {
         document.querySelector('body')?.classList.remove('scanner-active');
         BarcodeScanner.showBackground();
         store.commit('setQrScanner', false);
@@ -117,7 +115,7 @@ export default defineComponent({
     }
 
     async function scan() {
-      if (mobile) {
+      if (IS_MOBILE_APP) {
         return new Promise((resolve, reject) => {
           store.commit('setQrScanner', true);
 
@@ -225,7 +223,7 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      if (mobile) {
+      if (IS_MOBILE_APP) {
         if (await hasPermission()) {
           await BarcodeScanner.prepare();
         } else {
@@ -260,7 +258,7 @@ export default defineComponent({
     return {
       cameraAllowed,
       browserReader,
-      mobile,
+      IS_MOBILE_APP,
       heading,
       QrScanIcon,
       cancelReading,
@@ -285,7 +283,8 @@ export default defineComponent({
 
   .camera {
     --camera-size: 312px;
-    margin-top: 20px;
+
+    margin: 20px auto 0;
     width: var(--camera-size);
     height: var(--camera-size);
     display: flex;
@@ -310,17 +309,17 @@ export default defineComponent({
         width: 56px;
         height: 56px;
       }
-
     }
-
   }
 
   .heading {
     @extend %face-sans-19-medium;
+
     color: variables.$color-white;
   }
 
-  .subtitle, .title {
+  .subtitle,
+  .title {
     @extend %face-sans-16-regular;
 
     margin-top: 4px;
