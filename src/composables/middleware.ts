@@ -1,6 +1,5 @@
 import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
-import { load } from 'js-yaml';
 import { camelCase } from 'lodash-es';
 import type {
   IMiddleware,
@@ -46,9 +45,7 @@ export function useMiddleware() {
     await watchUntilTruthy(aeActiveNetworkSettings);
     const { middlewareUrl } = aeActiveNetworkSettings.value;
 
-    const swagger = await fetch(`${middlewareUrl}/swagger/swagger_v2.yaml`)
-      .then((response) => response.text());
-    const spec = load(swagger);
+    const spec = await fetchJson(`${middlewareUrl}/v2/api`);
 
     middlewareCurrentAeNetworkSettings = aeActiveNetworkSettings.value;
 
