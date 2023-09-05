@@ -297,11 +297,9 @@
       }
     },
     "qrCodeReader": {
-      "grantPermission": "Grant permission",
-      "scanQr": "Scan QR",
-      "subtitle": "Allow camera access to scan QR code",
-      "cameraNotAllowedFirst": "You need to grant your device camera access permission to scan QR code.",
-      "cameraNotAllowedSecond": "Please allow camera access in your browser settings and try again.",
+      "grantPermission": "Grant camera permission",
+      "scanQr": "Scan QR code",
+      "subtitle": "Allow Superhero wallet to  access your camera in order to scan QR codes.",
       "settings": "Settings"
     },
     "name-pointers-help": {
@@ -856,7 +854,7 @@
       "subtitle": "You may check the status of your transaction in æternity blockchain explorer",
       "success": "Success",
       "viewInExplorer": "View in explorer",
-      "scan": "Scan QR",
+      "scan": "Scan QR code",
       "review": "Review and send",
       "reviewtx": "Review transaction",
       "checkalert": "Please check the information carefully.",
@@ -872,7 +870,7 @@
       "to": "To",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan {protocolName} address",
+      "scanAddress": "Scan the recipient’s account address QR code in order to send {protocolName} to them.",
       "error": "Invalid AE address or AENS name",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },

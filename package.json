@@ -59,7 +59,7 @@
     "@vee-validate/i18n": "^4.8.6",
     "@vee-validate/rules": "^4.8.6",
     "@vue/vue3-jest": "^27.0.0",
-    "@zxing/library": "^0.19.1",
+    "@zxing/browser": "^0.1.4",
     "bignumber.js": "^9.0.2",
     "bip32": "^4.0.0",
     "bitcoinjs-lib": "^6.1.3",
