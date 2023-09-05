@@ -129,7 +129,8 @@ module.exports = {
           patterns: [
             { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
             { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
-            { from: 'public/favicons/request_permission.jpg', to: 'icons/request_permission.jpg' },
+            { from: 'public/icons/cameraRequestPermission', to: 'icons/cameraRequestPermission' },
+            { from: 'src/icons/logo.svg', to: 'icons/cameraRequestPermission/logo.svg' },
           ],
         }])
         .end();

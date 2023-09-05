@@ -1,22 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Superhero Camera Request</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Superhero Camera Request</title>
 </head>
+
 <body>
-    <div class="logo">
-        <img src="icons/request_permission.jpg" alt="Camera Request Permission">
+  <div class="center">
+    <div class="text">
+      <div class="title">Grant camera permission</div>
+      <div class="title secondary">in order to scan QR codes</div>
+      <div class="subtitle">
+        In your browser settings allow Superhero wallet to use the device camera in order to scan QR
+        codes.
+      </div>
+      <img class="logo" src="icons/cameraRequestPermission/logo.svg" alt="Superhero Wallet">
     </div>
+  </div>
 </body>
+
 </html>
 <style>
   body {
     margin: 0;
+    background: #191919;
+    display: flex !important;
+    justify-content: center;
   }
-  .logo img {
-    width: 100%;
+
+  .center {
+    margin-top: 44px;
+    width: 808px;
+    height: 414px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: url(icons/cameraRequestPermission/abstract_squares.svg);
+  }
+
+  .center .text {
+    font-family: 'IBM Plex Sans';
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .center .text .title {
+    font-size: 44px;
+    font-weight: 500;
+    line-height: 54px;
+  }
+
+  .center .text .secondary {
+    opacity: 0.5;
+    font-size: 36px;
+  }
+
+  .center .text .subtitle {
+    text-align: center;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 26px;
+    max-width: 460px;
+    margin: 32px;
+  }
+
+  .center .logo {
+    height: 32px;
+    margin-bottom: 30px;
   }
 </style>
