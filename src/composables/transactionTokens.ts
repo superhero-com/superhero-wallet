@@ -65,7 +65,10 @@ export function useTransactionTokens({
       return transactionFunction.value(
         transaction,
         availableTokens.value,
-      ).tokens;
+      ).tokens.map(({ amount, decimals, ...otherToken }) => ({
+        amount: +toShiftedBigNumber(amount!, -decimals!),
+        ...otherToken,
+      }));
     }
     if (transaction.protocol === PROTOCOL_BITCOIN) {
       return [{
