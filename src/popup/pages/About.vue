@@ -52,13 +52,13 @@
         </LinkButton>
         <LinkButton
           class="table-item link"
-          :to="`${middlewareUrl}/status`"
+          :to="`${nodeUrl}/v3/status`"
         >
           <div class="name">
             {{ $t('pages.about.node-version') }}
           </div>
           <div class="value">
-            {{ middlewareStatus.nodeVersion }}
+            {{ nodeStatus.node_version }}
             <ExternalLink class="compensate-icon-margin" />
           </div>
         </LinkButton>
@@ -98,6 +98,7 @@ import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
 import { useMiddleware } from '@/composables';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { fetchJson } from '@/utils';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
 import PanelItem from '../components/PanelItem.vue';
@@ -118,11 +119,16 @@ export default defineComponent({
     const { fetchMiddlewareStatus } = useMiddleware();
 
     const middlewareStatus = ref<IMiddlewareStatus>();
+    const nodeStatus = ref(null);
 
     const middlewareUrl = computed(() => aeActiveNetworkSettings.value.middlewareUrl);
+    const nodeUrl = computed(() => aeActiveNetworkSettings.value.nodeUrl);
 
     onMounted(async () => {
-      middlewareStatus.value = await fetchMiddlewareStatus();
+      [middlewareStatus.value, nodeStatus.value] = await Promise.all([
+        fetchMiddlewareStatus(),
+        fetchJson(`${nodeUrl.value}/v3/status`),
+      ]);
     });
 
     return {
@@ -135,6 +141,8 @@ export default defineComponent({
       sdkVersion: process.env.SDK_VERSION,
       middlewareStatus,
       middlewareUrl,
+      nodeStatus,
+      nodeUrl,
     };
   },
 });
