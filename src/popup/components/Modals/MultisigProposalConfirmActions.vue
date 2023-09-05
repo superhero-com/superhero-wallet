@@ -18,13 +18,13 @@
       </div>
 
       <h2 class="text-heading-2 text-center">
-        {{ confirmActionContent.title }}
+        {{ $rt(confirmActionContent.title) }}
       </h2>
 
       <FormSelect
         :value="activeAccount.address"
         :options="eligibleAccounts"
-        :default-text="confirmActionContent.formSelectText"
+        :default-text="$rt(confirmActionContent.formSelectText)"
         class="account-selector"
         persistent-default-text
         unstyled
@@ -41,12 +41,12 @@
           v-if="actionHasError"
           class="alert"
         >
-          {{ actionHasError }}
+          {{ $rt(actionHasError) }}
         </div>
       </div>
 
       <div class="msg">
-        {{ confirmActionContent.msg }}
+        {{ $rt(confirmActionContent.msg) }}
       </div>
     </div>
 
@@ -62,7 +62,7 @@
         data-cy="to-confirm"
         extra-padded
         :disabled="!!actionHasError"
-        :text="confirmActionContent.btnText"
+        :text="$rt(confirmActionContent.btnText)"
         @click="resolve"
       />
     </template>

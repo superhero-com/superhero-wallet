@@ -4,7 +4,7 @@
     class="url-status"
     :class="status"
   >
-    <span class="title">{{ data.content.title }}</span>
+    <span class="title">{{ $rt(data.content.title) }}</span>
     <a
       class="icon-link"
       :class="status"
@@ -63,8 +63,8 @@ export default {
     showModal() {
       const { openModal } = useModals();
       openModal(MODAL_RECIPIENT_HELPER, {
-        title: this.data.content.title,
-        msg: this.data.content.msg,
+        title: this.$rt(this.data.content.title),
+        msg: this.$rt(this.data.content.msg),
         icon: this.data.icon,
       });
     },
