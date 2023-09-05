@@ -67,10 +67,10 @@
 </template>
 
 <script lang="ts">
-import { IonHeader, IonToolbar } from '@ionic/vue';
+import { IonHeader, IonToolbar, useIonRouter } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
@@ -109,7 +109,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const route = useRoute();
-    const router = useRouter();
+    const ionRouter = useIonRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
@@ -164,25 +164,19 @@ export default defineComponent({
     );
 
     function back() {
-      const { fullPath, meta } = route;
-      const { directBackRoute, backRoute } = meta || {};
+      const { meta } = route;
+      const { backRoute } = meta || {};
 
-      if (directBackRoute) {
-        return router.go(-1);
-      }
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return router.replace(backRoute as RouteLocationRaw);
+        return ionRouter.navigate(backRoute, 'back', 'push');
       }
-      const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 
-      return router.replace(
-        path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
-      );
+      return ionRouter.back();
     }
 
     function close() {
-      router.replace({ name: currentHomeRouteName.value });
+      ionRouter.navigate(`/${currentHomeRouteName.value}`, 'back', 'push');
     }
 
     return {
