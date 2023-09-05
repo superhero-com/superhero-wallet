@@ -187,6 +187,10 @@ export default defineComponent({
         customPending = (isSent)
           ? t('transaction.type.sentTx')
           : t('transaction.type.receivedTx');
+      } else if (outerTxTag.value === Tag.ContractCreateTx) {
+        text = t('transaction.type.contractCreateTx');
+      } else if (outerTxTag.value === Tag.ContractCallTx) {
+        text = t('transaction.type.contractCallTx');
       }
 
       return { text, customPending, hasComma };
