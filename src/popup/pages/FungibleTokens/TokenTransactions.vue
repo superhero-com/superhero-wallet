@@ -12,7 +12,7 @@ import { computed, defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
 import type { ICommonTransaction, ITokenList, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
-import { useAccounts, useTransactionList } from '@/composables';
+import { useAccounts, useMultisigAccounts, useTransactionList } from '@/composables';
 import { useState } from '@/composables/vuex';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
@@ -32,6 +32,7 @@ export default defineComponent({
     const store = useStore();
 
     const { activeAccount } = useAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts({ store });
     const {
       fetchTransactions,
       getAccountAllTransactions,
@@ -41,9 +42,14 @@ export default defineComponent({
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
+    const currentAddress = computed(
+      () => (props.isMultisig)
+        ? activeMultisigAccount.value?.gaAccountId
+        : activeAccount.value.address,
+    );
 
     const loadedTransactionList = computed(
-      (): ICommonTransaction[] => getAccountAllTransactions(activeAccount.value.address!),
+      (): ICommonTransaction[] => getAccountAllTransactions(currentAddress.value!),
     );
 
     function isFungibleTokenTx(tx: ITx) {
@@ -75,7 +81,7 @@ export default defineComponent({
         await fetchTransactions(
           TXS_PER_PAGE,
           !!recent,
-          activeAccount.value.address,
+          currentAddress.value!,
         );
       } finally {
         loading.value = false;
