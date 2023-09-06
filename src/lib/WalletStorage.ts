@@ -17,18 +17,18 @@ interface IWalletStorage {
 function createBrowserStorageInterface(): IWalletStorage {
   const browserStorage = browser.storage.local;
   return {
-    set: (keys, value) => browserStorage.set({ [composeStorageKeys(keys)]: value }),
+    set: (keys, value) => browserStorage.set({ [composeStorageKeys(keys)]: JSON.stringify(value) }),
     get: async (keys) => {
       const key = composeStorageKeys(keys);
-      const result = await browserStorage.get(key) as any;
-      return result[key] || null;
+      const result = (await browserStorage.get(key) as any)[key];
+      return (result) ? JSON.parse(result) : null;
     },
     remove: (keys) => browserStorage.remove(keys),
     watch: (keys, callback) => {
       browser?.storage?.onChanged?.addListener((changes) => {
         const change = changes[composeStorageKeys(keys)];
         if (change && !isEqual(change.newValue, change.oldValue)) {
-          callback(change.newValue);
+          callback(JSON.parse(change.newValue));
         }
       });
     },

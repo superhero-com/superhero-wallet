@@ -21,12 +21,16 @@ const defaultNetworks: INetwork[] = [];
 /**
  * Networks added by the user by providing some custom URLs for each of the protocols.
  */
-const customNetworks = useStorageRef<INetwork[]>([], 'custom-networks');
+const customNetworks = useStorageRef<INetwork[]>([], 'custom-networks', {
+  backgroundSync: true,
+});
 
 /**
  * As the network is an unique string we are using it to differentiate the networks.
  */
-const activeNetworkName = useStorageRef(NETWORK_NAME_MAINNET, 'active-network-name');
+const activeNetworkName = useStorageRef(NETWORK_NAME_MAINNET, 'active-network-name', {
+  backgroundSync: true,
+});
 
 const networks = computed(
   (): Record<string, INetwork> => [
