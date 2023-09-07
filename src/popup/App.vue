@@ -231,6 +231,7 @@ export default defineComponent({
 @use '../styles/mixins';
 
 .ionic-wrapper {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
