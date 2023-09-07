@@ -53,6 +53,7 @@
     </PanelItem>
     <PanelItem
       v-else-if="isNodeTestnet"
+      :disabled="!isActiveAccountAe"
       :href="activeAccountFaucetUrl"
       :title="$t('common.faucet')"
     >
@@ -60,7 +61,6 @@
         <FaucetIcon />
       </template>
     </PanelItem>
-
     <PanelItem
       :href="AE_DEX_URL"
       :title="$t('pages.more.dex')"
@@ -115,7 +115,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccount, activeAccountFaucetUrl } = useAccounts({ store });
+    const { activeAccount, activeAccountFaucetUrl, isActiveAccountAe } = useAccounts({ store });
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     const isAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
@@ -126,6 +126,7 @@ export default defineComponent({
       BUG_REPORT_URL,
       UNFINISHED_FEATURES,
       activeAccountFaucetUrl,
+      isActiveAccountAe,
       isNodeMainnet,
       isNodeTestnet,
       isAccountAe,

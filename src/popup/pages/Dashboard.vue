@@ -93,7 +93,6 @@ export default defineComponent({
     const {
       activeAccount,
       activeAccountSimplexLink,
-      activeAccountFaucetUrl,
     } = useAccounts({ store });
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
@@ -111,7 +110,6 @@ export default defineComponent({
       activeAccount,
       GlobeIcon,
       activeAccountSimplexLink,
-      activeAccountFaucetUrl,
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
