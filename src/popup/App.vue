@@ -51,6 +51,7 @@ import {
 import {
   computed,
   defineComponent,
+  onBeforeMount,
   onMounted,
   ref,
   watch,
@@ -87,6 +88,7 @@ import {
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
 import Close from '@/icons/close.svg?vue-component';
+import { StatusBar } from '@capacitor/status-bar';
 
 export default defineComponent({
   name: 'App',
@@ -190,6 +192,14 @@ export default defineComponent({
     });
 
     initVisibilityListeners();
+
+    onBeforeMount(async () => {
+      if (IS_MOBILE_APP) {
+        StatusBar.setBackgroundColor({
+          color: '#141414',
+        });
+      }
+    });
 
     onMounted(async () => {
       setDocumentHeight();
