@@ -2,13 +2,18 @@ import { computed, ref } from 'vue';
 import { IFilterInputPayload, IFilters, ObjectValues } from '../types';
 import { tg } from '../store/plugins/languages';
 
-const FILTER_MODE = {
+const FILTER_MODE_BASE = {
   all: 'all',
   in: 'in',
   out: 'out',
+} as const;
+
+const FILTER_MODE = {
+  ...FILTER_MODE_BASE,
   dex: 'dex',
 } as const;
 
+type TransactionsFilterModeBase = ObjectValues<typeof FILTER_MODE_BASE>;
 type TransactionsFilterMode = ObjectValues<typeof FILTER_MODE>;
 
 type TransactionsFilterPayload = IFilterInputPayload<TransactionsFilterMode>;
@@ -25,10 +30,14 @@ export const useTransactionAndTokenFilter = () => {
     () => displayMode.value.key !== FILTER_MODE.all || !!searchPhrase.value.length,
   );
 
-  const filtersConfig = ref<IFilters<ObjectValues<typeof FILTER_MODE>>>({
+  const filtersConfig = ref<IFilters<TransactionsFilterModeBase>>({
     all: { name: tg('common.all') },
     in: { name: tg('filters.in') },
     out: { name: tg('filters.out') },
+  });
+
+  const filtersConfigAe = ref<IFilters<TransactionsFilterMode>>({
+    ...filtersConfig.value,
     dex: { name: tg('filters.dex') },
   });
 
@@ -42,6 +51,7 @@ export const useTransactionAndTokenFilter = () => {
     displayMode,
     isSearchBarAndFilterExpanded,
     filtersConfig,
+    filtersConfigAe,
     resetFilter,
     FILTER_MODE,
   };

@@ -15,7 +15,7 @@
         class="filter-wrapper"
       >
         <InputSearch
-          v-if="!hideSearch"
+          v-if="!hideSearch && isActiveAccountAe"
           v-model="searchPhrase"
           class="input-search"
           :placeholder="$t('pages.fungible-tokens.searchPlaceholder')"
@@ -25,7 +25,7 @@
           v-if="!hideFilterButton"
           v-model="displayMode"
           class="filters"
-          :filters="filtersConfig"
+          :filters="isActiveAccountAe ? filtersConfigAe : filtersConfig"
           :scroll-top-threshold="scrollTopThreshold"
         />
       </div>
@@ -41,12 +41,14 @@ import {
   ref, watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
+import { useStore } from 'vuex';
 import {
+  useAccounts,
   useTransactionAndTokenFilter,
-} from '../../composables';
+  useViewport,
+} from '@/composables';
 import InputSearch from './InputSearch.vue';
 import Filters from './Filters.vue';
-import { useViewport } from '../../composables/viewport';
 
 export default defineComponent({
   name: 'TransactionAndTokenFilter',
@@ -59,15 +61,18 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
+    const store = useStore();
     const transactionFilter = ref();
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
       displayMode,
       filtersConfig,
+      filtersConfigAe,
     } = useTransactionAndTokenFilter();
 
     const { viewportElement } = useViewport();
+    const { isActiveAccountAe } = useAccounts({ store });
 
     const scrollTopThreshold = 140;
     const maxHeight = ref(0);
@@ -107,6 +112,8 @@ export default defineComponent({
       transactionFilter,
       searchPhrase,
       filtersConfig,
+      filtersConfigAe,
+      isActiveAccountAe,
       openHeight,
       hideSearch,
       showFilterBar,
