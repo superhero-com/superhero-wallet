@@ -70,8 +70,8 @@ export default defineComponent({
 
     async function onClick(event: any) {
       if (IS_MOBILE_APP && props.href) {
-        await Browser.open({ url: props.href, windowName: '_system' });
         event.preventDefault();
+        await Browser.open({ url: props.href, windowName: '_system' });
       }
     }
 
