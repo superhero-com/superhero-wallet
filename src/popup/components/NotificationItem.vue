@@ -1,7 +1,7 @@
 <template>
   <div
     class="notification-item"
-    @click.stop="handleClick"
+    @click.stop="(event) => handleClick(event)"
   >
     <div class="status-and-date ">
       <span
@@ -67,7 +67,7 @@ import { useI18n } from 'vue-i18n';
 import type { INotification } from '@/types';
 import { relativeTimeTo } from '@/utils';
 import {
-  IS_CORDOVA,
+  IS_MOBILE_APP,
   IS_EXTENSION,
   IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
@@ -144,11 +144,12 @@ export default defineComponent({
       ? initialStatus
       : props.notification.status) !== NOTIFICATION_STATUS_READ);
 
-    function handleClick() {
+    function handleClick(event: MouseEvent) {
       if (props.notification.path) {
         if (typeof props.notification.path === 'string' && /^\w+:\D+/.test(props.notification.path)) {
-          if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
-            window.cordova.InAppBrowser.open(props.notification.path, '_system');
+          if (IS_MOBILE_APP) {
+            event.preventDefault();
+            window.open(props.notification.path, '_system');
           } else {
             window.open(props.notification.path, '_blank');
           }
