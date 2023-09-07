@@ -3,21 +3,23 @@
     class="account-card-add"
     @click="openCreateAccountModal()"
   >
-    <span class="title">
-      <PlusCircle />
-      {{
-        isMultisig
-          ? $t('pages.vaults.addVault')
-          : $t('pages.accounts.addAccount')
-      }}
-    </span>
-    <span class="description">
-      {{
-        isMultisig
-          ? $t('pages.vaults.addVaultDescription')
-          : $t('pages.accounts.addAccountDescription')
-      }}
-    </span>
+    <div class="wrapper">
+      <span class="title">
+        <PlusCircle />
+        {{
+          isMultisig
+            ? $t('pages.vaults.addVault')
+            : $t('pages.accounts.addAccount')
+        }}
+      </span>
+      <span class="description">
+        {{
+          isMultisig
+            ? $t('pages.vaults.addVaultDescription')
+            : $t('pages.accounts.addAccountDescription')
+        }}
+      </span>
+    </div>
   </BtnBase>
 </template>
 
@@ -60,15 +62,17 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .account-card-add {
-  display: flex;
-  flex-direction: column;
   border-radius: variables.$border-radius-card;
   background: variables.$color-bg-6;
-  padding: 16px;
-  text-align: left;
-  cursor: pointer;
   width: 100%;
   height: 192px;
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+  }
 
   .title {
     display: inline-flex;

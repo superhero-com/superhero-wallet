@@ -32,11 +32,13 @@
 
       <SwiperSlide
         class="account-swiper-slide"
+        :virtual-index="addressList.length"
         :swiper-ref="customSwiper"
       >
         <AccountSwiperSlide
           hide-next
-          @slide="() => setCurrentSlide(addressList.length - 1)"
+          :idx="addressList.length"
+          @slide="(newIndex) => setCurrentSlide(newIndex)"
         >
           <AccountCardAdd :is-multisig="isMultisig" />
         </AccountSwiperSlide>
