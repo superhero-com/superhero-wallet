@@ -17,6 +17,18 @@
 html.is-extension {
   width: $extension-width;
   height: $extension-height;
+
+  // fixes issue with extension not rendering properly
+  ion-tabs,
+  .tabs-inner,
+  ion-router-outlet,
+  .ion-page {
+    contain: layout style !important;
+  }
+
+  body {
+    position: unset;
+  }
 }
 
 // When scanner is active we need to hide everything else
