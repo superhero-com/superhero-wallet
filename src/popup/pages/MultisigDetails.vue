@@ -156,6 +156,7 @@ export default defineComponent({
 @use '../../styles/variables';
 
 .multisig-details {
+  padding: 0 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;

@@ -84,7 +84,7 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .names-list {
-  padding-top: 4px;
+  padding: 4px 12px 0 12px;
 
   .name-item {
     margin-top: 1px;
