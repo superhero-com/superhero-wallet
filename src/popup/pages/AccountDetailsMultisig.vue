@@ -18,7 +18,10 @@
         </template>
 
         <template #balance>
-          <BalanceInfo :balance="+(activeMultisigAccount.balance || 0)" />
+          <BalanceInfo
+            is-multisig
+            :balance="+(activeMultisigAccount.balance || 0)"
+          />
         </template>
 
         <template #buttons>

@@ -2,6 +2,7 @@
   <div
     class="balance-info"
     data-cy="balance-info"
+    :class="{ isMultisig }"
   >
     <template v-if="isOnline">
       <MainBalance
@@ -43,12 +44,13 @@ export default defineComponent({
     balance: { type: Number, required: true },
     protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
     horizontalOfflineMessage: Boolean,
+    isMultisig: Boolean,
   },
   setup(props) {
     const store = useStore();
     const { getFormattedFiat } = useCurrencies({ store, selectedProtocol: props.protocol });
     const { isOnline } = useConnection();
-
+    console.log(props.isMultisig);
     const currencyFormatted = computed(() => getFormattedFiat(props.balance));
 
     return {
@@ -68,6 +70,10 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   padding-top: 8px;
+
+  &.isMultisig {
+    padding-top: 5em;
+  }
 
   .display-value {
     @extend %face-sans-16-medium;
