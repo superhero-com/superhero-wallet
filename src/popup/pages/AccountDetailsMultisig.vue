@@ -21,6 +21,7 @@
           <BalanceInfo
             :balance="+(activeMultisigAccount.balance || 0)"
             :protocol="PROTOCOL_AETERNITY"
+            is-multisig
           />
         </template>
 
