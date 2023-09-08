@@ -126,7 +126,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
             amount: 0,
             callData: calldata,
             nonce: nonce.value,
-          }) as any,
+          }),
           Tag.ContractCallTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
         ).fee).shiftedBy(-AE_COIN_PRECISION);
         return;
@@ -144,7 +144,7 @@ export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,
-        }) as any,
+        }),
         Tag.SpendTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION);
       if (!minFee.isEqualTo(fee.value)) fee.value = minFee;

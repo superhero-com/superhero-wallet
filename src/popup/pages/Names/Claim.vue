@@ -136,13 +136,13 @@ export default defineComponent({
     const totalNameClaimAmount = computed(() => !name.value.length
       ? BigNumber(0)
       : BigNumber(unpackTx(
-          buildTx({
-            tag: Tag.NamePreclaimTx,
-            accountId: STUB_ADDRESS,
-            nonce: STUB_NONCE,
-            commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
-          }) as any,
-          Tag.NamePreclaimTx,
+        buildTx({
+          tag: Tag.NamePreclaimTx,
+          accountId: STUB_ADDRESS,
+          nonce: STUB_NONCE,
+          commitmentId: commitmentHash(fullName.value, STUB_NAME_SALT),
+        }),
+        Tag.NamePreclaimTx,
       ).fee)
         .plus(getExecutionCost(buildTx({
           tag: Tag.NameClaimTx,
