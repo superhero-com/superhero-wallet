@@ -50,7 +50,6 @@ export default defineComponent({
     const store = useStore();
     const { getFormattedFiat } = useCurrencies({ store, selectedProtocol: props.protocol });
     const { isOnline } = useConnection();
-    console.log(props.isMultisig);
     const currencyFormatted = computed(() => getFormattedFiat(props.balance));
 
     return {
