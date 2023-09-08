@@ -18,7 +18,7 @@
       />
       <BtnClose
         class="close-button"
-        :to="{ name: homeRouteName }"
+        :to="{ name: homeRouteName, replace: true }"
       />
     </div>
     <div>
