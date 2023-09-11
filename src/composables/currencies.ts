@@ -11,7 +11,6 @@ import type {
 import {
   CURRENCIES,
   DEFAULT_LOCALE,
-  PROTOCOL_AETERNITY,
 } from '@/constants';
 import {
   getLocalStorageItem,
@@ -26,7 +25,6 @@ import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 export interface UseCurrenciesOptions extends IDefaultComposableOptions {
   withoutPolling?: boolean;
-  selectedProtocol?: Protocol;
 }
 
 const POLLING_INTERVAL = 3600000;
@@ -53,16 +51,15 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 export function useCurrencies({
   withoutPolling = false,
   store,
-  selectedProtocol = PROTOCOL_AETERNITY, // TODO - remove default value & make the protocol required
 }: UseCurrenciesOptions) {
   const { protocolsInUse, isLoggedIn } = useAccounts({ store });
-  const minTipAmount = computed(() => 0.01 / (currencyRates.value?.[selectedProtocol].usd || 1));
-  const currentCurrencyRate = computed(
-    (): number => currencyRates.value?.[selectedProtocol]?.[currentCurrencyCode.value] || 0,
-  );
   const currentCurrencyInfo = computed(
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );
+
+  function getCurrentCurrencyRate(protocol: Protocol): number {
+    return currencyRates.value?.[protocol]?.[currentCurrencyCode.value] || 0;
+  }
 
   function getCoinGeckoCoinIdList() {
     return protocolsInUse.value.map(
@@ -126,32 +123,35 @@ export function useCurrencies({
   }
 
   /**
-   * @param value Aeternity coin amount
-   * @returns Aeternity coin converted to fiat
+   * @param value Selected protocol coin amount
+   * @param protocol used protocol
+   * @returns Selected protocol coin converted to fiat
    */
-  function getFiat(value: number): number {
-    return +(currentCurrencyRate.value * value).toFixed(2);
+  function getFiat(value: number, protocol: Protocol): number {
+    return +(getCurrentCurrencyRate(protocol) * value).toFixed(2);
   }
 
   /**
-   * @param value Aeternity coin amount
-   * @returns Aeternity coin converted to fiat and formatted as a currency
+   * @param value Selected protocol coin amount
+   * @param protocol used protocol
+   * @returns Selected protocol coin converted to fiat and formatted as a currency
    *   according to the user's browser settings
    */
-  function getFormattedFiat(value: number) {
-    return formatCurrency(getFiat(value));
+  function getFormattedFiat(value: number, protocol: Protocol) {
+    return formatCurrency(getFiat(value, protocol));
   }
 
   /**
    * Does the same as `getFormattedFiat` but avoids displaying small fractions
    * by rounding them to 0.01.
-   * @param value Aeternity coin amount
+   * @param value Selected protocol coin amount
+   * @param protocol used protocol
    */
-  function getFormattedAndRoundedFiat(value: number): string {
-    if (!currentCurrencyRate.value || value === 0) {
+  function getFormattedAndRoundedFiat(value: number, protocol: Protocol): string {
+    if (!getCurrentCurrencyRate(protocol) || value === 0) {
       return formatCurrency(0);
     }
-    const converted = getFiat(value);
+    const converted = getFiat(value, protocol);
     return (converted < 0.01) ? `<${formatCurrency(0.01)}` : formatCurrency(converted);
   }
 
@@ -168,11 +168,10 @@ export function useCurrencies({
   return {
     CURRENCIES,
     marketData,
-    minTipAmount,
     currencyRates,
     currentCurrencyCode,
-    currentCurrencyRate,
     currentCurrencyInfo,
+    getCurrentCurrencyRate,
     loadCoinsData,
     loadCurrencyRates,
     setCurrentCurrency,

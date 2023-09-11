@@ -19,7 +19,7 @@
       :rules="{
         required: true,
         min_value_exclusive: 0,
-        min_tip_amount: true,
+        ae_min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_coin: fee.toString(),
       }"

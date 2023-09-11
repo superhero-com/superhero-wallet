@@ -47,6 +47,7 @@ import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
 import { useCurrencies } from '../../../composables';
 
@@ -69,12 +70,18 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { currentCurrencyRate, getFormattedFiat, formatCurrency } = useCurrencies({ store });
+    const {
+      getCurrentCurrencyRate,
+      getFormattedFiat,
+      formatCurrency,
+    } = useCurrencies({ store });
 
-    const price = computed(() => formatCurrency(currentCurrencyRate.value));
-
+    /**
+     * price and balanceFormatted are applicable only for AE Coin
+     */
+    const price = computed(() => formatCurrency(getCurrentCurrencyRate(PROTOCOL_AETERNITY)));
     const balanceFormatted = computed(
-      () => getFormattedFiat(props.tokenData.convertedBalance || 0),
+      () => getFormattedFiat(props.tokenData.convertedBalance || 0, PROTOCOL_AETERNITY),
     );
 
     const isTokenAeCoin = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);

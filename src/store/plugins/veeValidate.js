@@ -4,7 +4,12 @@ import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
-import { NETWORK_NAME_MAINNET, NETWORK_NAME_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
+import {
+  NETWORK_NAME_MAINNET,
+  NETWORK_NAME_TESTNET,
+  PROTOCOL_AETERNITY,
+  PROTOCOL_BITCOIN,
+} from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
@@ -48,7 +53,7 @@ configure({
       enough_ae_signer: () => tg('validation.enoughAeSigner'),
       not_token: () => tg('validation.notToken'),
       name_registered_address_or_url: () => tg('validation.invalidAddressChainUrl'),
-      min_tip_amount: () => tg('pages.tipPage.minAmountError'),
+      ae_min_tip_amount: () => tg('pages.tipPage.minAmountError'),
       invalid_hostname: () => tg('pages.network.error.invalidHostname'),
       network_name: () => tg('pages.network.error.enterName'),
       network_exists: () => tg('pages.network.error.networkExists'),
@@ -58,7 +63,7 @@ configure({
 
 export default (store) => {
   const { balance, updateBalances } = useBalances({ store });
-  const { minTipAmount } = useCurrencies({ store, withoutPolling: true });
+  const { currencyRates } = useCurrencies({ store, withoutPolling: true });
   const { getAeSdk } = useAeSdk({ store });
 
   const NAME_STATES = {
@@ -114,7 +119,11 @@ export default (store) => {
     }
   };
 
-  defineRule('min_tip_amount', (value) => BigNumber(value).isGreaterThan(minTipAmount.value));
+  defineRule('ae_min_tip_amount', (value) => {
+    const aeMinTipAmount = 0.01 / (currencyRates.value?.[PROTOCOL_AETERNITY].usd || 1);
+
+    return BigNumber(value).isGreaterThan(aeMinTipAmount);
+  });
 
   defineRule('name_unregistered', (value) => checkName(NAME_STATES.UNREGISTERED)(`${value}.chain`, []));
 
