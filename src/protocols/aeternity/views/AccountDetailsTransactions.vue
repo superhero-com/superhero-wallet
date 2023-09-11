@@ -21,7 +21,6 @@ import {
   onMounted,
   onUnmounted,
   ref,
-  watch,
 } from 'vue';
 import { useStore } from 'vuex';
 
@@ -30,10 +29,8 @@ import { TXS_PER_PAGE } from '@/constants';
 import {
   useAccounts,
   useConnection,
-  useTransactionAndTokenFilter,
   useTransactionList,
   useUi,
-  useViewport,
 } from '@/composables';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -58,7 +55,6 @@ export default defineComponent({
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
-    const { viewportElement } = useViewport();
     const { activeAccount } = useAccounts({ store });
 
     const {
@@ -66,8 +62,6 @@ export default defineComponent({
       getAccountTransactionsState,
       fetchTransactions,
     } = useTransactionList({ store });
-
-    const { displayMode } = useTransactionAndTokenFilter();
 
     const loading = ref(false);
     const isDestroyed = ref(false);
@@ -94,39 +88,13 @@ export default defineComponent({
     }
 
     async function loadMore() {
-      if (!loading.value) {
+      if (!loading.value && !isDestroyed.value && canLoadMore.value) {
         await fetchTransactionList();
       }
     }
 
-    async function checkLoadMore() {
-      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
-        return;
-      }
-
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
-
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        await loadMore();
-      }
-    }
-
-    watch(displayMode, () => {
-      checkLoadMore();
-    });
-
-    watch(loading, async (val) => {
-      if (!val) {
-        await checkLoadMore();
-      }
-    });
-
     onMounted(() => {
-      loadMore();
+      fetchTransactionList();
       polling = setInterval(() => {
         if (isAppActive.value) {
           fetchTransactionList(true);
