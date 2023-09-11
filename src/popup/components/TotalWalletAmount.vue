@@ -10,20 +10,25 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+} from 'vue';
 import { useStore } from 'vuex';
-import { useCurrencies } from '../../composables';
+import { useCurrencies } from '@/composables';
 
 export default defineComponent({
   props: {
-    totalBalance: { type: String, required: true },
+    totalBalance: { type: String, default: '0' },
     isMultisig: Boolean,
   },
   setup(props) {
     const store = useStore();
-    const { getFormattedFiat } = useCurrencies({ store });
+    const { formatCurrency } = useCurrencies({ store });
 
-    const totalAmount = computed(() => getFormattedFiat(+props.totalBalance));
+    const totalAmount = computed(
+      () => formatCurrency(+props.totalBalance),
+    );
 
     return {
       totalAmount,

@@ -90,7 +90,7 @@
           ...+balance.minus(fee) > 0 && isMultisig
             ? { max_value_vault: activeMultisigAccount?.balance.toString() }
             : {},
-          min_tip_amount: isTipUrl,
+          ae_min_tip_amount: isTipUrl,
         }"
         @asset-selected="handleAssetChange"
       >

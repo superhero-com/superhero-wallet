@@ -46,10 +46,10 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { getFormattedFiat } = useCurrencies({ store, selectedProtocol: props.protocol });
+    const { getFormattedFiat } = useCurrencies({ store });
     const { isOnline } = useConnection();
 
-    const currencyFormatted = computed(() => getFormattedFiat(props.balance));
+    const currencyFormatted = computed(() => getFormattedFiat(props.balance, props.protocol));
 
     return {
       isOnline,

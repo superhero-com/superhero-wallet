@@ -2,7 +2,7 @@
   <div class="dashboard-header">
     <TotalWalletAmount
       v-if="accounts.length > 1"
-      :total-balance="balancesTotal"
+      :total-balance="accountsTotalBalance"
     />
 
     <AccountSwiper
@@ -46,14 +46,14 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts({ store });
 
-    const { balancesTotal } = useBalances({ store });
+    const { accountsTotalBalance } = useBalances({ store });
 
     return {
       ROUTE_ACCOUNT_DETAILS,
       accounts,
       accountsAddressList,
       activeIdx,
-      balancesTotal,
+      accountsTotalBalance,
       setActiveAccountByGlobalIdx,
     };
   },

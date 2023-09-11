@@ -32,7 +32,7 @@ const { onNetworkChange } = createNetworkWatcher();
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   const { accounts } = useAccounts({ store });
-  const { balancesTotal } = useBalances({ store });
+  const { accountsTotalBalance } = useBalances({ store });
   const { nodeNetworkId } = useAeSdk({ store });
 
   const {
@@ -121,7 +121,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
    * we are fetching the transactions only if the total balance of the accounts changes.
    */
   watch(
-    balancesTotal,
+    accountsTotalBalance,
     (val, oldVal) => {
       if (val !== oldVal) {
         setTimeout(() => updateTransactionListData(), AE_MDW_TO_NODE_APPROX_DELAY_TIME);
