@@ -9,11 +9,11 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchAutoHide: true,
-      backgroundColor: '#141414FF',
+      launchAutoHide: false,
+      backgroundColor: '#141414',
       androidScaleType: 'CENTER_INSIDE',
       splashFullScreen: true,
-      splashImmersive: true,
+      useDialog: true,
     },
   },
 };
