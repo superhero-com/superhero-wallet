@@ -8,7 +8,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import {
+  computed, defineComponent, ref, onMounted,
+} from 'vue';
 import { useStore } from 'vuex';
 import type { ICommonTransaction, ITokenList, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
@@ -36,6 +38,7 @@ export default defineComponent({
     const {
       fetchTransactions,
       getAccountAllTransactions,
+      getAccountTransactionsState,
     } = useTransactionList({ store });
 
     const loading = ref(false);
@@ -47,6 +50,10 @@ export default defineComponent({
         ? activeMultisigAccount.value?.gaAccountId
         : activeAccount.value.address,
     );
+
+    const canLoadMore = computed(() => (
+      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
+    ));
 
     const loadedTransactionList = computed(
       (): ICommonTransaction[] => getAccountAllTransactions(currentAddress.value!),
@@ -89,10 +96,14 @@ export default defineComponent({
     }
 
     async function loadMore() {
-      if (!loading.value) {
+      if (!loading.value && canLoadMore.value) {
         await fetchTransactionList();
       }
     }
+
+    onMounted(() => {
+      fetchTransactionList();
+    });
 
     return {
       loading,
