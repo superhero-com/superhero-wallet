@@ -48,6 +48,7 @@
 import {
   IonRouterOutlet, IonApp, IonPage,
 } from '@ionic/vue';
+import { SplashScreen } from '@capacitor/splash-screen';
 import {
   computed,
   defineComponent,
@@ -205,6 +206,13 @@ export default defineComponent({
       setDocumentHeight();
       checkExtensionUpdates();
       initViewport(innerElement.value);
+      if (IS_MOBILE_APP) {
+        setTimeout(() => {
+          SplashScreen.hide({
+            fadeOutDuration: 300,
+          });
+        }, 2000);
+      }
 
       watchConnectionStatus();
 
