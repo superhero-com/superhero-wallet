@@ -22,9 +22,6 @@ export default {
   setLoginTargetLocation(state, location) {
     state.loginTargetLocation = location;
   },
-  setQrScanner(state, payload) {
-    state.qrScannerOpen = payload;
-  },
   hideCard(state, name) {
     state.hiddenCards.push(name);
   },

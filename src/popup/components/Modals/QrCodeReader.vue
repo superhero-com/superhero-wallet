@@ -53,7 +53,6 @@ import {
   defineComponent,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
 import { useI18n } from 'vue-i18n';
@@ -61,6 +60,7 @@ import { useI18n } from 'vue-i18n';
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
+import { useUi } from '@/composables';
 
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
@@ -91,8 +91,8 @@ export default defineComponent({
     const qrCodeVideoEl = ref<HTMLVideoElement>();
 
     const route = useRoute();
-    const store = useStore();
     const { t } = useI18n();
+    const { setQrScanner } = useUi();
 
     const cameraAllowed = computed(() => cameraStatus.value === 'granted');
     const heading = computed(() => {
@@ -109,7 +109,7 @@ export default defineComponent({
       if (IS_MOBILE_APP) {
         document.querySelector('body')?.classList.remove('scanner-active');
         BarcodeScanner.showBackground();
-        store.commit('setQrScanner', false);
+        setQrScanner(false);
         BarcodeScanner.stopScan();
       } else {
         browserReaderControls.value?.stop();
@@ -119,7 +119,7 @@ export default defineComponent({
     async function scan() {
       if (IS_MOBILE_APP) {
         return new Promise((resolve, reject) => {
-          store.commit('setQrScanner', true);
+          setQrScanner(true);
 
           document.querySelector('body')?.classList.add('scanner-active');
           BarcodeScanner.hideBackground().then(() => {

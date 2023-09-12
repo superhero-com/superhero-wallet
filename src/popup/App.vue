@@ -108,7 +108,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { watchConnectionStatus } = useConnection();
-    const { initVisibilityListeners } = useUi();
+    const { initVisibilityListeners, qrScannerOpen } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
@@ -120,7 +120,6 @@ export default defineComponent({
 
     const isRestored = computed(() => store.state.isRestored);
     const backedUpSeed = computed(() => store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 

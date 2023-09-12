@@ -25,7 +25,6 @@ export default new Vuex.Store({
     backedUpSeed: null,
     saveErrorLog: true,
     loginTargetLocation: { name: 'account' },
-    qrScannerOpen: false,
     hiddenCards: [],
   },
   getters,
