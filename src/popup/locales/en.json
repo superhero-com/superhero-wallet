@@ -124,7 +124,8 @@
     "needForApproval": "Needed for approval",
     "creatingAccount": "Creating account (pays for the transaction)",
     "approved": "Approved",
-    "waitingToBeSent": "Waiting to be sent..."
+    "waitingToBeSent": "Waiting to be sent...",
+    "scanAddress": "Scan æternity address"
   },
   "modals": {
     "createAccount": {
@@ -299,7 +300,7 @@
     "qrCodeReader": {
       "grantPermission": "Grant camera permission",
       "scanQr": "Scan QR code",
-      "subtitle": "Allow Superhero wallet to  access your camera in order to scan QR codes.",
+      "subtitle": "Allow Superhero wallet to access your camera in order to scan QR codes.",
       "settings": "Settings"
     },
     "name-pointers-help": {
@@ -870,7 +871,7 @@
       "to": "To",
       "hash": "Transaction Hash",
       "messageUrlOwner": "Message the URL owner (optional)",
-      "scanAddress": "Scan the recipient’s account address QR code in order to send {protocolName} to them.",
+      "scanAddress": "Scan the recipient’s account address QR code in order to send {assetName} to them.",
       "error": "Invalid AE address or AENS name",
       "confirm-sending-to-same-account": "Are you sure you want to send tokens to your own address?"
     },

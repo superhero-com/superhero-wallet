@@ -17,16 +17,16 @@
     />
     <div
       class="subtitle"
-      v-text="cameraAllowed? title : $t('modals.qrCodeReader.subtitle')"
+      v-text="cameraAllowed ? title : $t('modals.qrCodeReader.subtitle')"
     />
 
     <div class="camera">
       <span class="video-loader">
-        <AnimatedSpinner class="spinner" />
+        <AnimatedSpinnerIcon class="spinner" />
       </span>
       <div v-show="cameraAllowed">
         <video
-          ref="qrCodeVideo"
+          ref="qrCodeVideoEl"
           class="video"
         />
       </div>
@@ -55,17 +55,18 @@ import {
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { BrowserQRCodeReader, IScannerControls } from '@zxing/browser';
+import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
 import { useI18n } from 'vue-i18n';
 
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
 import { handleUnknownError, openInNewWindow } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 
-import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
 import IconBoxed from '@/popup/components/IconBoxed.vue';
+
+import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
@@ -73,7 +74,7 @@ export default defineComponent({
     Modal,
     BtnMain,
     IconBoxed,
-    AnimatedSpinner,
+    AnimatedSpinnerIcon,
   },
   props: {
     title: { type: String, required: true },
@@ -85,9 +86,9 @@ export default defineComponent({
     const cameraStatus = ref<PermissionState>(
       IS_MOBILE_APP ? 'granted' : 'denied',
     );
-    const browserReader = ref<BrowserQRCodeReader | null>(null);
+    const browserReader = ref<BrowserQRCodeReaderType | null>(null);
     const browserReaderControls = ref<IScannerControls>();
-    const qrCodeVideo = ref<HTMLVideoElement>();
+    const qrCodeVideoEl = ref<HTMLVideoElement>();
 
     const route = useRoute();
     const store = useStore();
@@ -99,7 +100,8 @@ export default defineComponent({
       return t('modals.qrCodeReader.grantPermission');
     });
 
-    function initBrowserReader() {
+    async function initBrowserReader() {
+      const { BrowserQRCodeReader } = await import('@zxing/browser');
       browserReader.value = new BrowserQRCodeReader();
     }
 
@@ -139,7 +141,7 @@ export default defineComponent({
       }
       return new Promise((resolve) => {
         browserReader.value?.decodeFromVideoDevice(
-          undefined, qrCodeVideo.value, (result, _, controls) => {
+          undefined, qrCodeVideoEl.value, (result, _, controls) => {
             browserReaderControls.value = controls;
             if (result) {
               resolve(result.getText());
@@ -263,7 +265,7 @@ export default defineComponent({
       QrScanIcon,
       cancelReading,
       openSettings,
-      qrCodeVideo,
+      qrCodeVideoEl,
     };
   },
 });

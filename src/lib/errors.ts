@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+
 export class RejectedByUserError extends Error {
   constructor() {
     super('Rejected by user');
