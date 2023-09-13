@@ -35,9 +35,11 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-  .account-ion-content {
-    overflow: hidden;
-    background-color: #191919;
-  }
+<style lang="scss" scoped>
+@use '@/styles/variables';
+
+.account-ion-content {
+  overflow: hidden;
+  background-color: variables.$color-bg-4;
+}
 </style>
