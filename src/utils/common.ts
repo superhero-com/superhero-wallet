@@ -13,6 +13,7 @@ import type {
   IAccount,
   ICommonTransaction,
   IDashboardTransaction,
+  IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
   ITransaction,
@@ -20,6 +21,7 @@ import type {
   Truthy,
 } from '@/types';
 import {
+  ADDRESS_GAP_LIMIT,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   IS_CORDOVA,
@@ -358,4 +360,41 @@ export function detectProtocolByOwner(network: string, address?: string) {
     return PROTOCOL_BITCOIN;
   }
   return null;
+}
+
+export async function defaultAccountDiscovery(
+  isAccountUsed: (address: string) => Promise<boolean>,
+  getHdWalletAccountFromMnemonicSeed: (
+    seed: Uint8Array,
+    accountIndex: number,
+  ) => IHdWalletAccount,
+  wallet: Uint8Array,
+): Promise<number> {
+  let lastNotEmptyIdx = 0;
+  let lastIndex = 0;
+  let isAccountUsedArray: boolean[] = [];
+  do {
+    try {
+      lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+      lastIndex += isAccountUsedArray.length;
+      // eslint-disable-next-line no-await-in-loop
+      isAccountUsedArray = await Promise.all(
+        Array.from(
+          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
+          // eslint-disable-next-line no-loop-func
+          (x) => x + lastIndex,
+        )
+          .map((index) => isAccountUsed(
+            getHdWalletAccountFromMnemonicSeed(wallet, index).address,
+          )),
+      );
+    } catch (e) {
+      break;
+    }
+  } while (!(
+    isAccountUsedArray.lastIndexOf(true) === -1
+    || isAccountUsedArray.filter((isAccountUsedValue) => !isAccountUsedValue)
+      .length === ADDRESS_GAP_LIMIT
+  ));
+  return lastNotEmptyIdx;
 }
