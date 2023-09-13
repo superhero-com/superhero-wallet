@@ -379,7 +379,7 @@ export interface ITx {
   return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string
-  senderId?: string
+  senderId?: Encoded.AccountAddress;
   selectedTokenContractId?: string
   tag?: Tag;
   /**

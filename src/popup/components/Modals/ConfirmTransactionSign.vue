@@ -125,13 +125,14 @@ import { camelCase } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { getExecutionCost } from '@aeternity/aepp-sdk';
-import ContractByteArrayEncoder from '@aeternity/aepp-calldata/src/ContractByteArrayEncoder';
+import { Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
+import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
   ITokenResolved,
   ITransaction,
   ITx,
+  TxArguments,
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
@@ -142,7 +143,6 @@ import {
   fetchJson,
   handleUnknownError,
   isNotFoundError,
-  postJson,
   toShiftedBigNumber,
 } from '@/utils';
 import {
@@ -380,10 +380,12 @@ export default defineComponent({
           if (popupProps.value.tx?.contractId) {
             const dryRunResult = await sdk.txDryRun(
               popupProps.value.txBase64,
-              popupProps.value.tx.callerId || popupProps.value.tx.senderId as any,
+              popupProps.value.tx.callerId || popupProps.value.tx.senderId!,
             );
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
-              error.value = new ContractByteArrayEncoder().decode(dryRunResult.callObj.returnValue);
+              error.value = new ContractByteArrayEncoder().decode(
+                dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
+              );
             }
           }
         } catch (e: any) {
@@ -395,7 +397,7 @@ export default defineComponent({
     }
 
     async function loadAdditionalDexInfo() {
-      if (popupProps.value?.tx?.contractId) {
+      if (popupProps.value?.tx?.contractId && popupProps.value.tx.callData) {
         try {
           loading.value = true;
           setTimeout(() => { loading.value = false; }, 20000);
@@ -408,15 +410,25 @@ export default defineComponent({
             getAeSdk(),
           ]);
 
-          const txParams: ITx = await postJson(
-            `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
-            { body: { bytecode, calldata: popupProps.value.tx.callData } },
-          );
-          txFunction.value = txParams.function as TxFunctionRaw;
+          const bytecodeContractCallEncoder = new BytecodeContractCallEncoder(bytecode);
 
-          setTransactionTx({ ...txParams, ...popupProps.value.tx });
+          const rawTxParams = bytecodeContractCallEncoder.decodeCall(
+            popupProps.value.tx.callData,
+          ) as any;
 
-          const allTokens = getTokens(txParams);
+          const txParams = {
+            function: rawTxParams.functionName as TxFunctionRaw,
+            arguments: rawTxParams.args.map((arg: any) => ({
+              type: Array.isArray(arg) ? 'list' : 'any',
+              value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
+            })) as TxArguments[],
+          };
+
+          txFunction.value = txParams.function;
+
+          setTransactionTx({ ...txParams, ...popupProps.value.tx as ITx });
+
+          const allTokens = getTokens({ ...txParams, ...popupProps.value.tx as ITx });
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
