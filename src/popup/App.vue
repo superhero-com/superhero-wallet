@@ -206,6 +206,9 @@ export default defineComponent({
       setDocumentHeight();
       checkExtensionUpdates();
       initViewport(innerElement.value);
+
+      // Hide splash screen programmatically when app is ready
+      // to avoid white screen on app start
       if (IS_MOBILE_APP) {
         setTimeout(() => {
           SplashScreen.hide({

@@ -1,7 +1,7 @@
 <template>
   <div
     class="notification-item"
-    @click.stop="(event) => handleClick(event)"
+    @click.stop="handleClick"
   >
     <div class="status-and-date ">
       <span
