@@ -86,9 +86,9 @@ if (!bounceAllowed) {
 
 #### Android
 
-build a production version signed by the [corresponding key](https://cordova.apache.org/docs/en/latest/guide/platforms/android/#using-buildjson):
+build a production version signed by the corresponding key ([see](https://ionicframework.com/docs/deployment/play-store#signing-an-apk)):
 ```bash
-cordova build android --release --buildConfig=myBuildConfig.json
+npm run build:android
 ```
 
 ## Security
