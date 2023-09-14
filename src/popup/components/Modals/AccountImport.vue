@@ -62,7 +62,10 @@ import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { MODAL_READ_QR_CODE } from '@/constants';
 import { isSeedLengthValid } from '@/utils';
-import { useModals } from '@/composables';
+import {
+  useModals,
+  useUi,
+} from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -85,6 +88,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
     const { openModal } = useModals();
+    const { loginTargetLocation } = useUi();
 
     const mnemonic = ref('');
     const error = ref<string | TranslateResult>('');
@@ -114,7 +118,7 @@ export default defineComponent({
       setTimeout(async () => {
         store.dispatch('accounts/hdWallet/discover');
       }, 100);
-      router.push(store.state.loginTargetLocation);
+      router.push(loginTargetLocation.value);
     }
 
     async function openScanQrModal() {

@@ -4,18 +4,12 @@ import AccountImport from '../../src/popup/components/Modals/AccountImport.vue';
 
 jest.mock('vuex', () => ({
   useStore: jest.fn(() => ({
-    state: {
-      loginTargetLocation: null,
-    },
     getters: {
       accounts: () => [],
     },
     commit: jest.fn(),
   })),
   Store: jest.fn(() => ({
-    state: {
-      loginTargetLocation: null,
-    },
     getters: {
       accounts: () => [],
     },

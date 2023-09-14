@@ -1,8 +1,10 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { ROUTE_ACCOUNT } from '../popup/router/routeNames';
+import { RouteLocationRaw } from 'vue-router';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
 const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
+const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -12,6 +14,10 @@ export function useUi() {
         onChangeCallback();
       }
     }
+  }
+
+  function setLoginTargetLocation(location: RouteLocationRaw) {
+    loginTargetLocation.value = location;
   }
 
   function handleVisibilityChange() {
@@ -32,7 +38,9 @@ export function useUi() {
   return {
     homeRouteName,
     isAppActive,
+    loginTargetLocation,
     initVisibilityListeners,
     setHomeRouteName,
+    setLoginTargetLocation,
   };
 }

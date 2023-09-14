@@ -23,7 +23,6 @@ export default new Vuex.Store({
     migrations: {},
     backedUpSeed: null,
     saveErrorLog: true,
-    loginTargetLocation: { name: 'account' },
     qrScannerOpen: false,
     hiddenCards: [],
   },
