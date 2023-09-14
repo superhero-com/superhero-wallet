@@ -25,7 +25,12 @@ import { getPopupProps } from '@/utils/getPopupProps';
 import store from '@/store';
 import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
-import { useAccounts, usePopupProps, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  usePopupProps,
+  useAeSdk,
+  useUi,
+} from '@/composables';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -50,6 +55,8 @@ const {
 } = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
+const { setLoginTargetLocation } = useUi();
+
 RouteQueryActionsController.init(router);
 
 const unbind = router.beforeEach(async (to, from, next) => {
@@ -70,7 +77,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
       next();
     } else {
-      store.commit('setLoginTargetLocation', to);
+      setLoginTargetLocation(to);
       next({ name: ROUTE_INDEX });
     }
     return;

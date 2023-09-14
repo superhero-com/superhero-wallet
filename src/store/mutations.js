@@ -19,9 +19,6 @@ export default {
   setSaveErrorLog(state, saveErrorLog) {
     state.saveErrorLog = saveErrorLog;
   },
-  setLoginTargetLocation(state, location) {
-    state.loginTargetLocation = location;
-  },
   setQrScanner(state, payload) {
     state.qrScannerOpen = payload;
   },

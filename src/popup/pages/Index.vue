@@ -91,7 +91,10 @@ import {
   IS_WEB,
   MODAL_ACCOUNT_IMPORT,
 } from '@/constants';
-import { useModals } from '@/composables';
+import {
+  useModals,
+  useUi,
+} from '@/composables';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -111,12 +114,13 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { openModal } = useModals();
+    const { loginTargetLocation } = useUi();
 
     const termsAgreed = ref(false);
 
     async function createWallet() {
       store.commit('setMnemonic', generateMnemonic());
-      router.push(store.state.loginTargetLocation);
+      router.push(loginTargetLocation.value);
     }
 
     async function importWallet() {
