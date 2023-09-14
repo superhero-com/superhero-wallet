@@ -18,7 +18,7 @@ interface ITokenPropsState {
 const tokenProps = ref<ITokenProps | null>(null);
 /**
  *  Data comming from a coin that will be passed to the tab components
- *  TokenDetails and  TokenTransaction when the user clicks in particular token asset.
+ *  TokenDetails and TokenTransaction when the user clicks in particular token asset.
  */
 export function useTokenProps(): ITokenPropsState {
   function setTokenProps(props: ITokenProps | null) {
