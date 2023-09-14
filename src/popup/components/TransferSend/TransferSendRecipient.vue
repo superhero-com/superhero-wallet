@@ -88,7 +88,7 @@ export default defineComponent({
     const store = useStore();
 
     const { openModal } = useModals();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const urlStatus = computed(
       () => store.getters['tipUrl/status'](props.modelValue),

@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+
 import {
   AensName,
   AeSdkWallet,
@@ -39,7 +41,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   getAccounts() {
-    const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
+    const { getLastActiveProtocolAccount } = useAccounts();
     const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
     return ({
       current: { [account.address]: {} },
@@ -49,7 +51,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   addresses() {
-    const { aeAccounts } = useAccounts({ store: this.store });
+    const { aeAccounts } = useAccounts();
     return aeAccounts.value.map(({ address }) => address);
   }
 

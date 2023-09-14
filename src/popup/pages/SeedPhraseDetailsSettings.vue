@@ -82,7 +82,7 @@ export default defineComponent({
     const router = useRouter();
 
     const { copy, copied } = useCopy();
-    const { mnemonic } = useAccounts({ store });
+    const { mnemonic } = useAccounts();
 
     function setBackedUpSeed() {
       store.commit('setBackedUpSeed');

@@ -118,6 +118,10 @@ export default defineComponent({
     const errorName = useFieldError('name');
     const { t } = useI18n();
 
+    const { activeAccount } = useAccounts();
+    const { openDefaultModal } = useModals();
+    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
+
     const name = ref('');
     const autoExtend = ref(false);
     const loading = ref(false);
@@ -147,15 +151,10 @@ export default defineComponent({
         }) as any).toString())
         .shiftedBy(-AE_COIN_PRECISION));
 
-    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
-
     async function claim() {
       if (!(await validate()).valid) {
         return;
       }
-
-      const { openDefaultModal } = useModals();
-      const { activeAccount } = useAccounts({ store });
 
       const aeSdk = await getAeSdk();
       const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);

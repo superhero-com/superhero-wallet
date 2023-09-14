@@ -27,7 +27,7 @@ export default defineComponent({
 
     const { nodeNetworkId } = useAeSdk({ store });
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi({ router });
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { setPopupProps } = usePopupProps();
 
     const app = computed((): IAppData => callbackOrigin.value ? {

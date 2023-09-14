@@ -72,6 +72,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  /**
+   * TODO remove any store dependencies ASAP
+   * The `useStore` should not be used out of component scope.
+   */
   getStore(): Store<any> {
     if (!this.store) {
       this.store = useStore();
@@ -139,10 +143,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override async isAccountUsed(address: string): Promise<boolean> {
     const store = this.getStore();
     const { getDryAeSdk } = useAeSdk({ store });
-
     const aeSdk = await getDryAeSdk();
-    const result = await aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
-    return result;
+    return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -156,12 +158,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     };
   }
 
+  /**
+   * As the Aeternity protocol is the primary one we always return at least 1.
+   */
   override async discoverAccounts(seed: Uint8Array): Promise<number> {
-    return defaultAccountDiscovery(
-      this.isAccountUsed,
-      this.getHdWalletAccountFromMnemonicSeed,
+    const accountNumber = await defaultAccountDiscovery(
+      this.isAccountUsed.bind(this),
+      this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,
     );
+    return (accountNumber > 0) ? accountNumber : 1;
   }
 
   override async constructAndSignTx() {

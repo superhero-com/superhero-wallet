@@ -1,14 +1,14 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
-import { mnemonicToSeed } from '@aeternity/bip39';
 import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
 import {
   formatDate,
   formatTime,
+  prepareStorageKey,
 } from '../../../src/utils';
 import {
-  LOCAL_STORAGE_PREFIX,
+  PROTOCOL_AETERNITY,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/constants';
 import {
@@ -23,15 +23,8 @@ export async function getLoginState({
   name,
   network,
 }) {
-  const { mnemonic, address } = STUB_ACCOUNT;
-  const account = {
-    address,
-    privateKey: mnemonicToSeed(mnemonic).toString('hex'),
-  };
   return {
     ...(await runMigrations()),
-    account,
-    mnemonic,
     backedUpSeed,
     current: { network: network || 'Testnet' },
     balance,
@@ -100,22 +93,29 @@ Cypress.Commands.add('mockExternalRequests', () => {
 
 Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
   if (isMockingExternalRequests) cy.mockExternalRequests();
-  cy.openPopup(async (contentWindow) => {
-    /* eslint-disable-next-line no-param-reassign */
-    contentWindow.localStorage.state = JSON.stringify(await getLoginState(options));
 
-    if (options.pendingTransaction) {
-      const localStorageKey = [
-        LOCAL_STORAGE_PREFIX,
+  cy.openPopup(async (contentWindow) => {
+    const dataToBeStored = {
+      state: await getLoginState(options),
+      [prepareStorageKey(['mnemonic'])]: STUB_ACCOUNT.mnemonic,
+      [prepareStorageKey(['accounts-raw'])]: [{
+        idx: 0,
+        protocol: PROTOCOL_AETERNITY,
+        isRestored: true,
+        type: 'hd-wallet',
+      }],
+      [prepareStorageKey([
         TRANSACTIONS_LOCAL_STORAGE_KEY,
         AE_NETWORK_MAINNET_ID,
-      ].join('_');
+      ])]: (options.pendingTransaction)
+        ? preparePendingTransactionToLocalStorage(options.pendingTransaction)
+        : null,
+    };
 
-      // eslint-disable-next-line no-param-reassign
-      contentWindow.localStorage[localStorageKey] = JSON.stringify(
-        preparePendingTransactionToLocalStorage(options.pendingTransaction),
-      );
-    }
+    Object.entries(dataToBeStored).forEach(([key, data]) => {
+      /* eslint-disable-next-line no-param-reassign */
+      contentWindow.localStorage[key] = JSON.stringify(data);
+    });
   }, route);
 });
 

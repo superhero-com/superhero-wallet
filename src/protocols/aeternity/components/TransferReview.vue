@@ -141,7 +141,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,

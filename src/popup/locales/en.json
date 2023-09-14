@@ -50,7 +50,8 @@
       "fast": "Fast",
       "medium": "Medium",
       "slow": "Slow"
-    }
+    },
+    "actionMayTakeFewMoments": "This may take a few moments."
   },
   "connectionStatus": {
     "offline": "You are offline. Go online to get real time data.",

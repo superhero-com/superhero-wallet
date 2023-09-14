@@ -162,7 +162,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '@/types';
 import {
@@ -199,8 +198,7 @@ export default defineComponent({
     tokens: { type: Array as PropType<IToken[]>, default: () => ([]) },
   },
   setup(props) {
-    const store = useStore();
-    const { formatCurrency } = useCurrencies({ store });
+    const { formatCurrency } = useCurrencies();
 
     const displayDexUrl = AE_DEX_URL.replace('https://', '');
 

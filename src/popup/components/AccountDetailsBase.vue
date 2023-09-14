@@ -76,7 +76,6 @@ import {
 } from 'vue';
 import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/constants';
 
 import {
@@ -107,21 +106,18 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const store = useStore();
 
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
+    const { homeRouteName } = useUi();
+    const { balance } = useBalances();
+    const { resetFilter } = useTransactionAndTokenFilter();
+
     const ACCOUNT_INFO_HEIGHT = 120;
     const BALANCE_AND_ACTIONS_HEIGHT = 280;
     const accountDetailsElem = ref<HTMLElement>();
     const appInnerScrollTop = ref<number>(0);
     const clientHeight = ref<number>(0);
     const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
-
-    const { resetFilter } = useTransactionAndTokenFilter();
-
-    const { homeRouteName } = useUi();
-
-    const { balance } = useBalances({ store });
 
     const balanceNumeric = computed(() => balance.value.toNumber());
 

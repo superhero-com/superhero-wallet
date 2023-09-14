@@ -3,6 +3,7 @@
     v-bind="$attrs"
     class="textarea"
     :class="[ size, { 'auto-height' : autoHeight } ]"
+    :readonly="readonly"
     @update:modelValue="handleInput"
   >
     <template #default="{ inputId }">
@@ -16,6 +17,7 @@
         :placeholder="placeholder"
         :value="modelValue"
         :rows="1"
+        :disabled="readonly"
         @keydown.enter.prevent="handleEnterClick"
         @input="(payload) => handleInput(payload as InputEvent)"
       />
@@ -58,6 +60,7 @@ export default defineComponent({
       validator: (val: string) => SIZES.includes(val),
     },
     autoHeight: Boolean,
+    readonly: Boolean,
   },
   emits: ['update:modelValue', 'submit'],
   setup(props, { emit }) {

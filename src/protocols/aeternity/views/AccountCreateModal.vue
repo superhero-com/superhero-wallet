@@ -45,7 +45,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useConnection, useModals } from '@/composables';
 
@@ -64,16 +63,16 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { addRawAccount } = useAccounts({ store });
+    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
 
     async function createPlainAccount() {
-      addRawAccount({
+      const idx = addRawAccount({
         isRestored: false,
         protocol: PROTOCOL_AETERNITY,
       });
+      setActiveAccountByProtocolAndIdx(PROTOCOL_AETERNITY, idx);
       props.resolve();
     }
 

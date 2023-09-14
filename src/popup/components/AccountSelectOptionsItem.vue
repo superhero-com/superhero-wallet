@@ -1,12 +1,13 @@
 <template>
   <BtnPlain
+    v-if="account"
     class="account-select-options-item"
     :style="bgColorStyle"
     @click.prevent="$emit('click')"
   >
     <div
       class="option-wrapper"
-      :class="{ selected: account.address === value }"
+      :class="{ selected }"
     >
       <AccountInfo
         :account="account"
@@ -33,9 +34,8 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { IFormSelectOption } from '@/types';
-import { useBalances } from '@/composables';
+import { useAccounts, useBalances } from '@/composables';
 import { getAddressColor } from '@/utils';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
@@ -51,29 +51,32 @@ export default defineComponent({
     BtnPlain,
   },
   props: {
-    account: {
+    option: {
       type: Object as PropType<IFormSelectOption>,
-      default: () => {},
+      default: () => ({}),
     },
-    value: { type: [String, Number], default: null },
+    selected: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { getAccountBalance } = useBalances({ store });
+    const { getAccountBalance } = useBalances();
+    const { getAccountByAddress } = useAccounts();
 
-    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.account.address) }));
+    const account = getAccountByAddress(props.option.value as any);
+
+    const bgColorStyle = computed(() => ({ '--bg-color': getAddressColor(props.option.value) }));
 
     const balance = computed(
-      () => (props.account?.address)
-        ? getAccountBalance(props.account.address).toNumber()
+      () => (props.option?.value)
+        ? getAccountBalance(props.option.value as string).toNumber()
         : 0,
     );
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(props.account.protocol!).getCoinSymbol(true),
+      () => ProtocolAdapterFactory.getAdapter(account!.protocol).getCoinSymbol(true),
     );
 
     return {
+      account,
       balance,
       bgColorStyle,
       tokenSymbol,

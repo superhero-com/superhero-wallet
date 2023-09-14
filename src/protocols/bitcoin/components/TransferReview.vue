@@ -32,7 +32,6 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useModals, useUi } from '@/composables';
@@ -63,11 +62,8 @@ export default defineComponent({
     const { t } = useI18n();
     const router = useRouter();
     const { homeRouteName } = useUi();
-
     const { openDefaultModal } = useModals();
-
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const loading = ref<boolean>(false);
 

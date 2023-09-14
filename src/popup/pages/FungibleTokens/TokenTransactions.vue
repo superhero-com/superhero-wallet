@@ -33,7 +33,7 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
 
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
     const {
       fetchTransactions,

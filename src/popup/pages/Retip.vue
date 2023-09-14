@@ -127,10 +127,10 @@ export default defineComponent({
     const { getCacheTip } = useAeTippingBackend();
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { marketData } = useCurrencies({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { marketData } = useCurrencies();
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { openCallbackOrGoHome } = useDeepLinkApi({ router });
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });

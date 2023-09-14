@@ -41,7 +41,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useState } from '@/composables/vuex';
 import { useCurrencies, useNetworks } from '@/composables';
 import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
@@ -54,10 +53,9 @@ export default defineComponent({
     PanelItem,
   },
   setup() {
-    const store = useStore();
-    const { currentCurrencyInfo } = useCurrencies({ store });
-
+    const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
+
     const saveErrorLog = useState('saveErrorLog');
 
     const activeCurrency = computed(

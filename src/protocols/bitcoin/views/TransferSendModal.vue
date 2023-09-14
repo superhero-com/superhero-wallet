@@ -29,7 +29,6 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   ResolveCallback,
@@ -62,9 +61,8 @@ export default defineComponent({
     address: { type: String as PropType<Encoded.AccountAddress>, default: null },
   },
   setup(props) {
-    const store = useStore();
-    const { marketData } = useCurrencies({ store });
-    const { balance } = useBalances({ store });
+    const { marketData } = useCurrencies();
+    const { balance } = useBalances();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);

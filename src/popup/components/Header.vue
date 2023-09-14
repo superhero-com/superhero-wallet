@@ -64,7 +64,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IS_CORDOVA, UNFINISHED_FEATURES } from '@/constants';
@@ -100,13 +99,12 @@ export default defineComponent({
     BtnIcon,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),

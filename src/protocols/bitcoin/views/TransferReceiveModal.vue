@@ -10,7 +10,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import {
   PROTOCOL_BITCOIN,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
@@ -26,8 +25,7 @@ export default defineComponent({
     TransferReceiveBase,
   },
   setup() {
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     return {
       PROTOCOL_BITCOIN,

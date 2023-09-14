@@ -33,7 +33,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
@@ -58,14 +57,14 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { addRawAccount } = useAccounts({ store });
+    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
     const loading = ref(false);
 
     async function createAccount(protocol: Protocol) {
       loading.value = true;
+      let idx: number;
 
       // TODO each of the blocks of this switch should be moved to the specific adapter
       switch (protocol) {
@@ -74,10 +73,11 @@ export default defineComponent({
           break;
 
         case PROTOCOL_BITCOIN:
-          addRawAccount({
+          idx = addRawAccount({
             isRestored: false,
             protocol: PROTOCOL_BITCOIN,
           });
+          setActiveAccountByProtocolAndIdx(PROTOCOL_BITCOIN, idx);
           break;
 
         default:

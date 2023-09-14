@@ -86,8 +86,9 @@
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
-import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { useAccounts, useAeSdk } from '@/composables';
+import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
+import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
 
 import PanelItem from '../components/PanelItem.vue';
 import Invites from '../../icons/invites.svg?vue-component';
@@ -115,10 +116,13 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    const { activeAccount, activeAccountFaucetUrl } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+    const activeAccountFaucetUrl = computed(
+      () => (isActiveAccountAe.value) ? buildAeFaucetUrl(activeAccount.value.address) : null,
+    );
 
     return {
       AE_DEX_URL,

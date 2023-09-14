@@ -22,7 +22,6 @@ import {
   onUnmounted,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 
 import type { ITransaction } from '@/types';
 import { PROTOCOL_BITCOIN } from '@/constants';
@@ -44,9 +43,8 @@ export default defineComponent({
 
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
 
-    const store = useStore();
     const { isOnline } = useConnection();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const transactionsLatest = ref<ITransaction[]>([]);
     const transactionsMore = ref<ITransaction[]>([]);

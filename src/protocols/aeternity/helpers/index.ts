@@ -38,6 +38,7 @@ import {
   AE_AENS_DOMAIN,
   AE_AENS_NAME_MAX_LENGTH,
   AE_CONTRACT_ID,
+  AE_FAUCET_URL,
   AE_HASH_PREFIXES_ALLOWED,
   AE_SIMPLEX_URL,
   AE_TRANSACTION_OWNERSHIP_STATUS,
@@ -63,7 +64,11 @@ export function aettosToAe(value: number | string) {
   });
 }
 
-export function buildSimplexLink(address: string) {
+export function buildAeFaucetUrl(address: string): string {
+  return `${AE_FAUCET_URL}?address=${address}`;
+}
+
+export function buildSimplexLink(address: string): string {
   const link = new URL(AE_SIMPLEX_URL);
   link.searchParams.set('wallet_address', address);
   return link.toString();
@@ -125,13 +130,17 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   }
 }
 
+/**
+ * As there is no UI element that displays multisig account index we can use the 0 as the idx values
+ * to only satisfy the requirements of the interface.
+ */
 export function convertMultisigAccountToAccount(
   multisigAccount: IMultisigAccount,
 ): Partial<IAccount> {
   return {
     address: multisigAccount.gaAccountId,
-    idx: 0,
     protocol: PROTOCOL_AETERNITY,
+    idx: 0,
     globalIdx: 0,
   };
 }

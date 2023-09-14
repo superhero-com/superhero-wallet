@@ -36,9 +36,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { useCurrencies } from '../../composables';
-import RadioButton from '../components/RadioButton.vue';
+import { useCurrencies } from '@/composables';
+import RadioButton from '@/popup/components/RadioButton.vue';
 
 export default defineComponent({
   name: 'CurrencySettings',
@@ -46,8 +45,7 @@ export default defineComponent({
     RadioButton,
   },
   setup() {
-    const store = useStore();
-    const { CURRENCIES, currentCurrencyCode, setCurrentCurrency } = useCurrencies({ store });
+    const { CURRENCIES, currentCurrencyCode, setCurrentCurrency } = useCurrencies();
 
     return {
       CURRENCIES,

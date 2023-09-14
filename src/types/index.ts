@@ -13,6 +13,7 @@ import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   POPUP_TYPES,
+  STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
 import type { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
@@ -29,7 +30,6 @@ import { Protocol } from './protocols';
 
 export * from './cordova';
 export * from './filter';
-export * from './forms';
 export * from './networks';
 export * from './protocols';
 export * from './router';
@@ -178,7 +178,6 @@ export type AccountType = 'hd-wallet';
  * or fetched when discovering the accounts.
  */
 export interface IAccountRaw {
-  idx: number;
   type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
@@ -188,8 +187,9 @@ export interface IAccountRaw {
  * Account stored on the application store.
  */
 export interface IAccount extends IKeyPair, IAccountRaw {
-  address: Encoded.AccountAddress;
+  address: Encoded.AccountAddress; // TODO use `string` as we use not only AE protocol
   globalIdx: number;
+  idx: number;
 }
 
 /**
@@ -652,6 +652,8 @@ export interface TransferFormModel extends IFormModel {
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
 
+export type StorageKey = ObjectValues<typeof STORAGE_KEYS>;
+
 export type StorageKeysInput = string | string[];
 
 export interface IWalletInfo {
@@ -660,4 +662,9 @@ export interface IWalletInfo {
   networkId: string;
   origin: any;
   type: any;
+}
+
+export interface IFormSelectOption {
+  text: string;
+  value: string | number;
 }

@@ -58,7 +58,6 @@ import {
   ref,
   unref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { MODAL_DAPP_BROWSER_ACTIONS, BROWSER_ACTIONS } from '@/constants';
@@ -95,18 +94,16 @@ export default defineComponent({
   },
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
-    const store = useStore();
     const router = useRouter();
     const { openModal } = useModals();
 
     const { homeRouteName } = useUi();
     const {
-      aeAccounts,
       isLoggedIn,
       activeAccount,
+      aeAccountsSelectOptions,
       setActiveAccountByAddress,
-      prepareAccountSelectOptions,
-    } = useAccounts({ store });
+    } = useAccounts();
 
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
@@ -118,7 +115,6 @@ export default defineComponent({
       const url = new URL(props.selectedApp.url);
       return url.host;
     });
-    const aeAccountsSelectOptions = computed(() => prepareAccountSelectOptions(aeAccounts.value));
 
     const accountAddress = ref(unref(activeAccount.value.address));
 

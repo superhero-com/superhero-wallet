@@ -27,7 +27,7 @@ export default (store) => {
   const {
     aeAccounts,
     getLastActiveProtocolAccount,
-  } = useAccounts({ store });
+  } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts({ store });
 
   store.registerModule('fungibleTokens', {

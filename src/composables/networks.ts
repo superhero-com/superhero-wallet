@@ -10,6 +10,7 @@ import {
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
   PROTOCOLS,
+  STORAGE_KEYS,
 } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { tg } from '@/store/plugins/languages';
@@ -21,16 +22,20 @@ const defaultNetworks: INetwork[] = [];
 /**
  * Networks added by the user by providing some custom URLs for each of the protocols.
  */
-const customNetworks = useStorageRef<INetwork[]>([], 'custom-networks', {
-  backgroundSync: true,
-});
+const customNetworks = useStorageRef<INetwork[]>(
+  [],
+  STORAGE_KEYS.customNetworks,
+  { backgroundSync: true },
+);
 
 /**
- * As the network is an unique string we are using it to differentiate the networks.
+ * As the network name is an unique string we are using it to differentiate the networks.
  */
-const activeNetworkName = useStorageRef(NETWORK_NAME_MAINNET, 'active-network-name', {
-  backgroundSync: true,
-});
+const activeNetworkName = useStorageRef<string>(
+  NETWORK_NAME_MAINNET,
+  STORAGE_KEYS.activeNetworkName,
+  { backgroundSync: true },
+);
 
 const networks = computed(
   (): Record<string, INetwork> => [
@@ -106,6 +111,11 @@ export function useNetworks() {
     }
   }
 
+  function resetNetworks() {
+    customNetworks.value = [];
+    activeNetworkName.value = NETWORK_NAME_MAINNET;
+  }
+
   if (!initialized) {
     ensureDefaultNetworksExists();
     if (!activeNetwork.value) {
@@ -124,6 +134,7 @@ export function useNetworks() {
     addCustomNetwork,
     updateCustomNetwork,
     deleteCustomNetwork,
+    resetNetworks,
   };
 }
 

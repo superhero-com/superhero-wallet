@@ -6,7 +6,6 @@
     <template #account-info>
       <AccountInfo
         :account="convertMultisigAccountToAccount(activeMultisigAccount)"
-        :protocol="PROTOCOL_AETERNITY"
         is-multisig
         with-protocol-icon
         can-copy-address

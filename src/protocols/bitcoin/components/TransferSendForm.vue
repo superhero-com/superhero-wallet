@@ -81,7 +81,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
 
@@ -132,18 +131,18 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
   },
-  emits: ['update:transferData', 'success', 'error'],
+  emits: [
+    'update:transferData',
+    'success',
+    'error',
+  ],
   setup(props, { emit }) {
-    const store = useStore();
     const { activeNetwork } = useNetworks();
+    const { balance } = useBalances();
+    const { activeAccount } = useAccounts();
 
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
-
-    const { balance } = useBalances({ store });
-    const {
-      activeAccount,
-    } = useAccounts({ store });
 
     const {
       formModel,

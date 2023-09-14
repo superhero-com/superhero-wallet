@@ -40,7 +40,7 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
     getMultisigAccountByContractId,
     addPendingMultisigAccount,
   } = useMultisigAccounts({ store, pollOnce: true });
-  const { balances } = useBalances({ store });
+  const { balances } = useBalances();
 
   const multisigAccount = ref<IMultisigAccount | null>(null);
   const multisigAccountCreationFee = ref<number>(0);

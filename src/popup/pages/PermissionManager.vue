@@ -196,8 +196,8 @@ export default defineComponent({
     const route = useRoute();
     const { validate, setValues } = useForm();
 
-    const { balance } = useBalances({ store });
-    const { getCurrentCurrencyRate } = useCurrencies({ store });
+    const { balance } = useBalances();
+    const { getCurrentCurrencyRate } = useCurrencies();
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;

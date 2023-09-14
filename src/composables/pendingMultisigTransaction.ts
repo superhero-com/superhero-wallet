@@ -29,7 +29,7 @@ export function usePendingMultisigTransaction({ store }: IDefaultComposableOptio
   const { activeMultisigAccount } = useMultisigAccounts({ store });
   const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
   const { topBlockHeight } = useTopHeaderData({ store });
-  const { aeAccounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts();
 
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
 

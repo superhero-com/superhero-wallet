@@ -83,7 +83,6 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import {
   IN_FRAME,
   IS_MOBILE_DEVICE,
@@ -112,9 +111,8 @@ export default defineComponent({
     Platforms,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
-    const { addRawAccount, setGeneratedMnemonic } = useAccounts({ store });
+    const { addRawAccount, setGeneratedMnemonic } = useAccounts();
     const { openModal } = useModals();
     const { loginTargetLocation } = useUi();
 

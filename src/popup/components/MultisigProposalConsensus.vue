@@ -110,7 +110,7 @@ export default defineComponent({
     const {
       activeMultisigAccount,
     } = useMultisigAccounts({ store });
-    const { isLocalAccountAddress } = useAccounts({ store });
+    const { isLocalAccountAddress } = useAccounts();
     const {
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,

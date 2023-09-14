@@ -22,7 +22,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount } from 'vue';
-import { useStore } from 'vuex';
 import type { IName } from '@/types';
 import { executeAndSetInterval } from '@/utils';
 import { useDispatch, useState } from '../../../composables/vuex';
@@ -40,10 +39,8 @@ export default defineComponent({
     RegisterName,
   },
   setup() {
-    const store = useStore();
-
     const { isAppActive } = useUi();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const areNamesFetching = useState('names', 'areNamesFetching');
     const namesOwned = useState<IName[]>('names', 'owned');
     const fetchOwned = useDispatch('names/fetchOwned');

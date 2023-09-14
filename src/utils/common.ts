@@ -14,6 +14,7 @@ import type {
   IAccount,
   ICommonTransaction,
   IDashboardTransaction,
+  IFormSelectOption,
   IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
@@ -170,9 +171,7 @@ export function getDefaultAccountLabel({ protocol, idx }: Partial<IAccount> = {}
 }
 
 export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
-  const result = window.localStorage.getItem(
-    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
-  );
+  const result = window.localStorage.getItem(prepareStorageKey(keys));
   return result ? JSON.parse(result) : undefined;
 }
 
@@ -223,6 +222,10 @@ export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
   return (data: T) => fns.reduce((currData, func) => func(currData), data);
 }
 
+export function prepareStorageKey(keys: string[]) {
+  return [LOCAL_STORAGE_PREFIX, ...keys].join('_');
+}
+
 export function postJson(url: string, options?: IRequestInitBodyParsed) {
   return fetchJson(url, {
     method: 'post',
@@ -230,6 +233,16 @@ export function postJson(url: string, options?: IRequestInitBodyParsed) {
     ...options,
     body: options?.body && JSON.stringify(options.body),
   });
+}
+
+/**
+ * Accounts data formatted as the form select options
+ */
+export function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelectOption[] {
+  return accountList.map((acc): IFormSelectOption => ({
+    text: getDefaultAccountLabel(acc),
+    value: acc.address,
+  }));
 }
 
 export function removeDuplicatedTransactions(transactions: ITransaction[]) {
@@ -264,7 +277,7 @@ export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {
 
 export function setLocalStorageItem(keys: string[], value: any): void {
   return window.localStorage.setItem(
-    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+    prepareStorageKey(keys),
     JSON.stringify(value),
   );
 }
@@ -376,6 +389,7 @@ export async function defaultAccountDiscovery(
     try {
       lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
       lastIndex += isAccountUsedArray.length;
+
       // eslint-disable-next-line no-await-in-loop
       isAccountUsedArray = await Promise.all(
         Array.from(

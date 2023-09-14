@@ -381,9 +381,7 @@ export default defineComponent({
 
     const {
       isLocalAccountAddress,
-    } = useAccounts({
-      store,
-    });
+    } = useAccounts();
 
     const getTxSymbol = useGetter('getTxSymbol');
 

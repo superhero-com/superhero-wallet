@@ -75,7 +75,7 @@ export default defineComponent({
       aeAccountsSelectOptions,
       getLastActiveProtocolAccount,
       setActiveAccountByAddress,
-    } = useAccounts({ store });
+    } = useAccounts();
 
     const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address);
     const id = ref<string>('');

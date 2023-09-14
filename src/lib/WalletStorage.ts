@@ -58,6 +58,6 @@ function createLocalStorageInterface(): IWalletStorage {
  * Exposes methods that allows to manipulate or watch the device storage.
  * Allows also to synchronize the state between the app and the extension background.
  */
-export const WalletStorage: IWalletStorage = ((IS_EXTENSION || RUNNING_IN_TESTS) && browser)
+export const WalletStorage: IWalletStorage = (!RUNNING_IN_TESTS && IS_EXTENSION && browser)
   ? createBrowserStorageInterface()
   : createLocalStorageInterface();

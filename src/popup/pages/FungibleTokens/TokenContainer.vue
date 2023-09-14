@@ -112,7 +112,7 @@ import {
 } from '@/composables';
 import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
-import { isContract } from '@/protocols/aeternity/helpers';
+import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
@@ -150,15 +150,12 @@ export default defineComponent({
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
     const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk({ store });
-    const {
-      activeAccountSimplexLink,
-      activeAccountFaucetUrl,
-    } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { aeTokenBalance } = useTokensList({
       store,
       isMultisig: isMultisig.value,
     });
-    const { marketData } = useCurrencies({ store });
+    const { marketData } = useCurrencies();
 
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
@@ -193,6 +190,12 @@ export default defineComponent({
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
+    const activeAccountFaucetUrl = computed(
+      () => (isAe) ? buildAeFaucetUrl(activeAccount.value.address) : null,
+    );
+    const activeAccountSimplexLink = computed(
+      () => (isAe) ? buildSimplexLink(activeAccount.value.address) : null,
+    );
 
     const tokenData = computed((): IToken => {
       if (isAe) {

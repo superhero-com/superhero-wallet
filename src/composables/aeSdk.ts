@@ -61,7 +61,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
     accountsAddressList,
     isLoggedIn,
     getLastActiveProtocolAccount,
-  } = useAccounts({ store });
+  } = useAccounts();
   const { openModal } = useModals();
 
   const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);

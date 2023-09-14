@@ -65,7 +65,7 @@ const setTransactionsNextPage = (address: Encoded.AccountAddress, url: string) =
 export function useTransactionList({ store }: IDefaultComposableOptions) {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { isLoggedIn, accounts } = useAccounts({ store });
+  const { isLoggedIn, accounts } = useAccounts();
   const {
     fetchFromMiddlewareCamelCased,
     getMiddleware,
