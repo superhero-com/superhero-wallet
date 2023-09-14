@@ -51,6 +51,7 @@ export interface WalletRouteMeta {
   hideFilterButton?: boolean;
   isMultisig?: boolean;
   directBackRoute?: boolean;
+  hideCloseBtn?: boolean;
 }
 
 export type WalletAppRouteConfig = Omit<RouteRecordRaw, 'meta'> & {

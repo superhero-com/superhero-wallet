@@ -40,12 +40,12 @@
 
         <div class="right">
           <BtnClose
-            v-if="showHeaderNavigation"
+            v-if="showHeaderNavigation && !hideCloseBtn"
             data-cy="close"
             class="btn-close"
             @click="close"
           />
-          <template v-else>
+          <template v-else-if="!showHeaderNavigation">
             <NetworkButton />
 
             <template v-if="isLoggedIn">
@@ -156,6 +156,7 @@ export default defineComponent({
     );
     const routeMeta = computed(() => route.meta as WalletRouteMeta);
     const showHeaderNavigation = computed(() => !!routeMeta.value?.showHeaderNavigation);
+    const hideCloseBtn = computed(() => !!routeMeta.value?.hideCloseBtn);
     const isLogoDisabled = computed(() => route.name === ROUTE_ACCOUNT);
     const titleTruncated = computed(
       () => (routeMeta.value?.title && pageTitles[routeMeta.value.title])
@@ -189,6 +190,7 @@ export default defineComponent({
       IS_MOBILE_APP,
       isLoggedIn,
       showHeaderNavigation,
+      hideCloseBtn,
       isLogoDisabled,
       titleTruncated,
       back,
@@ -263,6 +265,7 @@ ion-header {
   }
 
   .right {
+    min-width: 32px;
     display: flex;
     justify-content: flex-end;
     gap: 8px;
