@@ -18,11 +18,11 @@
 
     <div>
       <AccountSelectOptionsItem
-        v-for="(account, index) in optionsFiltered"
+        v-for="(option, index) in optionsFiltered"
         :key="index"
-        :account="account"
-        :value="value"
-        @click="resolve(account.address)"
+        :option="option"
+        :selected="option.value === value"
+        @click="resolve(option.value)"
       />
     </div>
   </Modal>
@@ -35,7 +35,7 @@ import {
   PropType,
   ref,
 } from 'vue';
-import type { IFormSelectOption, RejectCallback, ResolveCallback } from '../../../types';
+import type { IFormSelectOption, RejectCallback, ResolveCallback } from '@/types';
 
 import Modal from '../Modal.vue';
 import AccountSelectOptionsItem from '../AccountSelectOptionsItem.vue';

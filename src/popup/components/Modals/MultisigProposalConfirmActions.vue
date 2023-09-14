@@ -87,6 +87,7 @@ import type {
   ResolveCallback,
   StatusIconType,
 } from '@/types';
+import { prepareAccountSelectOptions } from '@/utils';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
@@ -123,8 +124,7 @@ export default defineComponent({
     const {
       activeAccount,
       setActiveAccountByAddress,
-      prepareAccountSelectOptions,
-    } = useAccounts({ store });
+    } = useAccounts();
     const {
       pendingMultisigTxSigners,
       pendingMultisigTxConfirmedBy,

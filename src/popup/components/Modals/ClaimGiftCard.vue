@@ -165,8 +165,8 @@ export default defineComponent({
 
     const { errors } = useForm();
     const { getAeSdk } = useAeSdk({ store });
-    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
-    const { getFormattedFiat } = useCurrencies({ store });
+    const { aeAccounts, aeAccountsSelectOptions } = useAccounts();
+    const { getFormattedFiat } = useCurrencies();
 
     const recipientId = ref<Encoded.AccountAddress>(aeAccounts.value[0].address);
     const amount = ref('');

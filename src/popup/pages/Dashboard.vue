@@ -54,6 +54,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   watch,
 } from 'vue';
@@ -73,6 +74,7 @@ import {
   useAeSdk,
   useDeepLinkApi,
 } from '@/composables';
+import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
@@ -106,13 +108,11 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
 
-    const {
-      activeAccount,
-      activeAccountSimplexLink,
-    } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
-
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+
+    const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
     watch(
       () => route.query,

@@ -143,14 +143,13 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { aeAccounts, aeAccountsSelectOptions } = useAccounts({ store });
+    const { aeAccounts, aeAccountsSelectOptions, isLocalAccountAddress } = useAccounts();
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
     } = useMultisigAccountCreate({ store });
-    const { isLocalAccountAddress } = useAccounts({ store });
 
     const { getAeSdk } = useAeSdk({ store });
 

@@ -47,7 +47,7 @@
 
         <TransactionAndTokenFilter
           :key="routeName"
-          :show-filters="showFilters"
+          :show-filters="isScrollEnabled"
         />
       </div>
 
@@ -75,7 +75,6 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
 
 import {
@@ -108,27 +107,18 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const store = useStore();
 
-    const { activeAccount } = useAccounts({ store });
-
+    const { activeAccount } = useAccounts();
     const { resetFilter } = useTransactionAndTokenFilter();
-
     const { isScrollEnabled } = useScrollConfig();
-
     const { homeRouteName } = useUi();
-
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
 
     const routerHeight = ref<string>();
-
     const headerEl = ref<HTMLDivElement>();
 
     const balanceNumeric = computed(() => balance.value.toNumber());
-
     const routeName = computed(() => route.name);
-
-    const showFilters = computed<boolean>(() => (isScrollEnabled.value));
 
     function calculateRouterHeight() {
       const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
@@ -178,11 +168,11 @@ export default defineComponent({
     return {
       headerEl,
       homeRouteName,
-      showFilters,
       routeName,
       balanceNumeric,
       activeAccount,
       routerHeight,
+      isScrollEnabled,
       IS_FIREFOX,
     };
   },

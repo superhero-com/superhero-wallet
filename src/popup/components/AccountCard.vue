@@ -33,7 +33,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import type { IAccount } from '../../types';
 import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
@@ -56,9 +55,7 @@ export default defineComponent({
     selected: Boolean,
   },
   setup() {
-    const store = useStore();
-
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
 

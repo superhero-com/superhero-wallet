@@ -81,7 +81,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
@@ -134,21 +133,21 @@ export default defineComponent({
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
   },
-  emits: ['update:transferData', 'success', 'error'],
+  emits: [
+    'update:transferData',
+    'success',
+    'error',
+  ],
   setup(props, { emit }) {
     const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
 
-    const store = useStore();
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
+    const { balance } = useBalances();
+    const { activeAccount } = useAccounts();
 
     const hasMultisigTokenWarning = ref(false);
     const isUrlTippingEnabled = ref(false);
-
-    const { balance } = useBalances({ store });
-    const {
-      activeAccount,
-    } = useAccounts({ store });
 
     const {
       formModel,

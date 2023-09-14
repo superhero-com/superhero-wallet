@@ -4,7 +4,6 @@ import { UNFINISHED_FEATURES } from '@/constants';
 import initDeeplinkHandler from './deeplinkHandler';
 import * as wallet from './wallet';
 import Logger from '../lib/logger';
-import store from './store';
 import { useAccounts } from '../composables';
 
 Logger.init({ background: true });
@@ -20,7 +19,7 @@ browser.runtime.onMessage.addListener(async (msg) => {
   }
 
   if (method === 'checkHasAccount') {
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
     return isLoggedIn.value;
   }
 

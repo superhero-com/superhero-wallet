@@ -27,7 +27,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { throttle } from 'lodash-es';
 import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 
@@ -53,9 +52,8 @@ export default defineComponent({
 
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
 
-    const store = useStore();
     const { isOnline } = useConnection();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { setScrollConf } = useScrollConfig();
 
     const innerScrollElem = ref<HTMLElement>();

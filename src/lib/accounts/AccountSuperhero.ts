@@ -30,7 +30,7 @@ export class AccountSuperhero extends AccountBase {
   constructor(store: Store<any>) {
     super();
     this.store = store;
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
     this.address = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
   }
 
@@ -69,7 +69,7 @@ export class AccountSuperhero extends AccountBase {
   }
 
   sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
-    const { getLastActiveProtocolAccount } = useAccounts({ store: this.store });
+    const { getLastActiveProtocolAccount } = useAccounts();
     return IS_EXTENSION_BACKGROUND
       ? sign(data, getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.secretKey) as any
       : this.store.dispatch('accounts/sign', {

@@ -257,7 +257,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const { aeAccountsSelectOptions } = useAccounts({ store });
+    const { aeAccountsSelectOptions } = useAccounts();
     const { openModal, openDefaultModal } = useModals();
     const errors = useFormErrors();
 

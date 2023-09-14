@@ -92,7 +92,6 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
   IN_FRAME,
@@ -125,9 +124,8 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
-    const { addRawAccount, setGeneratedMnemonic } = useAccounts({ store });
+    const { addRawAccount, setGeneratedMnemonic } = useAccounts();
     const { openModal } = useModals();
     const { loginTargetLocation } = useUi();
 

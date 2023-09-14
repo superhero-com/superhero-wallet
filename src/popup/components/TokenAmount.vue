@@ -42,7 +42,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import {
   calculateFontSize,
@@ -69,8 +68,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
+    const { getFormattedAndRoundedFiat } = useCurrencies();
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {

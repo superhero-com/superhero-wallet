@@ -65,8 +65,8 @@
 
         <Loader v-if="loading" />
       </div>
-    </ioncontent>
-  </ionpage>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -100,11 +100,11 @@ import {
   useTransactionList,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useGetter } from '../../composables/vuex';
+
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -133,10 +133,10 @@ export default defineComponent({
     const { getCacheTip } = useAeTippingBackend();
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { marketData } = useCurrencies({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { marketData } = useCurrencies();
+    const { getLastActiveProtocolAccount } = useAccounts();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });

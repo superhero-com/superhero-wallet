@@ -112,7 +112,7 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { activeAccount, getAccountByAddress } = useAccounts({ store });
+    const { activeAccount, getAccountByAddress } = useAccounts();
     const { t } = useI18n();
 
     const {

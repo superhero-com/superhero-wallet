@@ -68,7 +68,6 @@ import {
   onMounted,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import {
   useAccounts,
   useBalances,
@@ -76,6 +75,7 @@ import {
 } from '@/composables';
 import type { IAsset, Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -94,14 +94,13 @@ export default defineComponent({
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {
-    const store = useStore();
     const {
       getCurrentCurrencyRate,
       marketData,
       formatCurrency,
-    } = useCurrencies({ store });
-    const { balance } = useBalances({ store });
-    const { protocolsInUse } = useAccounts({ store });
+    } = useCurrencies();
+    const { balance } = useBalances();
+    const { protocolsInUse } = useAccounts();
 
     const defaultCoin = computed(() => ProtocolAdapterFactory
       .getAdapter(props.protocol)

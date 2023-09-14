@@ -6,7 +6,7 @@
       : $t('modals.receive.title', { name: $t('modals.receive.funds') })
     "
     :account-address="activeAccountAddress"
-    :account-name="activeAccountNameComputed"
+    :account-name="activeAccountName"
     :tokens="availableTokens"
     :disable-asset-selection="isMultisig"
     :protocol="PROTOCOL_AETERNITY"
@@ -36,7 +36,9 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
-    const { activeAccount, activeAccountName } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
+
+    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
 
     const availableTokens = computed<ITokenList>(
       () => store.state.fungibleTokens.availableTokens,
@@ -46,15 +48,15 @@ export default defineComponent({
       ? activeMultisigAccountId.value
       : activeAccount.value.address);
 
-    const activeAccountNameComputed = computed(
-      () => props.isMultisig ? undefined : activeAccountName.value,
+    const activeAccountName = computed(
+      () => props.isMultisig ? undefined : getDefaultName(activeAccount.value.address),
     );
 
     return {
       PROTOCOL_AETERNITY,
       availableTokens,
       activeAccountAddress,
-      activeAccountNameComputed,
+      activeAccountName,
     };
   },
 });

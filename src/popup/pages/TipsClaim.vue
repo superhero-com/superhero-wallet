@@ -95,7 +95,7 @@ export default defineComponent({
     } = useAeTippingBackend();
 
     const { isTippingSupported } = useAeSdk({ store });
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { openModal, openDefaultModal } = useModals();
     const { getTippingContracts } = useTippingContracts({ store });
 

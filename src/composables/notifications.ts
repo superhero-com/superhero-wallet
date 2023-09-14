@@ -41,7 +41,7 @@ export function useNotifications({
 }: UseNotificationsOptions) {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { fetchRespondChallenge } = useAeSdk({ store });
-  const { activeAccount } = useAccounts({ store });
+  const { activeAccount } = useAccounts();
 
   const canLoadMore = ref(true);
   const fetchedNotificationsOffset = ref(0);

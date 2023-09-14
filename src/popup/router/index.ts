@@ -51,7 +51,7 @@ const {
   activeAccount,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
-} = useAccounts({ store });
+} = useAccounts();
 const { setPopupProps } = usePopupProps();
 
 const { setLoginTargetLocation } = useUi();

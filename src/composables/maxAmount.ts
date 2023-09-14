@@ -53,8 +53,8 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  */
 export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
   const { getAeSdk } = useAeSdk({ store });
-  const { balance } = useBalances({ store });
-  const { getLastActiveProtocolAccount } = useAccounts({ store });
+  const { balance } = useBalances();
+  const { getLastActiveProtocolAccount } = useAccounts();
 
   let updateTokenBalanceInterval: NodeJS.Timer;
   let updateNonceInterval: NodeJS.Timer;

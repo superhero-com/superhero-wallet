@@ -99,7 +99,6 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { Field } from 'vee-validate';
 import type {
@@ -157,10 +156,9 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { copied, copy } = useCopy();
 
     const amount = ref<number | string>('');

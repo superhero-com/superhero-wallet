@@ -44,8 +44,8 @@ export function useTokensList({
   searchTerm,
   isMultisig,
 }: UseTokensListOptions) {
-  const { marketData } = useCurrencies({ store });
-  const { balance } = useBalances({ store });
+  const { marketData } = useCurrencies();
+  const { balance } = useBalances();
   const { activeMultisigAccount } = useMultisigAccounts({ store });
 
   const availableTokens = computed<ITokenList>(() => (

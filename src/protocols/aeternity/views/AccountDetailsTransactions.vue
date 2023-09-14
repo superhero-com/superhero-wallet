@@ -65,7 +65,7 @@ export default defineComponent({
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { setScrollConf } = useScrollConfig();
 
     const {

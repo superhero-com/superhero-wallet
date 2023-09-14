@@ -47,7 +47,7 @@ export default defineComponent({
     const store = useStore();
     const { tokenProps } = useTokenProps();
 
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
     const {
       fetchTransactions,

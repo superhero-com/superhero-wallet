@@ -119,16 +119,15 @@ export default defineComponent({
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners, qrScannerOpen } = useUi();
     const { modalsOpen } = useModals();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
     const { addWalletNotification } = useNotifications({ store });
-    const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
+    const { loadCoinsData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
 
     const innerElement = ref<HTMLDivElement>();
 
     const isRestored = computed(() => store.state.isRestored);
-    const backedUpSeed = computed(() => store.state.backedUpSeed);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -180,12 +179,9 @@ export default defineComponent({
       }
     }
 
-    async function fetchAndSetChainNames() {
-      store.commit('setChainNames', await getCacheChainNames());
-    }
-
-    watch(isLoggedIn, (val) => {
-      if (val && !backedUpSeed.value) {
+    async function verifyBackedUpSeed() {
+      await watchUntilTruthy(isRestored);
+      if (!store.state.backedUpSeed) {
         addWalletNotification({
           title: t('pages.account.secureYourAccount'),
           text: t('pages.account.seedNotification'),
@@ -193,6 +189,17 @@ export default defineComponent({
           path: '/more/settings/seed-phrase',
           isSeedBackup: true,
         });
+      }
+    }
+
+    async function fetchAndSetChainNames() {
+      store.commit('setChainNames', await getCacheChainNames());
+    }
+
+    const unwatchIsLoggedIn = watch(isLoggedIn, async (val) => {
+      if (val) {
+        unwatchIsLoggedIn();
+        verifyBackedUpSeed();
       }
     });
 

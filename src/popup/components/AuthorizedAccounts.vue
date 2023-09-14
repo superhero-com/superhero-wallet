@@ -29,7 +29,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts } from '../../composables';
 
@@ -51,9 +50,7 @@ export default defineComponent({
     },
   },
   setup() {
-    const store = useStore();
-
-    const { isLocalAccountAddress } = useAccounts({ store });
+    const { isLocalAccountAddress } = useAccounts();
 
     return {
       isLocalAccountAddress,

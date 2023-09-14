@@ -55,7 +55,7 @@ export default defineComponent({
       activeMultisigAccountId,
       setActiveMultisigAccountId,
     } = useMultisigAccounts({ store });
-    const { getFiat } = useCurrencies({ store });
+    const { getFiat } = useCurrencies();
 
     const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));
 

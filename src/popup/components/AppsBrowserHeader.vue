@@ -58,7 +58,7 @@ import {
   ref,
   unref,
 } from 'vue';
-import { useStore } from 'vuex';
+import { useIonRouter } from '@ionic/vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { MODAL_DAPP_BROWSER_ACTIONS, BROWSER_ACTIONS } from '@/constants';
 import {
@@ -79,7 +79,6 @@ import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import SecureIcon from '@/icons/secure-lock.svg?vue-component';
 import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
 import BackIcon from '@/icons/chevron.svg?vue-component';
-import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
   components: {
@@ -95,18 +94,16 @@ export default defineComponent({
   },
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
-    const store = useStore();
     const ionRouter = useIonRouter();
     const { openModal } = useModals();
 
     const { homeRouteName } = useUi();
     const {
-      aeAccounts,
       isLoggedIn,
       activeAccount,
+      aeAccountsSelectOptions,
       setActiveAccountByAddress,
-      prepareAccountSelectOptions,
-    } = useAccounts({ store });
+    } = useAccounts();
 
     const currentHomeRouteName = computed(
       () => isLoggedIn.value
@@ -118,7 +115,6 @@ export default defineComponent({
       const url = new URL(props.selectedApp.url);
       return url.host;
     });
-    const aeAccountsSelectOptions = computed(() => prepareAccountSelectOptions(aeAccounts.value));
 
     const accountAddress = ref(unref(activeAccount.value.address));
 

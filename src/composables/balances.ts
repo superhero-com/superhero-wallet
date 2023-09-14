@@ -4,8 +4,8 @@ import BigNumber from 'bignumber.js';
 import type {
   Balance,
   BalanceRaw,
-  IDefaultComposableOptions,
 } from '@/types';
+import { STORAGE_KEYS } from '@/constants';
 import { handleUnknownError, isNotFoundError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
@@ -20,12 +20,11 @@ type Balances = Record<string, Balance>;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;
-const LOCAL_STORAGE_BALANCES_KEY = 'balances';
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 const { onNetworkChange } = createNetworkWatcher();
 
-const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
+const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
   serializer: {
     read: (val) => mapValues(val, (balance: BalanceRaw) => new BigNumber(balance)),
     write: (val) => mapValues(val, (balance) => balance.toFixed()),
@@ -36,9 +35,9 @@ const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
  * This composable detects if any app components requires balances data and polls the API
  * to live update the values. If no components are using it the polling stops.
  */
-export function useBalances({ store }: IDefaultComposableOptions) {
-  const { activeAccount, accounts } = useAccounts({ store });
-  const { getCurrentCurrencyRate } = useCurrencies({ store });
+export function useBalances() {
+  const { activeAccount, accounts } = useAccounts();
+  const { getCurrentCurrencyRate } = useCurrencies();
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
 

@@ -121,7 +121,7 @@ export default defineComponent({
     const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getMiddleware } = useMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
-    const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
+    const { activeAccount, isLocalAccountAddress } = useAccounts();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
