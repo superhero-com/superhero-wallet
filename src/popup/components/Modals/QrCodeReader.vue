@@ -54,6 +54,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { Camera } from '@capacitor/camera';
 import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls } from '@zxing/browser';
 import { useI18n } from 'vue-i18n';
 
@@ -154,17 +155,15 @@ export default defineComponent({
 
     async function hasPermission() {
       // check if user already granted permission
-      const status = await BarcodeScanner.checkPermission({ force: false });
+      const status = await Camera.checkPermissions();
 
-      if (status.granted) {
+      if (status.camera === 'granted') {
         return true;
-      } if ((status.denied || status.restricted || status.unknown) && status.asked) {
-        return false;
       }
 
-      const statusRequest = await BarcodeScanner.checkPermission({ force: true });
+      const statusRequest = await Camera.requestPermissions({ permissions: ['camera'] });
 
-      if (statusRequest.granted) {
+      if (statusRequest.camera === 'granted') {
         return true;
       }
       return false;
@@ -227,6 +226,7 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_MOBILE_APP) {
         if (await hasPermission()) {
+          cameraStatus.value = 'granted';
           await BarcodeScanner.prepare();
         } else {
           cameraStatus.value = 'denied';
