@@ -37,10 +37,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { useAccounts } from '@/composables';
+import { useAccounts, useNetworks } from '@/composables';
+import { useDispatch } from '@/composables/vuex';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 
 import Modal from '../Modal.vue';
@@ -60,13 +60,17 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
-    const { resetAccounts } = useAccounts({ store });
+    const { resetAccounts } = useAccounts();
+    const { resetNetworks } = useNetworks();
+
+    const resetVuex = useDispatch('reset');
 
     async function onReset() {
-      resetAccounts();
       props.resolve();
+      resetAccounts();
+      resetNetworks();
+      resetVuex();
       router.push({ name: ROUTE_INDEX });
     }
 

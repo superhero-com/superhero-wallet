@@ -165,7 +165,6 @@ import {
   computed,
   defineComponent,
 } from 'vue';
-import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
@@ -199,7 +198,6 @@ export default defineComponent({
   },
 
   setup() {
-    const store = useStore();
     const { tokenDetails } = useTokenProps();
     const {
       tokenData,
@@ -207,7 +205,7 @@ export default defineComponent({
       tokens,
       tokenPairs,
     } = tokenDetails.value;
-    const { formatCurrency } = useCurrencies({ store });
+    const { formatCurrency } = useCurrencies();
 
     const displayDexUrl = AE_DEX_URL.replace('https://', '');
 

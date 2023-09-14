@@ -42,7 +42,6 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   useAccounts,
@@ -63,7 +62,7 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-    const store = useStore();
+
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
@@ -73,7 +72,7 @@ export default defineComponent({
     } = useTransactionAndTokenFilter();
 
     const { viewportElement } = useViewport();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const scrollTopThreshold = 140;
     const maxHeight = ref(0);

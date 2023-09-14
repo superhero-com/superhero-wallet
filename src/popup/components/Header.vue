@@ -69,7 +69,6 @@
 <script lang="ts">
 import { IonHeader, IonToolbar, useIonRouter } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
@@ -107,13 +106,12 @@ export default defineComponent({
     IonToolbar,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const ionRouter = useIonRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),

@@ -7,7 +7,7 @@ import {
   watch,
 } from 'vue';
 import { isEqual } from 'lodash-es';
-import type { StorageKeysInput } from '@/types';
+import type { StorageKey } from '@/types';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useConnection } from './connection';
 import { useUi } from './ui';
@@ -33,7 +33,7 @@ interface ICreateStorageRefOptions<T> {
  */
 export function useStorageRef<T = string | object | any[]>(
   initialState: T,
-  keys: StorageKeysInput,
+  keys: StorageKey,
   options: ICreateStorageRefOptions<T> = {},
 ) {
   const {

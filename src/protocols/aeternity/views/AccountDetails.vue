@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
@@ -47,8 +47,9 @@ import {
   useConnection,
   useAeSdk,
 } from '@/composables';
-import { AE_DEX_URL } from '@/protocols/aeternity/config';
 import { ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+import { AE_DEX_URL } from '@/protocols/aeternity/config';
+import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
@@ -74,11 +75,10 @@ export default defineComponent({
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
-    const {
-      activeAccount,
-      activeAccountSimplexLink,
-      activeAccountFaucetUrl,
-    } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
+
+    const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
+    const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 
     return {
       UNFINISHED_FEATURES,

@@ -23,10 +23,8 @@ export default {
   },
 
   actions: {
-    signWithoutConfirmation({ rootState, rootGetters }, { data, options }) {
-      const { activeAccount, getAccountByAddress } = useAccounts({
-        store: { state: rootState, getters: rootGetters },
-      });
+    signWithoutConfirmation(_, { data, options }) {
+      const { activeAccount, getAccountByAddress } = useAccounts();
       const { secretKey, protocol } = (options?.fromAccount)
         ? getAccountByAddress(options.fromAccount)
         : activeAccount.value;

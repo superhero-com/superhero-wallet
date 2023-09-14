@@ -5,43 +5,46 @@
     has-close-button
     @close="resolve"
   >
-    <div
-      v-if="discovering"
-    >
-      <p>{{ $t('pages.index.restoringAccounts') }}</p>
-      <AnimatedSpinnerIcon class="loader" />
+    <div class="text-center">
+      <p
+        class="text-heading-2"
+        v-text="$t('pages.index.importWallet')"
+      />
+      <div v-if="discovering">
+        <AnimatedSpinnerIcon class="loader" />
+        <p class="text-description">
+          {{ $t('pages.index.restoringAccounts') }}<br>
+          {{ $t('common.actionMayTakeFewMoments') }}
+        </p>
+      </div>
+      <div v-else>
+        <p v-text="$t('pages.index.enterSeedPhrase')" />
+      </div>
     </div>
-    <div
-      v-else
-      class="import-account-form"
-    >
-      <span class="header"> {{ $t('pages.index.importWallet') }} </span>
-      <p class="regular-text">
-        {{ $t('pages.index.enterSeedPhrase') }}
-      </p>
 
-      <FormTextarea
-        v-model="mnemonic"
-        size="xs"
-        :label="$t('pages.index.seedPhrase')"
-        :placeholder="$t('pages.index.seedPlaceHolder')"
-        :message="error"
-        :resizable="false"
-        data-cy="field-mnemonic"
-        enter-submit
-        @submit="importAccount"
-      >
-        <template #label-after>
-          <a
-            class="scan-button"
-            data-cy="scan-button"
-            @click="openScanQrModal"
-          >
-            <QrScanIcon />
-          </a>
-        </template>
-      </FormTextarea>
-    </div>
+    <FormTextarea
+      v-model="mnemonic"
+      size="xs"
+      :label="$t('pages.index.seedPhrase')"
+      :placeholder="$t('pages.index.seedPlaceHolder')"
+      :message="error"
+      :resizable="false"
+      :readonly="discovering"
+      data-cy="field-mnemonic"
+      enter-submit
+      @submit="importAccount"
+    >
+      <template #label-after>
+        <a
+          data-cy="scan-button"
+          class="scan-button"
+          :class="{ disabled: discovering }"
+          @click="openScanQrModal"
+        >
+          <QrScanIcon />
+        </a>
+      </template>
+    </FormTextarea>
 
     <template #footer>
       <BtnMain
@@ -99,7 +102,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
-    const { discoverAccounts, setMnemonic } = useAccounts({ store });
+    const { discoverAccounts, setMnemonic } = useAccounts();
     const { openModal } = useModals();
     const { loginTargetLocation } = useUi();
 
@@ -167,24 +170,7 @@ export default defineComponent({
   text-align: center;
 
   .loader {
-    width: 64px;
-  }
-
-  .import-account-form {
-    .header {
-      @extend %face-sans-18-medium;
-
-      color: variables.$color-white;
-    }
-
-    .regular-text {
-      @extend %face-sans-16-light;
-
-      color: variables.$color-white;
-      text-align: center;
-      margin-bottom: 24px;
-      margin-top: 8px;
-    }
+    width: 56px;
   }
 
   .scan-button {
@@ -192,6 +178,11 @@ export default defineComponent({
     display: block;
     width: 32px;
     height: 24px;
+
+    &.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
   }
 }
 </style>

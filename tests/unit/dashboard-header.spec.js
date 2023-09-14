@@ -6,6 +6,7 @@ jest.mock('../../src/store/index.js', () => ({}));
 jest.mock('../../src/composables/accounts.ts', () => ({
   useAccounts: jest.fn(() => ({
     accounts: [],
+    protocolsInUse: [],
   })),
 }));
 

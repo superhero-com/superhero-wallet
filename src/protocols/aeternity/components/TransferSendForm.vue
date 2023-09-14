@@ -165,6 +165,12 @@ import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
+import type {
+  IAsset,
+  IFormSelectOption,
+  ITokenList,
+  TransferFormModel,
+} from '@/types';
 import {
   MODAL_PAYLOAD_FORM,
   PROTOCOL_AETERNITY,
@@ -172,6 +178,7 @@ import {
 import {
   checkIfSuperheroCallbackUrl,
   isUrlValid,
+  prepareAccountSelectOptions,
 } from '@/utils';
 import {
   useAccounts,
@@ -185,12 +192,6 @@ import {
   AE_CONTRACT_ID,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
-import type {
-  IAsset,
-  IFormSelectOption,
-  ITokenList,
-  TransferFormModel,
-} from '@/types';
 import { useState } from '@/composables/vuex';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
@@ -238,7 +239,11 @@ export default defineComponent({
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
     isMultisig: Boolean,
   },
-  emits: ['update:transferData', 'success', 'error'],
+  emits: [
+    'update:transferData',
+    'success',
+    'error',
+  ],
   setup(props, { emit }) {
     const store = useStore();
     const route = useRoute();
@@ -249,15 +254,14 @@ export default defineComponent({
 
     const { openModal } = useModals();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
-    const { balance } = useBalances({ store });
-    const { marketData } = useCurrencies({ store });
+    const { balance } = useBalances();
+    const { marketData } = useCurrencies();
     const {
       accounts,
       activeAccount,
       setActiveAccountByGlobalIdx,
       setActiveAccountByAddress,
-      prepareAccountSelectOptions,
-    } = useAccounts({ store });
+    } = useAccounts();
 
     const fungibleTokens = useState('fungibleTokens');
 

@@ -31,8 +31,8 @@ const { onNetworkChange } = createNetworkWatcher();
  * that wants to use this data.
  */
 export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const { accounts } = useAccounts({ store });
-  const { accountsTotalBalance } = useBalances({ store });
+  const { accounts } = useAccounts();
+  const { accountsTotalBalance } = useBalances();
   const { nodeNetworkId } = useAeSdk({ store });
 
   const {

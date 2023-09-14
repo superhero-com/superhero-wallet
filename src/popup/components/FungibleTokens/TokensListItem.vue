@@ -48,10 +48,9 @@
 import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '../../router/routeNames';
-import { useCurrencies } from '../../../composables';
+import { useCurrencies } from '@/composables';
+import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
 
 import TokenAmount from '../TokenAmount.vue';
 import Tokens from '../Tokens.vue';
@@ -71,12 +70,11 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const {
       getCurrentCurrencyRate,
       getFormattedFiat,
       formatCurrency,
-    } = useCurrencies({ store });
+    } = useCurrencies();
 
     /**
      * price and balanceFormatted are applicable only for AE Coin

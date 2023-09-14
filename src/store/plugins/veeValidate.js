@@ -64,8 +64,8 @@ configure({
 });
 
 export default (store) => {
-  const { balance, updateBalances } = useBalances({ store });
-  const { currencyRates } = useCurrencies({ store, withoutPolling: true });
+  const { balance, updateBalances } = useBalances();
+  const { currencyRates } = useCurrencies({ withoutPolling: true });
   const { getAeSdk } = useAeSdk({ store });
 
   const NAME_STATES = {

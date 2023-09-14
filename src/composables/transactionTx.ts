@@ -49,7 +49,7 @@ export function useTransactionTx({
   externalAddress,
 }: UseTransactionOptions) {
   const { dexContracts } = useAeSdk({ store });
-  const { accounts, activeAccount } = useAccounts({ store });
+  const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts({ store });
 
   const outerTx = ref<ITx | undefined>(tx);

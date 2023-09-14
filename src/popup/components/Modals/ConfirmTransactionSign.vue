@@ -218,7 +218,7 @@ export default defineComponent({
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 

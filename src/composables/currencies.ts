@@ -4,7 +4,6 @@ import type {
   CurrencyCode,
   CurrencyRates,
   ICurrency,
-  IDefaultComposableOptions,
   Protocol,
   MarketData,
 } from '@/types';
@@ -23,7 +22,7 @@ import { useAccounts } from '@/composables/accounts';
 import { CoinGecko } from '../lib/CoinGecko';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
-export interface UseCurrenciesOptions extends IDefaultComposableOptions {
+export interface UseCurrenciesOptions {
   withoutPolling?: boolean;
 }
 
@@ -50,9 +49,8 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 
 export function useCurrencies({
   withoutPolling = false,
-  store,
-}: UseCurrenciesOptions) {
-  const { protocolsInUse, isLoggedIn } = useAccounts({ store });
+}: UseCurrenciesOptions = {}) {
+  const { protocolsInUse, isLoggedIn } = useAccounts();
   const currentCurrencyInfo = computed(
     (): ICurrency => CURRENCIES.find(({ code }) => code === currentCurrencyCode.value)!,
   );

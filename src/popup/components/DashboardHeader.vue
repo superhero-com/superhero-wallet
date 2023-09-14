@@ -23,7 +23,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useAccounts, useBalances } from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS } from '@/popup/router/routeNames';
 
@@ -38,15 +37,14 @@ export default defineComponent({
     AccountCard,
   },
   setup() {
-    const store = useStore();
     const {
       accounts,
       accountsAddressList,
       activeAccountGlobalIdx,
       setActiveAccountByGlobalIdx,
-    } = useAccounts({ store });
+    } = useAccounts();
 
-    const { accountsTotalBalance } = useBalances({ store });
+    const { accountsTotalBalance } = useBalances();
 
     return {
       ROUTE_ACCOUNT_DETAILS,

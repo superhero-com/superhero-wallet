@@ -27,7 +27,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import { useConnection, useCurrencies } from '@/composables';
 import MainBalance from './MainBalance.vue';
@@ -44,8 +43,7 @@ export default defineComponent({
     horizontalOfflineMessage: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { getFormattedFiat } = useCurrencies({ store });
+    const { getFormattedFiat } = useCurrencies();
     const { isOnline } = useConnection();
 
     const currencyFormatted = computed(() => getFormattedFiat(props.balance, props.protocol));

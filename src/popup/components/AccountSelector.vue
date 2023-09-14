@@ -51,9 +51,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
-import { useAccounts } from '../../composables';
-import type { IFormSelectOption } from '../../types';
+import type { IFormSelectOption } from '@/types';
+import { useAccounts } from '@/composables';
 
 import Avatar from './Avatar.vue';
 import AddressTruncated from './AddressTruncated.vue';
@@ -79,9 +78,7 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup() {
-    const store = useStore();
-
-    const { accountsSelectOptions } = useAccounts({ store });
+    const { accountsSelectOptions } = useAccounts();
 
     return { accountsSelectOptions };
   },

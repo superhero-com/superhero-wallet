@@ -33,7 +33,7 @@ export default defineComponent({
 
     const { isOnline } = useConnection();
     const { isAeNodeConnecting, isAeNodeReady, isAeNodeError } = useAeSdk({ store });
-    const { isLoggedIn } = useAccounts({ store });
+    const { isLoggedIn } = useAccounts();
 
     const justBeenConnected = ref(false);
 

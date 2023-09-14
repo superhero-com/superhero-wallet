@@ -42,7 +42,7 @@ export default (store) => {
   const {
     aeAccounts,
     getLastActiveProtocolAccount,
-  } = useAccounts({ store });
+  } = useAccounts();
 
   store.registerModule('names', {
     namespaced: true,

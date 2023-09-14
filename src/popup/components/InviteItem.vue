@@ -130,10 +130,10 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
 
-    const { marketData } = useCurrencies({ store });
+    const { getLastActiveProtocolAccount } = useAccounts();
+    const { marketData } = useCurrencies();
+    const { balance } = useBalances();
     const { getAeSdk } = useAeSdk({ store });
-    const { balance } = useBalances({ store });
-    const { getLastActiveProtocolAccount } = useAccounts({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',

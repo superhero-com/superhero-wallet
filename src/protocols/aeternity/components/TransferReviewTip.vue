@@ -75,8 +75,6 @@
 </template>
 
 <script>
-import { useStore } from 'vuex';
-
 import { AGGREGATOR_URL, PROTOCOL_AETERNITY } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
@@ -108,8 +106,7 @@ export default {
     transferData: { type: Object, required: true },
   },
   setup() {
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     return {
       activeAccount,

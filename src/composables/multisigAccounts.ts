@@ -66,7 +66,7 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
-  const { aeAccounts } = useAccounts({ store });
+  const { aeAccounts } = useAccounts();
 
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [
     ...multisigAccounts.value,

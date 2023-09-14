@@ -3,10 +3,7 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="invite-page">
         <AccountInfo
-          :address="activeAccount.address"
-          :name="activeAccount.name"
-          :idx="activeAccount.idx"
-          :protocol="activeAccount.protocol"
+          :account="activeAccount"
           can-copy-address
           with-protocol-icon
         />
@@ -110,10 +107,10 @@ export default defineComponent({
     const store = useStore();
     const loading = ref(false);
 
-    const { activeAccount } = useAccounts({ store });
-    const { marketData } = useCurrencies({ store });
+    const { activeAccount } = useAccounts();
+    const { marketData } = useCurrencies();
     const { getAeSdk } = useAeSdk({ store });
-    const { balance } = useBalances({ store });
+    const { balance } = useBalances();
 
     const formModel = ref<IFormModel>({
       amount: '',

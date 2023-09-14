@@ -24,7 +24,6 @@ import {
   defineAsyncComponent,
   defineComponent,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { Protocol, ProtocolView, ProtocolViewsConfig } from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
@@ -59,11 +58,10 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const store = useStore();
     const { params, meta } = useRoute();
 
     const { activeNetwork } = useNetworks();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const ownerProtocol = detectProtocolByOwner(
       activeNetwork.value.type,

@@ -87,7 +87,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import {
   useAccounts,
 } from '@/composables';
@@ -127,8 +126,7 @@ export default defineComponent({
     showFiat: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { activeAccount } = useAccounts({ store });
+    const { activeAccount } = useAccounts();
 
     const isRecipientName = computed(
       () => props.recipientAddress && isAensNameValid(props.recipientAddress),

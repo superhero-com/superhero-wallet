@@ -88,7 +88,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const { t } = useI18n();
-    const { accounts, activeAccount } = useAccounts({ store });
+    const { accounts, activeAccount } = useAccounts();
     const { dexContracts } = useAeSdk({ store });
     const { viewportElement } = useViewport();
 

@@ -5,7 +5,6 @@ import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import type {
   IAccount,
   IAccountRaw,
-  IDefaultComposableOptions,
   IFormSelectOption,
   Protocol,
   ProtocolRecord,
@@ -14,41 +13,71 @@ import {
   ACCOUNT_HD_WALLET,
   PROTOCOL_AETERNITY,
   PROTOCOLS,
+  STORAGE_KEYS,
 } from '@/constants';
 import {
-  getDefaultAccountLabel,
+  prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { AE_FAUCET_URL } from '@/protocols/aeternity/config';
-import { buildSimplexLink } from '@/protocols/aeternity/helpers';
 import { useStorageRef } from './composablesHelpers';
 
-let isIdxInitialized = false;
+let isInitialized = false;
 
 /**
  * TODO Implement more safe way of storing mnemonic
+ * For example by encrypting it with password or pin code.
  */
-const mnemonic = useStorageRef<string>('', 'mnemonic');
-const accountsRaw = useStorageRef<IAccountRaw[]>([], 'accounts-raw');
-const activeAccountGlobalIdx = useStorageRef<number>(0, 'active-account-global-idx');
-const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>({}, 'protocol-last-active-account-idx');
+const mnemonic = useStorageRef<string>(
+  '',
+  STORAGE_KEYS.mnemonic,
+  { backgroundSync: true },
+);
+
+const accountsRaw = useStorageRef<IAccountRaw[]>(
+  [],
+  STORAGE_KEYS.accountsRaw,
+  { backgroundSync: true },
+);
+
+const activeAccountGlobalIdx = useStorageRef<number>(
+  0,
+  STORAGE_KEYS.activeAccountGlobalIdx,
+  { backgroundSync: true },
+);
+
+const protocolLastActiveGlobalIdx = useStorageRef<ProtocolRecord<number>>(
+  {},
+  STORAGE_KEYS.protocolLastActiveAccountIdx,
+  { backgroundSync: true },
+);
 
 const mnemonicSeed = computed(() => mnemonic.value ? mnemonicToSeed(mnemonic.value) : null);
 
 const accounts = computed((): IAccount[] => {
-  if (!mnemonic.value || !accountsRaw.value.length) {
+  if (!mnemonic.value || !accountsRaw.value?.length) {
     return [];
   }
 
+  const idxList = PROTOCOLS.reduce(
+    (list, protocol) => ({ ...list, [protocol]: 0 }),
+    {} as Record<Protocol, number>,
+  );
+
   return accountsRaw.value
-    .map((account, index) => {
+    .map((account, globalIdx) => {
+      const idx = idxList[account.protocol];
       const hdWallet = ProtocolAdapterFactory
         .getAdapter(account.protocol)
-        .getHdWalletAccountFromMnemonicSeed(mnemonicSeed.value, account.idx) as any;
+        // Type `any` here is used only to satisfy the account address type differences
+        // TODO remove `any` when IAccount.address will be set to `string`.
+        .getHdWalletAccountFromMnemonicSeed(mnemonicSeed.value, idx) as any;
+
+      idxList[account.protocol] += 1;
 
       return {
-        globalIdx: index,
+        globalIdx,
+        idx,
         ...account,
         ...hdWallet,
       };
@@ -75,16 +104,16 @@ const accountsAddressList = computed(
   (): string[] => accounts.value.map(({ address }) => address),
 );
 
+const accountsSelectOptions = computed(
+  (): IFormSelectOption[] => prepareAccountSelectOptions(accounts.value),
+);
+
+const aeAccountsSelectOptions = computed(
+  (): IFormSelectOption[] => prepareAccountSelectOptions(aeAccounts.value),
+);
+
 const isLoggedIn = computed(
   (): boolean => activeAccount.value && Object.keys(activeAccount.value).length > 0,
-);
-
-const activeAccountSimplexLink = computed(
-  () => buildSimplexLink(activeAccount.value.address),
-);
-
-const activeAccountFaucetUrl = computed(
-  () => `${AE_FAUCET_URL}?address=${activeAccount.value.address}`,
 );
 
 const protocolsInUse = computed(
@@ -96,73 +125,13 @@ const protocolsInUse = computed(
  * The app is storing only basic account data in the browser storage.
  * The wallets's data is created in fly with the use of computed properties.
  */
-export function useAccounts({ store }: IDefaultComposableOptions) {
-  const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
-
-  const activeAccountName = computed(() => getDefaultName(activeAccount.value.address));
-
-  /**
-   * Accounts data formatted as the form select options
-   */
-  function prepareAccountSelectOptions(accountList: IAccount[]): IFormSelectOption[] {
-    return accountList.map((acc) => ({
-      text: getDefaultName(acc.address) || getDefaultAccountLabel(acc),
-      value: acc.address,
-      address: acc.address,
-      idx: acc.idx,
-      protocol: acc.protocol || PROTOCOL_AETERNITY,
-      globalIdx: acc.globalIdx,
-    }));
-  }
-
-  const accountsSelectOptions = computed(() => prepareAccountSelectOptions(accounts.value));
-
-  const aeAccountsSelectOptions = computed(() => prepareAccountSelectOptions(aeAccounts.value));
-
-  function setMnemonic(val: string) {
-    mnemonic.value = val;
-  }
-
-  function setGeneratedMnemonic() {
-    setMnemonic(generateMnemonic());
-  }
-
+export function useAccounts() {
   function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
 
   function getAccountByGlobalIdx(globalIdx: number): IAccount | undefined {
     return accounts.value.find((acc) => acc.globalIdx === globalIdx);
-  }
-
-  function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
-    const account = getAccountByGlobalIdx(globalIdx);
-
-    activeAccountGlobalIdx.value = account?.globalIdx || 0;
-
-    if (account) {
-      protocolLastActiveGlobalIdx.value[account.protocol] = account.globalIdx;
-    }
-  }
-
-  function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
-    if (address) {
-      setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
-    }
-  }
-
-  /**
-   * Determine if provided address belongs to any of the current user's accounts.
-   */
-  function isLocalAccountAddress(address: Encoded.AccountAddress): boolean {
-    return accountsAddressList.value.includes(address);
-  }
-
-  function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {
-    const protocolAccounts = accountsGroupedByProtocol.value[protocol];
-    return protocolAccounts
-      ? protocolAccounts[protocolAccounts.length - 1]
-      : undefined;
   }
 
   /**
@@ -179,18 +148,62 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
       : accounts.value.find((account) => account.protocol === protocol);
   }
 
+  function getLastProtocolAccount(protocol: Protocol): IAccount | undefined {
+    const protocolAccounts = accountsGroupedByProtocol.value[protocol];
+    return (protocolAccounts)
+      ? protocolAccounts[protocolAccounts.length - 1]
+      : undefined;
+  }
+
+  function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
+    const account = getAccountByGlobalIdx(globalIdx);
+    activeAccountGlobalIdx.value = account?.globalIdx || 0;
+    if (account) {
+      protocolLastActiveGlobalIdx.value[account.protocol] = account.globalIdx;
+    }
+  }
+
+  function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
+    if (address) {
+      setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
+    }
+  }
+
+  function setActiveAccountByProtocolAndIdx(protocol: Protocol, idx: number) {
+    const accountFound = accountsGroupedByProtocol.value[protocol]
+      ?.find((account) => account.idx === idx);
+    if (accountFound) {
+      setActiveAccountByGlobalIdx(accountFound.globalIdx);
+    }
+  }
+
+  function setMnemonic(val: string) {
+    mnemonic.value = val;
+  }
+
+  function setGeneratedMnemonic() {
+    setMnemonic(generateMnemonic());
+  }
+
+  /**
+   * Determine if provided address belongs to any of the current user's accounts.
+   */
+  function isLocalAccountAddress(address: Encoded.AccountAddress): boolean {
+    return accountsAddressList.value.includes(address);
+  }
+
   function addRawAccount({
     isRestored,
     protocol,
-  }: Omit<IAccountRaw, 'type' | 'idx'>) {
-    const lastProtocolAccount = getLastProtocolAccount(protocol);
-    const idx: number = (lastProtocolAccount) ? lastProtocolAccount.idx + 1 : 0;
+  }: Omit<IAccountRaw, 'type'>): number {
     accountsRaw.value.push({
       protocol,
       isRestored,
-      idx,
       type: ACCOUNT_HD_WALLET,
     });
+    const lastProtocolAccount = getLastProtocolAccount(protocol);
+    const idx: number = (lastProtocolAccount) ? lastProtocolAccount.idx : 0;
+    return idx;
   }
 
   /**
@@ -207,8 +220,10 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     );
 
     PROTOCOLS.forEach((protocol, index) => {
-      for (let i = 0; i < accountsToRecover[index]; i += 1) {
-        addRawAccount({ isRestored: true, protocol });
+      if (accountsToRecover[index] > 0) {
+        for (let i = 0; i < accountsToRecover[index]; i += 1) {
+          addRawAccount({ isRestored: true, protocol });
+        }
       }
     });
   }
@@ -220,10 +235,10 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   }
 
   (async () => {
-    if (!isIdxInitialized) {
-      await watchUntilTruthy(() => store.state.isRestored);
+    if (!isInitialized) {
+      await watchUntilTruthy(isLoggedIn);
 
-      isIdxInitialized = true;
+      isInitialized = true;
 
       protocolLastActiveGlobalIdx
         .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
@@ -239,15 +254,11 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     accountsRaw,
     activeAccount,
     activeAccountGlobalIdx,
-    activeAccountFaucetUrl,
-    activeAccountName,
-    activeAccountSimplexLink,
     isLoggedIn,
     mnemonic,
     mnemonicSeed,
     protocolsInUse,
     discoverAccounts,
-    prepareAccountSelectOptions,
     isLocalAccountAddress,
     addRawAccount,
     getAccountByAddress,
@@ -255,6 +266,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     getLastActiveProtocolAccount,
     setActiveAccountByAddress,
     setActiveAccountByGlobalIdx,
+    setActiveAccountByProtocolAndIdx,
     setMnemonic,
     setGeneratedMnemonic,
     resetAccounts,

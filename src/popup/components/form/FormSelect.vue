@@ -35,8 +35,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import { MODAL_ACCOUNT_SELECT_OPTIONS, MODAL_FORM_SELECT_OPTIONS } from '@/constants';
-import type { IFormSelectOption } from '../../../types';
-import { useModals } from '../../../composables';
+import type { IFormSelectOption } from '@/types';
+import { useModals } from '@/composables';
 
 import BtnPlain from '../buttons/BtnPlain.vue';
 import InputField from '../InputField.vue';
