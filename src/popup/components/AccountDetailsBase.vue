@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="account-details"
-  >
+  <div class="account-details">
     <div class="account-info-wrapper">
       <slot
         v-if="$slots['account-info']"
@@ -53,7 +51,10 @@
         />
       </div>
 
-      <div class="tabs-content">
+      <div
+        class="tabs-content"
+        :style="{ height: routerHeight }"
+      >
         <ion-router-outlet />
       </div>
     </div>
@@ -68,6 +69,8 @@ import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
+  ref,
+  nextTick,
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
@@ -116,13 +119,22 @@ export default defineComponent({
 
     const { balance } = useBalances({ store });
 
+    const routerHeight = ref<string>();
+
     const balanceNumeric = computed(() => balance.value.toNumber());
 
     const routeName = computed(() => route.name);
 
-    const showFilters = computed<boolean | any>(() => (
-      scrollConf.value
-    ));
+    const showFilters = computed<boolean>(() => (!!scrollConf.value));
+
+    function calculateRouterHeight() {
+      nextTick(() => {
+        const ionicWrapperBottom = document.querySelector('.app-wrapper')?.getBoundingClientRect()?.bottom;
+        const headerElementBottom = document.querySelector('.header')?.getBoundingClientRect()?.bottom;
+        const routerContent = ionicWrapperBottom! - headerElementBottom!;
+        routerHeight.value = `${routerContent}px`;
+      });
+    }
 
     watch(
       () => route,
@@ -131,12 +143,26 @@ export default defineComponent({
       },
     );
 
+    /**
+     * Observe tab height changes and recalculate router height.
+     * Tabs change height when filters are shown/hidden
+     */
+    function observeTabsHeight() {
+      const resizeObserver = new ResizeObserver(() => {
+        calculateRouterHeight();
+      });
+      resizeObserver.observe(document.querySelector('.header') as Element);
+    }
+
     onMounted(() => {
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#191919',
         });
       }
+
+      calculateRouterHeight();
+      observeTabsHeight();
     });
 
     onBeforeUnmount(() => {
@@ -153,6 +179,7 @@ export default defineComponent({
       routeName,
       balanceNumeric,
       activeAccount,
+      routerHeight,
     };
   },
 });

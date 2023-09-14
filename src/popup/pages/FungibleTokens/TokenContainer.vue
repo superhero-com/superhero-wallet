@@ -1,8 +1,6 @@
 <template>
   <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+    <ion-content class="ion-padding">
       <div class="token-container">
         <Loader v-if="loading" />
 
@@ -69,6 +67,7 @@
         </div>
         <ion-router-outlet
           class="token-router"
+          :style="{ height: routerHeight }"
         />
       </div>
     </ion-content>
@@ -89,6 +88,7 @@ import {
   onMounted,
   ref,
   unref,
+  nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
@@ -193,6 +193,7 @@ export default defineComponent({
         exact: true,
       },
     ];
+    const routerHeight = ref<string>();
     const loading = ref<boolean>(true);
     const tokenPairs = ref<Record<string, IToken | null>>({ token0: null, token1: null });
     const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
@@ -219,12 +220,33 @@ export default defineComponent({
 
     const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);
 
+    function calculateRouterHeight() {
+      nextTick(() => {
+        const ionicWrapperBottom = document.querySelector('.app-wrapper')?.getBoundingClientRect()?.bottom;
+        const tabsWrapperElementBottom = document.querySelector('.sticky-tabs-wrapper')?.getBoundingClientRect().bottom;
+        routerHeight.value = `${ionicWrapperBottom! - tabsWrapperElementBottom!}px`!;
+      });
+    }
+
+    /**
+     * Observe tabs wrapper height changes and recalculate router height.
+     * Tabs change height when filters are shown/hidden
+     */
+    function observeTabsWrapperHeight() {
+      const resizeObserver = new ResizeObserver(() => {
+        calculateRouterHeight();
+      });
+      resizeObserver.observe(document.querySelector('.sticky-tabs-wrapper') as Element);
+    }
+
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
         await getAeSdk();
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
+      calculateRouterHeight();
+      observeTabsWrapperHeight();
     });
 
     onIonViewDidEnter(() => {
@@ -265,14 +287,15 @@ export default defineComponent({
       routeName,
       isMultisig,
       routeParams,
+      routerHeight,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .token-container {
   --screen-padding-x: 12px;
