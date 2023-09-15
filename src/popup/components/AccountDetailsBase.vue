@@ -70,7 +70,6 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  nextTick,
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
@@ -128,12 +127,10 @@ export default defineComponent({
     const showFilters = computed<boolean>(() => (!!scrollConf.value));
 
     function calculateRouterHeight() {
-      nextTick(() => {
-        const ionicWrapperBottom = document.querySelector('.app-wrapper')?.getBoundingClientRect()?.bottom;
-        const headerElementBottom = document.querySelector('.header')?.getBoundingClientRect()?.bottom;
-        const routerContent = ionicWrapperBottom! - headerElementBottom!;
-        routerHeight.value = `${routerContent}px`;
-      });
+      const ionicWrapperBottom = document.querySelector('.app-wrapper')?.getBoundingClientRect()?.bottom;
+      const headerElementBottom = document.querySelector('.header')?.getBoundingClientRect()?.bottom;
+      const routerContent = Math.ceil(ionicWrapperBottom! - headerElementBottom!);
+      routerHeight.value = `${routerContent}px`;
     }
 
     watch(
@@ -160,9 +157,10 @@ export default defineComponent({
           color: '#191919',
         });
       }
-
-      calculateRouterHeight();
-      observeTabsHeight();
+      setTimeout(() => {
+        observeTabsHeight();
+        calculateRouterHeight();
+      }, 250);
     });
 
     onBeforeUnmount(() => {
@@ -268,7 +266,7 @@ export default defineComponent({
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
-    height: 60vh;
+    height: 350px;
   }
 
   .close-button {
