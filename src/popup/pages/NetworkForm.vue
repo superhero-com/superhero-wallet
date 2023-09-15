@@ -238,7 +238,6 @@ export default defineComponent({
         const keys: (NetworkProtocolSettingsRequired | AeNetworkProtocolSettings)[] = [
           'nodeUrl',
           'middlewareUrl',
-          'compilerUrl',
         ];
         keys.forEach((key) => {
           const val = route.query[key];

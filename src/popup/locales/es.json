@@ -565,8 +565,6 @@
       "networkUrlLabel": "URL de la red",
       "networkMiddlewarePlaceholder": "Introduce la URL del middleware de la red",
       "networkMiddlewareLabel": "Middleware de la red",
-      "networkCompilerPlaceholder": "Introduce la URL del compilador de la red",
-      "networkCompilerLabel": "Compilador de la red",
       "save": "Conectar"
     },
     "donate-error": {

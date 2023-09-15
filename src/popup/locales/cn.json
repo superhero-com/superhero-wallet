@@ -571,8 +571,6 @@
       "networkUrlLabel": "网络 Url",
       "networkMiddlewarePlaceholder": "输入网络中间件url",
       "networkMiddlewareLabel": "网络中间件",
-      "networkCompilerPlaceholder": "输入网络编译器url",
-      "networkCompilerLabel": "网络编译器",
       "save": "连接"
     },
     "donate-error": {
