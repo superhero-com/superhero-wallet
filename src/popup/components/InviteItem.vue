@@ -21,6 +21,7 @@
       <BtnMain
         v-if="inviteLinkBalance > 0"
         class="button"
+        variant="muted"
         :text="$t('pages.invite.claim')"
         @click="claim"
       />
@@ -261,8 +262,7 @@ export default defineComponent({
 
   .invite-link {
     width: 100%;
-    margin-bottom: 5px;
-    padding-block: 4px;
+    margin: 12px 0;
 
     &-url {
       display: block;
@@ -288,6 +288,7 @@ export default defineComponent({
     .date {
       font-size: 11px;
       color: variables.$color-white;
+      opacity: 0.5;
     }
   }
 
