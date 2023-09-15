@@ -53,7 +53,7 @@
         <slot name="tip-url" />
 
         <DetailsItem
-          v-if="contractId"
+          v-if="contractId && isContract(contractId)"
           :label="$t('common.smartContract')"
           small
         >
@@ -236,6 +236,7 @@ import {
   formatTime,
   splitAddress,
 } from '@/utils';
+import { isContract } from '@/protocols/aeternity/helpers';
 
 import TransactionOverview from '@/popup/components/TransactionOverview.vue';
 import SwapRoute from '@/popup/components/SwapRoute.vue';
@@ -302,6 +303,7 @@ export default defineComponent({
     formatDate,
     formatTime,
     splitAddress,
+    isContract,
   }),
 });
 </script>
