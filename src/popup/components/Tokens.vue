@@ -177,6 +177,7 @@ export default defineComponent({
 
   .icon {
     user-select: none;
+    width: max-content;
 
     .icon-image {
       width: var(--icon-size);
