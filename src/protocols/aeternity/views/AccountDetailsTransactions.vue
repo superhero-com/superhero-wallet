@@ -1,11 +1,12 @@
 <template>
-  <ion-page>
+  <ion-page
+    class="account-details-transactions"
+  >
     <ion-content
       class="ion-padding"
     >
       <div
         ref="innerScrollElem"
-        class="account-details-transactions"
       >
         <TransactionList
           v-if="isOnline"
@@ -153,6 +154,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .account-details-transactions {
   --filter-top-offset: 175px;
+
+  padding: 0 12px;
 
   :deep(.filters) {
     position: sticky;

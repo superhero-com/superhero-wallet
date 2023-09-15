@@ -199,7 +199,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   margin: 0 calc(-1 * var(--screen-padding-x));
-  padding: 10px 12px;
+  padding: 10px 0;
 
   .list {
     padding: 0;
