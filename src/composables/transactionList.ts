@@ -286,6 +286,15 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
       }
     });
 
+    (transactions.value[address]?.loaded?.filter(({ pending }) => pending) || [])
+      .forEach((transaction) => {
+        const newTransaction = preparedTransactions
+          .find((tx) => tx.hash === transaction.hash && !tx.pending);
+        if (newTransaction) {
+          updateAccountTransaction(address, newTransaction);
+        }
+      });
+
     preparedTransactions = recent
       ? preparedTransactions.slice(0, limit)
       : preparedTransactions;
