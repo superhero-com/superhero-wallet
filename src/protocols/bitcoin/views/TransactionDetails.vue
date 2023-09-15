@@ -10,7 +10,6 @@
         :total-amount="totalAmount"
         :direction="direction"
         :explorer-url="explorerUrl"
-        :is-local-account-address="isLocalAccountAddress"
         :hash="hash"
         :none-ae-coin="tokens"
         :protocol="PROTOCOL_BITCOIN"

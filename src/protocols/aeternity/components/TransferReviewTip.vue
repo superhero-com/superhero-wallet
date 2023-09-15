@@ -34,6 +34,7 @@
         <AddressTruncated
           show-explorer-link
           :address="activeAccount.address"
+          :protocol="PROTOCOL_AETERNITY"
         />
       </div>
     </div>
@@ -44,6 +45,7 @@
         :amount="+transferData.amount"
         :symbol="tokenSymbol"
         :hide-fiat="isAex9"
+        :protocol="PROTOCOL_AETERNITY"
         data-cy="review-total"
       />
       <span class="lowercase">{{ $t('pages.send.to') }}</span>
@@ -74,8 +76,8 @@
 
 <script>
 import { useStore } from 'vuex';
-import { AGGREGATOR_URL } from '@/constants';
 
+import { AGGREGATOR_URL, PROTOCOL_AETERNITY } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
 import { getDefaultAccountLabel } from '@/utils';
@@ -117,6 +119,7 @@ export default {
     return {
       AGGREGATOR_URL,
       AE_CONTRACT_ID,
+      PROTOCOL_AETERNITY,
       note: '',
       noteMaxLength: 280,
     };

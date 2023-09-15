@@ -14,7 +14,10 @@
     </template>
 
     <template #balance>
-      <BalanceInfo :balance="+(activeMultisigAccount.balance || 0)" />
+      <BalanceInfo
+        :balance="+(activeMultisigAccount.balance || 0)"
+        :protocol="PROTOCOL_AETERNITY"
+      />
     </template>
 
     <template #buttons>

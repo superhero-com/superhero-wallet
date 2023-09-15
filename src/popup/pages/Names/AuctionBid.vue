@@ -16,6 +16,7 @@
           v-model="amount"
           name="amount"
           :message="amountError || errorMessage"
+          :protocol="PROTOCOL_AETERNITY"
           readonly
         />
       </Field>
@@ -24,6 +25,7 @@
           <template #value>
             <TokenAmount
               :amount="+txFee"
+              :protocol="PROTOCOL_AETERNITY"
               hide-fiat
             />
           </template>
@@ -32,6 +34,7 @@
           <template #value>
             <TokenAmount
               :amount="+amountTotal"
+              :protocol="PROTOCOL_AETERNITY"
             />
           </template>
         </DetailsItem>
@@ -72,6 +75,7 @@ import { useForm, useFieldError, Field } from 'vee-validate';
 import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk } from '@/composables';
 import { useGetter } from '@/composables/vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
   AE_AENS_BID_MIN_RATIO,
@@ -160,6 +164,7 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
       loading,
       amount,
       amountTotal,

@@ -33,7 +33,6 @@ import {
 } from 'vue';
 import type { Protocol } from '@/types';
 import { truncateAddress } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
@@ -48,9 +47,9 @@ export default defineComponent({
   },
   props: {
     address: { type: String, required: true },
+    protocol: { type: String as PropType<Protocol>, required: true },
     showExplorerLink: Boolean,
     showProtocolIcon: Boolean,
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));

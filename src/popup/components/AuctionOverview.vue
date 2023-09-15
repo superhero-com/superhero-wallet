@@ -2,7 +2,10 @@
   <div class="auction-overview">
     <DetailsItem :label="$t('pages.auctionBid.current-highest-bid')">
       <template #value>
-        <TokenAmount :amount="amount" />
+        <TokenAmount
+          :amount="amount"
+          :protocol="PROTOCOL_AETERNITY"
+        />
       </template>
     </DetailsItem>
     <DetailsItem
@@ -21,6 +24,7 @@ import { IAuction, IAuctionBid } from '@/types';
 import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
 import { useGetter } from '@/composables/vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -47,6 +51,7 @@ export default defineComponent({
     const endHeight = computed(() => blocksToRelativeTime(blocksToExpiry.value));
 
     return {
+      PROTOCOL_AETERNITY,
       blocksToRelativeTime,
       auction,
       amount,

@@ -14,6 +14,7 @@
         no-symbol
         fiat-below
         large
+        :protocol="PROTOCOL_AETERNITY"
         :amount="convertedBalance"
         :aex9="!isAe"
       />
@@ -220,6 +221,7 @@ export default defineComponent({
     });
 
     return {
+      PROTOCOL_AETERNITY,
       UNFINISHED_FEATURES,
       IS_IOS,
       AE_DEX_URL,

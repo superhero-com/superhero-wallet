@@ -196,7 +196,8 @@
           <template #value>
             <TokenAmount
               :amount="+gasPrice"
-              symbol="AE"
+              :protocol="PROTOCOL_AETERNITY"
+              :symbol="AE_SYMBOL"
               hide-fiat
             />
           </template>
@@ -251,6 +252,7 @@ import PayloadDetails from '@/popup/components/PayloadDetails.vue';
 import TransactionErrorStatus from '@/popup/components/TransactionErrorStatus.vue';
 import Avatar from '@/popup/components/Avatar.vue';
 import DialogBox from '@/popup/components/DialogBox.vue';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import AnimatedPending from '@/icons/animated-pending.svg?vue-component';
 import ExternalLink from '@/icons/external-link.svg?vue-component';
@@ -297,9 +299,11 @@ export default defineComponent({
     multisigContractId: { type: String, default: '' },
     hash: { type: String, required: true },
     noneAeCoin: { type: Array, default: null },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup: () => ({
+    PROTOCOL_AETERNITY,
+    AE_SYMBOL,
     formatDate,
     formatTime,
     splitAddress,

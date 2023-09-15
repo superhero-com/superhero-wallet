@@ -22,6 +22,7 @@
       <div>
         <TokenAmount
           :amount="rate.price"
+          :protocol="PROTOCOL_AETERNITY"
           class="price"
           hide-fiat
           no-symbol
@@ -37,59 +38,82 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import {
+  computed,
+  defineComponent,
+  PropType,
+} from 'vue';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import { camelCase } from 'lodash-es';
+import { useState } from '@/composables/vuex';
 import {
   getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
 
+import {
+  ITransaction,
+  TxFunctionParsed,
+} from '@/types';
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
-export default {
+export default defineComponent({
   components: {
     Tokens,
     TokenAmount,
   },
   props: {
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    isSwapTx() {
-      return (
-        isTxFunctionDexSwap(this.transaction.tx.function)
-        || isTxFunctionDexPool(this.transaction.tx.function)
-      );
-    },
-    rates() {
-      if (!this.isSwapTx) return [];
+  setup(props) {
+    const availableTokens = useState('fungibleTokens', 'availableTokens');
 
-      const resolver = getTransactionTokenInfoResolver(camelCase(this.transaction.tx.function));
+    const isSwapTx = computed(() => isTxFunctionDexSwap(props.transaction.tx.function)
+        || isTxFunctionDexPool(props.transaction.tx.function));
+
+    const rates = computed(() => {
+      if (!isSwapTx.value) {
+        return [];
+      }
+
+      const resolver = getTransactionTokenInfoResolver(
+          camelCase(props.transaction.tx.function) as TxFunctionParsed,
+      );
 
       if (!resolver) return [];
 
-      const { tokens } = resolver(this.transaction, this.availableTokens);
+      const { tokens } = resolver(props.transaction, availableTokens.value);
 
-      if (tokens.length <= 1) return [];
+      if (tokens?.length <= 1) {
+        return [];
+      }
+
+      const hasAmount = tokens.every((token) => !!token.amount);
 
       return [
         {
           from: tokens[0],
           to: tokens[1],
-          price: tokens[1].amount / tokens[0].amount,
+          price: hasAmount ? tokens[1].amount! / tokens[0].amount! : 0,
         }, {
           from: tokens[1],
           to: tokens[0],
-          price: tokens[0].amount / tokens[1].amount,
+          price: hasAmount ? tokens[0].amount! / tokens[1].amount! : 0,
         },
       ];
-    },
+    });
+
+    return {
+      PROTOCOL_AETERNITY,
+      availableTokens,
+      isSwapTx,
+      rates,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

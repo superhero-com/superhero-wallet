@@ -30,7 +30,6 @@ import {
 import { useStore } from 'vuex';
 import type { Protocol } from '@/types';
 import { useConnection, useCurrencies } from '@/composables';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import MainBalance from './MainBalance.vue';
 import MessageOffline from './MessageOffline.vue';
 
@@ -41,7 +40,7 @@ export default defineComponent({
   },
   props: {
     balance: { type: Number, required: true },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     horizontalOfflineMessage: Boolean,
   },
   setup(props) {

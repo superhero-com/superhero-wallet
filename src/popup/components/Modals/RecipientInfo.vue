@@ -88,7 +88,7 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     close: { type: Function, default: null },
   },
   setup(props) {

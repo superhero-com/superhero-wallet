@@ -25,6 +25,7 @@
         :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
         :multisig-contract-id="multisigContractId"
         :hash="hash"
+        :protocol="PROTOCOL_AETERNITY"
       >
         <template #tip-url>
           <DetailsItem
@@ -68,6 +69,7 @@ import {
   useTransactionList,
   useTransactionTx,
 } from '@/composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -246,6 +248,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
+      PROTOCOL_AETERNITY,
       transaction,
       isSwap,
       isPool,

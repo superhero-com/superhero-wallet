@@ -20,7 +20,8 @@
       />
       <TokenAmount
         :amount="balance"
-        :symbol="AE_SYMBOL"
+        :symbol="tokenSymbol"
+        :protocol="account.protocol"
         fiat-below
         class="token-amount"
         small
@@ -41,6 +42,7 @@ import { useBalances } from '@/composables';
 import { getAddressColor } from '@/utils';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AccountInfo from './AccountInfo.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -70,9 +72,14 @@ export default defineComponent({
         : 0,
     );
 
+    const tokenSymbol = computed(
+      () => ProtocolAdapterFactory.getAdapter(props.account.protocol!).getCoinSymbol(true),
+    );
+
     return {
       balance,
       bgColorStyle,
+      tokenSymbol,
       AE_SYMBOL,
     };
   },
