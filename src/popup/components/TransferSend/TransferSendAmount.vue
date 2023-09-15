@@ -1,6 +1,9 @@
 <template>
   <div
     class="transfer-send-amount"
+    :class="{
+      'without-margin': withoutMargin
+    }"
   >
     <Field
       v-slot="{ field }"
@@ -59,6 +62,7 @@ export default defineComponent({
     errors: { type: Object, required: true },
     customLabel: { type: String, default: '' },
     readonly: Boolean,
+    withoutMargin: Boolean,
     protocol: { type: String as PropType<Protocol>, required: true },
   },
   emits: ['update:modelValue', 'asset-selected'],
@@ -76,6 +80,12 @@ export default defineComponent({
 .transfer-send-amount {
   .amount-input {
     margin-bottom: 22px;
+  }
+
+  &.without-margin {
+    .amount-input {
+      margin-bottom: 0;
+    }
   }
 }
 </style>

@@ -15,7 +15,8 @@
         'no-padding': noPadding,
         dense,
         'semi-dense': semiDense,
-        'blur-bg': !(IS_FIREFOX && IS_EXTENSION)
+        'blur-bg': !(IS_FIREFOX && IS_EXTENSION),
+        'min-height': minHeight
       }"
     >
       <div class="container">
@@ -100,6 +101,7 @@ export default defineComponent({
     noPadding: Boolean,
     centered: Boolean,
     bodyWithoutPaddingBottom: Boolean,
+    minHeight: Boolean,
     header: { type: String, default: null },
   },
   emits: ['close', 'open'],
@@ -196,6 +198,8 @@ export default defineComponent({
     .body {
       @extend %face-sans-15-regular;
 
+      display: flex;
+      flex-direction: column;
       padding: var(--screen-padding-x);
       color: variables.$color-grey-light;
       word-break: break-word;
@@ -216,6 +220,12 @@ export default defineComponent({
     position: fixed;
     z-index: -1;
     inset: 0;
+  }
+
+  &.min-height {
+    .container {
+      min-height: 480px;
+    }
   }
 
   &.full-screen,

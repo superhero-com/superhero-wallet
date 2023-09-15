@@ -88,6 +88,8 @@ export const AE_HASH_PREFIXES_ALLOWED = [
   Encoding.TxHash,
 ] as const;
 
+export const SEED_LENGTH = 32;
+
 /**
  * ITx.function
  */

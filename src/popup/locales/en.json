@@ -365,6 +365,17 @@
       "names": "Names",
       "namesNotAvailable": "Names list is not available offline.",
       "details": "Details"
+    },
+    "claimGiftCard": {
+      "title": "Redeem gift card",
+      "selectAccount": "Select account",
+      "balance": "Remaining card balance",
+      "amount": "Amount to redeem",
+      "redeem": "Redeem",
+      "redeemPartially": "Redeem partially",
+      "redeemFull": "Redeem full amount",
+      "redeemedBy": "{0} redeemed by",
+      "alreadyRedeemed": "This gift card has already been redeemed."
     }
   },
   "filters": {
@@ -471,7 +482,7 @@
       "address": "Send Address",
       "signMessage": "Sign Message",
       "signTransaction": "Sign Transaction",
-      "invite": "Invite",
+      "giftCards": "Gift cards",
       "txDetails": "Transaction details",
       "tokenDetails": "Token details",
       "coinDetails": "Coin details",
@@ -1108,15 +1119,15 @@
       "donate": "Donate Data"
     },
     "invite": {
-      "generate-link": "Generate new invite link",
-      "generate": "Generate Link",
-      "created-links": "Generated invite links",
+      "generate-link": "Generate new gift card",
+      "generate": "Generate gift card",
+      "created-links": "Gift cards",
       "top-up": "Top up",
       "collapse": "Collapse",
       "claim": "Claim Back",
       "insufficient-balance": "Insufficient balance",
       "insufficient-invite-balance": "This invite Link expired and the Tokens are already claimed.",
-      "tip-attached": "Tip attached",
+      "tip-attached": "Gift card amount",
       "top-up-with": "Top up with",
       "delete": "Delete"
     },
@@ -1189,6 +1200,7 @@
     "enoughAeSigner": "Insufficient balance on your signing account to propose a transaction",
     "maxLength": "The value should be no longer than {0} characters",
     "maxValue": "This field must be {0} or less",
+    "maxRedeem": "Maximum redeemable amount is {0} AE.",
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",

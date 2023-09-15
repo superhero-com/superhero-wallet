@@ -538,7 +538,7 @@ export const routes: WalletAppRouteConfig[] = [
     name: 'invite',
     component: Invite,
     meta: {
-      title: 'invite',
+      title: 'giftCards',
       showHeaderNavigation: true,
     },
   },
