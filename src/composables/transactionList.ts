@@ -232,11 +232,13 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
       fetchTipWithdrawnTransactions(address, recent),
     ]);
 
-    const lastPendingTransaction = pendingTransactions?.[pendingTransactions.length - 1];
-    if (lastPendingTransaction?.type === AEX9_TRANSFER_EVENT) {
+    const lastRegularTransaction = regularTransactions?.[regularTransactions.length - 1];
+    // DEX transaction is represented in 3 objects, only last one should be used
+    // this condition checking edge case when not all 3 objects in one chunk
+    if (lastRegularTransaction?.type === AEX9_TRANSFER_EVENT) {
       const middleware = await getMiddleware();
       pendingTransactions[pendingTransactions.length - 1] = (
-        await middleware.getTx(lastPendingTransaction.payload.txHash)
+        await middleware.getTx(lastRegularTransaction.payload.txHash)
       );
     }
 
