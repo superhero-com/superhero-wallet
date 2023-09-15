@@ -1,9 +1,16 @@
 import { ref } from 'vue';
-import { Router, RouteLocationNormalized as Route } from 'vue-router';
+import {
+  Router,
+  RouteLocationNormalized as Route,
+} from 'vue-router';
+import { checkIfSuperheroCallbackUrl } from '@/utils';
+import { MODAL_TRANSFER_SEND } from '@/constants';
+import { useModals } from '@/composables/modals';
 
 export interface UseDeepLinkApiOptions {
   router: Router
 }
+
 /**
  * TODO: refactor once upgrade to vue-router: 4.x.x
  * @param { router: Router }
@@ -15,6 +22,17 @@ export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
       ? (new URL(route.query['x-success'] as string))
       : null,
   );
+
+  /**
+   * Function needed to support legacy tipping from superhero.com
+   */
+  function checkIfOpenTransferSendModal() {
+    if (checkIfSuperheroCallbackUrl(route.query)) {
+      const { openModal } = useModals();
+
+      openModal(MODAL_TRANSFER_SEND);
+    }
+  }
 
   function openCallbackOrGoHome(
     isSuccess: boolean,
@@ -34,6 +52,7 @@ export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
   }
 
   return {
+    checkIfOpenTransferSendModal,
     callbackOrigin,
     openCallbackOrGoHome,
   };

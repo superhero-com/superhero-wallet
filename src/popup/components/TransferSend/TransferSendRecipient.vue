@@ -3,6 +3,7 @@
     <Field
       v-slot="{ field }"
       name="address"
+      :model-value="modelValue"
       :rules="{
         required: true,
         not_same_as: [activeAccount.address, protocol],

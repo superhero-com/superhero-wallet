@@ -8,6 +8,7 @@ import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
+import { LocationQuery } from 'vue-router';
 import type {
   BigNumberPublic,
   IAccount,
@@ -22,6 +23,7 @@ import type {
 } from '@/types';
 import {
   ADDRESS_GAP_LIMIT,
+  AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   IS_CORDOVA,
@@ -397,4 +399,12 @@ export async function defaultAccountDiscovery(
       .length === ADDRESS_GAP_LIMIT
   ));
   return lastNotEmptyIdx;
+}
+
+export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
+  const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
+
+  return [query['x-success'], query['x-cancel']].every(
+    (value) => value && (value as string).startsWith(slicedAggregatorUrl),
+  );
 }
