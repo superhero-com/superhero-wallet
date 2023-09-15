@@ -9,6 +9,7 @@
     :account-name="activeAccountName"
     :tokens="availableTokens"
     :disable-asset-selection="isMultisig"
+    :protocol="PROTOCOL_AETERNITY"
   />
 </template>
 
@@ -17,6 +18,7 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import type { ITokenList } from '@/types';
 import {
+  PROTOCOL_AETERNITY,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts, useMultisigAccounts } from '@/composables';
@@ -49,6 +51,7 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       availableTokens,
       activeAccountAddress,
       activeAccountName,

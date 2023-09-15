@@ -23,6 +23,7 @@
         :amount="+tokenData.convertedBalance || 0"
         :symbol="tokenData.symbol"
         :aex9="isTokenAeCoin"
+        :protocol="PROTOCOL_AETERNITY"
         dynamic-sizing
         no-symbol
         hide-fiat
@@ -97,6 +98,7 @@ export default defineComponent({
     });
 
     return {
+      PROTOCOL_AETERNITY,
       isTokenAeCoin,
       price,
       targetRouteName,

@@ -50,7 +50,6 @@ import {
 } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
@@ -67,8 +66,7 @@ export default defineComponent({
     highPrecision: Boolean,
     dynamicSizing: Boolean,
     small: Boolean,
-    // TODO - make required & remove default
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const store = useStore();

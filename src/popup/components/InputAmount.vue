@@ -75,7 +75,6 @@ import {
   useCurrencies,
 } from '@/composables';
 import type { IAsset, Protocol } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
@@ -91,8 +90,7 @@ export default defineComponent({
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     readonly: Boolean,
     showTokensWithBalance: Boolean,
-    // TODO - handle usages & make protocol required
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {

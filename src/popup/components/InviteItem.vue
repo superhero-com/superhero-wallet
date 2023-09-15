@@ -1,7 +1,10 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <TokenAmount :amount="inviteLinkBalance" />
+      <TokenAmount
+        :amount="inviteLinkBalance"
+        :protocol="PROTOCOL_AETERNITY"
+      />
       <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
     <CopyText
@@ -51,6 +54,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
+          :protocol="PROTOCOL_AETERNITY"
           readonly
         />
         <div class="centered-buttons">
@@ -226,6 +230,7 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       formModel,
       max,
       topUp,

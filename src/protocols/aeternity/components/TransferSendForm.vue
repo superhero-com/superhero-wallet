@@ -50,7 +50,7 @@
           <template #value>
             <AccountItem
               :address="multisigVaultAddress"
-              protocol="aeternity"
+              :protocol="PROTOCOL_AETERNITY"
             />
           </template>
         </DetailsItem>

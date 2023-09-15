@@ -11,7 +11,10 @@
     </template>
 
     <template #middle>
-      <BalanceInfo :balance="+account.balance" />
+      <BalanceInfo
+        :balance="+account.balance"
+        :protocol="PROTOCOL_AETERNITY"
+      />
     </template>
 
     <template #bottom>

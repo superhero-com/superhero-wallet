@@ -70,7 +70,10 @@
           >
             <template #value>
               <div class="row">
-                <AccountItem :address="activeMultisigAccount.proposedBy" />
+                <AccountItem
+                  :address="activeMultisigAccount.proposedBy"
+                  :protocol="PROTOCOL_AETERNITY"
+                />
                 <DialogBox
                   v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
                   dense
@@ -132,7 +135,8 @@
             <template #value>
               <TokenAmount
                 :amount="+(aettosToAe(multisigTx.gasPrice))"
-                symbol="AE"
+                :protocol="PROTOCOL_AETERNITY"
+                :symbol="AE_SYMBOL"
                 hide-fiat
               />
             </template>
@@ -145,6 +149,7 @@
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.gasPrice)"
                 :symbol="AE_SYMBOL"
+                :protocol="PROTOCOL_AETERNITY"
               />
             </template>
           </DetailsItem>
@@ -162,6 +167,7 @@
               <TokenAmount
                 :amount="+aettosToAe(multisigTx.fee)"
                 :symbol="AE_SYMBOL"
+                :protocol="PROTOCOL_AETERNITY"
               />
             </template>
           </DetailsItem>
@@ -174,6 +180,7 @@
               <TokenAmount
                 :amount="+aettosToAe(transaction.tx.fee)"
                 :symbol="AE_SYMBOL"
+                :protocol="PROTOCOL_AETERNITY"
               />
             </template>
           </DetailsItem>
@@ -187,6 +194,7 @@
               <TokenAmount
                 :amount="+aettosToAe(totalSpent)"
                 :symbol="AE_SYMBOL"
+                :protocol="PROTOCOL_AETERNITY"
                 high-precision
               />
             </template>
@@ -280,7 +288,10 @@ import type {
   ITransaction,
   ITx,
 } from '@/types';
-import { MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION } from '@/constants';
+import {
+  MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import {
   blocksToRelativeTime,
   formatDate,
@@ -518,6 +529,8 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
+      PROTOCOL_AETERNITY,
+      TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,
@@ -539,7 +552,6 @@ export default defineComponent({
       blocksToRelativeTime,
       dispatchProposalAction,
       processProposal,
-      TX_FUNCTIONS_MULTISIG,
     };
   },
 });

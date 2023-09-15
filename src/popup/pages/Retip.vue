@@ -1,6 +1,9 @@
 <template>
   <div class="retip">
-    <BalanceInfo :balance="numericBalance" />
+    <BalanceInfo
+      :balance="numericBalance"
+      :protocol="PROTOCOL_AETERNITY"
+    />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
     </div>
@@ -31,6 +34,7 @@
         class="amount-input"
         readonly
         :message="errorMessage"
+        :protocol="PROTOCOL_AETERNITY"
       />
     </Field>
 
@@ -234,6 +238,7 @@ export default defineComponent({
     });
 
     return {
+      PROTOCOL_AETERNITY,
       tip,
       formModel,
       loading,

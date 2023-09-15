@@ -67,7 +67,6 @@ import {
 import type { Protocol } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
@@ -86,7 +85,7 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     avatarSize: { type: String, default: 'lg' },
     idx: { type: Number, default: 0 },
     canCopyAddress: Boolean,

@@ -23,6 +23,7 @@
           :label="$t('pages.invite.tip-attached')"
           :message="errorMessage"
           readonly
+          :protocol="PROTOCOL_AETERNITY"
           :selected-asset="formModel.selectedAsset"
           @asset-selected="(val) => formModel.selectedAsset = val"
         />
@@ -129,6 +130,7 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
       balance,
       fee,
       invites,

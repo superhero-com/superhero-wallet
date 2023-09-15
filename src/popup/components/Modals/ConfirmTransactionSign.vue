@@ -14,7 +14,6 @@
       <TransactionOverview
         :transaction="completeTransaction"
       />
-
       <DetailsItem
         v-if="!!error"
         :label="$t('pages.transactionDetails.reason')"
@@ -39,7 +38,10 @@
         class="name-fee"
       >
         <template #value>
-          <TokenAmount :amount="nameAeFee" />
+          <TokenAmount
+            :amount="nameAeFee"
+            :protocol="PROTOCOL_AETERNITY"
+          />
         </template>
       </DetailsItem>
 
@@ -53,6 +55,7 @@
             :symbol="tokenSymbol"
             :aex9="isTransactionAex9(transactionWrapped)"
             :hide-fiat="!swapTokenAmountData.isAe"
+            :protocol="PROTOCOL_AETERNITY"
             data-cy="total"
           />
         </DetailsItem>
@@ -60,6 +63,7 @@
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
             :amount="txAeFee"
+            :protocol="PROTOCOL_AETERNITY"
             data-cy="fee"
           />
         </DetailsItem>
@@ -72,6 +76,7 @@
             :amount="executionCost || totalAmount"
             :symbol="getTxSymbol(popupProps?.tx)"
             :aex9="isTransactionAex9(transactionWrapped)"
+            :protocol="PROTOCOL_AETERNITY"
             data-cy="total"
           />
         </DetailsItem>
@@ -138,7 +143,10 @@ import type {
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
 import { RejectedByUserError } from '@/lib/errors';
-import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import {
+  PROTOCOL_AETERNITY,
+  TX_DIRECTION,
+} from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -468,6 +476,7 @@ export default defineComponent({
     return {
       AnimatedSpinner,
       AE_SYMBOL,
+      PROTOCOL_AETERNITY,
       TX_FIELDS_TO_DISPLAY,
       error,
       executionCost,

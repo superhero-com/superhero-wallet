@@ -97,6 +97,7 @@
             name="transactionSignLimit"
             label=" "
             :selected-asset="selectedAsset"
+            :protocol="PROTOCOL_AETERNITY"
             readonly
           />
         </Field>
@@ -105,18 +106,21 @@
           <TokenAmount
             :label="$t('pages.permissions.spent-today')"
             :amount="permission.transactionSignLimitLeft"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
         <div class="limit-info">
           <TokenAmount
             :label="$t('pages.permissions.left-today')"
             :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
         <div class="limit-info">
           <TokenAmount
             :label="$t('pages.account.balance')"
             :amount="+balance"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
       </div>
@@ -275,6 +279,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
+      PROTOCOL_AETERNITY,
       DeleteIcon,
       editView,
       balance,
