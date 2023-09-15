@@ -246,7 +246,7 @@ Cypress.Commands.add('openNetworks', () => {
  * For the values of the `data-cy` for particular fields please go to `AeternityAdapter`
  * and look for `testId` within the `networkSettings`.
  */
-Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl, compilerUrl) => {
+Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl) => {
   cy.get('[data-cy=network-form]')
     .should('be.visible')
     .getInputByTestId('network-name')
@@ -257,18 +257,15 @@ Cypress.Commands.add('enterNetworkDetails', (name, nodeUrl, middlewareUrl, compi
     .type(nodeUrl)
     .getInputByTestId('ae-middleware-url')
     .clear()
-    .type(middlewareUrl)
-    .getInputByTestId('ae-compiler-url')
-    .clear()
-    .type(compilerUrl);
+    .type(middlewareUrl);
 });
 
-Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl, compilerUrl) => {
+Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
   cy.get('[data-cy=to-add]')
     .click()
     .getByTestId('btn-add-network')
     .should('be.visible')
-    .enterNetworkDetails(name, nodeUrl, middlewareUrl, compilerUrl)
+    .enterNetworkDetails(name, nodeUrl, middlewareUrl)
     .getByTestId('btn-add-network')
     .click()
     .getByTestId('networks')

@@ -8,7 +8,6 @@ import type { INetworkProtocolSettings } from '@/types';
  */
 export type AeNetworkProtocolSettings =
   | 'middlewareUrl'
-  | 'compilerUrl'
   | 'backendUrl' // Tipping backend URL, rename in future to something more meaningful.
 
 /**

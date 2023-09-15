@@ -20,14 +20,14 @@ import {
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
+
 import type {
   IAccount,
   IAccountOverview,
   ITransaction,
-  ITx,
   TxFunction,
 } from '@/types';
-import { postJson } from '@/utils';
 import { TX_DIRECTION } from '@/constants';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import {
@@ -59,7 +59,7 @@ export default defineComponent({
     const store = useStore();
     const { t, tm } = useI18n();
 
-    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
     const { getMiddleware } = useMiddleware();
 
@@ -220,14 +220,13 @@ export default defineComponent({
 
       const aeSdk = await getAeSdk();
       const { bytecode } = await aeSdk.getContractByteCode(innerTx.value.contractId);
-      // TODO: use method from aeSdk once calldata-js library supports decoding bytecode feature
-      const txParams: ITx = await postJson(
-        `${aeActiveNetworkSettings.value.compilerUrl}/decode-calldata/bytecode`,
-        { body: { bytecode, calldata } },
-      );
+
+      const bytecodeContractCallEncoder = new BytecodeContractCallEncoder(bytecode);
+
+      const txParams = bytecodeContractCallEncoder.decodeCall(calldata) as any;
       if (!txParams) return undefined;
 
-      return txParams.arguments?.find((param: any) => param.type === 'address')?.value;
+      return txParams.args?.[0];
     }
 
     onMounted(async () => {

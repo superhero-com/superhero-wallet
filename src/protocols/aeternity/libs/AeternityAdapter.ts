@@ -62,14 +62,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.networkMiddlewareLabel'),
     },
     {
-      key: 'compilerUrl',
-      testId: 'ae-compiler-url',
-      required: true,
-      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.compilerUrl,
-      getPlaceholder: () => tg('pages.network.networkCompilerPlaceholder'),
-      getLabel: () => tg('pages.network.networkCompilerLabel'),
-    },
-    {
       key: 'backendUrl',
       required: true,
       defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.backendUrl,

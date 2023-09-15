@@ -83,8 +83,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
     isAeNodeError.value = false;
     isAeNodeConnecting.value = true;
     try {
-      // TODO: remove ignore version once HTTP compiler dependency is removed
-      nodeInstance = new Node(url, { ignoreVersion: true });
+      nodeInstance = new Node(url);
       nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
       isAeNodeReady.value = true;
     } catch (error) {

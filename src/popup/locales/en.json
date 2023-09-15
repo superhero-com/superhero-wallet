@@ -1085,8 +1085,6 @@
       "networkUrlLabel": "Network URL",
       "networkMiddlewarePlaceholder": "Enter network middleware URL",
       "networkMiddlewareLabel": "Network middleware",
-      "networkCompilerPlaceholder": "Enter network compiler URL",
-      "networkCompilerLabel": "Network compiler",
       "backendUrlPlaceholder": "Enter tipping Backend URL",
       "backendUrlLabel": "Tipping backend",
       "showTippingConfig": "Show Tipping Configuration",
