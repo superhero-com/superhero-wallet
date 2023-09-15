@@ -237,7 +237,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     // this condition checking edge case when not all 3 objects in one chunk
     if (lastRegularTransaction?.type === AEX9_TRANSFER_EVENT) {
       const middleware = await getMiddleware();
-      pendingTransactions[pendingTransactions.length - 1] = (
+      regularTransactions[regularTransactions.length - 1] = (
         await middleware.getTx(lastRegularTransaction.payload.txHash)
       );
     }
