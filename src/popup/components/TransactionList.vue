@@ -108,7 +108,7 @@ export default defineComponent({
         const txOwnerAddress = getTxOwnerAddress(innerTx);
 
         const direction = getTxDirection(
-          outerTx.payerId ? outerTx : innerTx,
+          outerTx?.payerId ? outerTx : innerTx,
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
