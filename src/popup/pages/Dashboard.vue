@@ -49,9 +49,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-
+import {
+  defineComponent,
+  onMounted,
+} from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+
 import {
   DASHBOARD_CARD_ID,
   IS_CORDOVA,
@@ -59,7 +63,11 @@ import {
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
-import { useAccounts, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useAeSdk,
+  useDeepLinkApi,
+} from '@/composables';
 
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
@@ -89,13 +97,19 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const router = useRouter();
 
     const {
       activeAccount,
       activeAccountSimplexLink,
     } = useAccounts({ store });
+    const { checkIfOpenTransferSendModal } = useDeepLinkApi({ router });
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+
+    onMounted(() => {
+      checkIfOpenTransferSendModal();
+    });
 
     return {
       PROTOCOL_AETERNITY,

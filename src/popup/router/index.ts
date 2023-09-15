@@ -50,7 +50,7 @@ const {
 } = useAccounts({ store });
 const { setPopupProps } = usePopupProps();
 
-RouteQueryActionsController.init(router, isLoggedIn);
+RouteQueryActionsController.init(router);
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
