@@ -8,11 +8,13 @@ import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { useI18n } from 'vue-i18n';
+import { LocationQuery } from 'vue-router';
 import type {
   BigNumberPublic,
   IAccount,
   ICommonTransaction,
   IDashboardTransaction,
+  IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
   ITransaction,
@@ -20,6 +22,8 @@ import type {
   Truthy,
 } from '@/types';
 import {
+  ADDRESS_GAP_LIMIT,
+  AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   IS_CORDOVA,
@@ -358,4 +362,49 @@ export function detectProtocolByOwner(network: string, address?: string) {
     return PROTOCOL_BITCOIN;
   }
   return null;
+}
+
+export async function defaultAccountDiscovery(
+  isAccountUsed: (address: string) => Promise<boolean>,
+  getHdWalletAccountFromMnemonicSeed: (
+    seed: Uint8Array,
+    accountIndex: number,
+  ) => IHdWalletAccount,
+  wallet: Uint8Array,
+): Promise<number> {
+  let lastNotEmptyIdx = 0;
+  let lastIndex = 0;
+  let isAccountUsedArray: boolean[] = [];
+  do {
+    try {
+      lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
+      lastIndex += isAccountUsedArray.length;
+      // eslint-disable-next-line no-await-in-loop
+      isAccountUsedArray = await Promise.all(
+        Array.from(
+          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1).keys(),
+          // eslint-disable-next-line no-loop-func
+          (x) => x + lastIndex,
+        )
+          .map((index) => isAccountUsed(
+            getHdWalletAccountFromMnemonicSeed(wallet, index).address,
+          )),
+      );
+    } catch (e) {
+      break;
+    }
+  } while (!(
+    isAccountUsedArray.lastIndexOf(true) === -1
+    || isAccountUsedArray.filter((isAccountUsedValue) => !isAccountUsedValue)
+      .length === ADDRESS_GAP_LIMIT
+  ));
+  return lastNotEmptyIdx;
+}
+
+export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
+  const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
+
+  return [query['x-success'], query['x-cancel']].every(
+    (value) => value && (value as string).startsWith(slicedAggregatorUrl),
+  );
 }

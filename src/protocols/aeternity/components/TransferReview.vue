@@ -16,7 +16,10 @@
         v-if="isMultisig"
         class="multisig-account"
       >
-        <AccountItem :address="activeMultisigAccount.gaAccountId" />
+        <AccountItem
+          :address="activeMultisigAccount.gaAccountId"
+          :protocol="PROTOCOL_AETERNITY"
+        />
       </div>
     </template>
 
@@ -43,6 +46,7 @@
           <TokenAmount
             :amount="PROPOSE_TRANSACTION_FEE"
             :symbol="AE_SYMBOL"
+            :protocol="PROTOCOL_AETERNITY"
             hide-fiat
             high-precision
             data-cy="multisig-review-fee"
@@ -61,6 +65,7 @@
           <TokenAmount
             :amount="+transferData.total"
             :symbol="AE_SYMBOL"
+            :protocol="PROTOCOL_AETERNITY"
             high-precision
             data-cy="review-total"
           />

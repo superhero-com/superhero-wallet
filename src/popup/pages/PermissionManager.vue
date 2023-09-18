@@ -97,6 +97,7 @@
             name="transactionSignLimit"
             label=" "
             :selected-asset="selectedAsset"
+            :protocol="PROTOCOL_AETERNITY"
             readonly
           />
         </Field>
@@ -105,18 +106,21 @@
           <TokenAmount
             :label="$t('pages.permissions.spent-today')"
             :amount="permission.transactionSignLimitLeft"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
         <div class="limit-info">
           <TokenAmount
             :label="$t('pages.permissions.left-today')"
             :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
         <div class="limit-info">
           <TokenAmount
             :label="$t('pages.account.balance')"
             :amount="+balance"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
       </div>
@@ -161,7 +165,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
 
 import type { IPermission } from '@/types';
-import { PERMISSION_DEFAULTS } from '@/constants';
+import {
+  PERMISSION_DEFAULTS,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import { useBalances, useCurrencies } from '@/composables';
 import { useState } from '@/composables/vuex';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
@@ -190,7 +197,7 @@ export default defineComponent({
     const { validate, setValues } = useForm();
 
     const { balance } = useBalances({ store });
-    const { currentCurrencyRate } = useCurrencies({ store });
+    const { getCurrentCurrencyRate } = useCurrencies({ store });
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;
@@ -204,7 +211,7 @@ export default defineComponent({
     const selectedAsset = computed(() => ({
       contractId: AE_CONTRACT_ID,
       symbol: AE_SYMBOL,
-      currentPrice: currentCurrencyRate.value,
+      currentPrice: getCurrentCurrencyRate(PROTOCOL_AETERNITY),
     }));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
@@ -272,6 +279,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
+      PROTOCOL_AETERNITY,
       DeleteIcon,
       editView,
       balance,

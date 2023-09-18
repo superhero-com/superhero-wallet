@@ -4,6 +4,7 @@ import {
   MODAL_ACCOUNT_IMPORT,
   MODAL_ACCOUNT_SELECT_OPTIONS,
   MODAL_ASSET_SELECTOR,
+  MODAL_CLAIM_GIFT_CARD,
   MODAL_CLAIM_SUCCESS,
   MODAL_CONFIRM,
   MODAL_CONFIRM_ACCOUNT_LIST,
@@ -57,6 +58,7 @@ import RecipientHelper from '../components/Modals/RecipientHelper.vue';
 import RecipientInfo from '../components/Modals/RecipientInfo.vue';
 import ConsensusInfo from '../components/Modals/ConsensusInfo.vue';
 import PayloadForm from '../components/Modals/PayloadForm.vue';
+import ClaimGiftCard from '../components/Modals/ClaimGiftCard.vue';
 import MultisigVaultCreate from '../components/Modals/MultisigVaultCreate.vue';
 import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
@@ -92,6 +94,10 @@ export default () => {
   });
   registerModal(MODAL_HELP, {
     component: Help,
+  });
+  registerModal(MODAL_CLAIM_GIFT_CARD, {
+    component: ClaimGiftCard,
+    showInPopupIfWebFrame: true,
   });
   registerModal(MODAL_CONFIRM_TRANSACTION_SIGN, {
     component: ConfirmTransactionSign,

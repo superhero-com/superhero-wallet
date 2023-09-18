@@ -34,13 +34,11 @@ export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSett
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: AE_NETWORK_MAINNET_NODE_URL,
     middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-    compilerUrl: 'https://compiler.aepps.com',
     backendUrl: 'https://raendom-backend.z52da5wt.xyz',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: AE_NETWORK_TESTNET_NODE_URL,
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
-    compilerUrl: 'https://latest.compiler.aepps.com',
     backendUrl: 'https://testnet.superhero.aeternity.art',
   },
 };
@@ -89,6 +87,8 @@ export const AE_HASH_PREFIXES_ALLOWED = [
   Encoding.OracleAddress,
   Encoding.TxHash,
 ] as const;
+
+export const SEED_LENGTH = 32;
 
 /**
  * ITx.function

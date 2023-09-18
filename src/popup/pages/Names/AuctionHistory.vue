@@ -8,6 +8,7 @@
       <AccountItem
         :address="highestBid.accountId"
         :name="getPreferred(highestBid.accountId)"
+        :protocol="PROTOCOL_AETERNITY"
       />
       <AuctionOverview :name="name" />
     </div>
@@ -16,8 +17,12 @@
       :key="index"
       class="item"
     >
-      <TokenAmount :amount="+bid.nameFee" />
+      <TokenAmount
+        :amount="+bid.nameFee"
+        :protocol="PROTOCOL_AETERNITY"
+      />
       <AccountItem
+        :protocol="PROTOCOL_AETERNITY"
         :address="bid.accountId"
         :name="getPreferred(bid.accountId)"
       />
@@ -25,28 +30,40 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex';
+<script lang="ts">
+import { defineComponent, computed } from 'vue';
+import type { IAuctionBid } from '@/types';
+import { useGetter } from '@/composables/vuex';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import AccountItem from '../../components/AccountItem.vue';
 import AuctionOverview from '../../components/AuctionOverview.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
 
-export default {
+export default defineComponent({
   components: { AccountItem, AuctionOverview, TokenAmount },
   props: {
     name: { type: String, required: true },
   },
-  computed: {
-    ...mapGetters('names', ['getAuction', 'getHighestBid', 'getPreferred']),
-    highestBid() {
-      return this.getHighestBid(this.name);
-    },
-    previousBids() {
-      return this.getAuction(this.name).bids
-        .filter((bid) => bid !== this.highestBid);
-    },
+  setup(props) {
+    const getHighestBid = useGetter('names/getHighestBid');
+    const getAuction = useGetter('names/getAuction');
+    const getPreferred = useGetter('names/getPreferred');
+
+    const highestBid = computed(() => getHighestBid.value(props.name));
+
+    const previousBids = computed(
+      () => (getAuction.value(props.name).bids)
+        .filter((bid: IAuctionBid) => bid !== highestBid.value),
+    );
+
+    return {
+      PROTOCOL_AETERNITY,
+      getPreferred,
+      highestBid,
+      previousBids,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

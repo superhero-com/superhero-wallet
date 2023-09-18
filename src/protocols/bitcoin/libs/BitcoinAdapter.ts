@@ -9,6 +9,7 @@ import {
   Transaction,
 } from 'bitcoinjs-lib';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
+
 import type {
   AdapterNetworkSettingList,
   ICoin,
@@ -19,7 +20,6 @@ import type {
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
-  MAXIMUM_ACCOUNTS_TO_DISCOVER,
   NETWORK_TYPE_TESTNET,
   PROTOCOL_BITCOIN,
 } from '@/constants';
@@ -33,7 +33,10 @@ import {
   BTC_CONTRACT_ID,
   BTC_SYMBOL,
 } from '@/protocols/bitcoin/config';
-import { fetchJson } from '@/utils';
+import {
+  defaultAccountDiscovery,
+  fetchJson,
+} from '@/utils';
 import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
 import { Blockstream } from '@/protocols/bitcoin/libs/Blockstream';
 import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetworkSettings';
@@ -118,10 +121,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     ).toString();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async isAccountUsed(address: string): Promise<boolean> {
-    // TODO: Implement this
-    return true;
+    const { activeNetwork } = useNetworks();
+
+    const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+    const { chain_stats: { funded_txo_sum: chainFunded } } = await fetchJson(`${nodeUrl}/address/${address}`);
+    return !!chainFunded;
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -149,16 +154,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   }
 
   override async discoverAccounts(seed: Uint8Array): Promise<number> {
-    let lastNotEmptyIdx = 0;
-
-    for (let i = 0; i < MAXIMUM_ACCOUNTS_TO_DISCOVER; i += 1) {
-      const account = this.getHdWalletAccountFromMnemonicSeed(seed, i);
-      // eslint-disable-next-line no-await-in-loop
-      if (await this.isAccountUsed(account.publicKey)) {
-        lastNotEmptyIdx = i;
-      }
-    }
-    return lastNotEmptyIdx;
+    return defaultAccountDiscovery(
+      this.isAccountUsed,
+      this.getHdWalletAccountFromMnemonicSeed.bind(this),
+      seed,
+    );
   }
 
   async fetchTransactions(address: string, lastTxId?: string) {

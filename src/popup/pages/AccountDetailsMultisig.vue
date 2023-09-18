@@ -14,7 +14,10 @@
     </template>
 
     <template #balance>
-      <BalanceInfo :balance="+(activeMultisigAccount.balance || 0)" />
+      <BalanceInfo
+        :balance="+(activeMultisigAccount.balance || 0)"
+        :protocol="PROTOCOL_AETERNITY"
+      />
     </template>
 
     <template #buttons>
@@ -37,9 +40,9 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink } from '@/protocols/aeternity/helpers';
-import { PROTOCOL_AETERNITY } from '@/constants';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
 import AccountDetailsBase from '../components/AccountDetailsBase.vue';
@@ -72,11 +75,11 @@ export default defineComponent({
     );
 
     return {
+      UNFINISHED_FEATURES,
       PROTOCOL_AETERNITY,
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
     };
   },
 });

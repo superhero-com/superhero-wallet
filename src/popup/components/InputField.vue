@@ -339,7 +339,6 @@ export default defineComponent({
   .message {
     @extend %face-sans-14-regular;
 
-    min-height: 24px;
     line-height: 20px;
     display: flex;
     align-items: center;

@@ -13,13 +13,14 @@
       <LatestTransactionsCard />
 
       <DashboardCard
-        v-if="IS_CORDOVA"
+        v-if="IS_CORDOVA || UNFINISHED_FEATURES"
         :title="$t('dashboard.daeppBrowserCard.title')"
         :description="$t('dashboard.daeppBrowserCard.description')"
         :btn-text="$t('dashboard.daeppBrowserCard.button')"
         :background="daeppBrowserBackground"
         :icon="GlobeIcon"
         :to="{ name: ROUTE_APPS_BROWSER }"
+        :card-id="DASHBOARD_CARD_ID.daeppBrowser"
       />
       <DashboardCard
         v-if="isNodeMainnet && UNFINISHED_FEATURES"
@@ -48,16 +49,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-
+import {
+  defineComponent,
+  onMounted,
+} from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+
 import {
   DASHBOARD_CARD_ID,
   IS_CORDOVA,
   PROTOCOL_AETERNITY,
+  UNFINISHED_FEATURES,
 } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
-import { useAccounts, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useAeSdk,
+  useDeepLinkApi,
+} from '@/composables';
 
 import DashboardCard from '@/popup/components/DashboardCard.vue';
 import DashboardWrapper from '@/popup/components/DashboardWrapper.vue';
@@ -87,19 +97,24 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const router = useRouter();
 
     const {
       activeAccount,
       activeAccountSimplexLink,
-      activeAccountFaucetUrl,
     } = useAccounts({ store });
+    const { checkIfOpenTransferSendModal } = useDeepLinkApi({ router });
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+
+    onMounted(() => {
+      checkIfOpenTransferSendModal();
+    });
 
     return {
       PROTOCOL_AETERNITY,
       DASHBOARD_CARD_ID,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ROUTE_APPS_BROWSER,
       ArrowSendIcon,
@@ -109,7 +124,6 @@ export default defineComponent({
       activeAccount,
       GlobeIcon,
       activeAccountSimplexLink,
-      activeAccountFaucetUrl,
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,

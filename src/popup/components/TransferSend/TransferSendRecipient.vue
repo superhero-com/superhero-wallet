@@ -3,6 +3,7 @@
     <Field
       v-slot="{ field }"
       name="address"
+      :model-value="modelValue"
       :rules="{
         required: true,
         not_same_as: [activeAccount.address, protocol],
@@ -61,10 +62,7 @@ import {
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import InputField from '@/popup/components/InputField.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import {
-  MODAL_RECIPIENT_INFO,
-  PROTOCOL_AETERNITY,
-} from '@/constants';
+import { MODAL_RECIPIENT_INFO } from '@/constants';
 
 export default defineComponent({
   components: {
@@ -77,7 +75,7 @@ export default defineComponent({
     isTipUrl: Boolean,
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     validationRules: {
       type: Object,
       default: () => {

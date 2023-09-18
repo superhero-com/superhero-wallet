@@ -54,6 +54,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
   const accountsAddressList = computed(() => accounts.value.map((acc) => acc.address));
 
   const activeAccount = computed((): IAccount => accounts.value[activeIdx.value] || {});
+  const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
 
   const isLoggedIn = computed(
     (): boolean => activeAccount.value && Object.keys(activeAccount.value).length > 0,
@@ -176,6 +177,7 @@ export function useAccounts({ store }: IDefaultComposableOptions) {
     isLoggedIn,
     protocolsInUse,
     protocolNextAccountIdx,
+    isActiveAccountAe,
     incrementProtocolNextAccountIdx,
     prepareAccountSelectOptions,
     isLocalAccountAddress,

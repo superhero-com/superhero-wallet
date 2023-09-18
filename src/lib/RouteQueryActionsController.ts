@@ -1,8 +1,4 @@
-import {
-  LocationQuery,
-  Router,
-} from 'vue-router';
-import { Ref } from 'vue';
+import { Router } from 'vue-router';
 import { Dictionary } from '@/types';
 import { useModals } from '@/composables';
 import { APP_LINK_WEB, MODAL_TRANSFER_SEND } from '@/constants';
@@ -56,28 +52,12 @@ export const RouteQueryActionsController = (() => {
     },
   };
 
-  function getDeeplinkAction(
-    query: LocationQuery,
-    isLoggedIn: Ref<boolean>,
-  ): RouteQueryActionName | null {
-    if (!isLoggedIn.value || !query) {
-      return null;
-    }
-
-    return (query['x-success'] && query['x-cancel'])
-      ? 'transferSend'
-      : null;
-  }
-
   /**
    * Monitor the action arguments in the query string and perform assigned action method.
    */
-  function init(router: Router, isLoggedIn: Ref<boolean>) {
+  function init(router: Router) {
     const unbind = router.beforeResolve(({ query }, from, next) => {
-      const action = (
-        query?.[ACTION_PROP]
-        || getDeeplinkAction(query, isLoggedIn)
-      ) as null | RouteQueryActionName;
+      const action = query?.[ACTION_PROP] as null | RouteQueryActionName;
 
       if (action && typeof action === 'string' && availableActions[action]) {
         const queryWithoutAction = { ...query };

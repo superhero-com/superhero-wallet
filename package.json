@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "release": "standard-version"
   },
   "dependencies": {
-    "@aeternity/aepp-calldata": "^1.4.0",
+    "@aeternity/aepp-calldata": "^1.5.1",
     "@aeternity/aepp-sdk": "~13.0.0",
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
@@ -56,7 +56,6 @@
     "detect-browser": "^5.3.0",
     "ecpair": "^2.1.0",
     "eslint-plugin-import": "^2.27.5",
-    "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "qr-code-styling": "github:aeternity/qr-code-styling",

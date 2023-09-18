@@ -3,6 +3,7 @@
     <Avatar
       v-if="!avatarOnly"
       :address="modelValue.toString()"
+      size="lg"
     />
     <div>
       <BtnPill
@@ -39,9 +40,10 @@
       </BtnPill>
       <AddressTruncated
         v-if="!avatarOnly"
-        :protocol="modelValue.protocol"
         show-explorer-link
+        show-protocol-icon
         :address="modelValue.toString()"
+        class="address-truncated"
       />
     </div>
   </div>
@@ -107,6 +109,10 @@ export default defineComponent({
     &.avatar-only {
       margin-bottom: 0;
     }
+  }
+
+  .address-truncated {
+    color: $color-white;
   }
 }
 </style>

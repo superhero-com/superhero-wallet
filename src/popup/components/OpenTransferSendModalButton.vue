@@ -3,7 +3,7 @@
     :text="isMultisig ? $t('dashboard.proposeCard.title') : $t('common.send')"
     :subtitle="subtitle"
     :icon="ArrowSendIcon"
-    :disabled="!isOnline || !isConnected || (!!pendingMultisigTransaction && isMultisig)"
+    :disabled="!isOnline || (!!pendingMultisigTransaction && isMultisig)"
     data-cy="send"
     :is-big="isBig"
     @click="openTransferSendModal()"
@@ -16,7 +16,6 @@ import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 
 import BtnBox from './buttons/BtnBox.vue';
 import ArrowSendIcon from '../../icons/arrow-send.svg?vue-component';
@@ -36,8 +35,6 @@ export default defineComponent({
     const { openModal } = useModals();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
-    const isConnected = useGetter('isConnected');
-
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {
         isMultisig: props.isMultisig,
@@ -51,7 +48,6 @@ export default defineComponent({
 
     return {
       isOnline,
-      isConnected,
       pendingMultisigTransaction,
       subtitle,
       ArrowSendIcon,

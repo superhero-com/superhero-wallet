@@ -19,7 +19,6 @@ describe('Test cases for networks page', () => {
         NETWORK_NAME_MAINNET,
         aeNetworkSettingsTestnet.nodeUrl,
         aeNetworkSettingsTestnet.middlewareUrl,
-        aeNetworkSettingsTestnet.compilerUrl,
       )
       .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')
@@ -44,7 +43,6 @@ describe('Test cases for networks page', () => {
         'NewNetwork',
         aeNetworkSettingsTestnet.nodeUrl,
         aeNetworkSettingsTestnet.middlewareUrl,
-        aeNetworkSettingsTestnet.compilerUrl,
       )
       .getByTestId('network-edit')
       .should('be.visible')
@@ -80,7 +78,6 @@ describe('Test cases for networks page', () => {
         'NewNetwork',
         aeNetworkSettingsTestnet.nodeUrl,
         aeNetworkSettingsTestnet.middlewareUrl,
-        aeNetworkSettingsTestnet.compilerUrl,
       )
       .buttonShouldBeDisabled('[data-cy=btn-add-network]')
       .getByTestId('input-message')

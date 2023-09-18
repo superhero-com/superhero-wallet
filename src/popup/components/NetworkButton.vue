@@ -9,8 +9,8 @@
     <div
       class="circle"
       :class="{
-        connected: isOnline && isNodeReady,
-        error: !isOnline || isNodeError,
+        connected: isOnline && isAeNodeReady,
+        error: !isOnline || isAeNodeError,
       }"
     />
     {{ activeNetwork.name }}
@@ -39,7 +39,7 @@ export default defineComponent({
     const { isOnline } = useConnection();
     const { activeNetwork } = useNetworks();
     const { openModal } = useModals();
-    const { isNodeReady, isNodeError } = useAeSdk({ store });
+    const { isAeNodeReady, isAeNodeError } = useAeSdk({ store });
 
     function openNetworkSwitcherModal() {
       return openModal(MODAL_NETWORK_SWITCHER);
@@ -47,8 +47,8 @@ export default defineComponent({
 
     return {
       isOnline,
-      isNodeReady,
-      isNodeError,
+      isAeNodeReady,
+      isAeNodeError,
       activeNetwork,
       openNetworkSwitcherModal,
     };

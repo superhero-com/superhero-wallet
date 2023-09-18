@@ -1,8 +1,5 @@
 /* eslint no-param-reassign: ["error", { "ignorePropertyModificationsFor": ["state"] }] */
 export default {
-  setNodeStatus(state, payload) {
-    state.nodeStatus = payload;
-  },
   setNotificationSettings(state, payload) {
     state.notificationSettings = payload;
   },

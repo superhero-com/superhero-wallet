@@ -50,7 +50,6 @@ import {
 } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
@@ -67,15 +66,11 @@ export default defineComponent({
     highPrecision: Boolean,
     dynamicSizing: Boolean,
     small: Boolean,
-    // TODO - make required & remove default
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const store = useStore();
-    const { getFormattedAndRoundedFiat } = useCurrencies({
-      selectedProtocol: props.protocol,
-      store,
-    });
+    const { getFormattedAndRoundedFiat } = useCurrencies({ store });
 
     const amountRounded = computed(() => {
       if (Number.isInteger(props.amount) || props.amount === 0) {
@@ -91,7 +86,7 @@ export default defineComponent({
     });
 
     const amountFiat = computed(
-      (): string => (props.hideFiat || props.aex9) ? '' : getFormattedAndRoundedFiat(props.amount),
+      (): string => (props.hideFiat || props.aex9) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
     );
 
     return {

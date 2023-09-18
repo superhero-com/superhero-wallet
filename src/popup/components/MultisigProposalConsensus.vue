@@ -31,7 +31,10 @@
           :key="signer"
           class="signer"
         >
-          <AccountItem :address="signer" />
+          <AccountItem
+            :address="signer"
+            :protocol="PROTOCOL_AETERNITY"
+          />
 
           <CheckCircle
             v-if="pendingMultisigTxConfirmedBy.includes(signer) || proposalCompleted"
@@ -65,7 +68,10 @@
 import { computed, defineComponent } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { MODAL_CONSENSUS_INFO } from '@/constants';
+import {
+  MODAL_CONSENSUS_INFO,
+  PROTOCOL_AETERNITY,
+} from '@/constants';
 import {
   useAccounts,
   useModals,
@@ -171,7 +177,7 @@ export default defineComponent({
       return {
         content: t('pages.proposalDetails.infoBox.pending', [
           pendingMultisigTxPendingConfirmationsCount.value,
-          pendingMultisigTxPendingConfirmationsCount.value > 1
+          (pendingMultisigTxPendingConfirmationsCount.value > 1)
             ? t('pages.proposalDetails.infoBox.signatures')
             : t('pages.proposalDetails.infoBox.signature'),
         ]),
@@ -184,6 +190,7 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
       activeMultisigAccount,
       isLocalAccountAddress,
       infoBox,

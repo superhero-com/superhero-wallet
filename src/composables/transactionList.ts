@@ -232,11 +232,13 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
       fetchTipWithdrawnTransactions(address, recent),
     ]);
 
-    const lastPendingTransaction = pendingTransactions?.[pendingTransactions.length - 1];
-    if (lastPendingTransaction?.type === AEX9_TRANSFER_EVENT) {
+    const lastRegularTransaction = regularTransactions?.[regularTransactions.length - 1];
+    // DEX transaction is represented in 3 objects, only last one should be used
+    // this condition checking edge case when not all 3 objects in one chunk
+    if (lastRegularTransaction?.type === AEX9_TRANSFER_EVENT) {
       const middleware = await getMiddleware();
-      pendingTransactions[pendingTransactions.length - 1] = (
-        await middleware.getTx(lastPendingTransaction.payload.txHash)
+      regularTransactions[regularTransactions.length - 1] = (
+        await middleware.getTx(lastRegularTransaction.payload.txHash)
       );
     }
 
@@ -283,6 +285,15 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
         removePendingTransactionByAccount(address, hash);
       }
     });
+
+    (transactions.value[address]?.loaded?.filter(({ pending }) => pending) || [])
+      .forEach((transaction) => {
+        const newTransaction = preparedTransactions
+          .find((tx) => tx.hash === transaction.hash && !tx.pending);
+        if (newTransaction) {
+          updateAccountTransaction(address, newTransaction);
+        }
+      });
 
     preparedTransactions = recent
       ? preparedTransactions.slice(0, limit)

@@ -1,7 +1,10 @@
 <template>
   <div class="invite-row">
     <div class="invite-info">
-      <TokenAmount :amount="inviteLinkBalance" />
+      <TokenAmount
+        :amount="inviteLinkBalance"
+        :protocol="PROTOCOL_AETERNITY"
+      />
       <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
     <CopyText
@@ -18,6 +21,7 @@
       <BtnMain
         v-if="inviteLinkBalance > 0"
         class="button"
+        variant="muted"
         :text="$t('pages.invite.claim')"
         @click="claim"
       />
@@ -51,6 +55,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
+          :protocol="PROTOCOL_AETERNITY"
           readonly
         />
         <div class="centered-buttons">
@@ -71,7 +76,6 @@
 </template>
 
 <script lang="ts">
-import nacl from 'tweetnacl';
 import {
   computed,
   defineComponent,
@@ -83,11 +87,12 @@ import { Field } from 'vee-validate';
 import {
   AE_AMOUNT_FORMATS,
   encode,
-  getAddressFromPriv,
   Encoding,
 } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+
+import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import type { IFormModel } from '@/types';
 import { formatDate } from '@/utils';
 import {
@@ -96,6 +101,7 @@ import {
 } from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
+  useAccounts,
   useBalances,
   useMaxAmount,
   useAeSdk,
@@ -127,6 +133,7 @@ export default defineComponent({
     const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
     const { balance } = useBalances({ store });
+    const { getLastActiveProtocolAccount } = useAccounts({ store });
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -150,9 +157,7 @@ export default defineComponent({
       );
     });
 
-    const address = computed(() => getAddressFromPriv(
-      nacl.sign.keyPair.fromSeed(Buffer.from(props.secretKey)).secretKey,
-    ));
+    const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
     function deleteItem() {
       store.commit('invites/delete', props.secretKey);
@@ -172,7 +177,11 @@ export default defineComponent({
     async function claim() {
       emit('loading', true);
       try {
-        await store.dispatch('invites/claim', props.secretKey);
+        await store.dispatch('invites/claim', {
+          secretKey: Buffer.from(props.secretKey),
+          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address,
+          isMax: true,
+        });
         await updateBalance();
       } catch (error) {
         if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
@@ -222,6 +231,7 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       formModel,
       max,
       topUp,
@@ -252,8 +262,7 @@ export default defineComponent({
 
   .invite-link {
     width: 100%;
-    margin-bottom: 5px;
-    padding-block: 4px;
+    margin: 12px 0;
 
     &-url {
       display: block;
@@ -279,6 +288,7 @@ export default defineComponent({
     .date {
       font-size: 11px;
       color: variables.$color-white;
+      opacity: 0.5;
     }
   }
 

@@ -1,8 +1,10 @@
+import nacl from 'tweetnacl';
 import {
   AE_AMOUNT_FORMATS,
   Encoded,
   Encoding,
   InvalidTxError,
+  MemoryAccount,
   Tag,
   decode,
   formatAmount,
@@ -38,6 +40,7 @@ import {
   AE_HASH_PREFIXES_ALLOWED,
   AE_SIMPLEX_URL,
   AE_TRANSACTION_OWNERSHIP_STATUS,
+  SEED_LENGTH,
   TX_FUNCTIONS,
   TX_FUNCTIONS_TYPE_DEX,
   TX_TAGS_SUPPORTED,
@@ -347,4 +350,13 @@ export function checkAddress(value: string) {
 
 export function checkAddressOrChannel(value: string) {
   return checkAddress(value) || isAddressValid(value, Encoding.Channel);
+}
+
+export function getAccountFromSecret(secretKey: Buffer) {
+  // `secretKey` variable can be either seed or seed + public key (legacy)
+  return new MemoryAccount(
+    Buffer.from(secretKey).length === SEED_LENGTH
+      ? nacl.sign.keyPair.fromSeed(Buffer.from(secretKey)).secretKey
+      : Buffer.from(secretKey),
+  );
 }

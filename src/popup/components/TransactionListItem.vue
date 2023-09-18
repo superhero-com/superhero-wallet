@@ -71,6 +71,7 @@ import {
   relativeTimeTo,
   toShiftedBigNumber,
 } from '@/utils';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
@@ -151,15 +152,18 @@ export default defineComponent({
 
     const fiatAmount = computed(() => {
       const aeToken = tokens.value?.find((t) => t?.isAe);
-      if (
-        !aeToken
-        || isErrorTransaction.value
-        || isDexPool.value
-      ) return 0;
+      if (!aeToken || isErrorTransaction.value || isDexPool.value) {
+        return 0;
+      }
       return getFormattedAndRoundedFiat(
-        +amountRounded((aeToken.decimals
-          ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
-          : aeToken.amount)!),
+        +amountRounded(
+          (
+            aeToken.decimals
+              ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
+              : aeToken.amount
+          )!,
+        ),
+        PROTOCOL_AETERNITY,
       );
     });
 

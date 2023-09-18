@@ -1,7 +1,6 @@
 <template>
   <LinkButton
     :to="explorerUrl"
-    target="_blank"
     class="account-item"
     variant="muted"
   >
@@ -47,7 +46,6 @@
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue';
 import type { Protocol } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import AddressTruncated from './AddressTruncated.vue';
@@ -74,7 +72,7 @@ export default defineComponent({
   props: {
     address: { type: String, required: true },
     name: { type: String, default: '' },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     size: {
       type: String,
       default: 'rg',

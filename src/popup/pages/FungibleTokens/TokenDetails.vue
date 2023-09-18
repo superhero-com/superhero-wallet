@@ -25,6 +25,7 @@
       <template #text>
         <AddressTruncated
           show-explorer-link
+          :protocol="PROTOCOL_AETERNITY"
           :address="tokenData.contractId"
         />
       </template>
@@ -165,6 +166,10 @@ import { useStore } from 'vuex';
 import BigNumber from 'bignumber.js';
 import type { IAsset, IToken } from '@/types';
 import {
+  PROTOCOL_AETERNITY,
+  UNFINISHED_FEATURES,
+} from '@/constants';
+import {
   amountRounded,
   formatNumber,
   toShiftedBigNumber,
@@ -214,8 +219,9 @@ export default defineComponent({
     );
 
     return {
+      PROTOCOL_AETERNITY,
       AE_DEX_URL,
-      UNFINISHED_FEATURES: process.env.UNFINISHED_FEATURES,
+      UNFINISHED_FEATURES,
       displayDexUrl,
       isAe,
       poolShare,

@@ -18,6 +18,7 @@ import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/store/plugins/languages';
+import { defaultAccountDiscovery } from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -34,13 +35,6 @@ import {
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { aettosToAe } from '../helpers';
-
-/**
- * Address gap limit is currently set to 5.
- * If the software hits 5 unused addresses in a row,
- * it expects there are no used addresses beyond this point and stops searching the address chain.
-*/
-const ADDRESS_GAP_LIMIT = 5;
 
 interface IAmountDecimalPlaces {
   highPrecision?: boolean;
@@ -66,14 +60,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.middlewareUrl,
       getPlaceholder: () => tg('pages.network.networkMiddlewarePlaceholder'),
       getLabel: () => tg('pages.network.networkMiddlewareLabel'),
-    },
-    {
-      key: 'compilerUrl',
-      testId: 'ae-compiler-url',
-      required: true,
-      defaultValue: AE_NETWORK_DEFAULT_ENV_SETTINGS.compilerUrl,
-      getPlaceholder: () => tg('pages.network.networkCompilerPlaceholder'),
-      getLabel: () => tg('pages.network.networkCompilerLabel'),
     },
     {
       key: 'backendUrl',
@@ -160,30 +146,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async discoverAccounts(seed: Uint8Array): Promise<number> {
-    let lastNotEmptyIdx = 0;
-    let lastIndex = 0;
-    let isAccountUsedArray: Boolean[] = [];
-
-    do {
-      try {
-        lastNotEmptyIdx = isAccountUsedArray.lastIndexOf(true) + lastIndex;
-        lastIndex += isAccountUsedArray.length;
-        // eslint-disable-next-line no-await-in-loop
-        isAccountUsedArray = await Promise.all(
-          Array(ADDRESS_GAP_LIMIT + lastNotEmptyIdx - lastIndex + 1)
-            // eslint-disable-next-line no-loop-func
-            .fill(0).map((x, i) => i + lastIndex).map((index) => this.isAccountUsed(
-              this.getHdWalletAccountFromMnemonicSeed(seed, index).publicKey,
-            )),
-        );
-      } catch (e) {
-        break;
-      }
-    } while (!(
-      isAccountUsedArray.lastIndexOf(true) === -1
-      || isAccountUsedArray.filter((isAccountUsed) => !isAccountUsed).length === ADDRESS_GAP_LIMIT
-    ));
-    return lastNotEmptyIdx;
+    return defaultAccountDiscovery(
+      this.isAccountUsed,
+      this.getHdWalletAccountFromMnemonicSeed,
+      seed,
+    );
   }
 
   async constructAndSignTx() {

@@ -1,10 +1,7 @@
-import nacl from 'tweetnacl';
-import { AeSdk, MemoryAccount, Node } from '@aeternity/aepp-sdk';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { useAccounts, useModals, useNetworks } from '@/composables';
+import { AeSdk, AE_AMOUNT_FORMATS, Node } from '@aeternity/aepp-sdk';
+import { useModals, useNetworks } from '@/composables';
+import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
 import { tg } from '../plugins/languages';
-
-const SEED_LENGTH = 32;
 
 export default {
   namespaced: true,
@@ -12,31 +9,42 @@ export default {
     invites: [],
   },
   mutations: {
-    add: ({ invites }, secretKey) => invites.unshift({ secretKey, createdAt: Date.now() }),
+    add: ({ invites }, secretKey) => invites.unshift({
+      secretKey: secretKey.toJSON(),
+      createdAt: Date.now(),
+    }),
     delete(state, secretKey) {
       state.invites = state.invites.filter((invite) => invite.secretKey !== secretKey);
     },
   },
   actions: {
-    async claim({ rootGetters, rootState }, secretKey) {
+    async claim(_, {
+      secretKey,
+      recipientId,
+      amount = undefined,
+      isMax,
+    }) {
       const { activeNetwork } = useNetworks();
-      const { getLastActiveProtocolAccount } = useAccounts({
-        store: { state: rootState, getters: rootGetters },
-      });
       const aeSdk = new AeSdk({
         nodes: [{
           name: activeNetwork.value.name,
           instance: new Node(activeNetwork.value.protocols.aeternity.nodeUrl),
         }],
-        // `secretKey` variable can be either seed or seed + public key (legacy)
-        accounts: [new MemoryAccount(secretKey.length === SEED_LENGTH
-          ? nacl.sign.keyPair.fromSeed(secretKey).secretKey : secretKey)],
+        accounts: [getAccountFromSecret(secretKey)],
       });
-      await aeSdk.transferFunds(
-        1,
-        getLastActiveProtocolAccount(PROTOCOL_AETERNITY).address,
-        { verify: false },
-      );
+      if (!isMax) {
+        await aeSdk.spend(
+          amount,
+          recipientId,
+          { denomination: AE_AMOUNT_FORMATS.AE },
+        );
+      } else {
+        await aeSdk.transferFunds(
+          1,
+          recipientId,
+          { verify: false },
+        );
+      }
     },
     async handleNotEnoughFoundsError(_, { error: { message }, isInviteError = false }) {
       if (!isInviteError && !message.includes('is not enough to execute')) return false;

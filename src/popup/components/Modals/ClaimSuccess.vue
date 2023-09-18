@@ -4,9 +4,16 @@
     centered
     @close="resolve"
   >
-    <CheckIcon /> <br>
-    <b>{{ $t('pages.claim.url') }}:</b> {{ url }} <br>
-    <b>{{ $t('pages.claim.tipsOnUrl') }}:</b> {{ claimAmount }} {{ $t('pages.claim.ae') }} <br>
+    <CheckIcon class="check-icon" />
+    <span>
+      <b>{{ $t('pages.claim.url') }}:</b>
+      {{ url }}
+    </span>
+    <span>
+      <b>{{ $t('pages.claim.tipsOnUrl') }}:</b>
+      {{ claimAmount }}
+      {{ $t('pages.claim.ae') }}
+    </span>
     <span class="claimed">{{ $t('pages.claim.claimed') }}</span>
 
     <template #footer>
@@ -40,6 +47,11 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
+
+.check-icon {
+  align-self: center;
+  margin-bottom: 8px;
+}
 
 .claimed {
   color: variables.$color-primary;

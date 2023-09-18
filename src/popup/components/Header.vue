@@ -47,7 +47,7 @@
         <NetworkButton />
 
         <template v-if="isLoggedIn">
-          <AppsBrowserBtn v-if="IS_CORDOVA" />
+          <AppsBrowserBtn v-if="IS_CORDOVA || UNFINISHED_FEATURES" />
 
           <NotificationsIcon />
 
@@ -67,18 +67,19 @@ import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_CORDOVA } from '@/constants';
-import { WalletRouteMeta } from '../../types';
+import { IS_CORDOVA, UNFINISHED_FEATURES } from '@/constants';
+import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
   ROUTE_INDEX,
   ROUTE_MORE,
-} from '../router/routeNames';
-import { useAccounts, useUi } from '../../composables';
+} from '@/popup/router/routeNames';
+import { useAccounts, useUi } from '@/composables';
 
-import Logo from '../../icons/logo-small.svg?vue-component';
-import BackIcon from '../../icons/back.svg?vue-component';
-import ThreeDotsIcon from '../../icons/three-dots.svg?vue-component';
+import Logo from '@/icons/logo-small.svg?vue-component';
+import BackIcon from '@/icons/back.svg?vue-component';
+import ThreeDotsIcon from '@/icons/three-dots.svg?vue-component';
+
 import Truncate from './Truncate.vue';
 import BtnClose from './buttons/BtnClose.vue';
 import BtnPlain from './buttons/BtnPlain.vue';
@@ -128,7 +129,7 @@ export default defineComponent({
       address: () => t('pages.titles.address'),
       signMessage: () => t('pages.titles.signMessage'),
       signTransaction: () => t('pages.titles.signTransaction'),
-      invite: () => t('pages.titles.invite'),
+      giftCards: () => t('pages.titles.giftCards'),
       txDetails: () => t('pages.titles.txDetails'),
       tokenDetails: () => t('pages.titles.tokenDetails'),
       coinDetails: () => t('pages.titles.coinDetails'),
@@ -178,6 +179,7 @@ export default defineComponent({
     }
 
     return {
+      UNFINISHED_FEATURES,
       homeRouteName,
       BackIcon,
       ThreeDotsIcon,

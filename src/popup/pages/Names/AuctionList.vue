@@ -20,7 +20,10 @@
         <div class="name-wrapper">
           <div class="name">
             {{ name }}
-            <TokenAmount :amount="getAeFee(lastBid.nameFee)" />
+            <TokenAmount
+              :amount="getAeFee(lastBid.nameFee)"
+              :protocol="PROTOCOL_AETERNITY"
+            />
           </div>
           <div
             v-if="topBlockHeight"
@@ -62,6 +65,7 @@ import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
 
+import { PROTOCOL_AETERNITY } from '@/constants';
 import Filters from '../../components/Filters.vue';
 import NameRow from '../../components/NameRow.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -126,6 +130,7 @@ export default defineComponent({
     });
 
     return {
+      PROTOCOL_AETERNITY,
       blocksToRelativeTime,
       loading,
       displayMode,

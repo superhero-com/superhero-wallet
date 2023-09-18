@@ -11,7 +11,7 @@
         error,
         received: token.isReceived
       }"
-      :style="{ '--font-size': calculateFontSize(tokenAmount(token)) }"
+      :style="{ '--font-size': calculateFontSize(token.amount) }"
     >
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
@@ -20,7 +20,7 @@
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ isRounded ? tokenAmount(token) : amountRounded(tokenAmount(token)) }}
+        {{ isRounded ? token.amount : amountRounded(token.amount) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -41,7 +41,6 @@ import type { ITokenResolved, ITransaction } from '@/types';
 import {
   amountRounded,
   calculateFontSize,
-  toShiftedBigNumber,
   truncateString,
 } from '@/utils';
 import { TX_DIRECTION } from '@/constants';
@@ -84,17 +83,10 @@ export default defineComponent({
       ) || [],
     );
 
-    function tokenAmount(token: ITokenResolved) {
-      return token.decimals
-        ? toShiftedBigNumber(token.amount || 0, -token.decimals)
-        : token.amount;
-    }
-
     const getTokenName = (token: ITokenResolved) => token?.isAe ? AE_SYMBOL : token.symbol;
 
     return {
       filteredTokens,
-      tokenAmount,
       truncateString,
       getTokenName,
       amountRounded,

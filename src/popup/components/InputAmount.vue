@@ -68,15 +68,14 @@ import {
   onMounted,
   PropType,
 } from 'vue';
+import { useStore } from 'vuex';
 import {
   useAccounts,
   useBalances,
   useCurrencies,
 } from '@/composables';
 import type { IAsset, Protocol } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useStore } from 'vuex';
 import InputField from './InputField.vue';
 import InputSelectAsset from './InputSelectAsset.vue';
 
@@ -91,17 +90,16 @@ export default defineComponent({
     selectedAsset: { type: Object as PropType<IAsset | null>, default: null },
     readonly: Boolean,
     showTokensWithBalance: Boolean,
-    // TODO - handle usages & make protocol required
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   emits: ['update:modelValue', 'asset-selected'],
   setup(props, { emit }) {
     const store = useStore();
     const {
-      currentCurrencyRate,
+      getCurrentCurrencyRate,
       marketData,
       formatCurrency,
-    } = useCurrencies({ selectedProtocol: props.protocol, store });
+    } = useCurrencies({ store });
     const { balance } = useBalances({ store });
     const { protocolsInUse } = useAccounts({ store });
 
@@ -116,7 +114,7 @@ export default defineComponent({
       ).includes(currentAsset.value.contractId),
     );
     const currentAssetFiatPrice = computed(
-      () => (isDefaultAsset.value) ? currentCurrencyRate.value : 0,
+      () => (isDefaultAsset.value) ? getCurrentCurrencyRate(props.protocol) : 0,
     );
     const currentAssetFiatPriceFormatted = computed(
       () => formatCurrency(currentAssetFiatPrice.value),
@@ -139,7 +137,6 @@ export default defineComponent({
 
     return {
       defaultCoin,
-      currentCurrencyRate,
       totalAmountFormatted,
       currentAssetFiatPrice,
       currentAssetFiatPriceFormatted,

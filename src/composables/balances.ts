@@ -8,6 +8,7 @@ import type {
 } from '@/types';
 import { handleUnknownError, isNotFoundError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useCurrencies } from '@/composables/currencies';
 import {
   createPollingBasedOnMountedComponents,
   useStorageRef,
@@ -37,13 +38,24 @@ const balances = useStorageRef<Balances>({}, LOCAL_STORAGE_BALANCES_KEY, {
  */
 export function useBalances({ store }: IDefaultComposableOptions) {
   const { activeAccount, accounts } = useAccounts({ store });
+  const { getCurrentCurrencyRate } = useCurrencies({ store });
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
-  const balancesTotal = computed(
-    () => Object.keys(balances.value)
-      .reduce((total, key) => total.plus(balances.value[key]), new BigNumber(0))
-      .toFixed(),
-  );
+
+  const accountsTotalBalance = computed(() => {
+    const result = accounts.value.reduce(
+      (total, account) => {
+        const accountBalance = balances.value?.[account.address];
+        if (!accountBalance) {
+          return total;
+        }
+        return total + (getCurrentCurrencyRate(account.protocol) * accountBalance.toNumber());
+      },
+      0,
+    );
+
+    return result.toFixed(2);
+  });
 
   function getAccountBalance(address: string) {
     return balances.value[address] || new BigNumber(0);
@@ -79,7 +91,7 @@ export function useBalances({ store }: IDefaultComposableOptions) {
 
   return {
     balances,
-    balancesTotal,
+    accountsTotalBalance,
     balance,
     getAccountBalance,
     updateBalances,

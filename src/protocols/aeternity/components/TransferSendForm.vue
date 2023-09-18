@@ -50,7 +50,7 @@
           <template #value>
             <AccountItem
               :address="multisigVaultAddress"
-              protocol="aeternity"
+              :protocol="PROTOCOL_AETERNITY"
             />
           </template>
         </DetailsItem>
@@ -90,7 +90,7 @@
           ...+balance.minus(fee) > 0 && isMultisig
             ? { max_value_vault: activeMultisigAccount?.balance.toString() }
             : {},
-          min_tip_amount: isTipUrl,
+          ae_min_tip_amount: isTipUrl,
         }"
         @asset-selected="handleAssetChange"
       >
@@ -166,11 +166,13 @@ import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
-  AGGREGATOR_URL,
   MODAL_PAYLOAD_FORM,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { isUrlValid } from '@/utils';
+import {
+  checkIfSuperheroCallbackUrl,
+  isUrlValid,
+} from '@/utils';
 import {
   useAccounts,
   useBalances,
@@ -406,8 +408,8 @@ export default defineComponent({
         }
 
         const { query } = route;
-        const slicedAggregatorUrl = AGGREGATOR_URL.endsWith('/') ? AGGREGATOR_URL.slice(0, -1) : AGGREGATOR_URL;
-        if ([query['x-success'], query['x-cancel']].every((value) => value && (value as string).startsWith(slicedAggregatorUrl))) {
+
+        if (checkIfSuperheroCallbackUrl(query)) {
           isUrlTippingEnabled.value = true;
         }
         updateFormModelValues({

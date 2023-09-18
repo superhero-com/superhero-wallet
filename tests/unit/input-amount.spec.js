@@ -31,7 +31,7 @@ config.global = {
 
 describe('InputAmount', () => {
   it('should render', async () => {
-    const wrapper = mount(InputAmount);
+    const wrapper = mount(InputAmount, { props: { protocol: PROTOCOL_AETERNITY } });
     expect(wrapper.classes()).toContain('input-amount');
   });
 

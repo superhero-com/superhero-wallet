@@ -175,7 +175,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .tips-claim {
-  padding: 12px;
+  padding: var(--screen-padding-x);
 
   .header {
     margin: 20px 0 24px 0;

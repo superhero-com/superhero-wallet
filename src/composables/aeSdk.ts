@@ -24,9 +24,6 @@ import {
   IS_EXTENSION_BACKGROUND,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
-  NODE_STATUS_CONNECTED,
-  NODE_STATUS_CONNECTING,
-  NODE_STATUS_ERROR,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_TESTS,
@@ -45,8 +42,14 @@ import { useModals } from './modals';
 let aeSdk: AeSdkSuperhero;
 let aeSdkBlocked = false;
 let storedNetworkName: string;
-const isAeSdkReady = ref(false);
+
 const nodeNetworkId = ref<string>();
+
+const isAeSdkReady = ref(false);
+const isAeNodeReady = ref(false);
+const isAeNodeConnecting = ref(false);
+const isAeNodeError = ref(false);
+
 const aeppInfo: Record<string, any> = {};
 
 let dryAeSdk: AeSdk;
@@ -54,14 +57,12 @@ let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk({ store }: IDefaultComposableOptions) {
   const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
-  const { isLoggedIn, getLastActiveProtocolAccount } = useAccounts({ store });
+  const {
+    accountsAddressList,
+    isLoggedIn,
+    getLastActiveProtocolAccount,
+  } = useAccounts({ store });
   const { openModal } = useModals();
-
-  const nodeStatus = computed((): string => store.state.nodeStatus);
-
-  const isNodeConnecting = computed(() => nodeStatus.value === NODE_STATUS_CONNECTING);
-  const isNodeReady = computed(() => nodeStatus.value === NODE_STATUS_CONNECTED);
-  const isNodeError = computed(() => nodeStatus.value === NODE_STATUS_ERROR);
 
   const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
   const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
@@ -78,17 +79,19 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    */
   async function createNodeInstance(url: string) {
     let nodeInstance;
-    store.commit('setNodeStatus', NODE_STATUS_CONNECTING);
+    isAeNodeReady.value = false;
+    isAeNodeError.value = false;
+    isAeNodeConnecting.value = true;
     try {
-      // TODO: remove ignore version once HTTP compiler dependency is removed
-      nodeInstance = new Node(url, { ignoreVersion: true });
+      nodeInstance = new Node(url);
       nodeNetworkId.value = (await nodeInstance.getStatus()).networkId;
-      store.commit('setNodeStatus', NODE_STATUS_CONNECTED);
+      isAeNodeReady.value = true;
     } catch (error) {
       nodeNetworkId.value = undefined;
-      store.commit('setNodeStatus', NODE_STATUS_ERROR);
+      isAeNodeError.value = true;
       return null;
     }
+    isAeNodeConnecting.value = false;
     return nodeInstance;
   }
 
@@ -100,6 +103,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       watchUntilTruthy(() => store.state.isRestored),
       watchUntilTruthy(isLoggedIn),
     ]);
+
     storedNetworkName = activeNetworkName.value;
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
@@ -165,7 +169,6 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
         ) {
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         }
-        const { accountsAddressList } = useAccounts({ store });
         return accountsAddressList.value;
       },
     });
@@ -197,20 +200,20 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
    */
   async function getDryAeSdk(): Promise<AeSdk> {
     if (!dryAeSdk) {
-      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
+      const nodeInstance = new Node(aeActiveNetworkSettings.value.nodeUrl, { ignoreVersion: true });
       dryAeSdk = new AeSdk({
         nodes: [{
           name: activeNetworkName.value,
-          instance: nodeInstance!,
+          instance: nodeInstance,
         }],
       });
-      dryAeSdkCurrentNodeNetworkId = await nodeInstance?.getNetworkId()!;
+      dryAeSdkCurrentNodeNetworkId = await nodeInstance.getNetworkId();
       return dryAeSdk;
     }
     const networkId = await dryAeSdk.api.getNetworkId();
     if (dryAeSdkCurrentNodeNetworkId !== networkId) {
       dryAeSdk.pool.delete(storedNetworkName);
-      const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
+      const nodeInstance = new Node(aeActiveNetworkSettings.value.nodeUrl, { ignoreVersion: true });
       dryAeSdk.addNode(activeNetworkName.value, nodeInstance!, true);
       dryAeSdkCurrentNodeNetworkId = networkId;
     }
@@ -241,9 +244,9 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
   }
 
   return {
-    isNodeReady,
-    isNodeConnecting,
-    isNodeError,
+    isAeNodeReady,
+    isAeNodeConnecting,
+    isAeNodeError,
     isNodeMainnet,
     isNodeTestnet,
     isAeSdkReady,

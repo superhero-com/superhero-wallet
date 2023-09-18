@@ -1,6 +1,9 @@
 <template>
   <div class="retip">
-    <BalanceInfo :balance="numericBalance" />
+    <BalanceInfo
+      :balance="numericBalance"
+      :protocol="PROTOCOL_AETERNITY"
+    />
     <div class="section-title">
       {{ $t('pages.tipPage.url') }}
     </div>
@@ -19,7 +22,7 @@
       :rules="{
         required: true,
         min_value_exclusive: 0,
-        min_tip_amount: true,
+        ae_min_tip_amount: true,
         ...+balance.minus(fee) > 0 ? { max_value: max } : {},
         enough_coin: fee.toString(),
       }"
@@ -31,6 +34,7 @@
         class="amount-input"
         readonly
         :message="errorMessage"
+        :protocol="PROTOCOL_AETERNITY"
       />
     </Field>
 
@@ -234,6 +238,7 @@ export default defineComponent({
     });
 
     return {
+      PROTOCOL_AETERNITY,
       tip,
       formModel,
       loading,

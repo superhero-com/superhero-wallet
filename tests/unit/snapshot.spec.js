@@ -33,6 +33,9 @@ jest.mock('../../src/composables', () => ({
     openModal: jest.fn(),
   })),
 }));
+jest.mock('@/utils', () => ({
+  fetchJson: jest.fn(() => ({})),
+}));
 jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({})),
 }));

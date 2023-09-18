@@ -30,7 +30,11 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
-import { useMultisigAccounts } from '../../composables';
+import { PROTOCOL_AETERNITY } from '@/constants';
+import {
+  useCurrencies,
+  useMultisigAccounts,
+} from '../../composables';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
 import TotalWalletAmount from './TotalWalletAmount.vue';
@@ -51,6 +55,7 @@ export default defineComponent({
       activeMultisigAccountId,
       setActiveMultisigAccountId,
     } = useMultisigAccounts({ store });
+    const { getFiat } = useCurrencies({ store });
 
     const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));
 
@@ -61,10 +66,14 @@ export default defineComponent({
     );
 
     const multisigBalancesTotal = computed(
-      () => multisigAccounts.value
-        .map((acc) => acc.balance)
-        .reduce((total, balance) => total.plus(balance), new BigNumber(0))
-        .toFixed(),
+      () => {
+        const totalBalance = multisigAccounts.value
+          .map((acc) => acc.balance)
+          .reduce((total, balance) => total.plus(balance), new BigNumber(0))
+          .toFixed();
+
+        return getFiat(+totalBalance, PROTOCOL_AETERNITY);
+      },
     );
 
     function selectAccount(index: number) {

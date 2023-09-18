@@ -18,13 +18,13 @@
       </div>
 
       <h2 class="text-heading-2 text-center">
-        {{ confirmActionContent.title }}
+        {{ $rt(confirmActionContent.title) }}
       </h2>
 
       <FormSelect
         :value="activeAccount.address"
         :options="eligibleAccounts"
-        :default-text="confirmActionContent.formSelectText"
+        :default-text="$rt(confirmActionContent.formSelectText)"
         class="account-selector"
         persistent-default-text
         unstyled
@@ -34,19 +34,22 @@
 
       <div>
         <div class="active-account">
-          <AccountItem :address="activeAccount.address" />
+          <AccountItem
+            :address="activeAccount.address"
+            :protocol="PROTOCOL_AETERNITY"
+          />
         </div>
 
         <div
           v-if="actionHasError"
           class="alert"
         >
-          {{ actionHasError }}
+          {{ $rt(actionHasError) }}
         </div>
       </div>
 
       <div class="msg">
-        {{ confirmActionContent.msg }}
+        {{ $rt(confirmActionContent.msg) }}
       </div>
     </div>
 
@@ -62,7 +65,7 @@
         data-cy="to-confirm"
         extra-padded
         :disabled="!!actionHasError"
-        :text="confirmActionContent.btnText"
+        :text="$rt(confirmActionContent.btnText)"
         @click="resolve"
       />
     </template>
@@ -87,6 +90,7 @@ import type {
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
+import { PROTOCOL_AETERNITY } from '@/constants';
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -178,6 +182,8 @@ export default defineComponent({
     }
 
     return {
+      PROTOCOL_AETERNITY,
+      TX_FUNCTIONS_MULTISIG,
       statusIcon,
       closeModal,
       eligibleAccounts,
@@ -186,7 +192,6 @@ export default defineComponent({
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,
-      TX_FUNCTIONS_MULTISIG,
     };
   },
 });

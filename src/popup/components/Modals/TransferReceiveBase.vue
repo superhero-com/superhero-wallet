@@ -111,7 +111,6 @@ import type {
 } from '@/types';
 import {
   IS_MOBILE_DEVICE,
-  PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
 } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
@@ -155,7 +154,7 @@ export default defineComponent({
     accountName: { type: String, default: null },
     tokens: { type: Object as PropType<ITokenList>, default: () => ({}) },
     disableAssetSelection: Boolean,
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const store = useStore();

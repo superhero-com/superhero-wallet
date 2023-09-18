@@ -1,5 +1,10 @@
 <template>
   <div class="address-truncated">
+    <ProtocolIcon
+      v-if="showProtocolIcon"
+      :protocol="protocol"
+      class="protocol-icon"
+    />
     <div class="address-truncated-chunks">
       <span class="address-chunk">{{ truncatedAddress[0] }}</span>
       <span class="dots">
@@ -28,21 +33,23 @@ import {
 } from 'vue';
 import type { Protocol } from '@/types';
 import { truncateAddress } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import ExternalLinkIcon from '@/icons/external-link.svg?vue-component';
+import ProtocolIcon from './ProtocolIcon.vue';
 import LinkButton from './LinkButton.vue';
 
 export default defineComponent({
   components: {
+    ProtocolIcon,
     LinkButton,
     ExternalLinkIcon,
   },
   props: {
     address: { type: String, required: true },
-    protocol: { type: String as PropType<Protocol>, default: PROTOCOL_AETERNITY },
+    protocol: { type: String as PropType<Protocol>, required: true },
     showExplorerLink: Boolean,
+    showProtocolIcon: Boolean,
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));
@@ -68,6 +75,10 @@ export default defineComponent({
   display: flex;
   align-items: center;
   user-select: none;
+
+  .protocol-icon {
+    margin-right: 4px;
+  }
 
   &-chunks {
     @extend %face-mono-12-medium;

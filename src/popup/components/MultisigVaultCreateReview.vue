@@ -65,6 +65,7 @@
           <TokenAmount
             :amount="fee"
             :symbol="AE_SYMBOL"
+            :protocol="PROTOCOL_AETERNITY"
           />
         </template>
       </DetailsItem>

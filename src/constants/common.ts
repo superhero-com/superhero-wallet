@@ -36,6 +36,13 @@ export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_TRANSFER_SEND,
 ] as const;
 
+/**
+ * Address gap limit is currently set to 5.
+ * If the software hits 5 unused addresses in a row,
+ * it expects there are no used addresses beyond this point and stops searching the address chain.
+*/
+export const ADDRESS_GAP_LIMIT = 5;
+
 export const SEED_LENGTH = 12;
 export const MAXIMUM_ACCOUNTS_TO_DISCOVER = 5;
 
@@ -66,10 +73,6 @@ export const NETWORK_NAME_TESTNET = 'Testnet';
 export const NETWORK_NAME_MAX_LENGTH = 15;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
-
-export const NODE_STATUS_CONNECTING = 'connecting';
-export const NODE_STATUS_CONNECTED = 'connected';
-export const NODE_STATUS_ERROR = 'error';
 
 export const TXS_PER_PAGE = 30;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
@@ -320,6 +323,7 @@ export const MODAL_TRANSFER_RECEIVE = 'transfer-receive';
 export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
+export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -364,7 +368,7 @@ export const DASHBOARD_CARD_ID = {
   buyAe: 'buyAe',
   claimName: 'claimName',
   faucet: 'faucet',
-  daeppBrowser: 'daeppBrowser',
+  daeppBrowser: null, // Closing this card is disabled due to stakeholders decision
 } as const;
 
 export const ALLOWED_ICON_STATUSES = [

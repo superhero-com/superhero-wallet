@@ -36,6 +36,7 @@ import {
   PropType,
   computed,
   defineComponent,
+  watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
@@ -54,6 +55,7 @@ import {
   useAccounts,
   useAeSdk,
   useTransactionAndTokenFilter,
+  useViewport,
 } from '@/composables';
 import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 import {
@@ -83,11 +85,12 @@ export default defineComponent({
     loading: Boolean,
   },
   emits: ['loadMore'],
-  setup(props) {
+  setup(props, { emit }) {
     const store = useStore();
     const { t } = useI18n();
     const { accounts, activeAccount } = useAccounts({ store });
     const { dexContracts } = useAeSdk({ store });
+    const { viewportElement } = useViewport();
 
     const {
       searchPhrase,
@@ -105,7 +108,7 @@ export default defineComponent({
         const txOwnerAddress = getTxOwnerAddress(innerTx);
 
         const direction = getTxDirection(
-          outerTx.payerId ? outerTx : innerTx,
+          outerTx?.payerId ? outerTx : innerTx,
           (transaction as ITransaction).transactionOwner
           || ((
             getOwnershipStatus(activeAccount.value, accounts.value, innerTx)
@@ -143,6 +146,32 @@ export default defineComponent({
         ),
       );
     }
+
+    function checkLoadMore() {
+      if (!viewportElement.value) {
+        return;
+      }
+
+      const {
+        scrollHeight,
+        scrollTop,
+        clientHeight,
+      } = viewportElement.value!;
+
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+        emit('loadMore');
+      }
+    }
+
+    watch(displayMode, () => {
+      checkLoadMore();
+    });
+
+    watch(() => props.loading, (val) => {
+      if (!val) {
+        checkLoadMore();
+      }
+    });
 
     const filteredTransactions = computed(
       () => pipe([

@@ -1,5 +1,6 @@
 import {
   computed,
+  nextTick,
   ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -44,7 +45,7 @@ export function useTransferSendForm({
 
   const { t } = useI18n();
   const { openModal, openDefaultModal } = useModals();
-  const { errors, validate } = useForm();
+  const { errors, validate, validateField } = useForm();
 
   const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
 
@@ -68,10 +69,10 @@ export function useTransferSendForm({
     const result: Partial<TransferFormModel> = {};
 
     const selectedToken = tokenHandler ? tokenHandler(token, formModel.value.selectedAsset) : null;
+
     if (selectedToken) {
       result.selectedAsset = selectedToken;
     }
-
     if (account) {
       result.address = account;
     }
@@ -85,11 +86,14 @@ export function useTransferSendForm({
     return result;
   }
 
-  function updateFormModelValues(params: Dictionary) {
+  async function updateFormModelValues(params: Dictionary) {
+    const updatedValues = returnFormModelValues(params, getSelectedAssetValue);
     formModel.value = {
       ...formModel.value,
-      ...returnFormModelValues(params, getSelectedAssetValue),
+      ...updatedValues,
     };
+    await nextTick();
+    Object.keys(updatedValues).forEach((field) => validateField(field));
   }
 
   async function openScanQrModal(tokenBalances: IToken[]) {
