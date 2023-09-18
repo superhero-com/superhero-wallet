@@ -82,7 +82,7 @@ import {
   useUi,
   useViewport,
 } from '@/composables';
-
+import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
 import Close from '@/icons/close.svg?vue-component';
@@ -98,6 +98,7 @@ export default defineComponent({
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+    const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
     const { initVisibilityListeners } = useUi();
@@ -161,7 +162,7 @@ export default defineComponent({
     }
 
     async function fetchAndSetChainNames() {
-      store.commit('setChainNames', await store.dispatch('getCacheChainNames'));
+      store.commit('setChainNames', await getCacheChainNames());
     }
 
     watch(isLoggedIn, (val) => {

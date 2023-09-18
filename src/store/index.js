@@ -1,7 +1,6 @@
 import Vuex from 'vuex';
 import getters from './getters';
 import mutations from './mutations';
-import actions from './actions';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
@@ -30,7 +29,6 @@ export default new Vuex.Store({
   },
   getters,
   mutations,
-  actions,
   plugins: [
     persistState(
       runMigrations,

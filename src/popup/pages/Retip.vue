@@ -94,6 +94,7 @@ import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config'
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useGetter } from '../../composables/vuex';
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -119,7 +120,7 @@ export default defineComponent({
     const formModel = ref<IFormModel>({
       amount: '',
     });
-
+    const { getCacheTip } = useAeTippingBackend();
     const { isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
     const { marketData } = useCurrencies({ store });
@@ -225,7 +226,7 @@ export default defineComponent({
       if (!tipId) throw new Error('"id" param is missing');
 
       try {
-        tip.value = await store.dispatch('getCacheTip', tipId);
+        tip.value = await getCacheTip(tipId as string);
       } catch (error: any) {
         error.payload = tipId;
         throw error;
