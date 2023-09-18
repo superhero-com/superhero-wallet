@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/aeternity/superhero-wallet/compare/v2.0.0...v2.0.1) (2023-09-18)
+
+
+### Features
+
+* adjust Invite page ([26086a7](https://github.com/aeternity/superhero-wallet/commit/26086a78d64fe4cd135a3bdec393fc80380f7e38))
+* allow to access app browser on dev ([41f595e](https://github.com/aeternity/superhero-wallet/commit/41f595e5babcd2b9bbf295b2a1250710803bcf2f))
+* discover accounts for every protocol ([a3dafe5](https://github.com/aeternity/superhero-wallet/commit/a3dafe5a307a247bb9aaa34c5cb3bef371065b62))
+* improve invite links ([e7da467](https://github.com/aeternity/superhero-wallet/commit/e7da4674a95a495f054ab517dd66315cfbb49ffa))
+
+
+### Bug Fixes
+
+* **about:** show correct node status ([883105d](https://github.com/aeternity/superhero-wallet/commit/883105dbad9c5e5e1f38b068e60cc83484848081))
+* add multisig account on multisig dashboard ([0d85058](https://github.com/aeternity/superhero-wallet/commit/0d85058c09391a866a83b37d4ad90fe0494b70f7))
+* adding new networks in chrome extension ([f704b9f](https://github.com/aeternity/superhero-wallet/commit/f704b9f5c8d2e8c092f4050212981e486ff77f03))
+* adjust tx filters for non ae accounts ([c10467b](https://github.com/aeternity/superhero-wallet/commit/c10467bb864b16e59004406da5465a32ae6a440b))
+* apply correct logic for dex transactions ([a5d7f56](https://github.com/aeternity/superhero-wallet/commit/a5d7f56b2936a44661f0371c436f154b57e37a34))
+* display only multisig transactions on multisig token transaction details ([2ff6514](https://github.com/aeternity/superhero-wallet/commit/2ff6514e93ee28414dfb0280f2124ce65e9b1f77))
+* don't display contract id if it's not present ([25f5351](https://github.com/aeternity/superhero-wallet/commit/25f53510c7ca3f94c93aebdab70db9f65f46662d))
+* include other protocols in total amount calculation ([38a459d](https://github.com/aeternity/superhero-wallet/commit/38a459dc10a3d707e79790dbb99d2300b0d4dd40))
+* **invites:** preserve invites state on extension ([435e7ba](https://github.com/aeternity/superhero-wallet/commit/435e7ba10b6c30d146a6e505c724c4c7cce2b293))
+* load filtered transactions correctly ([1b451b5](https://github.com/aeternity/superhero-wallet/commit/1b451b5a54d19b941b03abc846ed9ca86dcff264))
+* open external links in mobile correctly ([ddd7315](https://github.com/aeternity/superhero-wallet/commit/ddd7315939acaf4a792495e40843aeaaa89be39c))
+* prevent transfer send opening on unsupported deeplinks ([9a1b49c](https://github.com/aeternity/superhero-wallet/commit/9a1b49c963df0c48a4b4237189f17f42d5a97edc))
+* prevent transfer send opening on unsupported deeplinks ([49c1f68](https://github.com/aeternity/superhero-wallet/commit/49c1f68e523946d26a96717edcc34bfcecf2686f))
+* show bitcoin transaction list correctly ([47b9d76](https://github.com/aeternity/superhero-wallet/commit/47b9d7645560bdb1e6a3e4be84a20227870f5927))
+* show ClaimSuccess modal correctly ([cd318ca](https://github.com/aeternity/superhero-wallet/commit/cd318caa9abd3282ae723e20e7b9c3a29c8bd392))
+* show correct label for claim transaction ([745fd7e](https://github.com/aeternity/superhero-wallet/commit/745fd7e42a495ab1c642655f2783db6d8cae33bc))
+* show correct token amount in transaction item ([d664006](https://github.com/aeternity/superhero-wallet/commit/d664006d39ca6ceefb0c42c6760e16e7759c79a9))
+* show the text correctly ([3b4ce51](https://github.com/aeternity/superhero-wallet/commit/3b4ce51b250a336528da1983ac683be7cb27ecc5))
+* **transaction-label:** show contract related labels ([3608e16](https://github.com/aeternity/superhero-wallet/commit/3608e16162a890902a406b660649db98099923cd))
+* **transaction-list:** correct aex9 event condition ([eca3c97](https://github.com/aeternity/superhero-wallet/commit/eca3c97ef083fd1a47d8ac350bd97008c9725597))
+* update no longer pending transaction ([6542a1d](https://github.com/aeternity/superhero-wallet/commit/6542a1de25b3531c7b2d86dc206b70683d59c175))
+
+
+### Maintenance
+
+* adjust middleware swagger file fetching ([c64bdb6](https://github.com/aeternity/superhero-wallet/commit/c64bdb639735f14fdccb5bdc3c656c8dec369c7e))
+* adjust transferSend util ([552320d](https://github.com/aeternity/superhero-wallet/commit/552320d3c7cdcc29e854520488e5d7abebe6011b))
+* ae node status as sdk composable state ([d28eaed](https://github.com/aeternity/superhero-wallet/commit/d28eaed159b106b78f032dfb7acfb4ff78b04e2c))
+* do not allow user to set custom compiler ([eb30b45](https://github.com/aeternity/superhero-wallet/commit/eb30b45664e1a8f60668aa6e11501af893ec6e66))
+* do not depend on http compiler ([b30330a](https://github.com/aeternity/superhero-wallet/commit/b30330a619756a522d4b203759b485a9f3d7cf62))
+
 ## [2.0.0](https://github.com/aeternity/superhero-wallet/compare/v1.1.4...v2.0.0) (2023-08-29)
 
 
