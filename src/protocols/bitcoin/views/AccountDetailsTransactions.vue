@@ -1,9 +1,13 @@
 <template>
-  <ion-page>
+  <ion-page
+    class="account-details-transactions"
+  >
     <ion-content
       class="ion-padding"
     >
-      <div class="account-details-transactions">
+      <div
+        ref="innerScrollElem"
+      >
         <TransactionList
           v-if="isOnline"
           :transactions="transactions"
@@ -27,13 +31,14 @@ import {
   onMounted,
   onUnmounted,
   ref,
+  watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
 
 import type { ITransaction } from '@/types';
 import { PROTOCOL_BITCOIN } from '@/constants';
-import { useAccounts, useConnection } from '@/composables';
+import { useAccounts, useConnection, useScrollConfig } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
@@ -49,6 +54,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const FIXED_SCROLL_HEIGHT = 120;
+
     let pollingInterval: NodeJS.Timer;
 
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
@@ -56,7 +63,10 @@ export default defineComponent({
     const store = useStore();
     const { isOnline } = useConnection();
     const { activeAccount } = useAccounts({ store });
+    const { setScrollConf } = useScrollConfig();
 
+    const innerScrollElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
     const transactionsLatest = ref<ITransaction[]>([]);
     const transactionsMore = ref<ITransaction[]>([]);
     const loading = ref(false);
@@ -65,6 +75,10 @@ export default defineComponent({
       ...transactionsLatest.value || [],
       ...transactionsMore.value || [],
     ]);
+
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => innerScrollElem.value?.parentElement,
+    );
 
     async function fetchTransactionList() {
       if (!loading.value) {
@@ -96,7 +110,19 @@ export default defineComponent({
       }
     }
 
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+      },
+    );
+
     onMounted(() => {
+      if (innerScrollElem.value && appInnerElem.value) {
+        appInnerElem.value.addEventListener('scroll', () => {
+          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+        });
+      }
       pollingInterval = executeAndSetInterval(() => {
         fetchTransactionList();
       }, 10000);
@@ -108,6 +134,10 @@ export default defineComponent({
       }
     });
 
+    onIonViewWillLeave(() => {
+      setScrollConf(false);
+    });
+
     return {
       isOnline,
       transactions,
@@ -115,7 +145,25 @@ export default defineComponent({
       transactionsMore,
       loading,
       loadMoreTransactions,
+      innerScrollElem,
     };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.account-details-transactions {
+  --filter-top-offset: 175px;
+
+  padding: 0 12px;
+
+  :deep(.filters) {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+
+  .offline-message {
+    margin-top: 40px;
+  }
+}
+</style>
