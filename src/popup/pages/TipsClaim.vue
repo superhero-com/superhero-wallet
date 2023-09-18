@@ -35,7 +35,7 @@
     <BtnMain
       :disabled="!normalizedUrl || !isTippingSupported"
       extend
-      @click="claimTips"
+      @click="handleClaimTips"
     >
       {{ $t('common.confirm') }}
     </BtnMain>
@@ -66,6 +66,7 @@ import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 
+import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import InputField from '../components/InputField.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BtnHelp from '../components/buttons/BtnHelp.vue';
@@ -83,6 +84,11 @@ export default defineComponent({
     const { t } = useI18n();
     const store = useStore();
     const router = useRouter();
+    const {
+      claimTips,
+      cacheInvalidateOracle,
+      cacheInvalidateTips,
+    } = useAeTippingBackend();
 
     const { isTippingSupported } = useAeSdk({ store });
     const { activeAccount } = useAccounts({ store });
@@ -96,7 +102,7 @@ export default defineComponent({
       () => isUrlValid(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
     );
 
-    async function claimTips() {
+    async function handleClaimTips() {
       const url = normalizedUrl.value;
       loading.value = true;
       try {
@@ -111,10 +117,10 @@ export default defineComponent({
         if (!claimAmount) {
           throw new Error('NO_ZERO_AMOUNT_PAYOUT');
         }
-        await store.dispatch('claimTips', { url, address: activeAccount.value.address });
+        await claimTips(url, activeAccount.value.address);
         await Promise.all([
-          store.dispatch('cacheInvalidateOracle'),
-          store.dispatch('cacheInvalidateTips'),
+          cacheInvalidateOracle,
+          cacheInvalidateTips,
         ]);
 
         openModal(MODAL_CLAIM_SUCCESS, { url, claimAmount });
@@ -159,12 +165,12 @@ export default defineComponent({
 
     return {
       activeAccount,
-      claimTips,
       loading,
       normalizedUrl,
       tipUrl,
       isTippingSupported,
       AE_BLOG_CLAIM_TIP_URL,
+      handleClaimTips,
     };
   },
 });

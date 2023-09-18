@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useModals } from '../../composables';
 import FormTextarea from '../components/form/FormTextarea.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
@@ -65,9 +66,10 @@ export default {
   methods: {
     async donate() {
       const { openDefaultModal } = useModals();
+      const { donateError } = useAeTippingBackend();
 
       try {
-        await this.$store.dispatch('donateError', { ...this.entry, description: this.description });
+        await donateError({ ...this.entry, description: this.description });
         await openDefaultModal({
           title: this.$t('modals.donate-errors.title'),
           msg: this.$t('modals.donate-errors.msg'),
