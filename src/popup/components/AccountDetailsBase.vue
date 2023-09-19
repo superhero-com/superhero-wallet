@@ -55,7 +55,7 @@
         class="tabs-content"
         :style="{ height: routerHeight }"
       >
-        <ion-router-outlet />
+        <ion-router-outlet :animated="!IS_FIREFOX" />
       </div>
     </div>
   </div>
@@ -74,7 +74,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { IS_MOBILE_APP } from '@/constants';
+import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
 
 import {
   useAccounts,
@@ -178,6 +178,7 @@ export default defineComponent({
       balanceNumeric,
       activeAccount,
       routerHeight,
+      IS_FIREFOX,
     };
   },
 });

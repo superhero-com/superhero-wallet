@@ -3,6 +3,7 @@
     <div class="account-details-names">
       <ion-router-outlet
         v-if="isOnline"
+        :animated="!IS_FIREFOX"
       />
       <MessageOffline
         v-else
@@ -16,6 +17,7 @@
 <script lang="ts">
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
+import { IS_FIREFOX } from '@/constants';
 import { useConnection } from '../../composables';
 import MessageOffline from '../components/MessageOffline.vue';
 
@@ -30,6 +32,7 @@ export default defineComponent({
 
     return {
       isOnline,
+      IS_FIREFOX,
     };
   },
 });

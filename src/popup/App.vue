@@ -23,7 +23,7 @@
         <Header v-if="showHeader" />
 
         <ion-router-outlet
-          :animated="!RUNNING_IN_TESTS"
+          :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
           :class="{ 'show-header': showHeader, 'ios': IS_IOS }"
           class="main"
         />
@@ -235,6 +235,7 @@ export default defineComponent({
     });
 
     return {
+      IS_FIREFOX,
       IS_IOS,
       IS_WEB,
       IS_EXTENSION,

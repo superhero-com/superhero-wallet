@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <ion-router-outlet :animated="!RUNNING_IN_TESTS" />
+    <ion-router-outlet :animated="!RUNNING_IN_TESTS && !IS_FIREFOX" />
   </ion-page>
 </template>
 
@@ -9,7 +9,7 @@ import { defineComponent, onMounted, onUpdated } from 'vue';
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import { useUi } from '@/composables';
-import { RUNNING_IN_TESTS } from '@/constants';
+import { RUNNING_IN_TESTS, IS_FIREFOX } from '@/constants';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -42,6 +42,7 @@ export default defineComponent({
 
     return {
       RUNNING_IN_TESTS,
+      IS_FIREFOX,
     };
   },
 });
