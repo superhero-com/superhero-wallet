@@ -137,6 +137,9 @@
     "web-ext-types": "^3.2.1",
     "xml-js": "^1.6.11"
   },
+  "overrides": {
+    "proxy-agent": "^6.0.0"
+  },
   "standard-version": {
     "types": [
       {
