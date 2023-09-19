@@ -40,6 +40,8 @@ export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 
+export const IS_MAC_OS_EXTENSION_PROMISE = IS_EXTENSION && window.browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
+
 export const IS_IOS = isPlatform('ios');
 
 export const IS_ANDROID = isPlatform('android');
