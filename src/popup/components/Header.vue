@@ -164,19 +164,29 @@ export default defineComponent({
     );
 
     function back() {
-      const { meta } = route;
-      const { backRoute } = meta || {};
+      const { fullPath, meta } = route;
+      const { directBackRoute, backRoute } = meta || {};
+
+      if (directBackRoute) {
+        return ionRouter.back();
+      }
 
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
         return ionRouter.navigate(backRoute, 'back', 'push');
       }
 
-      return ionRouter.back();
+      const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+
+      return ionRouter.navigate(
+        path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
+        'back',
+        'push',
+      );
     }
 
     function close() {
-      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
+      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'replace');
     }
 
     return {

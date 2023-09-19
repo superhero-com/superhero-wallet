@@ -133,13 +133,6 @@ export default defineComponent({
       routerHeight.value = `${routerContent}px`;
     }
 
-    watch(
-      () => route,
-      () => {
-        resetFilter();
-      },
-    );
-
     /**
      * Observe tab height changes and recalculate router height.
      * Tabs change height when filters are shown/hidden
@@ -150,6 +143,13 @@ export default defineComponent({
       });
       resizeObserver.observe(document.querySelector('.header') as Element);
     }
+
+    watch(
+      () => route,
+      () => {
+        resetFilter();
+      },
+    );
 
     onMounted(() => {
       if (IS_MOBILE_APP) {
