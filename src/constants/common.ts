@@ -73,6 +73,7 @@ export const NETWORK_NAME_TESTNET = 'Testnet';
 export const NETWORK_NAME_MAX_LENGTH = 15;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
+export const FIXED_TABS_SCROLL_HEIGHT = 30;
 
 export const TXS_PER_PAGE = 30;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;

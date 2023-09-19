@@ -34,10 +34,10 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 
 import type { ICommonTransaction } from '@/types';
-import { TXS_PER_PAGE } from '@/constants';
+import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useAccounts,
   useConnection,
@@ -66,8 +66,6 @@ export default defineComponent({
 
     let polling: NodeJS.Timer | null;
 
-    const FIXED_SCROLL_HEIGHT = 120;
-
     const store = useStore();
 
     const { isOnline } = useConnection();
@@ -94,6 +92,10 @@ export default defineComponent({
       (): ICommonTransaction[] => getAccountAllTransactions(activeAccount.value.address!),
     );
 
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => innerScrollElem.value?.parentElement,
+    );
+
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
@@ -116,11 +118,16 @@ export default defineComponent({
     watch(
       appInnerScrollTop,
       (value) => {
-        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
       },
     );
 
     onMounted(() => {
+      if (innerScrollElem.value && appInnerElem.value) {
+        appInnerElem.value.addEventListener('scroll', () => {
+          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+        });
+      }
       fetchTransactionList();
       polling = setInterval(() => {
         if (isAppActive.value) {
@@ -136,7 +143,7 @@ export default defineComponent({
       isDestroyed.value = true;
     });
 
-    onIonViewWillLeave(() => {
+    onIonViewWillEnter(() => {
       setScrollConf(false);
     });
 

@@ -34,10 +34,10 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 
 import type { ITransaction } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import { PROTOCOL_BITCOIN, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useAccounts, useConnection, useScrollConfig } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -54,8 +54,6 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const FIXED_SCROLL_HEIGHT = 120;
-
     let pollingInterval: NodeJS.Timer;
 
     const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
@@ -113,7 +111,7 @@ export default defineComponent({
     watch(
       appInnerScrollTop,
       (value) => {
-        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
       },
     );
 
@@ -134,7 +132,7 @@ export default defineComponent({
       }
     });
 
-    onIonViewWillLeave(() => {
+    onIonViewWillEnter(() => {
       setScrollConf(false);
     });
 
@@ -156,14 +154,5 @@ export default defineComponent({
   --filter-top-offset: 175px;
 
   padding: 0 12px;
-
-  :deep(.filters) {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
-  }
-
-  .offline-message {
-    margin-top: 40px;
-  }
 }
 </style>

@@ -3,7 +3,10 @@
     <ion-content
       class="ion-padding"
     >
-      <div class="transaction-list-wrapper">
+      <div
+        ref="innerScrollElem"
+        class="transaction-list-wrapper"
+      >
         <TransactionList
           v-if="isOnline"
           :loading="loading"
@@ -29,9 +32,9 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 import type { ICommonTransaction } from '@/types';
-import { TXS_PER_PAGE } from '@/constants';
+import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useConnection,
   useMultisigAccounts,
@@ -40,6 +43,7 @@ import {
   useTransactionList,
   useUi,
   useViewport,
+  useScrollConfig,
 } from '@/composables';
 
 import MessageOffline from '../components/MessageOffline.vue';
@@ -66,6 +70,7 @@ export default defineComponent({
     let polling: NodeJS.Timer | null;
 
     const store = useStore();
+    const { setScrollConf } = useScrollConfig();
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
@@ -84,12 +89,18 @@ export default defineComponent({
 
     const loading = ref(false);
     const isDestroyed = ref(false);
+    const innerScrollElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
 
     const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
     const canLoadMore = computed(() => (
       !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
     ));
+
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => innerScrollElem.value?.parentElement,
+    );
 
     const loadedTransactionList = computed((): ICommonTransaction[] => [
       ...getAccountAllTransactions(currentAddress.value!),
@@ -131,6 +142,13 @@ export default defineComponent({
       }
     }
 
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
+      },
+    );
+
     watch(displayMode, () => {
       checkLoadMore();
     });
@@ -142,6 +160,11 @@ export default defineComponent({
     });
 
     onMounted(() => {
+      if (innerScrollElem.value && appInnerElem.value) {
+        appInnerElem.value.addEventListener('scroll', () => {
+          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+        });
+      }
       loadMore();
       polling = setInterval(() => {
         if (isAppActive.value) {
@@ -157,11 +180,16 @@ export default defineComponent({
       isDestroyed.value = true;
     });
 
+    onIonViewWillEnter(() => {
+      setScrollConf(false);
+    });
+
     return {
       isOnline,
       loading,
       loadedTransactionList,
       loadMore,
+      innerScrollElem,
     };
   },
 });
@@ -169,13 +197,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .transaction-list-wrapper {
-  --filter-top-offset: 175px;
-
-  :deep(.filters) {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
-  }
-
   .offline-message {
     text-align: center;
   }

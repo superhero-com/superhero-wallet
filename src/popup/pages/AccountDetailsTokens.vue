@@ -23,10 +23,11 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 import {
   defineComponent, ref, computed, watch, onMounted,
 } from 'vue';
+import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '../../composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
 import MessageOffline from '../components/MessageOffline.vue';
@@ -42,8 +43,6 @@ export default defineComponent({
     showFilters: Boolean,
   },
   setup() {
-    const FIXED_SCROLL_HEIGHT = 100;
-
     const { isOnline } = useConnection();
     const { searchPhrase } = useTransactionAndTokenFilter();
     const { setScrollConf } = useScrollConfig();
@@ -57,7 +56,7 @@ export default defineComponent({
     watch(
       appInnerScrollTop,
       (value) => {
-        setScrollConf(value >= FIXED_SCROLL_HEIGHT);
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
       },
     );
     onMounted(() => {
@@ -67,7 +66,8 @@ export default defineComponent({
         });
       }
     });
-    onIonViewWillLeave(() => {
+
+    onIonViewWillEnter(() => {
       setScrollConf(false);
     });
     return {
