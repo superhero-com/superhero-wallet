@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="settings">
         <PanelItem
           :to="{ name: 'settings-seed-phrase' }"
@@ -41,8 +39,8 @@
           :title="$t('pages.titles.resetWallet')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

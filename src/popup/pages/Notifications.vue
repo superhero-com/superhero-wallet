@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="notifications">
         <InfiniteScroll
           v-if="notificationsToShow.length"
@@ -22,8 +20,8 @@
           {{ $t('pages.notifications.noNotifications') }}
         </p>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

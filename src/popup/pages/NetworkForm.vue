@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div
         class="network-form"
         data-cy="network-form"
@@ -106,8 +104,8 @@
           </BtnMain>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

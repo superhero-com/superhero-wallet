@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
       <div
         ref="innerScrollElem"
         class="account-details-tokens"
@@ -18,18 +16,22 @@
           :text="$t('modals.accountDetails.assetsNotAvailable')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
 import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 import {
-  defineComponent, ref, computed, watch, onMounted,
+  defineComponent,
+  ref,
+  computed,
+  watch,
+  onMounted,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
-import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '../../composables';
+import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
 import MessageOffline from '../components/MessageOffline.vue';
 
@@ -66,6 +68,7 @@ export default defineComponent({
         setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
       },
     );
+
     onMounted(() => {
       if (innerScrollElem.value && appInnerElem.value) {
         appInnerElem.value.addEventListener('scroll', throttledScroll());
@@ -75,6 +78,7 @@ export default defineComponent({
     onIonViewWillEnter(() => {
       setScrollConf(false);
     });
+
     return {
       isOnline,
       searchPhrase,

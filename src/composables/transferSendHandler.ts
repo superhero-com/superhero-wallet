@@ -9,14 +9,15 @@ import {
 import { useModals } from '@/composables';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/utils';
 
+/**
+ * Save and restore form-data on local storage.
+ * Example usecase - Save data after extension closes & opens window to ask camera permission
+ * and restore data when user comes back to the extension
+ */
 export function useTransferSendHandler() {
   const { meta } = useRoute();
   const { openModal } = useModals();
 
-  /**
-   * Save form data on local storage to restore it
-   * e.g. after extension closes & opens window to ask camera permission
-   */
   function save(formModel: TransferFormModel) {
     setLocalStorageItem([TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY], formModel);
   }

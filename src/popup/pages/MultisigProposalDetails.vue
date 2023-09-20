@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="multisig-proposal-details">
         <AnimatedSpinner
           v-if="!activeMultisigAccount || !multisigTx"
@@ -269,8 +267,8 @@
           <Loader v-if="processingAction" />
         </template>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

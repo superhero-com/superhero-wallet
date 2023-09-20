@@ -1,5 +1,5 @@
 <template>
-  <ion-page>
+  <IonPage>
     <div class="auction">
       <div class="auction-tabs">
         <Tabs>
@@ -23,7 +23,7 @@
         :name="name"
       />
     </div>
-  </ion-page>
+  </IonPage>
 </template>
 
 <script lang="ts">

@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="permissions-settings">
         <i18n-t
           keypath="pages.permissions.description"
@@ -35,8 +33,8 @@
           :icon="PlusIcon"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

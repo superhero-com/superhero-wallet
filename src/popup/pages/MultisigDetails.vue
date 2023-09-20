@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div
         v-if="activeMultisigAccount"
         class="multisig-details"
@@ -86,8 +84,8 @@
           :address-list="activeMultisigAccount.signers"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

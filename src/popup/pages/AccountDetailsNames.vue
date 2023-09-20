@@ -1,7 +1,9 @@
 <template>
-  <ion-page>
+  <IonPage>
     <div class="account-details-names">
-      <ion-router-outlet
+      <!-- We are disabling animations on FF because of a bug that causes flickering
+        see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+      <IonRouterOutlet
         v-if="isOnline"
         :animated="!IS_FIREFOX"
       />
@@ -11,7 +13,7 @@
         :text="$t('modals.accountDetails.namesNotAvailable')"
       />
     </div>
-  </ion-page>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -39,10 +41,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-:deep(.ion-padding) {
-  background-color: #191919;
-}
-
 .account-details-names {
   .offline-message {
     margin-top: 40px;

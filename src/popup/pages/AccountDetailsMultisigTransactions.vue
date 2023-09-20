@@ -1,12 +1,7 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
-      <div
-        ref="innerScrollElem"
-        class="transaction-list-wrapper"
-      >
+  <IonPage class="transaction-list-wrapper">
+    <IonContent class="ion-padding ion-content-bg">
+      <div ref="innerScrollElem">
         <TransactionList
           v-if="isOnline"
           :loading="loading"
@@ -18,8 +13,8 @@
           :text="$t('modals.accountDetails.transactionsNotAvailable')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -202,6 +197,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .transaction-list-wrapper {
+  --filter-top-offset: 175px;
+
+  :deep(.filters) {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+
   .offline-message {
     text-align: center;
   }

@@ -1,7 +1,7 @@
 <!-- eslint-disable max-len -->
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="privacy-policy">
         <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
         <ol class="policy-list">
@@ -353,8 +353,8 @@
           </li>
         </ol>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>

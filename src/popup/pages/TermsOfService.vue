@@ -1,7 +1,7 @@
 <template>
   <!-- eslint-disable max-len -->
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="terms-of-service">
         <!-- header -->
         <p class="italic">
@@ -932,8 +932,8 @@
           </div>
         </AccordionItem>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

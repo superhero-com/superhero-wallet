@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="auction-history">
         <span class="title">
           {{ $t('pages.names.auctions.bids-on') }}
@@ -30,8 +30,8 @@
           />
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

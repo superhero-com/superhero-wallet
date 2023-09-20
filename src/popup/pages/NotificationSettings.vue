@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="notification-settings">
         <p class="text-description">
           {{ $t('pages.notification-settings.description') }}
@@ -21,8 +21,8 @@
           />
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>

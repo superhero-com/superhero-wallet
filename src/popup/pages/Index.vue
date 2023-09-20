@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div
         class="index"
         :class="{ 'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE }"
@@ -84,8 +82,8 @@
           </div>
         </transition>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

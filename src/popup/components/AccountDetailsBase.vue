@@ -42,7 +42,10 @@
         />
       </div>
 
-      <div class="header">
+      <div
+        ref="headerEl"
+        class="header"
+      >
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
@@ -53,9 +56,11 @@
 
       <div
         class="tabs-content"
-        :style="{ height: routerHeight }"
+        :style="{ height: routerHeight || '350px' }"
       >
-        <ion-router-outlet :animated="!IS_FIREFOX" />
+        <!-- We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <IonRouterOutlet :animated="!IS_FIREFOX" />
       </div>
     </div>
   </div>
@@ -112,7 +117,7 @@ export default defineComponent({
 
     const { resetFilter } = useTransactionAndTokenFilter();
 
-    const { scrollConf } = useScrollConfig();
+    const { isScrollEnabled } = useScrollConfig();
 
     const { homeRouteName } = useUi();
 
@@ -120,15 +125,17 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
 
+    const headerEl = ref<HTMLDivElement>();
+
     const balanceNumeric = computed(() => balance.value.toNumber());
 
     const routeName = computed(() => route.name);
 
-    const showFilters = computed<boolean>(() => (!!scrollConf.value));
+    const showFilters = computed<boolean>(() => (isScrollEnabled.value));
 
     function calculateRouterHeight() {
-      const ionicWrapperBottom = document.querySelector('.app-wrapper')?.getBoundingClientRect()?.bottom;
-      const headerElementBottom = document.querySelector('.header')?.getBoundingClientRect()?.bottom;
+      const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
+      const headerElementBottom = headerEl.value?.getBoundingClientRect()?.bottom;
       const routerContent = Math.ceil(ionicWrapperBottom! - headerElementBottom!);
       routerHeight.value = `${routerContent}px`;
     }
@@ -141,7 +148,7 @@ export default defineComponent({
       const resizeObserver = new ResizeObserver(() => {
         calculateRouterHeight();
       });
-      resizeObserver.observe(document.querySelector('.header') as Element);
+      resizeObserver.observe(headerEl.value!);
     }
 
     watch(
@@ -172,6 +179,7 @@ export default defineComponent({
     });
 
     return {
+      headerEl,
       homeRouteName,
       showFilters,
       routeName,
@@ -188,10 +196,6 @@ export default defineComponent({
 @use '../../styles/variables';
 @use '../../styles/mixins';
 @use '../../styles/typography';
-
-:deep(.ion-padding) {
-  background-color: variables.$color-bg-4;
-}
 
 .account-details {
   --account-info-height: 120px;
@@ -212,8 +216,6 @@ export default defineComponent({
   }
 
   .account-info-wrapper {
-    position: fixed;
-    width: 100%;
     top: env(safe-area-inset-top);
     z-index: 2;
     display: flex;
@@ -243,10 +245,6 @@ export default defineComponent({
     }
   }
 
-  .balance-info {
-    padding-top: 5em;
-  }
-
   .buttons {
     display: flex;
     justify-content: space-between;
@@ -267,7 +265,6 @@ export default defineComponent({
   .tabs-content {
     position: relative;
     padding: 0 var(--screen-padding-x);
-    height: 350px;
   }
 
   .close-button {

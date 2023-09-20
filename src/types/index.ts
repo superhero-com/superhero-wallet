@@ -139,6 +139,8 @@ export interface IToken {
   value?: string; // TODO copy of the contractId, maybe we should remove it
 }
 
+export type TokenPair = Record<'token0' | 'token1', IToken | null>
+
 /**
  * In most cases it's the result of firing one of the `TransactionResolvers`.
  */
@@ -564,11 +566,12 @@ export interface IPopupConfig {
   show?: boolean;
   txBase64?: Encoded.Transaction;
 }
+
 export interface TokenProps {
   contractId?: string;
-  tokenPairs?: any; // TODO: find and declare types
-  tokenData?: any; // TODO: update types
-  tokens?: IToken[]; // TODO: update types
+  tokenPairs?: any; // TODO: replace any with TokenPair & resolve issues
+  tokenData?: any; // TODO: replace any with IToken & resolve issues
+  tokens?: IToken[];
   isMultisig?: boolean;
 }
 

@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="account-ion-content">
+  <IonPage>
+    <IonContent class="account-ion-content">
       <AccountDetailsBase class="account-details">
         <template #buttons>
           <BtnBox
@@ -28,8 +28,8 @@
           <AccountDetailsNavigation />
         </template>
       </AccountDetailsBase>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -100,6 +100,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <style lang="scss" scoped>
 @use '@/styles/variables';
 

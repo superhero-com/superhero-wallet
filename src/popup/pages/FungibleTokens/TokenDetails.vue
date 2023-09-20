@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="token-details">
         <DetailsRow
           v-if="tokenData?.symbol"
@@ -158,8 +156,8 @@
           :text="formatCurrency(tokenData.atl)"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -183,10 +181,10 @@ import { useCurrencies, useTokenProps } from '@/composables';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
-import DetailsRow from '../../components/FungibleTokens/DetailsRow.vue';
-import AddressTruncated from '../../components/AddressTruncated.vue';
-import Tokens from '../../components/Tokens.vue';
-import ExternalLink from '../../../icons/external-link.svg?vue-component';
+import DetailsRow from '@/popup/components/FungibleTokens/DetailsRow.vue';
+import AddressTruncated from '@/popup/components/AddressTruncated.vue';
+import Tokens from '@/popup/components/Tokens.vue';
+import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
   name: 'TokenDetails',
@@ -204,16 +202,20 @@ export default defineComponent({
     const store = useStore();
     const { tokenDetails } = useTokenProps();
     const {
-      tokenData, contractId, tokens, tokenPairs,
+      tokenData,
+      contractId,
+      tokens,
+      tokenPairs,
     } = tokenDetails.value;
     const { formatCurrency } = useCurrencies({ store });
 
     const displayDexUrl = AE_DEX_URL.replace('https://', '');
 
-    const isAe = computed(() => tokenData.contractId === AE_CONTRACT_ID);
+    const isAe = computed(() => tokenData?.contractId === AE_CONTRACT_ID);
 
     const poolShare = computed(() => {
-      if (!tokenPairs
+      if (
+        !tokenPairs
       || !tokenPairs.balance
       || !tokenPairs.totalSupply) {
         return null;

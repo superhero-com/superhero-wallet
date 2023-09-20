@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <DashboardWrapper class="dashboard">
         <template #header>
           <DashboardHeader />
@@ -50,8 +48,8 @@
           />
         </template>
       </DashboardWrapper>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

@@ -112,6 +112,7 @@ export default defineComponent({
   .title {
     @extend %face-sans-16-semi-bold;
 
+    color: variables.$color-white;
     line-height: 24px;
     padding-inline: 12px;
     margin-bottom: 4px;

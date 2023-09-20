@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <AccountDetailsBase
         v-if="activeMultisigAccount"
         without-default-buttons
@@ -21,7 +19,6 @@
           <BalanceInfo
             :balance="+(activeMultisigAccount.balance || 0)"
             :protocol="PROTOCOL_AETERNITY"
-            is-multisig
           />
         </template>
 
@@ -40,8 +37,8 @@
           <AccountDetailsNavigation is-multisig />
         </template>
       </AccountDetailsBase>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

@@ -4,7 +4,7 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_RAW_SIGN,
-  IS_MAC_OS_EXTENSION_PROMISE,
+  IS_EXTENSION,
 } from '@/constants';
 import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
@@ -31,12 +31,13 @@ export const showPopup = async (aepp: any, type: string, params?: any) => {
   const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params.tx);
   const popupType = isRawSign ? POPUP_TYPE_RAW_SIGN : type;
   const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
+  const isMackOsExtension = IS_EXTENSION && window.browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
   const popupWindow = await browser.windows.create({
     url: popupUrl,
     type: 'popup',
     height: 630,
-    width: await IS_MAC_OS_EXTENSION_PROMISE ? 360 : 375,
+    width: await isMackOsExtension ? 360 : 375,
   });
 
   return new Promise((resolve, reject) => {

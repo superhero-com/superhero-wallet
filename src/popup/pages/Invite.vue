@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="invite-page">
         <AccountInfo
           :address="activeAccount.address"
@@ -65,8 +65,8 @@
         </div>
         <Loader v-if="loading" />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

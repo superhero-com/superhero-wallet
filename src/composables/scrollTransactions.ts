@@ -1,24 +1,18 @@
-import {
-  ref, Ref,
-} from 'vue';
+import { ref } from 'vue';
 
-interface IScrollConf {
-  scrollConf: Ref<boolean | null>
-  setScrollConf: (props: boolean | null) => void
-}
+const isScrollEnabled = ref<boolean>(false);
 
-const scrollConf = ref<boolean | null>(null);
 /**
  *  Data comming from AccountDetailsTokens or AccountDetailsTransactions and will be passed
  *  to AccountDetailsBase in order to showFilters
  */
-export function useScrollConfig(): IScrollConf {
-  function setScrollConf(value: boolean | null) {
-    scrollConf.value = value;
+export function useScrollConfig() {
+  function setScrollConf(value: boolean) {
+    isScrollEnabled.value = value;
   }
 
   return {
     setScrollConf,
-    scrollConf,
+    isScrollEnabled,
   };
 }

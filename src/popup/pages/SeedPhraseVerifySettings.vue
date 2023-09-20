@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="seed-phrase-verify-settings">
         <div class="seed-phrase-verify-settings-body">
           <div class="text-heading-1">
@@ -68,8 +66,8 @@
           />
         </FixedScreenFooter>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

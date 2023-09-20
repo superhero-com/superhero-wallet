@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="currency-settings">
         <p class="text-description">
           {{ $t('pages.currencySettings.chooseLanguage') }}
@@ -34,8 +34,8 @@
           </RadioButton>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -48,7 +48,9 @@ import RadioButton from '../components/RadioButton.vue';
 export default defineComponent({
   name: 'CurrencySettings',
   components: {
-    RadioButton, IonPage, IonContent,
+    RadioButton,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="seed-phrase-settings">
         <i18n-t
           keypath="pages.seed-phrase-settings.seedRecoverySmall"
@@ -40,8 +38,8 @@
           {{ $t('pages.seed-phrase-settings.seedRecoveryBtn') }}
         </BtnMain>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>

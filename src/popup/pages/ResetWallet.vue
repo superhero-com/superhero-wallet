@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="reset-wallet-settings">
         <p class="text-description">
           {{ $t('pages.resetWallet.description') }}
@@ -25,8 +25,8 @@
           @click="onResetWallet"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -39,7 +39,9 @@ import ResetWalletIcon from '../../icons/reset-wallet.svg?vue-component';
 
 export default defineComponent({
   components: {
-    BtnMain, IonPage, IonContent,
+    BtnMain,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { openModal } = useModals();

@@ -1,17 +1,15 @@
 <template>
-  <ion-page>
-    <ion-toolbar>
+  <IonPage class="auction-list">
+    <IonToolbar class="toolbar">
       <Filters
         v-if="activeAuctions.length || auctions.length || loading"
         v-model="displayMode"
         :filters="filters"
         sticky
       />
-    </ion-toolbar>
-    <ion-content
-      class="ion-padding"
-    >
-      <div class="auction-list">
+    </IonToolbar>
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div class="auction-list-content">
         <ul
           v-if="activeAuctions.length || auctions.length"
           class="list"
@@ -50,8 +48,8 @@
           :msg="$t('pages.names.auctions.no-auctions')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -161,55 +159,58 @@ export default defineComponent({
 @use '../../../styles/typography';
 @use '../../../styles/mixins';
 
-ion-toolbar {
-  padding: 0 var(--screen-padding-x);
-  --background: var(--screen-bg-color);
-  --min-height: 0;
-}
-
 .auction-list {
-  --filter-top-offset: 166px;
+  .toolbar {
+    --background: var(--screen-bg-color);
+    --min-height: 0;
 
-  display: flex;
-  flex-direction: column;
+    padding: 0 var(--screen-padding-x);
+  }
 
-  .list {
-    padding: 0 12px;
-    margin-inline: calc(-1 * var(--screen-padding-x));
+  .auction-list-content {
+    --filter-top-offset: 166px;
 
-    .name-wrapper {
-      @extend %face-sans-14-regular;
+    display: flex;
+    flex-direction: column;
 
-      display: flex;
-      justify-content: space-between;
-      line-height: 16px;
+    .list {
+      padding: 0 12px;
+      margin-inline: calc(-1 * var(--screen-padding-x));
 
-      .name {
+      .name-wrapper {
+        @extend %face-sans-14-regular;
+
         display: flex;
-        flex-direction: column;
-        font-weight: bold;
-      }
+        justify-content: space-between;
+        line-height: 16px;
 
-      .expiration {
-        align-self: flex-end;
-        user-select: none;
-        color: variables.$color-grey-dark;
+        .name {
+          display: flex;
+          flex-direction: column;
+          font-weight: bold;
+        }
+
+        .expiration {
+          align-self: flex-end;
+          user-select: none;
+          color: variables.$color-grey-dark;
+        }
       }
     }
-  }
 
-  .spinner {
-    display: flex;
-    width: 56px;
-    height: 56px;
-    margin: 72px auto 0 auto;
-  }
+    .spinner {
+      display: flex;
+      width: 56px;
+      height: 56px;
+      margin: 72px auto 0 auto;
+    }
 
-  :deep(.filters) {
-    position: sticky;
-    top: env(safe-area-inset-top);
-    margin-left: 0;
-    margin-right: 0;
+    :deep(.filters) {
+      position: sticky;
+      top: env(safe-area-inset-top);
+      margin-left: 0;
+      margin-right: 0;
+    }
   }
 }
 </style>

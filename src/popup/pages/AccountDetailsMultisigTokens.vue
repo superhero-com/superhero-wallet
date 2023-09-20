@@ -1,16 +1,14 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
       <div class="multisig-token-list-wrapper">
         <TokensList
           :search-term="searchPhrase"
           is-multisig
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>

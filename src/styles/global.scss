@@ -3,6 +3,14 @@
 @use './mixins';
 @use './transitions';
 
+/* Core CSS required for Ionic components to work properly */
+@import '@ionic/vue/css/core.css';
+
+/* Basic CSS for apps built with Ionic */
+@import '@ionic/vue/css/normalize.css';
+@import '@ionic/vue/css/structure.css';
+@import '@ionic/vue/css/typography.css';
+
 * {
   box-sizing: border-box;
   scrollbar-width: none;
@@ -18,7 +26,8 @@ html.is-extension {
   width: $extension-width;
   height: $extension-height;
 
-  // fixes issue with extension not rendering properly
+  // Fixes issue with extension not rendering properly
+  // .tabs-inner & .ion-page classes are added by Ionic
   ion-tabs,
   .tabs-inner,
   ion-router-outlet,
@@ -58,10 +67,19 @@ body.scanner-active {
   }
 
   ion-content,
-  .ion-padding {
+  .ion-content-bg,
+  .ion-content-bg--lighter {
     --background: transparent;
 
     background: transparent;
+  }
+}
+
+.ion-content-bg {
+  background-color: $color-bg-app;
+
+  &--lighter {
+    background-color: $color-bg-4;
   }
 }
 
@@ -84,11 +102,6 @@ ion-content {
   }
 }
 
-/** temporary solution for adding background-color to pages **/
-.ion-padding {
-  background-color: $color-bg-app;
-}
-
 html,
 body,
 #app {
@@ -97,6 +110,8 @@ body,
 
 body,
 #app {
+  --ion-text-color: $color-white;
+
   margin: 0;
   background-color: $color-black;
 

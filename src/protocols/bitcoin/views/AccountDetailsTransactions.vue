@@ -1,13 +1,7 @@
 <template>
-  <ion-page
-    class="account-details-transactions"
-  >
-    <ion-content
-      class="ion-padding"
-    >
-      <div
-        ref="innerScrollElem"
-      >
+  <IonPage class="account-details-transactions">
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div ref="innerScrollElem">
         <TransactionList
           v-if="isOnline"
           :transactions="transactions"
@@ -20,8 +14,8 @@
           :text="$t('modals.accountDetails.transactionsNotAvailable')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -157,7 +151,5 @@ export default defineComponent({
 <style lang="scss" scoped>
 .account-details-transactions {
   --filter-top-offset: 175px;
-
-  padding: 0 12px;
 }
 </style>

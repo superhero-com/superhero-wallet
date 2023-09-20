@@ -1,26 +1,18 @@
-import {
-  ComputedRef, computed, Ref, ref,
-} from 'vue';
-import { TokenProps } from '../types';
+import { computed, ref } from 'vue';
+import type { TokenProps } from '@/types';
 
 type ITokenProps = Partial<TokenProps>;
 
 type ITokenDetail = Omit<TokenProps, 'isMultisig'>
-type ITokenTransaction = Pick<TokenProps, 'contractId'|'isMultisig'>
-
-interface ITokenPropsState {
-  tokenProps: Ref<ITokenProps | null>
-  tokenDetails: ComputedRef<ITokenDetail>
-  tokenTransactions: ComputedRef<ITokenTransaction>
-  setTokenProps: (props: ITokenProps | null) => void
-}
+type ITokenTransaction = Pick<TokenProps, 'contractId' | 'isMultisig'>
 
 const tokenProps = ref<ITokenProps | null>(null);
+
 /**
- *  Data comming from a coin that will be passed to the tab components
+ *  Data coming from a coin that will be passed to the tab components
  *  TokenDetails and TokenTransaction when the user clicks in particular token asset.
  */
-export function useTokenProps(): ITokenPropsState {
+export function useTokenProps() {
   function setTokenProps(props: ITokenProps | null) {
     tokenProps.value = props;
   }

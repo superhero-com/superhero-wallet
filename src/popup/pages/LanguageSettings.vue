@@ -1,6 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content class="ion-padding">
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="language-settings">
         <p class="text-description">
           {{ $t('pages.languageSettings.chooseLanguage') }}
@@ -27,8 +27,8 @@
           </RadioButton>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>

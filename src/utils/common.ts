@@ -216,9 +216,7 @@ export async function invokeDeviceShare(text: string): Promise<void> {
   const canShare = (await Share.canShare()).value;
 
   if (canShare) {
-    await Share.share({
-      text,
-    });
+    await Share.share({ text });
   }
 }
 

@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="transaction-details">
         <Loader v-if="!transaction || transaction.incomplete" />
         <template v-else>
@@ -53,8 +51,8 @@
           </TransactionDetailsBase>
         </template>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

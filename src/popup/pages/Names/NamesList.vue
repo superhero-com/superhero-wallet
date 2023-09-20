@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
       <div class="names-list">
         <template v-if="namesForAccount.length">
           <NameItem
@@ -22,8 +20,8 @@
           :msg="$t('pages.names.list.no-names')"
         />
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

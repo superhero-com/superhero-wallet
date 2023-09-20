@@ -70,6 +70,8 @@ import IconBoxed from '@/popup/components/IconBoxed.vue';
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
+const SCANNER_ACTIVE_CLASS = 'scanner-active';
+
 export default defineComponent({
   components: {
     Modal,
@@ -87,7 +89,7 @@ export default defineComponent({
     const cameraStatus = ref<PermissionState>(
       IS_MOBILE_APP ? 'granted' : 'denied',
     );
-    const browserReader = ref<BrowserQRCodeReaderType | null>(null);
+    const browserReader = ref<BrowserQRCodeReaderType>();
     const browserReaderControls = ref<IScannerControls>();
     const qrCodeVideoEl = ref<HTMLVideoElement>();
 
@@ -108,7 +110,7 @@ export default defineComponent({
 
     function stopReading() {
       if (IS_MOBILE_APP) {
-        document.querySelector('body')?.classList.remove('scanner-active');
+        document.querySelector('body')?.classList.remove(SCANNER_ACTIVE_CLASS);
         BarcodeScanner.showBackground();
         setQrScanner(false);
         BarcodeScanner.stopScan();
@@ -119,34 +121,27 @@ export default defineComponent({
 
     async function scan() {
       if (IS_MOBILE_APP) {
-        return new Promise((resolve, reject) => {
-          setQrScanner(true);
+        setQrScanner(true);
 
-          document.querySelector('body')?.classList.add('scanner-active');
-          BarcodeScanner.hideBackground().then(() => {
-            BarcodeScanner.startScan().then((result) => {
-              if (result.hasContent) {
-                resolve(result.content);
-              } else {
-                reject(new Error('No content'));
-              }
-            }, (error) => {
-              reject(error);
-            });
-          });
-
-          setTimeout(() => {
-            document.querySelector('.camera-close-button')?.addEventListener('click', stopReading);
-          }, 500);
-        });
+        document.querySelector('body')?.classList.add(SCANNER_ACTIVE_CLASS);
+        await BarcodeScanner.hideBackground();
+        const result = await BarcodeScanner.startScan();
+        if (result.hasContent) {
+          return result.content;
+        }
+        setTimeout(() => {
+          document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
+        }, 500);
+        return new Error('No content');
       }
+
       return new Promise((resolve) => {
         browserReader.value?.decodeFromVideoDevice(
           undefined, qrCodeVideoEl.value, (result, _, controls) => {
             browserReaderControls.value = controls;
             if (result) {
-              resolve(result.getText());
               controls?.stop();
+              resolve(result.getText());
             }
           },
         );
@@ -236,13 +231,15 @@ export default defineComponent({
         return;
       }
 
-      initBrowserReader();
+      await initBrowserReader();
       const status = navigator.permissions
-      && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
-        const firefoxExceptionMessage = "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
-        if (error.message !== firefoxExceptionMessage) handleUnknownError(error);
-        return null;
-      }));
+        && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
+          const firefoxExceptionMessage = "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
+          if (error.message !== firefoxExceptionMessage) {
+            handleUnknownError(error);
+          }
+          return null;
+        }));
       if (status) {
         cameraStatus.value = status.state;
         status.onchange = () => {

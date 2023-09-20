@@ -1,7 +1,9 @@
 <template>
-  <ion-page>
-    <ion-router-outlet :animated="!RUNNING_IN_TESTS && !IS_FIREFOX" />
-  </ion-page>
+  <IonPage>
+    <!-- We are disabling animations on FF because of a bug that causes flickering
+      see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+    <IonRouterOutlet :animated="!RUNNING_IN_TESTS && !IS_FIREFOX" />
+  </IonPage>
 </template>
 
 <script lang="ts">

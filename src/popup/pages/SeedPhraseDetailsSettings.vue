@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <div class="seed-phrase-details">
         <div class="text-heading-1">
           {{ $t('pages.seed-phrase-settings.this-your-seed-phrase') }}
@@ -63,8 +61,8 @@
           </BtnMain>
         </div>
       </div>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

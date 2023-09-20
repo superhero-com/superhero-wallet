@@ -1,8 +1,8 @@
 <template>
-  <ion-header class="ion-no-border">
-    <ion-toolbar>
+  <IonHeader class="header ion-no-border">
+    <IonToolbar class="toolbar">
       <div
-        class="header"
+        class="wrapper"
         :class="{
           'not-logged-in': !isLoggedIn,
         }"
@@ -62,8 +62,8 @@
           </template>
         </div>
       </div>
-    </ion-toolbar>
-  </ion-header>
+    </IonToolbar>
+  </IonHeader>
 </template>
 
 <script lang="ts">
@@ -213,102 +213,103 @@ export default defineComponent({
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
-ion-toolbar {
-  --min-height: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-ion-header {
+.header {
   z-index: variables.$z-index-header;
   height: var(--header-height);
-}
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--screen-bg-color);
-  padding: 0 8px;
-  width: 100%;
-  height: var(--header-height);
+  .toolbar {
+    --opacity: 0;
+    --min-height: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+  }
 
-  @include mixins.mobile {
+  .wrapper {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    background-color: var(--screen-bg-color);
+    padding: 0 8px;
     width: 100%;
-  }
+    height: var(--header-height);
 
-  .left {
-    display: flex;
-
-    .home-button {
-      &.disabled {
-        cursor: default;
-      }
-
-      &:not(.disabled) {
-        .home-icon {
-          cursor: pointer;
-        }
-
-        &:hover svg {
-          color: variables.$color-primary-hover;
-        }
-
-        &:active svg {
-          color: variables.$color-primary-hover;
-          opacity: 0.9;
-        }
-      }
-
-      .home-icon {
-        width: 32px;
-        height: 32px;
-        color: variables.$color-primary;
-      }
-    }
-  }
-
-  .right {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .title {
-    .text {
-      @extend %face-sans-16-medium;
-
-      padding: 0 4px;
+    @include mixins.mobile {
       display: flex;
-      justify-content: center;
-      white-space: nowrap;
-      line-height: 24px;
-      color: variables.$color-white;
+      justify-content: space-between;
+      width: 100%;
     }
 
-    &:only-child {
-      flex-grow: 2;
-      margin-left: 8px;
-    }
-  }
-
-  &.not-logged-in:not(:only-child) {
     .left {
-      z-index: 1;
+      display: flex;
+
+      .home-button {
+        &.disabled {
+          cursor: default;
+        }
+
+        &:not(.disabled) {
+          .home-icon {
+            cursor: pointer;
+          }
+
+          &:hover svg {
+            color: variables.$color-primary-hover;
+          }
+
+          &:active svg {
+            color: variables.$color-primary-hover;
+            opacity: 0.9;
+          }
+        }
+
+        .home-icon {
+          width: 32px;
+          height: 32px;
+          color: variables.$color-primary;
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
     }
 
     .title {
-      width: 100%;
-      position: absolute;
-    }
-  }
+      .text {
+        @extend %face-sans-16-medium;
 
-  .home-button + .back {
-    margin-left: 22px;
+        padding: 0 4px;
+        display: flex;
+        justify-content: center;
+        white-space: nowrap;
+        line-height: 24px;
+        color: variables.$color-white;
+      }
+
+      &:only-child {
+        flex-grow: 2;
+        margin-left: 8px;
+      }
+    }
+
+    &.not-logged-in:not(:only-child) {
+      .left {
+        z-index: 1;
+      }
+
+      .title {
+        width: 100%;
+        position: absolute;
+      }
+    }
+
+    .home-button + .back {
+      margin-left: 22px;
+    }
   }
 }
 </style>

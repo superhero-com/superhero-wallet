@@ -1,8 +1,6 @@
 <template>
-  <ion-page>
-    <ion-content
-      class="ion-padding"
-    >
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
       <DashboardWrapper>
         <template #header>
           <DashboardHeaderMultisig />
@@ -23,8 +21,8 @@
           <PendingMultisigTransactionCard />
         </template>
       </DashboardWrapper>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">

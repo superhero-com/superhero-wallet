@@ -70,10 +70,10 @@ import {
 } from 'vue';
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import { getAddressColor } from '@/utils';
-import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
 import SwiperCore from 'swiper';
 import { Virtual } from 'swiper/modules';
+import { getAddressColor } from '@/utils';
+import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
