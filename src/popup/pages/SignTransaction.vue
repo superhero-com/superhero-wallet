@@ -61,6 +61,11 @@ export default defineComponent({
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
       } catch (error: any) {
+        await openDefaultModal({
+          title: t('modals.transaction-failed.msg'),
+          icon: 'critical',
+          msg: error.message,
+        });
         openCallbackOrGoHome(false);
 
         if (error instanceof RejectedByUserError) {
