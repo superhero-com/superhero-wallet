@@ -87,7 +87,7 @@
         @click="goBack"
       />
       <BtnMain
-        :icon="isEdit ? PlusCircleIcon : null"
+        :icon="isEdit ? null : PlusCircleIcon"
         :disabled="Object.keys(errors).length"
         data-cy="btn-add-network"
         class="add-button"
