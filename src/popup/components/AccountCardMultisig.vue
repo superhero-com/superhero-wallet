@@ -5,7 +5,7 @@
         :account="convertMultisigAccountToAccount(account)"
         is-multisig
         avatar-borderless
-        with-protocol-icon
+        show-protocol-icon
       />
     </template>
 

@@ -7,7 +7,7 @@
       <AccountInfo
         :account="account"
         avatar-borderless
-        with-protocol-icon
+        show-protocol-icon
       />
     </template>
 

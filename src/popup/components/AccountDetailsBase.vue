@@ -9,7 +9,7 @@
         v-else
         :account="activeAccount"
         can-copy-address
-        with-protocol-icon
+        show-protocol-icon
       />
       <BtnClose
         class="close-button"
