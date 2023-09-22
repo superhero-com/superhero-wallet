@@ -201,29 +201,25 @@ export function useAccounts() {
       isRestored,
       type: ACCOUNT_HD_WALLET,
     });
-    const lastProtocolAccount = getLastProtocolAccount(protocol);
-    const idx: number = (lastProtocolAccount) ? lastProtocolAccount.idx : 0;
-    return idx;
+    return getLastProtocolAccount(protocol)?.idx || 0;
   }
 
   /**
-   * Establish how many accounts are present under the actual seed phrase in each of the protocols
-   * and collect the raw versions so they can be stored in the browser storage.
+   * Establish the last used account index under the actual seed phrase for each of the protocols
+   * and collect the raw accounts so they can be stored in the browser storage.
    */
   async function discoverAccounts() {
-    const accountsToRecover: number[] = await Promise.all(
+    const lastUsedAccountIndexRegistry: number[] = await Promise.all(
       PROTOCOLS.map(
         (protocol) => ProtocolAdapterFactory
           .getAdapter(protocol)
-          .discoverAccounts(mnemonicSeed.value),
+          .discoverLastUsedAccountIndex(mnemonicSeed.value),
       ),
     );
 
     PROTOCOLS.forEach((protocol, index) => {
-      if (accountsToRecover[index] > 0) {
-        for (let i = 0; i < accountsToRecover[index]; i += 1) {
-          addRawAccount({ isRestored: true, protocol });
-        }
+      for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
+        addRawAccount({ isRestored: true, protocol });
       }
     });
   }

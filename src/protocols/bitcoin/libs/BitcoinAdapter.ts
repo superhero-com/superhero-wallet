@@ -34,7 +34,7 @@ import {
   BTC_SYMBOL,
 } from '@/protocols/bitcoin/config';
 import {
-  defaultAccountDiscovery,
+  getLastNotEmptyAccountIndex,
   fetchJson,
 } from '@/utils';
 import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
@@ -153,8 +153,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async discoverAccounts(seed: Uint8Array): Promise<number> {
-    return defaultAccountDiscovery(
+  override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
+    return getLastNotEmptyAccountIndex(
       this.isAccountUsed,
       this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,

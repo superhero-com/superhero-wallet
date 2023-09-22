@@ -18,7 +18,7 @@ import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/store/plugins/languages';
-import { defaultAccountDiscovery } from '@/utils';
+import { getLastNotEmptyAccountIndex } from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -159,15 +159,15 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   /**
-   * As the Aeternity protocol is the primary one we always return at least 1.
+   * As the Aeternity protocol is the primary one we always return at least index 0 (one account).
    */
-  override async discoverAccounts(seed: Uint8Array): Promise<number> {
-    const accountNumber = await defaultAccountDiscovery(
+  override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
+    const index = await getLastNotEmptyAccountIndex(
       this.isAccountUsed.bind(this),
       this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,
     );
-    return (accountNumber > 0) ? accountNumber : 1;
+    return (index > -1) ? index : 0;
   }
 
   override async constructAndSignTx() {

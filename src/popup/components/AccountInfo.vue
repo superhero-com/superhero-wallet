@@ -35,11 +35,6 @@
         v-if="account.address?.length"
         class="account-address"
       >
-        <IconWrapper
-          v-if="withProtocolIcon"
-          :protocol-icon="account.protocol"
-          class="protocol-icon"
-        />
         <CopyText
           data-cy="copy"
           :value="account.address"
@@ -48,6 +43,7 @@
           <AddressTruncated
             :address="account.address"
             :protocol="account.protocol"
+            :show-protocol-icon="showProtocolIcon"
             class="ae-address"
           />
         </CopyText>
@@ -71,11 +67,9 @@ import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
 import Truncate from './Truncate.vue';
 import AddressTruncated from './AddressTruncated.vue';
-import IconWrapper from './IconWrapper.vue';
 
 export default defineComponent({
   components: {
-    IconWrapper,
     AddressTruncated,
     Avatar,
     Truncate,
@@ -88,7 +82,7 @@ export default defineComponent({
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
-    withProtocolIcon: Boolean,
+    showProtocolIcon: Boolean,
   },
   setup(props) {
     const store = useStore();
@@ -155,7 +149,6 @@ export default defineComponent({
 
     .ae-address {
       color: rgba(variables.$color-white, 0.85);
-      opacity: 0.85;
       user-select: none;
 
       .icon {
@@ -178,6 +171,8 @@ export default defineComponent({
 
   &.can-copy-address {
     .ae-address {
+      opacity: 0.85;
+
       &:hover {
         opacity: 1;
       }

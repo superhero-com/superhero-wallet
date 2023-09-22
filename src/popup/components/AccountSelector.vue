@@ -17,10 +17,10 @@
           :avatar="avatarOnly"
           :model-value="modelValue"
           :options="options || accountsSelectOptions"
-          unstyled
           :hide-arrow="avatarOnly"
           :default-text="$t('modals.createMultisigAccount.selectAccount')"
           account-select
+          unstyled
           @update:modelValue="$emit('update:modelValue', $event)"
         >
           <template #current-text="{ text }">
@@ -41,8 +41,8 @@
       <AddressTruncated
         v-if="!avatarOnly"
         show-explorer-link
-        show-protocol-icon
         :address="modelValue.toString()"
+        :protocol="selectedAccount?.protocol"
         class="address-truncated"
       />
     </div>
@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 import type { IFormSelectOption } from '@/types';
 import { useAccounts } from '@/composables';
 
@@ -77,10 +77,19 @@ export default defineComponent({
     avatarOnly: Boolean,
   },
   emits: ['update:modelValue'],
-  setup() {
-    const { accountsSelectOptions } = useAccounts();
+  setup(props) {
+    const { accountsSelectOptions, getAccountByAddress } = useAccounts();
 
-    return { accountsSelectOptions };
+    const selectedAccount = computed(
+      () => (props.modelValue)
+        // TODO remove any after changing the address type to string
+        ? getAccountByAddress(props.modelValue as any)
+        : undefined,
+    );
+    return {
+      accountsSelectOptions,
+      selectedAccount,
+    };
   },
 });
 </script>

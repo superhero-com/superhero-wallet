@@ -3,7 +3,7 @@
     <AccountInfo
       :account="activeAccount"
       can-copy-address
-      with-protocol-icon
+      show-protocol-icon
     />
     <BalanceInfo
       :balance="balance.toNumber()"

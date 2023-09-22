@@ -7,7 +7,7 @@
       <AccountInfo
         :account="convertMultisigAccountToAccount(activeMultisigAccount)"
         is-multisig
-        with-protocol-icon
+        show-protocol-icon
         can-copy-address
       />
     </template>

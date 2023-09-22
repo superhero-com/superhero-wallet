@@ -374,7 +374,10 @@ export function detectProtocolByOwner(network: string, address?: string) {
   return null;
 }
 
-export async function defaultAccountDiscovery(
+/**
+ * @returns {number} between -1 and n where -1 means there are no accounts found.
+ */
+export async function getLastNotEmptyAccountIndex(
   isAccountUsed: (address: string) => Promise<boolean>,
   getHdWalletAccountFromMnemonicSeed: (
     seed: Uint8Array,

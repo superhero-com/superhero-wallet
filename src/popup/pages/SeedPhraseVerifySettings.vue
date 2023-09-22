@@ -76,7 +76,9 @@ import { shuffle } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { ROUTE_ACCOUNT } from '../router/routeNames';
+import { useAccounts } from '@/composables';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
 import SeedPhraseNotification from '../components/SeedPhraseNotification.vue';
@@ -94,12 +96,13 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
+    const { mnemonic } = useAccounts();
+
     const selectedWordIds = ref<number[]>([]);
     const showNotification = ref<boolean>(false);
     const hasError = ref<boolean>(false);
     const examplePhrase = ref([t('pages.seedPhrase.first'), t('pages.seedPhrase.second'), '...']);
 
-    const mnemonic = computed((): string => store.state.mnemonic);
     const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
 
     function verifyLastStep() {

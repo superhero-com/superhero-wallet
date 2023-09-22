@@ -26,8 +26,8 @@
           v-model.trim="signer.address"
           :default-text="$t('modals.createMultisigAccount.signerInputPlaceholder')"
           :label="getSignerLabel(index)"
-          item-title="address"
           :options="aeAccountsSelectOptions"
+          item-title="value"
           account-select
         />
         <Field
