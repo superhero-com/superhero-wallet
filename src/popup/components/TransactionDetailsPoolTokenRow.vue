@@ -21,7 +21,6 @@
             v-if="token.contractId"
             show-explorer-link
             :address="token.contractId"
-            :protocol="PROTOCOL_AETERNITY"
           />
         </div>
       </div>
