@@ -27,6 +27,7 @@ import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 import {
   defineComponent, ref, computed, watch, onMounted,
 } from 'vue';
+import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '../../composables';
 import TokensList from '../components/FungibleTokens/TokensList.vue';
@@ -53,6 +54,12 @@ export default defineComponent({
       () => innerScrollElem.value?.parentElement,
     );
 
+    function throttledScroll() {
+      return throttle(() => {
+        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+      }, 200);
+    }
+
     watch(
       appInnerScrollTop,
       (value) => {
@@ -61,9 +68,7 @@ export default defineComponent({
     );
     onMounted(() => {
       if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', () => {
-          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-        });
+        appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
     });
 

@@ -32,6 +32,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { throttle } from 'lodash-es';
 import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
 import type { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
@@ -142,6 +143,12 @@ export default defineComponent({
       }
     }
 
+    function throttledScroll() {
+      return throttle(() => {
+        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+      }, 200);
+    }
+
     watch(
       appInnerScrollTop,
       (value) => {
@@ -161,9 +168,7 @@ export default defineComponent({
 
     onMounted(() => {
       if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', () => {
-          appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-        });
+        appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
       loadMore();
       polling = setInterval(() => {
