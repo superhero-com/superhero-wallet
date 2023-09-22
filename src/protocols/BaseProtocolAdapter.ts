@@ -63,9 +63,9 @@ export abstract class BaseProtocolAdapter {
   /**
    * Discover accounts that have been used in the past
    * @param seed 12 word seed array buffer
-   * @returns total number of used accounts
+   * @returns index of the last account that has any history records (-1 means no accounts found)
    */
-  abstract discoverAccounts(seed: Uint8Array): Promise<number>;
+  abstract discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number>;
 
   abstract constructAndSignTx(
     amount: number,
