@@ -34,6 +34,7 @@
       v-else
       class="address"
       :address="address"
+      :protocol="protocol"
     />
 
     <template #icon>

@@ -677,3 +677,5 @@ export interface IFormSelectOption {
   text: string;
   value: string | number;
 }
+
+export type Migration<T = any> = (restoredValue: T | any) => Promise<T>;

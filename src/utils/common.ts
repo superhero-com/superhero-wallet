@@ -228,6 +228,16 @@ export function pipe<T = any[]>(fns: ((data: T) => T)[]) {
   return (data: T) => fns.reduce((currData, func) => func(currData), data);
 }
 
+/**
+ * Run asynchronous callbacks one by one and pass previous returned value to the next one.
+ */
+export function asyncPipe<T = any[]>(fns: ((data: T) => PromiseLike<T>)[]) {
+  return (data: T): Promise<T> => fns.reduce(
+    async (currData, func) => func(await currData),
+    Promise.resolve(data),
+  );
+}
+
 export function prepareStorageKey(keys: string[]) {
   return [LOCAL_STORAGE_PREFIX, ...keys].join('_');
 }

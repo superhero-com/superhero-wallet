@@ -20,6 +20,8 @@ import {
   watchUntilTruthy,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
+import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
 import { useStorageRef } from './composablesHelpers';
 
 let isInitialized = false;
@@ -31,13 +33,23 @@ let isInitialized = false;
 const mnemonic = useStorageRef<string>(
   '',
   STORAGE_KEYS.mnemonic,
-  { backgroundSync: true },
+  {
+    backgroundSync: true,
+    migrations: [
+      migrateMnemonicVuexToComposable,
+    ],
+  },
 );
 
 const accountsRaw = useStorageRef<IAccountRaw[]>(
   [],
   STORAGE_KEYS.accountsRaw,
-  { backgroundSync: true },
+  {
+    backgroundSync: true,
+    migrations: [
+      migrateAccountsVuexToComposable,
+    ],
+  },
 );
 
 const activeAccountGlobalIdx = useStorageRef<number>(

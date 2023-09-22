@@ -41,6 +41,7 @@
       <AddressTruncated
         v-if="!avatarOnly"
         show-explorer-link
+        show-protocol-icon
         :address="modelValue.toString()"
         :protocol="selectedAccount?.protocol"
         class="address-truncated"

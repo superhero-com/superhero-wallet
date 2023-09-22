@@ -7,7 +7,8 @@ import {
   watch,
 } from 'vue';
 import { isEqual } from 'lodash-es';
-import type { StorageKey } from '@/types';
+import type { Migration, StorageKey } from '@/types';
+import { asyncPipe } from '@/utils';
 import { WalletStorage } from '@/lib/WalletStorage';
 import { useConnection } from './connection';
 import { useUi } from './ui';
@@ -21,9 +22,10 @@ interface ICreateStorageRefOptions<T> {
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
   serializer?: {
-    read: (v: T) => any,
-    write: (v: T) => any,
+    read: (v: T) => any;
+    write: (v: T) => any;
   };
+  migrations?: Migration<T>[];
 }
 
 /**
@@ -39,13 +41,13 @@ export function useStorageRef<T = string | object | any[]>(
   const {
     serializer,
     backgroundSync = false,
+    migrations,
   } = options;
 
-  let isRestored = false;
   let watcherDisabled = false; // Avoid watcher going infinite loop
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136
 
-  function setState(val: any) {
+  function setLocalState(val: T | null) {
     if (val) {
       watcherDisabled = true;
       state.value = (serializer?.read) ? serializer.read(val) : val;
@@ -53,29 +55,38 @@ export function useStorageRef<T = string | object | any[]>(
     }
   }
 
-  watch(state, (val, oldVal) => {
-    // Arrays are not compared as there is a bug which makes the new and old val always the same.
-    if (!watcherDisabled && (Array.isArray(initialState) || !isEqual(val, oldVal))) {
-      WalletStorage.set(storageKey, (serializer?.write) ? serializer.write(val) : val);
+  function setStorageState(val: T | null) {
+    WalletStorage.set(storageKey, (val && serializer?.write) ? serializer.write(val) : val);
+  }
+
+  // Restore state and run watchers
+  (async () => {
+    let restoredValue = await WalletStorage.get<T | null>(storageKey);
+    if (migrations?.length) {
+      restoredValue = await asyncPipe<T | null>(migrations)(restoredValue);
+      setStorageState(restoredValue);
     }
-  }, { deep: true });
+    setLocalState(restoredValue);
 
-  /**
-   * Two way binding between the extension and the background
-   * Whenever the app saves the state to browser storage the extension background picks this
-   * and synchronizes own state with the change.
-   */
-  if (backgroundSync) {
-    WalletStorage.watch?.(storageKey, (val) => setState(val));
-  }
+    /**
+     * Synchronize the state value with the storage.
+     */
+    watch(state, (val, oldVal) => {
+      // Arrays are not compared as there is a bug which makes the new and old val always the same.
+      if (!watcherDisabled && (Array.isArray(initialState) || !isEqual(val, oldVal))) {
+        setStorageState(val);
+      }
+    }, { deep: true });
 
-  if (!isRestored) {
-    (async () => {
-      const restoredValue = await WalletStorage.get<T | null>(storageKey);
-      setState(restoredValue);
-      isRestored = true;
-    })();
-  }
+    /**
+     * Two way binding between the extension and the background
+     * Whenever the app saves the state to browser storage the extension background picks this
+     * and synchronizes own state with the change.
+     */
+    if (backgroundSync) {
+      WalletStorage.watch?.(storageKey, (val) => setLocalState(val));
+    }
+  })();
 
   return state;
 }
