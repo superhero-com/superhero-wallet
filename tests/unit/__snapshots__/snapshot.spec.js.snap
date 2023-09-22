@@ -5,7 +5,7 @@ exports[`Pages About 1`] = `
   class="ion-page"
 >
   <ion-content
-    class="ion-padding"
+    class="ion-padding ion-content-bg"
   >
     <div
       class="about"
@@ -151,7 +151,7 @@ exports[`Pages Index 1`] = `
   class="ion-page"
 >
   <ion-content
-    class="ion-padding"
+    class="ion-padding ion-content-bg"
   >
     <div
       class="index extended-top-padding"
@@ -300,7 +300,7 @@ exports[`Pages Index 2`] = `
   class="ion-page"
 >
   <ion-content
-    class="ion-padding"
+    class="ion-padding ion-content-bg"
   >
     <div
       class="index extended-top-padding"
@@ -449,7 +449,7 @@ exports[`Pages Index 3`] = `
   class="ion-page"
 >
   <ion-content
-    class="ion-padding"
+    class="ion-padding ion-content-bg"
   >
     <div
       class="index extended-top-padding"
@@ -598,7 +598,7 @@ exports[`Pages PrivacyPolicy 1`] = `
   class="ion-page"
 >
   <ion-content
-    class="ion-padding"
+    class="ion-padding ion-content-bg"
   >
     <div
       class="privacy-policy"
@@ -1527,7 +1527,7 @@ exports[`Pages TermsOfService 1`] = `
     class="ion-page"
   >
     <ion-content
-      class="ion-padding"
+      class="ion-padding ion-content-bg"
     >
       <div
         class="terms-of-service"
