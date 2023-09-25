@@ -522,6 +522,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'sendTip',
       notPersist: true,
+      showHeaderNavigation: true,
     },
   },
   {
