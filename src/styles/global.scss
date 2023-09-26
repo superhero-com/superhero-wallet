@@ -49,13 +49,14 @@ body.scanner-active {
   --ion-background-color: transparent;
   --screen-bg-color: transparent;
 
-  .app-wrapper {
+  .app .app-wrapper {
     --screen-bg-color: transparent;
 
     background: transparent;
   }
 
-  .ionic-wrapper {
+  .ionic-wrapper,
+  &.color-bg-app {
     background-color: transparent;
   }
 
@@ -68,7 +69,8 @@ body.scanner-active {
 
   ion-content,
   .ion-content-bg,
-  .ion-content-bg--lighter {
+  .ion-content-bg--lighter,
+  .account-ion-content {
     --background: transparent;
 
     background: transparent;

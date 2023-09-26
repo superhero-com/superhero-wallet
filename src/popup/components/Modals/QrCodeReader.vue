@@ -125,13 +125,13 @@ export default defineComponent({
 
         document.querySelector('body')?.classList.add(SCANNER_ACTIVE_CLASS);
         await BarcodeScanner.hideBackground();
+        setTimeout(() => {
+          document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
+        }, 500);
         const result = await BarcodeScanner.startScan();
         if (result.hasContent) {
           return result.content;
         }
-        setTimeout(() => {
-          document.querySelector('#camera-close-btn')?.addEventListener('click', stopReading);
-        }, 500);
         return new Error('No content');
       }
 
@@ -144,7 +144,13 @@ export default defineComponent({
               resolve(result.getText());
             }
           },
-        );
+        ).catch((error) => {
+          if (error.name === 'NotAllowedError') {
+            cameraStatus.value = 'denied';
+            return;
+          }
+          handleUnknownError(error);
+        });
       });
     }
 
@@ -175,10 +181,16 @@ export default defineComponent({
 
     function getExtensionPermission() {
       if (IS_EXTENSION) {
-        openInNewWindow(
-          browser.extension.getURL('./CameraRequestPermission.html'),
-        );
-        props.reject(new NoUserMediaPermissionError());
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then(() => {
+            cameraStatus.value = 'granted';
+          }).catch(() => {
+            openInNewWindow(
+              browser.extension.getURL('./CameraRequestPermission.html'),
+            );
+            props.reject(new NoUserMediaPermissionError());
+          });
       }
     }
 
@@ -234,7 +246,7 @@ export default defineComponent({
       await initBrowserReader();
       const status = navigator.permissions
         && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
-          const firefoxExceptionMessage = "'name' member of PermissionDescriptor 'camera' is not a valid value for enumeration PermissionName.";
+          const firefoxExceptionMessage = "'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.";
           if (error.message !== firefoxExceptionMessage) {
             handleUnknownError(error);
           }
@@ -247,7 +259,7 @@ export default defineComponent({
         };
         return;
       }
-      cameraStatus.value = 'granted';
+      cameraStatus.value = IS_EXTENSION ? 'prompt' : 'granted';
     });
 
     onBeforeUnmount(() => {
