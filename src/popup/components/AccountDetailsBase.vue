@@ -203,6 +203,8 @@ export default defineComponent({
   --screen-bg-color: #{variables.$color-bg-modal};
   --header-height: 64px;
 
+  position: relative;
+  top: env(safe-area-inset-top);
   background-color: variables.$color-bg-4;
   border-radius: variables.$border-radius-app;
   min-height: 100%;
@@ -216,7 +218,6 @@ export default defineComponent({
   }
 
   .account-info-wrapper {
-    top: env(safe-area-inset-top);
     z-index: 2;
     display: flex;
     justify-content: space-between;
