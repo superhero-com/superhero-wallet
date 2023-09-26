@@ -78,12 +78,8 @@ import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 
-import { useAccounts, useTransactionTx } from '@/composables';
-import { useState } from '@/composables/vuex';
-import {
-  ITokenList,
-  ITransaction,
-} from '@/types';
+import { useAccounts, useFungibleTokens, useTransactionTx } from '@/composables';
+import { ITransaction } from '@/types';
 import { TX_DIRECTION } from '@/constants';
 import { getAccountNameToDisplay } from '@/utils';
 import {
@@ -133,7 +129,7 @@ export default defineComponent({
       externalAddress: props.transaction.transactionOwner,
     });
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+    const { availableTokens } = useFungibleTokens();
 
     const label = computed((): {
       text: string;

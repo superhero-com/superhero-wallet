@@ -94,7 +94,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, ITokenList } from '@/types';
+import type { IToken } from '@/types';
 import { IS_IOS, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import {
   ROUTE_COIN,
@@ -108,9 +108,9 @@ import {
   useAccounts,
   useAeSdk,
   useCurrencies,
+  useFungibleTokens,
   useTokensList,
 } from '@/composables';
-import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { isContract } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -158,6 +158,7 @@ export default defineComponent({
       store,
       isMultisig: isMultisig.value,
     });
+    const { availableTokens, getTokenBalance, getContractTokenPairs } = useFungibleTokens();
     const { marketData } = useCurrencies({ store });
 
     const isCoin: boolean = !!route.matched.find(
@@ -188,8 +189,7 @@ export default defineComponent({
     ];
     const loading = ref<boolean>(true);
     const tokenPairs = ref<Record<string, IToken | null>>({ token0: null, token1: null });
-    const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
@@ -200,7 +200,7 @@ export default defineComponent({
           .getAdapter(PROTOCOL_AETERNITY)
           .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
       }
-      return tokenBalances.value.find(
+      return getTokenBalance().find(
         (token) => token.contractId === contractId,
       ) || { ...fungibleToken.value, contractId };
     });
@@ -215,7 +215,7 @@ export default defineComponent({
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
         await getAeSdk();
-        tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        tokenPairs.value = await getContractTokenPairs(contractId);
       }
       loading.value = false;
     });

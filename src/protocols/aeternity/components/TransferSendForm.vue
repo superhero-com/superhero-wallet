@@ -176,7 +176,7 @@ import {
 import {
   useAccounts,
   useBalances,
-  useCurrencies,
+  useCurrencies, useFungibleTokens,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
@@ -188,10 +188,8 @@ import {
 import type {
   IAsset,
   IFormSelectOption,
-  ITokenList,
   TransferFormModel,
 } from '@/types';
-import { useState } from '@/composables/vuex';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
@@ -259,9 +257,7 @@ export default defineComponent({
       prepareAccountSelectOptions,
     } = useAccounts({ store });
 
-    const fungibleTokens = useState('fungibleTokens');
-
-    const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
+    const { availableTokens, getTokenBalance } = useFungibleTokens();
 
     function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
@@ -305,7 +301,7 @@ export default defineComponent({
       () => formModel.value.selectedAsset?.contractId === AE_CONTRACT_ID,
     );
 
-    const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
+    const tokenBalances = computed(() => getTokenBalance());
 
     const isTipUrl = computed(() => (
       !!formModel.value.address

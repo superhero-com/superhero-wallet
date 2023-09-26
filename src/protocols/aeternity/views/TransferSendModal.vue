@@ -35,7 +35,6 @@ import {
   ref,
 } from 'vue';
 import type {
-  ITokenList,
   ResolveCallback,
   TransferSendStepExtended,
   TransferFormModel,
@@ -44,7 +43,6 @@ import type {
 import { Encoded } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { useState } from '@/composables/vuex';
 
 import {
   PROTOCOL_AETERNITY,
@@ -52,7 +50,7 @@ import {
   TRANSFER_SEND_STEPS,
 } from '@/constants';
 import { isUrlValid } from '@/utils';
-import { useAeSdk } from '@/composables';
+import { useAeSdk, useFungibleTokens } from '@/composables';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
 import TransferSendBase from '@/popup/components/Modals/TransferSendBase.vue';
@@ -75,6 +73,7 @@ export default defineComponent({
     const { t } = useI18n();
     const store = useStore();
     const { isAeNodeReady } = useAeSdk({ store });
+    const { availableTokens } = useFungibleTokens();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStepExtended>(TRANSFER_SEND_STEPS.form);
@@ -84,8 +83,6 @@ export default defineComponent({
       selectedAsset: undefined,
       payload: '',
     });
-
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
 
     const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AE_AENS_DOMAIN));
 

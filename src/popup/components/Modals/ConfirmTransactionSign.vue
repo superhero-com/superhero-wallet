@@ -156,10 +156,10 @@ import {
 import {
   useAccounts,
   useAeSdk,
+  useFungibleTokens,
   usePopupProps,
   useTransactionTx,
 } from '@/composables';
-import { useGetter, useState } from '@/composables/vuex';
 import {
   AE_SYMBOL,
   DEX_TRANSACTION_TAGS,
@@ -242,9 +242,7 @@ export default defineComponent({
     const error = ref('');
     const verifying = ref(false);
 
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
-    const getTxSymbol = useGetter('getTxSymbol');
-    const getTxAmountTotal = useGetter('getTxAmountTotal');
+    const { availableTokens, getTxSymbol, getTxAmountTotal } = useFungibleTokens();
 
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
@@ -276,13 +274,13 @@ export default defineComponent({
     });
 
     const totalAmount = computed(
-      () => getTxAmountTotal.value(transactionWrapped.value, direction.value),
+      () => getTxAmountTotal(transactionWrapped.value as ITransaction, direction.value),
     );
 
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol.value(popupProps.value?.tx),
+      symbol: getTxSymbol(popupProps.value?.tx as any),
     }));
 
     const filteredTxFields = computed(

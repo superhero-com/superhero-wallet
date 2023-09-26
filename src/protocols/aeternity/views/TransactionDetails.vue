@@ -63,7 +63,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
-  useAccounts,
+  useAccounts, useFungibleTokens,
   useMiddleware,
   useMultisigAccounts,
   useTransactionList,
@@ -147,11 +147,9 @@ export default defineComponent({
       getTransactionByHash,
     } = useTransactionList({ store });
 
+    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens();
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
-
-    const getTxSymbol = computed(() => store.getters.getTxSymbol);
-    const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
 
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const contractId = computed(() => transaction.value?.tx.contractId);

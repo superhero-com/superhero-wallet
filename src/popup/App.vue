@@ -79,6 +79,7 @@ import {
   useCurrencies,
   useModals,
   useNotifications,
+  usePollAccountInfo,
   useUi,
   useViewport,
 } from '@/composables';
@@ -107,6 +108,7 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
     const { initViewport } = useViewport();
+    usePollAccountInfo({ store });
 
     const innerElement = ref<HTMLDivElement>();
 

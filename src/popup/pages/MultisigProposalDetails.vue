@@ -303,9 +303,8 @@ import {
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
-  useModals,
+  useModals, useFungibleTokens,
 } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
@@ -385,7 +384,7 @@ export default defineComponent({
       store,
     });
 
-    const getTxSymbol = useGetter('getTxSymbol');
+    const { getTxSymbol } = useFungibleTokens();
 
     const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);

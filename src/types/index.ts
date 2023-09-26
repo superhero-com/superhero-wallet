@@ -126,16 +126,17 @@ export interface IToken {
   contractId: Encoded.ContractAddress
   | typeof AE_CONTRACT_ID
   | typeof BTC_CONTRACT_ID
-  contract_txi?: number;
+  contractTxi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
   event_supply?: number;
   extensions?: string[];
   holders?: number;
   image?: string;
-  initial_supply?: number;
+  initialSupply?: number;
   name: string;
   symbol: string;
+  amount?: number | string;
   text?: string; // TODO determine if we can remove this
   value?: string; // TODO copy of the contractId, maybe we should remove it
 }
@@ -144,7 +145,6 @@ export interface IToken {
  * In most cases it's the result of firing one of the `TransactionResolvers`.
  */
 export interface ITokenResolved extends Partial<IToken> {
-  amount?: number;
   isAe?: boolean;
   isPool?: boolean;
   isReceived?: boolean;

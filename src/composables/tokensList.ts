@@ -14,6 +14,8 @@ import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useCurrencies } from '@/composables/currencies';
+import { useFungibleTokens } from '@/composables/fungibleTokens';
+import { useAccounts } from '@/composables/accounts';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
 
@@ -44,22 +46,28 @@ export function useTokensList({
   searchTerm,
   isMultisig,
 }: UseTokensListOptions) {
+  const { activeAccount } = useAccounts({ store });
   const { marketData } = useCurrencies({ store });
   const { balance } = useBalances({ store });
   const { activeMultisigAccount } = useMultisigAccounts({ store });
+  const {
+    availableTokens: allAvailableTokens,
+    getTokenBalance,
+  } = useFungibleTokens();
 
   const availableTokens = computed<ITokenList>(() => (
     isMultisig
-      ? []
-      : (store.state as any).fungibleTokens.availableTokens
+      ? {}
+      : allAvailableTokens.value
   ));
-  const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
 
   const aeTokenBalance = computed((): Balance => (
     isMultisig
       ? new BigNumber(activeMultisigAccount.value?.balance || 0)
       : balance.value || new BigNumber(0)
   ));
+
+  const tokenBalance = computed(() => getTokenBalance(activeAccount.value.address));
 
   /**
    * Returns the default aeternity meta information
@@ -80,7 +88,7 @@ export function useTokensList({
         contractId: contractId as Encoded.ContractAddress,
       }));
 
-    tokenBalances.value.forEach((singleBalance) => {
+    tokenBalance.value.forEach((singleBalance) => {
       const index = tokens.findIndex((token) => token.contractId === singleBalance?.contractId);
       if (index !== -1) {
         tokens[index] = singleBalance;
@@ -102,7 +110,7 @@ export function useTokensList({
       .filter((token) => (
         !ownedOnly
         || token.contractId === AE_CONTRACT_ID
-        || tokenBalances.value.includes(token)
+        || tokenBalance.value.includes(token)
       ))
       .filter((token) => (
         !withBalanceOnly

@@ -22,6 +22,8 @@ export * from './transactionTx';
 export * from './transactionTokens';
 export * from './transactionAndTokenFilter';
 export * from './ui';
+export * from './pollAccountInfo';
 export * from './viewport';
 export * from './popupProps';
 export * from './transactionList';
+export * from './fungibleTokens';

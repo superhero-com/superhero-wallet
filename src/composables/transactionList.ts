@@ -77,7 +77,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     }
     const { pending, loaded } = getAccountTransactionsState(address);
 
-    return [...loaded, ...(pending[nodeNetworkId.value!] || [])];
+    return [...loaded, ...((pending || {})[nodeNetworkId.value!] || [])];
   }
 
   function getTransactionByHash(address: Encoded.AccountAddress, hash: string) {
@@ -277,7 +277,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     preparedTransactions = orderBy(preparedTransactions, ['microTime'], ['desc']);
 
     const oldPendingTransactionForAccount: ITransaction[] = (
-      transactions.value[address]?.pending[nodeNetworkId.value!] || []
+      transactions.value[address]?.pending?.[nodeNetworkId.value!] || []
     );
 
     oldPendingTransactionForAccount.forEach(({ hash }) => {
@@ -321,7 +321,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
       transactions.value = getLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, value!]) || {};
 
       Object.entries(transactions.value).forEach(([address, transactionState]) => {
-        (transactionState.pending[nodeNetworkId.value!])?.filter(({ sent = false }) => !sent)
+        (transactionState.pending?.[nodeNetworkId.value!])?.filter(({ sent = false }) => !sent)
           .forEach((transaction) => {
             if (Date.now() - (transaction.microTime || 0) > 600000) {
               removePendingTransactionByAccount(

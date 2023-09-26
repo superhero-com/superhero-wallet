@@ -92,7 +92,7 @@ import {
   useAccounts,
   useTippingContracts,
   useAeSdk,
-  useTransactionList,
+  useTransactionList, useFungibleTokens,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 
@@ -134,6 +134,7 @@ export default defineComponent({
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+    const { createOrChangeAllowance } = useFungibleTokens();
 
     const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -167,11 +168,9 @@ export default defineComponent({
           && formModel.value.selectedAsset?.contractId
           && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
-          await store.dispatch(
-            'fungibleTokens/createOrChangeAllowance',
-            [
-              formModel.value.selectedAsset.contractId,
-              formModel.value.amount],
+          await createOrChangeAllowance(
+            formModel.value.selectedAsset.contractId,
+            formModel.value.amount || 0,
           );
 
           retipResponse = await tippingV2.retip_token(

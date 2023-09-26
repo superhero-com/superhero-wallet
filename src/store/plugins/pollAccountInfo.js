@@ -1,4 +1,11 @@
+import { useFungibleTokens } from '@/composables';
+
 export default async (store) => {
+  const {
+    loadTokenBalances,
+    loadAvailableTokens,
+  } = useFungibleTokens();
+
   let pollAvailableTokens;
   let pollTokenBalances;
   let pollDefaultNames;
@@ -11,8 +18,8 @@ export default async (store) => {
 
   function startPolling() {
     pollDefaultNames = setInterval(() => store.dispatch('names/setDefaults'), 10000);
-    pollAvailableTokens = setInterval(() => store.dispatch('fungibleTokens/loadAvailableTokens'), 60000);
-    pollTokenBalances = setInterval(() => store.dispatch('fungibleTokens/loadTokenBalances'), 10000);
+    pollAvailableTokens = setInterval(() => loadAvailableTokens(), 60000);
+    pollTokenBalances = setInterval(() => loadTokenBalances(), 10000);
   }
 
   function handleVisibilityChange(event) {

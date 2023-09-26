@@ -3,7 +3,6 @@ import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   IAccount,
   IDefaultComposableOptions,
-  ITokenList,
   ITx,
   ObjectValues,
   TxFunctionRaw,
@@ -35,6 +34,7 @@ import {
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { useFungibleTokens } from '@/composables/fungibleTokens';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
@@ -52,14 +52,10 @@ export function useTransactionTx({
   const { dexContracts } = useAeSdk({ store });
   const { accounts, activeAccount } = useAccounts({ store });
   const { tippingContractAddresses } = useTippingContracts({ store });
-
+  const { availableTokens } = useFungibleTokens();
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
 
   const getPreferredName = computed(() => store.getters['names/getPreferred']);
 

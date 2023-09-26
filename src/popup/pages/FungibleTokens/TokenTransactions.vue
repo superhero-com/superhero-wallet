@@ -12,10 +12,14 @@ import {
   computed, defineComponent, ref, onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { ICommonTransaction, ITokenList, ITx } from '@/types';
+import type { ICommonTransaction, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
-import { useAccounts, useMultisigAccounts, useTransactionList } from '@/composables';
-import { useState } from '@/composables/vuex';
+import {
+  useAccounts,
+  useFungibleTokens,
+  useMultisigAccounts,
+  useTransactionList,
+} from '@/composables';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
 
@@ -41,9 +45,10 @@ export default defineComponent({
       getAccountTransactionsState,
     } = useTransactionList({ store });
 
+    const { availableTokens } = useFungibleTokens();
+
     const loading = ref(false);
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
     const currentAddress = computed(
       () => (props.isMultisig)

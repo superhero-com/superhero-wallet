@@ -18,11 +18,8 @@ import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import { useTippingContracts, useTransactionTx } from '@/composables';
-import type {
-  ITokenList,
-  ITransaction,
-} from '@/types';
+import { useFungibleTokens, useTippingContracts, useTransactionTx } from '@/composables';
+import type { ITransaction } from '@/types';
 import { excludeFalsy, includes } from '@/utils';
 import {
   AENS,
@@ -64,9 +61,7 @@ export default defineComponent({
 
     const { tippingContractAddresses } = useTippingContracts({ store });
 
-    const availableTokens = computed<ITokenList>(
-      () => store.state.fungibleTokens.availableTokens,
-    );
+    const { availableTokens } = useFungibleTokens();
 
     const labels = computed((): string[] => {
       if (props.customTitle) {

@@ -85,7 +85,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { Tag } from '@aeternity/aepp-sdk';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { TransferFormModel, ITransaction } from '@/types';
 import {
   escapeSpecialChars,
@@ -94,7 +94,7 @@ import {
 } from '@/utils';
 import {
   useAccounts,
-  useDeepLinkApi,
+  useDeepLinkApi, useFungibleTokens,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
@@ -148,6 +148,11 @@ export default defineComponent({
       updateMultisigAccounts,
     } = useMultisigAccounts({ store });
     const { getTippingContracts } = useTippingContracts({ store });
+    const {
+      createOrChangeAllowance,
+      burnTriggerPoS,
+      transfer: fungibleTokenTransfer,
+    } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
 
@@ -173,20 +178,20 @@ export default defineComponent({
         let actionResult;
 
         if (props.transferData.invoiceId !== null) {
-          actionResult = await store.dispatch('fungibleTokens/burnTriggerPoS', [
+          actionResult = await burnTriggerPoS(
             selectedAsset.contractId,
             amount,
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
             { waitMined: false, modal: false },
-          ]);
+          );
         } else if (!isSelectedAssetAeCoin) {
-          actionResult = await store.dispatch('fungibleTokens/transfer', [
+          actionResult = await fungibleTokenTransfer(
             selectedAsset.contractId,
             recipient,
             amount,
             { waitMined: false, modal: false },
-          ]);
+          );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
           actionResult = await aeternityAdapter.spend(amount, recipient, {
@@ -196,7 +201,7 @@ export default defineComponent({
 
         if (actionResult && !isSelectedAssetAeCoin) {
           const transaction: ITransaction = {
-            hash: actionResult.hash,
+            hash: actionResult.hash as Encoded.TxHash,
             pendingTokenTx: true,
             pending: true,
             transactionOwner: activeAccount.value.address,
@@ -214,7 +219,7 @@ export default defineComponent({
           upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         } else if (actionResult) {
           const transaction: ITransaction = {
-            hash: actionResult.hash,
+            hash: actionResult.hash as Encoded.TxHash,
             pending: true,
             transactionOwner: activeAccount.value.address,
             tx: {
@@ -254,10 +259,10 @@ export default defineComponent({
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tippingV2 || tippingV1;
         if (selectedAsset.contractId !== AE_CONTRACT_ID && tippingV2) {
-          await store.dispatch('fungibleTokens/createOrChangeAllowance', [
+          await createOrChangeAllowance(
             selectedAsset.contractId,
             props.amount,
-          ]);
+          );
           txResult = await tippingV2.tip_token(
             recipient,
             escapeSpecialChars(note),

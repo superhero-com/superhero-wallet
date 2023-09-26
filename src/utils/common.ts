@@ -41,11 +41,11 @@ import { isAddressValid } from '@aeternity/aepp-sdk';
  * If the number is between high and low precision
  * no argument is passed to the `toFixed` method which means there will be no trailing zeros.
  */
-export function amountRounded(rawAmount: number | BigNumberPublic): string {
+export function amountRounded(rawAmount: number | BigNumberPublic | string): string {
   const ZERO_AND_COMA_LEN = 2;
   const amount: BigNumberPublic = (typeof rawAmount === 'object')
     ? rawAmount
-    : new BigNumber(rawAmount);
+    : new BigNumber(Number(rawAmount));
   if (
     amount.lt(0.01)
     && amount.toString().length - ZERO_AND_COMA_LEN < DECIMAL_PLACES_HIGH_PRECISION
