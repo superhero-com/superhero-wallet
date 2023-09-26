@@ -20,4 +20,5 @@ app.use(store);
 app.use(router);
 app.component('Loader', LoaderComponent);
 app.mount('#app');
+
 Logger.init({ app });

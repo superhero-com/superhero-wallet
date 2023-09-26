@@ -216,8 +216,9 @@ export default defineComponent({
     const poolShare = computed(() => {
       if (
         !tokenPairs
-      || !tokenPairs.balance
-      || !tokenPairs.totalSupply) {
+        || !tokenPairs.balance
+        || !tokenPairs.totalSupply
+      ) {
         return null;
       }
       return `${amountRounded((new BigNumber(tokenPairs.balance))
