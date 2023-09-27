@@ -33,7 +33,7 @@ interface ICreateStorageRefOptions<T> {
  */
 export function useStorageRef<T = string | object | any[]>(
   initialState: T,
-  keys: StorageKey,
+  storageKey: StorageKey,
   options: ICreateStorageRefOptions<T> = {},
 ) {
   const {
@@ -56,7 +56,7 @@ export function useStorageRef<T = string | object | any[]>(
   watch(state, (val, oldVal) => {
     // Arrays are not compared as there is a bug which makes the new and old val always the same.
     if (!watcherDisabled && (Array.isArray(initialState) || !isEqual(val, oldVal))) {
-      WalletStorage.set(keys, (serializer?.write) ? serializer.write(val) : val);
+      WalletStorage.set(storageKey, (serializer?.write) ? serializer.write(val) : val);
     }
   }, { deep: true });
 
@@ -66,12 +66,12 @@ export function useStorageRef<T = string | object | any[]>(
    * and synchronizes own state with the change.
    */
   if (backgroundSync) {
-    WalletStorage.watch?.(keys, (val) => setState(val));
+    WalletStorage.watch?.(storageKey, (val) => setState(val));
   }
 
   if (!isRestored) {
     (async () => {
-      const restoredValue = await WalletStorage.get<T | null>(keys);
+      const restoredValue = await WalletStorage.get<T | null>(storageKey);
       setState(restoredValue);
       isRestored = true;
     })();
