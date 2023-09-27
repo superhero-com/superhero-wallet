@@ -177,8 +177,8 @@ export function useAccounts() {
     }
   }
 
-  function setMnemonic(val: string) {
-    mnemonic.value = val;
+  function setMnemonic(newMnemonic: string) {
+    mnemonic.value = newMnemonic;
   }
 
   function setGeneratedMnemonic() {
