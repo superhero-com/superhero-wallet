@@ -23,12 +23,7 @@
           show-message-help
           :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
           :message="errorMessage"
-          @keydown.enter.stop="
-            customAppURL.length > 0 &&
-              !errorMessage &&
-              !isWarningModalOpened &&
-              onSelectApp({ url: customAppURL })
-          "
+          @keydown.enter.stop="(event: KeyboardEvent) => handleEnter(event, errorMessage)"
         >
           <template #after>
             <Component
@@ -193,6 +188,17 @@ export default defineComponent({
       }, () => { });
     }
 
+    function handleEnter(event: KeyboardEvent, errorMessage?: string) {
+      if (
+        customAppURL.value.length > 0
+        && !errorMessage
+        && !isWarningModalOpened.value
+      ) {
+        (event?.target as HTMLElement).blur();
+        onSelectApp({ url: customAppURL.value });
+      }
+    }
+
     /**
      * Clean up after the iframe is closed
      */
@@ -239,6 +245,7 @@ export default defineComponent({
       GlobeSmallIcon,
       back,
       isWarningModalOpened,
+      handleEnter,
     };
   },
 });
