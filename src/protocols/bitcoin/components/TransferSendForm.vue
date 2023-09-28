@@ -60,8 +60,8 @@
         >
           <template #value>
             <TransactionSpeedPicker
+              v-model="feeSelectedIndex"
               :fee-list="feeList"
-              @changeFee="(value) => setFee(value)"
             />
           </template>
         </DetailsItem>
@@ -82,34 +82,36 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
 
-import { useNetworks } from '@/composables/networks';
+import type { TransferFormModel } from '@/types';
 import {
   useAccounts,
   useBalances,
+  useNetworks,
 } from '@/composables';
-import type { TransferFormModel } from '@/types';
-import {
-  BTC_COIN_NAME,
-  BTC_SYMBOL,
-  DUST_AMOUNT,
-} from '@/protocols/bitcoin/config';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { NETWORK_TYPE_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
 import {
   executeAndSetInterval,
   fetchJson,
 } from '@/utils';
-
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import Logger from '@/lib/logger';
+import {
+  BTC_COIN_NAME,
+  BTC_SYMBOL,
+  DUST_AMOUNT,
+} from '@/protocols/bitcoin/config';
+
 import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
-import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
+import TransactionSpeedPicker, { FeeItem } from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
@@ -134,7 +136,10 @@ export default defineComponent({
   },
   emits: ['update:transferData', 'success', 'error'],
   setup(props, { emit }) {
+    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+
     const store = useStore();
+    const { t } = useI18n();
     const { activeNetwork } = useNetworks();
 
     const hasMultisigTokenWarning = ref(false);
@@ -159,19 +164,20 @@ export default defineComponent({
       protocol: PROTOCOL_BITCOIN,
     });
 
-    const fee = ref(new BigNumber(0));
-    const feeList = ref([
-      { fee: new BigNumber(0.00002), time: 3540 },
-      { fee: new BigNumber(0.00004), time: 600 },
-      { fee: new BigNumber(0.00005), time: 25 },
+    const feeSelectedIndex = ref(1);
+    const feeSlow = ref(new BigNumber(0.00002));
+    const feeMedium = ref(new BigNumber(0.00002));
+    const feeHigh = ref(new BigNumber(0.00002));
+
+    const feeList = computed((): FeeItem[] => [
+      { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
+      { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
+      { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
     ]);
+    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
 
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
-
-    function setFee(value: BigNumber) {
-      fee.value = value;
-    }
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -198,46 +204,42 @@ export default defineComponent({
     }
 
     async function updateFeeList() {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
-      const byteSize = (await bitcoinAdapter.constructAndSignTx(
-        // TODO: changed to 0 because balance.value can differs
-        // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
-        // consider returning an actual amount in future
-        0,
-        formModel.value.address! || activeAccount.value.address,
-        {
-          fee: 0,
-          ...activeAccount.value,
-        },
-      )).virtualSize();
-      const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+      try {
+        const byteSize = (await bitcoinAdapter.constructAndSignTx(
+          // TODO: changed to 0 because balance.value can differs
+          // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
+          // consider returning an actual amount in future
+          0,
+          formModel.value.address || activeAccount.value.address,
+          {
+            fee: 0,
+            ...activeAccount.value,
+          },
+        )).virtualSize();
+        const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
-      const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
-      const feeStepFactor = new BigNumber(0.5);
-      const mediumFee = new BigNumber(Math.ceil(feeRate * byteSize));
+        const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
+        const feeStepFactor = new BigNumber(0.5);
+        const newFeeMedium = new BigNumber(Math.ceil(feeRate * byteSize));
 
-      feeList.value = [
-        {
-          fee: new BigNumber(toBitcoin(Math.ceil(mediumFee.minus(
-            mediumFee.times(feeStepFactor),
-          ).toNumber()))),
-          time: 3540,
-        },
-        {
-          fee: new BigNumber(toBitcoin(
+        feeSlow.value = new BigNumber(
+          toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),
+        );
+
+        feeMedium.value = new BigNumber(
+          toBitcoin(
             // Double the fee for the testnet to match relay fee.
             // TODO: Revisit this along with fee calculation
-            mediumFee.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2.0 : 1.0),
-          )),
-          time: 600,
-        },
-        {
-          fee: new BigNumber(toBitcoin(Math.ceil(mediumFee.plus(
-            mediumFee.times(feeStepFactor),
-          ).toNumber()))),
-          time: 25,
-        },
-      ];
+            newFeeMedium.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1),
+          ),
+        );
+
+        feeHigh.value = new BigNumber(
+          toBitcoin(Math.ceil(newFeeMedium.plus(newFeeMedium.times(feeStepFactor)).toNumber())),
+        );
+      } catch (error: any) {
+        Logger.write(error);
+      }
     }
 
     let polling: NodeJS.Timer | null = null;
@@ -280,16 +282,16 @@ export default defineComponent({
       isUrlTippingEnabled,
       activeNetwork,
       fee,
+      feeList,
+      feeSelectedIndex,
       numericFee,
       activeAccount,
-      feeList,
       errors,
       balance,
       max,
       clearPayload,
       openScanQrModal,
       handleAssetChange,
-      setFee,
       EditIcon,
       DeleteIcon,
       PlusCircleIcon,
