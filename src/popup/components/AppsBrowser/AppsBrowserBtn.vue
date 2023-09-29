@@ -9,10 +9,12 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ROUTE_APPS_BROWSER } from '../router/routeNames';
 
-import BtnIcon from './buttons/BtnIcon.vue';
-import GlobeSmallIcon from '../../icons/globe-small.svg?vue-component';
+import { ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+
+import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
+
+import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
 
 export default defineComponent({
   components: { BtnIcon },

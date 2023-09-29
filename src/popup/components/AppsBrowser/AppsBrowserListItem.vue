@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import { Component, defineComponent, PropType } from 'vue';
-import IconWrapper from './IconWrapper.vue';
+import IconWrapper from '../IconWrapper.vue';
 
 export default defineComponent({
   name: 'AppsBrowserListItem',

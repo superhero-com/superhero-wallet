@@ -91,9 +91,9 @@ import { Field } from 'vee-validate';
 import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
 import { useAeSdk, useModals } from '@/composables';
 import InputField from '@/popup/components/InputField.vue';
-import AppsBrowserHeader from '@/popup/components/AppsBrowserHeader.vue';
+import AppsBrowserHeader from '@/popup/components/AppsBrowser/AppsBrowserHeader.vue';
+import AppsBrowserListItem from '@/popup/components/AppsBrowser/AppsBrowserListItem.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
-import AppsBrowserListItem from '@/popup/components/AppsBrowserListItem.vue';
 
 import CloseIcon from '@/icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';

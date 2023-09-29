@@ -101,7 +101,7 @@ import BtnPlain from './buttons/BtnPlain.vue';
 import NotificationsIcon from './NotificationsIcon.vue';
 import BtnIcon from './buttons/BtnIcon.vue';
 import NetworkButton from './NetworkButton.vue';
-import AppsBrowserBtn from './AppsBrowserBtn.vue';
+import AppsBrowserBtn from './AppsBrowser/AppsBrowserBtn.vue';
 
 export default defineComponent({
   components: {
