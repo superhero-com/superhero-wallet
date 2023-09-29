@@ -3,6 +3,8 @@ import {
   Router,
   RouteLocationNormalized as Route,
 } from 'vue-router';
+
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { checkIfSuperheroCallbackUrl } from '@/utils';
 import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables/modals';
@@ -26,8 +28,11 @@ export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
   /**
    * Function needed to support legacy tipping from superhero.com
    */
-  function checkIfOpenTransferSendModal() {
-    if (checkIfSuperheroCallbackUrl(route.query)) {
+  async function checkIfOpenTransferSendModal(currentRoute: Route) {
+    if (
+      currentRoute.path.slice(1) === ROUTE_ACCOUNT
+      && checkIfSuperheroCallbackUrl(currentRoute.query)
+    ) {
       const { openModal } = useModals();
 
       openModal(MODAL_TRANSFER_SEND);
