@@ -4,7 +4,7 @@ import {
   RouteLocationNormalized as Route,
 } from 'vue-router';
 import { checkIfSuperheroCallbackUrl } from '@/utils';
-import { MODAL_TRANSFER_SEND } from '@/constants';
+import { IS_CORDOVA, MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables/modals';
 
 export interface UseDeepLinkApiOptions {
@@ -48,7 +48,11 @@ export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
       route.query[isSuccess ? 'x-success' : 'x-cancel'],
     ) as string;
     router.push({ name: 'account' });
-    window.open(callbackUrl, '_self');
+    if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
+      window.cordova.InAppBrowser.open(callbackUrl, '_system');
+    } else {
+      window.open(callbackUrl, '_self');
+    }
   }
 
   return {
