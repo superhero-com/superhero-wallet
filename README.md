@@ -59,30 +59,18 @@ $ npm run test # to run both unit and e2e tests
 
 #### iOS
 
-- create Xcode project by `cordova prepare ios`
+- create Xcode project by `npm run build:ios`
 - open created project in Xcode
+- Go to TARGETS->App
 - open Signing & Capabilities
 - enable signing by the corresponding development team
 - ensure that `applinks:wallet.superhero.com` is in Associated domains feature
 - open Build Settings
 - switch "Code Signing Identity => Release" and "Code Signing Identity => Release => Any iOS SDK" from "iOS Distribution" to "iOS Developer" 
-- add those lines to: `platforms/ios/CordovaLib/Classes/Private/Plugins/CDVWebViewEngine/CDVWebViewEngine.m`
-```
-if (!bounceAllowed) {
-  if ([wkWebView respondsToSelector:@selector(scrollView)]) {
-      ((UIScrollView*)[wkWebView scrollView]).bounces = NO;
-      ((UIScrollView*)[wkWebView scrollView]).scrollEnabled = NO; // <==
-  } else {
-      for (id subview in wkWebView.subviews) {
-          if ([[subview class] isSubclassOfClass:[UIScrollView class]]) {
-              ((UIScrollView*)subview).scrollEnabled = NO; // <==
-              ((UIScrollView*)subview).bounces = NO;
-          }
-      }
-  }
-}
-```
-- choose Product => Archive and follow the instructions
+- In the Info Tab ensure that you have the following permissions set. Privacy - Camera Usage Description, Privacy - Photo Library Usage Description and Privacy - Photo Library Additions Usage Description 
+- Update in General Tab desired Release Version and Build Number
+- choose Product => Archive
+- In the organizer you can distribute app to Testflight and AppStore
 
 #### Android
 
