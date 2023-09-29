@@ -7,6 +7,7 @@ import {
   networks,
   Psbt,
   Transaction,
+  script as ScriptCompiler,
 } from 'bitcoinjs-lib';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 
@@ -112,21 +113,16 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const { activeNetwork } = useNetworks();
 
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
-    const {
-      chain_stats: { funded_txo_sum: chainFunded, spent_txo_sum: chainSpent },
-      mempool_stats: { funded_txo_sum: mempoolFunded, spent_txo_sum: mempoolSpent },
-    } = await fetchJson(`${nodeUrl}/address/${address}`);
-    return toBitcoin(
-      Number(chainFunded) - Number(chainSpent) + Number(mempoolFunded) - Number(mempoolSpent),
-    ).toString();
+    const { confirmed, unconfirmed } = await fetchJson(`${nodeUrl}/address/${address}/balance`);
+    return toBitcoin(confirmed + unconfirmed).toString();
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
     const { activeNetwork } = useNetworks();
 
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
-    const { chain_stats: { funded_txo_sum: chainFunded } } = await fetchJson(`${nodeUrl}/address/${address}`);
-    return !!chainFunded;
+    const txs = await fetchJson(`${nodeUrl}/address/${address}/txs`);
+    return txs.length > 0;
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -166,7 +162,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const rawTransactions = await fetchJson(lastTxId
-      ? `${nodeUrl}/address/${address}/txs/chain/${lastTxId}`
+      ? `${nodeUrl}/address/tx/${lastTxId}`
       : `${nodeUrl}/address/${address}/txs`);
     return rawTransactions.map((t: any) => normalizeTransactionStructure(t, address));
   }
@@ -207,24 +203,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const psbt = new Psbt({ network });
 
     // Fetch all the Unspent transaction outputs
-    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/utxo`);
-
-    /**
-     * Fetch raw transaction in hex of only confirmed UTXOs.
-     * Filter UTXos from mempool/unconfirmed
-     */
-    const fetchHexPromises = utxos
-      .map(async ({ txid, vout, value }: { txid: string, vout: number, value: number }) => {
-        const rawTransactionBody = await fetch(`${nodeUrl}/tx/${txid}/hex`);
-        return {
-          txid,
-          vout, // Output vector index
-          value, // Amount
-          transactionInHex: await rawTransactionBody.text(),
-        };
-      });
-
-    const utxoDetails = await Promise.all(fetchHexPromises);
+    const utxos = await fetchJson(`${nodeUrl}/address/${options.address}/?unspent=true`);
 
     const amountInSatoshi = toSatoshi(amountInBtc);
     const feeInSatoshi = toSatoshi(options.fee);
@@ -233,8 +212,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     // eslint-disable-next-line no-restricted-syntax
     for (const {
-      txid, vout, value, transactionInHex,
-    } of utxoDetails) {
+      mintTxid, mintIndex, value, script,
+    } of utxos) {
       /**
        * Use minimum number of UTXOs for this transaction
        * TODO: Select minimum number of UTXOs based on the amount and the input size
@@ -243,28 +222,20 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
         break;
       }
 
-      const parsedTransaction = Transaction.fromHex(transactionInHex);
-      const input = parsedTransaction.outs.at(vout);
-      const isSegwit = parsedTransaction.hasWitnesses();
+      // Get the witness script for the unspent output.
+      const witnessScript = ScriptCompiler.fromASM(script);
 
-      if (isSegwit) {
-        psbt.addInput({
-          hash: txid,
-          index: vout,
-          witnessUtxo: {
-            script: input!.script,
-            value,
-          },
-        });
-      } else {
-        psbt.addInput({
-          hash: txid,
-          index: vout,
-          nonWitnessUtxo: Buffer.from(transactionInHex, 'hex'),
-        });
-      }
+      psbt.addInput({
+        hash: mintTxid,
+        index: mintIndex,
+        witnessUtxo: {
+          script: witnessScript,
+          value,
+        },
+      });
 
       totalBalance += value;
+
       if (totalBalance >= amountInSatoshi + feeInSatoshi) {
         hasSufficientBalance = true;
       }
@@ -306,7 +277,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
-    const rawTransaction = (await this.constructAndSignTx(amount, recipient, options)).toHex();
+    const requestBody = {
+      rawTx: (await this.constructAndSignTx(amount, recipient, options)).toHex(),
+    };
 
     // Broadcast raw transaction
     const requestOptions = {
@@ -314,19 +287,19 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       headers: new Headers({
         'Content-Type': 'text/plain',
       }),
-      body: rawTransaction,
+      body: JSON.stringify(requestBody),
       redirect: 'follow' as RequestRedirect,
     };
 
-    const transactionId = await fetch(`${nodeUrl}/tx`, requestOptions)
-      .then(async (response) => {
+    const response = await fetch(`${nodeUrl}/tx/send`, requestOptions)
+      .then(async (rawResponse) => {
         if (response.status !== 200) {
-          throw new Error(await response.text());
+          throw new Error(await rawResponse.text());
         }
-        return response.text();
+        return rawResponse.json();
       });
     return {
-      hash: transactionId,
+      hash: response.txid,
     };
   }
 }
