@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/aeternity/superhero-wallet/compare/v2.0.1...v2.0.2) (2023-10-02)
+
+
+### Features
+
+* removing action.js from store ([8e78599](https://github.com/aeternity/superhero-wallet/commit/8e785992331e9f81fa4b44e5772f677656435d94))
+* show error modal if failed to sign transaction via deeplink ([3b319c6](https://github.com/aeternity/superhero-wallet/commit/3b319c648b0f097c69e85332d2150508912b9fb2))
+
+
+### Bug Fixes
+
+* be able to broadcast signed via deeplink transaction ([b35226d](https://github.com/aeternity/superhero-wallet/commit/b35226d607990231e9dd41d4220b75fdd647cd76))
+* be able to open a tip deeplink on mobile ([bbcf398](https://github.com/aeternity/superhero-wallet/commit/bbcf3985b31eef638140c2ac4d089ddc08b82f9b))
+* **confirm-raw-sign:** show the correct raw data ([e6adc4a](https://github.com/aeternity/superhero-wallet/commit/e6adc4aa4890bb1c12a836d751cec58ca26e9455))
+* don't show error when opening transfer send modal with 0 btc balance ([34e1eb7](https://github.com/aeternity/superhero-wallet/commit/34e1eb78659b473566a5b5ecfc61cc208bb64f7d))
+* open deeplink url correctly on mobile ([0ac4d76](https://github.com/aeternity/superhero-wallet/commit/0ac4d76b0b65853fa63ae41b32ebe127dba1d4c8))
+* **retip:** show correct header ([ee365c3](https://github.com/aeternity/superhero-wallet/commit/ee365c3e7cdf0d9dc44f32408b75ea3a2ffe0589))
+* show icon on adding a new network ([3fa9d5d](https://github.com/aeternity/superhero-wallet/commit/3fa9d5dc7edee5a0163f441a7e46da6502111e3c))
+
+
+### Maintenance
+
+* move loginTargetLocation to composable ([edf6d28](https://github.com/aeternity/superhero-wallet/commit/edf6d285cd1cc61d81e6a0c5169d6801fc1184ee))
+
 ### [2.0.1](https://github.com/aeternity/superhero-wallet/compare/v2.0.0...v2.0.1) (2023-09-18)
 
 
