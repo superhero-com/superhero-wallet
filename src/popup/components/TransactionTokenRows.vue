@@ -2,6 +2,7 @@
   <div
     v-if="filteredTokens.length"
     class="transaction-token-rows"
+    :class="{ reversed }"
   >
     <div
       v-for="token in filteredTokens"
@@ -9,7 +10,8 @@
       class="token-row"
       :class="{
         error,
-        received: token.isReceived
+        received: token.isReceived,
+        'multiple-rows': multipleRows,
       }"
       :style="{ '--font-size': calculateFontSize(token.amount) }"
     >
@@ -60,6 +62,8 @@ export default defineComponent({
     error: Boolean,
     isAllowance: Boolean,
     isRounded: Boolean,
+    reversed: Boolean,
+    multipleRows: Boolean,
   },
   setup(props) {
     const store = useStore();
@@ -133,6 +137,26 @@ export default defineComponent({
 
       letter-spacing: -2%;
     }
+
+    &.multiple-rows {
+      margin-bottom: 12px;
+      padding-inline: 16px;
+
+      .amount {
+        @extend %face-sans-18-regular;
+      }
+
+      .tokens {
+        @extend %face-sans-18-medium;
+
+        color: rgba(#fff, 0.75);
+      }
+    }
+  }
+
+  &.reversed {
+    display: flex;
+    flex-direction: column-reverse;
   }
 }
 </style>

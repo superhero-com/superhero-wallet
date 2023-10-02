@@ -1,5 +1,8 @@
 <template>
-  <div class="pool-tokens">
+  <div
+    class="pool-tokens"
+    :class="{ reversed }"
+  >
     <TransactionDetailsPoolTokenRow
       v-for="(token, index) in tokens"
       :key="index"
@@ -45,6 +48,7 @@ export default defineComponent({
     },
     hideAmount: Boolean,
     isAllowance: Boolean,
+    reversed: Boolean,
   },
   setup(props) {
     const store = useStore();
@@ -93,5 +97,9 @@ export default defineComponent({
   @include mixins.flex(flex-start, flex-start, column);
 
   gap: 16px;
+
+  &.reversed {
+    flex-direction: column-reverse;
+  }
 }
 </style>

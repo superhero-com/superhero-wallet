@@ -8,45 +8,146 @@
             :transaction="transaction"
             :coin-symbol="AE_SYMBOL"
             :transaction-fee="+aettosToAe(transactionFee)"
-            :is-swap="isSwap"
-            :is-pool="isPool"
             :token-symbol="getTxSymbol(transaction)"
             :total-amount="getTxAmountTotal(transaction, direction)"
             :is-error-transaction="isErrorTransaction"
-            :is-dex-allowance="isDexAllowance"
-            :is-dex="isDex"
             :is-transaction-aex9="isTransactionAex9(transaction)"
             :payload="getTransactionPayload(transaction)"
-            :is-multisig="isMultisig"
-            :direction="direction"
             :explorer-url="explorerUrl || ''"
             :is-local-account-address="isLocalAccountAddress"
-            :gas-price="gasPrice ? +aettosToAe(gasPrice) : 0"
-            :gas-used="gasUsed"
             :contract-id="contractId"
-            :multisig-transaction-fee-paid-by="multisigTransactionFeePaidBy"
-            :multisig-contract-id="multisigContractId"
+            :show-header="!isDexAllowance"
+            :hide-amount="isDex || isDexAllowance || isMultisig"
             :hash="hash"
             :protocol="PROTOCOL_AETERNITY"
           >
-            <template #tip-url>
+            <template #tokens>
+              <TransactionTokens
+                  :transaction="transaction"
+                  :direction="direction"
+                  :is-allowance="isDexAllowance"
+                  :error="isErrorTransaction"
+                  :reversed="isPool"
+                  icon-size="md"
+                  :is-rounded="false"
+                  multiple-rows
+              />
+            </template>
+
+            <template
+                v-if="isSwap"
+                #swap-data
+            >
+              <SwapRates :transaction="transaction" />
+              <SwapRoute :transaction="transaction" />
+            </template>
+
+            <template #additional-content>
+              <TransactionDetailsPoolTokens
+                  v-if="(isPool || isDexAllowance)"
+                  :transaction="transaction"
+                  :direction="direction"
+                  :tx-function="transaction.tx.function"
+                  :is-allowance="isDexAllowance"
+                  :reversed="isPool"
+              />
+
               <DetailsItem
-                v-if="tipUrl"
-                :label="$t('pages.transactionDetails.tipUrl')"
-                class="tip-url"
-                data-cy="tip-url"
+                  v-if="tipUrl"
+                  :label="$t('pages.transactionDetails.tipUrl')"
+                  class="tip-url"
+                  data-cy="tip-url"
               >
                 <template #value>
                   <CopyText :value="tipUrl">
                     <LinkButton :to="tipLink">
                       <Truncate
-                        :str="tipUrl"
-                        fixed
+                          :str="tipUrl"
+                          fixed
                       />
                     </LinkButton>
                   </CopyText>
                 </template>
               </DetailsItem>
+            </template>
+
+            <template #multisig-content>
+              <DetailsItem
+                  v-if="multisigTransactionFeePaidBy"
+                  :label="$t('pages.transactionDetails.feePaidBy')"
+                  small
+              >
+                <div class="row payer-id">
+                  <Avatar
+                      :address="multisigTransactionFeePaidBy"
+                      size="sm"
+                  />
+                  <div>
+                    <DialogBox
+                        v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                        class="dialog-box"
+                        dense
+                        position="bottom"
+                    >
+                      {{ $t('common.you') }}
+                    </DialogBox>
+                    <CopyText
+                        hide-icon
+                        :value="multisigTransactionFeePaidBy"
+                        :copied-text="$t('common.addressCopied')"
+                    >
+                  <span class="text-address">
+                    {{ splitAddress(multisigTransactionFeePaidBy) }}
+                  </span>
+                    </CopyText>
+                  </div>
+                </div>
+              </DetailsItem>
+
+              <DetailsItem
+                  v-if="multisigContractId"
+                  :label="$t('pages.transactionDetails.vaultContractId')"
+                  small
+              >
+                <div class="row">
+                  <Avatar
+                      :address="multisigContractId"
+                      size="sm"
+                  />
+                  <CopyText
+                      hide-icon
+                      :value="multisigContractId"
+                      :copied-text="$t('common.addressCopied')"
+                  >
+                <span class="text-address">
+                  {{ splitAddress(multisigContractId) }}
+                </span>
+                  </CopyText>
+                </div>
+              </DetailsItem>
+            </template>
+
+            <template #gas>
+              <DetailsItem
+                  v-if="gasPrice"
+                  :label="$t('pages.transactionDetails.gasPrice')"
+                  data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                      :amount="+aettosToAe(gasPrice)"
+                      :symbol="AE_SYMBOL"
+                      :protocol="PROTOCOL_AETERNITY"
+                      hide-fiat
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                  v-if="gasUsed"
+                  :value="gasUsed"
+                  :label="$t('pages.transactionDetails.gasUsed')"
+                  data-cy="gas"
+              />
             </template>
           </TransactionDetailsBase>
         </template>
@@ -99,10 +200,24 @@ import DetailsItem from '@/popup/components/DetailsItem.vue';
 import LinkButton from '@/popup/components/LinkButton.vue';
 import Truncate from '@/popup/components/Truncate.vue';
 import CopyText from '@/popup/components/CopyText.vue';
+import SwapRates from '@/popup/components/SwapRates.vue';
+import SwapRoute from '@/popup/components/SwapRoute.vue';
+import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
+import DialogBox from '@/popup/components/DialogBox.vue';
+import Avatar from '@/popup/components/Avatar.vue';
+import TransactionTokens from '@/popup/components/TransactionTokenRows.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
   components: {
+    TokenAmount,
+    Avatar,
+    DialogBox,
+    SwapRoute,
+    SwapRates,
     TransactionDetailsBase,
+    TransactionDetailsPoolTokens,
+    TransactionTokens,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -286,7 +401,11 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scope>
+<style lang="scss" scoped>
+@use '@/styles/variables';
+@use '@/styles/typography';
+@use '@/styles/mixins';
+
 .transaction-details {
   .tip-url {
     width: 100%;
@@ -297,6 +416,24 @@ export default defineComponent({
 
     .link-button {
       display: block;
+    }
+  }
+
+  .row {
+    @include mixins.flex(flex-start, center, row);
+
+    gap: 8px;
+  }
+
+  .payer-id {
+    position: relative;
+
+    .dialog-box {
+      width: 30px;
+      height: 20px;
+      position: absolute;
+      right: 15px;
+      top: -28px;
     }
   }
 }
