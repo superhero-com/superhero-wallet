@@ -31,7 +31,6 @@
 
     <DetailsItem
       :label="$t('modals.confirmTransactionSign.data-sign')"
-      :value="dataAsString"
       data-cy="data"
     >
       <template #value>

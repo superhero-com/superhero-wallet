@@ -51,9 +51,9 @@
 <script lang="ts">
 import {
   defineComponent,
-  onMounted,
+  watch,
 } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import {
@@ -97,6 +97,7 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const route = useRoute();
     const router = useRouter();
 
     const {
@@ -107,9 +108,14 @@ export default defineComponent({
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
-    onMounted(() => {
-      checkIfOpenTransferSendModal();
-    });
+    watch(
+      () => route.query,
+      () => checkIfOpenTransferSendModal(route),
+      {
+        deep: true,
+        immediate: true,
+      },
+    );
 
     return {
       PROTOCOL_AETERNITY,

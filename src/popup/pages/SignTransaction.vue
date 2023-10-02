@@ -7,6 +7,8 @@ import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
+
+import { DEFAULT_WAITING_HEIGHT } from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
 import { handleUnknownError } from '@/utils';
 import {
@@ -52,12 +54,18 @@ export default defineComponent({
         );
 
         if (broadcast) {
-          const result = await aeSdk.sendTransaction(signedTransaction, { waitMined: true });
-          openCallbackOrGoHome(true, { 'transaction-hash': result.hash });
+          const { txHash } = await aeSdk.api.postTransaction({ tx: signedTransaction });
+          await aeSdk.poll(txHash, { blocks: DEFAULT_WAITING_HEIGHT });
+          openCallbackOrGoHome(true, { 'transaction-hash': txHash });
         } else {
           openCallbackOrGoHome(true, { transaction: signedTransaction });
         }
       } catch (error: any) {
+        await openDefaultModal({
+          title: t('modals.transaction-failed.msg'),
+          icon: 'critical',
+          msg: error.message,
+        });
         openCallbackOrGoHome(false);
 
         if (error instanceof RejectedByUserError) {

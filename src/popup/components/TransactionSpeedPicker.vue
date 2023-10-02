@@ -2,14 +2,12 @@
   <div class="transaction-speed-picker">
     <div class="radio-wrapper">
       <RadioButton
-        v-for="(fee, index) in feeList"
-        :key="fee"
-        :value="selectedIndex === index"
+        v-for="(feeItem, index) in feeList"
+        :key="index"
+        :value="modelValue === index"
         @input="handleInput(index)"
       >
-        <p>
-          {{ labels[index] }}
-        </p>
+        <p v-text="feeItem.label" />
       </RadioButton>
     </div>
     <p
@@ -18,7 +16,7 @@
     >
       {{
         $t('modals.send.transactionWillBeCompleted', {
-          time: secondsToRelativeTime(feeList[selectedIndex].time, true)
+          time: secondsToRelativeTime(feeList[modelValue].time, true)
         })
       }}
     </p>
@@ -26,22 +24,18 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  PropType,
-  ref,
-  watch,
-} from 'vue';
-import { useI18n } from 'vue-i18n';
-import BigNumber from 'bignumber.js';
+import { defineComponent, PropType } from 'vue';
 
-import RadioButton from '@/popup/components/RadioButton.vue';
+import type { BigNumberPublic } from '@/types';
 import { secondsToRelativeTime } from '@/utils';
 import { UNFINISHED_FEATURES } from '@/constants';
 
-type FeeItem = {
-  fee: BigNumber,
-  time: number, // time in seconds
+import RadioButton from '@/popup/components/RadioButton.vue';
+
+export type FeeItem = {
+  fee: BigNumberPublic;
+  time: number; // time in seconds
+  label: string;
 }
 
 export default defineComponent({
@@ -52,30 +46,16 @@ export default defineComponent({
       required: true,
       validate: (val: string[]) => val.length === 3,
     },
+    modelValue: { type: Number, default: 1 },
   },
-  emits: ['changeFee'],
+  emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const { t } = useI18n();
-    const selectedIndex = ref(1);
-    const labels = [t('common.transferSpeed.slow'), t('common.transferSpeed.medium'), t('common.transferSpeed.fast')];
-
     function handleInput(index: number) {
-      selectedIndex.value = index;
-      emit('changeFee', props.feeList[index].fee);
+      emit('update:modelValue', index);
     }
-
-    watch(
-      () => props.feeList,
-      () => {
-        emit('changeFee', props.feeList[selectedIndex.value].fee);
-      },
-      { immediate: true },
-    );
 
     return {
       UNFINISHED_FEATURES,
-      labels,
-      selectedIndex,
       secondsToRelativeTime,
       handleInput,
     };
