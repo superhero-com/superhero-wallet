@@ -18,6 +18,7 @@ import {
   RUNNING_IN_POPUP,
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
+  IS_EXTENSION,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
@@ -30,6 +31,8 @@ import {
   useAeSdk,
   useUi,
 } from '@/composables';
+import dayjs from 'dayjs';
+import { WalletStorage } from '@/lib/WalletStorage';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -44,7 +47,7 @@ const router = createRouter({
   scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
-const lastRouteKey = 'last-path';
+const LAST_ROUTE_KEY = 'last-route';
 
 const {
   isLoggedIn,
@@ -60,14 +63,20 @@ RouteQueryActionsController.init(router);
 
 const unbind = router.beforeEach(async (to, from, next) => {
   await watchUntilTruthy(() => store.state.isRestored);
-  next(
-    (
-      !RUNNING_IN_POPUP
-      && to.name === ROUTE_INDEX
-      && ((await browser?.storage.local.get(lastRouteKey)) as any)[lastRouteKey]
-    )
-    || undefined,
-  );
+
+  // This check is run to avoid unnecessary fetching from WalletStorage
+  if (RUNNING_IN_POPUP || to.name !== ROUTE_INDEX) {
+    next(undefined);
+  }
+
+  const lastRoute = await WalletStorage.get(LAST_ROUTE_KEY);
+
+  if (!lastRoute || (IS_EXTENSION && dayjs().isAfter(dayjs(lastRoute?.time).add(10, 'minutes')))) {
+    next(undefined);
+  } else {
+    next(lastRoute.path);
+  }
+
   unbind();
 });
 
@@ -136,11 +145,13 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.afterEach(async (to) => {
-  if (RUNNING_IN_POPUP) return;
+  if (RUNNING_IN_POPUP) {
+    return;
+  }
   if (to.meta?.notPersist) {
-    await browser?.storage.local.remove(lastRouteKey);
+    await WalletStorage.remove(LAST_ROUTE_KEY);
   } else {
-    await browser?.storage.local.set({ [lastRouteKey]: to.path });
+    await WalletStorage.set(LAST_ROUTE_KEY, { path: to.path, time: dayjs() });
   }
 });
 
