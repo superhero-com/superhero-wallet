@@ -107,14 +107,14 @@
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.spent-today')"
-                :amount="permission.transactionSignLimitLeft"
+                :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
                 :protocol="PROTOCOL_AETERNITY"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.left-today')"
-                :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
+                :amount="permission.transactionSignLimitLeft"
                 :protocol="PROTOCOL_AETERNITY"
               />
             </div>
@@ -133,7 +133,7 @@
             <BtnMain
               variant="muted"
               :text="$t('common.cancel')"
-              :to="{ name: 'permissions-settings' }"
+              :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
             />
             <BtnMain
               class="confirm"
@@ -149,7 +149,7 @@
             variant="muted"
             :text="$t('pages.permissions.delete')"
             :icon="DeleteIcon"
-            @click="removePermission"
+            @click="removePermissionAndRedirect()"
           />
         </div>
       </div>
@@ -164,7 +164,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, Field } from 'vee-validate';
 import { IonPage, IonContent } from '@ionic/vue';
@@ -175,8 +174,8 @@ import {
   PROTOCOL_AETERNITY,
 } from '@/constants';
 import { useBalances, useCurrencies } from '@/composables';
-import { useState } from '@/composables/vuex';
-import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { usePermissions } from '@/composables/permissions';
+import { ROUTE_NOT_FOUND, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
 import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import SwitchButton from '../components/SwitchButton.vue';
@@ -198,13 +197,13 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { validate, setValues } = useForm();
 
     const { balance } = useBalances();
     const { getCurrentCurrencyRate } = useCurrencies();
+    const { permissions, addPermission, removePermission } = usePermissions();
 
     const routeHost = route.params.host as string;
     const editView = !!route.meta?.isEdit;
@@ -212,8 +211,6 @@ export default defineComponent({
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
     const originalTransactionSignLimit = ref<number>(0);
-
-    const permissions = useState<Record<string, IPermission>>('permissions');
 
     const selectedAsset = computed(() => ({
       contractId: AE_CONTRACT_ID,
@@ -223,9 +220,9 @@ export default defineComponent({
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
 
-    function removePermission() {
-      store.commit('permissions/removePermission', routeHost);
-      router.push({ name: 'permissions-settings' });
+    function removePermissionAndRedirect() {
+      removePermission(routeHost);
+      router.push({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     async function savePermission() {
@@ -238,7 +235,7 @@ export default defineComponent({
       ));
 
       if (host !== routeHost) {
-        store.commit('permissions/removePermission', routeHost);
+        removePermission(routeHost);
       }
 
       if (!permission.value.dailySpendLimit) {
@@ -249,11 +246,8 @@ export default defineComponent({
         );
       }
 
-      store.commit('permissions/addPermission', {
-        ...permission.value,
-        host,
-      });
-      router.push({ name: 'permissions-settings' });
+      addPermission({ ...permission.value, host });
+      router.push({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     if (editView) {
@@ -287,6 +281,7 @@ export default defineComponent({
 
     return {
       PROTOCOL_AETERNITY,
+      ROUTE_PERMISSIONS_SETTINGS,
       DeleteIcon,
       editView,
       balance,
@@ -294,7 +289,7 @@ export default defineComponent({
       permissionHostValidation,
       permissionChanged,
       selectedAsset,
-      removePermission,
+      removePermissionAndRedirect,
       savePermission,
     };
   },

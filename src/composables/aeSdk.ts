@@ -7,6 +7,7 @@ import {
   Node,
   WALLET_TYPE,
   RpcRejectedByUserError,
+  METHODS,
 } from '@aeternity/aepp-sdk';
 import type {
   IDefaultComposableOptions,
@@ -17,20 +18,14 @@ import type {
 } from '@/types';
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import { FramesConnection } from '@/lib/FramesConnection';
-import { App } from '@/store/modules/permissions';
 import { watchUntilTruthy } from '@/utils';
 import {
   IN_FRAME,
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
-  MODAL_CONFIRM_ACCOUNT_LIST,
-  MODAL_CONFIRM_CONNECT,
-  POPUP_TYPE_CONNECT,
-  POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_TESTS,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { showPopup } from '@/background/popupHandler';
 import {
   AE_NETWORK_MAINNET_ID,
   AE_NETWORK_TESTNET_ID,
@@ -38,7 +33,7 @@ import {
 } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
-import { useModals } from './modals';
+import { usePermissions } from './permissions';
 
 let aeSdk: AeSdkSuperhero;
 let aeSdkBlocked = false;
@@ -63,7 +58,7 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
     isLoggedIn,
     getLastActiveProtocolAccount,
   } = useAccounts();
-  const { openModal } = useModals();
+  const { checkOrAskPermission } = usePermissions();
 
   const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
   const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
@@ -124,53 +119,19 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
       },
       async onSubscription(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
-        const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
-        const app = new App(url);
-        if (!(await store.dispatch('permissions/requestAddressForHost', {
-          host: app.host.host,
-          name: app.host.hostname,
-          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
-          connectionPopupCb: () => IS_EXTENSION_BACKGROUND
-            ? showPopup(app.host.href, POPUP_TYPE_CONNECT)
-            : openModal(MODAL_CONFIRM_CONNECT, {
-              app: {
-                name: app.host.hostname,
-                icons: [],
-                protocol: app.host.protocol,
-                host: app.host.host,
-                url: app.host.href,
-              },
-            }),
-        }))
-        ) {
-          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+        const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+        if (await checkOrAskPermission(host, METHODS.subscribeAddress)) {
+          return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
         }
-        return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
+        return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
       },
       async onAskAccounts(aeppId: string, params: any, origin: string) {
         const aepp = aeppInfo[aeppId];
-        const url = IS_EXTENSION_BACKGROUND ? new URL(aepp.origin) : new URL(origin);
-        const app = new App(url);
-        if (!(await store.dispatch('permissions/requestAllAddressesForHost', {
-          host: app.host.host,
-          name: app.host.hostname,
-          address: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address,
-          connectionPopupCb: () => IS_EXTENSION_BACKGROUND
-            ? showPopup(app.host.href, POPUP_TYPE_ACCOUNT_LIST)
-            : openModal(MODAL_CONFIRM_ACCOUNT_LIST, {
-              app: {
-                name: app.host.hostname,
-                icons: [],
-                protocol: app.host.protocol,
-                host: app.host.host,
-                url: app.host.href,
-              },
-            }),
-        }))
-        ) {
-          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+        const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+        if (await checkOrAskPermission(host, METHODS.address)) {
+          return accountsAddressList.value;
         }
-        return accountsAddressList.value;
+        return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
       },
     });
 

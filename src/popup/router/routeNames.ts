@@ -1,3 +1,6 @@
+/**
+ * Regular pages
+ */
 export const ROUTE_INDEX = 'index';
 export const ROUTE_ACCOUNT = 'account';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
@@ -31,3 +34,15 @@ export const ROUTE_APPS_BROWSER = 'apps-browser';
 export const ROUTE_TERMS = 'about-terms';
 export const ROUTE_AUCTION_BID = 'auction-bid';
 export const ROUTE_AUCTION_HISTORY = 'auction-history';
+export const ROUTE_PERMISSIONS_ADD = 'permissions-add';
+export const ROUTE_PERMISSIONS_DETAILS = 'permissions-details';
+export const ROUTE_PERMISSIONS_SETTINGS = 'permissions-settings';
+
+/**
+ * Popup pages
+ */
+export const ROUTE_POPUP_CONNECT = 'connect';
+export const ROUTE_POPUP_SIGN_TX = 'popup-sign-tx';
+export const ROUTE_POPUP_ACCOUNT_LIST = 'account-list';
+export const ROUTE_POPUP_RAW_SIGN = 'popup-raw-sign';
+export const ROUTE_POPUP_MESSAGE_SIGN = 'message-sign';

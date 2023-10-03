@@ -33,7 +33,7 @@ interface IModalSettings {
   viewComponentName?: ProtocolView;
 }
 
-interface IModalProps {
+export interface IModalProps {
   [key: string]: any; // Props defined on the component's level
   resolve?: ResolveCallback;
   reject?: RejectCallback;

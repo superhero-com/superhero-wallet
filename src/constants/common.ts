@@ -1,4 +1,3 @@
-import { METHODS } from '@aeternity/aepp-sdk';
 import type {
   ICurrency,
   INotificationSetting,
@@ -155,6 +154,7 @@ export const STORAGE_KEYS = {
   namesOwned: 'names-owned',
   namesDefault: 'names-default',
   lastRoute: 'last-route',
+  permissions: 'permissions',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -356,7 +356,6 @@ export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
 export const POPUP_TYPE_SIGN = 'sign';
 export const POPUP_TYPE_MESSAGE_SIGN = 'messageSign';
 export const POPUP_TYPE_RAW_SIGN = 'rawSign';
-export const POPUP_TYPE_TX_SIGN = METHODS.sign;
 
 export const POPUP_TYPES = [
   POPUP_TYPE_CONNECT,
@@ -364,7 +363,6 @@ export const POPUP_TYPES = [
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  POPUP_TYPE_TX_SIGN,
 ] as const;
 
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';

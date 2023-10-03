@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import type { Dictionary } from '@/types';
+import type { Dictionary, PopupType } from '@/types';
 import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
@@ -12,7 +12,7 @@ const popups: Dictionary = {};
 
 export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
-export const showPopup = async (aepp: any, type: string, params?: any) => {
+export const openPopup = async (type: PopupType, aepp: any, params?: any) => {
   const id = uuid();
   const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
   const tabs = await browser.tabs.query({ active: true });

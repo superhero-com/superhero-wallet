@@ -1,4 +1,4 @@
-import { showPopup, getPopup, removePopup } from '../../../src/background/popupHandler';
+import { openPopup, getPopup, removePopup } from '../../../src/background/popupHandler';
 import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,
@@ -80,7 +80,7 @@ describe('popupHandler', () => {
   }, index) => it(
     `should be able to create, get, remove popup for signing a/an ${name}`,
     async () => {
-      showPopup(connectedAepp ?? testAeppUrl, type, params);
+      openPopup(type, connectedAepp ?? testAeppUrl, params);
       await new Promise((r) => setTimeout(r, 50));
       const call = mockCreate.mock.calls[index][0];
       const queryParams = Object.fromEntries(new URLSearchParams(call.url.split('?')[1]).entries());

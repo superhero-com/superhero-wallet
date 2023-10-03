@@ -256,16 +256,21 @@ export interface IRawMultisigAccount {
 }
 
 export interface IPermission {
-  address: boolean
-  addressList: boolean,
-  host: string
-  messageSign: boolean
-  name: string
-  dailySpendLimit: boolean
-  transactionSignFirstAskedOn: any
-  transactionSignLimit: number
-  transactionSignLimitLeft: number
+  address: boolean;
+  addressList: boolean;
+  host: string;
+  messageSign: boolean;
+  name: string;
+  dailySpendLimit: boolean;
+  transactionSignFirstAskedOn: string | null;
+  transactionSignLimit: number;
+  transactionSignLimitLeft: number;
 }
+
+/**
+ * The `string` stands for the hostname, e.g.: `test.com`.
+ */
+export type PermissionRegistry = Record<string, IPermission>;
 
 export type NotificationStatus = 'CREATED' | 'PEEKED' | 'READ';
 
@@ -476,7 +481,7 @@ export type IAccountTransactionsState = Record<Encoded.AccountAddress, ITransact
 /**
  * Browser popup window names
  */
-export type IPopupType = typeof POPUP_TYPES[number];
+export type PopupType = typeof POPUP_TYPES[number];
 
 export interface ITopHeader {
   hash: string;

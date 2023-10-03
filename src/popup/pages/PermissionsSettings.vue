@@ -20,7 +20,7 @@
             v-for="permission in permissions"
             :key="permission.host"
             class="host"
-            :to="{ name: 'permissions-details', params: { host: permission.host } }"
+            :to="{ name: ROUTE_PERMISSIONS_DETAILS, params: { host: permission.host } }"
             :title="permission.name"
           />
         </div>
@@ -29,7 +29,7 @@
           extend
           variant="muted"
           :text="$t('pages.permissions.add')"
-          :to="{ name: 'permissions-add' }"
+          :to="{ name: ROUTE_PERMISSIONS_ADD }"
           :icon="PlusIcon"
         />
       </div>
@@ -38,16 +38,17 @@
 </template>
 
 <script lang="ts">
-import { useStore } from 'vuex';
-import { computed } from 'vue';
+import { defineComponent } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
+import { usePermissions } from '@/composables/permissions';
+import { ROUTE_PERMISSIONS_ADD, ROUTE_PERMISSIONS_DETAILS } from '@/popup/router/routeNames';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
-import { IonPage, IonContent } from '@ionic/vue';
 import PanelItem from '../components/PanelItem.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import PlusIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     LinkButton,
     PanelItem,
@@ -56,15 +57,16 @@ export default {
     IonContent,
   },
   setup() {
-    const store = useStore();
-    const permissions = computed(() => Object.values(store.state.permissions));
+    const { permissions } = usePermissions();
 
     return {
+      ROUTE_PERMISSIONS_ADD,
+      ROUTE_PERMISSIONS_DETAILS,
       PlusIcon,
       permissions,
     };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="address-truncated">
     <ProtocolIcon
-      v-if="protocol"
+      v-if="showProtocolIcon"
       :protocol="protocol"
       class="protocol-icon"
     />
@@ -47,8 +47,9 @@ export default defineComponent({
   },
   props: {
     address: { type: String, required: true },
-    protocol: { type: String as PropType<Protocol>, default: null },
+    protocol: { type: String as PropType<Protocol>, required: true },
     showExplorerLink: Boolean,
+    showProtocolIcon: Boolean,
   },
   setup(props) {
     const truncatedAddress = computed(() => truncateAddress(props.address));
