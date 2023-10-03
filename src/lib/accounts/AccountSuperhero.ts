@@ -9,18 +9,15 @@ import {
 } from '@aeternity/aepp-sdk';
 import { Store } from 'vuex';
 import { useAccounts } from '@/composables/accounts';
-import { useModals } from '@/composables/modals';
+import { usePermissions } from '@/composables/permissions';
 import {
-  IN_FRAME,
   IS_MOBILE_APP,
   IS_EXTENSION_BACKGROUND,
-  MODAL_MESSAGE_SIGN,
-  POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_SIGN,
-  POPUP_TYPE_TX_SIGN,
   PROTOCOL_AETERNITY,
+  IN_FRAME,
 } from '@/constants';
-import { showPopup } from '@/background/popupHandler';
+import { openPopup } from '@/background/popupHandler';
 
 export class AccountSuperhero extends AccountBase {
   address: Encoded.AccountAddress;
@@ -34,41 +31,86 @@ export class AccountSuperhero extends AccountBase {
     this.address = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
   }
 
-  signTransaction(txBase64: Encoded.Transaction, options: any): Promise<Encoded.Transaction> {
-    if (IS_MOBILE_APP && options.aeppOrigin) {
-      return this.fgPermissionCheckAndSign(POPUP_TYPE_SIGN, txBase64, options, options.aeppOrigin);
-    }
-    if (IS_EXTENSION_BACKGROUND) {
-      return this.bgPermissionCheckAndSign(
-        POPUP_TYPE_TX_SIGN,
+  async signTransaction(
+    txBase64: Encoded.Transaction,
+    options: Parameters<AccountBase['signTransaction']>[1],
+  ): Promise<Encoded.Transaction> {
+    const { aeppOrigin } = options;
+    const app = aeppOrigin ? new URL(aeppOrigin) : null;
+    const { checkPermission } = usePermissions();
+
+    try {
+      if (IS_EXTENSION_BACKGROUND && aeppOrigin) {
+        const txObject = unpackTx(txBase64);
+        if (
+          (checkPermission(new URL(aeppOrigin).host, METHODS.sign, txObject as any))
+          || (await openPopup(
+            POPUP_TYPE_SIGN,
+            aeppOrigin,
+            {
+              ...options,
+              tx: txBase64,
+              txObject,
+            },
+          ).then(() => true, () => false))
+        ) {
+          return this.store.dispatch('accounts/signTransaction', {
+            txBase64,
+            options: {
+              fromAccount: this.address,
+              ...options,
+              modal: false, // Already asked for permission with the popup window
+              app,
+            },
+          });
+        }
+      }
+
+      return this.store.dispatch('accounts/signTransaction', {
         txBase64,
-        { ...options, origin: options.aeppOrigin },
-      );
+        options: {
+          fromAccount: this.address,
+          ...options,
+          modal: !!aeppOrigin, // Ask for permission if deep linking
+          app,
+        },
+      });
+    } catch (error: any) {
+      throw new RpcRejectedByUserError(error.message);
     }
-    return this.store.dispatch('accounts/signTransaction', {
-      txBase64,
-      options: {
-        fromAccount: this.address,
-        ...options,
-      },
-    });
   }
 
-  async signMessage(message: string, options: any): Promise<Uint8Array> {
-    if ((IS_MOBILE_APP || IN_FRAME) && options.aeppOrigin) {
-      return this.fgPermissionCheckAndSign('message.sign', message, options, options.aeppOrigin);
-    }
-    if (IS_EXTENSION_BACKGROUND) {
-      return this.bgPermissionCheckAndSign(
+  async signMessage(
+    message: string,
+    options: Parameters<AccountBase['signMessage']>[1],
+  ): Promise<Uint8Array> {
+    if (
+      (IS_MOBILE_APP || IS_EXTENSION_BACKGROUND || IN_FRAME)
+      && options?.aeppOrigin
+    ) {
+      const { checkOrAskPermission } = usePermissions();
+      const hasPermission = await checkOrAskPermission(
+        options?.aeppOrigin,
         METHODS.signMessage,
-        message,
-        { ...options, origin: options.aeppOrigin },
+        { message },
       );
+      if (!hasPermission) {
+        throw new RpcRejectedByUserError('Rejected by user');
+      }
     }
-    return this.sign(messageToHash(message), { fromAccount: this.address, ...options });
+
+    return (IS_EXTENSION_BACKGROUND)
+      ? this.store.dispatch('accounts/sign', {
+        data: messageToHash(message),
+        options: { fromAccount: this.address },
+      })
+      : this.sign(messageToHash(message), options);
   }
 
-  sign(data: string | Uint8Array, options: any): Promise<Uint8Array> {
+  sign(
+    data: string | Uint8Array,
+    options: Parameters<AccountBase['sign']>[1],
+  ): Promise<Uint8Array> {
     const { getLastActiveProtocolAccount } = useAccounts();
     return IS_EXTENSION_BACKGROUND
       ? sign(data, getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.secretKey) as any
@@ -79,87 +121,5 @@ export class AccountSuperhero extends AccountBase {
           ...options,
         },
       });
-  }
-
-  async fgPermissionCheckAndSign(method: any, payload: any, options: any, origin?: string) {
-    try {
-      const app = origin ? new URL(origin) : null;
-      const permission = (!origin && IS_MOBILE_APP) || await this.store.dispatch('permissions/checkPermissions', {
-        host: app ? app.host : null,
-        method,
-        params: payload,
-      });
-      if (method === 'message.sign') {
-        if (!permission) {
-          const { openModal } = useModals();
-          await openModal(MODAL_MESSAGE_SIGN, {
-            message: payload,
-            app: {
-              name: app?.hostname,
-              icons: [],
-              protocol: app?.protocol,
-              host: app?.host,
-              url: app?.href,
-            },
-          });
-        }
-        return this.sign(messageToHash(payload), { fromAccount: this.address, ...options });
-      }
-
-      return this.store.dispatch('accounts/signTransaction', {
-        txBase64: payload,
-        options: {
-          fromAccunt: this.address,
-          ...options,
-          modal: !permission,
-          app,
-        },
-      });
-    } catch (error: any) {
-      throw new RpcRejectedByUserError(error.message);
-    }
-  }
-
-  async bgPermissionCheckAndSign(method: METHODS, payload: any, options: Record<string, any>) {
-    const isTxSigning = method === POPUP_TYPE_TX_SIGN;
-    if (
-      (await this.store.dispatch('permissions/checkPermissions', {
-        host: new URL(options.origin).host,
-        method,
-        params: options,
-      }))
-      || (await showPopup(
-        options.origin,
-        isTxSigning ? POPUP_TYPE_SIGN : POPUP_TYPE_MESSAGE_SIGN,
-        {
-          ...options,
-          ...(isTxSigning)
-            ? {
-              tx: payload,
-              txObject: unpackTx(payload),
-            }
-            : {
-              message: payload,
-            },
-        },
-      ).then(
-        () => true,
-        () => false,
-      ))
-    ) {
-      if (method === METHODS.signMessage) {
-        return this.store.dispatch('accounts/sign', { data: messageToHash(payload), options: { fromAccount: this.address } });
-      }
-      return this.store.dispatch('accounts/signTransaction', {
-        txBase64: payload,
-        options: {
-          fromAccount: this.address,
-          ...options,
-          modal: false,
-          host: options.origin,
-        },
-      });
-    }
-    throw new RpcRejectedByUserError('Rejected by user');
   }
 }

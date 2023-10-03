@@ -13,7 +13,7 @@
           data-cy="networks-settings"
         />
         <PanelItem
-          :to="{ name: 'permissions-settings' }"
+          :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
           :title="$t('pages.titles.permissionsSettings')"
         />
         <PanelItem
@@ -47,7 +47,7 @@
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useCurrencies, useNetworks, useUi } from '@/composables';
-import { ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
+import { ROUTE_NETWORK_SETTINGS, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
 
@@ -69,6 +69,7 @@ export default defineComponent({
 
     return {
       ROUTE_NETWORK_SETTINGS,
+      ROUTE_PERMISSIONS_SETTINGS,
       activeNetwork,
       saveErrorLog,
       activeCurrency,

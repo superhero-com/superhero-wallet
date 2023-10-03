@@ -12,6 +12,7 @@ import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
+  ROUTE_APPS_BROWSER,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
   ROUTE_TOKEN,
@@ -34,9 +35,16 @@ import {
   ROUTE_NETWORK_EDIT,
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
-  ROUTE_APPS_BROWSER,
   ROUTE_AUCTION_BID,
   ROUTE_AUCTION_HISTORY,
+  ROUTE_PERMISSIONS_ADD,
+  ROUTE_POPUP_ACCOUNT_LIST,
+  ROUTE_POPUP_SIGN_TX,
+  ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_MESSAGE_SIGN,
+  ROUTE_PERMISSIONS_DETAILS,
+  ROUTE_PERMISSIONS_SETTINGS,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -305,7 +313,7 @@ export const routes: WalletAppRouteConfig[] = [
     redirect: '/account/:a(.*)',
   },
   {
-    name: 'popup-sign-tx',
+    name: ROUTE_POPUP_SIGN_TX,
     path: '/popup-sign-tx',
     component: ConfirmTransactionSign,
     props: true,
@@ -314,7 +322,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'popup-raw-sign',
+    name: ROUTE_POPUP_RAW_SIGN,
     path: '/popup-raw-sign',
     component: ConfirmRawSign,
     props: true,
@@ -323,7 +331,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'connect',
+    name: ROUTE_POPUP_CONNECT,
     path: '/connect',
     component: PopupConnect,
     props: true,
@@ -332,7 +340,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'message-sign',
+    name: ROUTE_POPUP_MESSAGE_SIGN,
     path: '/message-sign',
     component: PopupMessageSign,
     props: true,
@@ -341,7 +349,7 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    name: 'account-list',
+    name: ROUTE_POPUP_ACCOUNT_LIST,
     path: '/account-list',
     component: PopupAccountList,
     props: true,
@@ -454,7 +462,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions',
     component: PermissionsSettings,
-    name: 'permissions-settings',
+    name: ROUTE_PERMISSIONS_SETTINGS,
     meta: {
       title: 'permissionsSettings',
       showHeaderNavigation: true,
@@ -463,7 +471,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions/add',
     component: PermissionManager,
-    name: 'permissions-add',
+    name: ROUTE_PERMISSIONS_ADD,
     meta: {
       title: 'permissionsAdd',
       showHeaderNavigation: true,
@@ -472,7 +480,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     path: '/more/settings/permissions/:host',
     component: PermissionManager,
-    name: 'permissions-details',
+    name: ROUTE_PERMISSIONS_DETAILS,
     meta: {
       title: 'permissionsEdit',
       showHeaderNavigation: true,

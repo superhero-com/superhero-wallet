@@ -13,7 +13,6 @@ import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
-  POPUP_TYPE_TX_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
   PROTOCOL_AETERNITY,
@@ -37,6 +36,11 @@ import {
   ROUTE_APPS_BROWSER,
   ROUTE_INDEX,
   ROUTE_NOT_FOUND,
+  ROUTE_POPUP_ACCOUNT_LIST,
+  ROUTE_POPUP_CONNECT,
+  ROUTE_POPUP_MESSAGE_SIGN,
+  ROUTE_POPUP_RAW_SIGN,
+  ROUTE_POPUP_SIGN_TX,
 } from './routeNames';
 
 const router = createRouter({
@@ -99,12 +103,11 @@ router.beforeEach(async (to, from, next) => {
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {
     const name = {
-      [POPUP_TYPE_CONNECT]: 'connect',
-      [POPUP_TYPE_ACCOUNT_LIST]: 'account-list',
-      [POPUP_TYPE_SIGN]: 'popup-sign-tx',
-      [POPUP_TYPE_RAW_SIGN]: 'popup-raw-sign',
-      [POPUP_TYPE_MESSAGE_SIGN]: 'message-sign',
-      [POPUP_TYPE_TX_SIGN]: 'transaction-sign',
+      [POPUP_TYPE_CONNECT]: ROUTE_POPUP_CONNECT,
+      [POPUP_TYPE_ACCOUNT_LIST]: ROUTE_POPUP_ACCOUNT_LIST,
+      [POPUP_TYPE_SIGN]: ROUTE_POPUP_SIGN_TX,
+      [POPUP_TYPE_RAW_SIGN]: ROUTE_POPUP_RAW_SIGN,
+      [POPUP_TYPE_MESSAGE_SIGN]: ROUTE_POPUP_MESSAGE_SIGN,
     }[POPUP_TYPE];
 
     let popupProps: Dictionary = {};

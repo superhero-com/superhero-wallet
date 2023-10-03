@@ -1,5 +1,5 @@
 import { isPlatform } from '@ionic/vue';
-import type { IPopupType } from '../types';
+import type { PopupType } from '../types';
 
 const userAgentLowerCase = navigator.userAgent.toLowerCase();
 const url = new URL(window.location.href);
@@ -15,7 +15,7 @@ export const RUNNING_IN_POPUP = !!(
 
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
-export const POPUP_TYPE = url.searchParams.get('type') as IPopupType || null;
+export const POPUP_TYPE = url.searchParams.get('type') as PopupType || null;
 
 /**
  * Running in a web frame, eg.: as a widget on the Superhero.com or in the Dex.

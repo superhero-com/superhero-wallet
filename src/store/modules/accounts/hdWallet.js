@@ -7,6 +7,7 @@ import {
 } from '@aeternity/aepp-sdk';
 
 import { useAccounts, useAeSdk, useModals } from '@/composables';
+import { usePermissions } from '@/composables/permissions';
 import {
   ACCOUNT_HD_WALLET,
   MODAL_CONFIRM_RAW_SIGN,
@@ -35,8 +36,12 @@ export default {
 
       throw new Error('Unsupported protocol');
     },
-    async confirmTxSigning({ dispatch }, { txBase64, app }) {
+    // Confirm the transaction with the modal window. Not usable from the background
+    // as the background should use popups.
+    // TODO replace with `checkOrAskPermission` taken from the permissions composable
+    async confirmTxSigning(_, { txBase64, app }) {
       const { openModal } = useModals();
+      const { checkTransactionSignLimit } = usePermissions();
 
       if (!isTxOfASupportedType(txBase64)) {
         await openModal(MODAL_CONFIRM_RAW_SIGN, { data: txBase64, app });
@@ -44,12 +49,12 @@ export default {
       }
       const txObject = unpackTx(txBase64);
 
-      const checkTransactionSignPermission = await dispatch('permissions/checkTransactionSignPermission', {
-        ...txObject,
-        host: app?.host || null,
-      }, { root: true });
+      const hasPermission = checkTransactionSignLimit(
+        app?.host || null,
+        txObject, // TODO verify if this is correct
+      );
 
-      if (!checkTransactionSignPermission) {
+      if (!hasPermission) {
         await openModal(MODAL_CONFIRM_TRANSACTION_SIGN, { tx: txObject, txBase64 });
       }
     },

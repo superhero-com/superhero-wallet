@@ -59,15 +59,14 @@ import {
   onMounted,
   onUnmounted,
 } from 'vue';
-import { useStore } from 'vuex';
-import type { IAccountOverview, IPermission } from '@/types';
+import type { IAccountOverview } from '@/types';
 import { RejectedByUserError } from '@/lib/errors';
 import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
 } from '@/constants';
-import { useState } from '../../../composables/vuex';
-import { usePopupProps } from '../../../composables';
+import { usePopupProps } from '@/composables';
+import { usePermissions } from '@/composables/permissions';
 
 import Modal from '../../components/Modal.vue';
 import BtnMain from '../../components/buttons/BtnMain.vue';
@@ -90,11 +89,13 @@ export default defineComponent({
     },
   },
   setup() {
-    const store = useStore();
-
     const { popupProps, sender, setPopupProps } = usePopupProps();
+    const { permissions, addPermission } = usePermissions();
 
-    const permission = useState<IPermission>('permissions', popupProps.value?.app?.host);
+    const permission = computed(() => {
+      const host = popupProps.value?.app?.host;
+      return (host) ? permissions.value[host] : undefined;
+    });
 
     const appName = computed(() => permission.value?.name || popupProps.value?.app?.name);
 
@@ -103,7 +104,7 @@ export default defineComponent({
     };
 
     function confirm() {
-      store.commit('permissions/addPermission', {
+      addPermission({
         ...PERMISSION_DEFAULTS,
         ...popupProps.value?.app,
         ...permission.value,
