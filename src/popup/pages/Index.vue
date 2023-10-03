@@ -3,7 +3,10 @@
     <IonContent class="ion-padding ion-content-bg">
       <div
         class="index"
-        :class="{ 'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE }"
+        :class="{
+          'extended-top-padding': !IS_WEB && !IS_MOBILE_DEVICE,
+          'ios-top-padding': IS_IOS,
+        }"
       >
         <img
           v-if="IN_FRAME"
@@ -96,6 +99,7 @@ import {
   IN_FRAME,
   IS_MOBILE_DEVICE,
   IS_WEB,
+  IS_IOS,
   MODAL_ACCOUNT_IMPORT,
 } from '@/constants';
 import {
@@ -140,6 +144,7 @@ export default defineComponent({
       PlusCircleIcon,
       CheckCircleIcon,
       IS_WEB,
+      IS_IOS,
       IS_MOBILE_DEVICE,
       IN_FRAME,
       termsAgreed,
@@ -162,6 +167,10 @@ export default defineComponent({
 
   &.extended-top-padding {
     --padding-top: 64px;
+  }
+
+  &.ios-top-padding {
+    padding-top: env(safe-area-inset-top);
   }
 
   .iframe-image,
