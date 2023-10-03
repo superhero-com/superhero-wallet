@@ -9,9 +9,7 @@ import { STORAGE_KEYS } from '@/constants';
 import { handleUnknownError, isNotFoundError } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
-import {
-  createPollingBasedOnMountedComponents,
-} from './composablesHelpers';
+import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAccounts } from './accounts';
 import { createNetworkWatcher } from './networks';
 import { useStorageRef } from './storageRef';

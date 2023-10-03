@@ -19,7 +19,7 @@ import {
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAccounts } from '@/composables/accounts';
-import { CoinGecko } from '../lib/CoinGecko';
+import { CoinGecko } from '@/lib/CoinGecko';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 export interface UseCurrenciesOptions {
