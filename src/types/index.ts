@@ -27,7 +27,6 @@ import {
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
 import { Protocol } from './protocols';
 
-export * from './cordova';
 export * from './filter';
 export * from './forms';
 export * from './networks';
@@ -139,6 +138,8 @@ export interface IToken {
   text?: string; // TODO determine if we can remove this
   value?: string; // TODO copy of the contractId, maybe we should remove it
 }
+
+export type TokenPair = Record<'token0' | 'token1', IToken | null>
 
 /**
  * In most cases it's the result of firing one of the `TransactionResolvers`.
@@ -564,6 +565,14 @@ export interface IPopupConfig {
   reject?: any;
   show?: boolean;
   txBase64?: Encoded.Transaction;
+}
+
+export interface TokenProps {
+  contractId?: string;
+  tokenPairs?: any; // TODO: replace any with TokenPair & resolve issues
+  tokenData?: any; // TODO: replace any with IToken & resolve issues
+  tokens?: IToken[];
+  isMultisig?: boolean;
 }
 
 export interface IResponseChallenge {

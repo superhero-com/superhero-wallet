@@ -1,83 +1,83 @@
 <template>
-  <div class="apps-browser">
-    <AppsBrowserHeader
-      :selected-app="selectedApp"
-      :iframe="iframeRef"
-      @back="back()"
-      @refresh="refresh()"
-    />
-    <div v-if="!selectedApp">
-      <Field
-        v-slot="{ field, errorMessage, resetField }"
-        v-model="customAppURL"
-        name="customAppURL"
-        :rules="{
-          url: customAppURL.length > 0,
-        }"
-      >
-        <InputField
-          v-bind="field"
-          :model-value="customAppURL"
-          class="input-url"
-          type="url"
-          show-message-help
-          :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
-          :message="errorMessage"
-          @keydown.enter.stop="
-            customAppURL.length > 0 &&
-              !errorMessage &&
-              !isWarningModalOpened &&
-              onSelectApp({ url: customAppURL })
-          "
-        >
-          <template #after>
-            <Component
-              :is="GlobeSmallIcon"
-              v-if="!customAppURL.length"
-            />
-            <BtnIcon
-              v-else
-              size="sm"
-              :icon="CloseIcon"
-              @click="resetField({value: ''})"
-            />
-          </template>
-        </InputField>
-      </Field>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="apps-browser">
+        <AppsBrowserHeader
+          :selected-app="selectedApp"
+          :iframe="iframeRef"
+          @back="back()"
+          @refresh="refresh()"
+        />
+        <div v-if="!selectedApp">
+          <Field
+            v-slot="{ field, errorMessage, resetField }"
+            v-model="customAppURL"
+            name="customAppURL"
+            :rules="{
+              url: customAppURL.length > 0,
+            }"
+          >
+            <InputField
+              v-bind="field"
+              :model-value="customAppURL"
+              class="input-url"
+              type="url"
+              show-message-help
+              :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
+              :message="errorMessage"
+              @keydown.enter.stop="(event: KeyboardEvent) => handleEnter(event, errorMessage)"
+            >
+              <template #after>
+                <Component
+                  :is="GlobeSmallIcon"
+                  v-if="!customAppURL.length"
+                />
+                <BtnIcon
+                  v-else
+                  size="sm"
+                  :icon="CloseIcon"
+                  @click="resetField({value: ''})"
+                />
+              </template>
+            </InputField>
+          </Field>
 
-      <div class="apps-browser-popular-apps">
-        {{ $t('pages.appsBrowser.popularApps') }}
-      </div>
+          <div class="apps-browser-popular-apps">
+            {{ $t('pages.appsBrowser.popularApps') }}
+          </div>
 
-      <div class="apps-browser-list">
-        <div
-          v-for="app in DAPPS_LIST"
-          :key="app.title"
-          class="apps-browser-card"
-        >
-          <AppsBrowserListItem
-            :app-title="app.title"
-            :app-icon="app.icon"
-            :app-image="app.image"
-            @click="onSelectApp(app)"
-          />
+          <div class="apps-browser-list">
+            <div
+              v-for="app in DAPPS_LIST"
+              :key="app.title"
+              class="apps-browser-card"
+            >
+              <AppsBrowserListItem
+                :app-title="app.title"
+                :app-icon="app.icon"
+                :app-image="app.image"
+                @click="onSelectApp(app)"
+              />
+            </div>
+          </div>
         </div>
+        <iframe
+          v-else
+          ref="iframeRef"
+          class="apps-browser-iframe"
+          :src="selectedApp.url"
+          @load="onAppLoaded()"
+        />
       </div>
-    </div>
-    <iframe
-      v-else
-      ref="iframeRef"
-      class="apps-browser-iframe"
-      :src="selectedApp.url"
-      @load="onAppLoaded()"
-    />
-  </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
 import {
   BrowserWindowMessageConnection,
 } from '@aeternity/aepp-sdk';
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onUnmounted,
@@ -127,6 +127,8 @@ export default defineComponent({
     InputField,
     BtnIcon,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
@@ -193,6 +195,17 @@ export default defineComponent({
       }, () => { });
     }
 
+    function handleEnter(event: KeyboardEvent, errorMessage?: string) {
+      if (
+        customAppURL.value.length > 0
+        && !errorMessage
+        && !isWarningModalOpened.value
+      ) {
+        (event?.target as HTMLElement).blur();
+        onSelectApp({ url: customAppURL.value });
+      }
+    }
+
     /**
      * Clean up after the iframe is closed
      */
@@ -239,6 +252,7 @@ export default defineComponent({
       GlobeSmallIcon,
       back,
       isWarningModalOpened,
+      handleEnter,
     };
   },
 });
@@ -247,10 +261,15 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../styles/variables' as *;
 @use '../../styles/typography';
+@use '../../styles/mixins';
 
 .apps-browser {
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
+
+  @include mixins.desktop {
+    height: $extension-height;
+  }
 
   .input-url {
     margin: 16px 8px;

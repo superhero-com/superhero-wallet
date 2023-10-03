@@ -7,6 +7,7 @@
 import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
+import { Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
@@ -26,7 +27,6 @@ import {
   AGGREGATOR_URL,
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
-  IS_CORDOVA,
   LOCAL_STORAGE_PREFIX,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
@@ -80,7 +80,7 @@ export function calculateFontSize(amountValue: BigNumber | number) {
 
 /**
  * Check if the image is available by making a HEAD request.
- * Needed for Cordova because when using <img /> tag and the image is not available
+ * Needed for Ionic because when using <img /> tag and the image is not available
  * the DOM ready event is not fired.
  */
 export function checkImageAvailability(url: string): Promise<boolean> {
@@ -179,6 +179,12 @@ export function getLocalStorageItem<T = object>(keys: string[]): T | undefined {
   return result ? JSON.parse(result) : undefined;
 }
 
+export function removeLocalStorageItem(keys: string[]) {
+  return window.localStorage.removeItem(
+    [LOCAL_STORAGE_PREFIX, ...keys].join('_'),
+  );
+}
+
 /**
  * TODO: Probably we need to replace this with Logger.write
  */
@@ -204,14 +210,14 @@ export function includesCaseInsensitive(baseString: string, searchString: string
 
 /**
  * Invokes the native sharing mechanism of the device to share data such as text.
+ * The Share API works on iOS, Android, and the Web
  */
 export async function invokeDeviceShare(text: string): Promise<void> {
-  return (IS_CORDOVA)
-    ? new Promise<void>((resolve) => (window as any).plugins.socialsharing.shareW3C(
-      { text },
-      ({ app }: any) => app && resolve(),
-    ))
-    : navigator.share({ text });
+  const canShare = (await Share.canShare()).value;
+
+  if (canShare) {
+    await Share.share({ text });
+  }
 }
 
 export function isNotFoundError(error: any) {

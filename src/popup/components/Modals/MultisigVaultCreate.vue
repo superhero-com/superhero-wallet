@@ -189,7 +189,6 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   MODAL_READ_QR_CODE,
-  PROTOCOL_AETERNITY,
 } from '@/constants';
 import {
   excludeFalsy,
@@ -212,7 +211,6 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
 } from '@/protocols/aeternity/config';
 
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import BtnText from '../buttons/BtnText.vue';
@@ -335,10 +333,7 @@ export default defineComponent({
      */
     async function openScanQrModal(signerIndex: number) {
       const scanResult = await openModal(MODAL_READ_QR_CODE, {
-        title: t(
-          'pages.send.scanAddress',
-          { protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY).protocolName },
-        ),
+        title: t('multisig.scanAddress'),
         icon: 'critical',
       });
 

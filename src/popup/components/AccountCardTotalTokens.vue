@@ -40,6 +40,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @use '../../styles/typography';
+@use '../../styles/variables';
 
 .account-card-total-tokens {
   width: 100%;
@@ -47,6 +48,7 @@ export default defineComponent({
   .total-tokens {
     @extend %face-sans-14-medium;
 
+    color: variables.$color-white;
     line-height: 16px;
 
     .digit {

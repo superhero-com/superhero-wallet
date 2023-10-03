@@ -34,7 +34,7 @@ export default (
         if (IS_EXTENSION) browser.runtime.sendMessage({ method: 'reload' });
         const location = {
           extension: './index.html',
-          cordova: './index.html',
+          ionic: './index.html',
           web: '/',
         }[PLATFORM];
         if (!location) throw new Error('Unknown platform');

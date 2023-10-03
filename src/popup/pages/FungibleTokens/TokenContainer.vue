@@ -1,101 +1,115 @@
 <template>
-  <div class="token-container">
-    <Loader v-if="loading" />
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="token-container">
+        <div class="token-content">
+          <Loader v-if="loading" />
 
-    <div class="top">
-      <Tokens
-        :tokens="tokens"
-        :symbol-length="22"
-        vertical
-      />
+          <div class="top">
+            <Tokens
+              :tokens="tokens"
+              :symbol-length="22"
+              vertical
+            />
 
-      <TokenAmount
-        class="token-amount"
-        no-symbol
-        fiat-below
-        large
-        :protocol="PROTOCOL_AETERNITY"
-        :amount="convertedBalance"
-        :aex9="!isAe"
-      />
-    </div>
+            <TokenAmount
+              class="token-amount"
+              no-symbol
+              fiat-below
+              large
+              :protocol="PROTOCOL_AETERNITY"
+              :amount="convertedBalance"
+              :aex9="!isAe"
+            />
+          </div>
 
-    <div class="token-actions">
-      <OpenTransferReceiveModalButton
-        :is-multisig="isMultisig"
-        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
-      />
-      <OpenTransferSendModalButton
-        :is-multisig="isMultisig"
-        :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
-      />
-      <BtnBox
-        v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
-        :text="$t('common.buy')"
-        :icon="BuyIcon"
-        :href="activeAccountSimplexLink"
-      />
-      <BtnBox
-        v-else-if="isAe && isNodeTestnet"
-        :text="$t('common.faucet')"
-        :icon="FaucetIcon"
-        :href="activeAccountFaucetUrl"
-      />
-      <BtnBox
-        v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
-        :text="$t('common.swap')"
-        :icon="SwapIcon"
-        :href="AE_DEX_URL"
-      />
-    </div>
+          <div class="token-actions">
+            <OpenTransferReceiveModalButton
+              :is-multisig="isMultisig"
+              :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+            />
+            <OpenTransferSendModalButton
+              :is-multisig="isMultisig"
+              :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+            />
+            <BtnBox
+              v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
+              :text="$t('common.buy')"
+              :icon="BuyIcon"
+              :href="activeAccountSimplexLink"
+            />
+            <BtnBox
+              v-else-if="isAe && isNodeTestnet"
+              :text="$t('common.faucet')"
+              :icon="FaucetIcon"
+              :href="activeAccountFaucetUrl"
+            />
+            <BtnBox
+              v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
+              :text="$t('common.swap')"
+              :icon="SwapIcon"
+              :href="AE_DEX_URL"
+            />
+          </div>
 
-    <div class="sticky-tabs-wrapper">
-      <Tabs>
-        <Tab
-          v-for="tab in tabs"
-          :key="tab.routeName"
-          :exact-path="tab.exact"
-          :to="{ name: tab.routeName }"
-          :text="tab.text"
+          <div
+            ref="stickyTabsWrapperEl"
+            class="sticky-tabs-wrapper"
+          >
+            <Tabs>
+              <Tab
+                v-for="tab in tabs"
+                :key="tab.routeName"
+                :exact-path="tab.exact"
+                :to="{ name: tab.routeName, params: route.params }"
+                :text="tab.text"
+              />
+            </Tabs>
+            <TransactionAndTokenFilter
+              :key="routeName"
+              :show-filters="showFilterBar"
+            />
+          </div>
+        </div>
+        <!-- We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <IonRouterOutlet
+          :animated="!IS_FIREFOX"
+          class="token-router"
+          :style="{ height: routerHeight || '350px' }"
         />
-      </Tabs>
-      <TransactionAndTokenFilter
-        :key="routeName"
-        :show-filters="showFilterBar"
-      />
-    </div>
-    <RouterView
-      v-slot="{ Component }"
-      :contract-id="contractId"
-      :token-pairs="tokenPairs"
-      :token-data="tokenData"
-      :tokens="tokens"
-      :is-multisig="isMultisig"
-    >
-      <transition
-        name="fade-transition"
-        mode="out-in"
-      >
-        <Component :is="Component" />
-      </transition>
-    </RouterView>
-  </div>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import {
+  IonPage,
+  IonRouterOutlet,
+  IonContent,
+  onIonViewDidLeave,
+  onIonViewDidEnter,
+} from '@ionic/vue';
 import {
   computed,
   defineComponent,
   onMounted,
   ref,
+  nextTick,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, ITokenList } from '@/types';
-import { IS_IOS, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import type { IToken, ITokenList, TokenPair } from '@/types';
+import {
+  IS_IOS,
+  PROTOCOL_AETERNITY,
+  UNFINISHED_FEATURES,
+  IS_FIREFOX,
+} from '@/constants';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -109,6 +123,7 @@ import {
   useAeSdk,
   useCurrencies,
   useTokensList,
+  useTokenProps,
 } from '@/composables';
 import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
@@ -141,11 +156,15 @@ export default defineComponent({
     Tab,
     OpenTransferReceiveModalButton,
     OpenTransferSendModalButton,
+    IonPage,
+    IonContent,
+    IonRouterOutlet,
   },
   setup() {
     const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
+    const { setTokenProps } = useTokenProps();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
@@ -186,8 +205,10 @@ export default defineComponent({
         exact: true,
       },
     ];
+    const routerHeight = ref<string>();
     const loading = ref<boolean>(true);
-    const tokenPairs = ref<Record<string, IToken | null>>({ token0: null, token1: null });
+    const tokenPairs = ref<TokenPair>({ token0: null, token1: null });
+    const stickyTabsWrapperEl = ref<HTMLDivElement>();
     const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const fungibleToken = computed(() => availableTokens.value[contractId]);
@@ -212,12 +233,49 @@ export default defineComponent({
 
     const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);
 
+    function calculateRouterHeight() {
+      nextTick(() => {
+        const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
+        const tabsWrapperElementBottom = stickyTabsWrapperEl.value?.getBoundingClientRect().bottom;
+        routerHeight.value = `${ionicWrapperBottom! - tabsWrapperElementBottom!}px`!;
+      });
+    }
+
+    /**
+     * Observe tabs wrapper height changes and recalculate router height.
+     * Tabs change height when filters are shown/hidden
+     */
+    function observeTabsWrapperHeight() {
+      const resizeObserver = new ResizeObserver(() => {
+        calculateRouterHeight();
+      });
+      resizeObserver.observe(stickyTabsWrapperEl.value!);
+    }
+
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
         await getAeSdk();
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
       loading.value = false;
+      setTimeout(() => {
+        observeTabsWrapperHeight();
+        calculateRouterHeight();
+      }, 250);
+    });
+
+    onIonViewDidEnter(() => {
+      setTokenProps({
+        contractId,
+        tokenPairs: tokenPairs.value,
+        tokenData: tokenData.value,
+        tokens: tokens.value,
+        isMultisig: isMultisig.value,
+      });
+    });
+
+    onIonViewDidLeave(() => {
+      setTokenProps(null);
     });
 
     return {
@@ -225,6 +283,7 @@ export default defineComponent({
       UNFINISHED_FEATURES,
       IS_IOS,
       AE_DEX_URL,
+      stickyTabsWrapperEl,
       BuyIcon,
       SwapIcon,
       FaucetIcon,
@@ -244,21 +303,29 @@ export default defineComponent({
       convertedBalance,
       routeName,
       isMultisig,
+      route,
+      routerHeight,
+      IS_FIREFOX,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
+@use '@/styles/variables';
+@use '@/styles/typography';
 
 .token-container {
-  --screen-padding-x: 12px;
-
   display: flex;
   flex-direction: column;
-  padding-inline: var(--screen-padding-x);
+
+  .token-content {
+    --screen-padding-x: 12px;
+
+    display: flex;
+    flex-direction: column;
+    padding-inline: var(--screen-padding-x);
+  }
 
   .top {
     text-align: center;
@@ -278,6 +345,12 @@ export default defineComponent({
     justify-content: center;
     gap: var(--gap);
     margin-bottom: var(--gap);
+  }
+
+  .token-router {
+    position: inherit;
+    padding-inline-start: calc(-1 * var(--screen-padding-x));
+    padding-inline-end: calc(-1 * var(--screen-padding-x));
   }
 
   .sticky-tabs-wrapper {

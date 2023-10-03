@@ -1,73 +1,78 @@
 <template>
-  <div
-    class="header"
-    :class="{
-      'not-logged-in': !isLoggedIn,
-    }"
-  >
-    <div
-      v-if="isLoggedIn || titleTruncated"
-      class="left"
-    >
-      <BtnIcon
-        v-if="showHeaderNavigation"
-        class="icon-btn"
-        data-cy="back-arrow"
-        :icon="BackIcon"
-        @click="back"
-      />
-      <Component
-        :is="isLogoDisabled ? 'div' : 'RouterLink'"
-        v-else-if="isLoggedIn"
-        :to="isLogoDisabled ? null : { name: homeRouteName }"
-        :class="['home-button', { 'disabled': isLogoDisabled }]"
+  <IonHeader class="header ion-no-border">
+    <IonToolbar class="toolbar">
+      <div
+        class="wrapper"
+        :class="{
+          'not-logged-in': !isLoggedIn,
+        }"
       >
-        <Logo class="home-icon" />
-      </Component>
-    </div>
-
-    <div
-      v-if="showHeaderNavigation"
-      class="title"
-    >
-      <Truncate
-        :str="titleTruncated"
-        class="text"
-      />
-    </div>
-
-    <div class="right">
-      <BtnClose
-        v-if="showHeaderNavigation"
-        data-cy="close"
-        class="btn-close"
-        @click="close"
-      />
-      <template v-else>
-        <NetworkButton />
-
-        <template v-if="isLoggedIn">
-          <AppsBrowserBtn v-if="IS_CORDOVA || UNFINISHED_FEATURES" />
-
-          <NotificationsIcon />
-
+        <div
+          v-if="isLoggedIn || titleTruncated"
+          class="left"
+        >
           <BtnIcon
-            :to="{ name: ROUTE_MORE }"
-            :icon="ThreeDotsIcon"
-            data-cy="page-more"
+            v-if="showHeaderNavigation"
+            class="icon-btn"
+            data-cy="back-arrow"
+            :icon="BackIcon"
+            @click="back"
           />
-        </template>
-      </template>
-    </div>
-  </div>
+          <Component
+            :is="isLogoDisabled ? 'div' : 'RouterLink'"
+            v-else-if="isLoggedIn"
+            :to="isLogoDisabled ? null : { name: homeRouteName }"
+            :class="['home-button', { 'disabled': isLogoDisabled }]"
+          >
+            <Logo class="home-icon" />
+          </Component>
+        </div>
+
+        <div
+          v-if="showHeaderNavigation"
+          class="title"
+        >
+          <Truncate
+            :str="titleTruncated"
+            class="text"
+          />
+        </div>
+
+        <div class="right">
+          <BtnClose
+            v-if="showHeaderNavigation"
+            data-cy="close"
+            class="btn-close"
+            @click="close"
+          />
+          <template v-else>
+            <NetworkButton />
+
+            <template v-if="isLoggedIn">
+              <AppsBrowserBtn v-if="IS_MOBILE_APP || UNFINISHED_FEATURES" />
+
+              <NotificationsIcon />
+
+              <BtnIcon
+                :to="{ name: ROUTE_MORE }"
+                :icon="ThreeDotsIcon"
+                data-cy="page-more"
+              />
+            </template>
+          </template>
+        </div>
+      </div>
+    </IonToolbar>
+  </IonHeader>
 </template>
 
 <script lang="ts">
+import { IonHeader, IonToolbar, useIonRouter } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute, useRouter, RouteLocationRaw } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_CORDOVA, UNFINISHED_FEATURES } from '@/constants';
+import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
@@ -98,11 +103,13 @@ export default defineComponent({
     Logo,
     Truncate,
     BtnIcon,
+    IonHeader,
+    IonToolbar,
   },
   setup() {
     const store = useStore();
     const route = useRoute();
-    const router = useRouter();
+    const ionRouter = useIonRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
@@ -161,21 +168,25 @@ export default defineComponent({
       const { directBackRoute, backRoute } = meta || {};
 
       if (directBackRoute) {
-        return router.go(-1);
+        return ionRouter.back();
       }
+
       if (backRoute) {
         // TODO: rewrite back button logic in more unified way
-        return router.push(backRoute as RouteLocationRaw);
+        return ionRouter.navigate(backRoute, 'back', 'push');
       }
+
       const path = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
 
-      return router.push(
+      return ionRouter.navigate(
         path.substr(0, path.lastIndexOf('/')) || { name: currentHomeRouteName.value },
+        'back',
+        'push',
       );
     }
 
     function close() {
-      router.replace({ name: currentHomeRouteName.value });
+      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'replace');
     }
 
     return {
@@ -185,7 +196,7 @@ export default defineComponent({
       ThreeDotsIcon,
       ROUTE_ACCOUNT,
       ROUTE_MORE,
-      IS_CORDOVA,
+      IS_MOBILE_APP,
       isLoggedIn,
       showHeaderNavigation,
       isLogoDisabled,
@@ -203,91 +214,102 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .header {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  top: 0;
   z-index: variables.$z-index-header;
-  height: calc(var(--header-height) + env(safe-area-inset-top));
-  background-color: var(--screen-bg-color);
-  padding: env(safe-area-inset-top) 8px 0;
-  width: 100%;
+  height: var(--header-height);
 
-  @include mixins.mobile {
+  .toolbar {
+    --opacity: 0;
+    --min-height: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+  }
+
+  .wrapper {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    background-color: var(--screen-bg-color);
+    padding: 0 8px;
     width: 100%;
-  }
+    height: var(--header-height);
 
-  .left {
-    display: flex;
-
-    .home-button {
-      &.disabled {
-        cursor: default;
-      }
-
-      &:not(.disabled) {
-        .home-icon {
-          cursor: pointer;
-        }
-
-        &:hover svg {
-          color: variables.$color-primary-hover;
-        }
-
-        &:active svg {
-          color: variables.$color-primary-hover;
-          opacity: 0.9;
-        }
-      }
-
-      .home-icon {
-        width: 32px;
-        height: 32px;
-        color: variables.$color-primary;
-      }
-    }
-  }
-
-  .right {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .title {
-    .text {
-      @extend %face-sans-16-medium;
-
-      padding: 0 4px;
+    @include mixins.mobile {
       display: flex;
-      justify-content: center;
-      white-space: nowrap;
-      line-height: 24px;
-      color: variables.$color-white;
+      justify-content: space-between;
+      width: 100%;
     }
 
-    &:only-child {
-      flex-grow: 2;
-      margin-left: 8px;
-    }
-  }
-
-  &.not-logged-in:not(:only-child) {
     .left {
-      z-index: 1;
+      display: flex;
+
+      .home-button {
+        &.disabled {
+          cursor: default;
+        }
+
+        &:not(.disabled) {
+          .home-icon {
+            cursor: pointer;
+          }
+
+          &:hover svg {
+            color: variables.$color-primary-hover;
+          }
+
+          &:active svg {
+            color: variables.$color-primary-hover;
+            opacity: 0.9;
+          }
+        }
+
+        .home-icon {
+          width: 32px;
+          height: 32px;
+          color: variables.$color-primary;
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
     }
 
     .title {
-      width: 100%;
-      position: absolute;
-    }
-  }
+      .text {
+        @extend %face-sans-16-medium;
 
-  .home-button + .back {
-    margin-left: 22px;
+        padding: 0 4px;
+        display: flex;
+        justify-content: center;
+        white-space: nowrap;
+        line-height: 24px;
+        color: variables.$color-white;
+      }
+
+      &:only-child {
+        flex-grow: 2;
+        margin-left: 8px;
+      }
+    }
+
+    &.not-logged-in:not(:only-child) {
+      .left {
+        z-index: 1;
+      }
+
+      .title {
+        width: 100%;
+        position: absolute;
+      }
+    }
+
+    .home-button + .back {
+      margin-left: 22px;
+    }
   }
 }
 </style>

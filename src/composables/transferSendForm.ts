@@ -22,6 +22,8 @@ import {
 import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { NoUserMediaPermissionError } from '@/lib/errors';
+import { useTransferSendHandler } from './transferSendHandler';
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -39,13 +41,14 @@ export function useTransferSendForm({
   getSelectedAssetValue,
   protocol,
 }: UseTransferSendFormParams) {
-  const formModel = ref(transferData);
+  const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
   const invoiceContract = ref(null);
 
   const { t } = useI18n();
   const { openModal, openDefaultModal } = useModals();
   const { errors, validate, validateField } = useForm();
+  const { save: saveFormData } = useTransferSendHandler();
 
   const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
 
@@ -97,12 +100,20 @@ export function useTransferSendForm({
   }
 
   async function openScanQrModal(tokenBalances: IToken[]) {
-    const scanResult = await openModal(MODAL_READ_QR_CODE, {
+    let scanResult: string | null = '';
+    scanResult = await openModal(MODAL_READ_QR_CODE, {
       title: t(
         'pages.send.scanAddress',
-        { protocolName: ProtocolAdapterFactory.getAdapter(protocol).protocolName },
+        { assetName: (formModel.value.selectedAsset as IToken)?.name },
       ),
       icon: 'critical',
+    }).then(
+      (result: string) => result,
+    ).catch((error: Error) => {
+      if (error instanceof NoUserMediaPermissionError) {
+        saveFormData(formModel.value as TransferFormModel);
+      }
+      return null;
     });
     if (scanResult?.trim().charAt(0) === '{') {
       let parsedScanResult: any = null;

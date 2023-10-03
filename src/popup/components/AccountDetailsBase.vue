@@ -1,8 +1,5 @@
 <template>
-  <div
-    ref="accountDetailsElem"
-    class="account-details"
-  >
+  <div class="account-details">
     <div class="account-info-wrapper">
       <slot
         v-if="$slots['account-info']"
@@ -19,7 +16,7 @@
       />
       <BtnClose
         class="close-button"
-        :to="{ name: homeRouteName }"
+        :to="{ name: homeRouteName, replace: true }"
       />
     </div>
     <div>
@@ -45,7 +42,10 @@
         />
       </div>
 
-      <div class="header">
+      <div
+        ref="headerEl"
+        class="header"
+      >
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
@@ -54,21 +54,21 @@
         />
       </div>
 
-      <div class="tabs-content">
-        <RouterView v-slot="{ Component }">
-          <transition
-            name="fade-transition"
-            mode="out-in"
-          >
-            <Component :is="Component" />
-          </transition>
-        </RouterView>
+      <div
+        class="tabs-content"
+        :style="{ height: routerHeight || '350px' }"
+      >
+        <!-- We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <IonRouterOutlet :animated="!IS_FIREFOX" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { IonRouterOutlet } from '@ionic/vue';
+import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
@@ -77,16 +77,16 @@ import {
   ref,
   watch,
 } from 'vue';
-import { debounce } from 'lodash-es';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import { EXTENSION_HEIGHT, IS_CORDOVA } from '@/constants';
+import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
 
 import {
   useAccounts,
   useBalances,
   useTransactionAndTokenFilter,
   useUi,
+  useScrollConfig,
 } from '@/composables';
 import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
@@ -104,6 +104,7 @@ export default defineComponent({
     OpenTransferReceiveModalButton,
     TransactionAndTokenFilter,
     BtnClose,
+    IonRouterOutlet,
   },
   props: {
     withoutDefaultButtons: Boolean,
@@ -113,89 +114,79 @@ export default defineComponent({
     const store = useStore();
 
     const { activeAccount } = useAccounts({ store });
-    const ACCOUNT_INFO_HEIGHT = 120;
-    const BALANCE_AND_ACTIONS_HEIGHT = 280;
-    const accountDetailsElem = ref<HTMLElement>();
-    const appInnerScrollTop = ref<number>(0);
-    const clientHeight = ref<number>(0);
-    const initialClientHeight = ref<number>(EXTENSION_HEIGHT);
 
     const { resetFilter } = useTransactionAndTokenFilter();
+
+    const { isScrollEnabled } = useScrollConfig();
 
     const { homeRouteName } = useUi();
 
     const { balance } = useBalances({ store });
 
-    const balanceNumeric = computed(() => balance.value.toNumber());
+    const routerHeight = ref<string>();
 
-    const appInnerElem = computed<HTMLElement | null | undefined>(
-      () => accountDetailsElem.value?.parentElement,
-    );
+    const headerEl = ref<HTMLDivElement>();
+
+    const balanceNumeric = computed(() => balance.value.toNumber());
 
     const routeName = computed(() => route.name);
 
-    const showFilters = computed<boolean>(() => (
-      clientHeight.value > initialClientHeight.value
-        && appInnerScrollTop.value >= ACCOUNT_INFO_HEIGHT
-    ));
+    const showFilters = computed<boolean>(() => (isScrollEnabled.value));
 
-    const resizeObserver = new ResizeObserver(debounce((entries) => {
-      if (!(Array.isArray(entries) && entries.length)) {
-        return;
-      }
+    function calculateRouterHeight() {
+      const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
+      const headerElementBottom = headerEl.value?.getBoundingClientRect()?.bottom;
+      const routerContent = Math.ceil(ionicWrapperBottom! - headerElementBottom!);
+      routerHeight.value = `${routerContent}px`;
+    }
 
-      const newClientHeight = entries[0].target.clientHeight;
-
-      const totalHeight = clientHeight.value + BALANCE_AND_ACTIONS_HEIGHT + ACCOUNT_INFO_HEIGHT;
-
-      if (
-        newClientHeight
-          && (
-            totalHeight < newClientHeight
-            || newClientHeight <= initialClientHeight.value
-          )
-      ) {
-        clientHeight.value = newClientHeight;
-      }
-    }, 100));
+    /**
+     * Observe tab height changes and recalculate router height.
+     * Tabs change height when filters are shown/hidden
+     */
+    function observeTabsHeight() {
+      const resizeObserver = new ResizeObserver(() => {
+        calculateRouterHeight();
+      });
+      resizeObserver.observe(headerEl.value!);
+    }
 
     watch(
       () => route,
       () => {
-        clientHeight.value = 0;
         resetFilter();
       },
     );
 
     onMounted(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#191919');
+      if (IS_MOBILE_APP) {
+        StatusBar.setBackgroundColor({
+          color: '#191919',
+        });
       }
-      if (accountDetailsElem.value && appInnerElem.value) {
-        resizeObserver.observe(accountDetailsElem.value);
-        initialClientHeight.value = appInnerElem.value.clientHeight;
-        appInnerElem.value.addEventListener('scroll', () => {
-          appInnerScrollTop.value = accountDetailsElem?.value?.parentElement?.scrollTop ?? 0;
-          clientHeight.value = accountDetailsElem?.value?.clientHeight ?? 0;
+      setTimeout(() => {
+        observeTabsHeight();
+        calculateRouterHeight();
+      }, 250);
+    });
+
+    onBeforeUnmount(() => {
+      if (IS_MOBILE_APP) {
+        StatusBar.setBackgroundColor({
+          color: '#141414',
         });
       }
     });
 
-    onBeforeUnmount(() => {
-      if (IS_CORDOVA) {
-        window.StatusBar.backgroundColorByHexString('#141414');
-      }
-
-      resizeObserver.disconnect();
-    });
-
     return {
+      headerEl,
       homeRouteName,
       showFilters,
-      accountDetailsElem,
       routeName,
       balanceNumeric,
       activeAccount,
+      routerHeight,
+      IS_FIREFOX,
     };
   },
 });
@@ -212,8 +203,12 @@ export default defineComponent({
   --screen-bg-color: #{variables.$color-bg-modal};
   --header-height: 64px;
 
+  position: relative;
+  top: env(safe-area-inset-top);
+  background-color: variables.$color-bg-4;
   border-radius: variables.$border-radius-app;
   min-height: 100%;
+  height: 100%;
   font-weight: 500;
   color: variables.$color-white;
   box-shadow: 0 0 0 1px variables.$color-border, 0 0 50px rgba(variables.$color-black, 0.6);
@@ -223,8 +218,6 @@ export default defineComponent({
   }
 
   .account-info-wrapper {
-    position: sticky;
-    top: env(safe-area-inset-top);
     z-index: 2;
     display: flex;
     justify-content: space-between;
@@ -251,10 +244,6 @@ export default defineComponent({
 
       @extend %face-sans-16-regular;
     }
-  }
-
-  .balance-info {
-    padding-top: calc(8px + env(safe-area-inset-top));
   }
 
   .buttons {

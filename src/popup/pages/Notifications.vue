@@ -1,26 +1,31 @@
 <template>
-  <div class="notifications">
-    <InfiniteScroll
-      v-if="notificationsToShow.length"
-      :is-more-data="canLoadMore"
-      @loadMore="loadMoreNotifications"
-    >
-      <NotificationItem
-        v-for="notification in notificationsToShow"
-        :key="notification.id"
-        :notification="notification"
-      />
-    </InfiniteScroll>
-    <p
-      v-else
-      class="empty-list-message"
-    >
-      {{ $t('pages.notifications.noNotifications') }}
-    </p>
-  </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="notifications">
+        <InfiniteScroll
+          v-if="notificationsToShow.length"
+          :is-more-data="canLoadMore"
+          @loadMore="loadMoreNotifications"
+        >
+          <NotificationItem
+            v-for="notification in notificationsToShow"
+            :key="notification.id"
+            :notification="notification"
+          />
+        </InfiniteScroll>
+        <p
+          v-else
+          class="empty-list-message"
+        >
+          {{ $t('pages.notifications.noNotifications') }}
+        </p>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
@@ -39,6 +44,8 @@ export default defineComponent({
   components: {
     InfiniteScroll,
     NotificationItem,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

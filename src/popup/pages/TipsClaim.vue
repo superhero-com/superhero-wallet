@@ -1,47 +1,51 @@
 <template>
-  <div class="tips-claim">
-    <AccountInfo
-      :address="activeAccount.address"
-      :name="activeAccount.name"
-      :idx="activeAccount.idx"
-      :protocol="activeAccount.protocol"
-    />
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="tips-claim">
+        <AccountInfo
+          :address="activeAccount.address"
+          :name="activeAccount.name"
+          :idx="activeAccount.idx"
+          :protocol="activeAccount.protocol"
+        />
 
-    <div class="header">
-      <p class="text-description">
-        {{ $t('pages.claimTips.header') }}
-      </p>
+        <div class="header">
+          <p class="text-description">
+            {{ $t('pages.claimTips.header') }}
+          </p>
 
-      <BtnHelp
-        class="help-button"
-        :title="$t('modals.verify.title')"
-        :msg="$t('modals.verify.msg')"
-        :option="{
-          attrs: {
-            href: AE_BLOG_CLAIM_TIP_URL,
-            target: '_blank'
-          },
-        }"
-        icon="success"
-      />
-    </div>
+          <BtnHelp
+            class="help-button"
+            :title="$t('modals.verify.title')"
+            :msg="$t('modals.verify.msg')"
+            :option="{
+              attrs: {
+                href: AE_BLOG_CLAIM_TIP_URL,
+                target: '_blank'
+              },
+            }"
+            icon="success"
+          />
+        </div>
 
-    <InputField
-      v-model="tipUrl"
-      :label="$t('pages.claimTips.urlToClaim')"
-      :error="!normalizedUrl"
-    />
+        <InputField
+          v-model="tipUrl"
+          :label="$t('pages.claimTips.urlToClaim')"
+          :error="!normalizedUrl"
+        />
 
-    <BtnMain
-      :disabled="!normalizedUrl || !isTippingSupported"
-      extend
-      @click="handleClaimTips"
-    >
-      {{ $t('common.confirm') }}
-    </BtnMain>
+        <BtnMain
+          :disabled="!normalizedUrl || !isTippingSupported"
+          extend
+          @click="handleClaimTips"
+        >
+          {{ $t('common.confirm') }}
+        </BtnMain>
 
-    <Loader v-if="loading" />
-  </div>
+        <Loader v-if="loading" />
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -54,6 +58,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { IonContent, IonPage } from '@ionic/vue';
 import { isUrlValid, toURL } from '@/utils';
 import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/constants';
 import {
@@ -79,6 +84,8 @@ export default defineComponent({
     BtnMain,
     BtnHelp,
     AccountInfo,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { t } = useI18n();

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
@@ -11,11 +11,10 @@ export default defineComponent({
   name: 'SignMessage',
   setup() {
     const store = useStore();
-    const router = useRouter();
     const route = useRoute();
 
     onMounted(async () => {
-      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi({ router });
+      const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
       const { getAeSdk } = useAeSdk({ store });
       const { openModal } = useModals();
 

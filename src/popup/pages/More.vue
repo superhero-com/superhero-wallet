@@ -1,90 +1,95 @@
 <template>
-  <div class="more">
-    <PanelItem
-      :to="{ name: 'settings' }"
-      :title="$t('pages.titles.settings')"
-      data-cy="settings"
-    >
-      <template #icon>
-        <Settings />
-      </template>
-    </PanelItem>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="more">
+        <PanelItem
+          :to="{ name: 'settings' }"
+          :title="$t('pages.titles.settings')"
+          data-cy="settings"
+        >
+          <template #icon>
+            <Settings />
+          </template>
+        </PanelItem>
 
-    <template v-if="isNodeMainnet || isNodeTestnet">
-      <PanelItem
-        :to="{ name: 'tips-claim' }"
-        :title="$t('pages.claimTips.title')"
-        :disabled="!isAccountAe"
-        data-cy="tips-claim"
-      >
-        <template #icon>
-          <ClaimTips />
+        <template v-if="isNodeMainnet || isNodeTestnet">
+          <PanelItem
+            :to="{ name: 'tips-claim' }"
+            :title="$t('pages.claimTips.title')"
+            :disabled="!isAccountAe"
+            data-cy="tips-claim"
+          >
+            <template #icon>
+              <ClaimTips />
+            </template>
+          </PanelItem>
+          <PanelItem
+            :to="{ name: 'invite' }"
+            :title="$t('pages.titles.giftCards')"
+            :disabled="!isAccountAe"
+            data-cy="invite"
+          >
+            <template #icon>
+              <Invites />
+            </template>
+          </PanelItem>
         </template>
-      </PanelItem>
-      <PanelItem
-        :to="{ name: 'invite' }"
-        :title="$t('pages.titles.giftCards')"
-        :disabled="!isAccountAe"
-        data-cy="invite"
-      >
-        <template #icon>
-          <Invites />
-        </template>
-      </PanelItem>
-    </template>
 
-    <PanelItem
-      :href="BUG_REPORT_URL"
-      :title="$t('pages.about.reportBug')"
-    >
-      <template #icon>
-        <BugReport />
-      </template>
-    </PanelItem>
+        <PanelItem
+          :href="BUG_REPORT_URL"
+          :title="$t('pages.about.reportBug')"
+        >
+          <template #icon>
+            <BugReport />
+          </template>
+        </PanelItem>
 
-    <PanelItem
-      v-if="isNodeMainnet && UNFINISHED_FEATURES"
-      :href="AE_SIMPLEX_URL"
-      :title="$t('pages.fungible-tokens.buyAe')"
-    >
-      <template #icon>
-        <BuyIcon />
-      </template>
-    </PanelItem>
-    <PanelItem
-      v-else-if="isNodeTestnet"
-      :disabled="!isActiveAccountAe"
-      :href="activeAccountFaucetUrl"
-      :title="$t('common.faucet')"
-    >
-      <template #icon>
-        <FaucetIcon />
-      </template>
-    </PanelItem>
-    <PanelItem
-      :href="AE_DEX_URL"
-      :title="$t('pages.more.dex')"
-    >
-      <template #icon>
-        <Dex />
-      </template>
-    </PanelItem>
+        <PanelItem
+          v-if="isNodeMainnet && UNFINISHED_FEATURES"
+          :href="AE_SIMPLEX_URL"
+          :title="$t('pages.fungible-tokens.buyAe')"
+        >
+          <template #icon>
+            <BuyIcon />
+          </template>
+        </PanelItem>
+        <PanelItem
+          v-else-if="isNodeTestnet"
+          :disabled="!isActiveAccountAe"
+          :href="activeAccountFaucetUrl"
+          :title="$t('common.faucet')"
+        >
+          <template #icon>
+            <FaucetIcon />
+          </template>
+        </PanelItem>
+        <PanelItem
+          :href="AE_DEX_URL"
+          :title="$t('pages.more.dex')"
+        >
+          <template #icon>
+            <Dex />
+          </template>
+        </PanelItem>
 
-    <PanelItem
-      :to="{ name: 'about' }"
-      :title="$t('pages.titles.about')"
-      data-cy="about"
-    >
-      <template #icon>
-        <About />
-      </template>
-    </PanelItem>
-  </div>
+        <PanelItem
+          :to="{ name: 'about' }"
+          :title="$t('pages.titles.about')"
+          data-cy="about"
+        >
+          <template #icon>
+            <About />
+          </template>
+        </PanelItem>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { useAccounts, useAeSdk } from '@/composables';
@@ -111,6 +116,8 @@ export default defineComponent({
     BugReport,
     ClaimTips,
     FaucetIcon,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

@@ -1,0 +1,7 @@
+{
+  "name": "Superhero Wallet",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}

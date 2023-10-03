@@ -19,9 +19,6 @@ export default {
   setSaveErrorLog(state, saveErrorLog) {
     state.saveErrorLog = saveErrorLog;
   },
-  setQrScanner(state, payload) {
-    state.qrScannerOpen = payload;
-  },
   hideCard(state, name) {
     state.hiddenCards.push(name);
   },

@@ -1,6 +1,7 @@
 <template>
   <ListItemWrapper
     :to="to"
+    replace
     class="name-row"
     @click="$emit('click')"
   >

@@ -3,6 +3,14 @@
 @use './mixins';
 @use './transitions';
 
+/* Core CSS required for Ionic components to work properly */
+@import '@ionic/vue/css/core.css';
+
+/* Basic CSS for apps built with Ionic */
+@import '@ionic/vue/css/normalize.css';
+@import '@ionic/vue/css/structure.css';
+@import '@ionic/vue/css/typography.css';
+
 * {
   box-sizing: border-box;
   scrollbar-width: none;
@@ -14,6 +22,88 @@
   }
 }
 
+html.is-extension {
+  width: $extension-width;
+  height: $extension-height;
+
+  // Fixes issue with extension not rendering properly
+  // .tabs-inner & .ion-page classes are added by Ionic
+  ion-tabs,
+  .tabs-inner,
+  ion-router-outlet,
+  .ion-page {
+    contain: layout style !important;
+  }
+
+  body {
+    position: unset;
+  }
+}
+
+// When scanner is active we need to hide everything else
+// because the scanner will show-up behind the webview
+body.scanner-active {
+  background-color: transparent;
+
+  --background: transparent;
+  --ion-background-color: transparent;
+  --screen-bg-color: transparent;
+
+  .app .app-wrapper {
+    --screen-bg-color: transparent;
+
+    background: transparent;
+  }
+
+  .ionic-wrapper,
+  &.color-bg-app {
+    background-color: transparent;
+  }
+
+  #app {
+    background: transparent;
+    position: absolute;
+    z-index: 2;
+    width: 100%;
+  }
+
+  ion-content,
+  .ion-content-bg,
+  .ion-content-bg--lighter,
+  .account-ion-content {
+    --background: transparent;
+
+    background: transparent;
+  }
+}
+
+.ion-content-bg {
+  background-color: $color-bg-app;
+
+  &--lighter {
+    background-color: $color-bg-4;
+  }
+}
+
+ion-content {
+  /** hide scrollbar **/
+  --offset-bottom: auto !important;
+  --overflow: hidden;
+
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /** remove left-right padding **/
+  &::part(scroll) {
+    --padding-end: 0;
+    --padding-start: 0;
+    --padding-top: 0;
+  }
+}
+
 html,
 body,
 #app {
@@ -22,6 +112,8 @@ body,
 
 body,
 #app {
+  --ion-text-color: $color-white;
+
   margin: 0;
   background-color: $color-black;
 

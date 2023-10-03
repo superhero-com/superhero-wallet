@@ -13,13 +13,12 @@ const parseBool = (val) => (val ? JSON.parse(val) : false);
 
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
-const IS_CORDOVA = PLATFORM === 'cordova';
 
 module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
   outputDir: {
     extension: 'dist/extension',
-    cordova: 'www',
+    ionic: 'www',
     web: 'dist/web/root',
   }[PLATFORM],
   productionSourceMap: false,
@@ -101,7 +100,6 @@ module.exports = {
       definitions['process.env.RUNNING_IN_TESTS'] = RUNNING_IN_TESTS;
       definitions['process.env.COMMIT_HASH'] = JSON.stringify(commitHash);
       definitions['process.env.NETWORK'] = JSON.stringify(process.env.NETWORK);
-      definitions['process.env.IS_CORDOVA'] = IS_CORDOVA;
       definitions['process.env.SDK_VERSION'] = JSON.stringify(sdkVersion);
 
       return [definitions];
@@ -129,7 +127,8 @@ module.exports = {
           patterns: [
             { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
             { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
-            { from: 'public/favicons/request_permission.jpg', to: 'icons/request_permission.jpg' },
+            { from: 'public/icons/cameraRequestPermission', to: 'icons/cameraRequestPermission' },
+            { from: 'src/icons/logo.svg', to: 'icons/cameraRequestPermission/logo.svg' },
           ],
         }])
         .end();

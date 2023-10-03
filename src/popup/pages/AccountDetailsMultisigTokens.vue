@@ -1,13 +1,18 @@
 <template>
-  <div class="multisig-token-list-wrapper">
-    <TokensList
-      :search-term="searchPhrase"
-      is-multisig
-    />
-  </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div class="multisig-token-list-wrapper">
+        <TokensList
+          :search-term="searchPhrase"
+          is-multisig
+        />
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script>
+import { IonContent, IonPage } from '@ionic/vue';
 import {
   defineComponent,
 } from 'vue';
@@ -17,6 +22,8 @@ import { useTransactionAndTokenFilter } from '../../composables';
 export default defineComponent({
   components: {
     TokensList,
+    IonPage,
+    IonContent,
   },
   props: {
     showFilters: Boolean,

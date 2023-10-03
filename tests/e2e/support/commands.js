@@ -237,7 +237,7 @@ Cypress.Commands.add('openNetworks', () => {
   cy.openPageMore()
     .get('[data-cy=settings]')
     .click()
-    .get('[data-cy=networks]')
+    .get('[data-cy=networks-settings]')
     .click()
     .urlEquals('/more/settings/networks');
 });

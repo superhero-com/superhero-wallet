@@ -1,56 +1,60 @@
 <template>
-  <div class="auction-bid">
-    <AuctionCard :name="name" />
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="auction-bid">
+        <AuctionCard :name="name" />
 
-    <div class="form">
-      <Field
-        v-slot="{ field, errorMessage }"
-        name="amount"
-        :rules="{
-          enough_coin: amountTotal.toString(),
-          required: true,
-        }"
-      >
-        <InputAmount
-          v-bind="field"
-          v-model="amount"
-          name="amount"
-          :message="amountError || errorMessage"
-          :protocol="PROTOCOL_AETERNITY"
-          readonly
-        />
-      </Field>
-      <div class="tx-details">
-        <DetailsItem :label="$t('transaction.fee')">
-          <template #value>
-            <TokenAmount
-              :amount="+txFee"
+        <div class="form">
+          <Field
+            v-slot="{ field, errorMessage }"
+            name="amount"
+            :rules="{
+              enough_coin: amountTotal.toString(),
+              required: true,
+            }"
+          >
+            <InputAmount
+              v-bind="field"
+              v-model="amount"
+              name="amount"
+              :message="amountError || errorMessage"
               :protocol="PROTOCOL_AETERNITY"
-              hide-fiat
+              readonly
             />
-          </template>
-        </DetailsItem>
-        <DetailsItem :label="$t('common.total')">
-          <template #value>
-            <TokenAmount
-              :amount="+amountTotal"
-              :protocol="PROTOCOL_AETERNITY"
-            />
-          </template>
-        </DetailsItem>
+          </Field>
+          <div class="tx-details">
+            <DetailsItem :label="$t('transaction.fee')">
+              <template #value>
+                <TokenAmount
+                  :amount="+txFee"
+                  :protocol="PROTOCOL_AETERNITY"
+                  hide-fiat
+                />
+              </template>
+            </DetailsItem>
+            <DetailsItem :label="$t('common.total')">
+              <template #value>
+                <TokenAmount
+                  :amount="+amountTotal"
+                  :protocol="PROTOCOL_AETERNITY"
+                />
+              </template>
+            </DetailsItem>
+          </div>
+
+          <BtnMain
+            :disabled="!!amountError || !amount || errorName"
+            class="button"
+            extend
+            @click="bid"
+          >
+            {{ $t('pages.names.auctions.place-bid') }}
+          </BtnMain>
+        </div>
+        <Loader v-if="loading" />
       </div>
-
-      <BtnMain
-        :disabled="!!amountError || !amount || errorName"
-        class="button"
-        extend
-        @click="bid"
-      >
-        {{ $t('pages.names.auctions.place-bid') }}
-      </BtnMain>
-    </div>
-    <Loader v-if="loading" />
-  </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -60,6 +64,7 @@ import {
   ref,
   PropType,
 } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -98,6 +103,8 @@ export default defineComponent({
     TokenAmount,
     BtnMain,
     Field,
+    IonPage,
+    IonContent,
   },
   props: {
     name: { type: String as PropType<AensName>, required: true },

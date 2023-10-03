@@ -1,51 +1,55 @@
 <template>
-  <DashboardWrapper class="dashboard">
-    <template #header>
-      <DashboardHeader />
-    </template>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <DashboardWrapper class="dashboard">
+        <template #header>
+          <DashboardHeader />
+        </template>
 
-    <template #buttons>
-      <OpenTransferReceiveModalButton is-big />
-      <OpenTransferSendModalButton is-big />
-    </template>
+        <template #buttons>
+          <OpenTransferReceiveModalButton is-big />
+          <OpenTransferSendModalButton is-big />
+        </template>
 
-    <template #cards>
-      <LatestTransactionsCard />
+        <template #cards>
+          <LatestTransactionsCard />
 
-      <DashboardCard
-        v-if="IS_CORDOVA || UNFINISHED_FEATURES"
-        :title="$t('dashboard.daeppBrowserCard.title')"
-        :description="$t('dashboard.daeppBrowserCard.description')"
-        :btn-text="$t('dashboard.daeppBrowserCard.button')"
-        :background="daeppBrowserBackground"
-        :icon="GlobeIcon"
-        :to="{ name: ROUTE_APPS_BROWSER }"
-        :card-id="DASHBOARD_CARD_ID.daeppBrowser"
-      />
-      <DashboardCard
-        v-if="isNodeMainnet && UNFINISHED_FEATURES"
-        :title="$t('dashboard.buyCard.title')"
-        :description="$t('dashboard.buyCard.description')"
-        :btn-text="$t('dashboard.buyCard.button')"
-        :background="buyBackground"
-        :icon="CardIcon"
-        :href="activeAccountSimplexLink"
-        :card-id="DASHBOARD_CARD_ID.buyAe"
-      />
+          <DashboardCard
+            v-if="IS_MOBILE_APP || UNFINISHED_FEATURES"
+            :title="$t('dashboard.daeppBrowserCard.title')"
+            :description="$t('dashboard.daeppBrowserCard.description')"
+            :btn-text="$t('dashboard.daeppBrowserCard.button')"
+            :background="daeppBrowserBackground"
+            :icon="GlobeIcon"
+            :to="{ name: ROUTE_APPS_BROWSER }"
+            :card-id="DASHBOARD_CARD_ID.daeppBrowser"
+          />
+          <DashboardCard
+            v-if="isNodeMainnet && UNFINISHED_FEATURES"
+            :title="$t('dashboard.buyCard.title')"
+            :description="$t('dashboard.buyCard.description')"
+            :btn-text="$t('dashboard.buyCard.button')"
+            :background="buyBackground"
+            :icon="CardIcon"
+            :href="activeAccountSimplexLink"
+            :card-id="DASHBOARD_CARD_ID.buyAe"
+          />
 
-      <DashboardCard
-        v-if="(isNodeMainnet || isNodeTestnet) && activeAccount.protocol === PROTOCOL_AETERNITY"
-        :title="$t('dashboard.nameCard.title')"
-        :description="$t('dashboard.nameCard.description')"
-        :btn-text="$t('dashboard.nameCard.button')"
-        :background="chainNameBackground"
-        :icon="MenuCardIcon"
-        :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
-        :card-id="DASHBOARD_CARD_ID.claimName"
-        variant="purple"
-      />
-    </template>
-  </DashboardWrapper>
+          <DashboardCard
+            v-if="(isNodeMainnet || isNodeTestnet) && activeAccount.protocol === PROTOCOL_AETERNITY"
+            :title="$t('dashboard.nameCard.title')"
+            :description="$t('dashboard.nameCard.description')"
+            :btn-text="$t('dashboard.nameCard.button')"
+            :background="chainNameBackground"
+            :icon="MenuCardIcon"
+            :to="{ name: ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM }"
+            :card-id="DASHBOARD_CARD_ID.claimName"
+            variant="purple"
+          />
+        </template>
+      </DashboardWrapper>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -53,12 +57,13 @@ import {
   defineComponent,
   watch,
 } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { IonPage, IonContent } from '@ionic/vue';
+import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 import {
   DASHBOARD_CARD_ID,
-  IS_CORDOVA,
+  IS_MOBILE_APP,
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
 } from '@/constants';
@@ -94,17 +99,18 @@ export default defineComponent({
     OpenTransferSendModalButton,
     DashboardHeader,
     DashboardWrapper,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
     const route = useRoute();
-    const router = useRouter();
 
     const {
       activeAccount,
       activeAccountSimplexLink,
     } = useAccounts({ store });
-    const { checkIfOpenTransferSendModal } = useDeepLinkApi({ router });
+    const { checkIfOpenTransferSendModal } = useDeepLinkApi();
 
     const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
 
@@ -133,7 +139,7 @@ export default defineComponent({
       buyBackground,
       chainNameBackground,
       daeppBrowserBackground,
-      IS_CORDOVA,
+      IS_MOBILE_APP,
       isNodeMainnet,
       isNodeTestnet,
     };

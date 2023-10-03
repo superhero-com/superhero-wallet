@@ -2,6 +2,7 @@
   <ListItemWrapper
     class="transaction-item"
     :to="redirectRoute"
+    replace
     :data-cy="currentTransaction.pending && 'pending-txs'"
   >
     <div class="body">

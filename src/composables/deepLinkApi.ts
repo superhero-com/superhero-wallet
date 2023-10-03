@@ -1,27 +1,22 @@
 import { ref } from 'vue';
 import {
-  Router,
+  useRouter,
+  useRoute,
   RouteLocationNormalized as Route,
 } from 'vue-router';
 
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { checkIfSuperheroCallbackUrl } from '@/utils';
-import { IS_CORDOVA, MODAL_TRANSFER_SEND } from '@/constants';
+import { IS_MOBILE_APP, MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables/modals';
 
-export interface UseDeepLinkApiOptions {
-  router: Router
-}
+export function useDeepLinkApi() {
+  const router = useRouter();
+  const route = useRoute();
 
-/**
- * TODO: refactor once upgrade to vue-router: 4.x.x
- * @param { router: Router }
- */
-export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
-  const route: Route = router.currentRoute.value;
   const callbackOrigin = ref<URL | null>(
     route.query['x-success']
-      ? (new URL(route.query['x-success'] as string))
+      ? (new URL(decodeURIComponent(route.query['x-success'] as string)))
       : null,
   );
 
@@ -45,16 +40,16 @@ export function useDeepLinkApi({ router }: UseDeepLinkApiOptions) {
   ) {
     const callbackUrlTemplate = route.query[isSuccess ? 'x-success' : 'x-cancel'];
     if (!callbackUrlTemplate) {
-      router.push({ name: 'account' });
+      router.replace({ name: ROUTE_ACCOUNT });
       return;
     }
     const callbackUrl = Object.entries(templateParams).reduce(
-      (url, [key, value]) => String(url).replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
-      route.query[isSuccess ? 'x-success' : 'x-cancel'],
+      (url, [key, value]) => url.replace(new RegExp(`{${key}}`, 'g'), encodeURIComponent(value)),
+      decodeURIComponent(String(route.query[isSuccess ? 'x-success' : 'x-cancel'])),
     ) as string;
-    router.push({ name: 'account' });
-    if (IS_CORDOVA && window.cordova?.InAppBrowser?.open) {
-      window.cordova.InAppBrowser.open(callbackUrl, '_system');
+    router.replace({ name: ROUTE_ACCOUNT });
+    if (IS_MOBILE_APP) {
+      window.open(callbackUrl, '_system');
     } else {
       window.open(callbackUrl, '_self');
     }

@@ -1,89 +1,93 @@
 <template>
-  <div class="about">
-    <div class="table">
-      <div class="table-item">
-        <div class="name">
-          {{ $t('pages.about.name') }}
-        </div>
-        <div class="value">
-          Superhero Wallet
-        </div>
-      </div>
-      <LinkButton
-        class="table-item link"
-        :to="`${AE_COMMIT_URL}${commitHash}`"
-      >
-        <div class="name">
-          {{ $t('pages.about.commit') }}
-        </div>
-        <div class="value">
-          {{ commitHash.slice(0, 7) }}
-          <Github />
-        </div>
-      </LinkButton>
-      <div class="table-item">
-        <div class="name">
-          {{ $t('pages.about.software-version') }}
-        </div>
-        <div class="value">
-          v.{{ extensionVersion }}
-        </div>
-      </div>
-      <div class="table-item">
-        <div class="name">
-          {{ $t('pages.about.sdk-version') }}
-        </div>
-        <div class="value">
-          {{ sdkVersion }}
-        </div>
-      </div>
-      <template v-if="aeActiveNetworkSettings && middlewareStatus">
-        <LinkButton
-          class="table-item link"
-          :to="`${middlewareUrl}/status`"
-        >
-          <div class="name">
-            {{ $t('pages.about.middleware-version') }}
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="about">
+        <div class="table">
+          <div class="table-item">
+            <div class="name">
+              {{ $t('pages.about.name') }}
+            </div>
+            <div class="value">
+              Superhero Wallet
+            </div>
           </div>
-          <div class="value">
-            {{ middlewareStatus.mdwVersion }}
-            <ExternalLink class="compensate-icon-margin" />
+          <LinkButton
+            class="table-item link"
+            :to="`${AE_COMMIT_URL}${commitHash}`"
+          >
+            <div class="name">
+              {{ $t('pages.about.commit') }}
+            </div>
+            <div class="value">
+              {{ commitHash?.slice(0, 7) }}
+              <Github />
+            </div>
+          </LinkButton>
+          <div class="table-item">
+            <div class="name">
+              {{ $t('pages.about.software-version') }}
+            </div>
+            <div class="value">
+              v.{{ extensionVersion }}
+            </div>
           </div>
-        </LinkButton>
-        <LinkButton
-          class="table-item link"
-          :to="`${nodeUrl}/v3/status`"
-        >
-          <div class="name">
-            {{ $t('pages.about.node-version') }}
+          <div class="table-item">
+            <div class="name">
+              {{ $t('pages.about.sdk-version') }}
+            </div>
+            <div class="value">
+              {{ sdkVersion }}
+            </div>
           </div>
-          <div class="value">
-            {{ nodeStatus.node_version }}
-            <ExternalLink class="compensate-icon-margin" />
-          </div>
-        </LinkButton>
-      </template>
-    </div>
+          <template v-if="aeActiveNetworkSettings && middlewareStatus">
+            <LinkButton
+              class="table-item link"
+              :to="`${middlewareUrl}/status`"
+            >
+              <div class="name">
+                {{ $t('pages.about.middleware-version') }}
+              </div>
+              <div class="value">
+                {{ middlewareStatus.mdwVersion }}
+                <ExternalLink class="compensate-icon-margin" />
+              </div>
+            </LinkButton>
+            <LinkButton
+              class="table-item link"
+              :to="`${nodeUrl}/v3/status`"
+            >
+              <div class="name">
+                {{ $t('pages.about.node-version') }}
+              </div>
+              <div class="value">
+                {{ nodeStatus.node_version }}
+                <ExternalLink class="compensate-icon-margin" />
+              </div>
+            </LinkButton>
+          </template>
+        </div>
 
-    <div class="additional-links">
-      <PanelItem
-        :to="{ name: 'about-terms' }"
-        :title="$t('pages.about.terms')"
-      >
-        <template #icon>
-          <Terms />
-        </template>
-      </PanelItem>
-      <PanelItem
-        :to="{ name: 'about-privacy' }"
-        :title="$t('pages.about.privacyPolicy')"
-      >
-        <template #icon>
-          <Terms />
-        </template>
-      </PanelItem>
-    </div>
-  </div>
+        <div class="additional-links">
+          <PanelItem
+            :to="{ name: 'about-terms' }"
+            :title="$t('pages.about.terms')"
+          >
+            <template #icon>
+              <Terms />
+            </template>
+          </PanelItem>
+          <PanelItem
+            :to="{ name: 'about-privacy' }"
+            :title="$t('pages.about.privacyPolicy')"
+          >
+            <template #icon>
+              <Terms />
+            </template>
+          </PanelItem>
+        </div>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -93,6 +97,7 @@ import {
   onMounted,
   ref,
 } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import type { IMiddlewareStatus } from '@/types';
 import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
 import { useMiddleware } from '@/composables';
@@ -101,10 +106,10 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { fetchJson } from '@/utils';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
-import PanelItem from '../components/PanelItem.vue';
-import Terms from '../../icons/terms.svg?vue-component';
-import Github from '../../icons/github.svg?vue-component';
-import ExternalLink from '../../icons/external-link.svg?vue-component';
+import PanelItem from '@/popup/components/PanelItem.vue';
+import Terms from '@/icons/terms.svg?vue-component';
+import Github from '@/icons/github.svg?vue-component';
+import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -113,6 +118,8 @@ export default defineComponent({
     Terms,
     Github,
     ExternalLink,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();

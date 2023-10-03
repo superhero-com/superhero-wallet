@@ -32,11 +32,13 @@
 
       <SwiperSlide
         class="account-swiper-slide"
+        :virtual-index="addressList.length"
         :swiper-ref="customSwiper"
       >
         <AccountSwiperSlide
           hide-next
-          @slide="() => setCurrentSlide(addressList.length - 1)"
+          :idx="addressList.length"
+          @slide="(newIndex) => setCurrentSlide(newIndex)"
         >
           <AccountCardAdd :is-multisig="isMultisig" />
         </AccountSwiperSlide>
@@ -68,9 +70,10 @@ import {
 } from 'vue';
 import { RouteLocation } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import SwiperCore, { Virtual } from 'swiper';
+import SwiperCore from 'swiper';
+import { Virtual } from 'swiper/modules';
 import { getAddressColor } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -132,11 +135,10 @@ export default defineComponent({
     });
 
     return {
-      IS_CORDOVA: process.env.IS_CORDOVA,
+      IS_MOBILE_APP,
       PROTOCOL_AETERNITY,
       currentIdx,
       customSwiper,
-      swiper,
       getAccountColor,
       onSlideChange,
       setCurrentSlide,
@@ -146,7 +148,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@use 'swiper/swiper.scss';
+@use 'swiper/css';
 </style>
 
 <style lang="scss" scoped>

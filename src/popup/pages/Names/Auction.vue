@@ -1,26 +1,33 @@
 <template>
-  <div class="auction">
-    <div class="auction-tabs">
-      <Tabs>
-        <Tab
-          :to="{ name: 'auction-bid' }"
-          :text="$t('pages.names.auctions.place-bid')"
-          exact-path
-        />
-        <Tab
-          :to="{ name: 'auction-history' }"
-          :text="$t('pages.names.auctions.bid-history')"
-        />
-      </Tabs>
+  <IonPage>
+    <div class="auction">
+      <div class="auction-tabs">
+        <Tabs>
+          <Tab
+            :to="{ name: 'auction-bid', params: routeParams }"
+            :text="$t('pages.names.auctions.place-bid')"
+            exact-path
+          />
+          <Tab
+            :to="{ name: 'auction-history', params: routeParams }"
+            :text="$t('pages.names.auctions.bid-history')"
+          />
+        </Tabs>
+      </div>
+
+      <Loader v-if="loading" />
+
+      <IonRouterOutlet
+        v-else
+        class="auction-router"
+        :name="name"
+      />
     </div>
-
-    <Loader v-if="loading" />
-
-    <RouterView v-else />
-  </div>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import {
   defineComponent,
   ref,
@@ -29,7 +36,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { executeAndSetInterval } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useMiddleware, useUi } from '../../../composables';
@@ -44,6 +51,8 @@ export default defineComponent({
   components: {
     Tabs,
     Tab,
+    IonRouterOutlet,
+    IonPage,
   },
   props: {
     name: { type: String, required: true },
@@ -53,6 +62,7 @@ export default defineComponent({
     const router = useRouter();
 
     const { getMiddleware } = useMiddleware();
+    const { params: routeParams } = useRoute();
     const { isAppActive } = useUi();
 
     const loading = ref(true);
@@ -97,6 +107,7 @@ export default defineComponent({
 
     return {
       loading,
+      routeParams,
     };
   },
 });
@@ -108,6 +119,10 @@ export default defineComponent({
 .auction {
   &-tabs {
     padding-inline: var(--screen-padding-x);
+  }
+
+  &-router {
+    top: 8%;
   }
 }
 </style>

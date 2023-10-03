@@ -32,7 +32,6 @@ export default {
 
   @extend %face-sans-15-medium;
 
-  margin-inline: calc(-1 * var(--screen-padding-x));
   padding: 8px var(--screen-padding-x);
 
   .title {
