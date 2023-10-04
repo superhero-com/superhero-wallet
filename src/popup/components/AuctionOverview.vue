@@ -20,11 +20,10 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import { IAuction, IAuctionBid } from '@/types';
 import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
@@ -41,13 +40,12 @@ export default defineComponent({
     const store = useStore();
 
     const { topBlockHeight } = useTopHeaderData({ store });
+    const { getNameAuctionHighestBid, getNameAuction } = useAeNames({ store });
 
-    const getHighestBid = useGetter<(n: string) => IAuctionBid>('names/getHighestBid');
-    const getAuction = useGetter('names/getAuction');
+    const auction = computed(() => getNameAuction(props.name));
 
-    const auction = computed<IAuction>(() => getAuction.value(props.name));
     const blocksToExpiry = computed<number>(() => auction.value.expiration - topBlockHeight.value);
-    const amount = computed(() => +getHighestBid.value(props.name).nameFee);
+    const amount = computed(() => +getNameAuctionHighestBid(props.name).nameFee);
     const endHeight = computed(() => blocksToRelativeTime(blocksToExpiry.value));
 
     return {

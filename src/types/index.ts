@@ -83,6 +83,8 @@ export type BigNumberPublic = PublicPart<BigNumber> | BigNumber;
 export type Balance = BigNumberPublic;
 export type BalanceRaw = string;
 
+export type NetworkId = string;
+
 export interface IPageableResponse<T> {
   data: T[];
   next: string;
@@ -491,12 +493,14 @@ export interface ITopHeader {
 
 export type ISignMessage = (m: any) => Promise<any>
 
+export type ChainName = `${string}.chain`;
+
 export interface IName {
   autoExtend: boolean;
   createdAtHeight: number;
   expiresAt: number;
   hash: string;
-  name: string;
+  name: ChainName;
   owner: string;
   pointers: Dictionary;
 }
@@ -520,6 +524,7 @@ export interface IMiddleware {
   getActiveNames: GenericApiMethod;
   getActiveOracles: GenericApiMethod;
   getAllAuctions: GenericApiMethod;
+  getNamesAuctions: GenericApiMethod;
   getAllNames: GenericApiMethod;
   getBlockByHash: GenericApiMethod;
   getBlockByKbi: GenericApiMethod;
@@ -530,7 +535,9 @@ export interface IMiddleware {
   getName: GenericApiMethod;
   getNamePointees: GenericApiMethod;
   getNamePointers: GenericApiMethod;
-  getNames: (address: string) => Promise<any>;
+  getNames: (
+    options: { owned_by: Encoded.AccountAddress, state: string, limit: number }
+  ) => Promise<any>;
   getOracle: GenericApiMethod;
   getOracles: GenericApiMethod;
   getStatus: GenericApiMethod;
@@ -675,9 +682,14 @@ export type StorageKeysInput = string | string[];
 export interface IWalletInfo {
   id: string;
   name: string;
-  networkId: string;
+  networkId: NetworkId;
   origin: any;
   type: any;
+}
+
+export interface IAddressNamePair {
+  address: Encoded.AccountAddress;
+  name: ChainName;
 }
 
 export interface IFormSelectOption {

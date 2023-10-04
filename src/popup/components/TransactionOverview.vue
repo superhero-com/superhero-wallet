@@ -35,8 +35,8 @@ import {
   useMiddleware,
   useTransactionTx,
 } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionInfo from './TransactionInfo.vue';
@@ -61,12 +61,11 @@ export default defineComponent({
 
     const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
+    const { getName } = useAeNames({ store });
     const { getMiddleware } = useMiddleware();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
-
-    const getPreferredName = useGetter('names/getPreferred');
 
     const {
       isDex,
@@ -106,13 +105,13 @@ export default defineComponent({
           return {
             sender: {
               address: senderId,
-              name: getPreferredName.value(senderId),
+              name: getName(senderId).value,
               url: aeScan.prepareUrlByHash(senderId),
               label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
-              name: name.value || getPreferredName.value(recipientId),
+              name: name.value || getName(recipientId).value,
               url: aeScan.prepareUrlByHash(recipientId),
               label: t('transaction.overview.accountAddress'),
             },
@@ -177,7 +176,7 @@ export default defineComponent({
           return {
             sender: {
               address: innerTx.value.ownerId,
-              name: getPreferredName.value(innerTx.value.ownerId),
+              name: getName(innerTx.value.ownerId).value,
               url: aeScan.prepareUrlByHash(innerTx.value.ownerId),
               label: t('multisig.multisigVault'),
             },
@@ -192,13 +191,13 @@ export default defineComponent({
             return {
               sender: {
                 address: senderId,
-                name: getPreferredName.value(senderId),
+                name: getName(senderId).value,
                 url: aeScan.prepareUrlByHash(senderId),
                 label: t('transaction.overview.accountAddress'),
               },
               recipient: {
                 address: recipientId,
-                name: name.value || getPreferredName.value(recipientId),
+                name: name.value || getName(recipientId).value,
                 url: aeScan.prepareUrlByHash(recipientId),
                 label: t('transaction.overview.accountAddress'),
               },

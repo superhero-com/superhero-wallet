@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { toShiftedBigNumber } from '@/utils';
-import {
-  TX_DIRECTION,
-} from '@/constants';
+import { TX_DIRECTION } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,

@@ -62,6 +62,7 @@ import { useStore } from 'vuex';
 import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Avatar from './Avatar.vue';
 import CopyText from './CopyText.vue';
@@ -86,9 +87,9 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string;
+    const { getName } = useAeNames({ store });
 
-    const name = computed(() => getDefaultName(props.account.address));
+    const name = computed(() => getName(props.account.address!).value);
 
     const explorerUrl = computed(
       () => (props.account.protocol)

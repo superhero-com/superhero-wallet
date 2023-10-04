@@ -27,10 +27,11 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent, onBeforeUnmount } from 'vue';
-import type { IName } from '@/types';
 import { executeAndSetInterval } from '@/utils';
-import { useDispatch, useState } from '../../../composables/vuex';
-import { useAccounts, useUi } from '../../../composables';
+import { useAccounts, useUi } from '@/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+
+import { useStore } from 'vuex';
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -46,19 +47,18 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const store = useStore();
     const { isAppActive } = useUi();
     const { activeAccount } = useAccounts();
-    const areNamesFetching = useState('names', 'areNamesFetching');
-    const namesOwned = useState<IName[]>('names', 'owned');
-    const fetchOwned = useDispatch('names/fetchOwned');
+    const { areNamesFetching, ownedNames, updateOwnedNames } = useAeNames({ store });
 
     const namesForAccount = computed(
-      () => namesOwned.value.filter(({ owner }) => owner === activeAccount.value.address),
+      () => ownedNames.value.filter(({ owner }) => owner === activeAccount.value.address),
     );
 
     const id = executeAndSetInterval(() => {
       if (isAppActive.value) {
-        fetchOwned();
+        updateOwnedNames();
       }
     }, POLLING_INTERVAL);
 

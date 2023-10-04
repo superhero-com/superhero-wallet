@@ -29,3 +29,5 @@ export const ROUTE_INVITE_CLAIM = 'invite-claim';
 export const ROUTE_DONATE_ERROR = 'donate-error';
 export const ROUTE_APPS_BROWSER = 'apps-browser';
 export const ROUTE_TERMS = 'about-terms';
+export const ROUTE_AUCTION_BID = 'auction-bid';
+export const ROUTE_AUCTION_HISTORY = 'auction-history';

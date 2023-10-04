@@ -6,9 +6,6 @@ import accounts from '../store/modules/accounts';
 const store = new Vuex.Store({
   plugins: [persistState()],
   modules: { permissions, accounts },
-  getters: {
-    'names/getDefault': () => (address) => `placeholder name for ${address}`,
-  },
 });
 
 export default store;

@@ -282,3 +282,8 @@ export const AE_TIPPING_CONTRACTS_TESTNET: AeTippingContractAddresses = {
   tippingV1: 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd',
   tippingV2: 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6pmC4kc55rD4MhqYSu',
 };
+
+export const UPDATE_POINTER_ACTION = {
+  update: 'update',
+  extend: 'extend',
+} as const;

@@ -28,7 +28,7 @@
             v-show="canBeDefault"
             :class="{ set: isDefault }"
             :disabled="isDefault"
-            @click="setDefault"
+            @click="handleSetDefault"
           >
             {{
               (isDefault)
@@ -39,7 +39,7 @@
           <button
             v-show="expand"
             :class="{ set: autoExtend }"
-            @click="setAutoExtend"
+            @click="toggleAutoExtend"
           >
             {{ $t('pages.names.auto-extend') }}
           </button>
@@ -75,7 +75,7 @@
         v-model="newPointer"
         class="input-address"
         :placeholder="$t('pages.names.details.address-placeholder')"
-        :message="error ? $t('pages.names.list.valid-identifier-error') : null"
+        :message="nameError ? $t('pages.names.list.valid-identifier-error') : null"
         code
       >
         <template #after>
@@ -140,12 +140,13 @@ import {
   computed,
   defineComponent,
   nextTick,
+  PropType,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
-import { IName } from '@/types';
+import { ChainName } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
 import {
   IS_EXTENSION,
@@ -154,9 +155,21 @@ import {
   UNFINISHED_FEATURES,
 } from '@/constants';
 import Logger from '@/lib/logger';
-import { blocksToRelativeTime } from '@/utils';
-import { useAccounts, useModals, useTopHeaderData } from '@/composables';
+import {
+  blocksToRelativeTime,
+  handleUnknownError,
+  postJson,
+} from '@/utils';
+import {
+  useAccounts,
+  useAeSdk,
+  useModals,
+  useTopHeaderData,
+} from '@/composables';
 import { checkAddressOrChannel } from '@/protocols/aeternity/helpers';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 
 import Avatar from './Avatar.vue';
 import Truncate from './Truncate.vue';
@@ -184,7 +197,7 @@ export default defineComponent({
     Paste,
   },
   props: {
-    name: { type: String, default: '' },
+    name: { type: String as PropType<ChainName>, default: '' },
     address: { type: String, default: '' },
     autoExtend: { type: Boolean },
   },
@@ -194,17 +207,27 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { t } = useI18n();
     const { topBlockHeight } = useTopHeaderData({ store });
+    const {
+      ownedNames,
+      setAutoExtend,
+      updateNamePointer,
+      getName,
+      setDefaultName,
+    } = useAeNames({ store });
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    const { fetchRespondChallenge } = useAeSdk({ store });
 
     const expand = ref(false);
     const newPointer = ref<string>('');
     const showInput = ref(false);
-    const error = ref(false);
+    const nameError = ref(false);
     const pointerInput = ref();
 
-    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
+    const nameEntry = computed(
+      () => ownedNames.value.find((ownedName) => ownedName.name === props.name),
+    );
 
-    const nameEntry = computed<IName | null>(() => store.getters['names/get'](props.name));
-    const isDefault = computed(() => getDefaultName(activeAccount.value.address) === props.name);
+    const isDefault = computed(() => getName(activeAccount.value.address).value === props.name);
     const hasPointer = computed((): boolean => !!nameEntry.value?.pointers?.accountPubkey);
     const canBeDefault = computed(
       (): boolean => nameEntry.value?.pointers?.accountPubkey === activeAccount.value.address,
@@ -256,14 +279,29 @@ export default defineComponent({
       showInput.value = false;
     }
 
-    async function setDefault() {
-      await store.dispatch('names/setDefault', {
-        address: activeAccount.value.address,
-        name: props.name,
-      });
+    async function handleSetDefault() {
+      try {
+        const { address } = activeAccount.value;
+        const { name } = props;
+        const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
+
+        const response = await postJson(url, {
+          body: {
+            preferredChainName: name,
+          },
+        });
+
+        const respondChallenge = await fetchRespondChallenge(response);
+
+        await postJson(url, { body: respondChallenge });
+
+        setDefaultName({ address, name });
+      } catch (error: any) {
+        handleUnknownError(error);
+      }
     }
 
-    async function setAutoExtend() {
+    async function toggleAutoExtend() {
       if (!props.autoExtend) {
         await openModal(MODAL_CONFIRM, {
           icon: 'info',
@@ -271,48 +309,47 @@ export default defineComponent({
           msg: t('modals.autoextend-help.msg'),
         });
       }
-      store.commit('names/setAutoExtend', { name: props.name, value: !props.autoExtend });
+      setAutoExtend(props.name);
     }
 
     async function setPointer() {
       if (!checkAddressOrChannel(newPointer.value)) {
-        error.value = true;
+        nameError.value = true;
         return;
       }
-      store.dispatch('names/updatePointer', {
+      updateNamePointer({
         name: props.name,
         address: newPointer.value,
-        type: 'update',
+        type: UPDATE_POINTER_ACTION.update,
       });
       newPointer.value = '';
       showInput.value = false;
     }
 
     watch(newPointer, () => {
-      error.value = false;
+      nameError.value = false;
     });
 
     return {
       UNFINISHED_FEATURES,
-      expand,
-      newPointer,
-      showInput,
-      error,
-      pointerInput,
       activeAccount,
-      nameEntry,
-      isDefault,
-      hasPointer,
       addressOrFirstPointer,
-      topBlockHeight,
       canBeDefault,
+      nameError,
+      expand,
+      hasPointer,
+      isDefault,
+      nameEntry,
+      newPointer,
+      pointerInput,
+      showInput,
+      topBlockHeight,
       blocksToRelativeTime,
-      checkAddressOrChannel,
-      insertValueFromClipboard,
       expandAndShowInput,
+      handleSetDefault,
+      insertValueFromClipboard,
       onExpandCollapse,
-      setDefault,
-      setAutoExtend,
+      toggleAutoExtend,
       setPointer,
     };
   },
