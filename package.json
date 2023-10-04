@@ -14,7 +14,7 @@
     "build": "ionic build",
     "build:android": "cross-env PLATFORM=ionic ionic capacitor build android",
     "build:ios": "cross-env PLATFORM=ionic ionic capacitor build ios",
-    "build:extension": "cross-env PLATFORM=extension ionic build",
+    "build:extension": "cross-env PLATFORM=extension vue-cli-service build",
     "build:web": "cross-env PLATFORM=web ionic build",
     "build-zip": "node scripts/build-zip.js",
     "serve": "cross-env PLATFORM=web ionic serve --port=8080",
