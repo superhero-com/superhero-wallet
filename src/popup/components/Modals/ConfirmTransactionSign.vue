@@ -141,7 +141,7 @@ import type {
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
   PROTOCOL_AETERNITY,

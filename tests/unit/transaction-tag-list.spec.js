@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { i18n, tg } from '@/popup/plugins/i18n';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
-import { i18n, tg } from '../../src/store/plugins/languages';
+
 import {
-  // STUB_ACCOUNT,
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
 } from '../../src/constants/stubs';

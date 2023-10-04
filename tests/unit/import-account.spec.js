@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { i18n } from '../../src/store/plugins/languages';
+import { i18n } from '@/popup/plugins/i18n';
 import AccountImport from '../../src/popup/components/Modals/AccountImport.vue';
 
 jest.mock('vuex', () => ({

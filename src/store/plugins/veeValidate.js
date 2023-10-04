@@ -16,7 +16,7 @@ import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/he
 import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { tg } from './languages';
+import { tg } from '@/popup/plugins/i18n';
 
 defineRule('url', (url) => isUrlValid(url));
 defineRule('required', required);

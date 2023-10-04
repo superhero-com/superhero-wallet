@@ -4,14 +4,14 @@
  */
 
 import type { TxFunctionMultisig, TxFunctionRaw, TxType } from '@/types';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 
 type TranslationMap<T extends string | number | symbol = string> = Partial<
   Record<T, () => string>
 >;
 
 /**
- * ITx.type translated into human readable label
+ * ITx.type translated into human-readable label
  */
 const TX_TYPE_TRANSLATIONS: TranslationMap<TxType> = {
   ChannelCloseSoloTx: () => tg('transaction.type.channelCloseSoloTx'),
@@ -57,7 +57,7 @@ export function getTxTypeListLabel(txType: TxType): string {
 }
 
 /**
- * ITx.function translated into human readable label
+ * ITx.function translated into human-readable label
  */
 const TX_FUNCTION_TRANSLATIONS: TranslationMap<TxFunctionRaw | TxFunctionMultisig> = {
   propose: () => tg('transaction.function.propose'),

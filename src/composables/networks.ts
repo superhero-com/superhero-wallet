@@ -13,7 +13,7 @@ import {
   STORAGE_KEYS,
 } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import { useStorageRef } from './composablesHelpers';
 import { useModals } from './modals';
 

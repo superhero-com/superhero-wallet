@@ -5,7 +5,7 @@ import type {
   INotificationSetting,
   IPermission,
 } from '@/types';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;

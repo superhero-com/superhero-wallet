@@ -23,7 +23,7 @@ import {
   NETWORK_TYPE_TESTNET,
   PROTOCOL_BITCOIN,
 } from '@/constants';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import {
   BTC_COIN_NAME,

@@ -1,7 +1,7 @@
 import { AeSdk, AE_AMOUNT_FORMATS, Node } from '@aeternity/aepp-sdk';
 import { useModals, useNetworks } from '@/composables';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
-import { tg } from '../plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 
 export default {
   namespaced: true,

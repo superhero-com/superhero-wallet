@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
+import { tg } from '@/popup/plugins/i18n';
 import { IFilterInputPayload, IFilters, ObjectValues } from '../types';
-import { tg } from '../store/plugins/languages';
 
 const FILTER_MODE_BASE = {
   all: 'all',

@@ -27,3 +27,4 @@ export * from './popupProps';
 export * from './transactionList';
 export * from './coinTokensProps';
 export * from './scrollTransactions';
+export * from './languages';
