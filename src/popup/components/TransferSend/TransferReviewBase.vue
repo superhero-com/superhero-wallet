@@ -94,7 +94,7 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import type { TransferFormModel, Protocol } from '@/types';
 
 import DetailsItem from '../DetailsItem.vue';

@@ -88,6 +88,7 @@ import {
   useAccounts,
   useConnection,
   useCurrencies,
+  useLanguages,
   useModals,
   useNotifications,
   useUi,
@@ -123,6 +124,7 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ withoutPolling: true });
     const { initViewport } = useViewport();
+    const { restoreLanguage } = useLanguages();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
 
     const innerElement = ref<HTMLDivElement>();
@@ -148,7 +150,7 @@ export default defineComponent({
     }
 
     async function checkExtensionUpdates() {
-      // `requestUpdateCheck` does not exists in the `runtime` type
+      // `requestUpdateCheck` does not exist in the `runtime` type
       // because this feature is available only for selected browsers.
       const updateCheck = (browser?.runtime as any)?.requestUpdateCheck;
 
@@ -223,6 +225,7 @@ export default defineComponent({
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
+      restoreLanguage();
       initViewport(innerElement.value);
 
       // Hide splash screen programmatically when app is ready

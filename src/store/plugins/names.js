@@ -15,7 +15,7 @@ import {
 } from '@/composables';
 import { checkAddress, isAensNameValid, isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { tg } from './languages';
+import { tg } from '@/popup/plugins/i18n';
 
 export default (store) => {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();

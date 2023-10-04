@@ -4,7 +4,6 @@ import mutations from './mutations';
 import persistState from './plugins/persistState';
 import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
-import languagesPlugin from './plugins/languages';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
@@ -34,7 +33,6 @@ export default new Vuex.Store({
     tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
-    languagesPlugin,
     veeValidate,
     pollAccountInfo,
   ],

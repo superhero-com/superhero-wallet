@@ -33,7 +33,7 @@ import {
   PROTOCOL_BITCOIN,
   TX_DIRECTION,
 } from '@/constants';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
 import { isAddressValid } from '@aeternity/aepp-sdk';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';

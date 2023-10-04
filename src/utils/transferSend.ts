@@ -1,5 +1,5 @@
 import { IInputMessage } from '@/types';
-import { tg } from '@/store/plugins/languages';
+import { tg } from '@/popup/plugins/i18n';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 
 // TOOD: in the future we might rely on the error codes instead
