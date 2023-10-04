@@ -9,7 +9,7 @@
         <div class="item">
           <AccountItem
             :address="highestBid.accountId"
-            :name="getPreferred(highestBid.accountId)"
+            :name="getName(highestBid.accountId).value"
             :protocol="PROTOCOL_AETERNITY"
           />
           <AuctionOverview :name="name" />
@@ -26,7 +26,7 @@
           <AccountItem
             :protocol="PROTOCOL_AETERNITY"
             :address="bid.accountId"
-            :name="getPreferred(bid.accountId)"
+            :name="getName(bid.accountId).value"
           />
         </div>
       </div>
@@ -37,9 +37,11 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
-import type { IAuctionBid } from '@/types';
-import { useGetter } from '@/composables/vuex';
+import { useStore } from 'vuex';
+
 import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
+
 import AccountItem from '../../components/AccountItem.vue';
 import AuctionOverview from '../../components/AuctionOverview.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -56,20 +58,18 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const getHighestBid = useGetter('names/getHighestBid');
-    const getAuction = useGetter('names/getAuction');
-    const getPreferred = useGetter('names/getPreferred');
+    const store = useStore();
+    const { getNameAuctionHighestBid, getNameAuction, getName } = useAeNames({ store });
 
-    const highestBid = computed(() => getHighestBid.value(props.name));
+    const highestBid = computed(() => getNameAuctionHighestBid(props.name));
 
     const previousBids = computed(
-      () => (getAuction.value(props.name).bids)
-        .filter((bid: IAuctionBid) => bid !== highestBid.value),
+      () => getNameAuction(props.name).bids.filter((bid) => bid !== highestBid.value),
     );
 
     return {
       PROTOCOL_AETERNITY,
-      getPreferred,
+      getName,
       highestBid,
       previousBids,
     };

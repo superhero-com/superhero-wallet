@@ -37,6 +37,7 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
+
 import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions extends IDefaultComposableOptions {
@@ -60,8 +61,6 @@ export function useTransactionTx({
   const availableTokens = computed<ITokenList>(
     () => (store.state as any).fungibleTokens.availableTokens,
   );
-
-  const getPreferredName = computed(() => store.getters['names/getPreferred']);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
   const innerTxTag = computed((): Tag | null => innerTx.value ? getTxTag(innerTx.value) : null);
@@ -174,21 +173,17 @@ export function useTransactionTx({
   }
 
   function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
+    const { current, subAccount } = AE_TRANSACTION_OWNERSHIP_STATUS;
     switch (ownershipStatus.value) {
-      case AE_TRANSACTION_OWNERSHIP_STATUS.current:
+      case current:
         return activeAccount.value;
-      case AE_TRANSACTION_OWNERSHIP_STATUS.subAccount: {
+      case subAccount: {
         const { accountId, callerId } = innerTx.value || {};
-
         return accounts.value.find(({ address }) => [accountId, callerId].includes(address))!;
       }
       default: {
         const address = externalOwnerAddress || txOwnerAddress.value!;
-
-        return {
-          name: getPreferredName.value(address) || '',
-          address,
-        };
+        return { address };
       }
     }
   }

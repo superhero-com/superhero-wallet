@@ -76,16 +76,16 @@ import {
 } from '@aeternity/aepp-sdk';
 import { useForm, useFieldError, Field } from 'vee-validate';
 
-import type { IAuctionBid } from '@/types';
 import { useModals, useAeSdk, useUi } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
   AE_AENS_BID_MIN_RATIO,
   AE_COIN_PRECISION,
 } from '@/protocols/aeternity/config';
+import { ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import AuctionCard from '../../components/AuctionCard.vue';
 import InputAmount from '../../components/InputAmount.vue';
@@ -116,14 +116,15 @@ export default defineComponent({
     const errorName = useFieldError('amount');
 
     const { getAeSdk } = useAeSdk({ store });
+    const { getNameAuctionHighestBid } = useAeNames({ store });
     const { openDefaultModal } = useModals();
     const { setLoaderVisible } = useUi();
 
     const amount = ref('');
 
-    const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
-
-    const highestBid = computed(() => getHighestBid.value(props.name)?.nameFee || new BigNumber(0));
+    const highestBid = computed(
+      () => getNameAuctionHighestBid(props.name)?.nameFee || new BigNumber(0),
+    );
     const txFee = computed<BigNumber>(
       () => BigNumber(unpackTx(
         buildTx({
@@ -157,7 +158,7 @@ export default defineComponent({
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
         });
-        router.push({ name: 'auction-history', params: { name: props.name } });
+        router.push({ name: ROUTE_AUCTION_HISTORY, params: { name: props.name } });
       } catch (error: any) {
         let msg = error.message;
         if (msg.includes('is not enough to execute')) {

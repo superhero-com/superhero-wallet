@@ -13,6 +13,7 @@ import type {
   INetwork,
   IResponseChallenge,
   IRespondChallenge,
+  NetworkId,
 } from '@/types';
 import { AeSdkSuperhero } from '@/protocols/aeternity/libs/AeSdkSuperhero';
 import { FramesConnection } from '@/lib/FramesConnection';
@@ -43,7 +44,7 @@ let aeSdk: AeSdkSuperhero;
 let aeSdkBlocked = false;
 let storedNetworkName: string;
 
-const nodeNetworkId = ref<string>();
+const nodeNetworkId = ref<NetworkId>();
 
 const isAeSdkReady = ref(false);
 const isAeNodeReady = ref(false);

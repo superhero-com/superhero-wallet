@@ -33,6 +33,8 @@ import {
   ROUTE_INVITE_CLAIM,
   ROUTE_DONATE_ERROR,
   ROUTE_APPS_BROWSER,
+  ROUTE_AUCTION_BID,
+  ROUTE_AUCTION_HISTORY,
 } from './routeNames';
 
 import About from '../pages/About.vue';
@@ -561,7 +563,7 @@ export const routes: WalletAppRouteConfig[] = [
         path: '',
         component: AuctionBid,
         props: true,
-        name: 'auction-bid',
+        name: ROUTE_AUCTION_BID,
         meta: {
           title: 'auction',
           showHeaderNavigation: true,
@@ -571,7 +573,7 @@ export const routes: WalletAppRouteConfig[] = [
         path: 'history',
         component: AuctionHistory,
         props: true,
-        name: 'auction-history',
+        name: ROUTE_AUCTION_HISTORY,
         meta: {
           title: 'auction',
           backRoute: { name: ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS },

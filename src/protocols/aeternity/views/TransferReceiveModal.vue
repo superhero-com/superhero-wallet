@@ -24,6 +24,7 @@ import {
 import { useAccounts, useMultisigAccounts } from '@/composables';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_RECEIVE,
@@ -37,8 +38,7 @@ export default defineComponent({
     const store = useStore();
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount } = useAccounts();
-
-    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
+    const { getName } = useAeNames({ store });
 
     const availableTokens = computed<ITokenList>(
       () => store.state.fungibleTokens.availableTokens,
@@ -48,9 +48,7 @@ export default defineComponent({
       ? activeMultisigAccountId.value
       : activeAccount.value.address);
 
-    const activeAccountName = computed(
-      () => props.isMultisig ? undefined : getDefaultName(activeAccount.value.address),
-    );
+    const activeAccountName = props.isMultisig ? undefined : getName(activeAccount.value.address);
 
     return {
       PROTOCOL_AETERNITY,

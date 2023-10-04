@@ -68,16 +68,22 @@ import type {
   IFilters,
   IFilterInputPayload,
 } from '@/types';
-import { blocksToRelativeTime } from '@/utils';
-import { useTopHeaderData } from '@/composables';
+import {
+  blocksToRelativeTime,
+  fetchAllPages,
+} from '@/utils';
+import {
+  useMiddleware,
+  useTopHeaderData,
+} from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
-
 import { PROTOCOL_AETERNITY } from '@/constants';
-import Filters from '../../components/Filters.vue';
-import NameRow from '../../components/NameRow.vue';
-import TokenAmount from '../../components/TokenAmount.vue';
-import RegisterName from '../../components/RegisterName.vue';
-import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
+
+import Filters from '@/popup/components/Filters.vue';
+import NameRow from '@/popup/components/NameRow.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import RegisterName from '@/popup/components/RegisterName.vue';
+import AnimatedSpinner from '@/icons/animated-spinner.svg?skip-optimize';
 
 const SORT_MODE = {
   soonest: 'soonest',
@@ -108,6 +114,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { topBlockHeight } = useTopHeaderData({ store });
+    const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware();
 
     const loading = ref(false);
     const activeAuctions = ref<IActiveAuction[]>([]);
@@ -135,7 +142,21 @@ export default defineComponent({
 
     onMounted(async () => {
       loading.value = true;
-      activeAuctions.value = await store.dispatch('names/fetchAuctions');
+
+      const middleware = await getMiddleware();
+
+      // TODO: Switch to onscroll loading after/while resolving https://github.com/aeternity/ae_mdw/issues/666
+      activeAuctions.value = (
+        await fetchAllPages(
+          () => middleware.getNamesAuctions({ by: 'expiration', direction: 'forward', limit: 100 }),
+          fetchFromMiddlewareCamelCased,
+        )
+      ).map(({ name, info }) => ({
+        name,
+        expiration: info.auctionEnd,
+        lastBid: info.lastBid.tx,
+      }));
+
       loading.value = false;
     });
 

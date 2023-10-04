@@ -2,7 +2,6 @@ import Vuex from 'vuex';
 import getters from './getters';
 import mutations from './mutations';
 import persistState from './plugins/persistState';
-import namesPlugin from './plugins/names';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
@@ -25,7 +24,6 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
-    namesPlugin,
     fungibleTokensPlugin,
     veeValidate,
     pollAccountInfo,

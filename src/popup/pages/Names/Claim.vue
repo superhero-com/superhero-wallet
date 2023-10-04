@@ -102,6 +102,7 @@ import {
   AE_AENS_NAME_MAX_LENGTH,
   AE_AENS_NAME_AUCTION_MAX_LENGTH,
 } from '@/protocols/aeternity/config';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import InputField from '../../components/InputField.vue';
 import CheckBox from '../../components/CheckBox.vue';
@@ -166,6 +167,12 @@ export default defineComponent({
         return;
       }
 
+      const {
+        setPendingAutoExtendName,
+        updateOwnedNames,
+        updateNamePointer,
+      } = useAeNames({ store });
+
       const aeSdk = await getAeSdk();
       const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
 
@@ -181,7 +188,7 @@ export default defineComponent({
           const { salt } = await aeSdk.aensPreclaim(fullName.value);
           claimTxHash = (await aeSdk.aensClaim(fullName.value, salt, { waitMined: false })).hash;
           if (autoExtend.value) {
-            store.commit('names/setPendingAutoExtendName', fullName.value);
+            setPendingAutoExtendName(fullName.value);
           }
           router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
         } catch (e: any) {
@@ -199,18 +206,17 @@ export default defineComponent({
         }
 
         try {
-          store.dispatch('names/fetchOwned');
           await aeSdk.poll(claimTxHash);
           if (AE_AENS_NAME_AUCTION_MAX_LENGTH < fullName.value.length) {
-            store.dispatch('names/updatePointer', {
+            await updateNamePointer({
               name: fullName.value,
               address: activeAccount.value.address,
             });
           }
-        } catch (e: any) {
-          openDefaultModal({ msg: e.message });
+        } catch (error: any) {
+          openDefaultModal({ msg: error.message });
         } finally {
-          store.dispatch('names/fetchOwned');
+          updateOwnedNames();
         }
       }
     }

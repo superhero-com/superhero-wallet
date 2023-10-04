@@ -148,6 +148,8 @@ export const STORAGE_KEYS = {
   otherSettings: 'other-settings',
   errorLog: 'error-log',
   invites: 'invites',
+  namesOwned: 'names-owned',
+  namesDefault: 'names-default',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

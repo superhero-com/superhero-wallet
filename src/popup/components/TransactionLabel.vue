@@ -80,6 +80,7 @@ import { useStore } from 'vuex';
 
 import { useAccounts, useTransactionTx } from '@/composables';
 import { useState } from '@/composables/vuex';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import {
   ITokenList,
   ITransaction,
@@ -114,6 +115,7 @@ export default defineComponent({
     const store = useStore();
     const { activeAccount, getAccountByAddress } = useAccounts();
     const { t } = useI18n();
+    const { getName } = useAeNames({ store });
 
     const {
       outerTxTag,
@@ -134,8 +136,6 @@ export default defineComponent({
     });
 
     const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
-
-    const getDefaultName = store.getters['names/getDefault'] as (a?: string) => string | undefined;
 
     const label = computed((): {
       text: string;
@@ -200,7 +200,7 @@ export default defineComponent({
 
     const ownerName = computed(() => {
       const accountFound = getAccountByAddress(props.transaction.transactionOwner!);
-      return getDefaultName(accountFound?.address) || getDefaultAccountLabel(accountFound);
+      return getName(accountFound?.address).value || getDefaultAccountLabel(accountFound);
     });
 
     const errorTypeName = computed((): string | null => {
