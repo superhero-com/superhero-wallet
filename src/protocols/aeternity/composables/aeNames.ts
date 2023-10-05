@@ -32,10 +32,10 @@ import {
   useModals,
   useMiddleware,
   useStorageRef,
-  useTransactionList,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
 import { tg } from '@/popup/plugins/i18n';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
@@ -164,8 +164,8 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
   }
 
   function fetchPendingNameClaimTransactions(address: Encoded.AccountAddress) {
-    const { fetchPendingTransactions } = useTransactionList({ store });
-    return fetchPendingTransactions(address)
+    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
+    return aeternityAdapter.fetchPendingTransactions(address)
       .then(
         (transactions: ITransaction[]) => (transactions)
           .filter(({ tx: { type } }) => type === 'NameClaimTx')

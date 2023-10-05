@@ -448,6 +448,7 @@ export interface ITransaction {
   sent?: boolean;
   transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
+  type?: string;
   url?: string;
 }
 
@@ -489,11 +490,11 @@ export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
 export type ITransactionsState = {
   loaded: ITransaction[];
   nextPageUrl: string | null;
-  pending: Record<string, ITransaction[]>; // this string refers to node network ID.
+  localPendingTransaction: ITransaction | null;
   tipWithdrawnTransactions: ITransaction[];
 }
 
-export type IAccountTransactionsState = Record<Encoded.AccountAddress, ITransactionsState>
+export type IAccountTransactionsState = Record<string, ITransactionsState>
 
 /**
  * Browser popup window names
@@ -714,6 +715,12 @@ export interface IAddressNamePair {
   name: ChainName;
 }
 
+export interface IFetchTransactionResult {
+  regularTransactions: ITransaction[];
+  pendingTransactions?: any[]; // TODO prepare types for PendingTransaction
+  tipWithdrawnTransactions?: ITransaction[];
+  nextPageParams: string | null;
+}
 export interface IFormSelectOption {
   text: string;
   value: string | number;

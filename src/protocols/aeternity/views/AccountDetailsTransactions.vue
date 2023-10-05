@@ -32,7 +32,7 @@ import { IonContent, IonPage } from '@ionic/vue';
 import { throttle } from 'lodash-es';
 
 import type { ICommonTransaction, IonicLifecycleStatus } from '@/types';
-import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
+import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useAccounts,
   useConnection,
@@ -99,11 +99,7 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions(
-          TXS_PER_PAGE,
-          !!recent,
-          activeAccount.value.address,
-        );
+        await fetchTransactions(activeAccount.value.address, recent);
       } finally {
         loading.value = false;
       }
@@ -111,7 +107,7 @@ export default defineComponent({
 
     async function loadMore() {
       if (!loading.value && !isDestroyed.value && canLoadMore.value) {
-        await fetchTransactionList();
+        await fetchTransactions(activeAccount.value.address, false);
       }
     }
 

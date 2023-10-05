@@ -24,7 +24,6 @@ import {
 } from '@ionic/vue';
 import { useStore } from 'vuex';
 import type { ICommonTransaction, ITx } from '@/types';
-import { TXS_PER_PAGE } from '@/constants';
 import {
   useAccounts,
   useFungibleTokens,
@@ -100,11 +99,7 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions(
-          TXS_PER_PAGE,
-          !!recent,
-          currentAddress.value!,
-        );
+        await fetchTransactions(activeAccount.value.address, recent);
       } finally {
         loading.value = false;
       }

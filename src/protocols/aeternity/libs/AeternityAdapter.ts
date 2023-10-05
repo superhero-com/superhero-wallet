@@ -1,9 +1,11 @@
 /* eslint-disable class-methods-use-this */
+import JsonBig from '@/lib/json-big';
 import {
   encode,
   Encoded,
   Encoding,
   getHdWalletAccountFromSeed,
+  Tag,
 } from '@aeternity/aepp-sdk';
 import { Store, useStore } from 'vuex';
 
@@ -13,12 +15,14 @@ import type {
   IHdWalletAccount,
   MarketData,
   NetworkTypeDefault,
+  IFetchTransactionResult,
+  ITransaction,
 } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOL_AETERNITY, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
-import { getLastNotEmptyAccountIndex } from '@/utils';
+import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -34,6 +38,8 @@ import {
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useMiddleware } from '@/composables/middleware';
+
 import { aettosToAe } from '../helpers';
 
 interface IAmountDecimalPlaces {
@@ -182,8 +188,121 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // TODO
   }
 
-  override async fetchTransactions(): Promise<any> {
-    // TODO
+  async fetchTransactionsFromMiddleware(
+    address: string,
+    nextPageUrl: string | null,
+    limit: number,
+  ) {
+    const { fetchFromMiddlewareCamelCased } = useMiddleware();
+
+    const url = ([null, ''].includes(nextPageUrl))
+      ? `/v2/accounts/${address}/activities?limit=${limit}`
+      : nextPageUrl!;
+
+    try {
+      const { data, next } = await fetchFromMiddlewareCamelCased(url);
+
+      return {
+        regularTransactions: data || [],
+        nextPageParams: next,
+      };
+    } catch (error) {
+      return {};
+    }
+  }
+
+  override async fetchPendingTransactions(
+    address: string,
+  ) {
+    try {
+      const store = useStore();
+      const { getAeSdk } = useAeSdk({ store });
+      const sdk = await getAeSdk();
+      const fetchedPendingTransaction = (
+        await sdk.api.getPendingAccountTransactionsByPubkey(address)
+      );
+
+      return JsonBig.parse(JsonBig.stringify(
+        fetchedPendingTransaction?.transactions || [],
+      )).map((transaction: ITransaction) => ({ ...transaction, pending: true }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async fetchTipWithdrawnTransactions(address: string, recent: boolean) {
+    try {
+      const store = useStore();
+      const { getAeSdk } = useAeSdk({ store });
+      const { aeActiveNetworkSettings } = useAeNetworkSettings();
+      await getAeSdk();
+
+      const response = await fetchJson(
+        `${aeActiveNetworkSettings.value.backendUrl}/cache/events/?address=${address}&event=TipWithdrawn${recent ? '&limit=5' : ''}`,
+      );
+
+      if (response.message) {
+        return [];
+      }
+
+      // TODO prepare interface for response
+      const tipWithdrawnTransactions: ITransaction[] = (response as any[]).map(({
+        amount,
+        contract,
+        height,
+        data: { tx },
+        ...t
+      }) => ({
+        tx: {
+          ...tx,
+          address,
+          amount,
+          contractId: contract,
+          type: Tag[Tag.ContractCallTx],
+        },
+        ...t,
+        microTime: new Date(t.createdAt).getTime(),
+        blockHeight: height,
+        claim: true,
+      }));
+
+      return tipWithdrawnTransactions;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  override async fetchTransactions(
+    address: string,
+    nextPage: string | null,
+  ): Promise<IFetchTransactionResult> {
+    const store = useStore();
+    const { getAeSdk } = useAeSdk({ store });
+    await getAeSdk(); // Ensure the `nodeNetworkId` is established
+
+    if (typeof nextPage !== 'string') {
+      return {
+        regularTransactions: [],
+        nextPageParams: null,
+      };
+    }
+
+    const [
+      { regularTransactions, nextPageParams },
+      pendingTransactions,
+      tipWithdrawnTransactions,
+    ] = await Promise.all([
+      this.fetchTransactionsFromMiddleware(address, nextPage, TXS_PER_PAGE),
+      this.fetchPendingTransactions(address),
+      this.fetchTipWithdrawnTransactions(address, !nextPage),
+    ]);
+
+    return {
+      regularTransactions,
+      nextPageParams,
+      pendingTransactions,
+      tipWithdrawnTransactions,
+    };
   }
 
   override async spend(

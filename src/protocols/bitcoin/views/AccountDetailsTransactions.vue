@@ -4,9 +4,9 @@
       <div ref="innerScrollElem">
         <TransactionList
           v-if="isOnline"
-          :transactions="transactions"
+          :transactions="loadedTransactionList"
           :loading="loading"
-          @load-more="loadMoreTransactions()"
+          @load-more="loadMore()"
         />
         <MessageOffline
           v-else
@@ -30,15 +30,19 @@ import {
 import { throttle } from 'lodash-es';
 import { IonContent, IonPage } from '@ionic/vue';
 
-import type { ITransaction, IonicLifecycleStatus } from '@/types';
-import { PROTOCOL_BITCOIN, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
-import { useAccounts, useConnection, useScrollConfig } from '@/composables';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import type { ICommonTransaction, IonicLifecycleStatus } from '@/types';
+import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
+import {
+  useAccounts,
+  useConnection,
+  useScrollConfig,
+  useTransactionList,
+  useUi,
+} from '@/composables';
 
-import TransactionList from '@/popup/components/TransactionList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
-import { executeAndSetInterval } from '@/utils';
-import Logger from '@/lib/logger';
+import TransactionList from '@/popup/components/TransactionList.vue';
+import { useStore } from 'vuex';
 
 export default defineComponent({
   components: {
@@ -51,56 +55,56 @@ export default defineComponent({
     ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
   },
   setup(props) {
-    let pollingInterval: NodeJS.Timer;
+    /**
+     * TODO Extract duplicated logic of this component
+     * Some of the following code was taken from
+     * `src/popup/pages/AccountDetailsMultisigTransactions.vue`
+     * during the multichain development.
+     */
 
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+    let pollingInterval: NodeJS.Timer | null;
 
+    const store = useStore();
     const { isOnline } = useConnection();
+    const { isAppActive } = useUi();
     const { activeAccount } = useAccounts();
     const { setScrollConf } = useScrollConfig();
 
+    const {
+      getAccountAllTransactions,
+      getAccountTransactionsState,
+      fetchTransactions,
+    } = useTransactionList({ store });
+
     const innerScrollElem = ref<HTMLElement>();
     const appInnerScrollTop = ref<number>(0);
-    const transactionsLatest = ref<ITransaction[]>([]);
-    const transactionsMore = ref<ITransaction[]>([]);
     const loading = ref(false);
+    const isDestroyed = ref(false);
 
-    const transactions = computed(() => [
-      ...transactionsLatest.value || [],
-      ...transactionsMore.value || [],
-    ]);
+    const canLoadMore = computed(() => (
+      !!getAccountTransactionsState(activeAccount.value.address).nextPageUrl
+    ));
+
+    const loadedTransactionList = computed(
+      (): ICommonTransaction[] => getAccountAllTransactions(activeAccount.value.address!),
+    );
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => innerScrollElem.value?.parentElement,
     );
 
-    async function fetchTransactionList() {
-      if (!loading.value) {
-        try {
-          loading.value = true;
-          transactionsLatest.value = await adapter.fetchTransactions(activeAccount.value.address);
-        } catch (error: any) {
-          Logger.write(error);
-        } finally {
-          loading.value = false;
-        }
+    async function fetchTransactionList(recent?: boolean) {
+      loading.value = true;
+      try {
+        await fetchTransactions(activeAccount.value.address, recent);
+      } finally {
+        loading.value = false;
       }
     }
 
-    async function loadMoreTransactions() {
-      const latestTxId: string = (transactionsMore.value.length)
-        ? transactionsMore.value[transactionsMore.value.length - 1].hash
-        : transactionsLatest.value[transactionsLatest.value.length - 1].hash;
-
-      if (latestTxId) {
-        try {
-          const result = await adapter.fetchTransactions(activeAccount.value.address, latestTxId);
-          if (result?.length) {
-            transactionsMore.value = [...transactionsMore.value, result];
-          }
-        } catch (error: any) {
-          Logger.write(error);
-        }
+    async function loadMore() {
+      if (!loading.value && !isDestroyed.value && canLoadMore.value) {
+        await fetchTransactions(activeAccount.value.address, false);
       }
     }
 
@@ -109,6 +113,13 @@ export default defineComponent({
         appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
       }, 200);
     }
+
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
+      },
+    );
 
     function onViewDidLeaveHandler() {
       if (pollingInterval) {
@@ -136,8 +147,11 @@ export default defineComponent({
           if (innerScrollElem.value && appInnerElem.value) {
             appInnerElem.value.addEventListener('scroll', throttledScroll());
           }
-          pollingInterval = executeAndSetInterval(() => {
-            fetchTransactionList();
+          fetchTransactionList();
+          pollingInterval = setInterval(() => {
+            if (isAppActive.value) {
+              fetchTransactionList(true);
+            }
           }, 10000);
           return;
         }
@@ -152,11 +166,9 @@ export default defineComponent({
 
     return {
       isOnline,
-      transactions,
-      transactionsLatest,
-      transactionsMore,
       loading,
-      loadMoreTransactions,
+      loadedTransactionList,
+      loadMore,
       innerScrollElem,
     };
   },
@@ -166,5 +178,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 .account-details-transactions {
   --filter-top-offset: 175px;
+
+  :deep(.filters) {
+    position: sticky;
+    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+  }
+
+  .offline-message {
+    margin-top: 40px;
+  }
 }
 </style>

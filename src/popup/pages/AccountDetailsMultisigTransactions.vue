@@ -7,6 +7,7 @@
           :loading="loading"
           :transactions="loadedTransactionList"
           is-multisig
+          @load-more="loadMore()"
         />
         <MessageOffline
           v-else
@@ -34,15 +35,13 @@ import {
   onIonViewWillLeave,
 } from '@ionic/vue';
 import type { ICommonTransaction } from '@/types';
-import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
+import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useConnection,
   useMultisigAccounts,
   usePendingMultisigTransaction,
-  useTransactionAndTokenFilter,
   useTransactionList,
   useUi,
-  useViewport,
   useScrollConfig,
 } from '@/composables';
 
@@ -74,16 +73,12 @@ export default defineComponent({
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
-    const { viewportElement } = useViewport();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
 
     const {
       getAccountAllTransactions,
-      getAccountTransactionsState,
       fetchTransactions,
     } = useTransactionList({ store });
-
-    const { displayMode } = useTransactionAndTokenFilter();
 
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
@@ -93,10 +88,6 @@ export default defineComponent({
     const appInnerScrollTop = ref<number>(0);
 
     const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
-
-    const canLoadMore = computed(() => (
-      !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
-    ));
 
     const appInnerElem = computed<HTMLElement | null | undefined>(
       () => innerScrollElem.value?.parentElement,
@@ -110,11 +101,7 @@ export default defineComponent({
     async function fetchTransactionList(recent?: boolean) {
       loading.value = true;
       try {
-        await fetchTransactions(
-          TXS_PER_PAGE,
-          !!recent,
-          currentAddress.value!,
-        );
+        await fetchTransactions(currentAddress.value!, recent);
       } finally {
         loading.value = false;
       }
@@ -123,22 +110,6 @@ export default defineComponent({
     async function loadMore() {
       if (!loading.value) {
         await fetchTransactionList();
-      }
-    }
-
-    async function checkLoadMore() {
-      if (viewportElement.value && (isDestroyed.value || !canLoadMore.value)) {
-        return;
-      }
-
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
-
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        await loadMore();
       }
     }
 
@@ -161,16 +132,6 @@ export default defineComponent({
         setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
       },
     );
-
-    watch(displayMode, () => {
-      checkLoadMore();
-    });
-
-    watch(loading, async (val) => {
-      if (!val) {
-        await checkLoadMore();
-      }
-    });
 
     onIonViewWillEnter(() => {
       setScrollConf(false);

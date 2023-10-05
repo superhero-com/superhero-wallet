@@ -15,8 +15,10 @@ import type {
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
+  ITransaction,
   MarketData,
   NetworkTypeDefault,
+  IFetchTransactionResult,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
@@ -166,14 +168,29 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     );
   }
 
-  async fetchTransactions(address: string, lastTxId?: string) {
+  override async fetchPendingTransactions() {
+    // TODO if needed
+    return [];
+  }
+
+  override async fetchTransactions(
+    address: string,
+    lastTxId: string | null,
+  ): Promise<IFetchTransactionResult> {
     const { activeNetwork } = useNetworks();
 
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const rawTransactions = await fetchJson(lastTxId
       ? `${nodeUrl}/address/${address}/txs/chain/${lastTxId}`
       : `${nodeUrl}/address/${address}/txs`);
-    return rawTransactions.map((t: any) => normalizeTransactionStructure(t, address));
+    const regularTransactions: ITransaction[] = rawTransactions.map(
+      (t: any) => normalizeTransactionStructure(t, address),
+    );
+
+    return {
+      regularTransactions,
+      nextPageParams: regularTransactions[0]?.hash || null,
+    };
   }
 
   async getTransactionByHash(hash: string) { // it is not actually a hash it's an id
