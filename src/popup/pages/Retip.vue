@@ -102,8 +102,7 @@ import {
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { useAeTippingBackend } from '@/protocols/aeternity/composables';
-import { useGetter } from '../../composables/vuex';
+import { useAeTippingBackend, useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
@@ -140,6 +139,7 @@ export default defineComponent({
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+    const { getTippingUrlStatus } = useAeTippingUrls();
 
     const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -148,8 +148,8 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-    const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
 
+    const urlStatus = computed(() => getTippingUrlStatus(tip.value.url));
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     async function sendTip() {

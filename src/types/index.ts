@@ -129,8 +129,8 @@ export type IInputMessageRaw = string | IInputMessage;
  */
 export interface IToken {
   contractId: Encoded.ContractAddress
-  | typeof AE_CONTRACT_ID
-  | typeof BTC_CONTRACT_ID
+    | typeof AE_CONTRACT_ID
+    | typeof BTC_CONTRACT_ID
   contract_txi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -302,6 +302,13 @@ export interface ICurrency {
   code: CurrencyCode;
   symbol: string;
 }
+
+export type UrlStatus =
+  | 'default'
+  | 'blacklisted'
+  | 'verified'
+  | 'not-secure'
+  | 'not-verified';
 
 export type CurrencyRates = Record<Protocol, Record<CurrencyCode, number>>;
 

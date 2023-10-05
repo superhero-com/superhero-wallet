@@ -2,7 +2,6 @@ import Vuex from 'vuex';
 import getters from './getters';
 import mutations from './mutations';
 import persistState from './plugins/persistState';
-import tipUrl from './plugins/tipUrl';
 import namesPlugin from './plugins/names';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
@@ -30,7 +29,6 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
-    tipUrl,
     namesPlugin,
     fungibleTokensPlugin,
     veeValidate,
