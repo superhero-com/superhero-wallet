@@ -147,6 +147,7 @@ export const STORAGE_KEYS = {
   hiddenCards: 'hidden-cards',
   otherSettings: 'other-settings',
   errorLog: 'error-log',
+  invites: 'invites',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

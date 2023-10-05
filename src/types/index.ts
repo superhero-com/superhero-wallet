@@ -679,3 +679,8 @@ export interface IFormSelectOption {
 }
 
 export type Migration<T = any> = (restoredValue: T | any) => Promise<T>;
+
+export interface IInvite {
+  secretKey: object;
+  createdAt: number;
+}
