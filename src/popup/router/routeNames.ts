@@ -1,7 +1,7 @@
 export const ROUTE_INDEX = 'index';
 export const ROUTE_ACCOUNT = 'account';
 export const ROUTE_ACCOUNT_DETAILS = 'account-details';
-export const ROUTE_ACCOUNT_DETAILS_TRANSACTIONS = 'account-details-transactions';
+export const ROUTE_ACCOUNT_DETAILS_ASSETS = 'account-details-assets';
 export const ROUTE_ACCOUNT_DETAILS_NAMES = 'account-details-names';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS = 'account-details-names-auctions';
 export const ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM = 'account-details-names-claim';
@@ -12,7 +12,7 @@ export const ROUTE_MULTISIG_TX_DETAILS = 'multisig-tx-details';
 export const ROUTE_MULTISIG_DETAILS = 'multisig-account-details';
 export const ROUTE_MULTISIG_DETAILS_INFO = 'multisig-account-details-info';
 export const ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS = 'account-details-multisig-proposal-details';
-export const ROUTE_MULTISIG_DETAILS_TRANSACTIONS = 'multisig-account-details-transactions';
+export const ROUTE_MULTISIG_DETAILS_ASSETS = 'multisig-account-details-assets';
 export const ROUTE_TX_DETAILS = 'tx-details';
 export const ROUTE_MORE = 'more';
 export const ROUTE_NOTIFICATIONS = 'notifications';

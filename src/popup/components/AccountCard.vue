@@ -33,10 +33,9 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
+import { IAccount } from '@/types';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import type { IAccount } from '../../types';
-import { ROUTE_ACCOUNT_DETAILS } from '../router/routeNames';
-import { useBalances } from '../../composables';
+import { useBalances } from '@/composables';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
@@ -60,7 +59,6 @@ export default defineComponent({
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     return {
-      ROUTE_ACCOUNT_DETAILS,
       PROTOCOL_AETERNITY,
       numericBalance,
     };

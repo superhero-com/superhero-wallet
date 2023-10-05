@@ -19,7 +19,7 @@ describe('Tests cases not connected to specific page', () => {
       { path: '/notifications', redirect: false },
       { path: '/account-details/names', redirect: true },
       { path: '/more/about', redirect: true },
-      { path: '/account-details/transactions', redirect: true },
+      { path: '/account-details/', redirect: true },
     ].forEach(({ path, redirect }) => {
       cy.login({}, path)
         .visit('')
