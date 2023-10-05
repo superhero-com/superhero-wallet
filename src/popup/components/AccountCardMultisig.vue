@@ -36,7 +36,7 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
+import { useMultisigAccounts } from '@/composables';
 
 import AccountInfo from './AccountInfo.vue';
 import BalanceInfo from './BalanceInfo.vue';
@@ -45,7 +45,6 @@ import AccountCardBase from './AccountCardBase.vue';
 import AccountCardSyncing from './AccountCardSyncing.vue';
 
 import type { IMultisigAccount } from '../../types';
-import { useMultisigAccounts } from '../../composables';
 
 export default defineComponent({
   components: {
@@ -72,7 +71,6 @@ export default defineComponent({
 
     return {
       PROTOCOL_AETERNITY,
-      ROUTE_MULTISIG_DETAILS,
       isPendingAccount,
     };
   },

@@ -8,8 +8,8 @@ import {
   ROUTE_INDEX,
   ROUTE_ACCOUNT,
   ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
-  ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
   ROUTE_NOTIFICATIONS,
   ROUTE_COIN,
   ROUTE_TOKEN,
@@ -20,7 +20,7 @@ import {
   ROUTE_NETWORK_SETTINGS,
   ROUTE_MULTISIG_ACCOUNT,
   ROUTE_MULTISIG_DETAILS,
-  ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
   ROUTE_MULTISIG_TX_DETAILS,
   ROUTE_TX_DETAILS,
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
@@ -123,8 +123,8 @@ export const routes: WalletAppRouteConfig[] = [
         props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS },
         children: [
           {
-            path: '',
-            name: ROUTE_ACCOUNT_DETAILS,
+            path: 'assets',
+            name: ROUTE_ACCOUNT_DETAILS_ASSETS,
             component: AccountDetailsTokens,
             meta: {
               showFilterBar: true,
@@ -133,8 +133,8 @@ export const routes: WalletAppRouteConfig[] = [
             },
           },
           {
-            path: 'transactions',
-            name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+            path: '',
+            name: ROUTE_ACCOUNT_DETAILS,
             component: ProtocolSpecificView,
             props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS },
             meta: {
@@ -187,7 +187,7 @@ export const routes: WalletAppRouteConfig[] = [
     meta: {
       title: 'txDetails',
       showHeaderNavigation: true,
-      backRoute: { name: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS },
+      backRoute: { name: ROUTE_ACCOUNT_DETAILS },
     },
   },
   {
@@ -207,8 +207,8 @@ export const routes: WalletAppRouteConfig[] = [
         component: AccountDetailsMultisig,
         children: [
           {
-            path: '',
-            name: ROUTE_MULTISIG_DETAILS,
+            path: 'assets',
+            name: ROUTE_MULTISIG_DETAILS_ASSETS,
             component: AccountDetailsMultisigTokens,
             meta: {
               showFilterBar: true,
@@ -217,8 +217,8 @@ export const routes: WalletAppRouteConfig[] = [
             },
           },
           {
-            path: 'transactions',
-            name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+            path: '',
+            name: ROUTE_MULTISIG_DETAILS,
             component: AccountDetailsMultisigTransactions,
             meta: {
               hideHeader: true,
@@ -244,7 +244,7 @@ export const routes: WalletAppRouteConfig[] = [
         meta: {
           title: 'txDetails',
           showHeaderNavigation: true,
-          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
+          backRoute: { name: ROUTE_MULTISIG_DETAILS },
         },
       },
       {
@@ -254,7 +254,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'multisigProposalDetails',
-          backRoute: { name: ROUTE_MULTISIG_DETAILS_TRANSACTIONS },
+          backRoute: { name: ROUTE_MULTISIG_DETAILS },
           showHeaderNavigation: true,
         },
       },
@@ -269,7 +269,7 @@ export const routes: WalletAppRouteConfig[] = [
             props: true,
             meta: {
               title: 'coinDetails',
-              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              backRoute: { name: ROUTE_MULTISIG_DETAILS_ASSETS },
               showHeaderNavigation: true,
               showFilterBar: true,
               hideSearchBar: true,
@@ -283,7 +283,7 @@ export const routes: WalletAppRouteConfig[] = [
             props: true,
             meta: {
               title: 'coinDetails',
-              backRoute: { name: ROUTE_MULTISIG_DETAILS },
+              backRoute: { name: ROUTE_MULTISIG_DETAILS_ASSETS },
               showHeaderNavigation: true,
               isMultisig: true,
             },
@@ -619,7 +619,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'coinDetails',
-          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
           showHeaderNavigation: true,
           showFilterBar: true,
           hideSearchBar: true,
@@ -632,7 +632,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'coinDetails',
-          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
           showHeaderNavigation: true,
         },
       },
@@ -649,7 +649,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'tokenDetails',
-          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
           showHeaderNavigation: true,
           showFilterBar: true,
           hideSearchBar: true,
@@ -662,7 +662,7 @@ export const routes: WalletAppRouteConfig[] = [
         props: true,
         meta: {
           title: 'tokenDetails',
-          backRoute: { name: ROUTE_ACCOUNT_DETAILS },
+          backRoute: { name: ROUTE_ACCOUNT_DETAILS_ASSETS },
           showHeaderNavigation: true,
         },
       },
