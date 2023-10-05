@@ -92,7 +92,6 @@
     "@commitlint/cli": "^16.3.0",
     "@commitlint/config-conventional": "^16.2.4",
     "@intlify/vue-i18n-loader": "^5.0.1",
-    "@types/copy-webpack-plugin": "^10.1.0",
     "@types/lodash-es": "^4.17.7",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
