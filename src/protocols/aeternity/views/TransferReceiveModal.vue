@@ -16,12 +16,11 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
-import type { ITokenList } from '@/types';
 import {
   PROTOCOL_AETERNITY,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
-import { useAccounts, useMultisigAccounts } from '@/composables';
+import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -40,9 +39,7 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { getName } = useAeNames({ store });
 
-    const availableTokens = computed<ITokenList>(
-      () => store.state.fungibleTokens.availableTokens,
-    );
+    const { availableTokens } = useFungibleTokens({ store });
 
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccountId.value

@@ -27,6 +27,7 @@ export * from './transactionTokens';
 export * from './transactionList';
 export * from './ui';
 export * from './viewport';
+export * from './fungibleTokens';
 export * from './coinTokensProps';
 export * from './scrollTransactions';
 export * from './languages';

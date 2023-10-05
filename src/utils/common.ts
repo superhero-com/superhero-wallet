@@ -43,11 +43,11 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
  * If the number is between high and low precision
  * no argument is passed to the `toFixed` method which means there will be no trailing zeros.
  */
-export function amountRounded(rawAmount: number | BigNumberPublic): string {
+export function amountRounded(rawAmount: number | BigNumberPublic | string): string {
   const ZERO_AND_COMA_LEN = 2;
   const amount: BigNumberPublic = (typeof rawAmount === 'object')
     ? rawAmount
-    : new BigNumber(rawAmount);
+    : new BigNumber(Number(rawAmount));
   if (
     amount.lt(0.01)
     && amount.toString().length - ZERO_AND_COMA_LEN < DECIMAL_PLACES_HIGH_PRECISION
@@ -124,8 +124,8 @@ export function executeAndSetInterval(handler: () => any, timeout: number) {
 }
 
 export async function fetchAllPages<T = any>(
-  getFunction: () => Promise<IPageableResponse<T>>,
-  getNextPage: (url: string) => Promise<IPageableResponse<T>>,
+  getFunction: () => Promise<IPageableResponse<T> | null>,
+  getNextPage: (url: string) => Promise<IPageableResponse<T> | null>,
 ) {
   const result = [];
   let nextPageUrl: string | null = '';

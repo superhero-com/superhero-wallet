@@ -154,6 +154,8 @@ export const STORAGE_KEYS = {
   namesOwned: 'names-owned',
   namesDefault: 'names-default',
   lastRoute: 'last-route',
+  fungibleTokenList: 'fungible-token-list',
+  fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',
 } as const;
 

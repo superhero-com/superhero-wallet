@@ -2,7 +2,6 @@ import { computed } from 'vue';
 import { camelCase } from 'lodash-es';
 import type {
   IDefaultComposableOptions,
-  ITokenList,
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
@@ -20,6 +19,7 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin/helpers';
+import { useFungibleTokens } from './fungibleTokens';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
   transaction: ITransaction
@@ -35,13 +35,8 @@ export function useTransactionTokens({
   transaction,
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
-  const getTxSymbol = computed(() => store.getters.getTxSymbol);
-  const getTxAmountTotal = computed(() => store.getters.getTxAmountTotal);
   const innerTx = computed(() => getInnerTransaction(transaction.tx));
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
+  const { availableTokens, getTxAmountTotal, getTxSymbol } = useFungibleTokens({ store });
 
   const transactionFunction = computed(() => {
     if (innerTx.value?.function) {
@@ -83,13 +78,13 @@ export function useTransactionTokens({
       ...innerTx.value || {},
       amount: isAllowance
         ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
-        : getTxAmountTotal.value(transaction, direction),
-      symbol: isAllowance ? AE_SYMBOL : getTxSymbol.value(transaction),
+        : getTxAmountTotal(transaction, direction),
+      symbol: isAllowance ? AE_SYMBOL : getTxSymbol(transaction),
       isReceived: direction === TX_DIRECTION.received,
       isAe:
         isAllowance
         || (
-          getTxSymbol.value(transaction) === AE_SYMBOL
+          getTxSymbol(transaction) === AE_SYMBOL
           && !isTransactionAex9(transaction)
         ),
     }];

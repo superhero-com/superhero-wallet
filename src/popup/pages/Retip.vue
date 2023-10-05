@@ -91,14 +91,15 @@ import type {
 } from '@/types';
 import { toShiftedBigNumber } from '@/utils';
 import {
+  useAccounts,
+  useAeSdk,
+  useBalances,
   useCurrencies,
   useDeepLinkApi,
+  useFungibleTokens,
   useMaxAmount,
-  useBalances,
   useModals,
-  useAccounts,
   useTippingContracts,
-  useAeSdk,
   useTransactionList,
   useUi,
 } from '@/composables';
@@ -146,6 +147,7 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts({ store });
     const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
     const { getTippingUrlStatus } = useAeTippingUrls();
+    const { createOrChangeAllowance } = useFungibleTokens({ store });
 
     const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({
@@ -178,11 +180,9 @@ export default defineComponent({
           && formModel.value.selectedAsset?.contractId
           && formModel.value.selectedAsset.contractId !== AE_CONTRACT_ID
         ) {
-          await store.dispatch(
-            'fungibleTokens/createOrChangeAllowance',
-            [
-              formModel.value.selectedAsset.contractId,
-              formModel.value.amount],
+          await createOrChangeAllowance(
+            formModel.value.selectedAsset.contractId,
+            formModel.value.amount || 0,
           );
 
           retipResponse = await tippingV2.retip_token(

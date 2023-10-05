@@ -3,7 +3,6 @@ import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   IAccountOverview,
   IDefaultComposableOptions,
-  ITokenList,
   ITx,
   ObjectValues,
   TxFunctionRaw,
@@ -35,6 +34,7 @@ import {
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { useFungibleTokens } from '@/composables/fungibleTokens';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 
@@ -53,14 +53,11 @@ export function useTransactionTx({
   const { dexContracts } = useAeSdk({ store });
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts({ store });
+  const { availableTokens } = useFungibleTokens({ store });
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
   const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
-
-  const availableTokens = computed<ITokenList>(
-    () => (store.state as any).fungibleTokens.availableTokens,
-  );
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
   const innerTxTag = computed((): Tag | null => innerTx.value ? getTxTag(innerTx.value) : null);

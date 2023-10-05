@@ -15,6 +15,7 @@ import {
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
+import { useFungibleTokens } from './fungibleTokens';
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { useTransactionTx } from './transactionTx';
@@ -40,9 +41,8 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
     fetchTransactions,
   } = useTransactionList({ store });
 
+  const { tokenBalances } = useFungibleTokens({ store });
   const btcTransactions = ref<ITransaction[]>([]);
-
-  const tokens = computed(() => store.state.fungibleTokens.tokens);
 
   const latestTransactions = computed(() => {
     const aeTransactions = Object.entries(transactions.value)
@@ -131,7 +131,7 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
   );
 
   watch(
-    tokens,
+    tokenBalances,
     (oldTokens, newTokens) => {
       if (!isEqual(oldTokens, newTokens)) {
         updateTransactionListData();

@@ -168,7 +168,6 @@ import { Encoded } from '@aeternity/aepp-sdk';
 import type {
   IAsset,
   IFormSelectOption,
-  ITokenList,
   TransferFormModel,
 } from '@/types';
 import {
@@ -184,6 +183,7 @@ import {
   useAccounts,
   useBalances,
   useCurrencies,
+  useFungibleTokens,
   useMaxAmount,
   useModals,
   useMultisigAccounts,
@@ -192,7 +192,6 @@ import {
   AE_CONTRACT_ID,
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
-import { useState } from '@/composables/vuex';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
@@ -263,9 +262,7 @@ export default defineComponent({
       setActiveAccountByAddress,
     } = useAccounts();
 
-    const fungibleTokens = useState('fungibleTokens');
-
-    const availableTokens = computed<ITokenList>(() => fungibleTokens.value.availableTokens);
+    const { availableTokens, getAccountTokenBalances } = useFungibleTokens({ store });
 
     function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
@@ -309,7 +306,7 @@ export default defineComponent({
       () => formModel.value.selectedAsset?.contractId === AE_CONTRACT_ID,
     );
 
-    const tokenBalances = computed(() => fungibleTokens.value.tokenBalances);
+    const tokenBalances = computed(() => getAccountTokenBalances());
 
     const isTipUrl = computed(() => (
       !!formModel.value.address

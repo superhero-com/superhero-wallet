@@ -16,9 +16,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { IAccount } from '@/types';
-import { useConnection } from '@/composables';
-import { useGetter } from '@/composables/vuex';
+import { useConnection, useFungibleTokens } from '@/composables';
 
 export default defineComponent({
   props: {
@@ -26,9 +26,12 @@ export default defineComponent({
   },
   setup(props) {
     const { isOnline } = useConnection();
-    const getTokenBalance = useGetter('fungibleTokens/getTokenBalance');
+    const store = useStore();
+    const { getAccountTokenBalances } = useFungibleTokens({ store });
 
-    const totalTokens = computed(() => getTokenBalance.value(props.currentAccount.address).length);
+    const totalTokens = computed(
+      () => getAccountTokenBalances(props.currentAccount.address).length,
+    );
 
     return {
       isOnline,

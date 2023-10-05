@@ -102,7 +102,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, ITokenList, TokenPair } from '@/types';
+import type { IToken, TokenPair } from '@/types';
 import {
   IS_IOS,
   PROTOCOL_AETERNITY,
@@ -121,11 +121,11 @@ import {
   useAccounts,
   useAeSdk,
   useCurrencies,
+  useFungibleTokens,
   useTokensList,
   useTokenProps,
   useUi,
 } from '@/composables';
-import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -175,6 +175,11 @@ export default defineComponent({
       isMultisig: isMultisig.value,
     });
     const { marketData } = useCurrencies();
+    const {
+      getContractTokenPairs,
+      availableTokens,
+      getAccountTokenBalances,
+    } = useFungibleTokens({ store });
 
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
@@ -203,10 +208,9 @@ export default defineComponent({
       },
     ];
     const routerHeight = ref<string>();
-    const tokenPairs = ref<TokenPair>({ token0: null, token1: null });
+    const tokenPairs = ref<Partial<TokenPair>>({ token0: null, token1: null });
     const stickyTabsWrapperEl = ref<HTMLDivElement>();
-    const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
+
     const fungibleToken = computed(() => availableTokens.value[contractId]);
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
@@ -223,7 +227,7 @@ export default defineComponent({
           .getAdapter(PROTOCOL_AETERNITY)
           .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
       }
-      return tokenBalances.value.find(
+      return getAccountTokenBalances().find(
         (token) => token.contractId === contractId,
       ) || { ...fungibleToken.value, contractId };
     });
@@ -258,7 +262,7 @@ export default defineComponent({
       if (isContract(contractId) && !isAe) {
         setLoaderVisible(true);
         await getAeSdk();
-        tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        tokenPairs.value = await getContractTokenPairs(contractId);
         setLoaderVisible(false);
       }
       setTimeout(() => {

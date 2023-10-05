@@ -46,17 +46,18 @@ import {
 } from 'vue';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { camelCase } from 'lodash-es';
-import { useState } from '@/composables/vuex';
+import { useStore } from 'vuex';
+
 import {
   getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-
 import {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
+import { useFungibleTokens } from '@/composables';
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
@@ -69,7 +70,8 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const availableTokens = useState('fungibleTokens', 'availableTokens');
+    const store = useStore();
+    const { availableTokens } = useFungibleTokens({ store });
 
     const isSwapTx = computed(() => isTxFunctionDexSwap(props.transaction.tx.function)
         || isTxFunctionDexPool(props.transaction.tx.function));
@@ -93,15 +95,20 @@ export default defineComponent({
 
       const hasAmount = tokens.every((token) => !!token.amount);
 
+      const tokenAmount = [
+        Number(tokens[0].amount),
+        Number(tokens[1].amount),
+      ];
+
       return [
         {
           from: tokens[0],
           to: tokens[1],
-          price: hasAmount ? tokens[1].amount! / tokens[0].amount! : 0,
+          price: hasAmount ? tokenAmount[1] / tokenAmount[0] : 0,
         }, {
           from: tokens[1],
           to: tokens[0],
-          price: hasAmount ? tokens[0].amount! / tokens[1].amount! : 0,
+          price: hasAmount ? tokenAmount[0] / tokenAmount[1] : 0,
         },
       ];
     });
