@@ -37,7 +37,6 @@ import { useStore } from 'vuex';
 import type { IMultisigAccount } from '@/types';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
-import { ROUTE_MULTISIG_DETAILS } from '@/popup/router/routeNames';
 import { convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import AccountInfo from './AccountInfo.vue';
@@ -71,7 +70,6 @@ export default defineComponent({
 
     return {
       PROTOCOL_AETERNITY,
-      ROUTE_MULTISIG_DETAILS,
       isPendingAccount,
       convertMultisigAccountToAccount,
     };

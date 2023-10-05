@@ -1,6 +1,5 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
-import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
 import {
   formatDate,
@@ -280,8 +279,6 @@ Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
 
 Cypress.Commands.add('openTransactions', () => {
   cy.get('[data-cy=account-card-base]')
-    .click()
-    .get(`[data-cy=${ROUTE_ACCOUNT_DETAILS_TRANSACTIONS}]`)
     .click()
     .get('[data-cy=loader]')
     .should('be.visible');
