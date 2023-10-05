@@ -7,7 +7,6 @@ import namesPlugin from './plugins/names';
 import pollAccountInfo from './plugins/pollAccountInfo';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
-import invitesModule from './modules/invites';
 import permissionsModule from './modules/permissions';
 import fungibleTokensPlugin from './plugins/fungibleTokens';
 import stateReducer from './utils';
@@ -35,7 +34,6 @@ export default new Vuex.Store({
   ],
   modules: {
     accounts: accountsModule,
-    invites: invitesModule,
     permissions: permissionsModule,
   },
 });

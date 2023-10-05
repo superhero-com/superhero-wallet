@@ -4,6 +4,7 @@ export * from './copy';
 export * from './connection';
 export * from './currencies';
 export * from './deepLinkApi';
+export * from './invites';
 export * from './latestTransactionList';
 export * from './maxAmount';
 export * from './middleware';

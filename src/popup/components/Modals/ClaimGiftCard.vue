@@ -120,6 +120,7 @@ import {
   useAccounts,
   useAeSdk,
   useCurrencies,
+  useInvites,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
@@ -167,6 +168,7 @@ export default defineComponent({
     const { getAeSdk } = useAeSdk({ store });
     const { aeAccounts, aeAccountsSelectOptions } = useAccounts();
     const { getFormattedFiat } = useCurrencies();
+    const { claimInvite } = useInvites();
 
     const recipientId = ref<Encoded.AccountAddress>(aeAccounts.value[0].address);
     const amount = ref('');
@@ -226,7 +228,7 @@ export default defineComponent({
       switch (step.value) {
         case STEPS.initial:
           setMaxAmount();
-          await store.dispatch('invites/claim', {
+          await claimInvite({
             secretKey: props.secretKey,
             recipientId: recipientId.value,
             isMax: true,
@@ -234,7 +236,7 @@ export default defineComponent({
           step.value = STEPS.redeemFull;
           break;
         case STEPS.form:
-          await store.dispatch('invites/claim', {
+          await claimInvite({
             secretKey: props.secretKey,
             recipientId: recipientId.value,
             amount: amount.value,

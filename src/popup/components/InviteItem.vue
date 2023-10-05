@@ -102,10 +102,11 @@ import {
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
   useAccounts,
-  useBalances,
-  useMaxAmount,
   useAeSdk,
+  useBalances,
   useCurrencies,
+  useInvites,
+  useMaxAmount,
 } from '@/composables';
 
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -134,6 +135,7 @@ export default defineComponent({
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
     const { getAeSdk } = useAeSdk({ store });
+    const { claimInvite, removeInvite, handleInsufficientBalanceError } = useInvites();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -160,7 +162,7 @@ export default defineComponent({
     const address = computed(() => getAccountFromSecret(props.secretKey).address);
 
     function deleteItem() {
-      store.commit('invites/delete', props.secretKey);
+      removeInvite(props.secretKey);
     }
 
     async function updateBalance() {
@@ -177,14 +179,14 @@ export default defineComponent({
     async function claim() {
       emit('loading', true);
       try {
-        await store.dispatch('invites/claim', {
+        await claimInvite({
           secretKey: Buffer.from(props.secretKey),
-          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address,
+          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address!,
           isMax: true,
         });
         await updateBalance();
-      } catch (error) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+      } catch (error: any) {
+        if (await handleInsufficientBalanceError(error, true)) {
           return;
         }
         throw error;
@@ -215,7 +217,7 @@ export default defineComponent({
         await updateBalance();
         resetTopUpChanges();
       } catch (error: any) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) {
+        if (await handleInsufficientBalanceError(error)) {
           return;
         }
         throw error;

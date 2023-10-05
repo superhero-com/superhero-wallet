@@ -1,19 +1,18 @@
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 
 import { MODAL_CLAIM_GIFT_CARD } from '@/constants';
-import { useModals } from '../../composables';
+import { useInvites, useModals } from '../../composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
   setup() {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { openDefaultModal, openModal } = useModals();
+    const { handleInsufficientBalanceError } = useInvites();
 
     onMounted(async () => {
       router.push({ name: ROUTE_ACCOUNT });
@@ -33,7 +32,7 @@ export default defineComponent({
           });
           return;
         }
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error, isInviteError: true })) {
+        if (await handleInsufficientBalanceError(error, true)) {
           return;
         }
         throw error;

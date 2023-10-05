@@ -76,14 +76,14 @@ import { useStore } from 'vuex';
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { useState } from '../../composables/vuex';
 import {
   useAccounts,
   useAeSdk,
   useBalances,
-  useMaxAmount,
   useCurrencies,
-} from '../../composables';
+  useInvites,
+  useMaxAmount,
+} from '@/composables';
 
 import AccountInfo from '../components/AccountInfo.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
@@ -111,6 +111,7 @@ export default defineComponent({
     const { marketData } = useCurrencies();
     const { getAeSdk } = useAeSdk({ store });
     const { balance } = useBalances();
+    const { invites, addInvite, handleInsufficientBalanceError } = useInvites();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -120,8 +121,6 @@ export default defineComponent({
     });
 
     const { max, fee } = useMaxAmount({ formModel, store });
-
-    const invites = useState('invites', 'invites');
 
     async function generate() {
       loading.value = true;
@@ -135,14 +134,16 @@ export default defineComponent({
           // @ts-ignore
           { denomination: AE_AMOUNT_FORMATS.AE },
         );
-      } catch (error) {
-        if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
+      } catch (error: any) {
+        if (await handleInsufficientBalanceError(error)) {
+          return;
+        }
         throw error;
       } finally {
         loading.value = false;
       }
 
-      store.commit('invites/add', Buffer.from(secretKey, 'hex').slice(0, 32));
+      addInvite(Buffer.from(secretKey, 'hex').slice(0, 32));
       formModel.value.amount = '';
     }
 
