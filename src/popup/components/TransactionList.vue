@@ -50,10 +50,10 @@ import {
   pipe,
   sortTransactionsByDate,
 } from '@/utils';
-import { useGetter } from '@/composables/vuex';
 import {
   useAccounts,
   useAeSdk,
+  useFungibleTokens,
   useTransactionAndTokenFilter,
   useViewport,
 } from '@/composables';
@@ -98,7 +98,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const getTxSymbol = useGetter('getTxSymbol');
+    const { getTxSymbol } = useFungibleTokens({ store });
 
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {
@@ -140,7 +140,7 @@ export default defineComponent({
         (transaction) => (
           !searchPhrase.value
           || includesCaseInsensitive(
-            getTxSymbol.value(transaction),
+            getTxSymbol(getTransaction(transaction)),
             searchPhrase.value.toLocaleLowerCase(),
           )
         ),

@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { i18n, tg } from '@/popup/plugins/i18n';
+import { useFungibleTokens } from '@/composables';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
 
 import {
@@ -12,13 +13,7 @@ import {
 } from '../../src/constants';
 
 const store = new Vuex.Store({
-  state: {
-    fungibleTokens: {
-      availableTokens: {
-        [STUB_TOKEN_CONTRACT_ADDRESS]: {},
-      },
-    },
-  },
+  state: {},
 });
 
 const transactionLabels = {
@@ -118,6 +113,9 @@ describe('TransactionTagList', () => {
         global: { plugins: [i18n, store] },
         props,
       });
+      const { availableTokens } = useFungibleTokens({ store });
+      availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {};
+
       wrapper.findAll('.transaction-tag').forEach((el, index) => {
         expect(el.text()).toEqual(labels[index] || '');
       });

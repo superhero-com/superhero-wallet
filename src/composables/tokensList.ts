@@ -13,7 +13,9 @@ import type {
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
-import { useCurrencies } from '@/composables/currencies';
+import { useCurrencies } from './currencies';
+import { useFungibleTokens } from './fungibleTokens';
+import { useAccounts } from './accounts';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
 
@@ -46,20 +48,26 @@ export function useTokensList({
 }: UseTokensListOptions) {
   const { marketData } = useCurrencies();
   const { balance } = useBalances();
+  const { activeAccount } = useAccounts();
   const { activeMultisigAccount } = useMultisigAccounts({ store });
+  const {
+    availableTokens: allAvailableTokens,
+    getAccountTokenBalances,
+  } = useFungibleTokens({ store });
 
   const availableTokens = computed<ITokenList>(() => (
     isMultisig
-      ? []
-      : (store.state as any).fungibleTokens.availableTokens
+      ? {}
+      : allAvailableTokens.value
   ));
-  const tokenBalances = computed<IToken[]>(() => store.getters['fungibleTokens/tokenBalances']);
 
   const aeTokenBalance = computed((): Balance => (
     isMultisig
       ? new BigNumber(activeMultisigAccount.value?.balance || 0)
       : balance.value || new BigNumber(0)
   ));
+
+  const tokenBalances = computed(() => getAccountTokenBalances(activeAccount.value.address));
 
   /**
    * Returns the default aeternity meta information

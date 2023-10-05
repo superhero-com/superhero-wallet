@@ -303,13 +303,13 @@ import {
 } from '@/utils';
 import {
   useAccounts,
+  useFungibleTokens,
   useMultisigAccounts,
   usePendingMultisigTransaction,
   useMultisigTransactions,
   useModals,
   useUi,
 } from '@/composables';
-import { useGetter } from '@/composables/vuex';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
@@ -390,8 +390,7 @@ export default defineComponent({
     } = useAccounts();
 
     const { isLoaderVisible, setLoaderVisible } = useUi();
-
-    const getTxSymbol = useGetter('getTxSymbol');
+    const { getTxSymbol } = useFungibleTokens({ store });
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);

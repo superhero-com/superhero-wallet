@@ -50,14 +50,14 @@ import {
 
 export * from './transactionTokenInfoResolvers';
 
-export function aeToAettos(value: number | string) {
+export function aeToAettos(value: number | string | BigNumber) {
   return formatAmount(value.toString(), {
     denomination: AE_AMOUNT_FORMATS.AE,
     targetDenomination: AE_AMOUNT_FORMATS.AETTOS,
   });
 }
 
-export function aettosToAe(value: number | string) {
+export function aettosToAe(value: number | string | BigNumber) {
   return formatAmount(value.toString(), {
     denomination: AE_AMOUNT_FORMATS.AETTOS,
     targetDenomination: AE_AMOUNT_FORMATS.AE,
@@ -76,7 +76,7 @@ export function buildSimplexLink(address: string): string {
 
 export function calculateSupplyAmount(balance: number, totalSupply: number, reserve: number) {
   if (!balance || !totalSupply || !reserve) {
-    return null;
+    return undefined;
   }
   const share = new BigNumber(balance).times(100).div(totalSupply);
   const amount = new BigNumber(reserve).times(share).div(100);

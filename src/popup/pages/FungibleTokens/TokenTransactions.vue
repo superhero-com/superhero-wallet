@@ -23,15 +23,15 @@ import {
   IonPage,
 } from '@ionic/vue';
 import { useStore } from 'vuex';
-import type { ICommonTransaction, ITokenList, ITx } from '@/types';
+import type { ICommonTransaction, ITx } from '@/types';
 import { TXS_PER_PAGE } from '@/constants';
 import {
   useAccounts,
+  useFungibleTokens,
   useMultisigAccounts,
   useTransactionList,
   useTokenProps,
 } from '@/composables';
-import { useState } from '@/composables/vuex';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
 import TransactionList from '@/popup/components/TransactionList.vue';
@@ -55,9 +55,10 @@ export default defineComponent({
       getAccountTransactionsState,
     } = useTransactionList({ store });
 
+    const { availableTokens } = useFungibleTokens({ store });
+
     const loading = ref(false);
 
-    const availableTokens = useState<ITokenList>('fungibleTokens', 'availableTokens');
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
     const currentAddress = computed(
       () => (tokenProps.value?.isMultisig)

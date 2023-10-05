@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="tokens.length > 1"
+    v-if="tokenList.length > 1"
     class="swap-route"
   >
     <div class="title">
@@ -8,7 +8,7 @@
     </div>
     <div class="swap-wrapper">
       <span
-        v-for="(token, idx) of tokens"
+        v-for="(token, idx) of tokenList"
         :key="idx"
         class="swap"
       >
@@ -30,78 +30,112 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex';
+<script lang="ts">
+import { computed, defineComponent, PropType } from 'vue';
+import { useStore } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { useAeSdk } from '@/composables';
+import { useAeSdk, useFungibleTokens } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
-import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
 
+import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
+import {
+  ITransaction,
+  TxFunction,
+  TxFunctionParsed,
+  TxFunctionRaw,
+} from '@/types';
+import { Encoded } from '@aeternity/aepp-sdk';
 import Tokens from './Tokens.vue';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
 
-export default {
+export default defineComponent({
   components: {
     Tokens,
     ArrowHead,
   },
   props: {
-    transaction: { type: Object, required: true },
+    transaction: { type: Object as PropType<ITransaction>, required: true },
   },
-  computed: {
-    ...mapState('fungibleTokens', ['availableTokens']),
-    tokens() {
-      if (!isTxFunctionDexSwap(this.transaction.tx.function)) {
+  setup(props) {
+    const store = useStore();
+    const { nodeNetworkId } = useAeSdk({ store });
+    const { availableTokens } = useFungibleTokens({ store });
+
+    function getTxFunction(
+      functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
+    ): TxFunctionParsed {
+      return camelCase(functionName) as TxFunctionParsed;
+    }
+
+    const tokenList = computed(() => {
+      const txFunction = getTxFunction(props.transaction.tx.function!);
+
+      if (!isTxFunctionDexSwap(txFunction)) {
         return [];
       }
-      const resolver = getTransactionTokenInfoResolver(camelCase(this.transaction.tx.function));
-      if (!resolver) return [];
-      let { tokens } = resolver(this.transaction, this.availableTokens);
-      const index = this.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
-      if (index >= 0 && this.transaction.tx.arguments[index].value.length > tokens.length) {
+      const resolver = getTransactionTokenInfoResolver(txFunction);
+      if (!resolver) {
+        return [];
+      }
+      let { tokens } = resolver(props.transaction, availableTokens.value);
+      const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+
+      if (index >= 0 && props.transaction.tx.arguments[index].value.length > tokens.length) {
         tokens = [
           tokens[0],
-          ...this.transaction.tx.arguments[index].value
-            .slice(1, this.transaction.tx.arguments[index].value.length - 1)
-            .map(({ value }) => this.availableTokens[value]),
+          ...props.transaction.tx.arguments[index].value
+            .slice(1, props.transaction.tx.arguments[index].value.length - 1)
+            .map((element: any) => availableTokens.value[element.value]),
           tokens[1],
         ];
       }
-      const { nodeNetworkId } = useAeSdk({ store: this.$store });
-      const waeContract = DEX_CONTRACTS[nodeNetworkId.value]?.wae;
-      if (tokens[0].isAe && waeContract && !waeContract?.includes(tokens[1].contractId)) {
+
+      const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
+
+      const tokenLastIndex = tokens.length - 1;
+
+      if (
+        tokens[0].isAe
+        && waeContract
+        && !waeContract?.includes(tokens[1].contractId as Encoded.ContractAddress)
+      ) {
         tokens.unshift({
           ...tokens[0],
           isAe: true,
         });
         tokens[1].isAe = false;
       }
-      if (tokens[tokens.length - 1].isAe && waeContract
-        && !waeContract?.includes(tokens[tokens.length - 2].contractId)) {
-        tokens[tokens.length - 1].isAe = false;
-        tokens.push({ ...tokens[tokens.length - 1], isAe: true });
+      if (tokens[tokenLastIndex].isAe && waeContract
+        && !waeContract?.includes(
+            tokens[tokenLastIndex - 1].contractId as Encoded.ContractAddress,
+        )
+      ) {
+        tokens[tokenLastIndex].isAe = false;
+        tokens.push({ ...tokens[tokenLastIndex], isAe: true });
       }
       return tokens;
-    },
-  },
-  methods: {
-    checkWaeAeTx(idx) {
-      if (idx === this.tokens.length - 1) {
+    });
+
+    function checkWaeAeTx(idx: number) {
+      if (idx === tokenList.value.length - 1) {
         return false;
       }
-      const { nodeNetworkId } = useAeSdk({ store: this.$store });
-      const contracts = DEX_CONTRACTS[nodeNetworkId.value];
-      return (
-        contracts?.wae?.includes(this.tokens[idx].contractId)
-        && this.tokens[idx + 1].isAe
-      )
-      || (
-        contracts?.wae?.includes(this.tokens[idx + 1].contractId)
-        && this.tokens[idx].isAe
+      const contracts = DEX_CONTRACTS[nodeNetworkId.value!];
+
+      return (contracts?.wae?.includes(tokenList.value[idx].contractId as Encoded.ContractAddress)
+          && tokenList.value[idx + 1].isAe
+      ) || (
+        contracts?.wae?.includes(tokenList.value[idx + 1].contractId as Encoded.ContractAddress)
+          && tokenList.value[idx].isAe
       );
-    },
+    }
+
+    return {
+      tokenList,
+      checkWaeAeTx,
+    };
   },
-};
+});
 </script>
 
 <style lang="scss" scoped>
