@@ -50,20 +50,20 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import { Field } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
-
+import { MODAL_RECIPIENT_INFO } from '@/constants';
 import {
   useAccounts,
   useModals,
 } from '@/composables';
+import { useAeTippingUrls } from '@/protocols/aeternity/composables';
+
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import InputField from '@/popup/components/InputField.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
-import { MODAL_RECIPIENT_INFO } from '@/constants';
 
 export default defineComponent({
   components: {
@@ -86,14 +86,11 @@ export default defineComponent({
   },
   emits: ['openQrModal', 'update:modelValue'],
   setup(props) {
-    const store = useStore();
-
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
+    const { getTippingUrlStatus } = useAeTippingUrls();
 
-    const urlStatus = computed(
-      () => store.getters['tipUrl/status'](props.modelValue),
-    );
+    const urlStatus = computed(() => getTippingUrlStatus(props.modelValue));
 
     const addressMessage = computed((): IInputMessage => {
       if (props.isTipUrl) {
@@ -101,7 +98,6 @@ export default defineComponent({
           case 'verified':
             return { status: 'success', text: '', hideMessage: true };
           case 'not-secure':
-            return { status: 'warning', text: '', hideMessage: true };
           case 'not-verified':
             return { status: 'warning', text: '', hideMessage: true };
           case 'blacklisted':
