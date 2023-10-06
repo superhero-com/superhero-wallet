@@ -23,7 +23,7 @@
       <BtnMain
         class="button-action-primary"
         :disabled="primaryButtonDisabled"
-        :icon="(showSendButton && hideArrowSendIcon) ? ArrowSendIcon : null"
+        :icon="(showSendButton && !hideArrowSendIcon) ? ArrowSendIcon : null"
         :text="primaryButtonText"
         data-cy="next-step-button"
         @click="proceedToNextStep"
