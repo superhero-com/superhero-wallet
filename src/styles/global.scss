@@ -23,9 +23,6 @@
 }
 
 html.is-extension {
-  width: $extension-width;
-  height: $extension-height;
-
   // Fixes issue with extension not rendering properly
   // .tabs-inner & .ion-page classes are added by Ionic
   ion-tabs,
@@ -37,6 +34,11 @@ html.is-extension {
 
   body {
     position: unset;
+  }
+
+  .app {
+    width: $extension-width;
+    height: $extension-height;
   }
 }
 
