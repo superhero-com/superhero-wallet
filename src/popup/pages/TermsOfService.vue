@@ -977,7 +977,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .terms-of-service {
-  padding: 16px;
+  padding: 0 16px;
   word-break: break-word;
   line-height: 20px;
   color: rgba(variables.$color-white, 0.85);
