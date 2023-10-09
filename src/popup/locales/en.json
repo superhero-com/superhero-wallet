@@ -1161,6 +1161,7 @@
     },
     "appsBrowser": {
       "popularApps": "Featured",
+      "recentApps": "Latest visited",
       "inputPlaceholder": "Enter URL"
     },
     "warningDappBrowser": {

@@ -157,6 +157,7 @@ export const STORAGE_KEYS = {
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',
+  appsBrowserHistory: 'apps-browser-history',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -428,3 +429,5 @@ export const BROWSER_ACTIONS = {
 } as const;
 
 export const PAGE_TRANSITION_DURATION = 150;
+
+export const MAX_BROWSER_HISTORY_ITEMS = 10;

@@ -3,47 +3,41 @@
     <div
       class="app-image-wrapper"
     >
-      <IconWrapper
-        v-if="appIcon"
-        :icon="appIcon"
-        class="app-image"
-        is-full
-      />
       <img
-        v-else-if="appImage"
-        :src="getImageUrl(appImage)"
+        :src="imageUrl"
         class="app-image"
       >
     </div>
     <div class="app-title">
-      {{ appTitle }}
+      {{ title }}
     </div>
   </button>
 </template>
 
 <script lang="ts">
-import { Component, defineComponent, PropType } from 'vue';
-import IconWrapper from '../IconWrapper.vue';
+import { computed, defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'AppsBrowserListItem',
-  components: { IconWrapper },
   props: {
-    appTitle: { type: String, required: true },
-    appIcon: { type: Object as PropType<Component>, default: null },
+    title: { type: String, required: true },
     /**
      * App image name, should be located in src\icons\dapp
      */
-    appImage: { type: String, default: null },
+    image: { type: String, default: null },
   },
-  setup() {
-    function getImageUrl(name: string) {
-      // eslint-disable-next-line global-require, import/no-dynamic-require
-      return require(`@/icons/dapp/${name}`);
-    }
+  setup(props) {
+    const imageUrl = computed(() => {
+      if (props.image) {
+        // eslint-disable-next-line global-require, import/no-dynamic-require
+        return require(`@/icons/dapp/${props.image}`);
+      }
+
+      return null;
+    });
 
     return {
-      getImageUrl,
+      imageUrl,
     };
   },
 });

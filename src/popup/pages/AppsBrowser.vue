@@ -1,7 +1,10 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <div class="apps-browser">
+      <div
+        class="apps-browser"
+        :class="{'app-selected': selectedApp}"
+      >
         <AppsBrowserHeader
           :selected-app="selectedApp"
           :iframe="iframeRef"
@@ -53,14 +56,15 @@
               class="apps-browser-card"
             >
               <AppsBrowserListItem
-                :app-title="app.title"
-                :app-icon="app.icon"
-                :app-image="app.image"
+                :title="app.title"
+                :image="app.image"
                 @click="onSelectApp(app)"
               />
             </div>
           </div>
+          <AppsBrowserHistory @select-app="onSelectApp" />
         </div>
+
         <iframe
           v-else
           ref="iframeRef"
@@ -69,6 +73,7 @@
           @load="onAppLoaded()"
         />
       </div>
+      <BackToTop v-if="!selectedApp" />
     </IonContent>
   </IonPage>
 </template>
@@ -76,6 +81,7 @@
 <script lang="ts">
 import {
   BrowserWindowMessageConnection,
+  RPC_STATUS,
 } from '@aeternity/aepp-sdk';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
@@ -90,15 +96,16 @@ import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { Field } from 'vee-validate';
 import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
 import { useAeSdk, useModals } from '@/composables';
+import { useAppsBrowserHistory } from '@/composables/appsBrowserHistory';
 import InputField from '@/popup/components/InputField.vue';
 import AppsBrowserHeader from '@/popup/components/AppsBrowser/AppsBrowserHeader.vue';
 import AppsBrowserListItem from '@/popup/components/AppsBrowser/AppsBrowserListItem.vue';
+import AppsBrowserHistory from '@/popup/components/AppsBrowser/AppsBrowserHistory.vue';
+import BackToTop from '@/popup/components/BackToTop.vue';
 import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 
 import CloseIcon from '@/icons/circle-close.svg?vue-component';
 import GlobeSmallIcon from '@/icons/globe-small.svg?vue-component';
-import GraffitiIcon from '@/icons/dapp/graffiti.svg?vue-component';
-import DEXIcon from '@/icons/dapp/SuperheroDEX.svg?vue-component';
 
 const DAPPS_LIST = [
   {
@@ -109,12 +116,12 @@ const DAPPS_LIST = [
   {
     title: 'Graffiti Aepp',
     url: 'https://graffiti.aeternity.com',
-    icon: GraffitiIcon,
+    image: 'graffiti.svg',
   },
   {
     title: 'Superhero DEX',
     url: 'https://aepp.dex.superhero.com/swap',
-    icon: DEXIcon,
+    image: 'SuperheroDEX.svg',
   },
 ];
 
@@ -124,14 +131,17 @@ export default defineComponent({
   components: {
     AppsBrowserListItem,
     AppsBrowserHeader,
+    AppsBrowserHistory,
     InputField,
     BtnIcon,
     Field,
     IonPage,
     IonContent,
+    BackToTop,
   },
   setup() {
     const store = useStore();
+    const { addHistoryItem } = useAppsBrowserHistory();
 
     const selectedApp = ref();
     const iframeRef = ref();
@@ -149,6 +159,7 @@ export default defineComponent({
     async function onAppLoaded() {
       if (!iframeRef.value || !selectedApp.value) return;
       const sdk = await getAeSdk();
+      let isAddedToHistory = false;
 
       const target = iframeRef.value.contentWindow;
 
@@ -164,8 +175,14 @@ export default defineComponent({
         shareWalletInfoInterval = setInterval(
           () => {
             try {
-              if (sdk._clients.get(currentClientId.value)) {
+              const rpcClient = sdk._clients.get(currentClientId.value);
+              if (rpcClient) {
                 sdk.shareWalletInfo(currentClientId.value);
+
+                if (rpcClient.status === RPC_STATUS.CONNECTED && !isAddedToHistory) {
+                  isAddedToHistory = true;
+                  addHistoryItem(selectedApp.value);
+                }
               }
             } catch (e) {
               handleUnknownError(e);
@@ -264,11 +281,15 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .apps-browser {
-  height: 100vh;
-  overflow: hidden;
+  height: 100%;
 
-  @include mixins.desktop {
-    height: $extension-height;
+  &.app-selected {
+    height: 100vh;
+    overflow: hidden;
+
+    @include mixins.desktop {
+      height: $extension-height;
+    }
   }
 
   .input-url {
@@ -290,12 +311,12 @@ export default defineComponent({
   }
 
   .apps-browser-popular-apps {
+    @extend %face-sans-16-semi-bold;
+
     margin-left: 12px;
     margin-bottom: 8px;
     opacity: 0.5;
     color: $color-white;
-    font-size: 16px;
-    font-weight: 600;
     line-height: 24px;
   }
 
