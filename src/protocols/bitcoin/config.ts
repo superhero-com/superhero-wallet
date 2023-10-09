@@ -14,7 +14,7 @@ export const DUST_AMOUNT = 546;
 
 export const BTC_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://blockstream.info/api',
+    nodeUrl: 'https://bitcoin.prd.service.aepps.com/api/BTC/mainnet',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: 'https://blockstream.info/testnet/api',
@@ -23,7 +23,7 @@ export const BTC_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings =
 
 export const BTC_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = { // TODO - type
   [NETWORK_TYPE_MAINNET]: {
-    explorerUrl: 'https://blockstream.info',
+    explorerUrl: 'https://bitcoin.prd.service.aepps.com/api/BTC/mainnet',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://blockstream.info/testnet',

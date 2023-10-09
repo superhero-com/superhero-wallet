@@ -44,9 +44,9 @@ export function normalizeTransactionStructure(
     transactionOwner: transactionOwner as any,
     hash: txid, // TODO: we can go with additional field
     microTime: status.block_time * 1000,
-    pending: !status.confirmed,
+    pending: transaction.confirmations === -1,
     tx: {
-      amount: satoshiToBtc(vout[0].value),
+      amount: satoshiToBtc(transaction.value),
       fee: satoshiToBtc(fee),
       senderId: vin[0].prevout.scriptpubkey_address,
       recipientId: vout[0].scriptpubkey_address,
