@@ -34,10 +34,12 @@ export default defineComponent({
 
 .platform-icon {
   height: 44px;
+  width: 40px;
+  padding: 2px 0;
 
   .platform-icon-image {
-    height: 40px;
-    width: 40px;
+    height: 100%;
+    margin: 0 auto;
     transition: all 0.15s ease-in-out;
 
     &.grey {
