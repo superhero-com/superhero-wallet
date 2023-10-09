@@ -32,6 +32,7 @@ import {
   BTC_COINGECKO_COIN_ID,
   BTC_CONTRACT_ID,
   BTC_SYMBOL,
+  DUST_AMOUNT,
 } from '@/protocols/bitcoin/config';
 import {
   getLastNotEmptyAccountIndex,
@@ -204,6 +205,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     const network = networks[activeNetwork.value.type as keyof typeof networks] || networks.bitcoin;
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
+    const amountInSatoshi = toSatoshi(amountInBtc);
+    const feeInSatoshi = toSatoshi(options.fee);
+    let totalBalance: number = 0;
+    let hasSufficientBalance = false;
+
     const psbt = new Psbt({ network });
 
     // Fetch all the Unspent transaction outputs
@@ -213,7 +219,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
      * Fetch raw transaction in hex of only confirmed UTXOs.
      * Filter UTXos from mempool/unconfirmed
      */
-    const fetchHexPromises = utxos
+    const fullUtxos = await Promise.all(utxos
       .map(async ({ txid, vout, value }: { txid: string, vout: number, value: number }) => {
         const rawTransactionBody = await fetch(`${nodeUrl}/tx/${txid}/hex`);
         return {
@@ -222,23 +228,20 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
           value, // Amount
           transactionInHex: await rawTransactionBody.text(),
         };
-      });
+      }));
 
-    const utxoDetails = await Promise.all(fetchHexPromises);
-
-    const amountInSatoshi = toSatoshi(amountInBtc);
-    const feeInSatoshi = toSatoshi(options.fee);
-    let totalBalance: number = 0;
-    let hasSufficientBalance = false;
+    // Sort UTXOs by ascending absolute difference from the amount to send
+    const spendableUtxos = fullUtxos.sort(
+      (a, b) => (
+        Math.abs(a.value - amountInSatoshi + feeInSatoshi)
+        - Math.abs(b.value - amountInSatoshi + feeInSatoshi)
+      ),
+    );
 
     // eslint-disable-next-line no-restricted-syntax
     for (const {
       txid, vout, value, transactionInHex,
-    } of utxoDetails) {
-      /**
-       * Use minimum number of UTXOs for this transaction
-       * TODO: Select minimum number of UTXOs based on the amount and the input size
-       */
+    } of spendableUtxos) {
       if (hasSufficientBalance) {
         break;
       }
@@ -281,7 +284,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     });
 
     // Transfer the rest of the balance back to the senders address
-    if (totalBalance - amountInSatoshi - feeInSatoshi > 0) {
+    if (totalBalance - (amountInSatoshi + feeInSatoshi) > DUST_AMOUNT) {
       psbt.addOutput({
         address: options.address,
         value: totalBalance - amountInSatoshi - feeInSatoshi,
