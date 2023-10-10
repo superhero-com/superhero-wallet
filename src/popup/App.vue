@@ -9,6 +9,7 @@
         'is-extension': IS_EXTENSION,
       }"
     >
+      <Loader v-if="isLoaderVisible" />
       <button
         v-if="qrScannerOpen"
         id="camera-close-btn"
@@ -99,6 +100,7 @@ import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import Loader from '@/popup/components/Loader.vue';
 import Close from '@/icons/close.svg?vue-component';
 
 export default defineComponent({
@@ -110,6 +112,7 @@ export default defineComponent({
     IonApp,
     IonRouterOutlet,
     IonPage,
+    Loader,
   },
   setup() {
     const store = useStore();
@@ -118,7 +121,12 @@ export default defineComponent({
     const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
-    const { isSeedBackedUp, qrScannerOpen, initVisibilityListeners } = useUi();
+    const {
+      isSeedBackedUp,
+      qrScannerOpen,
+      isLoaderVisible,
+      initVisibilityListeners,
+    } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts();
     const { addWalletNotification } = useNotifications({ store });
@@ -263,6 +271,7 @@ export default defineComponent({
       showHeader,
       showScrollbar,
       innerElement,
+      isLoaderVisible,
     };
   },
 });

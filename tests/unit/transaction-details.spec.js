@@ -182,9 +182,8 @@ describe('Transaction Details', () => {
     expect(wrapper.find('.explorer').exists()).toBeTruthy();
   });
 
-  it('should display only spinner before loading transaction', async () => {
+  it('should not display hash before loading transaction', async () => {
     const wrapper = mountComponent();
-    expect(wrapper.find('[data-cy=loader]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=hash]').exists()).toBeFalsy();
   });
 });

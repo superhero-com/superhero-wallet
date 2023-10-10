@@ -264,7 +264,6 @@
               </BtnMain>
             </div>
           </div>
-          <Loader v-if="processingAction" />
         </template>
       </div>
     </IonContent>
@@ -276,7 +275,6 @@ import {
   computed,
   defineComponent,
   ref,
-  onBeforeUnmount,
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
@@ -285,7 +283,7 @@ import { isEqual } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
-import { IonContent, IonPage } from '@ionic/vue';
+import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
 
 import type {
   IGAMetaTx,
@@ -309,6 +307,7 @@ import {
   usePendingMultisigTransaction,
   useMultisigTransactions,
   useModals,
+  useUi,
 } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
@@ -389,6 +388,8 @@ export default defineComponent({
     const {
       isLocalAccountAddress,
     } = useAccounts();
+
+    const { setLoaderVisible } = useUi();
 
     const getTxSymbol = useGetter('getTxSymbol');
 
@@ -530,7 +531,17 @@ export default defineComponent({
       fetchAdditionalInfo();
     });
 
-    onBeforeUnmount(stopFetchingAdditionalInfo);
+    watch(
+      processingAction,
+      (value) => {
+        setLoaderVisible(value);
+      },
+    );
+
+    onIonViewWillLeave(() => {
+      stopFetchingAdditionalInfo();
+      setLoaderVisible(false);
+    });
 
     return {
       AE_SYMBOL,

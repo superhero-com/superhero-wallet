@@ -3,8 +3,6 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="token-container">
         <div class="token-content">
-          <Loader v-if="loading" />
-
           <div class="top">
             <Tokens
               :tokens="tokens"
@@ -124,6 +122,7 @@ import {
   useCurrencies,
   useTokensList,
   useTokenProps,
+  useUi,
 } from '@/composables';
 import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
@@ -135,7 +134,6 @@ import TokenAmount from '../../components/TokenAmount.vue';
 import Tokens from '../../components/Tokens.vue';
 import OpenTransferReceiveModalButton from '../../components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '../../components/OpenTransferSendModalButton.vue';
-import Loader from '../../components/Loader.vue';
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
 import TransactionAndTokenFilter from '../../components/TransactionAndTokenFilter.vue';
@@ -151,7 +149,6 @@ export default defineComponent({
     TokenAmount,
     BtnBox,
     Tokens,
-    Loader,
     Tabs,
     Tab,
     OpenTransferReceiveModalButton,
@@ -165,6 +162,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
     const { setTokenProps } = useTokenProps();
+    const { setLoaderVisible } = useUi();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
@@ -203,7 +201,6 @@ export default defineComponent({
       },
     ];
     const routerHeight = ref<string>();
-    const loading = ref<boolean>(true);
     const tokenPairs = ref<TokenPair>({ token0: null, token1: null });
     const stickyTabsWrapperEl = ref<HTMLDivElement>();
     const tokenBalances = useGetter<IToken[]>('fungibleTokens/tokenBalances');
@@ -260,7 +257,7 @@ export default defineComponent({
         await getAeSdk();
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
       }
-      loading.value = false;
+      setLoaderVisible(false);
       setTimeout(() => {
         observeTabsWrapperHeight();
         calculateRouterHeight();
@@ -268,6 +265,7 @@ export default defineComponent({
     });
 
     onIonViewDidEnter(() => {
+      setLoaderVisible(true);
       setTokenProps({
         contractId,
         tokenPairs: tokenPairs.value,
@@ -278,6 +276,7 @@ export default defineComponent({
     });
 
     onIonViewDidLeave(() => {
+      setLoaderVisible(false);
       setTokenProps(null);
     });
 
@@ -295,7 +294,6 @@ export default defineComponent({
       isAe,
       isNodeMainnet,
       isNodeTestnet,
-      loading,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
       tabs,

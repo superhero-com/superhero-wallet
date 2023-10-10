@@ -18,6 +18,7 @@ export interface IOtherSettings {
 
 const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
+const isLoaderVisible = ref(false);
 const loginTargetLocation = ref<RouteLocationRaw>({ name: ROUTE_ACCOUNT });
 const qrScannerOpen = ref(false);
 
@@ -48,6 +49,10 @@ export function useUi() {
         onChangeCallback();
       }
     }
+  }
+
+  function setLoaderVisible(show: boolean) {
+    isLoaderVisible.value = show;
   }
 
   function setLoginTargetLocation(location: RouteLocationRaw) {
@@ -91,6 +96,7 @@ export function useUi() {
     isAppActive,
     loginTargetLocation,
     qrScannerOpen,
+    isLoaderVisible,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
@@ -98,6 +104,7 @@ export function useUi() {
     setHomeRouteName,
     setLoginTargetLocation,
     setQrScanner,
+    setLoaderVisible,
     isSeedBackedUp: computed(() => otherSettings.value.isSeedBackedUp || false),
     saveErrorLog: computed(() => otherSettings.value.saveErrorLog || false),
   };
