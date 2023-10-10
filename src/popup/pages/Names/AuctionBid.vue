@@ -134,7 +134,7 @@ export default defineComponent({
           name: props.name,
           nameSalt: 0,
           nameFee: aeToAettos(highestBid.value.multipliedBy(AE_AENS_BID_MIN_RATIO).toString()),
-        }) as any,
+        }),
         Tag.NameClaimTx, // https://github.com/aeternity/aepp-sdk-js/issues/1852
       ).fee).shiftedBy(-AE_COIN_PRECISION),
     );
