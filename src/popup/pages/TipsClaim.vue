@@ -41,8 +41,6 @@
         >
           {{ $t('common.confirm') }}
         </BtnMain>
-
-        <Loader v-if="loading" />
       </div>
     </IonContent>
   </IonPage>
@@ -66,6 +64,7 @@ import {
   useModals,
   useAeSdk,
   useTippingContracts,
+  useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
@@ -101,9 +100,9 @@ export default defineComponent({
     const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const { getTippingContracts } = useTippingContracts({ store });
+    const { setLoaderVisible } = useUi();
 
     const tipUrl = ref('');
-    const loading = ref(false);
 
     const normalizedUrl = computed(
       () => isUrlValid(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
@@ -111,7 +110,7 @@ export default defineComponent({
 
     async function handleClaimTips() {
       const url = normalizedUrl.value;
-      loading.value = true;
+      setLoaderVisible(true);
       try {
         const { tippingV1 } = await getTippingContracts();
         const claimAmount = parseFloat(
@@ -157,11 +156,13 @@ export default defineComponent({
           throw error;
         }
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     onMounted(async () => {
+      setLoaderVisible(false);
+
       if (IS_EXTENSION && browser) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         if (tab?.url && isUrlValid(tab.url)) {
@@ -172,7 +173,6 @@ export default defineComponent({
 
     return {
       activeAccount,
-      loading,
       normalizedUrl,
       tipUrl,
       isTippingSupported,

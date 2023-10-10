@@ -27,8 +27,6 @@
             {{ $t('common.confirm') }}
           </BtnMain>
         </FixedScreenFooter>
-
-        <Loader v-if="loading" />
       </div>
     </ioncontent>
   </ionpage>
@@ -51,6 +49,7 @@ import {
   useAeSdk,
   useDeepLinkApi,
   useModals,
+  useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -73,6 +72,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
+    const { setLoaderVisible } = useUi();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
@@ -88,7 +88,6 @@ export default defineComponent({
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
-    const loading = ref<boolean>(false);
 
     watch(
       () => route,
@@ -106,7 +105,7 @@ export default defineComponent({
     );
 
     async function sendComment() {
-      loading.value = true;
+      setLoaderVisible(true);
 
       try {
         const postToCommentApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/comment/api/`, { body });
@@ -130,15 +129,15 @@ export default defineComponent({
         e.payload = { id, parentId, text };
         throw e;
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     // Wait until the `isTippingSupported` is established by the aeSdk
     (async () => {
-      loading.value = true;
+      setLoaderVisible(true);
       await getAeSdk();
-      loading.value = false;
+      setLoaderVisible(false);
     })();
 
     return {
@@ -147,7 +146,6 @@ export default defineComponent({
       id,
       parentId,
       text,
-      loading,
       isTippingSupported,
       sendComment,
       openCallbackOrGoHome,

@@ -2,8 +2,7 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <div class="transaction-details">
-        <Loader v-if="!transaction || transaction.incomplete" />
-        <template v-else>
+        <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
             :transaction="transaction"
             :coin-symbol="AE_SYMBOL"
@@ -61,6 +60,7 @@ import {
   defineComponent,
   ref,
   onMounted,
+  watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
@@ -73,6 +73,7 @@ import {
   useMultisigAccounts,
   useTransactionList,
   useTransactionTx,
+  useUi,
 } from '@/composables';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import {
@@ -122,6 +123,7 @@ export default defineComponent({
     const { getMiddleware } = useMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts({ store });
+    const { setLoaderVisible } = useUi();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -252,6 +254,15 @@ export default defineComponent({
         }
       }
     });
+
+    watch(
+      transaction,
+      (value) => {
+        const loading = !!(!value || value.incomplete);
+        setLoaderVisible(loading);
+      },
+      { immediate: true, deep: true },
+    );
 
     return {
       AE_SYMBOL,

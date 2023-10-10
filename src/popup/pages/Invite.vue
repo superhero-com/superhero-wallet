@@ -60,10 +60,9 @@
             v-for="link in invites"
             v-bind="link ?? null"
             :key="link.secretKey"
-            @loading="(val) => (loading = val)"
+            @loading="(val) => setLoaderVisible(val)"
           />
         </div>
-        <Loader v-if="loading" />
       </div>
     </IonContent>
   </IonPage>
@@ -86,6 +85,7 @@ import {
   useBalances,
   useMaxAmount,
   useCurrencies,
+  useUi,
 } from '../../composables';
 
 import AccountInfo from '../components/AccountInfo.vue';
@@ -108,12 +108,12 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const loading = ref(false);
 
     const { activeAccount } = useAccounts({ store });
     const { marketData } = useCurrencies({ store });
     const { getAeSdk } = useAeSdk({ store });
     const { balance } = useBalances({ store });
+    const { setLoaderVisible } = useUi();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -127,7 +127,7 @@ export default defineComponent({
     const invites = useState('invites', 'invites');
 
     async function generate() {
-      loading.value = true;
+      setLoaderVisible(true);
       const { publicKey, secretKey } = generateKeyPair();
 
       try {
@@ -142,7 +142,7 @@ export default defineComponent({
         if (await store.dispatch('invites/handleNotEnoughFoundsError', { error })) return;
         throw error;
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
 
       store.commit('invites/add', Buffer.from(secretKey, 'hex').slice(0, 32));
@@ -156,10 +156,10 @@ export default defineComponent({
       balance,
       fee,
       invites,
-      loading,
       max,
       formModel,
       generate,
+      setLoaderVisible,
     };
   },
 });

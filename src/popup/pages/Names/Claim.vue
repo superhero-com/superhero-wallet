@@ -43,8 +43,6 @@
           </div>
         </CheckBox>
 
-        <Loader v-if="loading" />
-
         <i18n-t
           keypath="pages.names.claim.short-names.message"
           tag="p"
@@ -82,7 +80,7 @@ import {
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
-import { IonPage, IonContent } from '@ionic/vue';
+import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
@@ -90,7 +88,12 @@ import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
-import { useAccounts, useModals, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useModals,
+  useAeSdk,
+  useUi,
+} from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import {
@@ -125,9 +128,10 @@ export default defineComponent({
     const errorName = useFieldError('name');
     const { t } = useI18n();
 
+    const { setLoaderVisible } = useUi();
+
     const name = ref('');
     const autoExtend = ref(false);
-    const loading = ref(false);
     const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
     const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
@@ -172,7 +176,7 @@ export default defineComponent({
           title: t('modals.name-exist.msg'),
         });
       } else {
-        loading.value = true;
+        setLoaderVisible(true);
         let claimTxHash;
 
         try {
@@ -193,7 +197,7 @@ export default defineComponent({
           });
           return;
         } finally {
-          loading.value = false;
+          setLoaderVisible(false);
         }
 
         try {
@@ -213,6 +217,10 @@ export default defineComponent({
       }
     }
 
+    onIonViewWillEnter(() => {
+      setLoaderVisible(false);
+    });
+
     return {
       AE_AENS_DOMAIN,
       autoExtend,
@@ -221,7 +229,6 @@ export default defineComponent({
       name,
       totalNameClaimAmount,
       errorName,
-      loading,
       maxNameLength,
       claim,
     };

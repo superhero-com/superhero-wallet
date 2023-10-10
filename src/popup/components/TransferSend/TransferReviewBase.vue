@@ -76,8 +76,6 @@
       class="details-item"
       :payload="transferData.payload"
     />
-
-    <Loader v-if="loading" />
   </div>
 </template>
 
@@ -85,11 +83,14 @@
 import {
   computed,
   defineComponent,
+  onUnmounted,
   PropType,
+  watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import {
   useAccounts,
+  useUi,
 } from '@/composables';
 import {
   AE_CONTRACT_ID,
@@ -129,12 +130,24 @@ export default defineComponent({
   setup(props) {
     const store = useStore();
     const { activeAccount } = useAccounts({ store });
+    const { setLoaderVisible } = useUi();
 
     const isRecipientName = computed(
       () => props.recipientAddress && isAensNameValid(props.recipientAddress),
     );
 
     const tokenSymbol = computed(() => props.transferData.selectedAsset?.symbol || '-');
+
+    watch(
+      () => props.loading,
+      (loading) => {
+        setLoaderVisible(loading);
+      },
+    );
+
+    onUnmounted(() => {
+      setLoaderVisible(false);
+    });
 
     return {
       AE_CONTRACT_ID,

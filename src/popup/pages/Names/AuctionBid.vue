@@ -51,7 +51,6 @@
             {{ $t('pages.names.auctions.place-bid') }}
           </BtnMain>
         </div>
-        <Loader v-if="loading" />
       </div>
     </IonContent>
   </IonPage>
@@ -78,7 +77,7 @@ import {
 import { useForm, useFieldError, Field } from 'vee-validate';
 
 import type { IAuctionBid } from '@/types';
-import { useModals, useAeSdk } from '@/composables';
+import { useModals, useAeSdk, useUi } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
@@ -118,8 +117,8 @@ export default defineComponent({
 
     const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
+    const { setLoaderVisible } = useUi();
 
-    const loading = ref(false);
     const amount = ref('');
 
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
@@ -153,7 +152,7 @@ export default defineComponent({
       const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {
-        loading.value = true;
+        setLoaderVisible(true);
         await aeSdk.aensBid(props.name, aeToAettos(amount.value));
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
@@ -166,13 +165,12 @@ export default defineComponent({
         }
         openDefaultModal({ msg });
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     return {
       PROTOCOL_AETERNITY,
-      loading,
       amount,
       amountTotal,
       amountError,

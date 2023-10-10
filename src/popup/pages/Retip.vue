@@ -62,8 +62,6 @@
         >
           {{ $t('common.cancel') }}
         </BtnMain>
-
-        <Loader v-if="loading" />
       </div>
     </ioncontent>
   </ionpage>
@@ -98,6 +96,7 @@ import {
   useTippingContracts,
   useAeSdk,
   useTransactionList,
+  useUi,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 
@@ -126,6 +125,7 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
     const errorAmount = useFieldError();
+    const { setLoaderVisible } = useUi();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -147,7 +147,6 @@ export default defineComponent({
       id: '',
     });
 
-    const loading = ref<boolean>(false);
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
@@ -158,7 +157,7 @@ export default defineComponent({
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
       const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
-      loading.value = true;
+      setLoaderVisible(true);
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tipId?.includes('_v2') || tipId?.includes('_v3')
@@ -223,12 +222,12 @@ export default defineComponent({
         error.payload = tip.value;
         throw error;
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     onMounted(async () => {
-      loading.value = true;
+      setLoaderVisible(true);
       formModel.value.selectedAsset = ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY)
         .getDefaultCoin(marketData.value!, +balance.value);
@@ -241,14 +240,13 @@ export default defineComponent({
         error.payload = tipId;
         throw error;
       }
-      loading.value = false;
+      setLoaderVisible(false);
     });
 
     return {
       PROTOCOL_AETERNITY,
       tip,
       formModel,
-      loading,
       urlStatus,
       isTippingSupported,
       numericBalance,
