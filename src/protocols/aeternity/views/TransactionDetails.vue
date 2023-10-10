@@ -23,20 +23,20 @@
           >
             <template #tokens>
               <TransactionTokens
-                  :transaction="transaction"
-                  :direction="direction"
-                  :is-allowance="isDexAllowance"
-                  :error="isErrorTransaction"
-                  :reversed="isPool"
-                  icon-size="md"
-                  :is-rounded="false"
-                  multiple-rows
+                :transaction="transaction"
+                :direction="direction"
+                :is-allowance="isDexAllowance"
+                :error="isErrorTransaction"
+                :reversed="isPool"
+                icon-size="md"
+                :is-rounded="false"
+                multiple-rows
               />
             </template>
 
             <template
-                v-if="isSwap"
-                #swap-data
+              v-if="isSwap"
+              #swap-data
             >
               <SwapRates :transaction="transaction" />
               <SwapRoute :transaction="transaction" />
@@ -44,26 +44,26 @@
 
             <template #additional-content>
               <TransactionDetailsPoolTokens
-                  v-if="(isPool || isDexAllowance)"
-                  :transaction="transaction"
-                  :direction="direction"
-                  :tx-function="transaction.tx.function"
-                  :is-allowance="isDexAllowance"
-                  :reversed="isPool"
+                v-if="(isPool || isDexAllowance)"
+                :transaction="transaction"
+                :direction="direction"
+                :tx-function="transaction.tx.function"
+                :is-allowance="isDexAllowance"
+                :reversed="isPool"
               />
 
               <DetailsItem
-                  v-if="tipUrl"
-                  :label="$t('pages.transactionDetails.tipUrl')"
-                  class="tip-url"
-                  data-cy="tip-url"
+                v-if="tipUrl"
+                :label="$t('pages.transactionDetails.tipUrl')"
+                class="tip-url"
+                data-cy="tip-url"
               >
                 <template #value>
                   <CopyText :value="tipUrl">
                     <LinkButton :to="tipLink">
                       <Truncate
-                          :str="tipUrl"
-                          fixed
+                        :str="tipUrl"
+                        fixed
                       />
                     </LinkButton>
                   </CopyText>
@@ -73,55 +73,55 @@
 
             <template #multisig-content>
               <DetailsItem
-                  v-if="multisigTransactionFeePaidBy"
-                  :label="$t('pages.transactionDetails.feePaidBy')"
-                  small
+                v-if="multisigTransactionFeePaidBy"
+                :label="$t('pages.transactionDetails.feePaidBy')"
+                small
               >
                 <div class="row payer-id">
                   <Avatar
-                      :address="multisigTransactionFeePaidBy"
-                      size="sm"
+                    :address="multisigTransactionFeePaidBy"
+                    size="sm"
                   />
                   <div>
                     <DialogBox
-                        v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
-                        class="dialog-box"
-                        dense
-                        position="bottom"
+                      v-if="isLocalAccountAddress(multisigTransactionFeePaidBy)"
+                      class="dialog-box"
+                      dense
+                      position="bottom"
                     >
                       {{ $t('common.you') }}
                     </DialogBox>
                     <CopyText
-                        hide-icon
-                        :value="multisigTransactionFeePaidBy"
-                        :copied-text="$t('common.addressCopied')"
+                      hide-icon
+                      :value="multisigTransactionFeePaidBy"
+                      :copied-text="$t('common.addressCopied')"
                     >
-                  <span class="text-address">
-                    {{ splitAddress(multisigTransactionFeePaidBy) }}
-                  </span>
+                      <span class="text-address">
+                        {{ splitAddress(multisigTransactionFeePaidBy) }}
+                      </span>
                     </CopyText>
                   </div>
                 </div>
               </DetailsItem>
 
               <DetailsItem
-                  v-if="multisigContractId"
-                  :label="$t('pages.transactionDetails.vaultContractId')"
-                  small
+                v-if="multisigContractId"
+                :label="$t('pages.transactionDetails.vaultContractId')"
+                small
               >
                 <div class="row">
                   <Avatar
-                      :address="multisigContractId"
-                      size="sm"
+                    :address="multisigContractId"
+                    size="sm"
                   />
                   <CopyText
-                      hide-icon
-                      :value="multisigContractId"
-                      :copied-text="$t('common.addressCopied')"
+                    hide-icon
+                    :value="multisigContractId"
+                    :copied-text="$t('common.addressCopied')"
                   >
-                <span class="text-address">
-                  {{ splitAddress(multisigContractId) }}
-                </span>
+                    <span class="text-address">
+                      {{ splitAddress(multisigContractId) }}
+                    </span>
                   </CopyText>
                 </div>
               </DetailsItem>
@@ -129,24 +129,24 @@
 
             <template #gas>
               <DetailsItem
-                  v-if="gasPrice"
-                  :label="$t('pages.transactionDetails.gasPrice')"
-                  data-cy="gas-price"
+                v-if="gasPrice"
+                :label="$t('pages.transactionDetails.gasPrice')"
+                data-cy="gas-price"
               >
                 <template #value>
                   <TokenAmount
-                      :amount="+aettosToAe(gasPrice)"
-                      :symbol="AE_SYMBOL"
-                      :protocol="PROTOCOL_AETERNITY"
-                      hide-fiat
+                    :amount="+aettosToAe(gasPrice)"
+                    :symbol="AE_SYMBOL"
+                    :protocol="PROTOCOL_AETERNITY"
+                    hide-fiat
                   />
                 </template>
               </DetailsItem>
               <DetailsItem
-                  v-if="gasUsed"
-                  :value="gasUsed"
-                  :label="$t('pages.transactionDetails.gasUsed')"
-                  data-cy="gas"
+                v-if="gasUsed"
+                :value="gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
               />
             </template>
           </TransactionDetailsBase>
