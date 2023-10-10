@@ -1,35 +1,35 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-  <div class="transaction-details">
-    <Loader v-if="!transaction" />
-    <template v-else>
-      <TransactionDetailsBase
-        :transaction="transaction"
-        :coin-symbol="BTC_SYMBOL"
-        :transaction-fee="transactionFee"
-        :token-symbol="BTC_SYMBOL"
-        :total-amount="totalAmount"
-        :explorer-url="explorerUrl"
-        :hash="hash"
-        :none-ae-coin="tokens"
-        :protocol="PROTOCOL_BITCOIN"
-        show-header
-      >
-        <template #tokens>
-          <TransactionTokens
-            :ext-tokens="tokens"
-            :is-rounded="!!tokens"
+      <div class="transaction-details">
+        <Loader v-if="!transaction" />
+        <template v-else>
+          <TransactionDetailsBase
             :transaction="transaction"
-            :direction="direction"
-            icon-size="md"
-            multiple-rows
-          />
+            :coin-symbol="BTC_SYMBOL"
+            :transaction-fee="transactionFee"
+            :token-symbol="BTC_SYMBOL"
+            :total-amount="totalAmount"
+            :explorer-url="explorerUrl"
+            :hash="hash"
+            :none-ae-coin="tokens"
+            :protocol="PROTOCOL_BITCOIN"
+            show-header
+          >
+            <template #tokens>
+              <TransactionTokens
+                :ext-tokens="tokens"
+                :is-rounded="!!tokens"
+                :transaction="transaction"
+                :direction="direction"
+                icon-size="md"
+                multiple-rows
+              />
+            </template>
+          </TransactionDetailsBase>
         </template>
-      </TransactionDetailsBase>
-    </template>
-  </div>
-      </IonContent>
+      </div>
+    </IonContent>
   </IonPage>
 </template>
 
