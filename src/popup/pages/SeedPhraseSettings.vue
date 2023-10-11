@@ -56,7 +56,7 @@ export default {
 @use '../../styles/typography';
 
 .seed-phrase-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .white-text {
     color: variables.$color-white;

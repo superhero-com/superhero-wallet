@@ -50,7 +50,7 @@ export default {
 @use '../../styles/typography';
 
 .notification-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .switches {
     margin-top: 20px;

@@ -77,7 +77,7 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .networks {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .networks-list {
     margin-top: 20px;
