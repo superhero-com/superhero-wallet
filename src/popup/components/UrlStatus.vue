@@ -102,9 +102,11 @@ export default defineComponent({
 @use '../../styles/typography';
 @use '../../styles/mixins';
 
-.url-status,
-.icon-link {
+.url-status {
   @extend %face-sans-14-regular;
+
+  display: flex;
+  align-items: center;
 
   &.blacklisted,
   &.alert,
@@ -129,14 +131,19 @@ export default defineComponent({
   }
 
   .title {
-    padding-right: 10px;
+    margin-right: 8px;
   }
 
-  .icon {
-    width: 22px;
-    height: 22px;
-    vertical-align: text-bottom;
-    cursor: pointer;
+  .icon-link {
+    color: inherit;
+    display: inline-block;
+    line-height: 1;
+
+    .icon {
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+    }
   }
 }
 </style>

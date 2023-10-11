@@ -6,20 +6,25 @@
           :balance="numericBalance"
           :protocol="PROTOCOL_AETERNITY"
         />
-        <div class="section-title">
-          {{ $t('pages.tipPage.url') }}
-        </div>
 
-        <div
-          v-if="urlStatus"
-          class="url-bar"
+        <DetailsItem
+          v-if="tip.url"
+          class="url-info"
+          :label="$t('pages.tipPage.url')"
         >
-          <UrlStatus :status="urlStatus" />
-          <a>{{ tip.url }}</a>
-        </div>
+          <a
+            :href="tip.url"
+            class="url"
+            v-text="tip.url"
+          />
+          <UrlStatus
+            v-if="urlStatus"
+            :status="urlStatus"
+          />
+        </DetailsItem>
 
         <Field
-          v-slot="{ field, errorMessage}"
+          v-slot="{ field, errorMessage }"
           name="amount"
           :rules="{
             required: true,
@@ -47,21 +52,20 @@
           {{ tip.title }}
         </div>
 
-        <BtnMain
-          class="bottom-btn"
-          extend
-          :disabled="!isTippingSupported || errorAmount"
-          @click="sendTip"
-        >
-          {{ $t('common.confirm') }}
-        </BtnMain>
-        <BtnMain
-          class="bottom-btn"
-          extend
-          @click="openCallbackOrGoHome(false)"
-        >
-          {{ $t('common.cancel') }}
-        </BtnMain>
+        <div class="button-wrapper">
+          <BtnMain
+            variant="muted"
+            extra-padded
+            :text="$t('common.cancel')"
+            @click="openCallbackOrGoHome(false)"
+          />
+          <BtnMain
+            wide
+            :disabled="!isTippingSupported || errorAmount"
+            :text="$t('common.confirm')"
+            @click="sendTip"
+          />
+        </div>
 
         <Loader v-if="loading" />
       </div>
@@ -108,6 +112,7 @@ import InputAmount from '../components/InputAmount.vue';
 import UrlStatus from '../components/UrlStatus.vue';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import BalanceInfo from '../components/BalanceInfo.vue';
+import DetailsItem from '../components/DetailsItem.vue';
 
 export default defineComponent({
   name: 'Retip',
@@ -119,6 +124,7 @@ export default defineComponent({
     Field,
     IonPage,
     IonContent,
+    DetailsItem,
   },
   setup() {
     const store = useStore();
@@ -148,8 +154,8 @@ export default defineComponent({
     });
 
     const loading = ref<boolean>(false);
-
     const urlStatus = computed(() => getTippingUrlStatus(tip.value.url));
+
     const numericBalance = computed<number>(() => balance.value.toNumber());
 
     async function sendTip() {
@@ -270,44 +276,24 @@ export default defineComponent({
 .retip {
   padding: 16px;
 
-  .url-bar {
-    display: flex;
-    align-items: center;
+  .url-info {
+    margin-block: 30px 20px;
 
-    svg {
-      width: 24px;
-      height: 24px;
-    }
+    .url {
+      @extend %face-sans-14-medium;
 
-    > a {
+      display: block;
+      margin-bottom: 2px;
       overflow-wrap: anywhere;
-      text-align: left;
+      line-height: 1.4em;
       color: variables.$color-white;
-      flex-grow: 1;
       text-decoration: none;
-      width: 90%;
-      margin: 8px 0 8px 10px;
-
-      @extend %face-sans-11-regular;
     }
   }
 
-  .input-field + .button {
-    margin-top: 50px;
-  }
-
-  .section-title {
-    margin-bottom: 8px;
-    margin-top: 16px;
-    color: variables.$color-white;
-    text-align: left;
-
-    @extend %face-sans-16-regular;
-  }
-
-  .bottom-btn {
-    max-width: 280px;
-    margin: 10px auto 0;
+  .button-wrapper {
+    display: flex;
+    gap: var(--gap);
   }
 }
 </style>
