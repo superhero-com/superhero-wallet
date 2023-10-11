@@ -3,11 +3,9 @@
     :key="activeAccount.address"
     class="transaction-list"
   >
-    <InfiniteScroll
+    <div
       class="list"
       data-cy="list"
-      is-more-data
-      @loadMore="$emit('loadMore')"
     >
       <TransactionListItem
         v-for="transaction in filteredTransactions"
@@ -16,7 +14,7 @@
         :multisig-transaction="getMultisigTransaction(transaction)"
         :is-multisig="isMultisig"
       />
-    </InfiniteScroll>
+    </div>
     <AnimatedSpinner
       v-if="loading"
       class="spinner"
@@ -55,7 +53,6 @@ import {
   useAccounts,
   useAeSdk,
   useTransactionAndTokenFilter,
-  useViewport,
 } from '@/composables';
 import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 import {
@@ -70,11 +67,9 @@ import {
 
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
-import InfiniteScroll from './InfiniteScroll.vue';
 
 export default defineComponent({
   components: {
-    InfiniteScroll,
     TransactionListItem,
     AnimatedSpinner,
   },
@@ -85,12 +80,11 @@ export default defineComponent({
     loading: Boolean,
   },
   emits: ['loadMore'],
-  setup(props, { emit }) {
+  setup(props) {
     const store = useStore();
     const { t } = useI18n();
     const { accounts, activeAccount } = useAccounts();
     const { dexContracts } = useAeSdk({ store });
-    const { viewportElement } = useViewport();
 
     const {
       searchPhrase,
@@ -147,29 +141,38 @@ export default defineComponent({
       );
     }
 
-    function checkLoadMore() {
-      if (!viewportElement.value) {
-        return;
-      }
+    // function checkLoadMore() {
+    //   const scrollElement = scrollElementChild.value?.closest('ion-content');
+    //   if (!scrollElement) {
+    //     return;
+    //   }
 
-      const {
-        scrollHeight,
-        scrollTop,
-        clientHeight,
-      } = viewportElement.value!;
+    //   console.log('scrollElement', scrollElement);
 
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        emit('loadMore');
-      }
-    }
+    //   const {
+    //     scrollHeight,
+    //     scrollTop,
+    //     clientHeight,
+    //   } = scrollElement!;
+
+    //   // TODO USE IONIC INFINITE SCROLL COMPONENT
+    //   console.log('checkLoadMore', scrollHeight, scrollTop, clientHeight);
+    //   if (scrollHeight === 0 && clientHeight === 0 && scrollTop === 0) {
+    //     return;
+    //   }
+    //   if (scrollHeight - scrollTop <= clientHeight + 100) {
+    //     console.log('load  more');
+    //     emit('loadMore');
+    //   }
+    // }
 
     watch(displayMode, () => {
-      checkLoadMore();
+      // checkLoadMore();
     });
 
     watch(() => props.loading, (val) => {
       if (!val) {
-        checkLoadMore();
+        // checkLoadMore();
       }
     });
 

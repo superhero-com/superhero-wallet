@@ -6,7 +6,6 @@
           v-if="isOnline"
           :loading="loading"
           :transactions="loadedTransactionList"
-          @load-more="loadMore()"
         />
         <MessageOffline
           v-else
@@ -14,6 +13,11 @@
           :text="$t('modals.accountDetails.transactionsNotAvailable')"
         />
       </div>
+      <!-- Moved here because most ionic components need to be inside a IonContent  -->
+      <IonInfiniteScroll
+        threshold="100px"
+        @ion-infinite="handleInfiniteScroll"
+      />
     </IonContent>
   </IonPage>
 </template>
@@ -28,7 +32,13 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
+import {
+  IonContent,
+  IonPage,
+  onIonViewWillEnter,
+  IonInfiniteScroll,
+  InfiniteScrollCustomEvent,
+} from '@ionic/vue';
 import { throttle } from 'lodash-es';
 
 import type { ICommonTransaction } from '@/types';
@@ -50,6 +60,7 @@ export default defineComponent({
     MessageOffline,
     IonPage,
     IonContent,
+    IonInfiniteScroll,
   },
   setup() {
     /**
@@ -104,10 +115,16 @@ export default defineComponent({
       }
     }
 
-    async function loadMore() {
-      if (!loading.value && !isDestroyed.value && canLoadMore.value) {
-        await fetchTransactionList();
-      }
+    // async function loadMore() {
+    //   if (!loading.value && !isDestroyed.value && canLoadMore.value) {
+    //     await fetchTransactionList();
+    //   }
+    // }
+
+    async function handleInfiniteScroll(ev: InfiniteScrollCustomEvent) {
+      console.log('load more');
+      // await loadMore();
+      ev.target.complete();
     }
 
     function throttledScroll() {
@@ -149,8 +166,9 @@ export default defineComponent({
     return {
       isOnline,
       loading,
+      canLoadMore,
       loadedTransactionList,
-      loadMore,
+      handleInfiniteScroll,
       innerScrollElem,
     };
   },

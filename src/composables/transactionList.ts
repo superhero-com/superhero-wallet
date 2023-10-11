@@ -1,5 +1,5 @@
 import { orderBy, uniqBy } from 'lodash-es';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   ITransaction,
@@ -8,13 +8,13 @@ import type {
   IDefaultComposableOptions,
 } from '@/types';
 import {
-  TRANSACTIONS_LOCAL_STORAGE_KEY,
+  // TRANSACTIONS_LOCAL_STORAGE_KEY,
   TX_DIRECTION,
 } from '@/constants';
 import {
   fetchJson,
-  getLocalStorageItem,
-  setLocalStorageItem,
+  // getLocalStorageItem,
+  // setLocalStorageItem,
 } from '@/utils';
 import JsonBig from '@/lib/json-big';
 import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
@@ -315,30 +315,30 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
     );
   }
 
-  watch(nodeNetworkId, (value, oldValue) => {
-    if (value) {
-      setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, oldValue!], transactions.value);
-      transactions.value = getLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, value!]) || {};
+  // watch(nodeNetworkId, (value, oldValue) => {
+  //   if (value) {
+  //     setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, oldValue!], transactions.value);
+  //     transactions.value = getLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, value!]) || {};
 
-      Object.entries(transactions.value).forEach(([address, transactionState]) => {
-        (transactionState.pending[nodeNetworkId.value!])?.filter(({ sent = false }) => !sent)
-          .forEach((transaction) => {
-            if (Date.now() - (transaction.microTime || 0) > 600000) {
-              removePendingTransactionByAccount(
-                address as Encoded.AccountAddress,
-                transaction.hash,
-              );
-            } else {
-              waitTransactionMined(address as Encoded.AccountAddress, transaction.hash);
-            }
-          });
-      });
-    }
-  });
+  //     Object.entries(transactions.value).forEach(([address, transactionState]) => {
+  //       (transactionState.pending[nodeNetworkId.value!])?.filter(({ sent = false }) => !sent)
+  //         .forEach((transaction) => {
+  //           if (Date.now() - (transaction.microTime || 0) > 600000) {
+  //             removePendingTransactionByAccount(
+  //               address as Encoded.AccountAddress,
+  //               transaction.hash,
+  //             );
+  //           } else {
+  //             waitTransactionMined(address as Encoded.AccountAddress, transaction.hash);
+  //           }
+  //         });
+  //     });
+  //   }
+  // });
 
-  watch(transactions, (value) => {
-    setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, nodeNetworkId.value!], value);
-  }, { deep: true, immediate: true });
+  // watch(transactions, (value) => {
+  //   setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, nodeNetworkId.value!], value);
+  // }, { deep: true, immediate: true });
 
   return {
     getAccountAllTransactions,
