@@ -63,7 +63,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .reset-wallet-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .reset-wallet-button {
     margin-top: 34px;

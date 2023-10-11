@@ -70,7 +70,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .currency-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .options {
     margin-top: 20px;

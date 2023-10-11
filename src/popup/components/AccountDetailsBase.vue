@@ -252,7 +252,7 @@ export default defineComponent({
     gap: var(--gap);
     width: 100%;
     margin-top: 20px;
-    padding: 0 var(--screen-padding-x);
+    padding-inline: var(--screen-padding-x);
   }
 
   .header {
@@ -265,7 +265,7 @@ export default defineComponent({
 
   .tabs-content {
     position: relative;
-    padding: 0 var(--screen-padding-x);
+    padding-inline: var(--screen-padding-x);
   }
 
   .close-button {

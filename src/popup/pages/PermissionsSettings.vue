@@ -72,7 +72,7 @@ export default {
 @use '../../styles/typography';
 
 .permissions-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .hosts {
     margin-bottom: 26px;

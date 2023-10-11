@@ -54,7 +54,7 @@ export default {
 @use '../../styles/typography';
 
 .language-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .languages {
     margin-top: 16px;

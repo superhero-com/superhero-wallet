@@ -112,7 +112,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .seed-phrase-details {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .mnemonics {
     background: rgba(variables.$color-white, 0.15);
