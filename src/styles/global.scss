@@ -9,7 +9,6 @@
 /* Basic CSS for apps built with Ionic */
 @import '@ionic/vue/css/normalize.css';
 @import '@ionic/vue/css/structure.css';
-@import '@ionic/vue/css/typography.css';
 
 * {
   box-sizing: border-box;
@@ -289,10 +288,14 @@ hr {
   }
 }
 
-.styled-scrollbar {
+.styled-scrollbar,
+.styled-scrollbar ion-content {
+  --overflow: auto;
+
   scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
   scrollbar-width: thin; // Firefox
   -ms-overflow-style: auto;
+  overflow: auto;
 
   &::-webkit-scrollbar {
     display: block;
