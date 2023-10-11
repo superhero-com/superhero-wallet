@@ -955,7 +955,7 @@
       "section11Title": "11. FINAL PROVISIONS"
     },
     "tipPage": {
-      "url": "Send Tip to",
+      "url": "Send tip to",
       "claimingExplanation": "With Superhero wallet URL owners will be able to claim all tips from the URL as soon as their account address can be found on the page.",
       "maxNoteLengthError": "Please enter a message below 280 characters.",
       "minAmountError": "Tips should be over 0.01 USD in tokens."
