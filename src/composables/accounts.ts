@@ -189,6 +189,11 @@ export function useAccounts() {
     }
   }
 
+  function setActiveAccountByProtocol(protocol: Protocol) {
+    const account = getLastActiveProtocolAccount(protocol);
+    setActiveAccountByProtocolAndIdx(protocol, account?.idx || 0);
+  }
+
   function setMnemonic(newMnemonic: string) {
     mnemonic.value = newMnemonic;
   }
@@ -275,6 +280,7 @@ export function useAccounts() {
     setActiveAccountByAddress,
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,
+    setActiveAccountByProtocol,
     setMnemonic,
     setGeneratedMnemonic,
     resetAccounts,

@@ -22,6 +22,8 @@ export abstract class BaseProtocolAdapter {
 
   abstract getCoinSymbol(getShort: boolean): string;
 
+  abstract getUrlTokenKey(): string;
+
   abstract getCoinGeckoCoinId(): string;
 
   abstract getDefaultAssetContractId(): string;
