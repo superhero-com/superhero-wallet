@@ -86,7 +86,6 @@ If you discover a security vulnerability within this application, please get in 
 This project is tested with BrowserStack.
 
 ## Contribution
-
 Contributions are more than welcome.
 
 If you spot an issue while testing/using the extension - [submit an issue](https://github.com/aeternity/superhero-wallet/issues)
