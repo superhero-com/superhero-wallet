@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, watch } from 'vue';
 import { useViewport } from '../../composables/viewport';
 
 export default defineComponent({
@@ -15,13 +15,19 @@ export default defineComponent({
   },
   emits: ['loadMore'],
   setup(props, { emit }) {
-    const { onViewportScroll } = useViewport();
+    const { viewportElement, onViewportScroll } = useViewport();
 
-    onViewportScroll(({ isOutsideOfViewport }) => {
-      if (props.isMoreData && isOutsideOfViewport) {
-        emit('loadMore');
-      }
-    });
+    watch(
+      viewportElement,
+      () => {
+        onViewportScroll(({ isOutsideOfViewport }) => {
+          if (props.isMoreData && isOutsideOfViewport) {
+            emit('loadMore');
+          }
+        });
+      },
+      { immediate: true },
+    );
   },
 });
 </script>

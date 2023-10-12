@@ -19,7 +19,6 @@
       </button>
       <div
         v-show="!qrScannerOpen"
-        ref="innerElement"
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
@@ -92,7 +91,6 @@ import {
   useModals,
   useNotifications,
   useUi,
-  useViewport,
 } from '@/composables';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
@@ -129,7 +127,6 @@ export default defineComponent({
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
-    const { initViewport } = useViewport();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
 
     const innerElement = ref<HTMLDivElement>();
@@ -223,7 +220,6 @@ export default defineComponent({
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
-      initViewport(innerElement.value);
 
       // Hide splash screen programmatically when app is ready
       // to avoid white screen on app start

@@ -1,7 +1,10 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <div class="notifications">
+      <div
+        ref="innerElement"
+        class="notifications"
+      >
         <InfiniteScroll
           v-if="notificationsToShow.length"
           :is-more-data="canLoadMore"
@@ -31,10 +34,12 @@ import {
   onBeforeUnmount,
   onMounted,
   nextTick,
+  ref,
 } from 'vue';
 import { useStore } from 'vuex';
 import { IS_EXTENSION } from '@/constants';
 
+import { useViewport } from '@/composables';
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
@@ -49,6 +54,9 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
+    const { initViewport } = useViewport();
+
+    const innerElement = ref<HTMLElement>();
 
     const {
       notificationsToShow,
@@ -58,6 +66,7 @@ export default defineComponent({
     } = useNotifications({ store, requirePolling: true });
 
     onMounted(async () => {
+      initViewport(innerElement.value?.parentElement!);
       loadMoreNotifications();
       if (IS_EXTENSION) {
         await nextTick();
@@ -72,6 +81,7 @@ export default defineComponent({
     });
 
     return {
+      innerElement,
       notificationsToShow,
       canLoadMore,
       loadMoreNotifications,
