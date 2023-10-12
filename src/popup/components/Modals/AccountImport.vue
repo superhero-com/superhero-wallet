@@ -130,7 +130,7 @@ export default defineComponent({
 
       discovering.value = true;
       setMnemonic(mnemonicParsed);
-      setBackedUpSeed(false);
+      setBackedUpSeed(true);
       await discoverAccounts();
       props.resolve();
       router.push(loginTargetLocation.value);
