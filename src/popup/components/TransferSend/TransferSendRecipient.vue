@@ -11,11 +11,12 @@
         ...validationRules,
       }"
     >
-      <InputField
+      <FormTextarea
         v-bind="field"
         :model-value="modelValue"
         name="address"
         data-cy="address"
+        auto-height
         show-help
         show-message-help
         :label="$t('modals.send.recipientLabel')"
@@ -33,7 +34,7 @@
             <QrScanIcon />
           </a>
         </template>
-      </InputField>
+      </FormTextarea>
     </Field>
     <div class="status">
       <UrlStatus
@@ -62,12 +63,12 @@ import {
 import { useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import UrlStatus from '@/popup/components/UrlStatus.vue';
-import InputField from '@/popup/components/InputField.vue';
+import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 
 export default defineComponent({
   components: {
-    InputField,
+    FormTextarea,
     UrlStatus,
     Field,
     QrScanIcon,
