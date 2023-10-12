@@ -167,7 +167,7 @@ export default defineComponent({
 @use '../../styles/variables';
 
 .invite-page {
-  padding: 0 var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
   overflow: hidden;
 
   .section-title {

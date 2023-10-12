@@ -62,7 +62,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .language-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .text-description {
     margin-bottom: 16px;

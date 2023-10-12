@@ -164,7 +164,7 @@ export default defineComponent({
     --background: var(--screen-bg-color);
     --min-height: 0;
 
-    padding: 0 var(--screen-padding-x);
+    padding-inline: var(--screen-padding-x);
   }
 
   .auction-list-content {

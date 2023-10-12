@@ -47,7 +47,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .errors-log-settings {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .options {
     margin-top: 20px;
