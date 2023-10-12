@@ -184,7 +184,7 @@ export default defineComponent({
     }
 
     function close() {
-      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'replace');
+      ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
     }
 
     return {

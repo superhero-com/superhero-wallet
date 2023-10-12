@@ -25,7 +25,7 @@
               show-message-help
               :placeholder="$t('pages.appsBrowser.inputPlaceholder')"
               :message="errorMessage"
-              @keydown.enter.stop="(event: KeyboardEvent) => handleEnter(event, errorMessage)"
+              @keydown.enter.stop="(event) => handleEnter(event, errorMessage)"
             >
               <template #after>
                 <Component
