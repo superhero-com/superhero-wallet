@@ -39,6 +39,7 @@ import {
   useTransactionList,
   useUi,
   useScrollConfig,
+  useViewport,
 } from '@/composables';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -67,6 +68,7 @@ export default defineComponent({
     const { isAppActive } = useUi();
     const { activeAccount } = useAccounts();
     const { setScrollConf } = useScrollConfig();
+    const { initViewport } = useViewport();
 
     const {
       getAccountAllTransactions,
@@ -124,6 +126,7 @@ export default defineComponent({
     );
 
     onMounted(() => {
+      initViewport(appInnerElem.value!);
       if (innerScrollElem.value && appInnerElem.value) {
         appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
