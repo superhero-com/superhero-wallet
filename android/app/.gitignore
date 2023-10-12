@@ -1,2 +1,5 @@
 /build/*
 !/build/.npmkeep
+
+# ignore drawables for landscape mode as we do not support it
+/src/main/res/drawable-land*

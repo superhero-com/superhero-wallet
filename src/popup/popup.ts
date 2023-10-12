@@ -3,6 +3,7 @@ import '@/protocols/registerAdapters';
 import { createApp } from 'vue';
 import { IonicVue } from '@ionic/vue';
 import { i18n } from '@/popup/plugins/i18n';
+import { IS_MOBILE_APP } from '@/constants';
 import store from '../store';
 import router from './router';
 import registerModals from './router/modals';
@@ -11,6 +12,10 @@ import App from './App.vue';
 import LoaderComponent from './components/Loader.vue';
 
 import '../styles/fullscreen-message.scss';
+
+if (IS_MOBILE_APP) {
+  window.screen.orientation?.lock('portrait');
+}
 
 registerModals();
 const app = createApp(App);
