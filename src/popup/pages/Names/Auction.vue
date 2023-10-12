@@ -15,10 +15,8 @@
         </Tabs>
       </div>
 
-      <Loader v-if="loading" />
-
       <IonRouterOutlet
-        v-else
+        v-if="!isLoaderVisible"
         class="auction-router"
         :name="name"
       />
@@ -30,7 +28,6 @@
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import {
   defineComponent,
-  ref,
   onBeforeUnmount,
   watch,
 } from 'vue';
@@ -63,9 +60,9 @@ export default defineComponent({
 
     const { getMiddleware } = useMiddleware();
     const { params: routeParams } = useRoute();
-    const { isAppActive } = useUi();
+    const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
 
-    const loading = ref(true);
+    setLoaderVisible(true);
 
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
@@ -87,7 +84,7 @@ export default defineComponent({
       } catch (error) {
         router.push({ name: 'auction-bid' });
       }
-      loading.value = false;
+      setLoaderVisible(false);
     }
 
     const intervalId = executeAndSetInterval(() => {
@@ -106,7 +103,7 @@ export default defineComponent({
     );
 
     return {
-      loading,
+      isLoaderVisible,
       routeParams,
     };
   },
