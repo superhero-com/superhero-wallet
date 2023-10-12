@@ -13,7 +13,7 @@
       />
       <BtnClose
         class="close-button"
-        :to="{ name: homeRouteName, replace: true }"
+        @click="close"
       />
     </div>
     <div>
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { IonRouterOutlet } from '@ionic/vue';
+import { IonRouterOutlet, useIonRouter } from '@ionic/vue';
 import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
@@ -107,6 +107,7 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
+    const ionRouter = useIonRouter();
 
     const { activeAccount } = useAccounts();
     const { resetFilter } = useTransactionAndTokenFilter();
@@ -125,6 +126,10 @@ export default defineComponent({
       const headerElementBottom = headerEl.value?.getBoundingClientRect()?.bottom;
       const routerContent = Math.ceil(ionicWrapperBottom! - headerElementBottom!);
       routerHeight.value = `${routerContent}px`;
+    }
+
+    function close() {
+      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
     }
 
     /**
@@ -166,6 +171,7 @@ export default defineComponent({
     });
 
     return {
+      close,
       headerEl,
       homeRouteName,
       routeName,
