@@ -26,13 +26,11 @@
         @click="createAccount(protocol)"
       />
     </div>
-
-    <Loader v-if="loading" />
   </Modal>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, onMounted, PropType } from 'vue';
 import type { Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
@@ -40,16 +38,19 @@ import {
   PROTOCOL_BITCOIN,
   PROTOCOLS,
 } from '@/constants';
-import { useAccounts, useConnection, useModals } from '@/composables';
+import {
+  useAccounts,
+  useConnection,
+  useModals,
+  useUi,
+} from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import Loader from '@/popup/components/Loader.vue';
 import BtnSubheader from '../buttons/BtnSubheader.vue';
 import Modal from '../Modal.vue';
 
 export default defineComponent({
   components: {
-    Loader,
     Modal,
     BtnSubheader,
   },
@@ -60,10 +61,10 @@ export default defineComponent({
     const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const loading = ref(false);
+    const { setLoaderVisible } = useUi();
 
     async function createAccount(protocol: Protocol) {
-      loading.value = true;
+      setLoaderVisible(true);
       let idx: number;
 
       // TODO each of the blocks of this switch should be moved to the specific adapter
@@ -82,7 +83,7 @@ export default defineComponent({
 
         default:
       }
-      loading.value = false;
+      setLoaderVisible(false);
       props.resolve();
     }
 
@@ -90,12 +91,15 @@ export default defineComponent({
       return ProtocolAdapterFactory.getAdapter(protocol).protocolName;
     }
 
+    onMounted(() => {
+      setLoaderVisible(false);
+    });
+
     return {
       PROTOCOLS,
       PROTOCOL_AETERNITY,
       PROTOCOL_BITCOIN,
       isOnline,
-      loading,
       createAccount,
       getProtocolName,
     };
