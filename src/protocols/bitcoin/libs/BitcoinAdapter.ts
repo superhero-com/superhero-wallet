@@ -79,6 +79,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_SYMBOL;
   }
 
+  override getUrlTokenKey(): string {
+    return BTC_CONTRACT_ID;
+  }
+
   getNetworkSettings() {
     return this.networkSettings;
   }

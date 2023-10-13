@@ -101,6 +101,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
   }
 
+  override getUrlTokenKey(): string {
+    return AE_SYMBOL;
+  }
+
   override getCoinGeckoCoinId() {
     return AE_COINGECKO_COIN_ID;
   }
