@@ -376,7 +376,7 @@ export const PERMISSION_DEFAULTS: IPermission = {
   messageSign: false,
   dailySpendLimit: false,
   transactionSignLimit: 0,
-  transactionSignLimitLeft: 0,
+  transactionSignSpent: 0,
   transactionSignFirstAskedOn: null,
 };
 

@@ -107,14 +107,14 @@
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.spent-today')"
-                :amount="permission.transactionSignLimit - permission.transactionSignLimitLeft"
+                :amount="permission.transactionSignSpent"
                 :protocol="PROTOCOL_AETERNITY"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.left-today')"
-                :amount="permission.transactionSignLimitLeft"
+                :amount="permission.transactionSignLimit - permission.transactionSignSpent"
                 :protocol="PROTOCOL_AETERNITY"
               />
             </div>
@@ -210,7 +210,6 @@ export default defineComponent({
 
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
-    const originalTransactionSignLimit = ref<number>(0);
 
     const selectedAsset = computed(() => ({
       contractId: AE_CONTRACT_ID,
@@ -240,10 +239,6 @@ export default defineComponent({
 
       if (!permission.value.dailySpendLimit) {
         permission.value.transactionSignLimit = 0;
-      } else if (originalTransactionSignLimit.value !== permission.value.transactionSignLimit) {
-        permission.value.transactionSignLimitLeft += (
-          permission.value.transactionSignLimit - originalTransactionSignLimit.value
-        );
       }
 
       addPermission({ ...permission.value, host });
@@ -256,22 +251,11 @@ export default defineComponent({
         router.replace({ name: ROUTE_NOT_FOUND });
       } else {
         if (typeof savedPermission.transactionSignLimit === 'string') {
-          savedPermission.transactionSignLimit = parseInt(
-            savedPermission.transactionSignLimit,
-            10,
-          );
-          originalTransactionSignLimit.value = savedPermission.transactionSignLimit;
-        }
-
-        if (typeof savedPermission.transactionSignLimitLeft === 'string') {
-          savedPermission.transactionSignLimitLeft = parseInt(
-            savedPermission.transactionSignLimitLeft,
-            10,
-          );
+          savedPermission.transactionSignLimit = +savedPermission.transactionSignLimit;
         }
 
         setValues({ url: savedPermission.host, ...savedPermission });
-        permission.value = savedPermission;
+        permission.value = { ...PERMISSION_DEFAULTS, ...savedPermission };
       }
     }
 

@@ -263,8 +263,14 @@ export interface IPermission {
   name: string;
   dailySpendLimit: boolean;
   transactionSignFirstAskedOn: string | null;
+  /**
+   * Daily limit for transactions
+   */
   transactionSignLimit: number;
-  transactionSignLimitLeft: number;
+  /**
+   * Amount spent during that day
+   */
+  transactionSignSpent: number;
 }
 
 /**
