@@ -254,10 +254,11 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isContract(contractId) && !isAe) {
+        setLoaderVisible(true);
         await getAeSdk();
         tokenPairs.value = await store.dispatch('fungibleTokens/getContractTokenPairs', contractId);
+        setLoaderVisible(false);
       }
-      setLoaderVisible(false);
       setTimeout(() => {
         observeTabsWrapperHeight();
         calculateRouterHeight();
@@ -265,7 +266,6 @@ export default defineComponent({
     });
 
     onIonViewDidEnter(() => {
-      setLoaderVisible(true);
       setTokenProps({
         contractId,
         tokenPairs: tokenPairs.value,
@@ -276,7 +276,6 @@ export default defineComponent({
     });
 
     onIonViewDidLeave(() => {
-      setLoaderVisible(false);
       setTokenProps(null);
     });
 

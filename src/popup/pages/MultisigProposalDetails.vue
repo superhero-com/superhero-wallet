@@ -211,7 +211,7 @@
                   variant="muted"
                   nowrap
                   extra-padded
-                  :disabled="processingAction"
+                  :disabled="isLoaderVisible"
                   @click="dispatchProposalAction(
                     TX_FUNCTIONS_MULTISIG.refuse,
                     $t('pages.proposalDetails.refuse')
@@ -225,7 +225,7 @@
                   extend
                   nowrap
                   extra-padded
-                  :disabled="processingAction || pendingMultisigTxExpired"
+                  :disabled="isLoaderVisible || pendingMultisigTxExpired"
                   @click="processProposal()"
                 >
                   {{ $t('common.send') }}
@@ -236,7 +236,7 @@
                   nowrap
                   extra-padded
                   :disabled="
-                    processingAction
+                    isLoaderVisible
                       || pendingMultisigTxConfirmedByLocalSigners
                       || pendingMultisigTxExpired
                   "
@@ -254,7 +254,7 @@
                 extend
                 nowrap
                 extra-padded
-                :disabled="processingAction"
+                :disabled="isLoaderVisible"
                 @click="dispatchProposalAction(
                   TX_FUNCTIONS_MULTISIG.revoke,
                   $t('pages.proposalDetails.revoke')
@@ -389,11 +389,10 @@ export default defineComponent({
       isLocalAccountAddress,
     } = useAccounts();
 
-    const { setLoaderVisible } = useUi();
+    const { isLoaderVisible, setLoaderVisible } = useUi();
 
     const getTxSymbol = useGetter('getTxSymbol');
 
-    const processingAction = ref<boolean>(false);
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
     const proposalCompleted = ref<boolean>(false);
@@ -470,7 +469,7 @@ export default defineComponent({
         return;
       }
 
-      processingAction.value = true;
+      setLoaderVisible(true);
       try {
         await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
           action,
@@ -488,7 +487,7 @@ export default defineComponent({
         handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());
       }
 
-      processingAction.value = false;
+      setLoaderVisible(false);
     }
 
     /**
@@ -499,7 +498,7 @@ export default defineComponent({
         return;
       }
 
-      processingAction.value = true;
+      setLoaderVisible(true);
       try {
         const { gaAccountId, txHash, nonce } = activeMultisigAccount.value;
         const rawTx = await fetchTransactionByHash(txHash as string);
@@ -514,7 +513,7 @@ export default defineComponent({
       } catch (error) {
         handleInsufficientBalanceError(error, true);
       }
-      processingAction.value = false;
+      setLoaderVisible(false);
     }
 
     watch(
@@ -530,13 +529,6 @@ export default defineComponent({
     watch(() => multisigTx.value, () => {
       fetchAdditionalInfo();
     });
-
-    watch(
-      processingAction,
-      (value) => {
-        setLoaderVisible(value);
-      },
-    );
 
     onIonViewWillLeave(() => {
       stopFetchingAdditionalInfo();
@@ -559,11 +551,11 @@ export default defineComponent({
       formatDate,
       formatTime,
       isLocalAccountAddress,
+      isLoaderVisible,
       pendingMultisigTxCanBeSent,
       pendingMultisigTxExpired,
       expirationHeightToRelativeTime,
       pendingMultisigTxConfirmedByLocalSigners,
-      processingAction,
       proposalCompleted,
       blocksToRelativeTime,
       dispatchProposalAction,

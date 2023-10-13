@@ -9,7 +9,6 @@ import router from './router';
 import registerModals from './router/modals';
 import Logger from '../lib/logger';
 import App from './App.vue';
-import LoaderComponent from './components/Loader.vue';
 
 import '../styles/fullscreen-message.scss';
 
@@ -23,7 +22,6 @@ app.use(IonicVue);
 app.use(i18n);
 app.use(store);
 app.use(router);
-app.component('Loader', LoaderComponent);
 app.mount('#app');
 
 Logger.init({ app });
