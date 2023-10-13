@@ -1,4 +1,5 @@
 import { METHODS } from '@aeternity/aepp-sdk';
+
 import type {
   IAppData,
   IPermission,
@@ -22,9 +23,10 @@ import { useStorageRef } from './storageRef';
 import { IModalProps, useModals } from './modals';
 
 interface ITransactionSignPermissionOptions {
-  amount?: number;
-  fee?: number;
-  nameFee?: number;
+  amount?: number | string;
+  fee?: number | string;
+  nameFee?: number | string;
+  [x: string]: any;
 }
 
 const permissions = useStorageRef<PermissionRegistry>(
@@ -61,17 +63,10 @@ const modalAndPopupTypes: Partial<Record<METHODS, { modal: string, popup: PopupT
 export function usePermissions() {
   const { openModal } = useModals();
 
-  function setTransactionSignLimitLeft(host: string, value: number) {
+  function resetTransactionSignSpent(host: string) {
     permissions.value[host] = {
       ...permissions.value[host],
-      transactionSignLimitLeft: value,
-    };
-  }
-
-  function resetTransactionSignLimitLeft(host: string) {
-    permissions.value[host] = {
-      ...permissions.value[host],
-      transactionSignLimitLeft: permissions.value[host].transactionSignLimit,
+      transactionSignSpent: 0,
       transactionSignFirstAskedOn: (new Date()).toISOString(),
     };
   }
@@ -98,19 +93,19 @@ export function usePermissions() {
     } = permissions.value[host] || {};
 
     if (!transactionSignLimit) {
-      return false; // Always ask for permission if no limit is set
+      return false; // Always ask for permission if limit is not set
     }
     if (!transactionSignFirstAskedOn || hasDayPassed(transactionSignFirstAskedOn)) {
-      resetTransactionSignLimitLeft(host);
+      resetTransactionSignSpent(host);
     }
 
     const totalCost = +aettosToAe(+amount + +fee + +nameFee);
-    const futureLimitLeft = permissions.value[host].transactionSignLimitLeft - totalCost;
-    if (futureLimitLeft < 0) {
-      return false;
+    const currentAmountSpent = (permissions.value[host].transactionSignSpent || 0) + totalCost;
+    if (currentAmountSpent > transactionSignLimit) {
+      return false; // Transaction is out of the limit
     }
 
-    setTransactionSignLimitLeft(host, futureLimitLeft);
+    permissions.value[host].transactionSignSpent = currentAmountSpent;
     return true;
   }
 

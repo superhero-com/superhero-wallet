@@ -43,7 +43,7 @@ export class AccountSuperhero extends AccountBase {
       if (IS_EXTENSION_BACKGROUND && aeppOrigin) {
         const txObject = unpackTx(txBase64);
         if (
-          (checkPermission(new URL(aeppOrigin).host, METHODS.sign, txObject as any))
+          (checkPermission(new URL(aeppOrigin).host, METHODS.sign, txObject))
           || (await openPopup(
             POPUP_TYPE_SIGN,
             aeppOrigin,
