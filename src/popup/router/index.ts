@@ -18,21 +18,18 @@ import {
   RUNNING_IN_POPUP,
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
-  IS_EXTENSION,
 } from '@/constants';
-import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
 import store from '@/store';
 import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
+import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   usePopupProps,
   useAeSdk,
   useUi,
 } from '@/composables';
-import dayjs from 'dayjs';
-import { WalletStorage } from '@/lib/WalletStorage';
 import { routes } from './routes';
 import {
   ROUTE_ACCOUNT,
@@ -47,8 +44,6 @@ const router = createRouter({
   scrollBehavior: (to, from, savedPosition) => savedPosition || { left: 0, top: 0 },
 });
 
-const LAST_ROUTE_KEY = 'last-route';
-
 const {
   isLoggedIn,
   activeAccount,
@@ -60,25 +55,7 @@ const { setPopupProps } = usePopupProps();
 const { setLoginTargetLocation } = useUi();
 
 RouteQueryActionsController.init(router);
-
-const unbind = router.beforeEach(async (to, from, next) => {
-  await watchUntilTruthy(() => store.state.isRestored);
-
-  // This check is run to avoid unnecessary fetching from WalletStorage
-  if (RUNNING_IN_POPUP || to.name !== ROUTE_INDEX) {
-    next(undefined);
-  }
-
-  const lastRoute = await WalletStorage.get(LAST_ROUTE_KEY);
-
-  if (!lastRoute || (IS_EXTENSION && dayjs().isAfter(dayjs(lastRoute?.time).add(10, 'minutes')))) {
-    next(undefined);
-  } else {
-    next(lastRoute.path);
-  }
-
-  unbind();
-});
+RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
   if (!isLoggedIn.value) {
@@ -142,17 +119,6 @@ router.beforeEach(async (to, from, next) => {
 
   // @ts-ignore
   next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
-});
-
-router.afterEach(async (to) => {
-  if (RUNNING_IN_POPUP) {
-    return;
-  }
-  if (to.meta?.notPersist) {
-    await WalletStorage.remove(LAST_ROUTE_KEY);
-  } else {
-    await WalletStorage.set(LAST_ROUTE_KEY, { path: to.path, time: dayjs() });
-  }
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));
