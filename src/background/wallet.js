@@ -5,7 +5,7 @@ import { CONNECTION_TYPES } from '@/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
 import store from './store';
-import { useAeSdk, useNetworks } from '../composables';
+import { useAccounts, useAeSdk, useNetworks } from '../composables';
 
 window.browser = require('webextension-polyfill');
 
@@ -27,6 +27,7 @@ const addAeppConnection = async (port) => {
 
 export async function init() {
   const { activeNetwork } = useNetworks();
+  const { activeAccount } = useAccounts();
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk({ store });
 
   browser.runtime.onConnect.addListener(async (port) => {
@@ -87,8 +88,8 @@ export async function init() {
     },
   );
 
-  store.watch(
-    (state) => state.accounts?.activeIdx,
+  watch(
+    activeAccount,
     async (oldVal, newVal) => {
       const aeSdk = await getAeSdk();
       if (!isEqual(oldVal, newVal) && aeSdk) {
