@@ -65,6 +65,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  nextTick,
   ref,
   watch,
 } from 'vue';
@@ -103,8 +104,9 @@ export default defineComponent({
 
     const swiper = computed(() => customSwiper.value?.$el.swiper);
 
-    function setCurrentSlide(idx: number, slideParams?: number) {
-      if (currentIdx.value !== idx) {
+    async function setCurrentSlide(idx: number, slideParams?: number) {
+      if (idx > -1 && currentIdx.value !== idx) {
+        await nextTick();
         swiper.value.slideTo(idx, slideParams);
       }
     }
