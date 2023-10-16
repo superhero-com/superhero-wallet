@@ -150,6 +150,7 @@ export const STORAGE_KEYS = {
   invites: 'invites',
   namesOwned: 'names-owned',
   namesDefault: 'names-default',
+  lastRoute: 'last-route',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
