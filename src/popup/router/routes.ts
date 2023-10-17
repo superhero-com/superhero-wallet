@@ -491,7 +491,6 @@ export const routes: WalletAppRouteConfig[] = [
       showHeaderNavigation: true,
       showScrollbar: true,
       ifNotAuth: true,
-      directBackRoute: true,
     },
   },
   {
