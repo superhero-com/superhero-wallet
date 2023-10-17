@@ -3,7 +3,7 @@ import {
   ref,
 } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
-import type { IDefaultComposableOptions, ITransaction } from '@/types';
+import type { ITransaction } from '@/types';
 import { DASHBOARD_TRANSACTION_LIMIT } from '@/constants';
 import {
   pipe,
@@ -19,10 +19,8 @@ const isTransactionListLoading = ref(false);
  * Store the state of the latest transactions to avoid multiple fetching when opening pages
  * that wants to use this data.
  */
-export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
-  const {
-    transactions,
-  } = useTransactionList({ store });
+export function useLatestTransactionList() {
+  const { transactions } = useTransactionList();
 
   const latestTransactions = computed(() => {
     const allTransactions = Object.entries(transactions.value)
@@ -39,7 +37,6 @@ export function useLatestTransactionList({ store }: IDefaultComposableOptions) {
           const {
             direction,
           } = useTransactionTx({
-            store,
             tx: tr.tx,
             externalAddress: accountAddress as Encoded.AccountAddress,
           });

@@ -37,7 +37,6 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
-import { useStore } from 'vuex';
 
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -58,8 +57,7 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { getNameAuctionHighestBid, getNameAuction, getName } = useAeNames({ store });
+    const { getNameAuctionHighestBid, getNameAuction, getName } = useAeNames();
 
     const highestBid = computed(() => getNameAuctionHighestBid(props.name));
 

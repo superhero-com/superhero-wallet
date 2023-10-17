@@ -1,7 +1,6 @@
 import { computed, ref } from 'vue';
 import { Contract } from '@aeternity/aepp-sdk';
 
-import { IDefaultComposableOptions } from '@/types';
 import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 import TippingV1ACI from '@/lib/contracts/TippingV1ACI.json';
 import TippingV2ACI from '@/lib/contracts/TippingV2ACI.json';
@@ -23,9 +22,9 @@ let tippingV1: Contract<AeTippingV1ContractApi> | undefined;
 let tippingV2: Contract<AeTippingV2ContractApi> | undefined;
 const initializing = ref(false);
 
-export function useTippingContracts({ store }: IDefaultComposableOptions) {
+export function useTippingContracts() {
   const { activeNetwork } = useNetworks();
-  const { getAeSdk, isTippingSupported } = useAeSdk({ store });
+  const { getAeSdk, isTippingSupported } = useAeSdk();
 
   const tippingContractAddresses = computed((): AeTippingContractAddresses => {
     switch (activeNetwork.value.type) {

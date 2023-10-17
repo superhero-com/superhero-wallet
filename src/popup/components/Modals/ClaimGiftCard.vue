@@ -102,7 +102,6 @@ import {
   PropType,
   onMounted,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useForm } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
 import {
@@ -161,11 +160,10 @@ export default defineComponent({
     secretKey: { type: Buffer, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const { errors } = useForm();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const { aeAccounts, aeAccountsSelectOptions } = useAccounts();
     const { getFormattedFiat } = useCurrencies();
     const { claimInvite } = useInvites();

@@ -99,7 +99,6 @@ import {
   defineComponent,
   onBeforeUnmount,
 } from 'vue';
-import { useStore } from 'vuex';
 import { MODAL_CONSENSUS_INFO } from '@/constants';
 import { useModals, useMultisigAccounts } from '@/composables';
 
@@ -128,14 +127,13 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
     const { openModal } = useModals();
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store });
+    } = useMultisigAccounts();
 
     function openConsensusInfoModal() {
       openModal(MODAL_CONSENSUS_INFO);

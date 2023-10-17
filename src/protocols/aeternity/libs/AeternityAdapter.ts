@@ -7,7 +7,6 @@ import {
   getHdWalletAccountFromSeed,
   Tag,
 } from '@aeternity/aepp-sdk';
-import { Store, useStore } from 'vuex';
 
 import type {
   AdapterNetworkSettingList,
@@ -48,8 +47,6 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
-  store: Store<any> | undefined;
-
   protocolName = AE_PROTOCOL_NAME;
 
   networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
@@ -77,17 +74,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.backendUrlLabel'),
     },
   ];
-
-  /**
-   * TODO remove any store dependencies ASAP
-   * The `useStore` should not be used out of component scope.
-   */
-  getStore(): Store<any> {
-    if (!this.store) {
-      this.store = useStore();
-    }
-    return this.store;
-  }
 
   override getAccountPrefix() {
     return `${Encoding.AccountAddress}_`;
@@ -143,16 +129,14 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
-    const store = this.getStore();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const sdk = await getAeSdk();
     const balanceInAettos = await sdk.getBalance(address);
     return aettosToAe(balanceInAettos);
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
-    const store = this.getStore();
-    const { getDryAeSdk } = useAeSdk({ store });
+    const { getDryAeSdk } = useAeSdk();
     const aeSdk = await getDryAeSdk();
     return aeSdk.api.getAccountByPubkey(address).then(() => true, () => false);
   }
@@ -215,8 +199,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     address: string,
   ) {
     try {
-      const store = useStore();
-      const { getAeSdk } = useAeSdk({ store });
+      const { getAeSdk } = useAeSdk();
       const sdk = await getAeSdk();
       const fetchedPendingTransaction = (
         await sdk.api.getPendingAccountTransactionsByPubkey(address)
@@ -232,8 +215,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   async fetchTipWithdrawnTransactions(address: string, recent: boolean) {
     try {
-      const store = useStore();
-      const { getAeSdk } = useAeSdk({ store });
+      const { getAeSdk } = useAeSdk();
       const { aeActiveNetworkSettings } = useAeNetworkSettings();
       await getAeSdk();
 
@@ -276,8 +258,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     address: string,
     nextPage: string | null,
   ): Promise<IFetchTransactionResult> {
-    const store = useStore();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     await getAeSdk(); // Ensure the `nodeNetworkId` is established
 
     if (typeof nextPage !== 'string') {
@@ -310,12 +291,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     recipient: string,
     options: { payload: string },
   ): Promise<{ hash: string }> {
-    const store = this.getStore();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(amount, recipient as any, {
       payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
-      modal: false,
     });
   }
 }

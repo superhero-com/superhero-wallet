@@ -52,7 +52,7 @@ describe('Tests cases for AEX-2 popups', () => {
       .should('be.visible')
       .get('[data-cy=data]')
       .should('be.visible')
-      .should('contain', props2.data)
+      .should('contain', props2.txBase64)
       .get('[data-cy=sender]')
       .should('be.visible')
       .should('contain', props2.app.host);
@@ -67,7 +67,7 @@ describe('Tests cases for AEX-2 popups', () => {
 
   it('Opens connectConfirm, sign, messageSign popups and send accept/deny action', () => {
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && Tag[Tag.SpendTx])
+      cy.openAex2Popup(popup, popup === POPUP_TYPE_SIGN && Tag[Tag.SpendTx])
         .get('[data-cy=deny]')
         .click()
         .window()
@@ -77,7 +77,7 @@ describe('Tests cases for AEX-2 popups', () => {
     });
 
     popups.forEach((popup) => {
-      cy.openAex2Popup(popup, popup === 'sign' && Tag[Tag.SpendTx])
+      cy.openAex2Popup(popup, popup === POPUP_TYPE_SIGN && Tag[Tag.SpendTx])
         .get('[data-cy=accept]')
         .click()
         .window()
@@ -100,7 +100,7 @@ describe('Tests cases for AEX-2 popups', () => {
       } else {
         receiver = 'Contract create';
       }
-      cy.openAex2Popup('sign', Tag[txTag])
+      cy.openAex2Popup(POPUP_TYPE_SIGN, Tag[txTag])
         .get('[data-cy=label]')
         .should('be.visible')
         .should('contain', locale.transaction.type[lowerFirst(Tag[txTag])]);

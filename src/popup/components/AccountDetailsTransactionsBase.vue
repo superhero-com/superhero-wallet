@@ -16,7 +16,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 
 import type {
   ICommonTransaction,
@@ -36,13 +35,11 @@ export default defineComponent({
     isMultisig: { type: Boolean },
   },
   setup(props) {
-    const store = useStore();
-
     const {
       getAccountAllTransactions,
       getAccountTransactionsState,
       fetchTransactions,
-    } = useTransactionList({ store });
+    } = useTransactionList();
 
     const canLoadMore = computed(() => (
       !!getAccountTransactionsState(props.address as any).nextPageUrl

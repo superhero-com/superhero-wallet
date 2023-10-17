@@ -1,7 +1,5 @@
 import { computed, ref } from 'vue';
-import type { IAccountOverview, IPopupConfig } from '../types';
-
-type IPopupProps = Partial<IPopupConfig>;
+import type { IAccountOverview, IPopupProps } from '@/types';
 
 const popupProps = ref<IPopupProps | null>(null);
 

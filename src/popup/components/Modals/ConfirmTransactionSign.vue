@@ -127,7 +127,6 @@ import {
   ref,
 } from 'vue';
 import { camelCase } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
@@ -213,16 +212,13 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup() {
-    const store = useStore();
     const { t } = useI18n();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
-
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
-
     const { popupProps, setPopupProps } = usePopupProps();
+    const { availableTokens, getTxSymbol, getTxAmountTotal } = useFungibleTokens();
 
     const {
       direction,
@@ -230,8 +226,7 @@ export default defineComponent({
       isDex,
       setTransactionTx,
     } = useTransactionTx({
-      store,
-      tx: popupProps.value?.tx as ITx,
+      tx: popupProps.value?.tx,
     });
 
     const showAdvanced = ref(false);
@@ -241,8 +236,6 @@ export default defineComponent({
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
-
-    const { availableTokens, getTxSymbol, getTxAmountTotal } = useFungibleTokens({ store });
 
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
@@ -254,6 +247,8 @@ export default defineComponent({
     const isMinReceived = computed(() => isTxFunctionDexMinReceived(txFunction.value));
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
+
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     const swapDirection = computed(() => {
       if (isMaxSpent.value) {
@@ -432,9 +427,9 @@ export default defineComponent({
 
           txFunction.value = txParams.function;
 
-          setTransactionTx({ ...txParams, ...popupProps.value.tx as ITx });
+          setTransactionTx({ ...txParams, ...popupProps.value.tx });
 
-          const allTokens = getTokens({ ...txParams, ...popupProps.value.tx as ITx });
+          const allTokens = getTokens({ ...txParams, ...popupProps.value.tx });
 
           tokenList.value = allTokens.map((token) => ({
             ...token,

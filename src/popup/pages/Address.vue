@@ -11,7 +11,6 @@
 <script lang="ts">
 import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import type { IAppData } from '@/types';
 import {
   useAccounts,
@@ -30,9 +29,7 @@ export default defineComponent({
     IonPage,
   },
   setup() {
-    const store = useStore();
-
-    const { nodeNetworkId } = useAeSdk({ store });
+    const { nodeNetworkId } = useAeSdk();
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
     const { activeAccount } = useAccounts();
     const { setPopupProps } = usePopupProps();
@@ -51,7 +48,7 @@ export default defineComponent({
     const onReject = () => openCallbackOrGoHome(false);
 
     setPopupProps({
-      app: app.value as IAppData,
+      app: app.value,
       resolve: onResolve,
       reject: onReject,
     });

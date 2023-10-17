@@ -11,7 +11,6 @@ import {
 import dayjs from 'dayjs';
 
 import type {
-  IDefaultComposableOptions,
   IMultisigAccount,
   IMultisigCreationPhase,
   IRawMultisigAccount,
@@ -34,12 +33,12 @@ const pendingMultisigCreationTxs = ref<Record<string, IRawMultisigAccount>>({});
 const multisigAccountCreationPhase = ref<IMultisigCreationPhase>(null);
 const notEnoughBalanceToCreateMultisig = ref<boolean>(false);
 
-export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
-  const { getDryAeSdk, getAeSdk } = useAeSdk({ store });
+export function useMultisigAccountCreate() {
+  const { getDryAeSdk, getAeSdk } = useAeSdk();
   const {
     getMultisigAccountByContractId,
     addPendingMultisigAccount,
-  } = useMultisigAccounts({ store, pollOnce: true });
+  } = useMultisigAccounts({ pollOnce: true });
   const { balances } = useBalances();
 
   const multisigAccount = ref<IMultisigAccount | null>(null);
@@ -146,7 +145,6 @@ export function useMultisigAccountCreate({ store }: IDefaultComposableOptions) {
         tx: signedAttachTx,
       }),
       {
-        modal: false,
         fromAccount: payerId,
       } as any,
     );

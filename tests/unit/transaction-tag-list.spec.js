@@ -113,7 +113,7 @@ describe('TransactionTagList', () => {
         global: { plugins: [i18n, store] },
         props,
       });
-      const { availableTokens } = useFungibleTokens({ store });
+      const { availableTokens } = useFungibleTokens();
       availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {};
 
       wrapper.findAll('.transaction-tag').forEach((el, index) => {

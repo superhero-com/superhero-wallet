@@ -11,8 +11,7 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { useTokensList } from '../../../composables';
+import { useTokensList } from '@/composables';
 import TokensListItem from './TokensListItem.vue';
 
 export default defineComponent({
@@ -24,9 +23,7 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { filteredTokens } = useTokensList({
-      store,
       ownedOnly: true,
       searchTerm: computed(() => props.searchTerm),
       isMultisig: props.isMultisig,

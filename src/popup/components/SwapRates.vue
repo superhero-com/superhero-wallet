@@ -46,18 +46,18 @@ import {
 } from 'vue';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { camelCase } from 'lodash-es';
-import { useStore } from 'vuex';
 
 import {
   getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import {
+import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
 import { useFungibleTokens } from '@/composables';
+
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
@@ -70,11 +70,12 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { availableTokens } = useFungibleTokens({ store });
+    const { availableTokens } = useFungibleTokens();
 
-    const isSwapTx = computed(() => isTxFunctionDexSwap(props.transaction.tx.function)
-        || isTxFunctionDexPool(props.transaction.tx.function));
+    const isSwapTx = computed(() => (
+      isTxFunctionDexSwap(props.transaction.tx.function)
+      || isTxFunctionDexPool(props.transaction.tx.function)
+    ));
 
     const rates = computed(() => {
       if (!isSwapTx.value) {
@@ -82,7 +83,7 @@ export default defineComponent({
       }
 
       const resolver = getTransactionTokenInfoResolver(
-          camelCase(props.transaction.tx.function) as TxFunctionParsed,
+        camelCase(props.transaction.tx.function) as TxFunctionParsed,
       );
 
       if (!resolver) return [];

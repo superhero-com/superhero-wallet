@@ -31,7 +31,6 @@ import { executeAndSetInterval } from '@/utils';
 import { useAccounts, useUi } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
-import { useStore } from 'vuex';
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -47,10 +46,9 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const { isAppActive } = useUi();
     const { activeAccount } = useAccounts();
-    const { areNamesFetching, ownedNames, updateOwnedNames } = useAeNames({ store });
+    const { areNamesFetching, ownedNames, updateOwnedNames } = useAeNames();
 
     const namesForAccount = computed(
       () => ownedNames.value.filter(({ owner }) => owner === activeAccount.value.address),

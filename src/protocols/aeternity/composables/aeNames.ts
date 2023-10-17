@@ -6,7 +6,6 @@ import {
 } from 'vue';
 import type {
   ChainName,
-  IDefaultComposableOptions,
   IName,
   ITransaction,
   NetworkId,
@@ -83,11 +82,11 @@ const { onNetworkChange } = createNetworkWatcher();
  * This composable allows for obtaining and storing the chain names for the current user addresses
  * and external addresses (for example when displaying transaction details).
  */
-export function useAeNames({ store }: IDefaultComposableOptions) {
+export function useAeNames() {
   const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
-  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
+  const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
 
   const {

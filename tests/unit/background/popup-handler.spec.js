@@ -4,6 +4,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_MESSAGE_SIGN,
 } from '../../../src/constants';
+import { STUB_TX_BASE_64 } from '../../../src/constants/stubs';
 import { AE_DEX_URL } from '../../../src/protocols/aeternity/config';
 
 const mockCreate = jest.fn(() => true);
@@ -24,23 +25,26 @@ global.browser = {
   },
 };
 
+/**
+ * @property params - `IPopupProps` interface
+ */
 const testCases = [{
   name: 'supported transaction',
   params: {
-    tx: 'tx_+FEMAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCKhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywiC4YPJvVhyAAAE4ALeFGB',
-    txObject: {
+    txBase64: STUB_TX_BASE_64,
+    tx: {
       params: {
       },
     },
   },
   type: POPUP_TYPE_SIGN,
   resultType: POPUP_TYPE_SIGN,
-  propsField: 'tx',
+  propsField: 'txBase64',
 }, {
   name: 'supported transaction with a connected aepp',
   params: {
-    tx: 'tx_+FEMAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCKhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywiC4YPJvVhyAAAE4ALeFGB',
-    txObject: {
+    txBase64: STUB_TX_BASE_64,
+    tx: {
       params: {
       },
     },
@@ -60,10 +64,12 @@ const testCases = [{
 }, {
   name: 'unsupported transaction',
   // encoded gaAttachTx
-  params: { tx: 'tx_+O1QAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCITuIv4iUYDoIMndi6iAoqQltixF/3A6WlN0+rWVAan4LvFLy2pEJlhwLhcuDv+RNZEHwA3ADcAGg6CPwEDP/5s8lcLADcCFwcXdwAIPAIE+wNNTm90IGluIEF1dGggY29udGV4dAEBAJsvAhFE1kQfEWluaXQRbPJXCyVhdXRob3JpemWCLwCFNy4xLjAAoGzyVwsKFZm3CCkeUKo9rxPQx/JIS8M33a0kE6N/1KAJgwcAA4ZIjzqPaAAATIQ7msoAhysRRNZEHz+4yEN3' },
-  type: POPUP_TYPE_SIGN,
+  params: {
+    txBase64: 'tx_+O1QAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCITuIv4iUYDoIMndi6iAoqQltixF/3A6WlN0+rWVAan4LvFLy2pEJlhwLhcuDv+RNZEHwA3ADcAGg6CPwEDP/5s8lcLADcCFwcXdwAIPAIE+wNNTm90IGluIEF1dGggY29udGV4dAEBAJsvAhFE1kQfEWluaXQRbPJXCyVhdXRob3JpemWCLwCFNy4xLjAAoGzyVwsKFZm3CCkeUKo9rxPQx/JIS8M33a0kE6N/1KAJgwcAA4ZIjzqPaAAATIQ7msoAhysRRNZEHz+4yEN3',
+  },
+  type: POPUP_TYPE_RAW_SIGN,
   resultType: POPUP_TYPE_RAW_SIGN,
-  propsField: 'data',
+  propsField: 'txBase64',
 }, {
   name: 'message',
   params: {

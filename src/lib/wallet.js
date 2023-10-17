@@ -12,7 +12,7 @@ if (IN_FRAME) {
   store.registerModule('sdk-frame-reset', {
     actions: {
       async reset() {
-        const { getAeSdk } = useAeSdk({ store });
+        const { getAeSdk } = useAeSdk();
         const aeSdk = await getAeSdk();
 
         Object.values(aeSdk._clients).forEach((aepp) => {
@@ -31,7 +31,7 @@ if (IN_FRAME) {
 
 export default async function initSdk() {
   const { activeNetwork } = useNetworks();
-  const { getAeSdk, resetNode } = useAeSdk({ store });
+  const { getAeSdk, resetNode } = useAeSdk();
   const { getMiddleware } = useMiddleware();
 
   const [aeSdk] = await Promise.all([getAeSdk(), getMiddleware()]);

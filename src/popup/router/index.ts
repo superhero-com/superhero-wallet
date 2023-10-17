@@ -3,7 +3,7 @@ import {
   RouteRecordRaw,
 } from 'vue-router';
 import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
-import { Dictionary, WalletRouteMeta } from '@/types';
+import { IPopupProps, WalletRouteMeta } from '@/types';
 import {
   APP_LINK_WEB,
   IS_MOBILE_APP,
@@ -20,7 +20,6 @@ import {
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
-import store from '@/store';
 import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
@@ -95,7 +94,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  const { isAeSdkReady } = useAeSdk({ store });
+  const { isAeSdkReady } = useAeSdk();
 
   if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
     initSdk();
@@ -110,10 +109,10 @@ router.beforeEach(async (to, from, next) => {
       [POPUP_TYPE_MESSAGE_SIGN]: ROUTE_POPUP_MESSAGE_SIGN,
     }[POPUP_TYPE];
 
-    let popupProps: Dictionary = {};
+    let popupProps: IPopupProps | null = null;
 
     if (!Object.keys(to.params).length) {
-      popupProps = await getPopupProps() as Dictionary;
+      popupProps = await getPopupProps();
       if (!popupProps?.app) {
         next({ name: ROUTE_NOT_FOUND, params: { hideHomeButton: true as any } });
         return;

@@ -1,7 +1,6 @@
 import { computed } from 'vue';
 import { camelCase } from 'lodash-es';
 import type {
-  IDefaultComposableOptions,
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
@@ -21,7 +20,7 @@ import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin/helpers';
 import { useFungibleTokens } from './fungibleTokens';
 
-interface UseTransactionTokensOptions extends IDefaultComposableOptions {
+interface UseTransactionTokensOptions {
   transaction: ITransaction
   direction: string
   isAllowance: boolean
@@ -29,14 +28,13 @@ interface UseTransactionTokensOptions extends IDefaultComposableOptions {
 }
 
 export function useTransactionTokens({
-  store,
   direction,
   isAllowance,
   transaction,
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
   const innerTx = computed(() => getInnerTransaction(transaction.tx));
-  const { availableTokens, getTxAmountTotal, getTxSymbol } = useFungibleTokens({ store });
+  const { availableTokens, getTxAmountTotal, getTxSymbol } = useFungibleTokens();
 
   const transactionFunction = computed(() => {
     if (innerTx.value?.function) {

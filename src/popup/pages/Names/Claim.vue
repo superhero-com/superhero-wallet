@@ -55,7 +55,7 @@
         <BtnMain
           class="btn-register"
           extend
-          :disabled="!isAeSdkReady || !name || errorName"
+          :disabled="isLoaderVisible || !name || errorName"
           @click="claim"
         >
           {{
@@ -70,7 +70,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import {
+  defineComponent,
+  ref,
+  computed,
+  nextTick,
+} from 'vue';
 import {
   AensName,
   buildTx,
@@ -81,7 +86,6 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
@@ -124,15 +128,19 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const store = useStore();
     const { validate } = useForm();
     const errorName = useFieldError('name');
     const { t } = useI18n();
 
     const { activeAccount } = useAccounts();
     const { openDefaultModal } = useModals();
-    const { getAeSdk, isAeSdkReady } = useAeSdk({ store });
-    const { setLoaderVisible } = useUi();
+    const { getAeSdk } = useAeSdk();
+    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const {
+      setPendingAutoExtendName,
+      updateOwnedNames,
+      updateNamePointer,
+    } = useAeNames();
 
     const name = ref('');
     const autoExtend = ref(false);
@@ -163,25 +171,24 @@ export default defineComponent({
         .shiftedBy(-AE_COIN_PRECISION));
 
     async function claim() {
+      // Show loader at the beginning because the validation is also fetching some data
+      // so we need to block user from double clicking the claim button.
+      setLoaderVisible(true);
+
       if (!(await validate()).valid) {
+        setLoaderVisible(false);
         return;
       }
-
-      const {
-        setPendingAutoExtendName,
-        updateOwnedNames,
-        updateNamePointer,
-      } = useAeNames({ store });
 
       const aeSdk = await getAeSdk();
       const nameEntry = await aeSdk.api.getNameEntryByName(fullName.value).catch(() => false);
 
       if (nameEntry) {
+        setLoaderVisible(false);
         openDefaultModal({
           title: t('modals.name-exist.msg'),
         });
       } else {
-        setLoaderVisible(true);
         let claimTxHash;
 
         try {
@@ -190,10 +197,11 @@ export default defineComponent({
           if (autoExtend.value) {
             setPendingAutoExtendName(fullName.value);
           }
+          await nextTick();
           router.push({ name: ROUTE_ACCOUNT_DETAILS_NAMES });
-        } catch (e: any) {
-          let msg = e.message;
-          if (msg.includes('is not enough to execute') || e.statusCode === 404) {
+        } catch (error: any) {
+          let msg = error.message;
+          if (msg.includes('is not enough to execute') || error.statusCode === 404) {
             msg = t('pages.names.balance-error');
           }
           openDefaultModal({
@@ -228,8 +236,8 @@ export default defineComponent({
     return {
       AE_AENS_DOMAIN,
       autoExtend,
+      isLoaderVisible,
       isNameValid,
-      isAeSdkReady,
       name,
       totalNameClaimAmount,
       errorName,

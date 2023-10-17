@@ -163,7 +163,6 @@ import {
   onMounted,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
@@ -231,15 +230,15 @@ export default defineComponent({
     multisigDashboard: { type: Boolean },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
 
     const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getMiddleware } = useMiddleware();
-    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
+    const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
+    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -262,7 +261,6 @@ export default defineComponent({
       isMultisig,
       outerTxTag,
     } = useTransactionTx({
-      store,
       externalAddress: externalAddress.value,
     });
 
@@ -270,9 +268,8 @@ export default defineComponent({
       fetchAllPendingTransactions,
       updateAccountTransaction,
       getTransactionByHash,
-    } = useTransactionList({ store });
+    } = useTransactionList();
 
-    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens({ store });
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 

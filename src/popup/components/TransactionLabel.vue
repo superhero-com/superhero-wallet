@@ -76,7 +76,6 @@ import {
 } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 
 import type { ITransaction } from '@/types';
 import { TX_DIRECTION } from '@/constants';
@@ -108,10 +107,9 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { activeAccount, getAccountByAddress } = useAccounts();
     const { t } = useI18n();
-    const { getName } = useAeNames({ store });
+    const { getName } = useAeNames();
 
     const {
       outerTxTag,
@@ -126,12 +124,11 @@ export default defineComponent({
       isTip,
       txTypeListLabel,
     } = useTransactionTx({
-      store,
       tx: props.transaction.tx,
       externalAddress: props.transaction.transactionOwner,
     });
 
-    const { availableTokens } = useFungibleTokens({ store });
+    const { availableTokens } = useFungibleTokens();
 
     const label = computed((): {
       text: string;

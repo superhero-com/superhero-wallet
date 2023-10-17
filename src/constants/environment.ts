@@ -13,6 +13,10 @@ export const RUNNING_IN_POPUP = !!(
   && (window.location.pathname.includes('index.html') || RUNNING_IN_TESTS)
 );
 
+/**
+ * Running in a popup window opened by the extension's background process
+ * with the use of `popupHandler`.
+ */
 export const IN_POPUP = !!window.opener && window.name.startsWith('popup-');
 
 export const POPUP_TYPE = url.searchParams.get('type') as PopupType || null;

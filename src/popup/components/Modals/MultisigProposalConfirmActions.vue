@@ -79,7 +79,6 @@ import {
   PropType,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import type {
   IFormSelectOption,
   TxFunctionMultisig,
@@ -115,22 +114,16 @@ export default defineComponent({
     reject: { type: Function as PropType<RejectCallback>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { tm } = useI18n();
 
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store });
-    const {
-      activeAccount,
-      setActiveAccountByAddress,
-    } = useAccounts();
+    const { activeMultisigAccount } = useMultisigAccounts();
+    const { activeAccount, setActiveAccountByAddress } = useAccounts();
     const {
       pendingMultisigTxSigners,
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
-    } = usePendingMultisigTransaction({ store });
+    } = usePendingMultisigTransaction();
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),

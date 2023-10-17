@@ -17,7 +17,6 @@
 import { computed, defineComponent, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useFungibleTokens, useTippingContracts, useTransactionTx } from '@/composables';
 import type { ITransaction } from '@/types';
 import { excludeFalsy, includes } from '@/utils';
@@ -41,7 +40,6 @@ export default defineComponent({
     dense: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const {
@@ -54,14 +52,13 @@ export default defineComponent({
       isDex,
       isDexAllowance,
     } = useTransactionTx({
-      store,
       tx: props.transaction?.tx,
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    const { tippingContractAddresses } = useTippingContracts({ store });
+    const { tippingContractAddresses } = useTippingContracts();
 
-    const { availableTokens } = useFungibleTokens({ store });
+    const { availableTokens } = useFungibleTokens();
 
     const labels = computed((): string[] => {
       if (props.customTitle) {

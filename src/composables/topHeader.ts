@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import type { ITopHeader, IDefaultComposableOptions } from '@/types';
+import type { ITopHeader } from '@/types';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { createNetworkWatcher } from './networks';
@@ -13,8 +13,8 @@ const { onNetworkChange } = createNetworkWatcher();
 /**
  * Composable that provides the information about the last block of the blockchain.
  */
-export function useTopHeaderData({ store }: IDefaultComposableOptions) {
-  const { getAeSdk } = useAeSdk({ store });
+export function useTopHeaderData() {
+  const { getAeSdk } = useAeSdk();
 
   const topBlockHeight = computed(() => topHeaderData.value?.height || 0);
 

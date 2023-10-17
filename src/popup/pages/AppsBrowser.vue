@@ -91,9 +91,8 @@ import {
   ref,
   computed,
 } from 'vue';
-import { useStore } from 'vuex';
-import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { Field } from 'vee-validate';
+import { MODAL_WARNING_DAPP_BROWSER } from '@/constants';
 import { getLocalStorageItem, setLocalStorageItem, handleUnknownError } from '@/utils';
 import { useAeSdk, useModals } from '@/composables';
 import { useAppsBrowserHistory } from '@/composables/appsBrowserHistory';
@@ -140,7 +139,6 @@ export default defineComponent({
     BackToTop,
   },
   setup() {
-    const store = useStore();
     const { addHistoryItem } = useAppsBrowserHistory();
 
     const selectedApp = ref();
@@ -149,7 +147,7 @@ export default defineComponent({
     const currentClientId = ref('');
     let shareWalletInfoInterval: any;
 
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const { openModal, modalsOpen } = useModals();
 
     const isWarningModalOpened = computed(

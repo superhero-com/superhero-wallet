@@ -59,11 +59,11 @@ import {
 } from 'vue';
 import { RouteLocation } from 'vue-router';
 import dayjs from 'dayjs';
-import { useStore } from 'vuex';
 import type {
   IActiveMultisigTransaction,
   ITransaction,
 } from '@/types';
+import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   amountRounded,
   executeAndSetInterval,
@@ -72,17 +72,16 @@ import {
   relativeTimeTo,
   toShiftedBigNumber,
 } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import {
-  ROUTE_MULTISIG_TX_DETAILS,
-  ROUTE_TX_DETAILS,
-  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
-} from '../router/routeNames';
 import {
   useCurrencies,
   useTransactionTokens,
   useTransactionTx,
-} from '../../composables';
+} from '@/composables';
+import {
+  ROUTE_MULTISIG_TX_DETAILS,
+  ROUTE_TX_DETAILS,
+  ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
+} from '@/popup/router/routeNames';
 
 import TransactionTokenRows from './TransactionTokenRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
@@ -104,7 +103,6 @@ export default defineComponent({
     hasConsensus: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     let timerInterval: NodeJS.Timer;
@@ -122,13 +120,11 @@ export default defineComponent({
       isDexPool,
       isErrorTransaction,
     } = useTransactionTx({
-      store,
       tx: currentTransaction.value.tx,
       externalAddress: transactionOwner.value,
     });
 
     const { tokens } = useTransactionTokens({
-      store,
       direction: direction.value,
       isAllowance: isDexAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx

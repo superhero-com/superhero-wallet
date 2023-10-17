@@ -14,8 +14,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
-import { usePendingMultisigTransaction } from '../../composables';
+import { usePendingMultisigTransaction } from '@/composables';
 
 import TransactionListItem from './TransactionListItem.vue';
 
@@ -24,8 +23,7 @@ export default defineComponent({
     TransactionListItem,
   },
   setup() {
-    const store = useStore();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     return {
       pendingMultisigTransaction,

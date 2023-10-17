@@ -84,7 +84,6 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { TransferFormModel, ITransaction } from '@/types';
 import {
@@ -134,26 +133,25 @@ export default defineComponent({
     isAddressUrl: Boolean,
   },
   setup(props, { emit }) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList();
     const { activeAccount } = useAccounts();
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
       updateMultisigAccounts,
-    } = useMultisigAccounts({ store });
-    const { getTippingContracts } = useTippingContracts({ store });
+    } = useMultisigAccounts();
+    const { getTippingContracts } = useTippingContracts();
     const {
       createOrChangeAllowance,
       burnTriggerPoS,
       transferToken,
-    } = useFungibleTokens({ store });
+    } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
 
@@ -184,14 +182,14 @@ export default defineComponent({
             amount,
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
-            { waitMined: false, modal: false },
+            { waitMined: false },
           );
         } else if (!isSelectedAssetAeCoin) {
           actionResult = await transferToken(
             selectedAsset.contractId,
             recipient,
             amount,
-            { waitMined: false, modal: false },
+            { waitMined: false },
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
@@ -277,7 +275,6 @@ export default defineComponent({
             {
               amount,
               waitMined: false,
-              ...{ modal: false } as any, // TODO: `modal` is not a part of aeSdk types
             },
           );
         }
@@ -315,7 +312,7 @@ export default defineComponent({
       try {
         const {
           buildSpendTx, proposeTx, postSpendTx,
-        } = useMultisigTransactions({ store });
+        } = useMultisigTransactions();
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
             activeMultisigAccount.value.gaAccountId,

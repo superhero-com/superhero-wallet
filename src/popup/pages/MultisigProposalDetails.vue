@@ -280,7 +280,6 @@ import {
 import { TranslateResult, useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage, onIonViewWillLeave } from '@ionic/vue';
@@ -355,18 +354,19 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const { openDefaultModal, openModal } = useModals();
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
 
+    const { openDefaultModal, openModal } = useModals();
+    const { isLoaderVisible, setLoaderVisible } = useUi();
+    const { isLocalAccountAddress } = useAccounts();
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       updateMultisigAccounts,
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
-    } = useMultisigAccounts({ store });
+    } = useMultisigAccounts();
 
     const {
       pendingMultisigTxExpired,
@@ -374,23 +374,16 @@ export default defineComponent({
       pendingMultisigTxCanBeSent,
       pendingMultisigTxLocalSigners,
       pendingMultisigTxConfirmedByLocalSigners,
-    } = usePendingMultisigTransaction({ store });
+    } = usePendingMultisigTransaction();
 
     const {
       fetchActiveMultisigTx,
       fetchTransactionByHash,
       sendTx,
       callContractMethod,
-    } = useMultisigTransactions({
-      store,
-    });
+    } = useMultisigTransactions();
 
-    const {
-      isLocalAccountAddress,
-    } = useAccounts();
-
-    const { isLoaderVisible, setLoaderVisible } = useUi();
-    const { getTxSymbol } = useFungibleTokens({ store });
+    const { getTxSymbol } = useFungibleTokens();
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);

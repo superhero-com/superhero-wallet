@@ -42,7 +42,6 @@ import type {
 
 import { Encoded } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 
 import {
   PROTOCOL_AETERNITY,
@@ -73,9 +72,8 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
-    const store = useStore();
-    const { isAeNodeReady } = useAeSdk({ store });
-    const { availableTokens } = useFungibleTokens({ store });
+    const { isAeNodeReady } = useAeSdk();
+    const { availableTokens } = useFungibleTokens();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStepExtended>(TRANSFER_SEND_STEPS.form);

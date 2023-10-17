@@ -7,9 +7,11 @@ import {
 } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 import type {
-  IPopupConfig,
+  IAppData,
+  IPopupData,
   ITransaction,
   PartialDeep,
+  PopupType,
   TxFunctionParsed,
 } from '@/types';
 import { CoinGeckoMarketResponse } from '@/lib/CoinGecko';
@@ -29,6 +31,7 @@ import {
 export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
 export const STUB_CONTRACT_ADDRESS = 'ct_2rWUGgaVEVytGKuovkeJiUiLvrW63Fx7acvLBb5Ee9ypqoNxL6';
 export const STUB_CALLDATA = 'cb_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACDJfUrsdAtW6IZtMvhp0+eVDUiQivrquyBwXrl/ujPLcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJQQwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACUEMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJvjRF';
+export const STUB_TX_BASE_64 = 'tx_+FEMAaEByqPFadmQk4sGtyDiquosAZyKJNmherKOhheVIEYTLCKhAcqjxWnZkJOLBrcg4qrqLAGciiTZoXqyjoYXlSBGEywiC4YPJvVhyAAAE4ALeFGB';
 export const STUB_NONCE = 10000;
 export const STUB_TOKEN_CONTRACT_ADDRESS = 'ct_T6MWNrowGVC9dyTDksCBrCCSaeK3hzBMMY5hhMKwvwr8wJvM8';
 export const STUB_TIPPING_CONTRACT_ID_V1 = 'ct_2Cvbf3NYZ5DLoaNYAU71t67DdXLHeSXhodkSNifhgd7Xsw28Xd';
@@ -47,53 +50,30 @@ export const STUB_CURRENCY: CoinGeckoMarketResponse = {
   id: AE_COINGECKO_COIN_ID, symbol: 'ae', name: 'Aeternity', image: 'https://assets.coingecko.com/coins/images/1091/large/aeternity.png?1547035060', currentPrice: 0.076783, marketCap: 31487891, marketCapRank: 523, fullyDilutedValuation: null, totalVolume: 217034, high24h: 0.078539, low24h: 0.076793, priceChange24h: -0.001092194951687525, priceChangePercentage24h: -1.4025, marketCapChange24h: -429134.39267925173, marketCapChangePercentage24h: -1.34453, circulatingSupply: 409885828.49932, totalSupply: 536306702.0, maxSupply: null, ath: 5.69, athChangePercentage: -98.65091, athDate: '2018-04-29T03:50:39.593Z', atl: 0.059135, atlChangePercentage: 29.84246, atlDate: '2020-03-13T02:29:11.856Z', roi: { times: -0.725775445642378, currency: 'usd', percentage: -72.57754456423778 }, lastUpdated: '2023-01-17T11:38:23.610Z',
 };
 
-export const STUB_POPUP_PROPS: Record<string, IPopupConfig> = {
+export const STUB_APP_DATA: IAppData = {
+  url: 'http://localhost:5000/aepp/aepp',
+  name: 'AEPP',
+  protocol: 'http:',
+  host: 'localhost',
+};
+
+export const STUB_POPUP_PROPS: Record<PopupType | 'base', IPopupData> = {
   [POPUP_TYPE_CONNECT]: {
-    type: POPUP_TYPE_CONNECT,
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
+    app: STUB_APP_DATA,
   },
   [POPUP_TYPE_ACCOUNT_LIST]: {
-    type: POPUP_TYPE_ACCOUNT_LIST,
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
+    app: STUB_APP_DATA,
   },
   [POPUP_TYPE_MESSAGE_SIGN]: {
-    type: POPUP_TYPE_MESSAGE_SIGN,
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
+    app: STUB_APP_DATA,
     message: 'test',
   },
   [POPUP_TYPE_RAW_SIGN]: {
-    type: POPUP_TYPE_RAW_SIGN,
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
-    data: 'test',
+    app: STUB_APP_DATA,
+    txBase64: STUB_TX_BASE_64,
   },
   [POPUP_TYPE_SIGN]: {
-    type: POPUP_TYPE_SIGN,
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
+    app: STUB_APP_DATA,
     tx: {
       type: Tag[Tag.SpendTx],
       VSN: '1',
@@ -103,17 +83,14 @@ export const STUB_POPUP_PROPS: Record<string, IPopupConfig> = {
       fee: 16820000000000,
       nonce: 190,
       payload: 'ba_Xfbg4g==',
+      arguments: [],
+      callerId: STUB_ADDRESS,
+      contractId: STUB_CONTRACT_ADDRESS,
     },
   },
   base: {
-    type: 'sign',
+    app: STUB_APP_DATA,
     action: { params: { returnSigned: false }, method: 'transaction.sign' },
-    app: {
-      url: 'http://localhost:5000/aepp/aepp',
-      name: 'AEPP',
-      protocol: 'http:',
-      host: 'localhost',
-    },
   },
 };
 

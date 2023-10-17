@@ -43,7 +43,6 @@
 <script lang="ts">
 import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
@@ -71,8 +70,7 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
 
     const simplexLink = computed(
       () => (activeMultisigAccount.value)

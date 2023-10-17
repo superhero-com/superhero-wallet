@@ -8,7 +8,6 @@ import { isEqual } from 'lodash-es';
 import type {
   IAccount,
   IActiveMultisigTransaction,
-  IDefaultComposableOptions,
   ITransaction,
 } from '@/types';
 import { handleUnknownError } from '@/utils';
@@ -24,11 +23,11 @@ import { useTopHeaderData } from './topHeader';
 
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
-export function usePendingMultisigTransaction({ store }: IDefaultComposableOptions) {
+export function usePendingMultisigTransaction() {
   const { getMiddleware } = useMiddleware();
-  const { activeMultisigAccount } = useMultisigAccounts({ store });
-  const { fetchActiveMultisigTx } = useMultisigTransactions({ store });
-  const { topBlockHeight } = useTopHeaderData({ store });
+  const { activeMultisigAccount } = useMultisigAccounts();
+  const { fetchActiveMultisigTx } = useMultisigTransactions();
+  const { topBlockHeight } = useTopHeaderData();
   const { aeAccounts } = useAccounts();
 
   const latestMultisigAccountTransaction = ref<ITransaction | null>(null);

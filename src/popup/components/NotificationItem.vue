@@ -64,7 +64,6 @@
 import { PropType, computed, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import type { INotification } from '@/types';
 import { relativeTimeTo } from '@/utils';
 import {
@@ -101,8 +100,7 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
-    const store = useStore();
-    const { getName } = useAeNames({ store });
+    const { getName } = useAeNames();
 
     function getNotificationText(notification: INotification) {
       switch (notification.type) {

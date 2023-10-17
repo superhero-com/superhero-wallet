@@ -6,7 +6,6 @@ import BigNumber from 'bignumber.js';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
 import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import type {
-  IDefaultComposableOptions,
   IMultisigAccount,
   IMultisigConsensus,
   IMultisigAccountResponse,
@@ -35,7 +34,7 @@ const POLLING_INTERVAL = 7000;
 const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
 const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
 
-export interface MultisigAccountsOptions extends IDefaultComposableOptions {
+export interface MultisigAccountsOptions {
   pollOnce?: boolean;
   pollingDisabled?: boolean;
 }
@@ -67,12 +66,11 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
 const { onNetworkChange } = createNetworkWatcher();
 
 export function useMultisigAccounts({
-  store,
   pollOnce = false,
   pollingDisabled = false,
-}: MultisigAccountsOptions) {
+}: MultisigAccountsOptions = {}) {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
+  const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { aeAccounts } = useAccounts();
 
   const allMultisigAccounts = computed<IMultisigAccount[]>(() => [

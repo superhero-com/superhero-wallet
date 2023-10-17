@@ -58,7 +58,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { IAccount } from '@/types';
 import { getDefaultAccountLabel } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -86,8 +85,7 @@ export default defineComponent({
     showProtocolIcon: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { getName } = useAeNames({ store });
+    const { getName } = useAeNames();
 
     const name = computed(() => getName(props.account.address!).value);
 

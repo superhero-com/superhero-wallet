@@ -21,18 +21,16 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
-import { useAccounts, useConnection, useAeSdk } from '../../composables';
+import { useAccounts, useConnection, useAeSdk } from '@/composables';
 
 const CONNECTED_DISPLAY_TIME = 2000;
 
 export default defineComponent({
   setup() {
-    const store = useStore();
     const { t } = useI18n();
 
     const { isOnline } = useConnection();
-    const { isAeNodeConnecting, isAeNodeReady, isAeNodeError } = useAeSdk({ store });
+    const { isAeNodeConnecting, isAeNodeReady, isAeNodeError } = useAeSdk();
     const { isLoggedIn } = useAccounts();
 
     const justBeenConnected = ref(false);

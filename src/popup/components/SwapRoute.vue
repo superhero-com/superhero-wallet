@@ -32,19 +32,19 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { camelCase } from 'lodash-es';
-import { useAeSdk, useFungibleTokens } from '@/composables';
-import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
+import { Encoded } from '@aeternity/aepp-sdk';
 
-import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
-import {
+import type {
   ITransaction,
   TxFunction,
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
-import { Encoded } from '@aeternity/aepp-sdk';
+import { useAeSdk, useFungibleTokens } from '@/composables';
+import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
+import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
+
 import Tokens from './Tokens.vue';
 import ArrowHead from '../../icons/arrow-head.svg?vue-component';
 
@@ -57,9 +57,8 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const store = useStore();
-    const { nodeNetworkId } = useAeSdk({ store });
-    const { availableTokens } = useFungibleTokens({ store });
+    const { nodeNetworkId } = useAeSdk();
+    const { availableTokens } = useFungibleTokens();
 
     function getTxFunction(
       functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
@@ -79,6 +78,8 @@ export default defineComponent({
       }
       let { tokens } = resolver(props.transaction, availableTokens.value);
       const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
+      const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
+      const tokenLastIndex = tokens.length - 1;
 
       if (index >= 0 && props.transaction.tx.arguments[index].value.length > tokens.length) {
         tokens = [
@@ -89,11 +90,6 @@ export default defineComponent({
           tokens[1],
         ];
       }
-
-      const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
-
-      const tokenLastIndex = tokens.length - 1;
-
       if (
         tokens[0].isAe
         && waeContract
@@ -105,10 +101,9 @@ export default defineComponent({
         });
         tokens[1].isAe = false;
       }
-      if (tokens[tokenLastIndex].isAe && waeContract
-        && !waeContract?.includes(
-            tokens[tokenLastIndex - 1].contractId as Encoded.ContractAddress,
-        )
+      if (
+        tokens[tokenLastIndex].isAe && waeContract
+        && !waeContract?.includes(tokens[tokenLastIndex - 1].contractId as Encoded.ContractAddress)
       ) {
         tokens[tokenLastIndex].isAe = false;
         tokens.push({ ...tokens[tokenLastIndex], isAe: true });
@@ -122,11 +117,12 @@ export default defineComponent({
       }
       const contracts = DEX_CONTRACTS[nodeNetworkId.value!];
 
-      return (contracts?.wae?.includes(tokenList.value[idx].contractId as Encoded.ContractAddress)
-          && tokenList.value[idx + 1].isAe
+      return (
+        contracts?.wae?.includes(tokenList.value[idx].contractId as Encoded.ContractAddress)
+        && tokenList.value[idx + 1].isAe
       ) || (
         contracts?.wae?.includes(tokenList.value[idx + 1].contractId as Encoded.ContractAddress)
-          && tokenList.value[idx].isAe
+        && tokenList.value[idx].isAe
       );
     }
 
