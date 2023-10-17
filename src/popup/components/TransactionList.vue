@@ -50,7 +50,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IonContent } from '@ionic/vue';
 import { throttle } from 'lodash-es';
@@ -99,21 +98,20 @@ export default defineComponent({
     IonContent,
   },
   props: {
-    canLoadMore: { type: Boolean },
     fetchRecentTransactions: { type: Function, required: true },
     fetchMoreTransactions: { type: Function, required: true },
     ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
-    isMultisig: { type: Boolean },
-    isInitialLoading: { type: Boolean },
     transactions: { type: Array as PropType<ICommonTransaction[]>, default: () => [] },
+    canLoadMore: Boolean,
+    isMultisig: Boolean,
+    isInitialLoading: Boolean,
   },
   setup(props) {
     let pollingInterval: NodeJS.Timer | null;
 
-    const store = useStore();
     const { t } = useI18n();
     const { accounts, activeAccount } = useAccounts();
-    const { dexContracts } = useAeSdk({ store });
+    const { dexContracts } = useAeSdk();
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
     const { setScrollConf } = useScrollConfig();
@@ -153,7 +151,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { getTxSymbol } = useFungibleTokens({ store });
+    const { getTxSymbol } = useFungibleTokens();
 
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {

@@ -60,7 +60,6 @@ import {
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 
 import {
   DASHBOARD_CARD_ID,
@@ -105,12 +104,11 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
 
     const { activeAccount } = useAccounts();
     const { checkIfOpenTransferSendModal } = useDeepLinkApi();
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
 

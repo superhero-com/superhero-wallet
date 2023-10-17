@@ -29,7 +29,6 @@ import {
   defineComponent,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   useCurrencies,
@@ -48,13 +47,11 @@ export default defineComponent({
     TotalWalletAmount,
   },
   setup() {
-    const store = useStore();
-
     const {
       multisigAccounts,
       activeMultisigAccountId,
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store });
+    } = useMultisigAccounts();
     const { getFiat } = useCurrencies();
 
     const addressList = computed(() => multisigAccounts.value.map((acc) => acc.gaAccountId));

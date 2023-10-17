@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { useStore } from 'vuex';
 import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
 import type { IonicLifecycleStatus } from '@/types';
@@ -28,9 +27,8 @@ export default defineComponent({
   setup() {
     const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
 
-    const store = useStore();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     onIonViewDidEnter(() => {
       ionicLifecycleStatus.value = 'didEnter';

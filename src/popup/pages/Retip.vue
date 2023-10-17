@@ -81,7 +81,6 @@ import {
 } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import type {
@@ -127,7 +126,6 @@ export default defineComponent({
     DetailsItem,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
     const errorAmount = useFieldError();
@@ -137,17 +135,17 @@ export default defineComponent({
       amount: '',
     });
     const { getCacheTip } = useAeTippingBackend();
-    const { isTippingSupported } = useAeSdk({ store });
+    const { isTippingSupported } = useAeSdk();
     const { openDefaultModal } = useModals();
     const { marketData } = useCurrencies();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { balance } = useBalances();
-    const { max, fee } = useMaxAmount({ formModel, store });
-    const { getTippingContracts } = useTippingContracts({ store });
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList({ store });
+    const { max, fee } = useMaxAmount({ formModel });
+    const { getTippingContracts } = useTippingContracts();
+    const { upsertCustomPendingTransactionForAccount } = useTransactionList();
     const { getTippingUrlStatus } = useAeTippingUrls();
-    const { createOrChangeAllowance } = useFungibleTokens({ store });
+    const { createOrChangeAllowance } = useFungibleTokens();
 
     const tipId = route.query.id;
     const tip = ref<{ url: string, id: string }>({

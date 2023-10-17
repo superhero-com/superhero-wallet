@@ -10,7 +10,6 @@ import {
   METHODS,
 } from '@aeternity/aepp-sdk';
 import type {
-  IDefaultComposableOptions,
   INetwork,
   IResponseChallenge,
   IRespondChallenge,
@@ -51,7 +50,7 @@ const aeppInfo: Record<string, any> = {};
 let dryAeSdk: AeSdk;
 let dryAeSdkCurrentNodeNetworkId: string;
 
-export function useAeSdk({ store }: IDefaultComposableOptions) {
+export function useAeSdk() {
   const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
   const {
     accountsAddressList,
@@ -95,45 +94,45 @@ export function useAeSdk({ store }: IDefaultComposableOptions) {
     aeSdkBlocked = true;
     isAeSdkReady.value = false;
 
-    await Promise.all([
-      watchUntilTruthy(() => store.state.isRestored),
-      watchUntilTruthy(isLoggedIn),
-    ]);
+    await watchUntilTruthy(isLoggedIn);
 
     storedNetworkName = activeNetworkName.value;
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
 
-    aeSdk = new AeSdkSuperhero(store, {
-      name: 'Superhero',
-      nodes: [{
-        name: activeNetworkName.value,
-        instance: nodeInstance!,
-      }],
-      id: 'Superhero Wallet',
-      type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
-      onConnection(aeppId: string, params: any, origin: string) {
-        aeppInfo[aeppId] = { ...params, origin };
+    aeSdk = new AeSdkSuperhero(
+      {
+        name: 'Superhero',
+        nodes: [{
+          name: activeNetworkName.value,
+          instance: nodeInstance!,
+        }],
+        id: 'Superhero Wallet',
+        type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
+        onConnection(aeppId: string, params: any, origin: string) {
+          aeppInfo[aeppId] = { ...params, origin };
+        },
+        onDisconnect(aeppId: string) {
+          delete aeppInfo[aeppId];
+        },
+        async onSubscription(aeppId: string, params: any, origin: string) {
+          const aepp = aeppInfo[aeppId];
+          const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+          if (await checkOrAskPermission(host, METHODS.subscribeAddress)) {
+            return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
+          }
+          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+        },
+        async onAskAccounts(aeppId: string, params: any, origin: string) {
+          const aepp = aeppInfo[aeppId];
+          const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
+          if (await checkOrAskPermission(host, METHODS.address)) {
+            return accountsAddressList.value;
+          }
+          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+        },
       },
-      onDisconnect(aeppId: string) {
-        delete aeppInfo[aeppId];
-      },
-      async onSubscription(aeppId: string, params: any, origin: string) {
-        const aepp = aeppInfo[aeppId];
-        const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
-        if (await checkOrAskPermission(host, METHODS.subscribeAddress)) {
-          return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
-        }
-        return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
-      },
-      async onAskAccounts(aeppId: string, params: any, origin: string) {
-        const aepp = aeppInfo[aeppId];
-        const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
-        if (await checkOrAskPermission(host, METHODS.address)) {
-          return accountsAddressList.value;
-        }
-        return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
-      },
-    });
+      nodeNetworkId,
+    );
 
     if (IN_FRAME && !FramesConnection.initialized) {
       FramesConnection.init(aeSdk);

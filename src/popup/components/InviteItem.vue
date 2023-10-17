@@ -89,7 +89,6 @@ import {
   encode,
   Encoding,
 } from '@aeternity/aepp-sdk';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
@@ -128,13 +127,12 @@ export default defineComponent({
     createdAt: { type: Number, required: true },
   },
   setup(props, { emit }) {
-    const store = useStore();
     const router = useRouter();
 
     const { getLastActiveProtocolAccount } = useAccounts();
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const { claimInvite, removeInvite, handleInsufficientBalanceError } = useInvites();
 
     const formModel = ref<IFormModel>({
@@ -143,7 +141,7 @@ export default defineComponent({
         .getAdapter(PROTOCOL_AETERNITY)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
-    const { max } = useMaxAmount({ formModel, store });
+    const { max } = useMaxAmount({ formModel });
 
     const topUp = ref(false);
     const inviteLinkBalance = ref(0);

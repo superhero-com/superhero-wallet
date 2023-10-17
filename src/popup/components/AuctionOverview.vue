@@ -19,7 +19,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
 import { PROTOCOL_AETERNITY } from '@/constants';
@@ -37,10 +36,8 @@ export default defineComponent({
     name: { type: String, required: true },
   },
   setup(props) {
-    const store = useStore();
-
-    const { topBlockHeight } = useTopHeaderData({ store });
-    const { getNameAuctionHighestBid, getNameAuction } = useAeNames({ store });
+    const { topBlockHeight } = useTopHeaderData();
+    const { getNameAuctionHighestBid, getNameAuction } = useAeNames();
 
     const auction = computed(() => getNameAuction(props.name));
 

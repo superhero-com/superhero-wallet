@@ -5,9 +5,8 @@ import {
   ref,
 } from 'vue';
 import type {
+  IModalProps,
   ProtocolView,
-  RejectCallback,
-  ResolveCallback,
   StatusIconType,
 } from '@/types';
 import {
@@ -31,13 +30,6 @@ interface IModalSettings {
    * Usable only with `ProtocolSpecificView` passed to the `component` property.
    */
   viewComponentName?: ProtocolView;
-}
-
-export interface IModalProps {
-  [key: string]: any; // Props defined on the component's level
-  resolve?: ResolveCallback;
-  reject?: RejectCallback;
-  show?: boolean;
 }
 
 /**
@@ -117,7 +109,7 @@ export function useModals() {
       /**
        * These modals use the `usePopupProps` composable instead of props
        * even if they are not opened in a popup
-      */
+       */
       if (modalSettings.showInPopupIfWebFrame && !inPopup) {
         const { setPopupProps } = usePopupProps();
         setPopupProps({

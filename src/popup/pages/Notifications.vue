@@ -36,7 +36,6 @@ import {
   nextTick,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { IS_EXTENSION } from '@/constants';
 import { useViewport, useNotifications } from '@/composables';
 
@@ -52,7 +51,6 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const { initViewport } = useViewport();
 
     const innerElement = ref<HTMLElement>();
@@ -62,7 +60,7 @@ export default defineComponent({
       canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
-    } = useNotifications({ store, requirePolling: true });
+    } = useNotifications({ requirePolling: true });
 
     onMounted(async () => {
       initViewport(innerElement.value?.parentElement!);

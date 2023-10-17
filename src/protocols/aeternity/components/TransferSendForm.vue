@@ -162,7 +162,6 @@ import {
 import { useRoute } from 'vue-router';
 import { Field } from 'vee-validate';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
@@ -244,7 +243,6 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
-    const store = useStore();
     const route = useRoute();
 
     const hasMultisigTokenWarning = ref(false);
@@ -252,7 +250,7 @@ export default defineComponent({
     const amountField = ref<InstanceType<typeof Field> | null>(null);
 
     const { openModal } = useModals();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
     const { balance } = useBalances();
     const { marketData } = useCurrencies();
     const {
@@ -262,7 +260,7 @@ export default defineComponent({
       setActiveAccountByAddress,
     } = useAccounts();
 
-    const { availableTokens, getAccountTokenBalances } = useFungibleTokens({ store });
+    const { availableTokens, getAccountTokenBalances } = useFungibleTokens();
 
     function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
@@ -298,7 +296,7 @@ export default defineComponent({
       protocol: PROTOCOL_AETERNITY,
     });
 
-    const { max, fee } = useMaxAmount({ formModel, store });
+    const { max, fee } = useMaxAmount({ formModel });
 
     const multisigVaultAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 

@@ -177,7 +177,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -253,7 +252,6 @@ export default defineComponent({
     reject: { type: Function, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
 
@@ -263,7 +261,7 @@ export default defineComponent({
 
     const {
       setActiveMultisigAccountId,
-    } = useMultisigAccounts({ store, pollOnce: true });
+    } = useMultisigAccounts({ pollOnce: true });
 
     const {
       multisigAccount,
@@ -275,7 +273,7 @@ export default defineComponent({
       prepareVaultCreationAttachTx,
       deployMultisigAccount,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store });
+    } = useMultisigAccountCreate();
 
     const currentStep = ref<Step>(STEPS.form);
 
@@ -390,11 +388,13 @@ export default defineComponent({
           confirmationsRequired.value,
           signersAddressList.value,
         );
-      } catch (error) {
+      } catch (error: any) {
         handleUnknownError(error);
         await openDefaultModal({
           title: t('multisig.multisigVaultCreationFailed'),
           icon: 'critical',
+          msg: error?.details?.reason,
+          textCenter: true,
         });
         currentStep.value = STEPS.form;
       }
@@ -410,8 +410,7 @@ export default defineComponent({
 
     onMounted(() => {
       if (!signers.value.length) {
-        // eslint-disable-next-line no-plusplus
-        for (let n = 0; n < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS; n++) {
+        for (let n = 0; n < MULTISIG_VAULT_MIN_NUM_OF_SIGNERS; n += 1) {
           addNewSigner();
         }
       }

@@ -71,7 +71,6 @@ import { defineComponent, ref } from 'vue';
 import { Field } from 'vee-validate';
 import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
-import { useStore } from 'vuex';
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOL_AETERNITY } from '@/constants';
@@ -104,11 +103,9 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-
     const { activeAccount } = useAccounts();
     const { marketData } = useCurrencies();
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
     const { balance } = useBalances();
     const { invites, addInvite, handleInsufficientBalanceError } = useInvites();
     const { setLoaderVisible } = useUi();
@@ -120,7 +117,7 @@ export default defineComponent({
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
-    const { max, fee } = useMaxAmount({ formModel, store });
+    const { max, fee } = useMaxAmount({ formModel });
 
     async function generate() {
       setLoaderVisible(true);

@@ -6,7 +6,6 @@ import type {
   Balance,
   IAsset,
   ICoin,
-  IDefaultComposableOptions,
   IToken,
   ITokenList,
 } from '@/types';
@@ -19,7 +18,7 @@ import { useAccounts } from './accounts';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
 
-export interface UseTokensListOptions extends IDefaultComposableOptions {
+export interface UseTokensListOptions {
   /**
    * Restrict the list to tokens owned by the user
    */
@@ -40,7 +39,6 @@ export interface UseTokensListOptions extends IDefaultComposableOptions {
 }
 
 export function useTokensList({
-  store,
   ownedOnly = false,
   withBalanceOnly = false,
   searchTerm,
@@ -49,11 +47,11 @@ export function useTokensList({
   const { marketData } = useCurrencies();
   const { balance } = useBalances();
   const { activeAccount } = useAccounts();
-  const { activeMultisigAccount } = useMultisigAccounts({ store });
+  const { activeMultisigAccount } = useMultisigAccounts();
   const {
     availableTokens: allAvailableTokens,
     getAccountTokenBalances,
-  } = useFungibleTokens({ store });
+  } = useFungibleTokens();
 
   const availableTokens = computed<ITokenList>(() => (
     isMultisig

@@ -14,7 +14,6 @@ import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 
 import type {
   IActiveMultisigTransaction,
-  IDefaultComposableOptions,
   TxFunctionMultisig,
   IRawMultisigTx,
 } from '@/types';
@@ -31,10 +30,10 @@ import { useTopHeaderData } from './topHeader';
 
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
-export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
+export function useMultisigTransactions() {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk({ store });
-  const { fetchCurrentTopBlockHeight } = useTopHeaderData({ store });
+  const { nodeNetworkId, getDryAeSdk, getAeSdk } = useAeSdk();
+  const { fetchCurrentTopBlockHeight } = useTopHeaderData();
 
   async function buildSpendTx(
     senderId: Encoded.AccountAddress,
@@ -70,7 +69,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
    * @returns transaction with consensus details if exists or null
    */
   async function fetchActiveMultisigTx(): Promise<IActiveMultisigTransaction | null> {
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
     const txHash = activeMultisigAccount.value?.txHash;
 
     if (

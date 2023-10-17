@@ -19,10 +19,7 @@ import {
 } from '@aeternity/aepp-sdk';
 
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
-import type {
-  IDefaultComposableOptions,
-  IFormModel,
-} from '@/types';
+import type { IFormModel } from '@/types';
 import {
   executeAndSetInterval,
   handleUnknownError,
@@ -43,7 +40,7 @@ import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
-export interface MaxAmountOptions extends IDefaultComposableOptions {
+export interface MaxAmountOptions {
   formModel: Ref<IFormModel>
 }
 
@@ -51,8 +48,8 @@ export interface MaxAmountOptions extends IDefaultComposableOptions {
  * Composable that allows to use real max amount of selected token
  * considering the fee that needs to be paid.
  */
-export function useMaxAmount({ store, formModel }: MaxAmountOptions) {
-  const { getAeSdk } = useAeSdk({ store });
+export function useMaxAmount({ formModel }: MaxAmountOptions) {
+  const { getAeSdk } = useAeSdk();
   const { balance } = useBalances();
   const { getLastActiveProtocolAccount } = useAccounts();
 

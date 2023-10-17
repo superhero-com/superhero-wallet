@@ -60,7 +60,6 @@ import {
   onMounted,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import type {
   IActiveAuction,
@@ -110,10 +109,9 @@ export default defineComponent({
     IonToolbar,
   },
   setup() {
-    const store = useStore();
     const { t } = useI18n();
 
-    const { topBlockHeight } = useTopHeaderData({ store });
+    const { topBlockHeight } = useTopHeaderData();
     const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware();
 
     const loading = ref(false);

@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import Vuex from 'vuex';
 import { useFungibleTokens } from '@/composables';
 import { TX_DIRECTION } from '../../../src/constants';
 import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
@@ -54,8 +53,7 @@ const tests = [{
 ];
 
 describe('getTxAmountTotal', () => {
-  const store = new Vuex.Store({});
-  const { availableTokens, getTxAmountTotal } = useFungibleTokens({ store });
+  const { availableTokens, getTxAmountTotal } = useFungibleTokens();
 
   availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {
     decimals: TEST_TOKEN_DECIMALS,

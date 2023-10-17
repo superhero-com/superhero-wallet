@@ -78,7 +78,6 @@ import {
 } from 'vue';
 import { shuffle } from 'lodash-es';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { IonPage, IonContent } from '@ionic/vue';
 import { useAccounts, useNotifications, useUi } from '@/composables';
@@ -100,15 +99,11 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const store = useStore();
     const { t } = useI18n();
 
     const { setBackedUpSeed } = useUi();
     const { mnemonic } = useAccounts();
-    const { removeIsSeedBackedUpNotification } = useNotifications({
-      store,
-      requirePolling: false,
-    });
+    const { removeIsSeedBackedUpNotification } = useNotifications({ requirePolling: false });
 
     const selectedWordIds = ref<number[]>([]);
     const showNotification = ref<boolean>(false);

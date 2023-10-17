@@ -19,7 +19,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { MODAL_NETWORK_SWITCHER } from '@/constants';
 import {
   useConnection,
@@ -35,11 +34,10 @@ export default defineComponent({
     BtnPill,
   },
   setup() {
-    const store = useStore();
     const { isOnline } = useConnection();
     const { activeNetwork } = useNetworks();
     const { openModal } = useModals();
-    const { isAeNodeReady, isAeNodeError } = useAeSdk({ store });
+    const { isAeNodeReady, isAeNodeError } = useAeSdk();
 
     function openNetworkSwitcherModal() {
       return openModal(MODAL_NETWORK_SWITCHER);

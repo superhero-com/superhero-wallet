@@ -19,7 +19,6 @@ import {
   ref,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
@@ -56,12 +55,11 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { t, tm } = useI18n();
 
     const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    const { getAeSdk } = useAeSdk({ store });
-    const { getName } = useAeNames({ store });
+    const { getAeSdk } = useAeSdk();
+    const { getName } = useAeNames();
     const { getMiddleware } = useMiddleware();
 
     const name = ref('');
@@ -75,7 +73,6 @@ export default defineComponent({
       getOwnershipAccount,
       innerTx,
     } = useTransactionTx({
-      store,
       tx: props.transaction.tx,
       externalAddress: props.transaction?.transactionOwner,
     });

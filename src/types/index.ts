@@ -5,6 +5,7 @@ import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 import { Store } from 'vuex';
 import {
+  AensName,
   Encoded,
   Node,
   Tag,
@@ -13,6 +14,7 @@ import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
   NOTIFICATION_TYPES,
+  POPUP_ACTIONS,
   POPUP_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
@@ -201,7 +203,7 @@ export interface IAccountRaw {
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IKeyPair, IAccountRaw {
+export interface IAccount extends IHdWalletAccount, IAccountRaw {
   address: Encoded.AccountAddress; // TODO use `string` as we use not only AE protocol
   globalIdx: number;
   idx: number;
@@ -513,14 +515,17 @@ export interface ITopHeader {
 
 export type ISignMessage = (m: any) => Promise<any>
 
-export type ChainName = `${string}.chain`;
+/**
+ * Todo replace ChainName with AensName within the app
+ */
+export type ChainName = AensName;
 
 export interface IName {
   autoExtend: boolean;
   createdAtHeight: number;
   expiresAt: number;
   hash: string;
-  name: ChainName;
+  name: AensName;
   owner: string;
   pointers: Dictionary;
 }
@@ -591,17 +596,36 @@ export interface IMiddlewareStatus {
   nodeVersion: string
 }
 
-export interface IPopupConfig {
-  type: string;
-  app: IAppData;
+export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
+
+export interface IPopupActions {
+  resolve: ResolveCallback;
+  reject: RejectCallback;
+}
+
+/**
+ * This structure is also used in the `popup-handler.spec.js` file.
+ * Whenever any change is done here remember to align the test cases.
+ */
+export interface IPopupData {
   action?: any;
-  data?: string;
+  app?: IAppData;
   message?: string;
-  tx?: Partial<ITx>;
-  resolve?: any;
-  reject?: any;
-  show?: boolean;
+  type?: PopupActionType;
+  tx?: ITx;
   txBase64?: Encoded.Transaction;
+}
+
+/**
+ * Popups are the modal windows opened inside of the browser window popup.
+ * This set of properties relates only to `PopupType` modals.
+ */
+export interface IPopupProps extends IPopupActions, IPopupData {
+  show?: boolean; // Decides if the modal window should be open
+}
+
+export interface IModalProps extends Partial<IPopupProps> {
+  [key: string]: any; // Props defined on the component's level
 }
 
 export interface TokenProps {

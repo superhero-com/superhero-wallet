@@ -49,7 +49,6 @@ import {
   ref,
   onMounted,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { IonContent, IonPage } from '@ionic/vue';
@@ -85,7 +84,6 @@ export default defineComponent({
   },
   setup() {
     const { t } = useI18n();
-    const store = useStore();
     const router = useRouter();
     const {
       claimTips,
@@ -93,10 +91,10 @@ export default defineComponent({
       cacheInvalidateTips,
     } = useAeTippingBackend();
 
-    const { isTippingSupported } = useAeSdk({ store });
+    const { isTippingSupported } = useAeSdk();
     const { activeAccount } = useAccounts();
     const { openModal, openDefaultModal } = useModals();
-    const { getTippingContracts } = useTippingContracts({ store });
+    const { getTippingContracts } = useTippingContracts();
     const { setLoaderVisible } = useUi();
 
     const tipUrl = ref('');

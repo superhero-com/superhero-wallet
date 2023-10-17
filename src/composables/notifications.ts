@@ -1,6 +1,5 @@
 import { computed, ref, watch } from 'vue';
 import type {
-  IDefaultComposableOptions,
   INotification,
   INotificationSettings,
   NotificationStatus,
@@ -27,8 +26,8 @@ import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { useStorageRef } from './storageRef';
 
-export interface UseNotificationsOptions extends IDefaultComposableOptions {
-  requirePolling?: boolean
+export interface UseNotificationsOptions {
+  requirePolling?: boolean;
 }
 
 const POLLING_INTERVAL = 30000;
@@ -50,10 +49,9 @@ const notificationsWallet = ref<INotification[]>([]);
 
 export function useNotifications({
   requirePolling = false,
-  store,
-}: UseNotificationsOptions) {
+}: UseNotificationsOptions = {}) {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
-  const { fetchRespondChallenge } = useAeSdk({ store });
+  const { fetchRespondChallenge } = useAeSdk();
   const { activeAccount } = useAccounts();
 
   const canLoadMore = ref(true);

@@ -97,7 +97,6 @@ import {
   ref,
   nextTick,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
@@ -160,7 +159,6 @@ export default defineComponent({
     IonRouterOutlet,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const { t } = useI18n();
     const { setTokenProps } = useTokenProps();
@@ -168,10 +166,9 @@ export default defineComponent({
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
-    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk({ store });
+    const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
     const { activeAccount } = useAccounts();
     const { aeTokenBalance } = useTokensList({
-      store,
       isMultisig: isMultisig.value,
     });
     const { marketData } = useCurrencies();
@@ -179,7 +176,7 @@ export default defineComponent({
       getContractTokenPairs,
       availableTokens,
       getAccountTokenBalances,
-    } = useFungibleTokens({ store });
+    } = useFungibleTokens();
 
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),

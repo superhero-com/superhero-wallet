@@ -1,10 +1,9 @@
 import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
-import { CONNECTION_TYPES } from '@/constants';
+import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
-import store from './store';
 import { useAccounts, useAeSdk, useNetworks } from '../composables';
 
 window.browser = require('webextension-polyfill');
@@ -13,7 +12,7 @@ let isAeSdkBlocked = false;
 let connectionsQueue = [];
 
 const addAeppConnection = async (port) => {
-  const { getAeSdk } = useAeSdk({ store });
+  const { getAeSdk } = useAeSdk();
   const aeSdk = await getAeSdk();
   const connection = new BrowserRuntimeConnection({ port });
   const clientId = aeSdk.addRpcClient(connection);
@@ -28,7 +27,7 @@ const addAeppConnection = async (port) => {
 export async function init() {
   const { activeNetwork } = useNetworks();
   const { activeAccount } = useAccounts();
-  const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk({ store });
+  const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
     if (port.sender.id !== browser.runtime.id) return;
@@ -39,7 +38,7 @@ export async function init() {
         const popup = getPopup(id);
 
         port.onMessage.addListener((msg) => {
-          if (msg.type === 'getProps') {
+          if (msg.type === POPUP_ACTIONS.getProps) {
             port.postMessage({ uuid: msg.uuid, res: popup?.props });
             return;
           }
@@ -100,7 +99,7 @@ export async function init() {
 }
 
 export async function disconnect() {
-  const { getAeSdk } = useAeSdk({ store });
+  const { getAeSdk } = useAeSdk();
   const aeSdk = await getAeSdk();
 
   aeSdk._clients.forEach((aepp, aeppId) => {

@@ -88,7 +88,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { IonContent, IonPage } from '@ionic/vue';
 import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useAccounts, useAeSdk } from '@/composables';
@@ -121,10 +120,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
-
     const { activeAccount } = useAccounts();
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
     const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
     const activeAccountFaucetUrl = computed(

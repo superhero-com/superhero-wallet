@@ -10,7 +10,6 @@ import type {
   ITransaction,
   ITransactionsState,
   IAccountTransactionsState,
-  IDefaultComposableOptions,
 } from '@/types';
 import {
   PROTOCOL_AETERNITY,
@@ -72,13 +71,13 @@ function setTransactionsNextPage(address: string, url: string | null) {
   transactions.value[address].nextPageUrl = url;
 }
 
-export function useTransactionList({ store }: IDefaultComposableOptions) {
-  const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
+export function useTransactionList() {
+  const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { isLoggedIn, accounts, getAccountByAddress } = useAccounts();
   const { getMiddleware } = useMiddleware();
   const { accountsTotalBalance } = useBalances();
 
-  const { tokenBalances } = useFungibleTokens({ store });
+  const { tokenBalances } = useFungibleTokens();
 
   function getAccountAllTransactions(address: Encoded.AccountAddress) {
     if (!isLoggedIn) {

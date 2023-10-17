@@ -67,7 +67,6 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import {
   MODAL_CONSENSUS_INFO,
   PROTOCOL_AETERNITY,
@@ -103,13 +102,10 @@ export default defineComponent({
     proposalCompleted: Boolean,
   },
   setup(props: any) {
-    const store = useStore();
     const { t } = useI18n();
     const { openModal } = useModals();
 
-    const {
-      activeMultisigAccount,
-    } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
     const { isLocalAccountAddress } = useAccounts();
     const {
       pendingMultisigTxConfirmedBy,
@@ -124,9 +120,7 @@ export default defineComponent({
       isPendingMultisigTxCompleted,
       isPendingMultisigTxCompletedAndRevoked,
       isPendingMultisigTxCompletedAndConfirmed,
-    } = usePendingMultisigTransaction({
-      store,
-    });
+    } = usePendingMultisigTransaction();
 
     const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
       if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {

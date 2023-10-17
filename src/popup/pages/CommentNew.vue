@@ -40,7 +40,6 @@ import {
   watch,
 } from 'vue';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { postJson } from '@/utils';
@@ -68,14 +67,13 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
     const { setLoaderVisible } = useUi();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
+    const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const {

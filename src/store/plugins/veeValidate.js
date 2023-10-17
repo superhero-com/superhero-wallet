@@ -63,10 +63,10 @@ configure({
   }),
 });
 
-export default (store) => {
+export default () => {
   const { balance, updateBalances } = useBalances();
   const { currencyRates } = useCurrencies({ withoutPolling: true });
-  const { getAeSdk } = useAeSdk({ store });
+  const { getAeSdk } = useAeSdk();
 
   const NAME_STATES = {
     REGISTERED: Symbol('name state: registered'),

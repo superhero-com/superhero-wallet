@@ -38,7 +38,6 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { ITokenResolved, ITransaction } from '@/types';
 import {
   amountRounded,
@@ -66,12 +65,10 @@ export default defineComponent({
     multipleRows: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const localTokens = ref();
 
     if (!props.extTokens && !!props.transaction) {
       const { tokens } = useTransactionTokens({
-        store,
         transaction: props.transaction,
         direction: props.direction,
         isAllowance: props.isAllowance,

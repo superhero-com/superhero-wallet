@@ -36,10 +36,9 @@
       <slot name="footer">
         <BtnMain
           :class="{ 'center-button': textCenter }"
+          :text="buttonMessage || $t('common.ok')"
           @click="resolve"
-        >
-          {{ buttonMessage || $t('common.ok') }}
-        </BtnMain>
+        />
       </slot>
     </template>
   </Modal>
@@ -47,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import type { ResolveCallback, StatusIconType } from '../../../types';
+import type { ResolveCallback, StatusIconType } from '@/types';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 import StatusIcon from '../StatusIcon.vue';

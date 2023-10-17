@@ -1,21 +1,34 @@
 import { v4 as uuid } from 'uuid';
-import type { Dictionary, PopupType } from '@/types';
+import type {
+  Dictionary,
+  IPopupProps,
+  PopupType,
+} from '@/types';
 import {
-  POPUP_TYPE_SIGN,
   POPUP_TYPE_CONNECT,
-  POPUP_TYPE_RAW_SIGN,
   IS_EXTENSION,
 } from '@/constants';
-import { isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 
-const popups: Dictionary = {};
+interface IPopupConfig {
+  actions: Pick<IPopupProps, 'resolve' | 'reject'>;
+  props: Omit<IPopupProps, 'resolve' | 'reject'>;
+}
+
+const popups: Dictionary<IPopupConfig> = {};
 
 export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
-export const openPopup = async (type: PopupType, aepp: any, params?: any) => {
+export const openPopup = async (
+  popupType: PopupType,
+  aepp: string | object,
+  params: Partial<IPopupProps> = {},
+) => {
   const id = uuid();
-  const { href, protocol, host } = typeof aepp === 'object' ? getAeppUrl(aepp) : new URL(aepp);
+  const { href, protocol, host } = (typeof aepp === 'object') ? getAeppUrl(aepp) : new URL(aepp);
+  const { name = host } = (typeof aepp === 'object') ? aepp : {} as any;
+
   const tabs = await browser.tabs.query({ active: true });
+
   // @ts-ignore
   tabs.forEach(({ url: tabURL, id: tabId }) => {
     const tabUrl = new URL(tabURL as string);
@@ -28,8 +41,6 @@ export const openPopup = async (type: PopupType, aepp: any, params?: any) => {
   });
 
   const extUrl = browser.runtime.getURL('./index.html');
-  const isRawSign = type === POPUP_TYPE_SIGN && !isTxOfASupportedType(params.tx);
-  const popupType = isRawSign ? POPUP_TYPE_RAW_SIGN : type;
   const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
   const isMacOsExtension = IS_EXTENSION && window.browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
@@ -41,20 +52,22 @@ export const openPopup = async (type: PopupType, aepp: any, params?: any) => {
   });
 
   return new Promise((resolve, reject) => {
-    if (!popupWindow) reject();
+    if (!popupWindow) {
+      reject();
+    }
+
     popups[id] = {
       actions: { resolve, reject },
       props: {
         app: {
           url: href,
-          icons: aepp?.icons || [],
-          name: aepp?.name || host,
+          name,
           protocol,
           host,
         },
-        ...(params?.message && { message: params.message }),
-        ...(params?.txObject && !isRawSign && { tx: params.txObject, txBase64: params.tx }),
-        ...(isRawSign && { data: params.tx }),
+        message: params.message,
+        tx: params.tx,
+        txBase64: params.txBase64,
       },
     };
   });
@@ -62,4 +75,4 @@ export const openPopup = async (type: PopupType, aepp: any, params?: any) => {
 
 export const removePopup = (id: string) => delete popups[id];
 
-export const getPopup = (id: string) => popups[id];
+export const getPopup = (id: string): IPopupConfig => popups[id];

@@ -144,7 +144,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { ChainName } from '@/types';
 import { Clipboard } from '@capacitor/clipboard';
@@ -202,20 +201,19 @@ export default defineComponent({
     autoExtend: { type: Boolean },
   },
   setup(props) {
-    const store = useStore();
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
     const { t } = useI18n();
-    const { topBlockHeight } = useTopHeaderData({ store });
+    const { topBlockHeight } = useTopHeaderData();
     const {
       ownedNames,
       setAutoExtend,
       updateNamePointer,
       getName,
       setDefaultName,
-    } = useAeNames({ store });
+    } = useAeNames();
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { fetchRespondChallenge } = useAeSdk({ store });
+    const { fetchRespondChallenge } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');

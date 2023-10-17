@@ -96,7 +96,6 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
@@ -142,16 +141,15 @@ export default defineComponent({
     accountId: { type: String as PropType<Encoded.AccountAddress>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const { aeAccounts, aeAccountsSelectOptions, isLocalAccountAddress } = useAccounts();
     const {
       multisigAccountCreationFee,
       prepareVaultCreationRawTx,
       pendingMultisigCreationTxs,
       notEnoughBalanceToCreateMultisig,
-    } = useMultisigAccountCreate({ store });
+    } = useMultisigAccountCreate();
 
-    const { getAeSdk } = useAeSdk({ store });
+    const { getAeSdk } = useAeSdk();
 
     const { openModal } = useModals();
 

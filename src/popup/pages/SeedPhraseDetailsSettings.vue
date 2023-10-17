@@ -66,7 +66,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
   useAccounts,
@@ -89,13 +88,11 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const store = useStore();
 
     const { setBackedUpSeed } = useUi();
     const { copy, copied } = useCopy();
     const { mnemonic } = useAccounts();
     const { removeIsSeedBackedUpNotification } = useNotifications({
-      store,
       requirePolling: false,
     });
 

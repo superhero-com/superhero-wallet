@@ -16,7 +16,6 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import type { ITransaction, TxFunctionRaw } from '@/types';
 import { useTransactionTokens } from '@/composables';
@@ -51,11 +50,9 @@ export default defineComponent({
     reversed: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const { tokens } = useTransactionTokens({
-      store,
       transaction: props.transaction,
       direction: props.direction,
       isAllowance: props.isAllowance,

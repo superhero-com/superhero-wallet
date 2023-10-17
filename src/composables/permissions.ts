@@ -2,6 +2,7 @@ import { METHODS } from '@aeternity/aepp-sdk';
 
 import type {
   IAppData,
+  IModalProps,
   IPermission,
   PermissionRegistry,
   PopupType,
@@ -10,17 +11,21 @@ import {
   IS_EXTENSION_BACKGROUND,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
+  MODAL_CONFIRM_RAW_SIGN,
+  MODAL_CONFIRM_TRANSACTION_SIGN,
   MODAL_MESSAGE_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   POPUP_TYPE_CONNECT,
   POPUP_TYPE_MESSAGE_SIGN,
+  POPUP_TYPE_RAW_SIGN,
+  POPUP_TYPE_SIGN,
   STORAGE_KEYS,
 } from '@/constants';
-import { aettosToAe } from '@/protocols/aeternity/helpers';
+import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { openPopup } from '@/background/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
 import { useStorageRef } from './storageRef';
-import { IModalProps, useModals } from './modals';
+import { useModals } from './modals';
 
 interface ITransactionSignPermissionOptions {
   amount?: number | string;
@@ -40,7 +45,7 @@ const permissions = useStorageRef<PermissionRegistry>(
   },
 );
 
-const modalAndPopupTypes: Partial<Record<METHODS, { modal: string, popup: PopupType }>> = {
+const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType; }>> = {
   [METHODS.subscribeAddress]: {
     modal: MODAL_CONFIRM_CONNECT,
     popup: POPUP_TYPE_CONNECT,
@@ -53,7 +58,10 @@ const modalAndPopupTypes: Partial<Record<METHODS, { modal: string, popup: PopupT
     modal: MODAL_MESSAGE_SIGN,
     popup: POPUP_TYPE_MESSAGE_SIGN,
   },
-  // TODO add `METHODS.sign` by moving the `hdWallet/confirmTxSigning` logic here.
+  [METHODS.sign]: {
+    modal: MODAL_CONFIRM_TRANSACTION_SIGN,
+    popup: POPUP_TYPE_SIGN,
+  },
 };
 
 /**
@@ -139,7 +147,7 @@ export function usePermissions() {
     modalProps: IModalProps = {},
   ): Promise<boolean> {
     const url = new URL(fullUrl);
-    if (checkPermission(url.host, method)) {
+    if (checkPermission(url.host, method, modalProps.tx)) {
       return true;
     }
 
@@ -149,17 +157,28 @@ export function usePermissions() {
       protocol: url.protocol,
       url: url.href,
     };
+    const props = { ...modalProps, app };
 
     try {
-      const { modal, popup } = modalAndPopupTypes[method] || {};
+      let { modal, popup } = modalAndPopupTypes[method] || {};
       if (!modal || !popup) {
         return false;
       }
 
+      // The wallet app is able to recognize and properly display only bunch of transaction types.
+      // For every other we need to display different modal with some warnings.
+      if (
+        method === METHODS.sign
+        && (!modalProps.txBase64 || !isTxOfASupportedType(modalProps.txBase64))
+      ) {
+        modal = MODAL_CONFIRM_RAW_SIGN;
+        popup = POPUP_TYPE_RAW_SIGN;
+      }
+
       await (
         (IS_EXTENSION_BACKGROUND)
-          ? openPopup(popup, url.href, modalProps)
-          : openModal(modal, { ...modalProps, app })
+          ? openPopup(popup, url.href, props)
+          : openModal(modal, props)
       );
       return true;
     } catch {

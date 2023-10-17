@@ -34,7 +34,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
   IS_MOBILE_APP,
@@ -70,11 +69,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const { isOnline } = useConnection();
-
-    const { isNodeMainnet, isNodeTestnet } = useAeSdk({ store });
-
+    const { isNodeMainnet, isNodeTestnet } = useAeSdk();
     const { activeAccount } = useAccounts();
 
     const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));

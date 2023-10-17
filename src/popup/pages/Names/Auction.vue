@@ -34,7 +34,6 @@ import {
   PropType,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import type { ChainName } from '@/types';
 
@@ -62,13 +61,12 @@ export default defineComponent({
     name: { type: String as PropType<ChainName>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
 
     const { getMiddleware } = useMiddleware();
     const { params: routeParams } = useRoute();
     const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
-    const { setAuctionEntry } = useAeNames({ store });
+    const { setAuctionEntry } = useAeNames();
 
     setLoaderVisible(true);
 

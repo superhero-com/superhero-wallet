@@ -15,7 +15,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import {
   PROTOCOL_AETERNITY,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
@@ -34,12 +33,10 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const store = useStore();
-    const { activeMultisigAccountId } = useMultisigAccounts({ store, pollOnce: true });
+    const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount } = useAccounts();
-    const { getName } = useAeNames({ store });
-
-    const { availableTokens } = useFungibleTokens({ store });
+    const { getName } = useAeNames();
+    const { availableTokens } = useFungibleTokens();
 
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccountId.value

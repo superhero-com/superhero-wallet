@@ -1,11 +1,10 @@
 import { watch } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import BigNumber from 'bignumber.js';
-import { Encoded, Encoding } from '@aeternity/aepp-sdk';
+import { Contract, Encoded, Encoding } from '@aeternity/aepp-sdk';
 import { fetchAllPages, handleUnknownError, toShiftedBigNumber } from '@/utils';
 import type {
   BigNumberPublic,
-  IDefaultComposableOptions,
   IToken,
   ITokenBalanceResponse,
   ITokenList,
@@ -28,6 +27,8 @@ import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
 
+type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;
+
 /**
  * List of all custom tokens available (currently only AE network).
  * As this list is quite big (hundreds of items) it requires processing optimizations.
@@ -49,10 +50,10 @@ const { onNetworkChange } = createNetworkWatcher();
 const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
-export function useFungibleTokens({ store }: IDefaultComposableOptions) {
-  const { getAeSdk } = useAeSdk({ store });
+export function useFungibleTokens() {
+  const { getAeSdk } = useAeSdk();
   const { fetchFromMiddleware } = useMiddleware();
-  const { tippingContractAddresses } = useTippingContracts({ store });
+  const { tippingContractAddresses } = useTippingContracts();
   const {
     isLoggedIn,
     aeAccounts,
@@ -210,17 +211,14 @@ export function useFungibleTokens({ store }: IDefaultComposableOptions) {
     tokenContractId: Encoded.ContractAddress,
     toAccount: Encoded.AccountAddress,
     amount: number,
-    option: {
-      waitMined: boolean,
-      modal: boolean,
-    },
+    options: ContractInitializeOptions,
   ) {
     const aeSdk = await getAeSdk();
     const tokenContract = await aeSdk.initializeContract({
       aci: FungibleTokenFullInterfaceACI,
       address: tokenContractId,
     });
-    return tokenContract.transfer(toAccount, amount.toFixed(), option);
+    return tokenContract.transfer(toAccount, amount.toFixed(), options);
   }
 
   async function burnTriggerPoS(
@@ -228,10 +226,7 @@ export function useFungibleTokens({ store }: IDefaultComposableOptions) {
     posAddress: string,
     invoiceId: string,
     amount: number,
-    option: {
-      waitMined: boolean,
-      modal: boolean,
-    },
+    options: ContractInitializeOptions,
   ) {
     const aeSdk = await getAeSdk();
     const tokenContract = await aeSdk.initializeContract({
@@ -242,7 +237,7 @@ export function useFungibleTokens({ store }: IDefaultComposableOptions) {
       amount.toFixed(),
       posAddress,
       invoiceId,
-      option,
+      options,
     );
   }
 

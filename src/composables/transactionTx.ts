@@ -2,7 +2,6 @@ import { computed, ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
   IAccountOverview,
-  IDefaultComposableOptions,
   ITx,
   ObjectValues,
   TxFunctionRaw,
@@ -40,20 +39,19 @@ import { useAeSdk } from './aeSdk';
 
 import { useTippingContracts } from './tippingContracts';
 
-interface UseTransactionOptions extends IDefaultComposableOptions {
+interface UseTransactionOptions {
   tx?: ITx;
   externalAddress?: Encoded.AccountAddress;
 }
 
 export function useTransactionTx({
-  store,
   tx,
   externalAddress,
 }: UseTransactionOptions) {
-  const { dexContracts } = useAeSdk({ store });
+  const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
-  const { tippingContractAddresses } = useTippingContracts({ store });
-  const { availableTokens } = useFungibleTokens({ store });
+  const { tippingContractAddresses } = useTippingContracts();
+  const { availableTokens } = useFungibleTokens();
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);

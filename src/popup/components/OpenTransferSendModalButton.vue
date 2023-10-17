@@ -12,7 +12,6 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
@@ -28,12 +27,11 @@ export default defineComponent({
     tokenContractId: { type: String, default: '' },
   },
   setup(props) {
-    const store = useStore();
     const { t } = useI18n();
 
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {

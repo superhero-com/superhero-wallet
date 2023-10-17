@@ -33,7 +33,6 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { useStore } from 'vuex';
 import type { IMultisigAccount } from '@/types';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
@@ -58,9 +57,7 @@ export default defineComponent({
     selected: Boolean,
   },
   setup(props) {
-    const store = useStore();
-
-    const { pendingMultisigAccounts } = useMultisigAccounts({ store });
+    const { pendingMultisigAccounts } = useMultisigAccounts();
 
     const isPendingAccount = computed(
       () => !!pendingMultisigAccounts.value.find(

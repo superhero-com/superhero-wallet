@@ -34,9 +34,13 @@ import {
   watch,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute } from 'vue-router';
-import { useConnection, useLatestTransactionList, useViewport } from '../../composables';
+import {
+  useConnection,
+  useLatestTransactionList,
+  useViewport,
+} from '@/composables';
+
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 
@@ -47,7 +51,6 @@ export default defineComponent({
     AnimatedSpinner,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const latestTransactionCard = ref<HTMLDivElement | null>(null);
     const { isOnline } = useConnection();
@@ -55,7 +58,7 @@ export default defineComponent({
     const {
       isTransactionListLoading,
       latestTransactions,
-    } = useLatestTransactionList({ store });
+    } = useLatestTransactionList();
 
     const query = computed(() => route.query);
 

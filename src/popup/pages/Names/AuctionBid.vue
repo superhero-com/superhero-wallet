@@ -65,7 +65,6 @@ import {
 } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import BigNumber from 'bignumber.js';
-import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import {
@@ -109,14 +108,13 @@ export default defineComponent({
     name: { type: String as PropType<AensName>, required: true },
   },
   setup(props) {
-    const store = useStore();
     const router = useRouter();
     const { t } = useI18n();
     const { validate } = useForm();
     const errorName = useFieldError('amount');
 
-    const { getAeSdk } = useAeSdk({ store });
-    const { getNameAuctionHighestBid } = useAeNames({ store });
+    const { getAeSdk } = useAeSdk();
+    const { getNameAuctionHighestBid } = useAeNames();
     const { openDefaultModal } = useModals();
     const { setLoaderVisible } = useUi();
 

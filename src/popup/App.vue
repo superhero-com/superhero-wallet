@@ -128,11 +128,11 @@ export default defineComponent({
     } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts();
-    const { addWalletNotification } = useNotifications({ store });
+    const { addWalletNotification } = useNotifications();
     const { loadCoinsData } = useCurrencies({ withoutPolling: true });
     const { restoreLanguage } = useLanguages();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
-    const { multisigAccounts } = useMultisigAccounts({ store, pollingDisabled: true });
+    const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);

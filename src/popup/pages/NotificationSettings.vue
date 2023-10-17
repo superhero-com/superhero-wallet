@@ -28,7 +28,6 @@
 import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
 import { useI18n } from 'vue-i18n';
-import { useStore } from 'vuex';
 import type { NotificationType } from '@/types';
 import { NOTIFICATION_TYPES } from '@/constants';
 import { useNotifications } from '@/composables';
@@ -42,12 +41,11 @@ export default defineComponent({
     IonContent,
   },
   setup() {
-    const store = useStore();
     const { t } = useI18n();
     const {
       isNotificationTypeAllowed,
       toggleNotificationsSetting,
-    } = useNotifications({ store });
+    } = useNotifications();
 
     const notificationTypeLabels: Record<NotificationType, string> = {
       [NOTIFICATION_TYPES.wallet]: t('pages.notificationSettings.wallet'),

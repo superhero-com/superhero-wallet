@@ -10,7 +10,6 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useStore } from 'vuex';
 import { useNotifications } from '@/composables/notifications';
 import { ROUTE_NOTIFICATIONS } from '@/popup/router/routeNames';
 
@@ -23,8 +22,7 @@ export default defineComponent({
     BtnIcon,
   },
   setup() {
-    const store = useStore();
-    const { notificationsNew } = useNotifications({ store, requirePolling: true });
+    const { notificationsNew } = useNotifications({ requirePolling: true });
 
     const notificationsCount = computed<string | null>(() => {
       const count = notificationsNew.value.length;

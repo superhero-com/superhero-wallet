@@ -1,7 +1,6 @@
 <script lang="ts">
 import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex';
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
@@ -10,24 +9,24 @@ import { useDeepLinkApi, useModals, useAeSdk } from '@/composables';
 export default defineComponent({
   name: 'SignMessage',
   setup() {
-    const store = useStore();
     const route = useRoute();
 
     onMounted(async () => {
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
-      const { getAeSdk } = useAeSdk({ store });
+      const { getAeSdk } = useAeSdk();
       const { openModal } = useModals();
 
       try {
         const aeSdk = await getAeSdk();
-        const { message } = route.query;
+        const message = route.query.message?.toString();
+        const { host, href } = callbackOrigin.value || {} as any;
 
         await openModal(MODAL_MESSAGE_SIGN, {
           message,
           app: {
-            name: callbackOrigin.value?.host,
-            host: callbackOrigin.value?.host,
-            url: callbackOrigin.value?.href,
+            host,
+            name: host,
+            url: href,
           },
         });
 

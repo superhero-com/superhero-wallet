@@ -48,14 +48,14 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { useStore } from 'vuex';
-import type { IToken, RejectCallback, ResolveCallback } from '../../../types';
+import type { IToken, RejectCallback, ResolveCallback } from '@/types';
+import { useTokensList } from '@/composables';
+
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
 import BackToTop from '../BackToTop.vue';
 import Loader from '../Loader.vue';
-import { useTokensList } from '../../../composables';
 
 export default defineComponent({
   name: 'AssetSelector',
@@ -73,13 +73,11 @@ export default defineComponent({
     showTokensWithBalance: Boolean,
   },
   setup(props) {
-    const store = useStore();
     const loading = ref(true);
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
     const { filteredTokens } = useTokensList({
-      store,
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });

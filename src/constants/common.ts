@@ -334,6 +334,12 @@ export const POPUP_TYPES = [
 export const POPUP_CONNECT_ADDRESS_PERMISSION = 'address';
 export const POPUP_CONNECT_TRANSACTIONS_PERMISSION = 'transactions';
 
+export const POPUP_ACTIONS = {
+  getProps: 'getProps',
+  resolve: 'resolve',
+  reject: 'reject',
+} as const;
+
 export const PERMISSION_DEFAULTS: IPermission = {
   host: '',
   name: '',

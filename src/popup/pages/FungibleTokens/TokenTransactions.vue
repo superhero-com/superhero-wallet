@@ -15,7 +15,6 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
-import { useStore } from 'vuex';
 
 import type {
   ICommonTransaction,
@@ -40,18 +39,17 @@ export default defineComponent({
     TransactionList,
   },
   setup() {
-    const store = useStore();
     const { tokenProps } = useTokenProps();
 
     const { activeAccount } = useAccounts();
-    const { activeMultisigAccount } = useMultisigAccounts({ store });
+    const { activeMultisigAccount } = useMultisigAccounts();
     const {
       fetchTransactions,
       getAccountAllTransactions,
       getAccountTransactionsState,
-    } = useTransactionList({ store });
+    } = useTransactionList();
 
-    const { availableTokens } = useFungibleTokens({ store });
+    const { availableTokens } = useFungibleTokens();
 
     const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
