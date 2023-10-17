@@ -165,10 +165,10 @@ export default defineComponent({
 
     function back() {
       const { fullPath, meta } = route;
-      const { directBackRoute, backRoute } = meta || {};
+      const { backRoute } = meta || {};
 
-      if (directBackRoute) {
-        return ionRouter.back();
+      if (!isLoggedIn.value) {
+        return ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
       }
 
       if (backRoute) {
