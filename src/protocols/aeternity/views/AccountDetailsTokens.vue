@@ -32,8 +32,8 @@ import {
 import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
-import TokensList from '../components/FungibleTokens/TokensList.vue';
-import MessageOffline from '../components/MessageOffline.vue';
+import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
+import MessageOffline from '@/popup/components/MessageOffline.vue';
 
 export default defineComponent({
   components: {
