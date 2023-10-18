@@ -25,7 +25,13 @@ import {
   defineComponent,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { Protocol, ProtocolView, ProtocolViewsConfig } from '@/types';
+
+import type {
+  Protocol,
+  ProtocolView,
+  ProtocolViewsConfig,
+  WalletRouteMeta,
+} from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
@@ -33,7 +39,7 @@ import Logger from '@/lib/logger';
 import aeternityViews from '@/protocols/aeternity/views';
 import bitcoinViews from '@/protocols/bitcoin/views';
 
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   detectProtocolByOwner,
 } from '@/utils';
@@ -60,27 +66,35 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { params, meta } = useRoute();
+    const route = useRoute();
+    const routeMeta = route.meta as WalletRouteMeta;
+    const routeParams = route.params;
+
+    const router = useRouter();
 
     const { activeNetwork } = useNetworks();
     const { activeAccount } = useAccounts({ store });
 
     const ownerProtocol = detectProtocolByOwner(
       activeNetwork.value.type,
-      params.transactionOwner as string,
+      routeParams.transactionOwner as string,
     );
 
     const importViewComponent = views[
-      meta.isMultisig
+      routeMeta.isMultisig
         ? PROTOCOL_AETERNITY
         : (ownerProtocol || activeAccount.value.protocol)
-    ]?.[props.viewComponentName];
+    ]?.[props.viewComponentName!];
 
     if (!importViewComponent) {
-      Logger.write({
-        message: `Failed to access "${props.viewComponentName}" component for the "${activeAccount.value.protocol}" protocol`,
-        type: 'vue-error',
-      });
+      if (routeMeta.redirectIfNull) {
+        router.replace({ name: routeMeta.redirectIfNull, replace: true });
+      } else {
+        Logger.write({
+          message: `Failed to access "${props.viewComponentName}" component for the "${activeAccount.value.protocol}" protocol`,
+          type: 'vue-error',
+        });
+      }
     }
 
     const componentToDisplay = importViewComponent

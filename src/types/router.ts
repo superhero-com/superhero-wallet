@@ -8,6 +8,10 @@ export interface WalletRouteMeta {
    */
   backRoute?: RouteLocationRaw;
   /**
+   * Defines the route that should be used if a protocol does not support the view.
+   */
+  redirectIfNull?: string;
+  /**
    * Decide if the app header should be hidden
    */
   hideHeader?: boolean;
