@@ -46,7 +46,7 @@
         <slot name="navigation" />
 
         <TransactionAndTokenFilter
-          :key="routeName"
+          :key="routeName!"
           :show-filters="isScrollEnabled"
         />
       </div>
@@ -57,7 +57,10 @@
       >
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
-        <IonRouterOutlet :animated="!IS_FIREFOX" />
+        <IonRouterOutlet
+          :animated="!IS_FIREFOX"
+          :animation="fadeAnimation"
+        />
       </div>
     </div>
   </div>
@@ -88,8 +91,9 @@ import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferRecei
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
-import BtnClose from './buttons/BtnClose.vue';
-import TransactionAndTokenFilter from './TransactionAndTokenFilter.vue';
+import BtnClose from '@/popup/components/buttons/BtnClose.vue';
+import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
+import { popOutAnimation, fadeAnimation } from '@/popup/animations';
 
 export default defineComponent({
   name: 'AccountDetailsBase',
@@ -129,7 +133,7 @@ export default defineComponent({
     }
 
     function close() {
-      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push');
+      ionRouter.navigate({ name: homeRouteName.value }, 'back', 'push', popOutAnimation);
     }
 
     /**
@@ -179,6 +183,7 @@ export default defineComponent({
       activeAccount,
       routerHeight,
       isScrollEnabled,
+      fadeAnimation,
       IS_FIREFOX,
     };
   },

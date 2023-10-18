@@ -64,7 +64,7 @@
               />
             </Tabs>
             <TransactionAndTokenFilter
-              :key="routeName"
+              :key="routeName!"
               :show-filters="showFilterBar"
             />
           </div>
@@ -73,6 +73,7 @@
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
           :animated="!IS_FIREFOX"
+          :animation="fadeAnimation"
           class="token-router"
           :style="{ height: routerHeight || '350px' }"
         />
@@ -128,6 +129,7 @@ import { useState, useGetter } from '@/composables/vuex';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { fadeAnimation } from '@/popup/animations';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -306,6 +308,7 @@ export default defineComponent({
       route,
       routerHeight,
       IS_FIREFOX,
+      fadeAnimation,
     };
   },
 });

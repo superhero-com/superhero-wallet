@@ -6,6 +6,7 @@
       <IonRouterOutlet
         v-if="isOnline"
         :animated="!IS_FIREFOX"
+        :animation="fadeAnimation"
       />
       <MessageOffline
         v-else
@@ -20,6 +21,7 @@
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { IS_FIREFOX } from '@/constants';
+import { fadeAnimation } from '@/popup/animations';
 import { useConnection } from '@/composables';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 
@@ -35,6 +37,7 @@ export default defineComponent({
     return {
       isOnline,
       IS_FIREFOX,
+      fadeAnimation,
     };
   },
 });

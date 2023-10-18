@@ -2,7 +2,11 @@
   <IonPage>
     <!-- We are disabling animations on FF because of a bug that causes flickering
       see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
-    <IonRouterOutlet :animated="!RUNNING_IN_TESTS && !IS_FIREFOX" />
+
+    <IonRouterOutlet
+      :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
+      :animation="popInAnimation"
+    />
   </IonPage>
 </template>
 
@@ -12,6 +16,7 @@ import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { useRoute } from 'vue-router';
 import { useUi } from '@/composables';
 import { RUNNING_IN_TESTS, IS_FIREFOX } from '@/constants';
+import { popInAnimation } from '@/popup/animations';
 import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
@@ -45,6 +50,7 @@ export default defineComponent({
     return {
       RUNNING_IN_TESTS,
       IS_FIREFOX,
+      popInAnimation,
     };
   },
 });
