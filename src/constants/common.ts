@@ -405,3 +405,5 @@ export const BROWSER_ACTIONS = {
   share: 'share',
   favourite: 'favourite',
 } as const;
+
+export const PAGE_TRANSITION_DURATION = 150;

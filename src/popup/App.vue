@@ -22,7 +22,7 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header v-if="showHeader" />
+        <Header :show="showHeader" />
 
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
@@ -281,7 +281,6 @@ export default defineComponent({
     --screen-padding-x: 16px;
     --screen-border-radius: 0;
     --screen-bg-color: #{variables.$color-bg-app};
-    --header-height: 0;
     --gap: 12px;
 
     @extend %face-sans-16-regular;

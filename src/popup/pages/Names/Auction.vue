@@ -17,6 +17,7 @@
 
       <IonRouterOutlet
         v-if="!isLoaderVisible"
+        :animation="fadeAnimation"
         class="auction-router"
         :name="name"
       />
@@ -36,7 +37,8 @@ import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { executeAndSetInterval } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
-import { useMiddleware, useUi } from '../../../composables';
+import { useMiddleware, useUi } from '@/composables';
+import { fadeAnimation } from '@/popup/animations';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -105,6 +107,7 @@ export default defineComponent({
     return {
       isLoaderVisible,
       routeParams,
+      fadeAnimation,
     };
   },
 });
