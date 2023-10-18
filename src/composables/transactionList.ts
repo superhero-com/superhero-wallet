@@ -6,12 +6,14 @@ import {
 import { ref, watch } from 'vue';
 import { Encoded } from '@aeternity/aepp-sdk';
 import type {
+  Protocol,
   ITransaction,
   ITransactionsState,
   IAccountTransactionsState,
   IDefaultComposableOptions,
 } from '@/types';
 import {
+  PROTOCOL_AETERNITY,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TXS_PER_PAGE,
 } from '@/constants';
@@ -134,8 +136,11 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
   async function fetchTransactions(
     address: Encoded.AccountAddress,
     newest?: boolean,
+    isMultisig?: boolean,
   ): Promise<ITransaction[]> {
-    const { protocol } = getAccountByAddress(address) || {};
+    const { protocol } = isMultisig
+      ? { protocol: PROTOCOL_AETERNITY as Protocol }
+      : getAccountByAddress(address) || {};
     await getAeSdk(); // Ensure the `nodeNetworkId` is established
 
     ensureAccountTransactionStateExists(address);

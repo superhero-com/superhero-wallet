@@ -1,177 +1,50 @@
 <template>
-  <IonPage class="transaction-list-wrapper">
-    <IonContent class="ion-padding ion-content-bg">
-      <div ref="innerScrollElem">
-        <TransactionList
-          v-if="isOnline"
-          :loading="loading"
-          :transactions="loadedTransactionList"
-          is-multisig
-          @load-more="loadMore()"
-        />
-        <MessageOffline
-          v-else
-          :text="$t('modals.accountDetails.transactionsNotAvailable')"
-        />
-      </div>
-    </IonContent>
+  <IonPage>
+    <AccountDetailsTransactionsBase
+      v-bind="$attrs"
+      :address="activeMultisigAccount.gaAccountId"
+      :additional-transactions="pendingMultisigTransaction"
+      :ionic-lifecycle-status="ionicLifecycleStatus"
+      is-multisig
+    />
   </IonPage>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  onUnmounted,
-  ref,
-  watch,
-} from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useStore } from 'vuex';
-import { throttle } from 'lodash-es';
-import {
-  IonContent,
-  IonPage,
-  onIonViewWillEnter,
-  onIonViewWillLeave,
-} from '@ionic/vue';
-import type { ICommonTransaction } from '@/types';
-import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
-import {
-  useConnection,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
-  useTransactionList,
-  useUi,
-  useScrollConfig,
-} from '@/composables';
+import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
-import MessageOffline from '../components/MessageOffline.vue';
-import TransactionList from '../components/TransactionList.vue';
+import type { IonicLifecycleStatus } from '@/types';
+import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
+
+import AccountDetailsTransactionsBase from '@/popup/components/AccountDetailsTransactionsBase.vue';
 
 export default defineComponent({
   components: {
-    TransactionList,
-    MessageOffline,
     IonPage,
-    IonContent,
-  },
-  props: {
-    showFilters: Boolean,
+    AccountDetailsTransactionsBase,
   },
   setup() {
-    /**
-     * TODO Extract duplicated logic of this component
-     * Some of the following code was taken from
-     * `src/protocols/aeternity/views/AccountDetailsTransactions.vue`
-     * during the multichain development.
-     */
-
-    let polling: NodeJS.Timer | null;
+    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
 
     const store = useStore();
-    const { setScrollConf } = useScrollConfig();
-
-    const { isOnline } = useConnection();
-    const { isAppActive } = useUi();
     const { activeMultisigAccount } = useMultisigAccounts({ store });
-
-    const {
-      getAccountAllTransactions,
-      fetchTransactions,
-    } = useTransactionList({ store });
-
     const { pendingMultisigTransaction } = usePendingMultisigTransaction({ store });
 
-    const loading = ref(false);
-    const isDestroyed = ref(false);
-    const innerScrollElem = ref<HTMLElement>();
-    const appInnerScrollTop = ref<number>(0);
-
-    const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
-
-    const appInnerElem = computed<HTMLElement | null | undefined>(
-      () => innerScrollElem.value?.parentElement,
-    );
-
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountAllTransactions(currentAddress.value!),
-      ...pendingMultisigTransaction.value ? [pendingMultisigTransaction.value] : [],
-    ]);
-
-    async function fetchTransactionList(recent?: boolean) {
-      loading.value = true;
-      try {
-        await fetchTransactions(currentAddress.value!, recent);
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    async function loadMore() {
-      if (!loading.value) {
-        await fetchTransactionList();
-      }
-    }
-
-    function throttledScroll() {
-      return throttle(() => {
-        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
-      }, 200);
-    }
-
-    function onViewDidLeaveHandler() {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    }
-
-    watch(
-      appInnerScrollTop,
-      (value) => {
-        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
-      },
-    );
-
-    onIonViewWillEnter(() => {
-      setScrollConf(false);
-      if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', throttledScroll());
-      }
-      loadMore();
-      polling = setInterval(() => {
-        if (isAppActive.value) {
-          fetchTransactionList(true);
-        }
-      }, 10000);
+    onIonViewDidEnter(() => {
+      ionicLifecycleStatus.value = 'didEnter';
     });
 
-    onIonViewWillLeave(onViewDidLeaveHandler);
-
-    onUnmounted(onViewDidLeaveHandler);
+    onIonViewDidLeave(() => {
+      ionicLifecycleStatus.value = 'didLeave';
+    });
 
     return {
-      isOnline,
-      loading,
-      loadedTransactionList,
-      loadMore,
-      innerScrollElem,
+      activeMultisigAccount,
+      ionicLifecycleStatus,
+      pendingMultisigTransaction,
     };
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.transaction-list-wrapper {
-  --filter-top-offset: 175px;
-
-  :deep(.filters) {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
-  }
-
-  .offline-message {
-    text-align: center;
-  }
-}
-</style>
