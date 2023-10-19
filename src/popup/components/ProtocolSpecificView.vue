@@ -2,6 +2,7 @@
   <Component
     :is="componentToDisplay"
     v-if="viewComponentName"
+    :ionic-lifecycle-status="ionicLifecycleStatus"
   />
   <div v-else>
     <InfoBox
@@ -23,12 +24,14 @@ import {
   PropType,
   defineAsyncComponent,
   defineComponent,
+  ref,
 } from 'vue';
 import type {
+  IonicLifecycleStatus,
+  WalletRouteMeta,
   Protocol,
   ProtocolView,
   ProtocolViewsConfig,
-  WalletRouteMeta,
 } from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
@@ -41,6 +44,12 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   detectProtocolByOwner,
 } from '@/utils';
+import {
+  onIonViewDidEnter,
+  onIonViewDidLeave,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import InfoBox from './InfoBox.vue';
 
 /**
@@ -72,6 +81,8 @@ export default defineComponent({
     const { activeNetwork } = useNetworks();
     const { activeAccount } = useAccounts();
 
+    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
+
     const ownerProtocol = detectProtocolByOwner(
       activeNetwork.value.type,
       routeParams.transactionOwner as string,
@@ -98,8 +109,25 @@ export default defineComponent({
       ? defineAsyncComponent(() => importViewComponent())
       : null;
 
+    onIonViewDidEnter(() => {
+      ionicLifecycleStatus.value = 'didEnter';
+    });
+
+    onIonViewDidLeave(() => {
+      ionicLifecycleStatus.value = 'didLeave';
+    });
+
+    onIonViewWillEnter(() => {
+      ionicLifecycleStatus.value = 'willEnter';
+    });
+
+    onIonViewWillLeave(() => {
+      ionicLifecycleStatus.value = 'willLeave';
+    });
+
     return {
       componentToDisplay,
+      ionicLifecycleStatus,
     };
   },
 });

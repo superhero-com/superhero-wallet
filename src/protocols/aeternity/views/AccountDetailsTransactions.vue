@@ -20,18 +20,18 @@
 
 <script lang="ts">
 import {
+  PropType,
   computed,
   defineComponent,
-  onMounted,
   onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonPage } from '@ionic/vue';
 import { throttle } from 'lodash-es';
 
-import type { ICommonTransaction } from '@/types';
+import type { ICommonTransaction, IonicLifecycleStatus } from '@/types';
 import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useAccounts,
@@ -52,7 +52,10 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
-  setup() {
+  props: {
+    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
+  },
+  setup(props) {
     /**
      * TODO Extract duplicated logic of this component
      * Some of the following code was taken from
@@ -118,6 +121,14 @@ export default defineComponent({
       }, 200);
     }
 
+    function onViewDidLeaveHandler() {
+      if (polling) {
+        clearInterval(polling);
+      }
+      setScrollConf(false);
+      isDestroyed.value = true;
+    }
+
     watch(
       appInnerScrollTop,
       (value) => {
@@ -125,29 +136,38 @@ export default defineComponent({
       },
     );
 
-    onMounted(() => {
-      initViewport(appInnerElem.value!);
-      if (innerScrollElem.value && appInnerElem.value) {
-        appInnerElem.value.addEventListener('scroll', throttledScroll());
-      }
-      fetchTransactionList();
-      polling = setInterval(() => {
-        if (isAppActive.value) {
-          fetchTransactionList(true);
+    watch(
+      () => props.ionicLifecycleStatus,
+      () => {
+        if (props.ionicLifecycleStatus === 'willEnter') {
+          // reset state since component might not have been unmounted
+          loading.value = false;
+          isDestroyed.value = false;
+          setScrollConf(false);
+          return;
         }
-      }, 10000);
-    });
 
-    onUnmounted(() => {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    });
+        if (props.ionicLifecycleStatus === 'didEnter') {
+          initViewport(appInnerElem.value!);
+          if (innerScrollElem.value && appInnerElem.value) {
+            appInnerElem.value.addEventListener('scroll', throttledScroll());
+          }
+          fetchTransactionList();
+          polling = setInterval(() => {
+            if (isAppActive.value) {
+              fetchTransactionList(true);
+            }
+          }, 10000);
+          return;
+        }
 
-    onIonViewWillEnter(() => {
-      setScrollConf(false);
-    });
+        if (props.ionicLifecycleStatus === 'didLeave') {
+          onViewDidLeaveHandler();
+        }
+      },
+    );
+
+    onUnmounted(onViewDidLeaveHandler);
 
     return {
       isOnline,
