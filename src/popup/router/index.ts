@@ -3,7 +3,7 @@ import {
   RouteRecordRaw,
 } from 'vue-router';
 import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
-import { Dictionary } from '@/types';
+import { Dictionary, WalletRouteMeta } from '@/types';
 import {
   APP_LINK_WEB,
   IS_MOBILE_APP,
@@ -19,6 +19,7 @@ import {
   PROTOCOL_AETERNITY,
   UNFINISHED_FEATURES,
 } from '@/constants';
+import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
 import store from '@/store';
 import initSdk from '@/lib/wallet';
@@ -47,6 +48,7 @@ const router = createRouter({
 const {
   isLoggedIn,
   activeAccount,
+  areAccountsRestored,
   setActiveAccountByGlobalIdx,
   getLastActiveProtocolAccount,
 } = useAccounts();
@@ -58,8 +60,13 @@ RouteQueryActionsController.init(router);
 RouteLastUsedRoutes.init(router);
 
 router.beforeEach(async (to, from, next) => {
+  // Wait until we are sure that the user login state is correct
+  await watchUntilTruthy(areAccountsRestored);
+
+  const meta = to.meta as WalletRouteMeta;
+
   if (!isLoggedIn.value) {
-    if (to.meta?.ifNotAuthOnly || to.meta?.ifNotAuth) {
+    if (meta?.ifNotAuthOnly || meta?.ifNotAuth) {
       next();
     } else {
       setLoginTargetLocation(to);
@@ -118,7 +125,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // @ts-ignore
-  next(to.meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
+  next(meta?.ifNotAuthOnly ? { name: ROUTE_ACCOUNT } : undefined);
 });
 
 const deviceReadyPromise = new Promise((resolve) => document.addEventListener('deviceready', resolve));

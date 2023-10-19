@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
@@ -26,6 +26,8 @@ import { useStorageRef } from './storageRef';
 
 let isInitialized = false;
 
+const areAccountsRestored = ref(false);
+
 /**
  * TODO Implement more safe way of storing mnemonic
  * For example by encrypting it with password or pin code.
@@ -49,6 +51,9 @@ const accountsRaw = useStorageRef<IAccountRaw[]>(
     migrations: [
       migrateAccountsVuexToComposable,
     ],
+    onRestored: () => {
+      areAccountsRestored.value = true;
+    },
   },
 );
 
@@ -267,6 +272,7 @@ export function useAccounts() {
     accountsRaw,
     activeAccount,
     activeAccountGlobalIdx,
+    areAccountsRestored,
     isLoggedIn,
     mnemonic,
     mnemonicSeed,

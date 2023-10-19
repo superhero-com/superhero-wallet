@@ -16,6 +16,10 @@ interface ICreateStorageRefOptions<T> {
     write: (v: T) => any;
   };
   migrations?: Migration<T>[];
+  /**
+   * Allows to ensure the state is already synced with browser storage and migrated.
+   */
+  onRestored?: () => any;
 }
 
 /**
@@ -32,6 +36,7 @@ export function useStorageRef<T = string | object | any[]>(
     serializer,
     backgroundSync = false,
     migrations,
+    onRestored,
   } = options;
 
   let watcherDisabled = false; // Avoid watcher going infinite loop
@@ -58,6 +63,7 @@ export function useStorageRef<T = string | object | any[]>(
         setStorageState(restoredValue);
       }
     }
+    onRestored?.();
     setLocalState(restoredValue);
 
     /**
