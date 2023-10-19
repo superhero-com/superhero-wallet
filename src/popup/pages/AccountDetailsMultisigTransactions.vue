@@ -21,14 +21,18 @@
 import {
   computed,
   defineComponent,
-  onMounted,
   onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
 import { throttle } from 'lodash-es';
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
+import {
+  IonContent,
+  IonPage,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import type { ICommonTransaction } from '@/types';
 import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
@@ -144,6 +148,13 @@ export default defineComponent({
       }, 200);
     }
 
+    function onViewDidLeaveHandler() {
+      if (polling) {
+        clearInterval(polling);
+      }
+      isDestroyed.value = true;
+    }
+
     watch(
       appInnerScrollTop,
       (value) => {
@@ -161,7 +172,8 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => {
+    onIonViewWillEnter(() => {
+      setScrollConf(false);
       if (innerScrollElem.value && appInnerElem.value) {
         appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
@@ -173,16 +185,9 @@ export default defineComponent({
       }, 10000);
     });
 
-    onUnmounted(() => {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    });
+    onIonViewWillLeave(onViewDidLeaveHandler);
 
-    onIonViewWillEnter(() => {
-      setScrollConf(false);
-    });
+    onUnmounted(onViewDidLeaveHandler);
 
     return {
       isOnline,

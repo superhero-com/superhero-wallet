@@ -25,13 +25,14 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
-import { computed, defineComponent, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
+import { computed, defineComponent } from 'vue';
+import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
+
 import type { IName } from '@/types';
 import { executeAndSetInterval } from '@/utils';
+import { useAccounts, useUi } from '@/composables';
 import { useDispatch, useState } from '../../../composables/vuex';
-import { useAccounts, useUi } from '../../../composables';
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -65,7 +66,7 @@ export default defineComponent({
       }
     }, POLLING_INTERVAL);
 
-    onBeforeUnmount(() => {
+    onIonViewWillLeave(() => {
       clearInterval(id);
     });
 

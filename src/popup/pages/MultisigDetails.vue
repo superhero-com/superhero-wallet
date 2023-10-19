@@ -89,11 +89,15 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from '@ionic/vue';
+import {
+  IonContent,
+  IonPage,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
-  onMounted,
 } from 'vue';
 import { useStore } from 'vuex';
 import { MODAL_CONSENSUS_INFO } from '@/constants';
@@ -137,7 +141,9 @@ export default defineComponent({
       openModal(MODAL_CONSENSUS_INFO);
     }
 
-    onMounted(fetchAdditionalInfo);
+    onIonViewWillEnter(fetchAdditionalInfo);
+
+    onIonViewWillLeave(stopFetchingAdditionalInfo);
 
     onBeforeUnmount(stopFetchingAdditionalInfo);
 

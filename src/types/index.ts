@@ -667,3 +667,9 @@ export interface IWalletInfo {
   origin: any;
   type: any;
 }
+
+/**
+ * Ionic lifecycle events do not trigger on components that are not tied to a route.
+ * So we pass a status prop to the component to watch for the lifecycle events manually.
+ */
+export type IonicLifecycleStatus = 'willEnter' | 'didEnter' | 'willLeave' | 'didLeave' | null;
