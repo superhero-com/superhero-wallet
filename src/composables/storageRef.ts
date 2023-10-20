@@ -43,7 +43,7 @@ export function useStorageRef<T = string | object | any[]>(
   const state = ref(initialState) as Ref<T>; // https://github.com/vuejs/core/issues/2136
 
   function setLocalState(val: T | null) {
-    if (val) {
+    if (val !== null) {
       watcherDisabled = true;
       state.value = (serializer?.read) ? serializer.read(val) : val;
       setTimeout(() => { watcherDisabled = false; }, 0);
