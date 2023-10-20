@@ -20,8 +20,8 @@
 import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { IS_FIREFOX } from '@/constants';
-import { useConnection } from '../../composables';
-import MessageOffline from '../components/MessageOffline.vue';
+import { useConnection } from '@/composables';
+import MessageOffline from '@/popup/components/MessageOffline.vue';
 
 export default defineComponent({
   components: {

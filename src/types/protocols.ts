@@ -16,6 +16,7 @@ export type ProtocolView = typeof DISTINCT_PROTOCOL_VIEWS[number];
 /**
  * List of protocol views with corresponding dynamic imports.
  */
-export type ProtocolViewsConfig = Record<ProtocolView, () => Promise<any>>;
+export type ProtocolViewsConfig =
+  Record<ProtocolView, (() => Promise<any>) | null>;
 
 export type ProtocolRecord<T = any> = Partial<Record<Protocol, T>>;
