@@ -144,10 +144,7 @@ export default defineComponent({
           loading.value = false;
           isDestroyed.value = false;
           setScrollConf(false);
-          return;
-        }
 
-        if (props.ionicLifecycleStatus === 'didEnter') {
           initViewport(appInnerElem.value!);
           if (innerScrollElem.value && appInnerElem.value) {
             appInnerElem.value.addEventListener('scroll', throttledScroll());
