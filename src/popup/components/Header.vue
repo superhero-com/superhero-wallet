@@ -67,7 +67,12 @@
 </template>
 
 <script lang="ts">
-import { IonHeader, IonToolbar, useIonRouter } from '@ionic/vue';
+import {
+  IonHeader,
+  IonToolbar,
+  useBackButton,
+  useIonRouter,
+} from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -186,6 +191,8 @@ export default defineComponent({
     function close() {
       ionRouter.navigate({ name: currentHomeRouteName.value }, 'back', 'push');
     }
+
+    useBackButton(1, back);
 
     return {
       UNFINISHED_FEATURES,

@@ -82,6 +82,7 @@ import {
   onBeforeUnmount,
   onMounted,
 } from 'vue';
+import { BackButtonEvent } from '@ionic/vue';
 import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
@@ -108,17 +109,23 @@ export default defineComponent({
   setup(props, { slots, emit }) {
     const showHeader = computed(() => props.hasCloseButton || props.header || slots.header);
 
+    function handleClose() {
+      emit('close');
+    }
+
+    function onBackButtonHandler(event: BackButtonEvent) {
+      event.detail.register(100, handleClose);
+    }
+
     onMounted(() => {
+      document.addEventListener('ionBackButton', onBackButtonHandler);
       if (!document.body.style.overflow) {
         document.body.style.overflow = 'hidden';
       }
     });
 
-    function handleClose() {
-      emit('close');
-    }
-
     onBeforeUnmount(() => {
+      document.removeEventListener('ionBackButton', onBackButtonHandler);
       document.body.style.overflow = '';
     });
 
