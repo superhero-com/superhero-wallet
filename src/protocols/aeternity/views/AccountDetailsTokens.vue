@@ -21,17 +21,19 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue';
+import { IonContent, IonPage } from '@ionic/vue';
 import {
   defineComponent,
   ref,
   computed,
   watch,
   onMounted,
+  PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
+import { IonicLifecycleStatus } from '@/types';
 import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 
@@ -44,8 +46,9 @@ export default defineComponent({
   },
   props: {
     showFilters: Boolean,
+    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
   },
-  setup() {
+  setup(props) {
     const { isOnline } = useConnection();
     const { searchPhrase } = useTransactionAndTokenFilter();
     const { setScrollConf } = useScrollConfig();
@@ -69,14 +72,19 @@ export default defineComponent({
       },
     );
 
+    watch(
+      () => props.ionicLifecycleStatus,
+      () => {
+        if (props.ionicLifecycleStatus === 'willEnter') {
+          setScrollConf(false);
+        }
+      },
+    );
+
     onMounted(() => {
       if (innerScrollElem.value && appInnerElem.value) {
         appInnerElem.value.addEventListener('scroll', throttledScroll());
       }
-    });
-
-    onIonViewWillEnter(() => {
-      setScrollConf(false);
     });
 
     return {
