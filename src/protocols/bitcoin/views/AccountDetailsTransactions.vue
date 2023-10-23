@@ -133,10 +133,7 @@ export default defineComponent({
           // reset state since component might not have been unmounted
           loading.value = false;
           setScrollConf(false);
-          return;
-        }
 
-        if (props.ionicLifecycleStatus === 'didEnter') {
           if (innerScrollElem.value && appInnerElem.value) {
             appInnerElem.value.addEventListener('scroll', throttledScroll());
           }
