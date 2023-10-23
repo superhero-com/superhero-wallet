@@ -103,7 +103,8 @@ export default defineComponent({
     fetchRecentTransactions: { type: Function, required: true },
     fetchMoreTransactions: { type: Function, required: true },
     ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
-    isMultisig: Boolean,
+    isMultisig: { type: Boolean },
+    isInitialLoading: { type: Boolean },
     transactions: { type: Array as PropType<ICommonTransaction[]>, default: () => [] },
   },
   setup(props) {
@@ -263,7 +264,9 @@ export default defineComponent({
           if (innerScrollElem.value && appInnerElem.value) {
             appInnerElem.value.addEventListener('scroll', throttledScroll());
           }
-          fetchTransactionList();
+          if (props.isInitialLoading) {
+            fetchTransactionList();
+          }
           pollingInterval = setInterval(() => {
             if (isAppActive.value) {
               fetchTransactionList(true);

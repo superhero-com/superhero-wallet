@@ -3,6 +3,7 @@
     :fetch-recent-transactions="() => fetchTransactions(address, true, isMultisig)"
     :fetch-more-transactions="() => fetchTransactions(address, false, isMultisig)"
     :can-load-more="canLoadMore"
+    :is-initial-loading="isInitialLoading"
     :transactions="loadedTransactionList"
     :is-multisig="isMultisig"
     :ionic-lifecycle-status="ionicLifecycleStatus"
@@ -47,6 +48,10 @@ export default defineComponent({
       !!getAccountTransactionsState(props.address as any).nextPageUrl
     ));
 
+    const isInitialLoading = computed(() => (
+      getAccountTransactionsState(props.address as any).nextPageUrl === ''
+    ));
+
     const loadedTransactionList = computed((): ICommonTransaction[] => [
       ...getAccountAllTransactions(props.address as any),
       ...(props.additionalTransactions || []),
@@ -55,6 +60,7 @@ export default defineComponent({
     return {
       canLoadMore,
       fetchTransactions,
+      isInitialLoading,
       loadedTransactionList,
     };
   },

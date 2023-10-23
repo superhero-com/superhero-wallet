@@ -7,6 +7,7 @@
       :can-load-more="canLoadMore"
       :transactions="filteredTransactions"
       :is-multisig="tokenProps?.isMultisig"
+      :is-initial-loading="isInitialLoading"
     />
   </IonPage>
 </template>
@@ -64,6 +65,10 @@ export default defineComponent({
       !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
     ));
 
+    const isInitialLoading = computed(() => (
+      getAccountTransactionsState(currentAddress.value!).nextPageUrl === ''
+    ));
+
     const loadedTransactionList = computed(
       (): ICommonTransaction[] => getAccountAllTransactions(currentAddress.value!),
     );
@@ -112,6 +117,7 @@ export default defineComponent({
       currentAddress,
       filteredTransactions,
       ionicLifecycleStatus,
+      isInitialLoading,
       tokenProps,
       fetchMoreTransactions,
       fetchRecentTransactions,
