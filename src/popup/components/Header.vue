@@ -1,5 +1,8 @@
 <template>
-  <IonHeader class="header ion-no-border">
+  <IonHeader
+    class="header ion-no-border"
+    :class="{ 'hidden': !showHeader }"
+  >
     <IonToolbar class="toolbar">
       <div
         class="wrapper"
@@ -73,10 +76,15 @@ import {
   useBackButton,
   useIonRouter,
 } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
+import {
+  computed,
+  defineComponent,
+  ref,
+  watch,
+} from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IS_MOBILE_APP, UNFINISHED_FEATURES } from '@/constants';
+import { IS_MOBILE_APP, PAGE_TRANSITION_DURATION, UNFINISHED_FEATURES } from '@/constants';
 import type { WalletRouteMeta } from '@/types';
 import {
   ROUTE_ACCOUNT,
@@ -110,13 +118,18 @@ export default defineComponent({
     IonHeader,
     IonToolbar,
   },
-  setup() {
+  props: {
+    show: Boolean,
+  },
+  setup(props) {
     const route = useRoute();
     const ionRouter = useIonRouter();
     const { t } = useI18n();
 
     const { homeRouteName } = useUi();
     const { isLoggedIn } = useAccounts();
+
+    const showHeader = ref(false);
 
     const pageTitles: Record<string, () => string> = {
       settings: () => t('pages.titles.settings'),
@@ -194,6 +207,20 @@ export default defineComponent({
 
     useBackButton(1, back);
 
+    watch(
+      () => props.show,
+      async (value) => {
+        if (value) {
+          showHeader.value = true;
+        } else {
+          setTimeout(() => {
+            showHeader.value = false;
+          }, PAGE_TRANSITION_DURATION);
+        }
+      },
+      { immediate: true },
+    );
+
     return {
       UNFINISHED_FEATURES,
       homeRouteName,
@@ -206,6 +233,7 @@ export default defineComponent({
       showHeaderNavigation,
       isLogoDisabled,
       titleTruncated,
+      showHeader,
       back,
       close,
     };
@@ -221,6 +249,13 @@ export default defineComponent({
 .header {
   z-index: variables.$z-index-header;
   height: var(--header-height);
+  opacity: 1;
+  transition: opacity 0.15s ease-in-out;
+
+  &.hidden {
+    z-index: -1;
+    opacity: 0;
+  }
 
   .toolbar {
     --opacity: 0;

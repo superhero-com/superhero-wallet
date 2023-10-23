@@ -17,6 +17,7 @@
 
       <IonRouterOutlet
         v-if="!isLoaderVisible"
+        :animation="fadeAnimation"
         class="auction-router"
         :name="name"
       />
@@ -42,6 +43,7 @@ import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { ROUTE_AUCTION_BID, ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
 import { useMiddleware, useUi } from '@/composables';
+import { fadeAnimation } from '@/popup/animations';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -113,6 +115,7 @@ export default defineComponent({
       ROUTE_AUCTION_HISTORY,
       isLoaderVisible,
       routeParams,
+      fadeAnimation,
     };
   },
 });
