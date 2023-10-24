@@ -10,7 +10,10 @@ export const popInAnimation = (_: Element, opts: { enteringEl: Element, leavingE
 
   const leavingAnimation = createAnimation()
     .addElement(opts.leavingEl)
+    .addElement(document.querySelector('#header') as HTMLElement)
     .fromTo('opacity', 1, 0)
+    .beforeStyles({ filter: 'blur(5px)' })
+    .afterClearStyles(['filter'])
     .duration(PAGE_TRANSITION_DURATION);
 
   const animation = createAnimation()
