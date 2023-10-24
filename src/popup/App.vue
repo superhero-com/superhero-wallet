@@ -4,7 +4,7 @@
       id="app-wrapper"
       class="app-wrapper"
       :class="{
-        'show-header': showHeader,
+        'show-header': delayedShowHeader,
         'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
         'is-extension': IS_EXTENSION,
       }"
@@ -22,13 +22,13 @@
         class="app-inner"
         :class="{ 'styled-scrollbar': showScrollbar }"
       >
-        <Header :show="showHeader" />
+        <Header v-if="delayedShowHeader" />
 
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': showHeader, 'ios': IS_IOS }"
+          :class="{ 'show-header': delayedShowHeader, 'ios': IS_IOS }"
           class="main"
         />
 
@@ -83,6 +83,7 @@ import {
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
+  PAGE_TRANSITION_DURATION,
 } from '@/constants';
 import {
   useAccounts,
@@ -130,6 +131,7 @@ export default defineComponent({
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
 
     const innerElement = ref<HTMLDivElement>();
+    const delayedShowHeader = ref(false);
 
     const isRestored = computed(() => store.state.isRestored);
     const backedUpSeed = computed(() => store.state.backedUpSeed);
@@ -206,6 +208,24 @@ export default defineComponent({
       }
     });
 
+    watch(
+      showHeader,
+      async (value) => {
+        if (value) {
+          delayedShowHeader.value = true;
+        } else {
+          if (!isLoggedIn.value) {
+            delayedShowHeader.value = false;
+            return;
+          }
+          setTimeout(() => {
+            delayedShowHeader.value = false;
+          }, PAGE_TRANSITION_DURATION);
+        }
+      },
+      { immediate: true },
+    );
+
     initVisibilityListeners();
 
     onBeforeMount(async () => {
@@ -254,6 +274,7 @@ export default defineComponent({
       modalsOpen,
       qrScannerOpen,
       showHeader,
+      delayedShowHeader,
       showScrollbar,
       innerElement,
       isLoaderVisible,
@@ -281,6 +302,7 @@ export default defineComponent({
     --screen-padding-x: 16px;
     --screen-border-radius: 0;
     --screen-bg-color: #{variables.$color-bg-app};
+    --header-height: 0;
     --gap: 12px;
 
     @extend %face-sans-16-regular;
