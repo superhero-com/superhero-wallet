@@ -117,6 +117,9 @@ export default defineComponent({
       ionicLifecycleStatus.value = 'didLeave';
     });
 
+    // In case the component is a tab view, will enter will only be called
+    // when we are switching to the tab from another tab
+    // not when we are refreshing the page or navigating to the page containing the tab
     onIonViewWillEnter(() => {
       ionicLifecycleStatus.value = 'willEnter';
     });
