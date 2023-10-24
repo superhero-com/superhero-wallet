@@ -128,8 +128,9 @@ export default defineComponent({
 
     watch(
       () => props.ionicLifecycleStatus,
-      () => {
-        if (props.ionicLifecycleStatus === 'willEnter') {
+      (value) => {
+        // didEnter is always called, willEnter is only called when switching tabs
+        if (value === 'didEnter') {
           // reset state since component might not have been unmounted
           loading.value = false;
           setScrollConf(false);
