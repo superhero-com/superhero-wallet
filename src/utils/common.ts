@@ -307,6 +307,11 @@ export function sortTransactionsByDate(transactions: ICommonTransaction[]) {
     );
 
     const pending = (a.pending && !b.pending && -1) || (b.pending && !a.pending && 1);
+    // @ts-expect-error TODO: update ICommonTransaction type
+    const pendingMultisig = (a.hasConsensus === false && !b.hasConsensus && -1)
+      // @ts-expect-error TODO: update ICommonTransaction type
+      || (b.hasConsensus === false && !a.hasConsensus && 1);
+
     const compareMicroTime = () => {
       const withoutTimeIndex = [aMicroTime, bMicroTime].findIndex((time) => Number.isNaN(time));
       if (withoutTimeIndex === 0) {
@@ -324,7 +329,7 @@ export function sortTransactionsByDate(transactions: ICommonTransaction[]) {
 
       return sortDirection;
     };
-    return pending || compareMicroTime();
+    return pending || pendingMultisig || compareMicroTime();
   });
 }
 
