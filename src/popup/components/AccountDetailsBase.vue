@@ -72,6 +72,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -142,7 +143,9 @@ export default defineComponent({
      */
     function observeTabsHeight() {
       const resizeObserver = new ResizeObserver(() => {
-        calculateRouterHeight();
+        nextTick(() => {
+          calculateRouterHeight();
+        });
       });
       resizeObserver.observe(headerEl.value!);
     }
