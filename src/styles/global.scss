@@ -290,12 +290,9 @@ hr {
 
 .styled-scrollbar,
 .styled-scrollbar ion-content {
-  --overflow: auto;
-
   scrollbar-color: #{$color-scrollbar-thumb} transparent; // Firefox
   scrollbar-width: thin; // Firefox
   -ms-overflow-style: auto;
-  overflow: auto;
 
   &::-webkit-scrollbar {
     display: block;
