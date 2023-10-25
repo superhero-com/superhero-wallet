@@ -224,6 +224,7 @@ export default defineComponent({
         StatusBar.setBackgroundColor({
           color: '#141414',
         });
+        window.screen.orientation?.lock?.('portrait');
       }
     });
 
