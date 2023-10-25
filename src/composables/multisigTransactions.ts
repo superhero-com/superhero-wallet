@@ -88,7 +88,7 @@ export function useMultisigTransactions({ store }: IDefaultComposableOptions) {
         hash: txHash,
         tx: rawTx ? unpackTx(rawTx.tx) as any : undefined,
         isMultisigTransaction: true,
-        microTime: rawTx ? new Date(rawTx.createdAt).getTime() : undefined,
+        microTime: rawTx ? Date.now() : undefined,
       };
     }
     return null;
