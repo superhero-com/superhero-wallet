@@ -22,14 +22,14 @@ export const RouteLastUsedRoutes = (() => {
     // Redirect user to previously used route if the current route is the home page
     // and we have the data about previously used route. Usable only for first 10 minutes.
     const unbind = router.beforeEach(async (to, from, next) => {
+      unbind();
       if (to.name === ROUTE_INDEX) {
         const { path, time } = (await WalletStorage.get<ILastRouteInfo>(lastRouteKey)) || {};
         if (path && time && dayjs().isBefore(dayjs(time).add(10, 'minutes'))) {
-          next(path);
+          return next(path);
         }
       }
-      next();
-      unbind();
+      return next();
     });
 
     // Save the route if the page allows for this
