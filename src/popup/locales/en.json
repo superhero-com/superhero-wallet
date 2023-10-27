@@ -793,7 +793,7 @@
       "goToStore": "Go to store",
       "noNotifications": "You do not have any unread notifications."
     },
-    "notification-settings": {
+    "notificationSettings": {
       "description": "Wallet notifications are always on by default and you are not able of turning them off.",
       "description2": "You can choose below which notifications to receive from social platform Superhero.com.",
       "commentOnTip": "Someone commented on your tip or post.",

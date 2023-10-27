@@ -1,5 +1,7 @@
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
+import { Encoded } from '@aeternity/aepp-sdk';
+import type { ChainName } from '@/types';
 import { fetchJson, postJson } from '@/utils';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
 
 export function useAeTippingBackend() {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
@@ -21,7 +23,7 @@ export function useAeTippingBackend() {
     return postJson(`${backendUrl}/errorreport`, { body: error });
   }
 
-  function getCacheChainNames() {
+  function fetchCachedChainNames(): Promise<Record<Encoded.AccountAddress, ChainName> | null> {
     return fetchJson(`${backendUrl}/cache/chainnames`);
   }
 
@@ -34,7 +36,7 @@ export function useAeTippingBackend() {
     cacheInvalidateOracle,
     cacheInvalidateTips,
     donateError,
-    getCacheChainNames,
+    fetchCachedChainNames,
     getCacheTip,
   };
 }

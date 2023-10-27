@@ -40,6 +40,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
+import { useAeTippingBackend } from './aeTippingBackend';
 
 const POLLING_INTERVAL = 10000;
 
@@ -56,6 +57,8 @@ interface IAuctionEntryParams {
 }
 
 type NamesRegistry = Record<NetworkId, Record<Encoded.AccountAddress, ChainName>>;
+
+let initialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const pendingAutoExtendNames = ref<ChainName[]>([]);
@@ -84,6 +87,7 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
+  const { fetchCachedChainNames } = useAeTippingBackend();
 
   const {
     isMiddlewareReady,
@@ -91,13 +95,17 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
     fetchFromMiddlewareCamelCased,
   } = useMiddleware();
 
-  async function updateExternalName(address: Encoded.AccountAddress) {
-    const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
-      .catch(() => ({}));
-
+  function ensureExternalNameRegistryExists() {
     if (!externalNamesRegistry.value[nodeNetworkId.value!]) {
       externalNamesRegistry.value[nodeNetworkId.value!] = {};
     }
+  }
+
+  async function updateExternalName(address: Encoded.AccountAddress) {
+    ensureExternalNameRegistryExists();
+
+    const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
+      .catch(() => ({}));
 
     if (preferredChainName) {
       externalNamesRegistry.value[nodeNetworkId.value!][address] = preferredChainName;
@@ -271,6 +279,24 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
     );
   }
 
+  /**
+   * Fetch all account names involved in recent tipping actions.
+   * Mostly useful for displaying proper names in the notifications.
+   */
+  async function retrieveCachedChainNames() {
+    const [cachedChainNames] = await Promise.all([
+      fetchCachedChainNames(),
+      getAeSdk(), // Ensure the `nodeNetworkId` is established
+    ]);
+    if (cachedChainNames) {
+      ensureExternalNameRegistryExists();
+      externalNamesRegistry.value[nodeNetworkId.value!] = {
+        ...externalNamesRegistry.value[nodeNetworkId.value!],
+        ...cachedChainNames,
+      };
+    }
+  }
+
   onNetworkChange(async () => {
     await Promise.all([
       updateOwnedNames(),
@@ -294,6 +320,13 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
   initPollingWatcher(() => {
     updateDefaultNames();
   });
+
+  (async () => {
+    if (!initialized) {
+      initialized = true;
+      retrieveCachedChainNames();
+    }
+  })();
 
   return {
     ownedNames,

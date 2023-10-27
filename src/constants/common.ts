@@ -1,9 +1,7 @@
 import type {
   ICurrency,
-  INotificationSetting,
   IPermission,
 } from '@/types';
-import { tg } from '@/popup/plugins/i18n';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;
@@ -84,56 +82,20 @@ export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
 export const NOTIFICATION_STATUS_CREATED = 'CREATED';
 export const NOTIFICATION_STATUS_READ = 'READ';
 
-export const NOTIFICATION_TYPE_WALLET = 'wallet';
-export const NOTIFICATION_TYPE_COMMENT_ON_TIP = 'COMMENT_ON_TIP';
-export const NOTIFICATION_TYPE_COMMENT_ON_COMMENT = 'COMMENT_ON_COMMENT';
-export const NOTIFICATION_TYPE_TIP_ON_COMMENT = 'TIP_ON_COMMENT';
-export const NOTIFICATION_TYPE_CLAIM_OF_TIP = 'CLAIM_OF_TIP';
-export const NOTIFICATION_TYPE_CLAIM_OF_RETIP = 'CLAIM_OF_RETIP';
-export const NOTIFICATION_TYPE_RETIP_ON_TIP = 'RETIP_ON_TIP';
+export const NOTIFICATION_TYPES = {
+  wallet: 'wallet',
+  commentOnTip: 'COMMENT_ON_TIP',
+  commentOnComment: 'COMMENT_ON_COMMENT',
+  tipOnComment: 'TIP_ON_COMMENT',
+  claimOfTip: 'CLAIM_OF_TIP',
+  claimOfRetip: 'CLAIM_OF_RETIP',
+  retipOnTip: 'RETIP_ON_TIP',
+} as const;
 
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
 export const DASHBOARD_TRANSACTION_LIMIT = 3;
-
-export const NOTIFICATION_DEFAULT_SETTINGS: INotificationSetting[] = [
-  {
-    text: tg('pages.notification-settings.wallet'),
-    checked: true,
-    type: NOTIFICATION_TYPE_WALLET,
-  },
-  {
-    text: tg('pages.notification-settings.commentOnTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_COMMENT_ON_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.commentOnComment'),
-    checked: false,
-    type: NOTIFICATION_TYPE_COMMENT_ON_COMMENT,
-  },
-  {
-    text: tg('pages.notification-settings.retipOnTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_RETIP_ON_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.tipOnComment'),
-    checked: true,
-    type: NOTIFICATION_TYPE_TIP_ON_COMMENT,
-  },
-  {
-    text: tg('pages.notification-settings.claimOfTip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_CLAIM_OF_TIP,
-  },
-  {
-    text: tg('pages.notification-settings.claimOfRetip'),
-    checked: true,
-    type: NOTIFICATION_TYPE_CLAIM_OF_RETIP,
-  },
-];
 
 /**
  * List of string keys used to save app data in user's device (local/browser storage).
@@ -153,6 +115,7 @@ export const STORAGE_KEYS = {
   invites: 'invites',
   namesOwned: 'names-owned',
   namesDefault: 'names-default',
+  notificationsSettings: 'notifications-settings',
   lastRoute: 'last-route',
   fungibleTokenList: 'fungible-token-list',
   fungibleTokenBalances: 'fungible-token-balances',

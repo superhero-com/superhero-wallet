@@ -1,10 +1,19 @@
 <template>
   <Modal
+    class="claim-success-modal"
     has-close-button
     centered
     @close="resolve"
   >
-    <CheckIcon class="check-icon" />
+    <div class="top-icon-wrapper">
+      <IconBoxed>
+        <StatusIcon
+          status="success"
+          class="status-icon"
+        />
+      </IconBoxed>
+    </div>
+
     <span>
       <b>{{ $t('pages.claim.url') }}:</b>
       {{ url }}
@@ -26,16 +35,19 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { ResolveCallback } from '../../../types';
+import type { ResolveCallback } from '@/types';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
-import CheckIcon from '../../../icons/check-icon.svg?vue-component';
+import IconBoxed from '../IconBoxed.vue';
+import StatusIcon from '../StatusIcon.vue';
 
 export default defineComponent({
   components: {
     Modal,
     BtnMain,
-    CheckIcon,
+    IconBoxed,
+    StatusIcon,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
@@ -48,12 +60,14 @@ export default defineComponent({
 <style lang="scss" scoped>
 @use '../../../styles/variables';
 
-.check-icon {
-  align-self: center;
-  margin-bottom: 8px;
-}
+.claim-success-modal {
+  .claimed {
+    color: variables.$color-primary;
+  }
 
-.claimed {
-  color: variables.$color-primary;
+  .top-icon-wrapper {
+    margin-bottom: 20px;
+    text-align: center;
+  }
 }
 </style>

@@ -3,21 +3,20 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="notification-settings">
         <p class="text-description">
-          {{ $t('pages.notification-settings.description') }}
+          {{ $t('pages.notificationSettings.description') }}
         </p>
         <p class="text-description">
-          {{ $t('pages.notification-settings.description2') }}
+          {{ $t('pages.notificationSettings.description2') }}
         </p>
 
         <div class="switches">
           <SwitchButton
-            v-for="setting in notificationSettings"
-            :key="setting.type"
-            :class="{ unchecked: !setting.checked }"
-            :disabled="setting.type === NOTIFICATION_TYPE_WALLET"
-            :model-value="setting.checked"
-            :label="setting.text"
-            @update:modelValue="toggleNotificationSetting(setting.type)"
+            v-for="(label, type) in notificationTypeLabels"
+            :key="type"
+            :disabled="type === NOTIFICATION_TYPES.wallet"
+            :model-value="isNotificationTypeAllowed(type)"
+            :label="label"
+            @update:modelValue="toggleNotificationsSetting(type)"
           />
         </div>
       </div>
@@ -25,24 +24,50 @@
   </IonPage>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue';
 import { IonPage, IonContent } from '@ionic/vue';
-import { mapMutations, mapState } from 'vuex';
-import { NOTIFICATION_TYPE_WALLET } from '@/constants';
-import SwitchButton from '../components/SwitchButton.vue';
+import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import type { NotificationType } from '@/types';
+import { NOTIFICATION_TYPES } from '@/constants';
+import { useNotifications } from '@/composables';
 
-export default {
+import SwitchButton from '@/popup/components/SwitchButton.vue';
+
+export default defineComponent({
   components: {
     SwitchButton,
     IonPage,
     IonContent,
   },
-  data: () => ({
-    NOTIFICATION_TYPE_WALLET,
-  }),
-  computed: mapState(['notificationSettings']),
-  methods: mapMutations(['toggleNotificationSetting']),
-};
+  setup() {
+    const store = useStore();
+    const { t } = useI18n();
+    const {
+      isNotificationTypeAllowed,
+      toggleNotificationsSetting,
+    } = useNotifications({ store });
+
+    const notificationTypeLabels: Record<NotificationType, string> = {
+      [NOTIFICATION_TYPES.wallet]: t('pages.notificationSettings.wallet'),
+      [NOTIFICATION_TYPES.commentOnTip]: t('pages.notificationSettings.commentOnTip'),
+      [NOTIFICATION_TYPES.commentOnComment]: t('pages.notificationSettings.commentOnComment'),
+      [NOTIFICATION_TYPES.retipOnTip]: t('pages.notificationSettings.retipOnTip'),
+      [NOTIFICATION_TYPES.claimOfTip]: t('pages.notificationSettings.claimOfTip'),
+      [NOTIFICATION_TYPES.claimOfRetip]: t('pages.notificationSettings.claimOfRetip'),
+      [NOTIFICATION_TYPES.retipOnTip]: t('pages.notificationSettings.retipOnTip'),
+      [NOTIFICATION_TYPES.tipOnComment]: t('pages.notificationSettings.tipOnComment'),
+    };
+
+    return {
+      NOTIFICATION_TYPES,
+      notificationTypeLabels,
+      isNotificationTypeAllowed,
+      toggleNotificationsSetting,
+    };
+  },
+});
 </script>
 
 <style lang="scss" scoped>

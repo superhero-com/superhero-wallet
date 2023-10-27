@@ -22,6 +22,7 @@
     <DetailsItem
       :label="$t('pages.popupMessageSign.message')"
       data-cy="message"
+      class="message-text"
     >
       <template #value>
         <CopyText :value="popupProps?.message" />
@@ -94,14 +95,10 @@ export default defineComponent({
 @use '@/styles/typography';
 
 .message-sign {
-  .transaction-info {
-    margin-bottom: 16px;
-  }
-
   .subtitle {
     @extend %face-sans-15-medium;
 
-    margin-top: 24px;
+    margin-top: 28px;
     margin-bottom: 16px;
     color: variables.$color-grey-light;
     text-align: center;
@@ -111,9 +108,8 @@ export default defineComponent({
     }
   }
 
-  .details-item {
-    margin: 16px;
-    text-align: left;
+  .message-text {
+    margin-top: 16px;
   }
 }
 </style>
