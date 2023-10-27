@@ -66,7 +66,7 @@ import {
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
 import { watchUntilTruthy } from '@/utils';
@@ -85,11 +85,13 @@ import {
   RUNNING_IN_TESTS,
   PAGE_TRANSITION_DURATION,
 } from '@/constants';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useConnection,
   useCurrencies,
   useModals,
+  useMultisigAccounts,
   useNotifications,
   useUi,
 } from '@/composables';
@@ -115,6 +117,7 @@ export default defineComponent({
   setup() {
     const store = useStore();
     const route = useRoute();
+    const router = useRouter();
     const { t } = useI18n();
     const { getCacheChainNames } = useAeTippingBackend();
 
@@ -129,6 +132,7 @@ export default defineComponent({
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
+    const { multisigAccounts } = useMultisigAccounts({ store, pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);
@@ -207,6 +211,17 @@ export default defineComponent({
         innerElement.value.scrollTop = 0;
       }
     });
+
+    // Redirect to account page if no multisig accounts are present
+    // only if current page is a multisig page
+    watch(
+      multisigAccounts,
+      (value) => {
+        if (!value?.length && routeMeta.value?.isMultisig) {
+          router.push({ name: ROUTE_ACCOUNT });
+        }
+      },
+    );
 
     watch(
       showHeader,
