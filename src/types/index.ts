@@ -12,6 +12,7 @@ import {
 import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
+  NOTIFICATION_TYPES,
   POPUP_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
@@ -289,35 +290,31 @@ export interface IPermission {
  */
 export type PermissionRegistry = Record<string, IPermission>;
 
+export type NotificationType = ObjectValues<typeof NOTIFICATION_TYPES>;
+
 export type NotificationStatus = 'CREATED' | 'PEEKED' | 'READ';
 
 export interface INotification {
-  wallet?: boolean
-  senderName?: string
-  receiverName?: string
-  createdAt: string
-  entityId?: string
-  entityType?: string
-  id?: number
-  path?: RouteLocationRaw
-  receiver?: string
-  sender?: string
-  sourceId?: string
-  sourceType?: string
-  status: NotificationStatus
-  text?: string | TranslateResult
-  type: string
-  updatedAt?: string
-  isSeedBackup?: boolean
-  buttonLabel?: TranslateResult,
-  title?: TranslateResult,
+  wallet?: boolean;
+  createdAt: string;
+  entityId?: string;
+  entityType?: string;
+  id?: number;
+  path?: RouteLocationRaw;
+  receiver?: Encoded.AccountAddress;
+  sender?: Encoded.AccountAddress;
+  sourceId?: string;
+  sourceType?: string;
+  status: NotificationStatus;
+  text?: string;
+  type: NotificationType;
+  updatedAt?: string;
+  isSeedBackup?: boolean;
+  buttonLabel?: string;
+  title?: string;
 }
 
-export interface INotificationSetting {
-  text: TranslateResult
-  checked: boolean
-  type: string
-}
+export type INotificationSettings = Record<NotificationType, boolean>;
 
 export type CurrencyCode = 'usd' | 'eur' | 'aud' | 'brl' | 'cad' | 'chf' | 'cny' | 'czk' | 'dkk' | 'gbp' | 'hkd' | 'huf' | 'idr' | 'ils' | 'inr' | 'jpy' | 'krw' | 'mxn' | 'myr' | 'nok' | 'nzd' | 'php' | 'pln' | 'rub' | 'sek' | 'sgd' | 'thb' | 'try' | 'zar' | 'xau';
 

@@ -38,11 +38,10 @@ import {
 } from 'vue';
 import { useStore } from 'vuex';
 import { IS_EXTENSION } from '@/constants';
+import { useViewport, useNotifications } from '@/composables';
 
-import { useViewport } from '@/composables';
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
-import { useNotifications } from '../../composables/notifications';
 
 export default defineComponent({
   name: 'Notifications',

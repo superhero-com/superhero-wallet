@@ -1,5 +1,4 @@
 import Vuex from 'vuex';
-import mutations from './mutations';
 import persistState from './plugins/persistState';
 import runMigrations from './migrations';
 import accountsModule from './modules/accounts';
@@ -9,11 +8,8 @@ import veeValidate from './plugins/veeValidate';
 export default new Vuex.Store({
   state: {
     isRestored: false,
-    notificationSettings: [],
-    chainNames: null,
     migrations: {},
   },
-  mutations,
   plugins: [
     persistState(
       runMigrations,

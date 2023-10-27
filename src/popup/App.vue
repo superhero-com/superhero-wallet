@@ -80,7 +80,6 @@ import {
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
-  NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
   RUNNING_IN_TESTS,
   PAGE_TRANSITION_DURATION,
@@ -96,7 +95,6 @@ import {
   useNotifications,
   useUi,
 } from '@/composables';
-import { useAeTippingBackend } from '@/protocols/aeternity/composables';
 import { useTransferSendHandler } from '@/composables/transferSendHandler';
 
 import Header from '@/popup/components/Header.vue';
@@ -120,7 +118,6 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
-    const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
     const {
@@ -185,13 +182,6 @@ export default defineComponent({
       }
     }
 
-    async function setNotificationSettings() {
-      await watchUntilTruthy(isRestored);
-      if (store.state.notificationSettings.length === 0) {
-        store.commit('setNotificationSettings', NOTIFICATION_DEFAULT_SETTINGS);
-      }
-    }
-
     async function verifyBackedUpSeed() {
       await watchUntilTruthy(isRestored);
       if (!isSeedBackedUp.value) {
@@ -203,10 +193,6 @@ export default defineComponent({
           isSeedBackup: true,
         });
       }
-    }
-
-    async function fetchAndSetChainNames() {
-      store.commit('setChainNames', await getCacheChainNames());
     }
 
     const unwatchIsLoggedIn = watch(isLoggedIn, async (val) => {
@@ -283,11 +269,7 @@ export default defineComponent({
       restoreTransferSendForm();
 
       if (!RUNNING_IN_POPUP) {
-        Promise.allSettled([
-          loadCoinsData(),
-          fetchAndSetChainNames(),
-          setNotificationSettings(),
-        ]);
+        loadCoinsData();
       }
     });
 
