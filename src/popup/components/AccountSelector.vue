@@ -40,6 +40,7 @@
       </BtnPill>
       <AddressTruncated
         v-if="!avatarOnly"
+        v-bind="$attrs"
         show-explorer-link
         show-protocol-icon
         :address="modelValue.toString()"
