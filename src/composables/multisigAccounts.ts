@@ -28,6 +28,7 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { useAccounts } from './accounts';
+import { createNetworkWatcher } from './networks';
 
 const POLLING_INTERVAL = 7000;
 
@@ -36,6 +37,7 @@ const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
 
 export interface MultisigAccountsOptions extends IDefaultComposableOptions {
   pollOnce?: boolean;
+  pollingDisabled?: boolean;
 }
 
 function storeMultisigAccounts(
@@ -62,8 +64,13 @@ const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
+const { onNetworkChange } = createNetworkWatcher();
 
-export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccountsOptions) {
+export function useMultisigAccounts({
+  store,
+  pollOnce = false,
+  pollingDisabled = false,
+}: MultisigAccountsOptions) {
   const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
   const { aeAccounts } = useAccounts();
@@ -309,11 +316,16 @@ export function useMultisigAccounts({ store, pollOnce = false }: MultisigAccount
   function getMultisigAccountByContractId(contractId: Encoded.ContractAddress) {
     return allMultisigAccounts.value.find((acc) => acc.contractId === contractId);
   }
-  if (pollOnce && !getStoredMultisigAccounts(nodeNetworkId.value!).length) {
-    updateMultisigAccounts();
-  } else if (!pollOnce) {
-    initPollingWatcher(() => updateMultisigAccounts());
+
+  if (!pollingDisabled) {
+    if (pollOnce && !getStoredMultisigAccounts(nodeNetworkId.value!).length) {
+      updateMultisigAccounts();
+    } else if (!pollOnce) {
+      initPollingWatcher(() => updateMultisigAccounts());
+    }
   }
+
+  onNetworkChange(() => updateMultisigAccounts());
 
   return {
     multisigAccounts: allMultisigAccounts,
