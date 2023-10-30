@@ -9,8 +9,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "btc-account-details-transactions" */
     './AccountDetailsTransactions.vue'
   ),
+  AccountDetailsTokens: null,
+  AccountDetailsNames: null,
   TransactionDetails: () => import(
-    /* webpackChunkName: "ae-transaction-details" */
+    /* webpackChunkName: "btc-transaction-details" */
     './TransactionDetails.vue'
   ),
   TransferReceiveModal: () => import(

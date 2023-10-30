@@ -1,30 +1,40 @@
 <template>
-  <div class="transaction-list-wrapper">
-    <TransactionList
-      v-if="isOnline"
-      :loading="loading"
-      :transactions="loadedTransactionList"
-      is-multisig
-    />
-    <MessageOffline
-      v-else
-      :text="$t('modals.accountDetails.transactionsNotAvailable')"
-    />
-  </div>
+  <IonPage class="transaction-list-wrapper">
+    <IonContent class="ion-padding ion-content-bg">
+      <div ref="innerScrollElem">
+        <TransactionList
+          v-if="isOnline"
+          :loading="loading"
+          :transactions="loadedTransactionList"
+          is-multisig
+        />
+        <MessageOffline
+          v-else
+          :text="$t('modals.accountDetails.transactionsNotAvailable')"
+        />
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
 import {
   computed,
   defineComponent,
-  onMounted,
   onUnmounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
+import { throttle } from 'lodash-es';
+import {
+  IonContent,
+  IonPage,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import type { ICommonTransaction } from '@/types';
-import { TXS_PER_PAGE } from '@/constants';
+import { TXS_PER_PAGE, FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import {
   useConnection,
   useMultisigAccounts,
@@ -33,6 +43,7 @@ import {
   useTransactionList,
   useUi,
   useViewport,
+  useScrollConfig,
 } from '@/composables';
 
 import MessageOffline from '../components/MessageOffline.vue';
@@ -42,6 +53,8 @@ export default defineComponent({
   components: {
     TransactionList,
     MessageOffline,
+    IonPage,
+    IonContent,
   },
   props: {
     showFilters: Boolean,
@@ -57,6 +70,7 @@ export default defineComponent({
     let polling: NodeJS.Timer | null;
 
     const store = useStore();
+    const { setScrollConf } = useScrollConfig();
 
     const { isOnline } = useConnection();
     const { isAppActive } = useUi();
@@ -75,12 +89,18 @@ export default defineComponent({
 
     const loading = ref(false);
     const isDestroyed = ref(false);
+    const innerScrollElem = ref<HTMLElement>();
+    const appInnerScrollTop = ref<number>(0);
 
     const currentAddress = computed(() => activeMultisigAccount.value?.gaAccountId);
 
     const canLoadMore = computed(() => (
       !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
     ));
+
+    const appInnerElem = computed<HTMLElement | null | undefined>(
+      () => innerScrollElem.value?.parentElement,
+    );
 
     const loadedTransactionList = computed((): ICommonTransaction[] => [
       ...getAccountAllTransactions(currentAddress.value!),
@@ -122,6 +142,26 @@ export default defineComponent({
       }
     }
 
+    function throttledScroll() {
+      return throttle(() => {
+        appInnerScrollTop.value = appInnerElem?.value?.scrollTop ?? 0;
+      }, 200);
+    }
+
+    function onViewDidLeaveHandler() {
+      if (polling) {
+        clearInterval(polling);
+      }
+      isDestroyed.value = true;
+    }
+
+    watch(
+      appInnerScrollTop,
+      (value) => {
+        setScrollConf(value >= FIXED_TABS_SCROLL_HEIGHT);
+      },
+    );
+
     watch(displayMode, () => {
       checkLoadMore();
     });
@@ -132,7 +172,11 @@ export default defineComponent({
       }
     });
 
-    onMounted(() => {
+    onIonViewWillEnter(() => {
+      setScrollConf(false);
+      if (innerScrollElem.value && appInnerElem.value) {
+        appInnerElem.value.addEventListener('scroll', throttledScroll());
+      }
       loadMore();
       polling = setInterval(() => {
         if (isAppActive.value) {
@@ -141,18 +185,16 @@ export default defineComponent({
       }, 10000);
     });
 
-    onUnmounted(() => {
-      if (polling) {
-        clearInterval(polling);
-      }
-      isDestroyed.value = true;
-    });
+    onIonViewWillLeave(onViewDidLeaveHandler);
+
+    onUnmounted(onViewDidLeaveHandler);
 
     return {
       isOnline,
       loading,
       loadedTransactionList,
       loadMore,
+      innerScrollElem,
     };
   },
 });

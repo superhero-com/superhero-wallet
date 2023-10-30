@@ -1,62 +1,72 @@
 <template>
-  <div
-    class="app-wrapper"
-    :class="{
-      'show-header': showHeader,
-      'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
-      'is-extension': IS_EXTENSION,
-    }"
-  >
-    <button
-      v-if="qrScannerOpen"
-      class="camera-close-button"
+  <IonApp class="app">
+    <IonPage
+      id="app-wrapper"
+      class="app-wrapper"
+      :class="{
+        'show-header': delayedShowHeader,
+        'is-desktop-web': IS_WEB && !IS_MOBILE_DEVICE,
+        'is-extension': IS_EXTENSION,
+      }"
     >
-      <Close />
-    </button>
-    <div
-      v-show="!qrScannerOpen"
-      ref="innerElement"
-      class="app-inner"
-      :class="{ 'styled-scrollbar': showScrollbar }"
-    >
-      <Header v-if="showHeader" />
-
-      <RouterView
-        v-slot="{ Component }"
-        :class="{ 'show-header': showHeader }"
-        class="main"
+      <Loader v-if="isLoaderVisible" />
+      <button
+        v-if="qrScannerOpen"
+        id="camera-close-btn"
+        class="camera-close-button"
       >
-        <Transition name="page-transition">
-          <Component :is="Component" />
-        </Transition>
-      </RouterView>
+        <Close />
+      </button>
+      <div
+        v-show="!qrScannerOpen"
+        class="app-inner"
+        :class="{ 'styled-scrollbar': showScrollbar }"
+      >
+        <Header v-if="delayedShowHeader" />
 
-      <NodeConnectionStatus
-        v-if="!modalsOpen.length"
-        class="connection-status"
-      />
+        <!-- We are disabling animations on FF because of a bug that causes flickering
+          see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
+        <IonRouterOutlet
+          :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
+          :class="{ 'show-header': delayedShowHeader, 'ios': IS_IOS }"
+          class="main"
+        />
 
-      <Component
-        v-bind="props"
-        :is="component"
-        v-for="({ component, key, props, viewComponentName }) in modalsOpen"
-        :key="key"
-        :view-component-name="viewComponentName"
-      />
-    </div>
-  </div>
+        <NodeConnectionStatus
+          v-if="!modalsOpen.length"
+          class="connection-status"
+        />
+
+        <Component
+          v-bind="props"
+          :is="component"
+          v-for="({ component, key, props, viewComponentName }) in modalsOpen"
+          :key="key"
+          :view-component-name="viewComponentName"
+        />
+      </div>
+    </IonPage>
+  </IonApp>
 </template>
 
 <script lang="ts">
 import {
+  IonRouterOutlet,
+  IonApp,
+  IonPage,
+} from '@ionic/vue';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import {
   computed,
   defineComponent,
+  onBeforeMount,
   onMounted,
   ref,
   watch,
 } from 'vue';
 import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
 import { watchUntilTruthy } from '@/utils';
@@ -66,25 +76,31 @@ import {
   IS_WEB,
   IS_IOS,
   IS_MOBILE_DEVICE,
-  IS_CORDOVA,
+  IS_MOBILE_APP,
   IS_EXTENSION,
   IS_CHROME_BASED,
   IS_FIREFOX,
   NOTIFICATION_DEFAULT_SETTINGS,
   RUNNING_IN_POPUP,
+  RUNNING_IN_TESTS,
+  PAGE_TRANSITION_DURATION,
 } from '@/constants';
+import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useConnection,
   useCurrencies,
   useModals,
+  useMultisigAccounts,
   useNotifications,
   useUi,
-  useViewport,
 } from '@/composables';
 import { useAeTippingBackend } from '@/protocols/aeternity/composables';
+import { useTransferSendHandler } from '@/composables/transferSendHandler';
+
 import Header from '@/popup/components/Header.vue';
 import NodeConnectionStatus from '@/popup/components/NodeConnectionStatus.vue';
+import Loader from '@/popup/components/Loader.vue';
 import Close from '@/icons/close.svg?vue-component';
 
 export default defineComponent({
@@ -93,26 +109,36 @@ export default defineComponent({
     Header,
     NodeConnectionStatus,
     Close,
+    IonApp,
+    IonRouterOutlet,
+    IonPage,
+    Loader,
   },
   setup() {
     const store = useStore();
     const route = useRoute();
+    const router = useRouter();
     const { t } = useI18n();
     const { getCacheChainNames } = useAeTippingBackend();
 
     const { watchConnectionStatus } = useConnection();
-    const { initVisibilityListeners } = useUi();
+    const {
+      qrScannerOpen,
+      isLoaderVisible,
+      initVisibilityListeners,
+    } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts({ store });
     const { addWalletNotification } = useNotifications({ store });
     const { loadCoinsData } = useCurrencies({ store, withoutPolling: true });
-    const { initViewport } = useViewport();
+    const { restore: restoreTransferSendForm } = useTransferSendHandler();
+    const { multisigAccounts } = useMultisigAccounts({ store, pollingDisabled: true });
 
     const innerElement = ref<HTMLDivElement>();
+    const delayedShowHeader = ref(false);
 
     const isRestored = computed(() => store.state.isRestored);
     const backedUpSeed = computed(() => store.state.backedUpSeed);
-    const qrScannerOpen = computed(() => store.state.qrScannerOpen);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -125,8 +151,11 @@ export default defineComponent({
     function setDocumentHeight() {
       document.documentElement.style.setProperty(
         '--height',
-        IS_CORDOVA && IS_IOS ? '100vh' : '100%',
+        IS_MOBILE_APP && IS_IOS ? '100vh' : '100%',
       );
+      if (IS_EXTENSION) {
+        document.documentElement.classList.add('is-extension');
+      }
     }
 
     async function checkExtensionUpdates() {
@@ -183,14 +212,64 @@ export default defineComponent({
       }
     });
 
+    // Redirect to account page if no multisig accounts are present
+    // only if current page is a multisig page
+    watch(
+      multisigAccounts,
+      (value) => {
+        if (!value?.length && routeMeta.value?.isMultisig) {
+          router.push({ name: ROUTE_ACCOUNT });
+        }
+      },
+    );
+
+    watch(
+      showHeader,
+      async (value) => {
+        if (value) {
+          delayedShowHeader.value = true;
+        } else {
+          if (!isLoggedIn.value) {
+            delayedShowHeader.value = false;
+            return;
+          }
+          setTimeout(() => {
+            delayedShowHeader.value = false;
+          }, PAGE_TRANSITION_DURATION);
+        }
+      },
+      { immediate: true },
+    );
+
     initVisibilityListeners();
+
+    onBeforeMount(async () => {
+      if (IS_MOBILE_APP) {
+        StatusBar.setStyle({ style: Style.Dark });
+        StatusBar.setBackgroundColor({
+          color: '#141414',
+        });
+        window.screen.orientation?.lock?.('portrait');
+      }
+    });
 
     onMounted(async () => {
       setDocumentHeight();
       checkExtensionUpdates();
-      initViewport(innerElement.value);
+
+      // Hide splash screen programmatically when app is ready
+      // to avoid white screen on app start
+      if (IS_MOBILE_APP) {
+        setTimeout(() => {
+          SplashScreen.hide({
+            fadeOutDuration: 300,
+          });
+        }, 2000);
+      }
 
       watchConnectionStatus();
+
+      restoreTransferSendForm();
 
       if (!RUNNING_IN_POPUP) {
         Promise.allSettled([
@@ -202,14 +281,19 @@ export default defineComponent({
     });
 
     return {
+      IS_FIREFOX,
+      IS_IOS,
       IS_WEB,
       IS_EXTENSION,
       IS_MOBILE_DEVICE,
+      RUNNING_IN_TESTS,
       modalsOpen,
       qrScannerOpen,
       showHeader,
+      delayedShowHeader,
       showScrollbar,
       innerElement,
+      isLoaderVisible,
     };
   },
 });
@@ -222,85 +306,93 @@ export default defineComponent({
 @use '../styles/typography';
 @use '../styles/mixins';
 
-.app-wrapper {
-  --screen-padding-x: 16px;
-  --screen-border-radius: 0;
-  --screen-bg-color: #{variables.$color-bg-app};
-  --header-height: 0;
-  --gap: 12px;
-
-  @extend %face-sans-16-regular;
-
+.app {
   position: relative;
-  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
-  border-radius: var(--screen-border-radius);
-  color: variables.$color-white;
-  background-color: var(--screen-bg-color);
-  font-family: variables.$font-sans;
-  transition: background-color 200ms;
 
-  .camera-close-button {
-    position: absolute;
-    top: calc(20px + env(safe-area-inset-top));
-    right: 20px;
-    width: 28px;
-    height: 28px;
-    z-index: 10;
-  }
+  .app-wrapper {
+    --screen-padding-x: 16px;
+    --screen-border-radius: 0;
+    --screen-bg-color: #{variables.$color-bg-app};
+    --header-height: 0;
+    --gap: 12px;
 
-  .app-inner {
+    @extend %face-sans-16-regular;
+
+    position: relative;
+    margin: 0 auto;
     width: 100%;
     height: 100%;
-    overflow-y: auto;
-  }
-
-  .main {
-    padding-bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-top: env(safe-area-inset-top);
+    border-radius: var(--screen-border-radius);
+    color: variables.$color-white;
     background-color: var(--screen-bg-color);
-  }
+    font-family: variables.$font-sans;
+    transition: background-color 200ms;
 
-  .connection-status {
-    position: fixed;
-    z-index: variables.$z-index-header;
-    bottom: 0;
-    padding-bottom: env(safe-area-inset-bottom);
-    left: 0;
-    width: 100%;
-  }
-
-  &.is-extension,
-  &.is-desktop-web {
-    width: variables.$extension-width;
-    height: variables.$extension-height;
-  }
-
-  // Imitate the appearance of the mobile/extension app in a desktop browser
-  &.is-desktop-web {
-    --screen-border-radius: #{variables.$border-radius-app};
-
-    overflow: hidden;
-    box-shadow: variables.$color-border 0 0 0 1px;
-    transform: translate(0, 0); // Create custom viewport for fixed elements
-
-    @include mixins.mobile {
-      --screen-border-radius: 0;
-
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-      box-shadow: none;
+    .camera-close-button {
+      position: absolute;
+      top: calc(20px + env(safe-area-inset-top));
+      right: 20px;
+      width: 28px;
+      height: 28px;
+      z-index: 10;
     }
-  }
-
-  &.show-header {
-    --header-height: 40px;
 
     .app-inner {
-      padding-top: var(--header-height);
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .main {
+      margin-top: calc(var(--header-height) + env(safe-area-inset-top));
+      padding-bottom: env(safe-area-inset-bottom);
+      background-color: var(--screen-bg-color);
+
+      &.ios {
+        top: 10px;
+      }
+    }
+
+    .connection-status {
+      position: fixed;
+      z-index: variables.$z-index-header;
+      bottom: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+      left: 0;
+      width: 100%;
+    }
+
+    &.is-extension,
+    &.is-desktop-web {
+      width: variables.$extension-width;
+      height: variables.$extension-height;
+    }
+
+    // Imitate the appearance of the mobile/extension app in a desktop browser
+    &.is-desktop-web {
+      --screen-border-radius: #{variables.$border-radius-app};
+
+      overflow: hidden;
+      box-shadow: variables.$color-border 0 0 0 1px;
+      transform: translate(0, 0); // Create custom viewport for fixed elements
+
+      @include mixins.mobile {
+        --screen-border-radius: 0;
+
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        box-shadow: none;
+      }
+    }
+
+    &.show-header {
+      --header-height: 40px;
     }
   }
 }

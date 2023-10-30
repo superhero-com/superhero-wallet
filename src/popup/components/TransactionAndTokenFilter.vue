@@ -11,7 +11,7 @@
     >
       <div
         v-if="firstRender || openHeight"
-        ref="transactionFilter"
+        ref="transactionFilterEl"
         class="filter-wrapper"
       >
         <InputSearch
@@ -38,7 +38,8 @@ import {
   computed,
   defineComponent,
   onMounted,
-  ref, watch,
+  ref,
+  watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -62,7 +63,6 @@ export default defineComponent({
   setup(props) {
     const route = useRoute();
     const store = useStore();
-    const transactionFilter = ref();
     const {
       isSearchBarAndFilterExpanded,
       searchPhrase,
@@ -78,6 +78,8 @@ export default defineComponent({
     const maxHeight = ref(0);
     const firstRender = ref(true);
     const inputIsFocused = ref(false);
+    const transactionFilterEl = ref<HTMLDivElement>();
+    const resizeObserver = ref<ResizeObserver>();
 
     const openHeight = computed(() => (
       props.showFilters
@@ -95,21 +97,39 @@ export default defineComponent({
       inputIsFocused.value = val;
     }
 
+    function observeFilterElHeight() {
+      resizeObserver.value = new ResizeObserver(() => {
+        const clientHeight = (transactionFilterEl.value?.clientHeight || 0);
+        if (clientHeight && clientHeight > 0) {
+          maxHeight.value = clientHeight;
+        }
+      });
+    }
+
+    watch(transactionFilterEl, (value) => {
+      if (value) {
+        resizeObserver.value?.observe(value);
+      } else {
+        resizeObserver.value?.disconnect();
+      }
+    });
+
     watch(() => searchPhrase.value, () => {
       if (viewportElement.value && viewportElement.value.scrollTop > scrollTopThreshold) {
         viewportElement.value.scrollTo({ top: scrollTopThreshold, behavior: 'smooth' });
       }
     });
 
-    onMounted(() => {
+    onMounted(async () => {
       if (showFilterBar.value) {
-        maxHeight.value = (transactionFilter?.value as HTMLDivElement)?.clientHeight;
+        maxHeight.value = (transactionFilterEl?.value)?.clientHeight!;
         firstRender.value = false;
+        observeFilterElHeight();
       }
     });
 
     return {
-      transactionFilter,
+      transactionFilterEl,
       searchPhrase,
       filtersConfig,
       filtersConfigAe,

@@ -98,6 +98,7 @@ import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import { tg } from '@/store/plugins/languages';
 import type { TransferFormModel, Protocol } from '@/types';
 
+import Loader from '@/popup/components/Loader.vue';
 import DetailsItem from '../DetailsItem.vue';
 import TokenAmount from '../TokenAmount.vue';
 import AvatarWithChainName from '../AvatarWithChainName.vue';
@@ -111,6 +112,7 @@ export default defineComponent({
     ModalHeader,
     AvatarWithChainName,
     DetailsItem,
+    Loader,
     TokenAmount,
   },
   props: {

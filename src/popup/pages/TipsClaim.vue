@@ -1,47 +1,49 @@
 <template>
-  <div class="tips-claim">
-    <AccountInfo
-      :address="activeAccount.address"
-      :name="activeAccount.name"
-      :idx="activeAccount.idx"
-      :protocol="activeAccount.protocol"
-    />
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="tips-claim">
+        <AccountInfo
+          :address="activeAccount.address"
+          :name="activeAccount.name"
+          :idx="activeAccount.idx"
+          :protocol="activeAccount.protocol"
+        />
 
-    <div class="header">
-      <p class="text-description">
-        {{ $t('pages.claimTips.header') }}
-      </p>
+        <div class="header">
+          <p class="text-description">
+            {{ $t('pages.claimTips.header') }}
+          </p>
 
-      <BtnHelp
-        class="help-button"
-        :title="$t('modals.verify.title')"
-        :msg="$t('modals.verify.msg')"
-        :option="{
-          attrs: {
-            href: AE_BLOG_CLAIM_TIP_URL,
-            target: '_blank'
-          },
-        }"
-        icon="success"
-      />
-    </div>
+          <BtnHelp
+            class="help-button"
+            :title="$t('modals.verify.title')"
+            :msg="$t('modals.verify.msg')"
+            :option="{
+              attrs: {
+                href: AE_BLOG_CLAIM_TIP_URL,
+                target: '_blank'
+              },
+            }"
+            icon="success"
+          />
+        </div>
 
-    <InputField
-      v-model="tipUrl"
-      :label="$t('pages.claimTips.urlToClaim')"
-      :error="!normalizedUrl"
-    />
+        <InputField
+          v-model="tipUrl"
+          :label="$t('pages.claimTips.urlToClaim')"
+          :error="!normalizedUrl"
+        />
 
-    <BtnMain
-      :disabled="!normalizedUrl || !isTippingSupported"
-      extend
-      @click="handleClaimTips"
-    >
-      {{ $t('common.confirm') }}
-    </BtnMain>
-
-    <Loader v-if="loading" />
-  </div>
+        <BtnMain
+          :disabled="!normalizedUrl || !isTippingSupported"
+          extend
+          @click="handleClaimTips"
+        >
+          {{ $t('common.confirm') }}
+        </BtnMain>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -54,6 +56,7 @@ import {
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { IonContent, IonPage } from '@ionic/vue';
 import { isUrlValid, toURL } from '@/utils';
 import { IS_EXTENSION, MODAL_CLAIM_SUCCESS } from '@/constants';
 import {
@@ -61,6 +64,7 @@ import {
   useModals,
   useAeSdk,
   useTippingContracts,
+  useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
@@ -79,6 +83,8 @@ export default defineComponent({
     BtnMain,
     BtnHelp,
     AccountInfo,
+    IonPage,
+    IonContent,
   },
   setup() {
     const { t } = useI18n();
@@ -94,9 +100,9 @@ export default defineComponent({
     const { activeAccount } = useAccounts({ store });
     const { openModal, openDefaultModal } = useModals();
     const { getTippingContracts } = useTippingContracts({ store });
+    const { setLoaderVisible } = useUi();
 
     const tipUrl = ref('');
-    const loading = ref(false);
 
     const normalizedUrl = computed(
       () => isUrlValid(tipUrl.value) ? toURL(tipUrl.value).toString() : '',
@@ -104,7 +110,7 @@ export default defineComponent({
 
     async function handleClaimTips() {
       const url = normalizedUrl.value;
-      loading.value = true;
+      setLoaderVisible(true);
       try {
         const { tippingV1 } = await getTippingContracts();
         const claimAmount = parseFloat(
@@ -150,11 +156,13 @@ export default defineComponent({
           throw error;
         }
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     onMounted(async () => {
+      setLoaderVisible(false);
+
       if (IS_EXTENSION && browser) {
         const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
         if (tab?.url && isUrlValid(tab.url)) {
@@ -165,7 +173,6 @@ export default defineComponent({
 
     return {
       activeAccount,
-      loading,
       normalizedUrl,
       tipUrl,
       isTippingSupported,
@@ -181,7 +188,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .tips-claim {
-  padding: var(--screen-padding-x);
+  padding-inline: var(--screen-padding-x);
 
   .header {
     margin: 20px 0 24px 0;

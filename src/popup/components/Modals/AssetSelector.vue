@@ -54,6 +54,7 @@ import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
 import InputSearch from '../InputSearch.vue';
 import BackToTop from '../BackToTop.vue';
+import Loader from '../Loader.vue';
 import { useTokensList } from '../../../composables';
 
 export default defineComponent({
@@ -63,6 +64,7 @@ export default defineComponent({
     TokensListItem,
     Modal,
     InputSearch,
+    Loader,
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, required: true },

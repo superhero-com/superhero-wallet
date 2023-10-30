@@ -1,13 +1,12 @@
+import { App, URLOpenListenerEvent } from '@capacitor/app';
 import {
-  createRouter,
   RouteRecordRaw,
-  createWebHashHistory,
-  createWebHistory,
 } from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from '@ionic/vue-router';
 import { Dictionary } from '@/types';
 import {
   APP_LINK_WEB,
-  IS_CORDOVA,
+  IS_MOBILE_APP,
   IS_WEB,
   POPUP_TYPE,
   POPUP_TYPE_CONNECT,
@@ -85,7 +84,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === ROUTE_APPS_BROWSER) {
     // In-app browser is mobile-only
-    if (!IS_CORDOVA && !UNFINISHED_FEATURES) {
+    if (!IS_MOBILE_APP && !UNFINISHED_FEATURES) {
       next({ name: ROUTE_NOT_FOUND });
       return;
     }
@@ -154,14 +153,22 @@ const routerReadyPromise = new Promise((resolve) => {
   });
 });
 
-if (IS_CORDOVA) {
+if (IS_MOBILE_APP) {
   (async () => {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
-    window.IonicDeeplink.onDeepLink(({ url }: any) => {
-      const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => url.startsWith(p));
-      if (!prefix) throw new Error(`Unknown url: ${url}`);
+
+    App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+      const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => event.url.startsWith(p));
+      if (!prefix) throw new Error(`Unknown url: ${event.url}`);
+
       try {
-        window.location.href = `#/${url.slice(prefix.length)}`;
+        const path = `/${event.url.slice(prefix?.length).split('?')[0]}`;
+        const query = event.url.slice(prefix?.length).split('?')[1].split('&').reduce((acc, param) => {
+          const [key, value] = param.split('=');
+          return { ...acc, [key]: value };
+        }, {});
+
+        router.push({ path, query });
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
       }

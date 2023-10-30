@@ -1,13 +1,12 @@
 import { IPopupConfig } from './src/types';
-import { ICordova } from './src/types/cordova';
 
 export { };
 
 declare global {
   interface Window {
     popupProps?: Partial<IPopupConfig>
-    cordova?: ICordova
-    StatusBar?: any // cordova-plugin-statusbar
-    IonicDeeplink?: any
+  }
+  interface ScreenOrientation {
+    lock: (orientation: 'portrait' | 'landscape' | 'portrait-primary' | 'portrait-secondary' | 'landscape-primary' | 'landscape-secondary' | 'any') => Promise<void>
   }
 }

@@ -9,6 +9,7 @@
         <AccountSelector
           v-model="creatorAddress"
           :options="aeAccountsSelectOptions"
+          :protocol="PROTOCOL_AETERNITY"
         />
         <i18n-t
           v-if="notEnoughBalanceToCreateMultisig"

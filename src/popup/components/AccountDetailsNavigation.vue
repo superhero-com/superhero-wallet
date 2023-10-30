@@ -29,17 +29,17 @@
 import { computed, defineComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useConnection } from '@/composables';
 import {
   ROUTE_ACCOUNT_DETAILS,
   ROUTE_ACCOUNT_DETAILS_NAMES,
   ROUTE_ACCOUNT_DETAILS_NAMES_AUCTIONS,
   ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
-  ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
   ROUTE_MULTISIG_DETAILS,
   ROUTE_MULTISIG_DETAILS_INFO,
-  ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
 } from '../router/routeNames';
-import { useConnection } from '../../composables';
 
 import BtnPill from './buttons/BtnPill.vue';
 import Tab from './tabs/Tab.vue';
@@ -69,13 +69,13 @@ export default defineComponent({
 
     const navigationConfigRegular: NavigationElement[] = [
       {
-        text: t('modals.accountDetails.assets'),
+        text: t('modals.accountDetails.transactions'),
         routeName: ROUTE_ACCOUNT_DETAILS,
         exact: true,
       },
       {
-        text: t('modals.accountDetails.transactions'),
-        routeName: ROUTE_ACCOUNT_DETAILS_TRANSACTIONS,
+        text: t('modals.accountDetails.assets'),
+        routeName: ROUTE_ACCOUNT_DETAILS_ASSETS,
       },
       {
         text: t('modals.accountDetails.names'),
@@ -100,13 +100,13 @@ export default defineComponent({
 
     const navigationConfigMultisig: NavigationElement[] = [
       {
-        text: t('modals.accountDetails.assets'),
+        text: t('modals.accountDetails.transactions'),
         routeName: ROUTE_MULTISIG_DETAILS,
         exact: true,
       },
       {
-        text: t('modals.accountDetails.transactions'),
-        routeName: ROUTE_MULTISIG_DETAILS_TRANSACTIONS,
+        text: t('modals.accountDetails.assets'),
+        routeName: ROUTE_MULTISIG_DETAILS_ASSETS,
       },
       {
         text: t('modals.accountDetails.details'),

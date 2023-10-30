@@ -8,7 +8,7 @@
   >
     <slot />
 
-    <template v-if="!IS_CORDOVA">
+    <template v-if="!IS_MOBILE_APP">
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
@@ -34,6 +34,7 @@ import { RouteLocation } from 'vue-router';
 
 import { getAddressColor } from '@/utils';
 
+import { IS_MOBILE_APP } from '@/constants';
 import BtnPlain from './buttons/BtnPlain.vue';
 import BtnBase from './buttons/BtnBase.vue';
 import ChevronIcon from '../../icons/chevron.svg?vue-component';
@@ -57,7 +58,7 @@ export default defineComponent({
 
     return {
       color,
-      IS_CORDOVA: process.env.IS_CORDOVA,
+      IS_MOBILE_APP,
     };
   },
 });

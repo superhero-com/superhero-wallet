@@ -2,6 +2,7 @@
   <Component
     :is="componentToDisplay"
     v-if="viewComponentName"
+    :ionic-lifecycle-status="ionicLifecycleStatus"
   />
   <div v-else>
     <InfoBox
@@ -23,9 +24,17 @@ import {
   PropType,
   defineAsyncComponent,
   defineComponent,
+  ref,
 } from 'vue';
 import { useStore } from 'vuex';
-import type { Protocol, ProtocolView, ProtocolViewsConfig } from '@/types';
+
+import type {
+  IonicLifecycleStatus,
+  WalletRouteMeta,
+  Protocol,
+  ProtocolView,
+  ProtocolViewsConfig,
+} from '@/types';
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
@@ -33,10 +42,16 @@ import Logger from '@/lib/logger';
 import aeternityViews from '@/protocols/aeternity/views';
 import bitcoinViews from '@/protocols/bitcoin/views';
 
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import {
   detectProtocolByOwner,
 } from '@/utils';
+import {
+  onIonViewDidEnter,
+  onIonViewDidLeave,
+  onIonViewWillEnter,
+  onIonViewWillLeave,
+} from '@ionic/vue';
 import InfoBox from './InfoBox.vue';
 
 /**
@@ -60,35 +75,65 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore();
-    const { params, meta } = useRoute();
+    const route = useRoute();
+    const routeMeta = route.meta as WalletRouteMeta;
+    const routeParams = route.params;
+
+    const router = useRouter();
 
     const { activeNetwork } = useNetworks();
     const { activeAccount } = useAccounts({ store });
 
+    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
+
     const ownerProtocol = detectProtocolByOwner(
       activeNetwork.value.type,
-      params.transactionOwner as string,
+      routeParams.transactionOwner as string,
     );
 
     const importViewComponent = views[
-      meta.isMultisig
+      routeMeta.isMultisig
         ? PROTOCOL_AETERNITY
         : (ownerProtocol || activeAccount.value.protocol)
-    ]?.[props.viewComponentName];
+    ]?.[props.viewComponentName!];
 
     if (!importViewComponent) {
-      Logger.write({
-        message: `Failed to access "${props.viewComponentName}" component for the "${activeAccount.value.protocol}" protocol`,
-        type: 'vue-error',
-      });
+      if (routeMeta.redirectIfNull) {
+        router.replace({ name: routeMeta.redirectIfNull, replace: true });
+      } else {
+        Logger.write({
+          message: `Failed to access "${props.viewComponentName}" component for the "${activeAccount.value.protocol}" protocol`,
+          type: 'vue-error',
+        });
+      }
     }
 
     const componentToDisplay = importViewComponent
       ? defineAsyncComponent(() => importViewComponent())
       : null;
 
+    onIonViewDidEnter(() => {
+      ionicLifecycleStatus.value = 'didEnter';
+    });
+
+    onIonViewDidLeave(() => {
+      ionicLifecycleStatus.value = 'didLeave';
+    });
+
+    // In case the component is a tab view, will enter will only be called
+    // when we are switching to the tab from another tab
+    // not when we are refreshing the page or navigating to the page containing the tab
+    onIonViewWillEnter(() => {
+      ionicLifecycleStatus.value = 'willEnter';
+    });
+
+    onIonViewWillLeave(() => {
+      ionicLifecycleStatus.value = 'willLeave';
+    });
+
     return {
       componentToDisplay,
+      ionicLifecycleStatus,
     };
   },
 });

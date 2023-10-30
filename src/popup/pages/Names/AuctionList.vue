@@ -1,52 +1,59 @@
 <template>
-  <div class="auction-list">
-    <Filters
-      v-if="activeAuctions.length || auctions.length || loading"
-      v-model="displayMode"
-      :filters="filters"
-      sticky
-    />
-    <ul
-      v-if="activeAuctions.length || auctions.length"
-      class="list"
-    >
-      <NameRow
-        v-for="({ name, expiration, lastBid }, key) in auctions"
-        :key="key"
-        :to="{ name: 'auction-bid', params: { name } }"
-        :name="name"
-        :address="lastBid.accountId"
-      >
-        <div class="name-wrapper">
-          <div class="name">
-            {{ name }}
-            <TokenAmount
-              :amount="getAeFee(lastBid.nameFee)"
-              :protocol="PROTOCOL_AETERNITY"
-            />
-          </div>
-          <div
-            v-if="topBlockHeight"
-            class="expiration"
+  <IonPage class="auction-list">
+    <IonToolbar class="toolbar">
+      <Filters
+        v-if="activeAuctions.length || auctions.length || loading"
+        v-model="displayMode"
+        :filters="filters"
+        sticky
+      />
+    </IonToolbar>
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div class="auction-list-content">
+        <ul
+          v-if="activeAuctions.length || auctions.length"
+          class="list"
+        >
+          <NameRow
+            v-for="({ name, expiration, lastBid }, key) in auctions"
+            :key="key"
+            :to="{ name: 'auction-bid', params: { name } }"
+            :name="name"
+            :address="lastBid.accountId"
           >
-            {{ $t('pages.names.auctions.expires') }}
-            in ≈ {{ blocksToRelativeTime(expiration - topBlockHeight) }}
-          </div>
-        </div>
-      </NameRow>
-    </ul>
-    <AnimatedSpinner
-      v-else-if="loading"
-      class="spinner"
-    />
-    <RegisterName
-      v-else
-      :msg="$t('pages.names.auctions.no-auctions')"
-    />
-  </div>
+            <div class="name-wrapper">
+              <div class="name">
+                {{ name }}
+                <TokenAmount
+                  :amount="getAeFee(lastBid.nameFee)"
+                  :protocol="PROTOCOL_AETERNITY"
+                />
+              </div>
+              <div
+                v-if="topBlockHeight"
+                class="expiration"
+              >
+                {{ $t('pages.names.auctions.expires') }}
+                in ≈ {{ blocksToRelativeTime(expiration - topBlockHeight) }}
+              </div>
+            </div>
+          </NameRow>
+        </ul>
+        <AnimatedSpinner
+          v-else-if="loading"
+          class="spinner"
+        />
+        <RegisterName
+          v-else
+          :msg="$t('pages.names.auctions.no-auctions')"
+        />
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent, IonToolbar } from '@ionic/vue';
 import {
   computed,
   defineComponent,
@@ -92,6 +99,9 @@ export default defineComponent({
     TokenAmount,
     AnimatedSpinner,
     RegisterName,
+    IonPage,
+    IonContent,
+    IonToolbar,
   },
   setup() {
     const store = useStore();
@@ -150,46 +160,57 @@ export default defineComponent({
 @use '../../../styles/mixins';
 
 .auction-list {
-  --filter-top-offset: 166px;
+  .toolbar {
+    --background: var(--screen-bg-color);
+    --min-height: 0;
 
-  display: flex;
-  flex-direction: column;
+    padding-inline: var(--screen-padding-x);
+  }
 
-  .list {
-    padding: 0;
-    margin-inline: calc(-1 * var(--screen-padding-x));
+  .auction-list-content {
+    --filter-top-offset: 166px;
 
-    .name-wrapper {
-      @extend %face-sans-14-regular;
+    display: flex;
+    flex-direction: column;
 
-      display: flex;
-      justify-content: space-between;
-      line-height: 16px;
+    .list {
+      padding: 0 12px;
+      margin-inline: calc(-1 * var(--screen-padding-x));
 
-      .name {
+      .name-wrapper {
+        @extend %face-sans-14-regular;
+
         display: flex;
-        flex-direction: column;
-        font-weight: bold;
-      }
+        justify-content: space-between;
+        line-height: 16px;
 
-      .expiration {
-        align-self: flex-end;
-        user-select: none;
-        color: variables.$color-grey-dark;
+        .name {
+          display: flex;
+          flex-direction: column;
+          font-weight: bold;
+        }
+
+        .expiration {
+          align-self: flex-end;
+          user-select: none;
+          color: variables.$color-grey-dark;
+        }
       }
     }
-  }
 
-  .spinner {
-    display: flex;
-    width: 56px;
-    height: 56px;
-    margin: 72px auto 0 auto;
-  }
+    .spinner {
+      display: flex;
+      width: 56px;
+      height: 56px;
+      margin: 72px auto 0 auto;
+    }
 
-  :deep(.filters) {
-    position: sticky;
-    top: calc(var(--filter-top-offset) + env(safe-area-inset-top));
+    :deep(.filters) {
+      position: sticky;
+      top: env(safe-area-inset-top);
+      margin-left: 0;
+      margin-right: 0;
+    }
   }
 }
 </style>

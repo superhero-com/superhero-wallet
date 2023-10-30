@@ -143,6 +143,7 @@ export default {
   .description {
     @extend %face-sans-13-regular;
 
+    color: $color-white;
     opacity: 0.7;
     margin-top: 4px;
   }

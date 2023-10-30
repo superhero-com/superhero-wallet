@@ -18,11 +18,10 @@ $ cd superhero-wallet
 ```
 $ npm install
 $ npm run build
-$ npm run build:cordova # build a Cordova version
 $ npm run build:extension # build an extension
 $ npm run build:web # build a web version
-$ npm run gen:cordova-resources
-$ npx cordova build/run android/ios # to build Cordova application
+$ npm run build:android # to build android application
+$ npm run build:ios # to build ios application
 ```
 
 ### Develop locally
@@ -60,36 +59,24 @@ $ npm run test # to run both unit and e2e tests
 
 #### iOS
 
-- create Xcode project by `cordova prepare ios`
+- create Xcode project by `npm run build:ios`
 - open created project in Xcode
+- Go to TARGETS->App
 - open Signing & Capabilities
 - enable signing by the corresponding development team
 - ensure that `applinks:wallet.superhero.com` is in Associated domains feature
 - open Build Settings
 - switch "Code Signing Identity => Release" and "Code Signing Identity => Release => Any iOS SDK" from "iOS Distribution" to "iOS Developer" 
-- add those lines to: `platforms/ios/CordovaLib/Classes/Private/Plugins/CDVWebViewEngine/CDVWebViewEngine.m`
-```
-if (!bounceAllowed) {
-  if ([wkWebView respondsToSelector:@selector(scrollView)]) {
-      ((UIScrollView*)[wkWebView scrollView]).bounces = NO;
-      ((UIScrollView*)[wkWebView scrollView]).scrollEnabled = NO; // <==
-  } else {
-      for (id subview in wkWebView.subviews) {
-          if ([[subview class] isSubclassOfClass:[UIScrollView class]]) {
-              ((UIScrollView*)subview).scrollEnabled = NO; // <==
-              ((UIScrollView*)subview).bounces = NO;
-          }
-      }
-  }
-}
-```
-- choose Product => Archive and follow the instructions
+- In the Info Tab ensure that you have the following permissions set. Privacy - Camera Usage Description, Privacy - Photo Library Usage Description and Privacy - Photo Library Additions Usage Description 
+- Update in General Tab desired Release Version and Build Number
+- choose Product => Archive
+- In the organizer you can distribute app to Testflight and AppStore
 
 #### Android
 
-build a production version signed by the [corresponding key](https://cordova.apache.org/docs/en/latest/guide/platforms/android/#using-buildjson):
+build a production version signed by the corresponding key ([see](https://ionicframework.com/docs/deployment/play-store#signing-an-apk)):
 ```bash
-cordova build android --release --buildConfig=myBuildConfig.json
+npm run build:android
 ```
 
 ## Security

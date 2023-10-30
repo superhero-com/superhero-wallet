@@ -1,38 +1,43 @@
 <template>
-  <AccountDetailsBase class="account-details">
-    <template #buttons>
-      <BtnBox
-        v-if="isNodeMainnet && UNFINISHED_FEATURES"
-        :icon="CreditCardIcon"
-        :text="$t('common.buy')"
-        :href="activeAccountSimplexLink"
-        :disabled="!isOnline"
-      />
-      <BtnBox
-        v-if="isNodeTestnet"
-        :icon="FaucetIcon"
-        :text="$t('common.faucet')"
-        :href="activeAccountFaucetUrl"
-      />
-      <BtnBox
-        v-if="IS_CORDOVA && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
-        :icon="GlobeSmallIcon"
-        :text="$t('common.browser')"
-        :to="{ name: ROUTE_APPS_BROWSER }"
-      />
-    </template>
+  <IonPage>
+    <IonContent class="account-ion-content">
+      <AccountDetailsBase class="account-details">
+        <template #buttons>
+          <BtnBox
+            v-if="isNodeMainnet && UNFINISHED_FEATURES"
+            :icon="CreditCardIcon"
+            :text="$t('common.buy')"
+            :href="activeAccountSimplexLink"
+            :disabled="!isOnline"
+          />
+          <BtnBox
+            v-if="isNodeTestnet"
+            :icon="FaucetIcon"
+            :text="$t('common.faucet')"
+            :href="activeAccountFaucetUrl"
+          />
+          <BtnBox
+            v-if="IS_MOBILE_APP && (isNodeMainnet || isNodeTestnet) || UNFINISHED_FEATURES"
+            :icon="GlobeSmallIcon"
+            :text="$t('common.browser')"
+            :to="{ name: ROUTE_APPS_BROWSER }"
+          />
+        </template>
 
-    <template #navigation>
-      <AccountDetailsNavigation />
-    </template>
-  </AccountDetailsBase>
+        <template #navigation>
+          <AccountDetailsNavigation />
+        </template>
+      </AccountDetailsBase>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useStore } from 'vuex';
+import { IonContent, IonPage } from '@ionic/vue';
 import {
-  IS_CORDOVA,
+  IS_MOBILE_APP,
   IS_IOS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   UNFINISHED_FEATURES,
@@ -60,6 +65,8 @@ export default defineComponent({
     BtnBox,
     AccountDetailsNavigation,
     AccountDetailsBase,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
@@ -77,7 +84,7 @@ export default defineComponent({
       UNFINISHED_FEATURES,
       ROUTE_APPS_BROWSER,
       AE_DEX_URL,
-      IS_CORDOVA,
+      IS_MOBILE_APP,
       IS_IOS,
       CreditCardIcon,
       SwapIcon,
@@ -93,3 +100,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+@use '@/styles/variables';
+
+.account-ion-content {
+  overflow: hidden;
+  background-color: variables.$color-bg-4;
+}
+</style>

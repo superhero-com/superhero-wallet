@@ -1,71 +1,74 @@
 <template>
-  <div class="retip">
-    <BalanceInfo
-      :balance="numericBalance"
-      :protocol="PROTOCOL_AETERNITY"
-    />
-    <div class="section-title">
-      {{ $t('pages.tipPage.url') }}
-    </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="retip">
+        <BalanceInfo
+          :balance="numericBalance"
+          :protocol="PROTOCOL_AETERNITY"
+        />
+        <div class="section-title">
+          {{ $t('pages.tipPage.url') }}
+        </div>
 
-    <div
-      v-if="urlStatus"
-      class="url-bar"
-    >
-      <UrlStatus :status="urlStatus" />
-      <a>{{ tip.url }}</a>
-    </div>
+        <div
+          v-if="urlStatus"
+          class="url-bar"
+        >
+          <UrlStatus :status="urlStatus" />
+          <a>{{ tip.url }}</a>
+        </div>
 
-    <Field
-      v-slot="{ field, errorMessage}"
-      name="amount"
-      :rules="{
-        required: true,
-        min_value_exclusive: 0,
-        ae_min_tip_amount: true,
-        ...+balance.minus(fee) > 0 ? { max_value: max } : {},
-        enough_coin: fee.toString(),
-      }"
-    >
-      <InputAmount
-        v-bind="field"
-        v-model="formModel.amount"
-        name="amount"
-        class="amount-input"
-        readonly
-        :message="errorMessage"
-        :protocol="PROTOCOL_AETERNITY"
-      />
-    </Field>
+        <Field
+          v-slot="{ field, errorMessage}"
+          name="amount"
+          :rules="{
+            required: true,
+            min_value_exclusive: 0,
+            ae_min_tip_amount: true,
+            ...+balance.minus(fee) > 0 ? { max_value: max } : {},
+            enough_coin: fee.toString(),
+          }"
+        >
+          <InputAmount
+            v-bind="field"
+            v-model="formModel.amount"
+            name="amount"
+            class="amount-input"
+            readonly
+            :message="errorMessage"
+            :protocol="PROTOCOL_AETERNITY"
+          />
+        </Field>
 
-    <div
-      v-if="tip.title"
-      class="tip-note-preview"
-    >
-      {{ tip.title }}
-    </div>
+        <div
+          v-if="tip.title"
+          class="tip-note-preview"
+        >
+          {{ tip.title }}
+        </div>
 
-    <BtnMain
-      class="bottom-btn"
-      extend
-      :disabled="!isTippingSupported || errorAmount"
-      @click="sendTip"
-    >
-      {{ $t('common.confirm') }}
-    </BtnMain>
-    <BtnMain
-      class="bottom-btn"
-      extend
-      @click="openCallbackOrGoHome(false)"
-    >
-      {{ $t('common.cancel') }}
-    </BtnMain>
-
-    <Loader v-if="loading" />
-  </div>
+        <BtnMain
+          class="bottom-btn"
+          extend
+          :disabled="!isTippingSupported || errorAmount"
+          @click="sendTip"
+        >
+          {{ $t('common.confirm') }}
+        </BtnMain>
+        <BtnMain
+          class="bottom-btn"
+          extend
+          @click="openCallbackOrGoHome(false)"
+        >
+          {{ $t('common.cancel') }}
+        </BtnMain>
+      </div>
+    </ioncontent>
+  </ionpage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onMounted,
@@ -75,7 +78,7 @@ import {
 import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { Field, useFieldError } from 'vee-validate';
 import type {
   IFormModel,
@@ -93,6 +96,7 @@ import {
   useTippingContracts,
   useAeSdk,
   useTransactionList,
+  useUi,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 
@@ -113,13 +117,15 @@ export default defineComponent({
     BtnMain,
     BalanceInfo,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
-    const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
     const errorAmount = useFieldError();
+    const { setLoaderVisible } = useUi();
 
     const formModel = ref<IFormModel>({
       amount: '',
@@ -129,7 +135,7 @@ export default defineComponent({
     const { openDefaultModal } = useModals();
     const { marketData } = useCurrencies({ store });
     const { getLastActiveProtocolAccount } = useAccounts({ store });
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome } = useDeepLinkApi();
     const { balance } = useBalances({ store });
     const { max, fee } = useMaxAmount({ formModel, store });
     const { getTippingContracts } = useTippingContracts({ store });
@@ -141,7 +147,6 @@ export default defineComponent({
       id: '',
     });
 
-    const loading = ref<boolean>(false);
     const urlStatus = (useGetter('tipUrl/status') as any)[tip.value.url];
 
     const numericBalance = computed<number>(() => balance.value.toNumber());
@@ -152,7 +157,7 @@ export default defineComponent({
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
       const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
-      loading.value = true;
+      setLoaderVisible(true);
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
         const tippingContract = tipId?.includes('_v2') || tipId?.includes('_v3')
@@ -217,12 +222,12 @@ export default defineComponent({
         error.payload = tip.value;
         throw error;
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     onMounted(async () => {
-      loading.value = true;
+      setLoaderVisible(true);
       formModel.value.selectedAsset = ProtocolAdapterFactory
         .getAdapter(PROTOCOL_AETERNITY)
         .getDefaultCoin(marketData.value!, +balance.value);
@@ -235,14 +240,13 @@ export default defineComponent({
         error.payload = tipId;
         throw error;
       }
-      loading.value = false;
+      setLoaderVisible(false);
     });
 
     return {
       PROTOCOL_AETERNITY,
       tip,
       formModel,
-      loading,
       urlStatus,
       isTippingSupported,
       numericBalance,

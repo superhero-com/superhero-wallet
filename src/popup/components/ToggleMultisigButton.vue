@@ -30,8 +30,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, watch } from 'vue';
-
+import { computed, defineComponent } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useMultisigAccounts } from '../../composables';
@@ -50,7 +49,7 @@ export default defineComponent({
   props: {
     isMultisig: Boolean,
   },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
 
@@ -63,12 +62,6 @@ export default defineComponent({
     function toggleMultisigDashboard(showMultisigDashboard: boolean) {
       router.push({ name: showMultisigDashboard ? ROUTE_MULTISIG_ACCOUNT : ROUTE_ACCOUNT });
     }
-
-    watch(() => multisigAccounts.value, () => {
-      if (!multisigAccounts.value?.length && props.isMultisig) {
-        toggleMultisigDashboard(false);
-      }
-    });
 
     return {
       multisigAccounts,

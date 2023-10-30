@@ -21,6 +21,8 @@ export const PROTOCOLS = [
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS = 'AccountDetailsTransactions';
+export const PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS = 'AccountDetailsTokens';
+export const PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES = 'AccountDetailsNames';
 export const PROTOCOL_VIEW_TRANSACTION_DETAILS = 'TransactionDetails';
 export const PROTOCOL_VIEW_TRANSFER_RECEIVE = 'TransferReceiveModal';
 export const PROTOCOL_VIEW_TRANSFER_SEND = 'TransferSendModal';
@@ -32,6 +34,8 @@ export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
+  PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
+  PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
   PROTOCOL_VIEW_TRANSFER_SEND,
 ] as const;
@@ -73,6 +77,7 @@ export const NETWORK_NAME_TESTNET = 'Testnet';
 export const NETWORK_NAME_MAX_LENGTH = 15;
 
 export const DEFAULT_WAITING_HEIGHT = 15;
+export const FIXED_TABS_SCROLL_HEIGHT = 30;
 
 export const TXS_PER_PAGE = 30;
 export const AUTO_EXTEND_NAME_BLOCKS_INTERVAL = 17000;
@@ -382,6 +387,7 @@ export const ALLOWED_ICON_STATUSES = [
 ] as const;
 
 export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';
+export const TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY = 'transfer-send-data';
 
 export const TRANSFER_SEND_STEPS = {
   form: 'form',
@@ -399,3 +405,5 @@ export const BROWSER_ACTIONS = {
   share: 'share',
   favourite: 'favourite',
 } as const;
+
+export const PAGE_TRANSITION_DURATION = 150;

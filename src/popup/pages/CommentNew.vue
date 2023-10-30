@@ -1,36 +1,39 @@
 <template>
-  <div class="comment-new">
-    <AccountSelector
-      v-model="creatorAddress"
-      :options="aeAccountsSelectOptions"
-      @select="setActiveAccountByAddress"
-    />
-    <div class="comment-text">
-      {{ text }}
-    </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="comment-new">
+        <AccountSelector
+          v-model="creatorAddress"
+          :options="aeAccountsSelectOptions"
+          @select="setActiveAccountByAddress"
+        />
+        <div class="comment-text">
+          {{ text }}
+        </div>
 
-    <FixedScreenFooter>
-      <BtnMain
-        variant="muted"
-        extra-padded
-        class="cancel-button"
-        @click="openCallbackOrGoHome(false)"
-      >
-        {{ $t('common.cancel') }}
-      </BtnMain>
-      <BtnMain
-        :disabled="!isTippingSupported"
-        @click="sendComment"
-      >
-        {{ $t('common.confirm') }}
-      </BtnMain>
-    </FixedScreenFooter>
-
-    <Loader v-if="loading" />
-  </div>
+        <FixedScreenFooter>
+          <BtnMain
+            variant="muted"
+            extra-padded
+            class="cancel-button"
+            @click="openCallbackOrGoHome(false)"
+          >
+            {{ $t('common.cancel') }}
+          </BtnMain>
+          <BtnMain
+            :disabled="!isTippingSupported"
+            @click="sendComment"
+          >
+            {{ $t('common.confirm') }}
+          </BtnMain>
+        </FixedScreenFooter>
+      </div>
+    </ioncontent>
+  </ionpage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   ref,
@@ -46,6 +49,7 @@ import {
   useAeSdk,
   useDeepLinkApi,
   useModals,
+  useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -60,17 +64,20 @@ export default defineComponent({
     AccountSelector,
     BtnMain,
     FixedScreenFooter,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
     const { t } = useI18n();
+    const { setLoaderVisible } = useUi();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk, fetchRespondChallenge, isTippingSupported } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
-    const { openCallbackOrGoHome } = useDeepLinkApi({ router });
+    const { openCallbackOrGoHome } = useDeepLinkApi();
     const {
       aeAccountsSelectOptions,
       getLastActiveProtocolAccount,
@@ -81,7 +88,6 @@ export default defineComponent({
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');
-    const loading = ref<boolean>(false);
 
     watch(
       () => route,
@@ -99,7 +105,7 @@ export default defineComponent({
     );
 
     async function sendComment() {
-      loading.value = true;
+      setLoaderVisible(true);
 
       try {
         const postToCommentApi = async (body: any) => postJson(`${aeActiveNetworkSettings.value.backendUrl}/comment/api/`, { body });
@@ -123,15 +129,15 @@ export default defineComponent({
         e.payload = { id, parentId, text };
         throw e;
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     // Wait until the `isTippingSupported` is established by the aeSdk
     (async () => {
-      loading.value = true;
+      setLoaderVisible(true);
       await getAeSdk();
-      loading.value = false;
+      setLoaderVisible(false);
     })();
 
     return {
@@ -140,7 +146,6 @@ export default defineComponent({
       id,
       parentId,
       text,
-      loading,
       isTippingSupported,
       sendComment,
       openCallbackOrGoHome,

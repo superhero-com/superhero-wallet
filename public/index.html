@@ -1,45 +1,33 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Superhero Wallet</title>
+<html class="hydrated">
 
-    <% if (process.env.PLATFORM === 'web') { %>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Superhero Wallet</title>
+
+  <% if (process.env.PLATFORM==='web' ) { %>
     <link rel="shortcut icon" href="<%= BASE_URL %>favicons/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
     <% } %>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <link href="https://rsms.me/inter/inter.css" rel="stylesheet">
-  </head>
-  <body>
-    <noscript>
-      <p class="fullscreen-message white">
-        Superhero Wallet doesn't work without JavaScript enabled.
-        Please enable it to continue.
-      </p>
-    </noscript>
+      <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+      <link href="https://rsms.me/inter/inter.css" rel="stylesheet">
+</head>
 
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
+<body>
+  <noscript>
+    <p class="fullscreen-message white">
+      Superhero Wallet doesn't work without JavaScript enabled.
+      Please enable it to continue.
+    </p>
+  </noscript>
 
-    <script type="text/javascript">
-      window.onerror = function errorHandler() {
-        if (document.getElementById('app').innerHTML) {
-          window.onerror = null;
-          return;
-        }
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
 
-        document.body.innerHTML = '<p class="fullscreen-message">'
-          + 'Superhero Wallet has failed to run in this browser.'
-          + '</p>';
-      }
-    </script>
-    <% if (process.env.IS_CORDOVA) { %>
-    <script type="text/javascript" src="cordova.js"></script>
-    <% } %>
-  </body>
 </html>

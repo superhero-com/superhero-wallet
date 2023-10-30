@@ -1,70 +1,72 @@
 <template>
-  <div class="claim">
-    <Field
-      v-slot="{ field, errorMessage }"
-      name="name"
-      :rules="{
-        enough_coin: totalNameClaimAmount.toString(),
-        required: true,
-        name: true,
-        name_unregistered: true,
-      }"
-    >
-      <InputField
-        v-bind="field"
-        v-model="name"
-        name="name"
-        class="chain-name"
-        :label="$t('pages.names.claim.register-name')"
-        :message="errorMessage"
-        :placeholder="$t('pages.names.claim.name-placeholder')"
-      >
-        <template #label-after>
-          <span class="chain-name-counter">
-            {{ name.length }}/{{ maxNameLength }}
-          </span>
-        </template>
-        <template #after>
-          <span class="aens-domain">{{ AE_AENS_DOMAIN }}</span>
-        </template>
-      </InputField>
-    </Field>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div class="claim">
+        <Field
+          v-slot="{ field, errorMessage }"
+          name="name"
+          :rules="{
+            enough_coin: totalNameClaimAmount.toString(),
+            required: true,
+            name: true,
+            name_unregistered: true,
+          }"
+        >
+          <InputField
+            v-bind="field"
+            v-model="name"
+            name="name"
+            class="chain-name"
+            :label="$t('pages.names.claim.register-name')"
+            :message="errorMessage"
+            :placeholder="$t('pages.names.claim.name-placeholder')"
+          >
+            <template #label-after>
+              <span class="chain-name-counter">
+                {{ name.length }}/{{ maxNameLength }}
+              </span>
+            </template>
+            <template #after>
+              <span class="aens-domain">{{ AE_AENS_DOMAIN }}</span>
+            </template>
+          </InputField>
+        </Field>
 
-    <CheckBox v-model="autoExtend">
-      <div class="auto-extend-label">
-        {{ $t('pages.names.claim.auto-extend') }}
-        <BtnHelp
-          :title="$t('modals.autoextend-help.title')"
-          :msg="$t('modals.autoextend-help.msg')"
-          :class="{ active: autoExtend }"
-        />
+        <CheckBox v-model="autoExtend">
+          <div class="auto-extend-label">
+            {{ $t('pages.names.claim.auto-extend') }}
+            <BtnHelp
+              :title="$t('modals.autoextend-help.title')"
+              :msg="$t('modals.autoextend-help.msg')"
+              :class="{ active: autoExtend }"
+            />
+          </div>
+        </CheckBox>
+
+        <i18n-t
+          keypath="pages.names.claim.short-names.message"
+          tag="p"
+          class="text-description explanation"
+          scope="global"
+        >
+          <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
+        </i18n-t>
+
+        <BtnMain
+          class="btn-register"
+          extend
+          :disabled="!isAeSdkReady || !name || errorName"
+          @click="claim"
+        >
+          {{
+            isNameValid
+              ? $t('pages.names.claim.button-price', [totalNameClaimAmount.toFixed(4)])
+              : $t('pages.names.claim.button')
+          }}
+        </BtnMain>
       </div>
-    </CheckBox>
-
-    <Loader v-if="loading" />
-
-    <i18n-t
-      keypath="pages.names.claim.short-names.message"
-      tag="p"
-      class="text-description explanation"
-      scope="global"
-    >
-      <strong>{{ $t('pages.names.claim.short-names.insertion') }}</strong>
-    </i18n-t>
-
-    <BtnMain
-      class="btn-register"
-      extend
-      :disabled="!isAeSdkReady || !name || errorName"
-      @click="claim"
-    >
-      {{
-        isNameValid
-          ? $t('pages.names.claim.button-price', [totalNameClaimAmount.toFixed(4)])
-          : $t('pages.names.claim.button')
-      }}
-    </BtnMain>
-  </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -78,6 +80,7 @@ import {
   Tag,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { IonPage, IonContent, onIonViewWillEnter } from '@ionic/vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useForm, useFieldError, Field } from 'vee-validate';
@@ -85,7 +88,12 @@ import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
 
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
-import { useAccounts, useModals, useAeSdk } from '@/composables';
+import {
+  useAccounts,
+  useModals,
+  useAeSdk,
+  useUi,
+} from '@/composables';
 import { ROUTE_ACCOUNT_DETAILS_NAMES } from '@/popup/router/routeNames';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
 import {
@@ -110,6 +118,8 @@ export default defineComponent({
     BtnMain,
     BtnHelp,
     Field,
+    IonPage,
+    IonContent,
   },
   setup() {
     const router = useRouter();
@@ -118,9 +128,10 @@ export default defineComponent({
     const errorName = useFieldError('name');
     const { t } = useI18n();
 
+    const { setLoaderVisible } = useUi();
+
     const name = ref('');
     const autoExtend = ref(false);
-    const loading = ref(false);
     const maxNameLength = AE_AENS_NAME_MAX_LENGTH - AE_AENS_DOMAIN.length;
 
     const fullName = computed((): AensName => `${name.value}${AE_AENS_DOMAIN}`);
@@ -165,7 +176,7 @@ export default defineComponent({
           title: t('modals.name-exist.msg'),
         });
       } else {
-        loading.value = true;
+        setLoaderVisible(true);
         let claimTxHash;
 
         try {
@@ -186,7 +197,7 @@ export default defineComponent({
           });
           return;
         } finally {
-          loading.value = false;
+          setLoaderVisible(false);
         }
 
         try {
@@ -206,6 +217,10 @@ export default defineComponent({
       }
     }
 
+    onIonViewWillEnter(() => {
+      setLoaderVisible(false);
+    });
+
     return {
       AE_AENS_DOMAIN,
       autoExtend,
@@ -214,7 +229,6 @@ export default defineComponent({
       name,
       totalNameClaimAmount,
       errorName,
-      loading,
       maxNameLength,
       claim,
     };
@@ -227,6 +241,8 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .claim {
+  padding-inline: var(--screen-padding-x);
+
   .chain-name {
     margin-bottom: 6px;
 

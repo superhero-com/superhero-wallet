@@ -18,12 +18,12 @@
       />
     </InfiniteScroll>
     <AnimatedSpinner
-      v-if="loading"
+      v-show="loading"
       class="spinner"
       data-cy="loader"
     />
     <div
-      v-else-if="!filteredTransactions.length"
+      v-if="!loading && !filteredTransactions.length"
       class="message"
     >
       <p v-text="$t('pages.recentTransactions.noTransactionsFound')" />
@@ -198,7 +198,7 @@ export default defineComponent({
 .transaction-list {
   display: flex;
   flex-direction: column;
-  margin: 0 calc(-1 * var(--screen-padding-x));
+  padding: 10px 0;
 
   .list {
     padding: 0;

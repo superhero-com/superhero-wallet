@@ -1,7 +1,6 @@
 import '../../../src/lib/initPolyfills';
 import { v4 as uuid } from 'uuid';
 import { mnemonicToSeed } from '@aeternity/bip39';
-import { ROUTE_ACCOUNT_DETAILS_TRANSACTIONS } from '../../../src/popup/router/routeNames';
 import { STUB_CURRENCY, STUB_ACCOUNT } from '../../../src/constants/stubs';
 import {
   formatDate,
@@ -237,7 +236,7 @@ Cypress.Commands.add('openNetworks', () => {
   cy.openPageMore()
     .get('[data-cy=settings]')
     .click()
-    .get('[data-cy=networks]')
+    .get('[data-cy=networks-settings]')
     .click()
     .urlEquals('/more/settings/networks');
 });
@@ -280,8 +279,6 @@ Cypress.Commands.add('addNetwork', (name, nodeUrl, middlewareUrl) => {
 
 Cypress.Commands.add('openTransactions', () => {
   cy.get('[data-cy=account-card-base]')
-    .click()
-    .get(`[data-cy=${ROUTE_ACCOUNT_DETAILS_TRANSACTIONS}]`)
     .click()
     .get('[data-cy=loader]')
     .should('be.visible');

@@ -1,38 +1,44 @@
 <template>
-  <div class="auction">
-    <div class="auction-tabs">
-      <Tabs>
-        <Tab
-          :to="{ name: 'auction-bid' }"
-          :text="$t('pages.names.auctions.place-bid')"
-          exact-path
-        />
-        <Tab
-          :to="{ name: 'auction-history' }"
-          :text="$t('pages.names.auctions.bid-history')"
-        />
-      </Tabs>
+  <IonPage>
+    <div class="auction">
+      <div class="auction-tabs">
+        <Tabs>
+          <Tab
+            :to="{ name: 'auction-bid', params: routeParams }"
+            :text="$t('pages.names.auctions.place-bid')"
+            exact-path
+          />
+          <Tab
+            :to="{ name: 'auction-history', params: routeParams }"
+            :text="$t('pages.names.auctions.bid-history')"
+          />
+        </Tabs>
+      </div>
+
+      <IonRouterOutlet
+        v-if="!isLoaderVisible"
+        :animation="fadeAnimation"
+        class="auction-router"
+        :name="name"
+      />
     </div>
-
-    <Loader v-if="loading" />
-
-    <RouterView v-else />
-  </div>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { IonRouterOutlet, IonPage } from '@ionic/vue';
 import {
   defineComponent,
-  ref,
   onBeforeUnmount,
   watch,
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { executeAndSetInterval } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
-import { useMiddleware, useUi } from '../../../composables';
+import { useMiddleware, useUi } from '@/composables';
+import { fadeAnimation } from '@/popup/animations';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -44,6 +50,8 @@ export default defineComponent({
   components: {
     Tabs,
     Tab,
+    IonRouterOutlet,
+    IonPage,
   },
   props: {
     name: { type: String, required: true },
@@ -53,9 +61,10 @@ export default defineComponent({
     const router = useRouter();
 
     const { getMiddleware } = useMiddleware();
-    const { isAppActive } = useUi();
+    const { params: routeParams } = useRoute();
+    const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
 
-    const loading = ref(true);
+    setLoaderVisible(true);
 
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
@@ -77,7 +86,7 @@ export default defineComponent({
       } catch (error) {
         router.push({ name: 'auction-bid' });
       }
-      loading.value = false;
+      setLoaderVisible(false);
     }
 
     const intervalId = executeAndSetInterval(() => {
@@ -96,7 +105,9 @@ export default defineComponent({
     );
 
     return {
-      loading,
+      isLoaderVisible,
+      routeParams,
+      fadeAnimation,
     };
   },
 });
@@ -108,6 +119,10 @@ export default defineComponent({
 .auction {
   &-tabs {
     padding-inline: var(--screen-padding-x);
+  }
+
+  &-router {
+    top: 8%;
   }
 }
 </style>

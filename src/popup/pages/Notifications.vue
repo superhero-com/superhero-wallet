@@ -1,35 +1,45 @@
 <template>
-  <div class="notifications">
-    <InfiniteScroll
-      v-if="notificationsToShow.length"
-      :is-more-data="canLoadMore"
-      @loadMore="loadMoreNotifications"
-    >
-      <NotificationItem
-        v-for="notification in notificationsToShow"
-        :key="notification.id"
-        :notification="notification"
-      />
-    </InfiniteScroll>
-    <p
-      v-else
-      class="empty-list-message"
-    >
-      {{ $t('pages.notifications.noNotifications') }}
-    </p>
-  </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div
+        ref="innerElement"
+        class="notifications"
+      >
+        <InfiniteScroll
+          v-if="notificationsToShow.length"
+          :is-more-data="canLoadMore"
+          @loadMore="loadMoreNotifications"
+        >
+          <NotificationItem
+            v-for="notification in notificationsToShow"
+            :key="notification.id"
+            :notification="notification"
+          />
+        </InfiniteScroll>
+        <p
+          v-else
+          class="empty-list-message"
+        >
+          {{ $t('pages.notifications.noNotifications') }}
+        </p>
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
+import { IonPage, IonContent } from '@ionic/vue';
 import {
   defineComponent,
   onBeforeUnmount,
   onMounted,
   nextTick,
+  ref,
 } from 'vue';
 import { useStore } from 'vuex';
 import { IS_EXTENSION } from '@/constants';
 
+import { useViewport } from '@/composables';
 import NotificationItem from '../components/NotificationItem.vue';
 import InfiniteScroll from '../components/InfiniteScroll.vue';
 import { useNotifications } from '../../composables/notifications';
@@ -39,9 +49,14 @@ export default defineComponent({
   components: {
     InfiniteScroll,
     NotificationItem,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
+    const { initViewport } = useViewport();
+
+    const innerElement = ref<HTMLElement>();
 
     const {
       notificationsToShow,
@@ -51,6 +66,7 @@ export default defineComponent({
     } = useNotifications({ store, requirePolling: true });
 
     onMounted(async () => {
+      initViewport(innerElement.value?.parentElement!);
       loadMoreNotifications();
       if (IS_EXTENSION) {
         await nextTick();
@@ -65,6 +81,7 @@ export default defineComponent({
     });
 
     return {
+      innerElement,
       notificationsToShow,
       canLoadMore,
       loadMoreNotifications,

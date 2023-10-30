@@ -1,69 +1,73 @@
 <template>
-  <div class="seed-phrase-verify-settings">
-    <div class="seed-phrase-verify-settings-body">
-      <div class="text-heading-1">
-        {{ $t('pages.seed-phrase-settings.verifyYourSeedPhrase') }}
-      </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="seed-phrase-verify-settings">
+        <div class="seed-phrase-verify-settings-body">
+          <div class="text-heading-1">
+            {{ $t('pages.seed-phrase-settings.verifyYourSeedPhrase') }}
+          </div>
 
-      <div class="text-description">
-        {{ $t('pages.seed-phrase-settings.confirm-that-you-save-your-seed-phrase') }}
-      </div>
-      <i18n-t
-        keypath="pages.seed-phrase-settings.compose-your-seed-phrase"
-        tag="div"
-        class="text-description"
-        scope="global"
-      >
-        <strong>
-          {{ $t('pages.seed-phrase-settings.in-correct-order') }}
-        </strong>
-      </i18n-t>
+          <div class="text-description">
+            {{ $t('pages.seed-phrase-settings.confirm-that-you-save-your-seed-phrase') }}
+          </div>
+          <i18n-t
+            keypath="pages.seed-phrase-settings.compose-your-seed-phrase"
+            tag="div"
+            class="text-description"
+            scope="global"
+          >
+            <strong>
+              {{ $t('pages.seed-phrase-settings.in-correct-order') }}
+            </strong>
+          </i18n-t>
 
-      <div class="phraser">
-        <SeedPhraseBadge
-          v-for="(word, index) in mnemonicShuffled"
-          :key="index"
-          :text="word"
-          :selected="selectedWordIds.includes(index)"
-          @click="onSelectWord(index)"
-        />
-      </div>
+          <div class="phraser">
+            <SeedPhraseBadge
+              v-for="(word, index) in mnemonicShuffled"
+              :key="index"
+              :text="word"
+              :selected="selectedWordIds.includes(index)"
+              @click="onSelectWord(index)"
+            />
+          </div>
 
-      <div class="phraser bright">
-        <template v-if="!selectedWordIds.length">
-          <SeedPhraseBadge
-            v-for="(word, index) in examplePhrase"
-            :key="index"
-            :text="word"
-            selected
-            editable
+          <div class="phraser bright">
+            <template v-if="!selectedWordIds.length">
+              <SeedPhraseBadge
+                v-for="(word, index) in examplePhrase"
+                :key="index"
+                :text="word"
+                selected
+                editable
+              />
+            </template>
+            <template v-else>
+              <SeedPhraseBadge
+                v-for="(id, index) in selectedWordIds"
+                :key="id"
+                :text="mnemonicShuffled[id]"
+                editable
+                @click="selectedWordIds.splice(index, 1)"
+              />
+            </template>
+          </div>
+        </div>
+        <FixedScreenFooter>
+          <BtnMain
+            class="verify-button"
+            :disabled="!selectedWordIds || selectedWordIds.length !== mnemonicShuffled.length"
+            @click="verifyLastStep"
+          >
+            {{ $t('pages.seedPhrase.verify') }}
+          </BtnMain>
+          <SeedPhraseNotification
+            v-if="showNotification"
+            :has-error="hasError"
           />
-        </template>
-        <template v-else>
-          <SeedPhraseBadge
-            v-for="(id, index) in selectedWordIds"
-            :key="id"
-            :text="mnemonicShuffled[id]"
-            editable
-            @click="selectedWordIds.splice(index, 1)"
-          />
-        </template>
+        </FixedScreenFooter>
       </div>
-    </div>
-    <FixedScreenFooter>
-      <BtnMain
-        class="verify-button"
-        :disabled="!selectedWordIds || selectedWordIds.length !== mnemonicShuffled.length"
-        @click="verifyLastStep"
-      >
-        {{ $t('pages.seedPhrase.verify') }}
-      </BtnMain>
-      <SeedPhraseNotification
-        v-if="showNotification"
-        :has-error="hasError"
-      />
-    </FixedScreenFooter>
-  </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -76,6 +80,7 @@ import { shuffle } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { IonPage, IonContent } from '@ionic/vue';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 import BtnMain from '../components/buttons/BtnMain.vue';
 import FixedScreenFooter from '../components/FixedScreenFooter.vue';
@@ -88,6 +93,8 @@ export default defineComponent({
     SeedPhraseNotification,
     FixedScreenFooter,
     BtnMain,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();

@@ -9,6 +9,7 @@
         id: tokenData.contractId,
       },
     }"
+    replace
     :extend="preventNavigation"
     :selected="selected"
   >

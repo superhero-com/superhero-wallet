@@ -60,7 +60,7 @@
           <template #value>
             <CopyText
               hide-icon
-              :value="hash"
+              :value="contractId"
               :copied-text="$t('common.hashCopied')"
             >
               <span class="text-address">{{ splitAddress(contractId) }}</span>

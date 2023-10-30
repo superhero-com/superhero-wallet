@@ -34,7 +34,7 @@ import { PROTOCOL_AETERNITY } from '@/constants';
 import {
   useCurrencies,
   useMultisigAccounts,
-} from '../../composables';
+} from '@/composables';
 import { ROUTE_MULTISIG_DETAILS } from '../router/routeNames';
 
 import TotalWalletAmount from './TotalWalletAmount.vue';
@@ -84,11 +84,11 @@ export default defineComponent({
     }
 
     return {
+      ROUTE_MULTISIG_DETAILS,
       multisigAccounts,
       multisigAccountIdx,
       multisigBalancesTotal,
       addressList,
-      ROUTE_MULTISIG_DETAILS,
       selectAccount,
     };
   },

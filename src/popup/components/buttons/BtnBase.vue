@@ -27,7 +27,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 
-import { IS_CORDOVA } from '@/constants';
+import { IS_MOBILE_APP } from '@/constants';
 
 export const BTN_VARIANT = [
   'primary',
@@ -67,17 +67,17 @@ export default defineComponent({
       }
     });
 
-    function onClick(event: any) {
-      if (IS_CORDOVA && window.cordova?.InAppBrowser?.open && props.href) {
-        window.cordova.InAppBrowser.open(props.href, '_system');
+    async function onClick(event: any) {
+      if (IS_MOBILE_APP && props.href) {
         event.preventDefault();
+        window.open(props.href, '_system');
       }
     }
 
     const bgColorStyle = computed(() => props.bgColor ? { '--bg-color': props.bgColor } : null);
 
     return {
-      IS_CORDOVA,
+      IS_MOBILE_APP,
       onClick,
       component,
       bgColorStyle,

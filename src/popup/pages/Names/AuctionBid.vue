@@ -1,56 +1,59 @@
 <template>
-  <div class="auction-bid">
-    <AuctionCard :name="name" />
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg">
+      <div class="auction-bid">
+        <AuctionCard :name="name" />
 
-    <div class="form">
-      <Field
-        v-slot="{ field, errorMessage }"
-        name="amount"
-        :rules="{
-          enough_coin: amountTotal.toString(),
-          required: true,
-        }"
-      >
-        <InputAmount
-          v-bind="field"
-          v-model="amount"
-          name="amount"
-          :message="amountError || errorMessage"
-          :protocol="PROTOCOL_AETERNITY"
-          readonly
-        />
-      </Field>
-      <div class="tx-details">
-        <DetailsItem :label="$t('transaction.fee')">
-          <template #value>
-            <TokenAmount
-              :amount="+txFee"
+        <div class="form">
+          <Field
+            v-slot="{ field, errorMessage }"
+            name="amount"
+            :rules="{
+              enough_coin: amountTotal.toString(),
+              required: true,
+            }"
+          >
+            <InputAmount
+              v-bind="field"
+              v-model="amount"
+              name="amount"
+              :message="amountError || errorMessage"
               :protocol="PROTOCOL_AETERNITY"
-              hide-fiat
+              readonly
             />
-          </template>
-        </DetailsItem>
-        <DetailsItem :label="$t('common.total')">
-          <template #value>
-            <TokenAmount
-              :amount="+amountTotal"
-              :protocol="PROTOCOL_AETERNITY"
-            />
-          </template>
-        </DetailsItem>
+          </Field>
+          <div class="tx-details">
+            <DetailsItem :label="$t('transaction.fee')">
+              <template #value>
+                <TokenAmount
+                  :amount="+txFee"
+                  :protocol="PROTOCOL_AETERNITY"
+                  hide-fiat
+                />
+              </template>
+            </DetailsItem>
+            <DetailsItem :label="$t('common.total')">
+              <template #value>
+                <TokenAmount
+                  :amount="+amountTotal"
+                  :protocol="PROTOCOL_AETERNITY"
+                />
+              </template>
+            </DetailsItem>
+          </div>
+
+          <BtnMain
+            :disabled="!!amountError || !amount || errorName"
+            class="button"
+            extend
+            @click="bid"
+          >
+            {{ $t('pages.names.auctions.place-bid') }}
+          </BtnMain>
+        </div>
       </div>
-
-      <BtnMain
-        :disabled="!!amountError || !amount || errorName"
-        class="button"
-        extend
-        @click="bid"
-      >
-        {{ $t('pages.names.auctions.place-bid') }}
-      </BtnMain>
-    </div>
-    <Loader v-if="loading" />
-  </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
@@ -60,6 +63,7 @@ import {
   ref,
   PropType,
 } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
@@ -73,7 +77,7 @@ import {
 import { useForm, useFieldError, Field } from 'vee-validate';
 
 import type { IAuctionBid } from '@/types';
-import { useModals, useAeSdk } from '@/composables';
+import { useModals, useAeSdk, useUi } from '@/composables';
 import { useGetter } from '@/composables/vuex';
 import { PROTOCOL_AETERNITY } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
@@ -98,6 +102,8 @@ export default defineComponent({
     TokenAmount,
     BtnMain,
     Field,
+    IonPage,
+    IonContent,
   },
   props: {
     name: { type: String as PropType<AensName>, required: true },
@@ -111,8 +117,8 @@ export default defineComponent({
 
     const { getAeSdk } = useAeSdk({ store });
     const { openDefaultModal } = useModals();
+    const { setLoaderVisible } = useUi();
 
-    const loading = ref(false);
     const amount = ref('');
 
     const getHighestBid = useGetter<(n: string) => IAuctionBid | null>('names/getHighestBid');
@@ -146,7 +152,7 @@ export default defineComponent({
       const aeSdk = await getAeSdk();
       if (amountError.value) return;
       try {
-        loading.value = true;
+        setLoaderVisible(true);
         await aeSdk.aensBid(props.name, aeToAettos(amount.value));
         openDefaultModal({
           msg: t('pages.names.auctions.bid-added', { name: props.name }),
@@ -159,13 +165,12 @@ export default defineComponent({
         }
         openDefaultModal({ msg });
       } finally {
-        loading.value = false;
+        setLoaderVisible(false);
       }
     }
 
     return {
       PROTOCOL_AETERNITY,
-      loading,
       amount,
       amountTotal,
       amountError,

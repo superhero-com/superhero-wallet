@@ -1,32 +1,38 @@
 <template>
-  <div class="names-list">
-    <template v-if="namesForAccount.length">
-      <NameItem
-        v-for="({ name, owner, autoExtend }, index) in namesForAccount"
-        :key="index"
-        :name="name"
-        :address="owner"
-        :auto-extend="autoExtend"
-      />
-    </template>
-    <AnimatedSpinner
-      v-else-if="areNamesFetching"
-      class="spinner"
-    />
-    <RegisterName
-      v-else
-      :msg="$t('pages.names.list.no-names')"
-    />
-  </div>
+  <IonPage>
+    <IonContent class="ion-padding ion-content-bg--lighter">
+      <div class="names-list">
+        <template v-if="namesForAccount.length">
+          <NameItem
+            v-for="({ name, owner, autoExtend }, index) in namesForAccount"
+            :key="index"
+            :name="name"
+            :address="owner"
+            :auto-extend="autoExtend"
+          />
+        </template>
+        <AnimatedSpinner
+          v-else-if="areNamesFetching"
+          class="spinner"
+        />
+        <RegisterName
+          v-else
+          :msg="$t('pages.names.list.no-names')"
+        />
+      </div>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
+import { computed, defineComponent } from 'vue';
+import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
+
 import type { IName } from '@/types';
 import { executeAndSetInterval } from '@/utils';
+import { useAccounts, useUi } from '@/composables';
 import { useDispatch, useState } from '../../../composables/vuex';
-import { useAccounts, useUi } from '../../../composables';
 import NameItem from '../../components/NameItem.vue';
 import RegisterName from '../../components/RegisterName.vue';
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
@@ -38,6 +44,8 @@ export default defineComponent({
     NameItem,
     AnimatedSpinner,
     RegisterName,
+    IonPage,
+    IonContent,
   },
   setup() {
     const store = useStore();
@@ -58,7 +66,7 @@ export default defineComponent({
       }
     }, POLLING_INTERVAL);
 
-    onBeforeUnmount(() => {
+    onIonViewWillLeave(() => {
       clearInterval(id);
     });
 
@@ -75,7 +83,7 @@ export default defineComponent({
 @use '../../../styles/typography';
 
 .names-list {
-  padding-top: 4px;
+  padding: 4px 12px 0 12px;
 
   .name-item {
     margin-top: 1px;
