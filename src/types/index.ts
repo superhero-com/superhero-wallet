@@ -731,3 +731,10 @@ export interface IInvite {
  * So we pass a status prop to the component to watch for the lifecycle events manually.
  */
 export type IonicLifecycleStatus = 'willEnter' | 'didEnter' | 'willLeave' | 'didLeave' | null;
+
+export interface IHistoryItem {
+  url: string;
+  cleanPath?: string;
+  title?: string;
+  image?: string;
+}

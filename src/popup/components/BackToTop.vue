@@ -4,7 +4,7 @@
     class="back-to-top"
     @click="scrollTop"
   >
-    <Chevron />
+    <Chevron class="chevron" />
   </BtnPlain>
 </template>
 
@@ -69,6 +69,8 @@ export default {
   }
 
   .chevron {
+    width: 22px;
+    height: 22px;
     transform: rotate(-90deg);
     opacity: 0.5;
   }
