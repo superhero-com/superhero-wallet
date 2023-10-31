@@ -31,10 +31,10 @@ export async function getLoginState({
 }
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
-  const { address } = testAccount;
+  const { address } = STUB_ACCOUNT;
 
   return {
-    [address]: { loaded: [], pending: { [AE_NETWORK_MAINNET_ID]: [pendingTransaction] } },
+    [address]: { loaded: [], localPendingTransaction: pendingTransaction },
   };
 }
 

@@ -130,13 +130,11 @@ export default defineComponent({
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,
       ROUTE_APPS_BROWSER,
       IS_MOBILE_APP,
-
       ArrowSendIcon,
       ArrowReceiveIcon,
       CardIcon,
       MenuCardIcon,
       GlobeIcon,
-
       activeAccount,
       activeAccountSimplexLink,
       buyBackground,

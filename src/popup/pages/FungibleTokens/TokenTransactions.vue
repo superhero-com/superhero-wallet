@@ -1,30 +1,27 @@
 <template>
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <TransactionList
-        :transactions="filteredTransactions"
-        :is-multisig="tokenProps?.isMultisig"
-        :loading="loading"
-        @load-more="loadMore()"
-      />
-    </IonContent>
+    <TransactionList
+      :ionic-lifecycle-status="ionicLifecycleStatus"
+      :fetch-recent-transactions="fetchRecentTransactions"
+      :fetch-more-transactions="fetchMoreTransactions"
+      :can-load-more="canLoadMore"
+      :transactions="filteredTransactions"
+      :is-multisig="tokenProps?.isMultisig"
+      :is-initial-loading="isInitialLoading"
+    />
   </IonPage>
 </template>
 
 <script lang="ts">
-import {
-  computed,
-  defineComponent,
-  ref,
-  onMounted,
-} from 'vue';
-import {
-  IonContent,
-  IonPage,
-} from '@ionic/vue';
+import { computed, defineComponent, ref } from 'vue';
+import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 import { useStore } from 'vuex';
-import type { ICommonTransaction, ITx } from '@/types';
-import { TXS_PER_PAGE } from '@/constants';
+
+import type {
+  ICommonTransaction,
+  IonicLifecycleStatus,
+  ITx,
+} from '@/types';
 import {
   useAccounts,
   useFungibleTokens,
@@ -39,9 +36,8 @@ import TransactionList from '@/popup/components/TransactionList.vue';
 export default defineComponent({
   name: 'TokenTransactions',
   components: {
-    TransactionList,
     IonPage,
-    IonContent,
+    TransactionList,
   },
   setup() {
     const store = useStore();
@@ -57,8 +53,7 @@ export default defineComponent({
 
     const { availableTokens } = useFungibleTokens({ store });
 
-    const loading = ref(false);
-
+    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
     const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
     const currentAddress = computed(
       () => (tokenProps.value?.isMultisig)
@@ -68,6 +63,10 @@ export default defineComponent({
 
     const canLoadMore = computed(() => (
       !!getAccountTransactionsState(currentAddress.value!).nextPageUrl
+    ));
+
+    const isInitialLoading = computed(() => (
+      getAccountTransactionsState(currentAddress.value!).nextPageUrl === ''
     ));
 
     const loadedTransactionList = computed(
@@ -97,34 +96,31 @@ export default defineComponent({
       () => narrowTransactionsToDefinedToken(loadedTransactionList.value),
     );
 
-    async function fetchTransactionList(recent?: boolean) {
-      loading.value = true;
-      try {
-        await fetchTransactions(
-          TXS_PER_PAGE,
-          !!recent,
-          currentAddress.value!,
-        );
-      } finally {
-        loading.value = false;
-      }
+    async function fetchRecentTransactions() {
+      await fetchTransactions(currentAddress.value!, true, tokenProps.value?.isMultisig);
     }
 
-    async function loadMore() {
-      if (!loading.value && canLoadMore.value) {
-        await fetchTransactionList();
-      }
+    async function fetchMoreTransactions() {
+      await fetchTransactions(currentAddress.value!, false, tokenProps.value?.isMultisig);
     }
 
-    onMounted(() => {
-      fetchTransactionList();
+    onIonViewDidEnter(() => {
+      ionicLifecycleStatus.value = 'didEnter';
+    });
+
+    onIonViewDidLeave(() => {
+      ionicLifecycleStatus.value = 'didLeave';
     });
 
     return {
-      loading,
+      canLoadMore,
+      currentAddress,
       filteredTransactions,
-      loadMore,
+      ionicLifecycleStatus,
+      isInitialLoading,
       tokenProps,
+      fetchMoreTransactions,
+      fetchRecentTransactions,
     };
   },
 });

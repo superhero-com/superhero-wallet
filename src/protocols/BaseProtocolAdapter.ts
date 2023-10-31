@@ -4,10 +4,11 @@ import type {
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
+  IFetchTransactionResult,
   MarketData,
   NetworkTypeDefault,
+  ITransaction,
 } from '@/types';
-
 /**
  *  Represents common attributes and behavior of a protocol
  */
@@ -77,10 +78,14 @@ export abstract class BaseProtocolAdapter {
 
   abstract getTransactionByHash(hash: string): Promise<any>
 
+  abstract fetchPendingTransactions(
+    address: string
+  ): Promise<ITransaction[]>
+
   abstract fetchTransactions(
     address: string,
-    lastTxId?: string,
-  ): Promise<any>;
+    nextPageParams: string | null,
+  ): Promise<IFetchTransactionResult>;
 
   /**
    * Spend coin
