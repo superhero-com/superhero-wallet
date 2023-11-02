@@ -1,8 +1,6 @@
 <!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <TransferSendBase
-    v-bind="$attrs"
-    :protocol="PROTOCOL_BITCOIN"
     :current-step="currentStep"
     :edit-transfer="editTransfer"
     :proceed-to-next-step="proceedToNextStep"
@@ -36,7 +34,7 @@ import type {
   TransferSendStep,
 } from '@/types';
 import {
-  PROTOCOL_BITCOIN,
+  PROTOCOL_ETHEREUM,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -72,7 +70,7 @@ export default defineComponent({
     const transferData = ref<TransferFormModel>({
       amount: props.amount,
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_BITCOIN)
+        .getAdapter(PROTOCOL_ETHEREUM)
         .getDefaultCoin(marketData.value!, +balance.value),
       payload: props.payload,
     });
@@ -118,7 +116,7 @@ export default defineComponent({
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOL_BITCOIN,
+      PROTOCOL_ETHEREUM,
       currentRenderedComponent,
       steps,
       currentStep,
