@@ -23,7 +23,7 @@ export type IAeNetworkPredefinedSettings = Record<AeNetworkProtocolPredefinedSet
 
 export interface AeTippingV1ContractApi extends ContractMethodsBase {
   unclaimed_for_url: (url: string) => string;
-  tip: (recipientId: Encoded.AccountAddress, note: string) => void;
+  tip: (recipientId: Encoded.AccountAddress, note: string, options: any) => void;
   retip: (tipId: number) => void;
 }
 

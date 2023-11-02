@@ -3,14 +3,12 @@ import BigNumber from 'bignumber.js';
 import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
-import veeValidate from '../../src/store/plugins/veeValidate';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 import { PROTOCOL_AETERNITY } from '../../src/constants';
 
 const maxBalance = 10000;
 
 const store = new Vuex.Store({
-  plugins: [veeValidate],
   getters: {
     currentCurrencyRate: () => 3,
     formatCurrency: () => (value) => (+value).toFixed(2),

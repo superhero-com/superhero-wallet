@@ -11,6 +11,7 @@ import {
   isAddressValid,
   unpackTx,
 } from '@aeternity/aepp-sdk';
+import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -20,7 +21,6 @@ import type {
   IDexContracts,
   IGAAttachTx,
   IMultisigAccount,
-  INameEntryFetched,
   ITransaction,
   ITx,
   TxFunction,
@@ -145,7 +145,7 @@ export function convertMultisigAccountToAccount(
   };
 }
 
-export function getAddressByNameEntry(nameEntry: INameEntryFetched, pointer = 'account_pubkey') {
+export function getAddressByNameEntry(nameEntry: NameEntry, pointer = 'account_pubkey') {
   return ((nameEntry.pointers && nameEntry.pointers.find(({ key }) => key === pointer)) || {}).id;
 }
 

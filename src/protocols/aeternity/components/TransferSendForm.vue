@@ -67,9 +67,9 @@
           ? $t('modals.send.recipientPlaceholderUrl')
           : $t('modals.send.recipientPlaceholder')"
         :validation-rules="{
-          name_registered_address_or_url: isUrlTippingEnabled,
-          name_registered_address: !isUrlTippingEnabled,
-          ...(isMultisig ? { not_same_as: multisigVaultAddress } : {}),
+          aens_name_registered_or_address_or_url: isUrlTippingEnabled,
+          aens_name_registered_or_address: !isUrlTippingEnabled,
+          ...(isMultisig ? { address_not_same_as: multisigVaultAddress } : {}),
           token_to_an_address: [!isAe],
         }"
         @openQrModal="openScanQrModal"
