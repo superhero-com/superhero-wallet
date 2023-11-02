@@ -23,8 +23,7 @@
           name="name"
           :rules="{
             required: true,
-            network_name: true,
-            network_exists: customNetworks,
+            network_exists: [customNetworks, savedNetworkName],
             max_len: NETWORK_NAME_MAX_LENGTH,
           }"
         >
@@ -56,7 +55,7 @@
             :name="`${protocol}-${input.key}`"
             :rules="{
               required: input.required === true,
-              invalid_hostname: true,
+              url: true,
             }"
           >
             <InputField
@@ -184,8 +183,9 @@ export default defineComponent({
     } = useNetworks();
 
     const isEdit = route.name === ROUTE_NETWORK_EDIT;
+    const savedNetworkName = route.params.name?.toString();
     const networkToEditIndex = (isEdit)
-      ? customNetworks.value.findIndex(({ name }) => name === route.params.name.toString())
+      ? customNetworks.value.findIndex(({ name }) => name === savedNetworkName)
       : null;
 
     const emptyNetworkSettings = PROTOCOLS.reduce(
@@ -276,7 +276,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (isEdit) {
-        newNetworkName.value = route.params.name.toString();
+        newNetworkName.value = savedNetworkName;
         newNetworkProtocols.value = networks.value[newNetworkName.value].protocols;
       } else {
         fillInFieldsWithDefaultValues();
@@ -290,6 +290,7 @@ export default defineComponent({
       NETWORK_NAME_MAX_LENGTH,
       INFO_BOX_TYPES,
       PlusCircleIcon,
+      savedNetworkName,
       newNetworkProtocols,
       newNetworkName,
       networks,

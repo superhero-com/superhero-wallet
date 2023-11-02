@@ -126,7 +126,7 @@ export default defineComponent({
         arr.push(t('transaction.type.createMultisigVault'));
       } else if (
         outerTxTag.value === Tag.ContractCallTx
-        && availableTokens.value[innerTx.value.contractId]
+        && availableTokens.value[innerTx.value?.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete

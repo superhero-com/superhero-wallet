@@ -7,7 +7,7 @@
       :validate-on-mount="!!modelValue"
       :rules="{
         required: true,
-        not_same_as: [activeAccount.address, protocol],
+        address_not_same_as: [activeAccount.address, protocol],
         ...validationRules,
       }"
     >
@@ -78,11 +78,7 @@ export default defineComponent({
     modelValue: { type: String, default: '' },
     placeholder: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },
-    validationRules: {
-      type: Object,
-      default: () => {
-      },
-    },
+    validationRules: { type: Object, default: () => ({}) },
     errors: { type: Object, required: true },
   },
   emits: ['openQrModal', 'update:modelValue'],

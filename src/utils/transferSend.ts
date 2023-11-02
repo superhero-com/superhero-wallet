@@ -2,11 +2,11 @@ import { IInputMessage } from '@/types';
 import { tg } from '@/popup/plugins/i18n';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 
-// TOOD: in the future we might rely on the error codes instead
+// TODO: in the future we might rely on the error codes instead
 const nonAlphabeticCharsRegExp = /[^\p{L}]/gu;
 
 const WARNING_RULES_WORDING = [
-  tg('validation.notSameAs').replace(nonAlphabeticCharsRegExp, ''),
+  tg('validation.addressNotSameAs').replace(nonAlphabeticCharsRegExp, ''),
   tg('validation.maxValueVault').replace(nonAlphabeticCharsRegExp, ''),
 ];
 

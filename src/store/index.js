@@ -2,7 +2,6 @@ import Vuex from 'vuex';
 import persistState from './plugins/persistState';
 import runMigrations from './migrations';
 import stateReducer from './utils';
-import veeValidate from './plugins/veeValidate';
 
 export default new Vuex.Store({
   state: {
@@ -14,6 +13,5 @@ export default new Vuex.Store({
       runMigrations,
       stateReducer,
     ),
-    veeValidate,
   ],
 });

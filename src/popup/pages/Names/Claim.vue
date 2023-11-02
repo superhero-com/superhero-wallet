@@ -8,8 +8,8 @@
           :rules="{
             enough_coin: totalNameClaimAmount.toString(),
             required: true,
-            name: true,
-            name_unregistered: true,
+            aens_name: true,
+            aens_name_unregistered: true,
           }"
         >
           <InputField

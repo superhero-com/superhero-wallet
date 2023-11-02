@@ -3,6 +3,7 @@ import '@/protocols/registerAdapters';
 import { createApp } from 'vue';
 import { IonicVue } from '@ionic/vue';
 import { i18n } from '@/popup/plugins/i18n';
+import initVeeValidateRules from '@/popup/plugins/veeValidate';
 import store from '../store';
 import router from './router';
 import registerModals from './router/modals';
@@ -20,3 +21,5 @@ app.use(router);
 app.mount('#app');
 
 Logger.init({ app });
+
+initVeeValidateRules();
