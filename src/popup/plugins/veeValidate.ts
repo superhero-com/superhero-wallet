@@ -88,6 +88,15 @@ defineRule(
   (value: string, [network]: [string]) => isBtcAddressValid(value, network) || tg('validation.addressBtc'),
 );
 
+// TODO: implement eth address validation
+defineRule(
+  'address_eth',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (value: string, [network]: any) => {
+    throw new Error('Not implemented');
+  },
+);
+
 defineRule(
   'network_exists',
   (value: string, [customNetworks, savedNetworkName]: [INetwork[], string]) => {
