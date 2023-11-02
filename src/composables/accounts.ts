@@ -12,6 +12,7 @@ import type {
 import {
   ACCOUNT_HD_WALLET,
   PROTOCOL_AETERNITY,
+  PROTOCOL_ETHEREUM,
   PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
@@ -81,7 +82,7 @@ const accounts = computed((): IAccount[] => {
     {} as Record<Protocol, number>,
   );
 
-  return accountsRaw.value
+  return [...accountsRaw.value
     .map((account, globalIdx) => {
       const idx = idxList[account.protocol];
       const hdWallet = ProtocolAdapterFactory
@@ -98,7 +99,17 @@ const accounts = computed((): IAccount[] => {
         ...account,
         ...hdWallet,
       };
-    });
+    }),
+  // TEMPORARY: add fake Ethereum account to the list
+  // TODO remove when Ethereum adapter is implemented
+  {
+    globalIdx: accountsRaw.value.length,
+    idx: 0,
+    protocol: PROTOCOL_ETHEREUM,
+    type: ACCOUNT_HD_WALLET,
+    isRestored: false,
+    address: '0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5',
+  }];
 });
 
 const activeAccount = computed((): IAccount => accounts.value[activeAccountGlobalIdx.value] || {});
