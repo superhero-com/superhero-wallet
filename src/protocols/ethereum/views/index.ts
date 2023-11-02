@@ -10,7 +10,10 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "eth-transfer-receive-modal" */
     './TransferReceiveModal.vue'
   ),
-  TransferSendModal: null,
+  TransferSendModal: () => import(
+    /* webpackChunkName: "eth-transfer-send-modal" */
+    './TransferSendModal.vue'
+  ),
 };
 
 export default protocolViews;
