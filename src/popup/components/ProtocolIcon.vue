@@ -9,6 +9,7 @@
 
 <script lang="ts">
 import {
+  Component,
   computed,
   defineComponent,
   PropType,
@@ -16,9 +17,12 @@ import {
 import {
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
+  PROTOCOL_ETHEREUM,
 } from '@/constants';
+import type { Protocol } from '@/types';
 import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
+import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 
 const SIZES = ['sm', 'rg'] as const;
 
@@ -27,7 +31,7 @@ export type AllowedProtocolIconSize = typeof SIZES[number];
 export default defineComponent({
   props: {
     protocol: {
-      type: String,
+      type: String as PropType<Protocol>,
       required: true,
     },
     iconSize: {
@@ -37,19 +41,13 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const selectedIcon = computed(() => {
-      switch (props.protocol) {
-        case PROTOCOL_AETERNITY: {
-          return AeternityIcon;
-        }
-        case PROTOCOL_BITCOIN: {
-          return BitcoinIcon;
-        }
-        default: {
-          return null;
-        }
-      }
-    });
+    const iconsMap: Record<Protocol, Component> = {
+      [PROTOCOL_AETERNITY]: AeternityIcon,
+      [PROTOCOL_BITCOIN]: BitcoinIcon,
+      [PROTOCOL_ETHEREUM]: EthereumIcon,
+    };
+
+    const selectedIcon = computed((): Component => iconsMap[props.protocol]);
 
     return {
       selectedIcon,
