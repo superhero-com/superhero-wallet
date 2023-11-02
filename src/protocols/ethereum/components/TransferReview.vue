@@ -1,11 +1,11 @@
 <template>
   <TransferReviewBase
-    :base-token-symbol="BTC_SYMBOL"
+    :base-token-symbol="ETH_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
-    show-fiat
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOL_ETHEREUM"
     class="transfer-review"
+    show-fiat
   >
     <template #total>
       <DetailsItem
@@ -15,10 +15,10 @@
         <template #value>
           <TokenAmount
             :amount="+transferData.total"
-            :symbol="BTC_SYMBOL"
-            high-precision
-            :protocol="PROTOCOL_BITCOIN"
+            :symbol="ETH_SYMBOL"
+            :protocol="PROTOCOL_ETHEREUM"
             data-cy="review-total"
+            high-precision
           />
         </template>
       </DetailsItem>
@@ -34,19 +34,17 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAccounts, useModals, useUi } from '@/composables';
+import { useModals, useUi } from '@/composables';
 import type { TransferFormModel } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_ETHEREUM } from '@/constants';
+import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import BigNumber from 'bignumber.js';
 
 export default defineComponent({
-  name: 'BtcTransferReview',
+  name: 'EthTransferReview',
   components: {
     TokenAmount,
     DetailsItem,
@@ -63,7 +61,6 @@ export default defineComponent({
     const router = useRouter();
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts();
 
     const loading = ref<boolean>(false);
 
@@ -75,26 +72,16 @@ export default defineComponent({
       });
     }
 
-    // TODO: replace that
-    // This is happening because of inner TemplateRenderer issue on parsing the blocksteam response
-    function HtmlEncode(content: string) {
-      const textAreaDiv = document.createElement('textarea');
-      textAreaDiv.textContent = content;
-      return textAreaDiv.innerHTML;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
       try {
         loading.value = true;
-        const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
-          fee: props.transferData.fee?.toNumber(),
-          ...activeAccount.value,
-        });
+        // TODO
+        const hash = 'fake_hash';
+        console.error('ETH Transfer not implemented yet');
         return hash;
       } catch (error: any) {
-        openTransactionFailedModal(HtmlEncode(error.message));
+        openTransactionFailedModal(error.message);
         throw error;
       } finally {
         loading.value = false;
@@ -124,8 +111,8 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_BITCOIN,
-      BTC_SYMBOL,
+      PROTOCOL_ETHEREUM,
+      ETH_SYMBOL,
       loading,
       submit,
     };
