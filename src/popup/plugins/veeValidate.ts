@@ -4,19 +4,20 @@ import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
 import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
+import { INetwork, ObjectValues, Protocol } from '@/types';
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_TESTNET,
   PROTOCOL_AETERNITY,
 } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
-import { useBalances, useCurrencies, useAeSdk } from '@/composables';
-import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
-import { tg } from '@/popup/plugins/i18n';
-import { INetwork, ObjectValues, Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
+import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
+import { isEthAddressValid } from '@/protocols/ethereum/helpers';
 
 defineRule(
   'required',
@@ -92,9 +93,7 @@ defineRule(
 defineRule(
   'address_eth',
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (value: string, [network]: any) => {
-    throw new Error('Not implemented');
-  },
+  (value: string, [network]: any) => isEthAddressValid(value),
 );
 
 defineRule(
