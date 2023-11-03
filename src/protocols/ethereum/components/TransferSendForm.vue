@@ -14,7 +14,7 @@
         :placeholder="recipientPlaceholderText"
         :errors="errors"
         :protocol="PROTOCOL_ETHEREUM"
-        :validation-rules="{ address_eth: [activeNetwork.type] }"
+        :validation-rules="{ address_eth: true }"
         @openQrModal="openScanQrModal"
       />
     </template>
