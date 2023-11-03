@@ -25,6 +25,7 @@ import {
   PROTOCOL_AETERNITY,
   STORAGE_KEYS,
 } from '@/constants';
+import Logger from '@/lib/logger';
 import {
   createNetworkWatcher,
   useAccounts,
@@ -284,16 +285,20 @@ export function useAeNames({ store }: IDefaultComposableOptions) {
    * Mostly useful for displaying proper names in the notifications.
    */
   async function retrieveCachedChainNames() {
-    const [cachedChainNames] = await Promise.all([
-      fetchCachedChainNames(),
-      getAeSdk(), // Ensure the `nodeNetworkId` is established
-    ]);
-    if (cachedChainNames) {
-      ensureExternalNameRegistryExists();
-      externalNamesRegistry.value[nodeNetworkId.value!] = {
-        ...externalNamesRegistry.value[nodeNetworkId.value!],
-        ...cachedChainNames,
-      };
+    try {
+      const [cachedChainNames] = await Promise.all([
+        fetchCachedChainNames(),
+        getAeSdk(), // Ensure the `nodeNetworkId` is established
+      ]);
+      if (cachedChainNames) {
+        ensureExternalNameRegistryExists();
+        externalNamesRegistry.value[nodeNetworkId.value!] = {
+          ...externalNamesRegistry.value[nodeNetworkId.value!],
+          ...cachedChainNames,
+        };
+      }
+    } catch (error: any) {
+      Logger.write(error);
     }
   }
 
