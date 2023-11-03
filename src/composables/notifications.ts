@@ -87,7 +87,7 @@ export function useNotifications({
   );
 
   const notificationsToShow = computed<INotification[]>(
-    () => notificationsRead.value
+    () => notificationsAllowed.value
       .slice(0, fetchedNotificationsOffset.value * FETCHED_NOTIFICATIONS_LIMIT),
   );
 
