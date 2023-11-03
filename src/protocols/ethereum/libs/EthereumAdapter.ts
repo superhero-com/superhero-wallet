@@ -19,7 +19,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   override protocolName = ETH_PROTOCOL_NAME;
 
   override getAccountPrefix() {
-    return ''; // TODO
+    return '0x';
   }
 
   override getAmountPrecision() {
