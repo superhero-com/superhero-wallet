@@ -14,6 +14,7 @@ import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
 import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
+import { isEthAddressValid } from '@/protocols/ethereum/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { tg } from '@/popup/plugins/i18n';
@@ -144,9 +145,7 @@ export default (store) => {
 
   defineRule('address_btc', (value, [network]) => isBtcAddressValid(value, network));
 
-  // TODO: implement eth address validation
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  defineRule('address_eth', (value, [network]) => new Error('Not implemented'));
+  defineRule('address_eth', (value) => isEthAddressValid(value));
 
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!isAensNameValid(nameOrAddress)) return nameOrAddress !== comparedAddress;
