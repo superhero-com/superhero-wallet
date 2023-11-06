@@ -166,6 +166,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
 import type { ITransaction, ITx, TxFunctionRaw } from '@/types';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
+import {
+  fetchJson,
+  handleUnknownError,
+  splitAddress,
+  watchUntilTruthy,
+} from '@/utils';
 import {
   useAccounts,
   useFungibleTokens,
@@ -175,13 +182,6 @@ import {
   useTransactionTx,
   useUi,
 } from '@/composables';
-import { PROTOCOLS, TX_DIRECTION } from '@/constants';
-import {
-  fetchJson,
-  handleUnknownError,
-  splitAddress,
-  watchUntilTruthy,
-} from '@/utils';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
@@ -206,6 +206,7 @@ import DialogBox from '@/popup/components/DialogBox.vue';
 import Avatar from '@/popup/components/Avatar.vue';
 import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   components: {
@@ -249,6 +250,11 @@ export default defineComponent({
           : activeAccount.value.address
       )));
 
+    const { transactionsLoaded } = useTransactionList({
+      accountAddress: externalAddress.value,
+      protocol: PROTOCOLS.aeternity,
+    });
+
     const {
       setExternalAddress,
       setTransactionTx,
@@ -261,12 +267,6 @@ export default defineComponent({
     } = useTransactionTx({
       externalAddress: externalAddress.value,
     });
-
-    const {
-      fetchAllPendingTransactions,
-      updateAccountTransaction,
-      getTransactionByHash,
-    } = useTransactionList();
 
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
@@ -309,44 +309,43 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+      let rawTransaction: ITransaction | undefined = transactionsLoaded.value
+        .find((tx) => tx.hash === hash) as ITransaction;
 
       if (!rawTransaction || rawTransaction.incomplete) {
-        const middleware = await getMiddleware();
         try {
+          const middleware = await getMiddleware();
           rawTransaction = {
             ...await middleware.getTx(hash),
             protocol: PROTOCOLS.aeternity,
           };
         } catch (e) {
-          // This case is for pending transaction
-          await fetchAllPendingTransactions();
+          // Pending transactions are not returned from the middleware.
+          const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+          const pendingTransactions = await adapter.fetchPendingTransactions(externalAddress.value);
 
-          rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+          rawTransaction = pendingTransactions.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
             router.push({ name: ROUTE_NOT_FOUND });
             return;
           }
         }
-
-        if (rawTransaction?.tx) {
-          if (props.multisigDashboard) {
-            await watchUntilTruthy(() => activeMultisigAccountId.value);
-          } else {
-            await watchUntilTruthy(() => activeAccount.value);
-          }
-          setExternalAddress(externalAddress.value);
-          transaction.value = {
-            ...rawTransaction,
-            transactionOwner: externalAddress.value,
-          };
-          updateAccountTransaction(activeAccount.value.address, transaction.value!);
-        }
-      } else {
-        transaction.value = rawTransaction;
       }
-      if (transaction.value?.tx) {
+
+      if (rawTransaction?.tx) {
+        if (props.multisigDashboard) {
+          await watchUntilTruthy(() => activeMultisigAccountId.value);
+        } else {
+          await watchUntilTruthy(() => activeAccount.value);
+        }
+
+        transaction.value = {
+          ...rawTransaction,
+          transactionOwner: externalAddress.value,
+        };
+
+        setExternalAddress(externalAddress.value);
         setTransactionTx(transaction.value.tx);
       }
 

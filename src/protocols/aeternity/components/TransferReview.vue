@@ -97,11 +97,11 @@ import {
   useAeSdk,
   useDeepLinkApi,
   useFungibleTokens,
+  useLatestTransactionList,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
   useTippingContracts,
-  useTransactionList,
   useUi,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -143,7 +143,7 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
     const { getAeSdk } = useAeSdk();
     const {
@@ -222,25 +222,7 @@ export default defineComponent({
           });
         }
 
-        if (actionResult && !isSelectedAssetAeCoin) {
-          const transaction: ITransaction = {
-            hash: actionResult.hash as Encoded.TxHash,
-            pendingTokenTx: true,
-            pending: true,
-            transactionOwner: activeAccount.value.address,
-            tx: {
-              amount: Number(amount),
-              callerId: activeAccount.value.address,
-              contractId: selectedAsset.contractId as Encoded.ContractAddress,
-              type: Tag[Tag.ContractCallTx],
-              function: TX_FUNCTIONS.transfer,
-              recipientId: recipient,
-              arguments: [],
-              fee: 0,
-            },
-          };
-          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
-        } else if (actionResult) {
+        if (actionResult) {
           const transaction: ITransaction = {
             hash: actionResult.hash as Encoded.TxHash,
             pending: true,
@@ -250,16 +232,17 @@ export default defineComponent({
               callerId: activeAccount.value.address,
               contractId: selectedAsset.contractId as Encoded.ContractAddress,
               senderId: activeAccount.value.address,
-              recipientId: recipient,
-              type: Tag[Tag.SpendTx],
+              type: (isSelectedAssetAeCoin) ? Tag[Tag.SpendTx] : Tag[Tag.ContractCallTx],
               function: TX_FUNCTIONS.transfer,
+              recipientId: recipient,
               arguments: [],
               fee: 0,
             },
           };
-
-          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+          addAccountPendingTransaction(activeAccount.value.address, transaction);
         }
+
+        // TODO find out if emitting success in case falsy `actionResult` makes sense.
         emit('success');
         return actionResult?.hash;
       } catch (error) {
@@ -318,7 +301,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+        addAccountPendingTransaction(activeAccount.value.address, transaction);
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {

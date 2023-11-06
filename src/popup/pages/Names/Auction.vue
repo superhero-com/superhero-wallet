@@ -78,7 +78,7 @@ export default defineComponent({
         const loadedBids = await Promise.all(bids.map(async (txId: number) => {
           const { tx } = await middleware.getTx(txId.toString());
           return {
-            nameFee: new BigNumber(aettosToAe(tx.nameFee)),
+            nameFee: new BigNumber(aettosToAe(tx.nameFee!)),
             accountId: tx.accountId,
           };
         }));

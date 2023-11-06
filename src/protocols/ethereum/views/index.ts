@@ -5,10 +5,6 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "eth-account-details" */
     './AccountDetails.vue'
   ),
-  AccountDetailsTransactions: () => import(
-    /* webpackChunkName: "eth-account-details-transactions" */
-    './AccountDetailsTransactions.vue'
-  ),
   AccountDetailsTokens: () => import(
     /* webpackChunkName: "eth-account-details-tokens" */
     './AccountDetailsTokens.vue'

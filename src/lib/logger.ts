@@ -23,7 +23,7 @@ interface ILoggerEntry {
 interface ILoggerInput {
   modal?: boolean;
   message: string;
-  type: 'vue-error' | 'unhandledrejection' | 'window-error';
+  type: 'vue-error' | 'unhandledrejection' | 'window-error' | 'api-response';
   stack?: string;
   info?: string | Error;
 }

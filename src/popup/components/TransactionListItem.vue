@@ -134,7 +134,7 @@ export default defineComponent({
       direction: direction.value,
       isAllowance: isDexAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx
-      transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
+      transaction: currentTransaction.value,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {

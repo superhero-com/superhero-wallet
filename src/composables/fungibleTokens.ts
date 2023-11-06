@@ -19,9 +19,8 @@ import type {
 import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
@@ -29,6 +28,8 @@ import { useTippingContracts } from './tippingContracts';
 import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
+
+let initialized = false;
 
 /**
  * List of all fungible tokens available on user's protocols.
@@ -65,7 +66,6 @@ export function useFungibleTokens() {
   const { tippingContractAddresses } = useTippingContracts();
   const {
     accounts,
-    aeAccounts,
     protocolsInUse,
     getLastActiveProtocolAccount,
   } = useAccounts();
@@ -89,8 +89,10 @@ export function useFungibleTokens() {
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
     const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
-      (protocolTokens, index) => protocolTokens
-        || Object.values(tokensAvailable.value[protocolsInUse.value[index]] || {}),
+      (protocolTokens, index) => (
+        protocolTokens
+        || Object.values(tokensAvailable.value[protocolsInUse.value[index]] || {})
+      ),
     ).flat();
 
     if (!tokens.length) {
@@ -182,17 +184,21 @@ export function useFungibleTokens() {
 
   function getTxAssetSymbol(transaction?: ITransaction) {
     const { protocol = PROTOCOLS.aeternity } = transaction || {};
+    const protocolTokens = getProtocolAvailableTokens(protocol);
+    let assetContractId = transaction?.tx?.contractId as AssetContractId;
 
+    // TODO move this logic to the AE adapter or transaction normalizer
     if (protocol === PROTOCOLS.aeternity) {
-      const protocolTokens = getProtocolAvailableTokens(protocol);
       const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
-      const assetContractId = (contractCallData)
-        ? contractCallData.token
-        : transaction?.tx?.contractId;
-      return protocolTokens[assetContractId!]?.symbol || AE_SYMBOL;
+      if (contractCallData?.token) {
+        assetContractId = contractCallData.token;
+      }
     }
 
-    return ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol;
+    return (
+      protocolTokens[assetContractId]?.symbol
+      || ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol
+    );
   }
 
   /**
@@ -248,14 +254,19 @@ export function useFungibleTokens() {
     }
   });
 
-  watch(aeAccounts, (val, oldVal) => {
-    if (val.length !== oldVal.length) {
-      loadTokenBalances();
-    }
-  });
-
   availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
+
+  if (!initialized) {
+    initialized = true;
+
+    // Refresh balances when new account is added
+    watch(accounts, (val, oldVal) => {
+      if (val.length !== oldVal.length) {
+        loadTokenBalances();
+      }
+    });
+  }
 
   return {
     tokenBalances,

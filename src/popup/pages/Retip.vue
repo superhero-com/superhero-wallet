@@ -96,10 +96,10 @@ import {
   useCurrencies,
   useDeepLinkApi,
   useFungibleTokens,
+  useLatestTransactionList,
   useMaxAmount,
   useModals,
   useTippingContracts,
-  useTransactionList,
   useUi,
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
@@ -143,7 +143,7 @@ export default defineComponent({
     const { balance } = useBalances();
     const { max, fee } = useMaxAmount({ formModel });
     const { getTippingContracts } = useTippingContracts();
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
     const { getTippingUrlStatus } = useAeTippingUrls();
     const { createOrChangeAllowance } = useFungibleTokens();
 
@@ -216,7 +216,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(account.address, transaction);
+        addAccountPendingTransaction(account.address, transaction);
         openCallbackOrGoHome(true);
       } catch (error: any) {
         openDefaultModal({

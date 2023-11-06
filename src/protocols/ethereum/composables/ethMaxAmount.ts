@@ -22,7 +22,7 @@ export function useEthMaxAmount({ formModel, fee }: EthMaxAmountOptions) {
 
   const isEthCoin = computed(() => {
     const ethAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
-    return formModel.value?.selectedAsset?.contractId === ethAdapter.getCoinContractId();
+    return formModel.value?.selectedAsset?.contractId === ethAdapter.coinContractId;
   });
   const selectedTokenBalance = computed(
     () => new BigNumber(formModel.value?.selectedAsset?.convertedBalance || 0),

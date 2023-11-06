@@ -1,7 +1,6 @@
 import type { WalletAppRouteConfig } from '@/types';
 import {
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
@@ -48,6 +47,7 @@ import {
 } from './routeNames';
 
 import About from '../pages/About.vue';
+import AccountDetailsTransactions from '../components/AccountDetailsTransactionsBase.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
 import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
@@ -147,8 +147,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_ACCOUNT_DETAILS,
-            component: ProtocolSpecificView,
-            props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS },
+            component: AccountDetailsTransactions,
             meta: {
               hideHeader: true,
               showFilterBar: true,

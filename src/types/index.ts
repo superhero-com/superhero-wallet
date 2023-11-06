@@ -427,7 +427,7 @@ export interface ITx {
   arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
+  callerId?: Encoded.AccountAddress;
   code?: Encoded.ContractBytearray;
   commitmentId?: any;
   contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
@@ -475,7 +475,6 @@ export interface ITransaction {
   microIndex?: number;
   microTime?: number;
   pending: boolean;
-  pendingTokenTx?: boolean;
   protocol?: Protocol;
   rawTx?: any; // TODO find type
   tipUrl?: string;
@@ -488,6 +487,7 @@ export interface ITransaction {
    * For example when we send some assets from one owned account to another
    * we are displaying the same transaction twice on the dashboard: as sent and received.
    * TODO maybe this can be removed and calculated on the component level
+   * TODO change the type to `AccountAddress`
    */
   transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
@@ -501,7 +501,7 @@ export interface IDashboardTransaction extends ITransaction {
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
-  hash?: string;
+  hash: string;
   tx?: ITx;
   isMultisigTransaction: boolean;
   microTime?: number;
@@ -528,16 +528,7 @@ export type DexFunctionType =
   | 'maxSpent'
   | 'minReceived';
 
-export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
-
-export type ITransactionsState = {
-  loaded: ITransaction[];
-  nextPageUrl: string | null;
-  localPendingTransaction: ITransaction | null;
-  tipWithdrawnTransactions: ITransaction[];
-}
-
-export type IAccountTransactionsState = Record<string, ITransactionsState>
+export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 
 export interface IFeeItem {
   fee: BigNumberPublic;
@@ -564,8 +555,6 @@ export interface ITopHeader {
   txsHash?: string;
   version: number;
 }
-
-export type ISignMessage = (m: any) => Promise<any>
 
 /**
  * Todo replace ChainName with AensName within the app
@@ -615,7 +604,7 @@ export interface IMiddleware {
     limit?: number;
     [key: string]: any;
   }]>;
-  getTx: (hash: string) => Promise<any>;
+  getTx: (hash: string) => Promise<ITransaction>;
   getTxByIndex: GenericApiMethod;
   getTxCountById: GenericApiMethod;
   getTxsByDirection: GenericApiMethod;
@@ -776,11 +765,27 @@ export interface IAddressNamePair {
   name: ChainName;
 }
 
+/**
+ * Different protocols use different methods to provide the ability to paginate the API
+ * response lists. This interface stores every possible option.
+ */
+export interface ITransactionApiPaginationParams {
+  /** Some APIs returns ready to use URL that allows to fetch next page results (eg.: Aeternity) */
+  nextPageUrl?: string;
+  /** Used by the Ethereum protocol */
+  nextPageNum?: string;
+  /** Used by the Bitcoin protocol to establish where the next page should start from */
+  lastTxId?: string;
+}
+
+/**
+ * TODO: Adapter's `fetchTransaction` method should return flat list of transaction without grouping
+ */
 export interface IFetchTransactionResult {
   regularTransactions: ITransaction[];
   pendingTransactions?: any[]; // TODO prepare types for PendingTransaction
   tipWithdrawnTransactions?: ITransaction[];
-  nextPageParams: string | null;
+  paginationParams: ITransactionApiPaginationParams;
 }
 export interface IFormSelectOption {
   text: string;
@@ -818,4 +823,9 @@ export type IonAnimationBuilder = (
 
 export interface ITransferResponse {
   hash: string;
+}
+
+export interface IAmountDecimalPlaces {
+  highPrecision?: boolean;
+  amount?: number;
 }
