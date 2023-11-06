@@ -6,17 +6,29 @@ import type {
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
+  NetworkTypeDefault,
 } from '@/types';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import { tg } from '@/popup/plugins/i18n';
 import {
   ETH_COINGECKO_COIN_ID,
   ETH_COIN_PRECISION,
+  ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_PROTOCOL_NAME,
   ETH_SYMBOL,
 } from '../config';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocolName = ETH_PROTOCOL_NAME;
+
+  networkSettings: AdapterNetworkSettingList = [
+    {
+      key: 'nodeUrl',
+      testId: 'url',
+      getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
+      getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
+  ];
 
   override getAccountPrefix() {
     return '0x';
@@ -87,12 +99,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override getNetworkSettings(): AdapterNetworkSettingList {
-    return {} as any; // TODO
+  override getNetworkSettings() {
+    return this.networkSettings;
   }
 
-  override getNetworkTypeDefaultValues(): INetworkProtocolSettings {
-    return {} as any; // TODO
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+    return ETH_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
   override async fetchBalance() {
