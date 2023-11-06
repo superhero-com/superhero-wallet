@@ -36,6 +36,8 @@ export type FeeItem = {
   fee: BigNumberPublic;
   time: number; // time in seconds
   label: string;
+  maxPriorityFee?: BigNumberPublic;
+  maxFeePerGas?: BigNumberPublic;
 }
 
 export default defineComponent({
