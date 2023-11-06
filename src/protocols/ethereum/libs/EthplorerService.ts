@@ -52,7 +52,7 @@ export class EthplorerService {
 
     return tokens
       .filter(({ address, name, symbol }: any) => (address && name && symbol))
-      // Remove the ETH coin from the results because as we are adding it manually
+      // Remove the ETH coin from the results because we are adding it manually
       .filter(({ address }: any) => address !== ETH_CONTRACT_ID_EXTERNAL)
       .map((token: any): IToken => this.normalizeTokenStructure(token));
   }

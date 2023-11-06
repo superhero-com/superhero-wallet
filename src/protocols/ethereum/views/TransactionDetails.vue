@@ -86,7 +86,7 @@ export default defineComponent({
       amount: amountTotal.value,
       symbol: ETH_SYMBOL,
       isReceived: direction.value === TX_DIRECTION.received,
-      contractId: adapter.getCoinContractId(),
+      contractId: adapter.coinContractId,
       isAe: false,
     }]);
 

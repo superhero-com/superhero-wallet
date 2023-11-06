@@ -10,9 +10,7 @@ import {
   NETWORK_NAME_TESTNET,
   PROTOCOLS,
   STORAGE_KEYS,
-  TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/constants';
-import { AE_NETWORK_TESTNET_ID } from '../../../src/protocols/aeternity/config';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
 
 export function preparePendingTransactionToLocalStorage(pendingTransaction) {
@@ -89,13 +87,12 @@ Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = 
         isRestored: true,
         type: 'hd-wallet',
       }],
-      [prepareStorageKey([STORAGE_KEYS.otherSettings])]: { isSeedBackedUp },
-      [prepareStorageKey([
-        TRANSACTIONS_LOCAL_STORAGE_KEY,
-        AE_NETWORK_TESTNET_ID,
-      ])]: (pendingTransaction)
-        ? preparePendingTransactionToLocalStorage(pendingTransaction)
-        : null,
+      [prepareStorageKey([STORAGE_KEYS.otherSettings])]: {
+        isSeedBackedUp,
+      },
+      [prepareStorageKey([STORAGE_KEYS.transactionsPending])]: {
+        [STUB_ACCOUNT.address]: pendingTransaction || [],
+      },
     };
 
     Object.entries(dataToBeStored).forEach(([key, data]) => {

@@ -5,10 +5,6 @@ const protocolViews: ProtocolViewsConfig = {
     /* webpackChunkName: "btc-account-details" */
     './AccountDetails.vue'
   ),
-  AccountDetailsTransactions: () => import(
-    /* webpackChunkName: "btc-account-details-transactions" */
-    './AccountDetailsTransactions.vue'
-  ),
   AccountDetailsTokens: null,
   AccountDetailsNames: null,
   TransactionDetails: () => import(

@@ -71,7 +71,7 @@ export default defineComponent({
     const ethAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
     const isSelectedAssetEthCoin = computed(
-      () => props.transferData?.selectedAsset?.contractId === ethAdapter.getCoinContractId(),
+      () => props.transferData?.selectedAsset?.contractId === ethAdapter.coinContractId,
     );
 
     function openTransactionFailedModal(msg: string) {
