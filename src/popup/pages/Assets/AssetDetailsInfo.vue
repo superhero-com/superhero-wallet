@@ -205,11 +205,11 @@ export default defineComponent({
     const { sharedAssetDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
 
-    const assetData = computed((): IAsset => sharedAssetDetails.value.tokenData || {});
+    const assetData = computed((): IAsset => sharedAssetDetails.tokenData || {});
     const assetContractId = computed(() => assetData.value.contractId);
-    const tokens = computed(() => sharedAssetDetails.value.tokens);
-    const tokenPairs = computed(() => sharedAssetDetails.value.tokenPairs);
-    const tokenBalance = computed(() => sharedAssetDetails.value.tokenBalance);
+    const tokens = computed(() => sharedAssetDetails.tokens);
+    const tokenPairs = computed(() => sharedAssetDetails.tokenPairs || {});
+    const tokenBalance = computed(() => sharedAssetDetails.tokenBalance);
     const isAssetCoin = computed(() => isCoin(assetContractId.value));
     const decimals = computed(() => assetData.value?.decimals || tokenBalance.value?.decimals);
 
@@ -233,6 +233,7 @@ export default defineComponent({
       getPooledTokenAmount,
       formatCurrency,
       formatNumber,
+      sharedAssetDetails,
       tokens,
       tokenPairs,
       tokenBalance,

@@ -1,47 +1,80 @@
 <template>
   <IonPage>
-    <AccountDetailsTransactionsBase
-      v-bind="$attrs"
-      :address="activeMultisigAccount.gaAccountId"
-      :additional-transactions="pendingMultisigTransaction ? [pendingMultisigTransaction] : null"
-      :ionic-lifecycle-status="ionicLifecycleStatus"
-      is-multisig
+    <TransactionList
+      v-if="isPageActive"
+      :transactions="transactionList"
+      :is-loading="isLoading"
+      :is-end-reached="isEndReached"
     />
   </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {
+  computed,
+  defineComponent,
+  onUnmounted,
+  ref,
+} from 'vue';
 import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
-import type { IonicLifecycleStatus } from '@/types';
-import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
+import type { ICommonTransaction } from '@/types';
+import { PROTOCOLS } from '@/constants';
+import { useMultisigAccounts, usePendingMultisigTransaction, useTransactionList } from '@/composables';
 
-import AccountDetailsTransactionsBase from '@/popup/components/AccountDetailsTransactionsBase.vue';
+import TransactionList from '../components/TransactionList.vue';
 
 export default defineComponent({
   components: {
     IonPage,
-    AccountDetailsTransactionsBase,
+    TransactionList,
   },
   setup() {
-    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
-
     const { activeMultisigAccount } = useMultisigAccounts();
     const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
-    onIonViewDidEnter(() => {
-      ionicLifecycleStatus.value = 'didEnter';
+    const {
+      transactionsLoaded,
+      isLoading,
+      isEndReached,
+      initializeTransactionListPolling,
+      stopTransactionListPolling,
+    } = useTransactionList({
+      accountAddress: activeMultisigAccount.value?.gaAccountId!,
+      protocol: PROTOCOLS.aeternity,
     });
 
+    /** Delay displaying the TransactionList so it can calculate parent element size */
+    const isPageActive = ref(false);
+
+    const transactionList = computed((): ICommonTransaction[] => [
+      ...(pendingMultisigTransaction.value) ? [pendingMultisigTransaction.value] : [],
+      ...transactionsLoaded.value,
+    ]);
+
+    // Fired when accessing the page both as tab and whole AccountDetails page.
+    onIonViewDidEnter(async () => {
+      isPageActive.value = true;
+      initializeTransactionListPolling();
+    });
+
+    // Fired only when leaving to different tab within the AccountDetails.
     onIonViewDidLeave(() => {
-      ionicLifecycleStatus.value = 'didLeave';
+      isPageActive.value = false;
+      stopTransactionListPolling();
+    });
+
+    // Fired when leaving the AccountDetails page.
+    onUnmounted(() => {
+      isPageActive.value = false;
+      stopTransactionListPolling();
     });
 
     return {
-      activeMultisigAccount,
-      ionicLifecycleStatus,
-      pendingMultisigTransaction,
+      isPageActive,
+      isLoading,
+      isEndReached,
+      transactionList,
     };
   },
 });

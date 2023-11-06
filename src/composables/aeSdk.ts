@@ -9,6 +9,7 @@ import {
   RpcRejectedByUserError,
   METHODS,
   RPC_STATUS,
+  Encoded,
 } from '@aeternity/aepp-sdk';
 import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import type {
@@ -56,6 +57,16 @@ const aeppInfo: Record<string, AeppInfoData> = {};
 
 let dryAeSdk: AeSdk;
 
+const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
+const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
+const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
+
+const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));
+
+const dexContracts = computed(
+  () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
+);
+
 export function useAeSdk() {
   const {
     aeActiveNetworkSettings,
@@ -68,16 +79,6 @@ export function useAeSdk() {
     getLastActiveProtocolAccount,
   } = useAccounts();
   const { checkOrAskPermission } = usePermissions();
-
-  const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
-  const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
-  const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
-
-  const isTippingSupported = computed(() => (RUNNING_IN_TESTS || !isNodeCustomNetwork.value));
-
-  const dexContracts = computed(
-    () => nodeNetworkId.value ? DEX_CONTRACTS[nodeNetworkId.value] : undefined,
-  );
 
   /**
    * Create Node instance and get connection status
@@ -231,6 +232,11 @@ export function useAeSdk() {
     }
   }
 
+  async function waitTransactionMined(hash: Encoded.TxHash) {
+    const aeSdkLocal = await getAeSdk();
+    return aeSdkLocal.poll(hash);
+  }
+
   return {
     isAeNodeReady,
     isAeNodeConnecting,
@@ -247,5 +253,6 @@ export function useAeSdk() {
     fetchRespondChallenge,
     createNodeInstance,
     disconnectDapps,
+    waitTransactionMined,
   };
 }

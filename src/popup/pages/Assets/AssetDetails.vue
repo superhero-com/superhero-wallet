@@ -168,7 +168,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setAssetDetails } = useAssetDetails();
+    const { setSharedAssetDetails, resetSharedAssetDetails } = useAssetDetails();
     const { setLoaderVisible } = useUi();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
@@ -339,7 +339,7 @@ export default defineComponent({
     });
 
     onIonViewDidEnter(() => {
-      setAssetDetails({
+      setSharedAssetDetails({
         contractId,
         tokenPairs: tokenPairs.value,
         tokenData: assetData.value,
@@ -350,7 +350,7 @@ export default defineComponent({
     });
 
     onIonViewDidLeave(() => {
-      setAssetDetails(null);
+      resetSharedAssetDetails();
     });
 
     return {

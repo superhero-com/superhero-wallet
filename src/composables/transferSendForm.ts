@@ -10,7 +10,6 @@ import type {
   Dictionary,
   IAsset,
   IToken,
-  Protocol,
   TransferFormModel,
 } from '@/types';
 import { useModals } from '@/composables/modals';
@@ -19,9 +18,8 @@ import {
   IS_PRODUCTION,
   MODAL_READ_QR_CODE,
 } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
 import Logger from '@/lib/logger';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { NoUserMediaPermissionError } from '@/lib/errors';
 import { useTransferSendHandler } from './transferSendHandler';
 import { useAccountAssetsList } from './accountAssetsList';
@@ -34,13 +32,11 @@ type SelectedAssetValueFunction = (
 interface UseTransferSendFormParams {
   transferData: TransferFormModel;
   getSelectedAssetValue?: SelectedAssetValueFunction;
-  protocol: Protocol;
 }
 
 export function useTransferSendForm({
   transferData,
   getSelectedAssetValue,
-  protocol,
 }: UseTransferSendFormParams) {
   const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
@@ -164,9 +160,9 @@ export function useTransferSendForm({
       }
       updateFormModelValues(Object.fromEntries([
         ...new URL(
-          (scanResult.startsWith(ProtocolAdapterFactory.getAdapter(protocol).getAccountPrefix()))
-            ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
-            : scanResult,
+          isUrlValid(scanResult)
+            ? scanResult
+            : `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`,
         )
           .searchParams.entries(),
       ].map(([k, v]) => [k, v])));

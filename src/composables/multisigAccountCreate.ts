@@ -139,7 +139,7 @@ export function useMultisigAccountCreate() {
     }
 
     const aeSdk = await getAeSdk();
-    const payedTx = await aeSdk.signTransaction(
+    const paidTx = await aeSdk.signTransaction(
       await aeSdk.buildTx({
         tag: Tag.PayingForTx,
         payerId,
@@ -150,10 +150,10 @@ export function useMultisigAccountCreate() {
       } as any,
     );
 
-    pendingMultisigCreationTxs.value[accountId].rawTx = payedTx;
+    pendingMultisigCreationTxs.value[accountId].rawTx = paidTx;
 
     // Calculate fee
-    const tx = unpackTx(payedTx, Tag.SignedTx);
+    const tx = unpackTx(paidTx, Tag.SignedTx);
     if (tx.encodedTx.tag !== Tag.PayingForTx || tx.encodedTx.tx.encodedTx.tag !== Tag.GaAttachTx) {
       throw Error('Transaction build failed');
     }

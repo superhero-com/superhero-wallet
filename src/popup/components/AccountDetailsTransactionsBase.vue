@@ -1,66 +1,77 @@
 <template>
-  <TransactionList
-    :fetch-recent-transactions="() => fetchTransactions(address, true, isMultisig)"
-    :fetch-more-transactions="() => fetchTransactions(address, false, isMultisig)"
-    :can-load-more="canLoadMore"
-    :is-initial-loading="isInitialLoading"
-    :transactions="loadedTransactionList"
-    :is-multisig="isMultisig"
-    :ionic-lifecycle-status="ionicLifecycleStatus"
-  />
+  <IonPage>
+    <TransactionList
+      v-if="isPageActive"
+      :transactions="transactionsLoadedAndPending"
+      :is-loading="isLoading"
+      :is-end-reached="isEndReached"
+      @load-more="loadCurrentPageTransactions()"
+    />
+  </IonPage>
 </template>
 
 <script lang="ts">
 import {
-  computed,
   defineComponent,
-  PropType,
+  onUnmounted,
+  ref,
 } from 'vue';
+import { IonPage, onIonViewDidEnter, onIonViewDidLeave } from '@ionic/vue';
 
-import type {
-  ICommonTransaction,
-  IonicLifecycleStatus,
-  ITransaction,
-} from '@/types';
-import { useTransactionList } from '@/composables';
+import {
+  useAccounts,
+  useTransactionList,
+} from '@/composables';
 
 import TransactionList from '@/popup/components/TransactionList.vue';
 
 export default defineComponent({
   components: {
+    IonPage,
     TransactionList,
   },
-  props: {
-    address: { type: String, required: true },
-    additionalTransactions: { type: Array as PropType<ITransaction[]>, default: null },
-    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
-    isMultisig: { type: Boolean },
-  },
-  setup(props) {
+  setup() {
+    const { activeAccount } = useAccounts();
+
     const {
-      getAccountAllTransactions,
-      getAccountTransactionsState,
-      fetchTransactions,
-    } = useTransactionList();
+      transactionsLoadedAndPending,
+      isEndReached,
+      isLoading,
+      loadCurrentPageTransactions,
+      initializeTransactionListPolling,
+      stopTransactionListPolling,
+    } = useTransactionList({
+      accountAddress: activeAccount.value.address,
+      protocol: activeAccount.value.protocol,
+    });
 
-    const canLoadMore = computed(() => (
-      !!getAccountTransactionsState(props.address as any).nextPageUrl
-    ));
+    /** Delay displaying the TransactionList so it can calculate parent element size */
+    const isPageActive = ref(false);
 
-    const isInitialLoading = computed(() => (
-      getAccountTransactionsState(props.address as any).nextPageUrl === ''
-    ));
+    // Fired when accessing the page both as tab and whole AccountDetails page.
+    onIonViewDidEnter(() => {
+      isPageActive.value = true;
+      initializeTransactionListPolling();
+    });
 
-    const loadedTransactionList = computed((): ICommonTransaction[] => [
-      ...getAccountAllTransactions(props.address as any),
-      ...(props.additionalTransactions || []),
-    ]);
+    // Fired only when leaving to different tab within the AccountDetails.
+    onIonViewDidLeave(() => {
+      isPageActive.value = false;
+      stopTransactionListPolling();
+    });
+
+    // Fired when leaving the AccountDetails page.
+    onUnmounted(() => {
+      isPageActive.value = false;
+      stopTransactionListPolling();
+    });
 
     return {
-      canLoadMore,
-      fetchTransactions,
-      isInitialLoading,
-      loadedTransactionList,
+      isPageActive,
+      isLoading,
+      isEndReached,
+      transactionsLoadedAndPending,
+      loadCurrentPageTransactions,
     };
   },
 });

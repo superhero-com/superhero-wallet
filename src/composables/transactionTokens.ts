@@ -64,16 +64,6 @@ export function useTransactionTokens({
       ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.getAmountPrecision())
       : getTxAmountTotal(transaction, direction);
 
-    if (protocol !== PROTOCOLS.aeternity) {
-      return [{
-        ...innerTx.value || {},
-        amount,
-        symbol: adapter.protocolSymbol,
-        isReceived,
-        isAe: false,
-      }];
-    }
-
     const symbol = isAllowance ? AE_SYMBOL : getTxAssetSymbol(transaction);
     const token = protocolTokens[transaction.tx.contractId];
 

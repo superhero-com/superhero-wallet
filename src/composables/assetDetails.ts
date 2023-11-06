@@ -1,5 +1,9 @@
-import { computed, ref } from 'vue';
-import { AssetContractId, IToken, ITokenBalance } from '@/types';
+import { reactive } from 'vue';
+import {
+  AssetContractId,
+  IToken,
+  ITokenBalance,
+} from '@/types';
 
 interface ISharedAssetDetails {
   contractId?: AssetContractId;
@@ -10,21 +14,28 @@ interface ISharedAssetDetails {
   isMultisig?: boolean;
 }
 
-const assetDetails = ref<ISharedAssetDetails | null>(null);
-
-const sharedAssetDetails = computed((): ISharedAssetDetails => assetDetails.value || {});
+const sharedAssetDetails = reactive<ISharedAssetDetails>({});
 
 /**
  * Share the asset (coin or token) details data between the asset details page
  * and the child pages: AssetDetailsTransactions and AssetDetailsInfo.
  */
 export function useAssetDetails() {
-  function setAssetDetails(details: ISharedAssetDetails | null) {
-    assetDetails.value = details;
+  function setSharedAssetDetails(details: ISharedAssetDetails) {
+    Object.keys(details).forEach((key: keyof ISharedAssetDetails) => {
+      sharedAssetDetails[key] = details[key];
+    });
+  }
+
+  function resetSharedAssetDetails() {
+    Object.keys(sharedAssetDetails).forEach((key: keyof ISharedAssetDetails) => {
+      sharedAssetDetails[key] = undefined;
+    });
   }
 
   return {
     sharedAssetDetails,
-    setAssetDetails,
+    setSharedAssetDetails,
+    resetSharedAssetDetails,
   };
 }

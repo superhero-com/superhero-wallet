@@ -1,3 +1,4 @@
+import { Component } from 'vue';
 import {
   PROTOCOLS,
   DISTINCT_PROTOCOL_VIEWS,
@@ -18,6 +19,6 @@ export type ProtocolView = typeof DISTINCT_PROTOCOL_VIEWS[number];
  * List of protocol views with corresponding dynamic imports.
  */
 export type ProtocolViewsConfig =
-  Record<ProtocolView, (() => Promise<any>) | null>;
+  Record<ProtocolView, (() => Promise<Component>) | null>;
 
 export type ProtocolRecord<T = any> = Partial<Record<Protocol, T>>;

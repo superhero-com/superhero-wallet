@@ -22,6 +22,7 @@ import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 
 import type {
+  AccountAddress,
   AdapterNetworkSettingList,
   AssetContractId,
   ICoin,
@@ -30,6 +31,8 @@ import type {
   INetworkProtocolSettings,
   IToken,
   ITokenBalance,
+  ITransaction,
+  ITransactionApiPaginationParams,
   ITransferResponse,
   MarketData,
   NetworkTypeDefault,
@@ -63,7 +66,17 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override protocolName = ETH_PROTOCOL_NAME;
 
+  override protocolSymbol = ETH_SYMBOL;
+
+  override coinName = ETH_COIN_NAME;
+
+  override coinSymbol = ETH_SYMBOL;
+
+  override coinContractId = ETH_CONTRACT_ID;
+
   override coinPrecision = ETH_COIN_PRECISION;
+
+  override hasTokensSupport = true;
 
   private bip32 = BIP32Factory(ecc);
 
@@ -87,12 +100,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ];
 
-  coinName = ETH_COIN_NAME;
-
-  coinSymbol = ETH_SYMBOL;
-
-  protocolSymbol = ETH_SYMBOL;
-
   async getTransactionCount(address: string): Promise<number> {
     const web3Eth = this.getWeb3EthInstance();
     const txCount = await getTransactionCount(web3Eth, address, 'pending', NUMBER_DATA_FORMAT);
@@ -104,7 +111,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getAmountPrecision(): number {
-    return ETH_COIN_PRECISION;
+    return 9;
   }
 
   override getCoinGeckoCoinId() {
@@ -120,10 +127,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return ETH_CONTRACT_ID;
   }
 
-  override getCoinContractId(): AssetContractId {
-    return ETH_CONTRACT_ID;
-  }
-
   override getDefaultCoin(
     marketData: MarketData,
     convertedBalance?: number,
@@ -131,7 +134,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return {
       ...(marketData?.[PROTOCOLS.ethereum] || {}),
       protocol: PROTOCOLS.ethereum,
-      contractId: this.getCoinContractId(),
+      contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.getAmountPrecision(),
       name: ETH_COIN_NAME,
@@ -147,17 +150,17 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return ETH_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
-  override async fetchBalance(address: string): Promise<string> {
+  override async fetchBalance(address: AccountAddress): Promise<string> {
     const web3Eth = this.getWeb3EthInstance();
     const balanceInWei = await getBalance(web3Eth, address, 'latest', NUMBER_DATA_FORMAT);
     return fromWei(balanceInWei, 'ether').toString();
   }
 
-  override isAccountAddressValid(address: string) {
+  override isAccountAddressValid(address: AccountAddress) {
     return isAddress(address);
   }
 
-  override async isAccountUsed(address: string): Promise<boolean> {
+  override async isAccountUsed(address: AccountAddress): Promise<boolean> {
     const [balance, txCount] = await Promise.all([
       await this.fetchBalance(address),
       this.getTransactionCount(address),
@@ -237,10 +240,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override async transferToken(
     amount: number,
-    recipient: string,
+    recipient: AccountAddress,
     contractId: AssetContractId,
     options: {
-      fromAccount: string;
+      fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
@@ -323,26 +326,82 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return normalized;
   }
 
-  override async fetchTransactions(
-    address: string,
-    nextPageParams?: string | null,
+  override async fetchAccountTransactions(
+    address: AccountAddress,
+    { nextPageNum }: ITransactionApiPaginationParams = {},
   ): Promise<IFetchTransactionResult> {
-    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
-    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
-    const regularTransactions = await new EtherscanService(apiUrl)
-      .fetchAccountTransactions(address, nextPageParams || undefined);
+    const paginationParams: ITransactionApiPaginationParams = {};
+    let regularTransactions: ITransaction[] = [];
+
+    try {
+      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      const [coinTransactions, tokenTransactions] = await Promise.all([
+        service.fetchAccountCoinTransactions(address, { page: nextPageNum }),
+        service.fetchAccountTokenTransactions(address, { page: nextPageNum }),
+      ]);
+
+      // Remove duplicate coin transactions (e.g.: token transfer fee paid with coin)
+      tokenTransactions.forEach((tokenTransaction) => {
+        const index = coinTransactions.findIndex(
+          (coinTransaction) => coinTransaction.hash === tokenTransaction.hash,
+        );
+        if (index > -1) {
+          coinTransactions.splice(index, 1);
+        }
+      });
+
+      regularTransactions = [...coinTransactions, ...tokenTransactions];
+
+      if (regularTransactions?.length) {
+        paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
+      }
+    } catch (error: any) {
+      Logger.write(error);
+    }
 
     return {
       regularTransactions,
-      nextPageParams: nextPageParams ? String(Number(nextPageParams) + 1) : null,
+      paginationParams,
+    };
+  }
+
+  override async fetchAccountAssetTransactions(
+    address: AccountAddress,
+    assetContractId: AssetContractId,
+    { nextPageNum }: ITransactionApiPaginationParams = {},
+  ): Promise<IFetchTransactionResult> {
+    const paginationParams: ITransactionApiPaginationParams = {};
+    let regularTransactions: ITransaction[] = [];
+
+    try {
+      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      regularTransactions = (assetContractId === this.coinContractId)
+        ? await service.fetchAccountCoinTransactions(address, { page: nextPageNum })
+        : await service.fetchAccountTokenTransactions(
+          address,
+          { page: nextPageNum, assetContractId },
+        );
+
+      if (regularTransactions?.length) {
+        paginationParams.nextPageNum = ((nextPageNum) ? +nextPageNum + 1 : 2).toString();
+      }
+    } catch (error: any) {
+      Logger.write(error);
+    }
+
+    return {
+      regularTransactions,
+      paginationParams,
     };
   }
 
   override async spend(
     amount: number,
-    recipient: string,
+    recipient: AccountAddress,
     options: {
-      fromAccount: string;
+      fromAccount: AccountAddress;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },

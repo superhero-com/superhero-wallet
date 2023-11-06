@@ -573,7 +573,8 @@
       "viewMore": "View full transaction history",
       "noTransactionsFound": "There are no recent transactions for this account.",
       "searchPlaceholder": "Search transactions by asset name",
-      "unknownMode": "Unknown display mode type:"
+      "unknownMode": "Unknown display mode type:",
+      "transactionListEnd": "There are no older transactions for this account."
     },
     "advancedSettings": {
       "heading": "Advanced",

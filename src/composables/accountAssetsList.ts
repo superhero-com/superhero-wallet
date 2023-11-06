@@ -101,7 +101,7 @@ export function useAccountAssetsList({
     const isSearchTermContract = searchTermParsed.startsWith('ct_');
     const protocolCoinContractId = ProtocolAdapterFactory
       .getAdapter(activeAccount.value.protocol)
-      .getCoinContractId();
+      .coinContractId;
 
     return accountAssets.value
       .filter(({ contractId }) => (
