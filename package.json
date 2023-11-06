@@ -89,6 +89,8 @@
     "vue-i18n": "^9.2.2",
     "vue-loader": "^17.2.2",
     "vue-router": "^4.2.4",
+    "web3-eth": "^4.3.1",
+    "web3-utils": "^4.0.7",
     "web3-validator": "^2.0.3",
     "webextension-polyfill": "^0.9.0"
   },
