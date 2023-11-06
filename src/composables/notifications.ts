@@ -227,7 +227,6 @@ export function useNotifications({
     notificationsSuperhero,
     notificationsWallet,
     notificationsSettings,
-    canLoadMore,
     loadMoreNotifications,
     markAsReadAll,
     addWalletNotification,

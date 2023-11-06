@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="showWidget"
-    ref="latestTransactionCard"
+    ref="latestTransactionCardEl"
     class="latest-transaction-card"
   >
     <div class="title">
@@ -15,7 +15,7 @@
       />
       <div v-else>
         <TransactionListItem
-          v-for="transaction in latestTransactions"
+          v-for="transaction in latestTransactionsToDisplay"
           :key="`${transaction.transactionOwner}-${transaction.hash}`"
           class="transaction-item"
           :transaction="transaction"
@@ -44,6 +44,8 @@ import {
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 
+const DASHBOARD_TRANSACTION_LIMIT = 3;
+
 export default defineComponent({
   name: 'LatestTransactionsCard',
   components: {
@@ -52,31 +54,35 @@ export default defineComponent({
   },
   setup() {
     const route = useRoute();
-    const latestTransactionCard = ref<HTMLDivElement | null>(null);
+    const latestTransactionCardEl = ref<HTMLDivElement | null>(null);
     const { isOnline } = useConnection();
     const { viewportElement } = useViewport();
     const {
-      isTransactionListLoading,
-      latestTransactions,
+      allLatestTransactions,
+      areLatestTransactionsUpdating,
     } = useLatestTransactionList();
 
     const query = computed(() => route.query);
 
     const isLoading = computed(
-      () => isTransactionListLoading.value && !latestTransactions.value.length,
+      () => areLatestTransactionsUpdating.value && !allLatestTransactions.value.length,
     );
 
     const showWidget = computed(() => (
       isOnline.value
-      && (isTransactionListLoading.value || latestTransactions.value.length)
+      && (areLatestTransactionsUpdating.value || allLatestTransactions.value.length)
     ));
+
+    const latestTransactionsToDisplay = computed(
+      () => allLatestTransactions.value.slice(0, DASHBOARD_TRANSACTION_LIMIT),
+    );
 
     function conditionalUpdatingState(param?: string) {
       // if we get "latestTxHash" query params, and also all container is mounted,
       // then we can scroll the page to LatestTransactionCard
-      if (param && viewportElement.value && latestTransactionCard.value) {
+      if (param && viewportElement.value && latestTransactionCardEl.value) {
         viewportElement.value.scrollTo({
-          top: latestTransactionCard.value.getBoundingClientRect().x + 50,
+          top: latestTransactionCardEl.value.getBoundingClientRect().x + 50,
         });
       }
     }
@@ -90,8 +96,9 @@ export default defineComponent({
     });
 
     return {
-      latestTransactionCard,
-      latestTransactions,
+      allLatestTransactions,
+      latestTransactionCardEl,
+      latestTransactionsToDisplay,
       showWidget,
       isLoading,
     };

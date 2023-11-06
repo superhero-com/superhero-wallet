@@ -2,6 +2,7 @@ import { computed } from 'vue';
 import { mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
+  AccountAddress,
   Balance,
   BalanceRaw,
 } from '@/types';
@@ -14,7 +15,7 @@ import { useAccounts } from './accounts';
 import { createNetworkWatcher } from './networks';
 import { useStorageRef } from './storageRef';
 
-type Balances = Record<string, Balance>;
+type Balances = Record<AccountAddress, Balance>;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;

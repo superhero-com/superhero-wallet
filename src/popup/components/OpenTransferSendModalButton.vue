@@ -11,8 +11,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { AssetContractId } from '@/types';
 import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useConnection, useModals, usePendingMultisigTransaction } from '@/composables';
 
@@ -24,7 +25,7 @@ export default defineComponent({
   props: {
     isBig: Boolean,
     isMultisig: Boolean,
-    tokenContractId: { type: String, default: '' },
+    tokenContractId: { type: String as PropType<AssetContractId>, default: '' },
   },
   setup(props) {
     const { t } = useI18n();

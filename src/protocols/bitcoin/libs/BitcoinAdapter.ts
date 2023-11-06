@@ -12,17 +12,18 @@ import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 
 import type {
+  AccountAddress,
   AdapterNetworkSettingList,
-  AssetContractId,
   ICoin,
+  IFetchTransactionResult,
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
   IToken,
+  ITransferResponse,
   MarketData,
   NetworkTypeDefault,
-  IFetchTransactionResult,
-  ITransferResponse,
+  ITransactionApiPaginationParams,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
@@ -55,11 +56,21 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override protocolName = 'Bitcoin';
 
-  coinPrecision = BTC_COIN_PRECISION;
+  override protocolSymbol = BTC_SYMBOL;
 
-  bip32 = BIP32Factory(ecc);
+  override coinName = BTC_COIN_NAME;
 
-  networkSettings: AdapterNetworkSettingList = [
+  override coinSymbol = BTC_SYMBOL;
+
+  override coinContractId = BTC_CONTRACT_ID;
+
+  override coinPrecision = BTC_COIN_PRECISION;
+
+  override hasTokensSupport = false;
+
+  private bip32 = BIP32Factory(ecc);
+
+  private networkSettings: AdapterNetworkSettingList = [
     {
       key: 'nodeUrl',
       testId: 'url',
@@ -67,12 +78,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
   ];
-
-  coinName = BTC_COIN_NAME;
-
-  coinSymbol = BTC_SYMBOL;
-
-  protocolSymbol = BTC_SYMBOL;
 
   override getAccountPrefix() {
     const { activeNetwork } = useNetworks();
@@ -107,10 +112,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_COINGECKO_COIN_ID;
   }
 
-  override getCoinContractId(): AssetContractId {
-    return BTC_CONTRACT_ID;
-  }
-
   override getDefaultCoin(
     marketData: MarketData,
     convertedBalance?: number,
@@ -118,7 +119,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return {
       ...(marketData?.[PROTOCOLS.bitcoin] || {}),
       protocol: PROTOCOLS.bitcoin,
-      contractId: this.getCoinContractId(),
+      contractId: this.coinContractId,
       symbol: this.coinSymbol,
       decimals: this.getAmountPrecision(),
       name: BTC_COIN_NAME,
@@ -219,9 +220,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return undefined;
   }
 
-  override async fetchTransactions(
-    address: string,
-    lastTxId: string | null,
+  override async fetchAccountTransactions(
+    address: AccountAddress,
+    { lastTxId }: ITransactionApiPaginationParams = {},
   ): Promise<IFetchTransactionResult> {
     const { activeNetwork } = useNetworks();
 
@@ -235,8 +236,21 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     return {
       regularTransactions,
-      nextPageParams: regularTransactions[0]?.hash || null,
+      paginationParams: {
+        lastTxId: regularTransactions[regularTransactions.length - 1]?.hash || undefined,
+      },
     };
+  }
+
+  /**
+   * Bitcoin protocol has only one asset so this is only an alias.
+   */
+  override async fetchAccountAssetTransactions(
+    address: AccountAddress,
+    assetContractId: string,
+    params?: ITransactionApiPaginationParams,
+  ) {
+    return this.fetchAccountTransactions(address, params);
   }
 
   /**

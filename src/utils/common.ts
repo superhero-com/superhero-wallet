@@ -180,6 +180,14 @@ export function removeLocalStorageItem(keys: string[]) {
 }
 
 /**
+ * Removes `propertyName: undefined` from the object.
+ * `{ a: 1, b: undefined }` => `{ a: 1 }`
+ */
+export function removeObjectUndefinedProperties(obj: object): object {
+  return Object.fromEntries(Object.entries(obj).filter((item) => item[1] !== undefined));
+}
+
+/**
  * TODO: Probably we need to replace this with Logger.write
  */
 export function handleUnknownError(error: any) {
@@ -216,6 +224,16 @@ export async function invokeDeviceShare(text: string): Promise<void> {
 
 export function isNotFoundError(error: any) {
   return error?.statusCode === 404;
+}
+
+/**
+ * Check if object has at least one property with a value, where 0 is also a correct value.
+ * `{ test: null }` => false
+ * `{ test: 'Foo' }` => true
+ * `{ test: 0 }` => true
+ */
+export function objectHasNonEmptyProperties(obj: object): boolean {
+  return Object.values(obj).some((val) => ![null, undefined, false].includes(val));
 }
 
 export function openInNewWindow(url: string) {
@@ -294,6 +312,11 @@ export function setLocalStorageItem(keys: string[], value: any): void {
     prepareStorageKey(keys),
     JSON.stringify(value),
   );
+}
+
+export async function sleep<T>(ms: number, fn?: () => Promise<T>) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  return fn?.();
 }
 
 export function sortTransactionsByDate(transactions: ICommonTransaction[]) {
@@ -428,6 +451,6 @@ export function isCoin(assetContractId: AssetContractId): boolean {
   return PROTOCOL_LIST.some(
     (protocol) => ProtocolAdapterFactory
       .getAdapter(protocol)
-      .getCoinContractId() === assetContractId,
+      .coinContractId === assetContractId,
   );
 }

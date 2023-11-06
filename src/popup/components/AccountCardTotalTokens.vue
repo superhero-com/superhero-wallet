@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="isOnline"
+    v-if="hasTokensSupport && isOnline"
     class="account-card-total-tokens"
   >
     <div class="total-tokens">
@@ -16,23 +16,29 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { IAccount } from '@/types';
+import type { IAccount } from '@/types';
 import { useConnection, useFungibleTokens } from '@/composables';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
-    currentAccount: { type: Object as PropType<IAccount>, required: true },
+    account: { type: Object as PropType<IAccount>, required: true },
   },
   setup(props) {
     const { isOnline } = useConnection();
     const { getAccountTokenBalances } = useFungibleTokens();
 
+    const adapter = ProtocolAdapterFactory.getAdapter(props.account.protocol);
+
+    const { hasTokensSupport } = adapter;
+
     const totalTokens = computed(
-      () => getAccountTokenBalances(props.currentAccount.address).length,
+      () => getAccountTokenBalances(props.account.address).length,
     );
 
     return {
       isOnline,
+      hasTokensSupport,
       totalTokens,
     };
   },

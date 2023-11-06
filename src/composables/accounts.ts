@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import type {
+  AccountAddress,
   IAccount,
   IAccountRaw,
   IFormSelectOption,
@@ -145,7 +145,7 @@ const protocolsInUse = computed(
  * The wallets's data is created in fly with the use of computed properties.
  */
 export function useAccounts() {
-  function getAccountByAddress(address: string): IAccount | undefined {
+  function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
 
@@ -182,7 +182,7 @@ export function useAccounts() {
     }
   }
 
-  function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
+  function setActiveAccountByAddress(address?: AccountAddress) {
     if (address) {
       setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
     }
@@ -212,7 +212,7 @@ export function useAccounts() {
   /**
    * Determine if provided address belongs to any of the current user's accounts.
    */
-  function isLocalAccountAddress(address: Encoded.AccountAddress): boolean {
+  function isLocalAccountAddress(address: AccountAddress): boolean {
     return accountsAddressList.value.includes(address);
   }
 
