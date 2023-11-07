@@ -95,14 +95,11 @@
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
-          <BtnPlain
+          <BtnMaxAmount
             v-if="!isMultisig"
-            class="max-button"
-            :class="{ chosen: isMaxValue }"
+            :is-max="isMaxValue"
             @click="setMaxValue"
-          >
-            {{ $t('common.max') }}
-          </BtnPlain>
+          />
         </template>
       </TransferSendAmount>
     </template>
@@ -206,7 +203,7 @@ import BtnIcon from '@/popup/components/buttons/BtnIcon.vue';
 import PayloadDetails from '@/popup/components/PayloadDetails.vue';
 import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
@@ -216,7 +213,7 @@ import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
 export default defineComponent({
   name: 'AeTransferSendForm',
   components: {
-    BtnPlain,
+    BtnMaxAmount,
     TransferSendAmount,
     TransferSendRecipient,
     DetailsItem,
@@ -485,26 +482,6 @@ export default defineComponent({
 
   .account-selector {
     color: rgba(variables.$color-white, 0.75);
-  }
-
-  .max-button {
-    padding: 2px 8px;
-    color: variables.$color-primary;
-
-    @extend %face-sans-14-medium;
-
-    line-height: 20px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-
-    &:hover {
-      background: rgba(variables.$color-primary, 0.15);
-    }
-
-    &.chosen {
-      background: rgba(variables.$color-primary, 0.15);
-      border-color: rgba(variables.$color-primary, 0.5);
-    }
   }
 
   .payload-add-wrapper {
