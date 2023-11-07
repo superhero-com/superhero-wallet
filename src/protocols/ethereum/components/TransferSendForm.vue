@@ -35,34 +35,26 @@
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
-          <BtnPlain
-            class="max-button"
-            :class="{ chosen: formModel?.amount?.toString() === max.toString() }"
+          <BtnMaxAmount
+            :is-max="formModel?.amount?.toString() === max.toString()"
             @click="setMaxAmount"
-          >
-            {{ $t('common.max') }}
-          </BtnPlain>
+          />
         </template>
       </TransferSendAmount>
     </template>
 
-    <template
-      #extra
-    >
-      <div
+    <template #extra>
+      <DetailsItem
         v-show="activeNetwork.type !== NETWORK_TYPE_TESTNET"
+        :label="$t('modals.send.transactionSpeed')"
       >
-        <DetailsItem
-          :label="$t('modals.send.transactionSpeed')"
-        >
-          <template #value>
-            <TransactionSpeedPicker
-              v-model="feeSelectedIndex"
-              :fee-list="feeList"
-            />
-          </template>
-        </DetailsItem>
-      </div>
+        <template #value>
+          <TransactionSpeedPicker
+            v-model="feeSelectedIndex"
+            :fee-list="feeList"
+          />
+        </template>
+      </DetailsItem>
     </template>
   </TransferSendFormBase>
 </template>
@@ -104,12 +96,12 @@ import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 import TransactionSpeedPicker, { FeeItem } from '@/popup/components/TransactionSpeedPicker.vue';
-import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
+import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
 export default defineComponent({
   name: 'EthTransferSendForm',
   components: {
-    BtnPlain,
+    BtnMaxAmount,
     TransactionSpeedPicker,
     DetailsItem,
     TransferSendAmount,
@@ -291,30 +283,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-@use '../../../styles/variables';
-@use '../../../styles/typography';
-
-.transfer-send-form {
-  .max-button {
-    padding: 2px 8px;
-    color: variables.$color-primary;
-
-    @extend %face-sans-14-medium;
-
-    line-height: 20px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-
-    &:hover {
-      background: rgba(variables.$color-primary, 0.15);
-    }
-
-    &.chosen {
-      background: rgba(variables.$color-primary, 0.15);
-      border-color: rgba(variables.$color-primary, 0.5);
-    }
-  }
-}
-</style>
