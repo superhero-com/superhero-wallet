@@ -29,13 +29,9 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { isAddressValid } from '@aeternity/aepp-sdk';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 /**
@@ -375,19 +371,6 @@ export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable
       { immediate: true },
     );
   });
-}
-
-export function detectProtocolByOwner(network: string, address?: string) {
-  if (!address) {
-    return null;
-  }
-  if (address.startsWith('ak_') && isAddressValid(address)) {
-    return PROTOCOL_AETERNITY;
-  }
-  if (isBtcAddressValid(address, network)) {
-    return PROTOCOL_BITCOIN;
-  }
-  return null;
 }
 
 /**
