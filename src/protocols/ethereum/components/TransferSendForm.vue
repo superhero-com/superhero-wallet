@@ -14,7 +14,7 @@
         :placeholder="recipientPlaceholderText"
         :errors="errors"
         :protocol="PROTOCOL_ETHEREUM"
-        :validation-rules="{ address_eth: true }"
+        :validation-rules="{ account_address: [PROTOCOL_ETHEREUM] }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -24,7 +24,6 @@
         v-model="formModel.amount"
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
-        readonly
         :protocol="PROTOCOL_ETHEREUM"
         :validation-rules="{
           ...+balance.minus(fee) > 0
@@ -32,6 +31,7 @@
             : {},
           enough_coin: [fee.toString(), ETH_SYMBOL],
         }"
+        readonly
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
