@@ -3,18 +3,18 @@
     v-bind="$attrs"
     :transfer-data="transferData"
     :fee="numericFee"
-    :fee-symbol="BTC_SYMBOL"
-    :protocol="PROTOCOL_BITCOIN"
-    :custom-title="$t('modals.send.sendAsset', { name: BTC_COIN_NAME })"
+    :fee-symbol="ETH_SYMBOL"
+    :protocol="PROTOCOL_ETHEREUM"
+    :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
       <TransferSendRecipient
         v-model.trim="formModel.address"
-        :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
+        :placeholder="recipientPlaceholderText"
         :errors="errors"
-        :protocol="PROTOCOL_BITCOIN"
-        :validation-rules="{ address_btc: [activeNetwork.type] }"
+        :protocol="PROTOCOL_ETHEREUM"
+        :validation-rules="{ address_eth: true }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -25,15 +25,12 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         readonly
-        :protocol="PROTOCOL_BITCOIN"
+        :protocol="PROTOCOL_ETHEREUM"
         :validation-rules="{
           ...+balance.minus(fee) > 0
             ? { max_value: max.toString() }
             : {},
-          enough_coin: [fee.toString(), BTC_SYMBOL],
-          ...activeNetwork.type === NETWORK_TYPE_TESTNET
-            ? {}
-            : { min_value_exclusive: toBitcoin(DUST_AMOUNT) },
+          enough_coin: [fee.toString(), ETH_SYMBOL],
         }"
         @asset-selected="handleAssetChange"
       >
@@ -76,29 +73,24 @@ import {
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import BigNumber from 'bignumber.js';
-import { toBitcoin } from 'satoshi-bitcoin';
 
 import type { TransferFormModel } from '@/types';
 import {
-  useAccounts,
   useBalances,
   useNetworks,
 } from '@/composables';
+import { useEthBaseFee } from '@/protocols/ethereum/composables/ethBaseFee';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { NETWORK_TYPE_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
+import { NETWORK_TYPE_TESTNET, PROTOCOL_ETHEREUM } from '@/constants';
 import {
   executeAndSetInterval,
-  fetchJson,
 } from '@/utils';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import Logger from '@/lib/logger';
 import {
-  BTC_COIN_NAME,
-  BTC_SYMBOL,
-  DUST_AMOUNT,
-} from '@/protocols/bitcoin/config';
+  ETH_COIN_NAME,
+  ETH_SYMBOL,
+} from '@/protocols/ethereum/config';
+import { etherFromGwei } from '@/protocols/ethereum/helpers';
 
-import { INFO_BOX_TYPES } from '@/popup/components/InfoBox.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
@@ -106,12 +98,8 @@ import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmou
 import TransactionSpeedPicker, { FeeItem } from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
-import EditIcon from '@/icons/pencil.svg?vue-component';
-import DeleteIcon from '@/icons/trash.svg?vue-component';
-import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
-
 export default defineComponent({
-  name: 'BtcTransferSendForm',
+  name: 'EthTransferSendForm',
   components: {
     BtnMaxAmount,
     TransactionSpeedPicker,
@@ -132,16 +120,11 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
-    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
-
     const route = useRoute();
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
     const { balance } = useBalances();
-    const { activeAccount } = useAccounts();
-
-    const hasMultisigTokenWarning = ref(false);
-    const isUrlTippingEnabled = ref(false);
+    const { getBaseFee } = useEthBaseFee();
 
     const {
       formModel,
@@ -149,29 +132,63 @@ export default defineComponent({
       hasError,
       invoiceId,
       invoiceContract,
-      clearPayload,
       openScanQrModal,
       handleAssetChange,
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
-      protocol: PROTOCOL_BITCOIN,
+      protocol: PROTOCOL_ETHEREUM,
     });
 
+    const isTestnet = activeNetwork.value.type === NETWORK_TYPE_TESTNET;
+
     const feeSelectedIndex = ref(1);
-    const feeSlow = ref(new BigNumber(0.00002));
-    const feeMedium = ref(new BigNumber(0.00002));
-    const feeHigh = ref(new BigNumber(0.00002));
 
+    // total fee
+    const feeSlow = ref(new BigNumber(0.00000002));
+    const feeMedium = ref(new BigNumber(0.00000002));
+    const feeHigh = ref(new BigNumber(0.00000002));
+
+    // max priority fee
+    const maxPriorityFeePerGasSlow = ref(etherFromGwei(isTestnet ? 0.000001 : 0.1));
+    const maxPriorityFeePerGasMedium = ref(etherFromGwei(isTestnet ? 0.000001 : 0.15));
+    const maxPriorityFeePerGasFast = ref(etherFromGwei(isTestnet ? 0.000001 : 0.2));
+
+    // maximum fee that will be paid
+    const maxFeePerGasSlow = ref(new BigNumber(0));
+    const maxFeePerGasMedium = ref(new BigNumber(0));
+    const maxFeePerGasHigh = ref(new BigNumber(0));
+
+    // TODO - set correct time values
     const feeList = computed((): FeeItem[] => [
-      { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
-      { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
-      { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
+      {
+        fee: feeSlow.value,
+        time: 3540,
+        label: t('common.transferSpeed.slow'),
+        maxPriorityFee: maxPriorityFeePerGasSlow.value,
+        maxFeePerGas: maxFeePerGasSlow.value,
+      },
+      {
+        fee: feeMedium.value,
+        time: 600,
+        label: t('common.transferSpeed.medium'),
+        maxPriorityFee: maxPriorityFeePerGasMedium.value,
+        maxFeePerGas: maxFeePerGasMedium.value,
+      },
+      {
+        fee: feeHigh.value,
+        time: 25,
+        label: t('common.transferSpeed.fast'),
+        maxPriorityFee: maxPriorityFeePerGasFast.value,
+        maxFeePerGas: maxFeePerGasHigh.value,
+      },
     ]);
-    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
 
+    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
+
+    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_ETHEREUM })} ${t('modals.send.recipientPlaceholderENS')}`;
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -198,42 +215,15 @@ export default defineComponent({
     }
 
     async function updateFeeList() {
-      try {
-        const byteSize = (await bitcoinAdapter.constructAndSignTx(
-          // TODO: changed to 0 because balance.value can differs
-          // from totalAmount from constructAndSignTx (balance is not being updated fast enough)
-          // consider returning an actual amount in future
-          0,
-          formModel.value.address || activeAccount.value.address,
-          {
-            fee: 0,
-            ...activeAccount.value,
-          },
-        )).virtualSize();
-        const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
+      const baseFee = new BigNumber(await getBaseFee());
 
-        const feeRate = (await fetchJson(`${nodeUrl}/fee-estimates`))['5'];
-        const feeStepFactor = new BigNumber(0.5);
-        const newFeeMedium = new BigNumber(Math.ceil(feeRate * byteSize));
+      maxFeePerGasSlow.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasSlow.value);
+      maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
+      maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
 
-        feeSlow.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.minus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
-
-        feeMedium.value = new BigNumber(
-          toBitcoin(
-            // Double the fee for the testnet to match relay fee.
-            // TODO: Revisit this along with fee calculation
-            newFeeMedium.toNumber() * (activeNetwork.value.type === NETWORK_TYPE_TESTNET ? 2 : 1),
-          ),
-        );
-
-        feeHigh.value = new BigNumber(
-          toBitcoin(Math.ceil(newFeeMedium.plus(newFeeMedium.times(feeStepFactor)).toNumber())),
-        );
-      } catch (error: any) {
-        Logger.write(error);
-      }
+      feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value);
+      feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value);
+      feeHigh.value = baseFee.plus(maxPriorityFeePerGasFast.value);
     }
 
     let polling: NodeJS.Timer | null = null;
@@ -271,33 +261,24 @@ export default defineComponent({
     );
 
     return {
-      INFO_BOX_TYPES,
-      BTC_SYMBOL,
-      BTC_COIN_NAME,
-      DUST_AMOUNT,
-      PROTOCOL_BITCOIN,
+      ETH_COIN_NAME,
+      ETH_SYMBOL,
+      PROTOCOL_ETHEREUM,
       NETWORK_TYPE_TESTNET,
-      hasMultisigTokenWarning,
       formModel,
-      isUrlTippingEnabled,
       activeNetwork,
       fee,
       feeList,
+      recipientPlaceholderText,
       feeSelectedIndex,
       numericFee,
-      activeAccount,
       errors,
       balance,
       max,
-      clearPayload,
       openScanQrModal,
       handleAssetChange,
-      EditIcon,
-      DeleteIcon,
-      PlusCircleIcon,
       submit,
       setMaxAmount,
-      toBitcoin,
     };
   },
 });

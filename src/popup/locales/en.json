@@ -337,6 +337,7 @@
       "recipientPlaceholder": "Enter public address or .chain name",
       "recipientPlaceholderUrl": "Enter public address, .chain name or URL",
       "recipientPlaceholderProtocol": "Enter {name} public address",
+      "recipientPlaceholderENS": "or ENS name",
       "transactionSpeed": "Transaction speed",
       "transactionWillBeCompleted": "Transaction will be completed in ≈{time}.",
       "payload": "Payload"
@@ -1195,7 +1196,7 @@
     "nameUnregistered": "This name has already been registered.",
     "notSameAs": "Sender and receiver address are the same. You will send {0} to your own account.",
     "tokenToAnAddress": "Unfortunately you can only send AEX-9 Tokens to an address",
-    "addressBtc": "Invalid BTC address",
+    "addressGeneric": "Invalid {protocol} address",
     "minValue": "This field must be {0} or more",
     "minValueExclusive": "This field must be more than {0}",
     "enoughCoin": "Not enough {0} balance",

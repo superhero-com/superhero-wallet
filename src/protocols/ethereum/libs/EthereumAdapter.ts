@@ -6,11 +6,14 @@ import type {
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
+  NetworkTypeDefault,
 } from '@/types';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
+import { tg } from '@/popup/plugins/i18n';
 import {
   ETH_COINGECKO_COIN_ID,
   ETH_COIN_PRECISION,
+  ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_PROTOCOL_NAME,
   ETH_SYMBOL,
 } from '../config';
@@ -18,8 +21,17 @@ import {
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocolName = ETH_PROTOCOL_NAME;
 
+  networkSettings: AdapterNetworkSettingList = [
+    {
+      key: 'nodeUrl',
+      testId: 'url',
+      getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
+      getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
+  ];
+
   override getAccountPrefix() {
-    return ''; // TODO
+    return '0x';
   }
 
   override getAmountPrecision() {
@@ -35,7 +47,15 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    return undefined; // TODO
+    // temp functions to avoid errors
+    return {
+      prepareUrlForHash(address: string): any {
+        return address; // TODO
+      },
+      prepareUrlForAccount(address: string): any {
+        return address; // TODO
+      },
+    };
   }
 
   override getUrlTokenKey() {
@@ -47,15 +67,44 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getDefaultCoin(): ICoin {
-    return {} as any; // TODO
+    // TODO: implement & remove this
+    return {
+      contractId: 'ethereum',
+      decimals: 18,
+      name: 'Ethereum',
+      symbol: 'ETH',
+      id: 'ethereum',
+      lastUpdated: '2021-10-20T21:00:00.000Z',
+      ath: 0,
+      athChangePercentage: 0,
+      athDate: '',
+      atl: 0,
+      atlChangePercentage: 0,
+      atlDate: '',
+      circulatingSupply: 0,
+      currentPrice: 0,
+      fullyDilutedValuation: 0,
+      high24h: 0,
+      low24h: 0,
+      marketCap: 0,
+      marketCapChange24h: 0,
+      marketCapChangePercentage24h: 0,
+      marketCapRank: 0,
+      maxSupply: 0,
+      priceChange24h: 0,
+      priceChangePercentage24h: 0,
+      roi: {},
+      totalSupply: 0,
+      totalVolume: 0,
+    };
   }
 
-  override getNetworkSettings(): AdapterNetworkSettingList {
-    return {} as any; // TODO
+  override getNetworkSettings() {
+    return this.networkSettings;
   }
 
-  override getNetworkTypeDefaultValues(): INetworkProtocolSettings {
-    return {} as any; // TODO
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+    return ETH_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
   override async fetchBalance() {

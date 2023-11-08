@@ -27,6 +27,7 @@ import {
   TX_RETURN_TYPES,
 } from '@/protocols/aeternity/config';
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { Protocol } from './protocols';
 
 export * from './filter';
@@ -147,6 +148,7 @@ export interface IToken {
   contractId: Encoded.ContractAddress
     | typeof AE_CONTRACT_ID
     | typeof BTC_CONTRACT_ID
+    | typeof ETH_CONTRACT_ID;
   contractTxi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;

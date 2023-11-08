@@ -14,9 +14,11 @@ import { isNotFoundError, isUrlValid } from '@/utils';
 import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
 import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
+import { isEthAddressValid } from '@/protocols/ethereum/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { tg } from '@/popup/plugins/i18n';
+import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 
 defineRule('url', (url) => isUrlValid(url));
 defineRule('required', required);
@@ -44,7 +46,8 @@ configure({
         tg('validation.notSameAs', [rule.params[1] === PROTOCOL_BITCOIN ? BTC_SYMBOL : tg('common.tokens')])
       ),
       token_to_an_address: () => tg('validation.tokenToAnAddress'),
-      address_btc: () => tg('validation.addressBtc'),
+      address_btc: () => tg('validation.addressGeneric', { protocol: BTC_SYMBOL }),
+      address_eth: () => tg('validation.addressGeneric', { protocol: ETH_SYMBOL }),
       min_value: ({ rule }) => tg('validation.minValue', [rule.params[0]]),
       min_value_exclusive: ({ rule }) => tg('validation.minValueExclusive', [rule.params[0]]),
       max_value: ({ rule }) => tg('validation.maxValue', [rule.params[0]]),
@@ -141,6 +144,8 @@ export default (store) => {
     { params: ['isToken'] });
 
   defineRule('address_btc', (value, [network]) => isBtcAddressValid(value, network));
+
+  defineRule('address_eth', (value) => isEthAddressValid(value));
 
   defineRule('not_same_as', (nameOrAddress, [comparedAddress]) => {
     if (!isAensNameValid(nameOrAddress)) return nameOrAddress !== comparedAddress;
