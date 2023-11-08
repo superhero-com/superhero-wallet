@@ -2,9 +2,14 @@ import { defineRule } from 'vee-validate';
 import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
+import { isAddressValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
-import { INetwork, ObjectValues, Protocol } from '@/types';
+import {
+  INetwork,
+  NetworkType,
+  ObjectValues,
+  Protocol,
+} from '@/types';
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_TESTNET,
@@ -16,8 +21,6 @@ import { useBalances, useCurrencies, useAeSdk } from '@/composables';
 import { tg } from '@/popup/plugins/i18n';
 import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
 import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { isEthAddressValid } from '@/protocols/ethereum/helpers';
 
 defineRule(
   'required',
@@ -34,9 +37,18 @@ defineRule(
   (value: string) => isAddressValid(value) || isAensNameValid(value) || tg('validation.address'),
 );
 
+/**
+ * `networkType` is required for the Bitcoin Address validation because same account has different
+ * address on the mainnet and testnet.
+ */
 defineRule(
   'account_address',
-  (value: string) => isAddressValid(value, Encoding.AccountAddress) || tg('validation.invalidAddress'),
+  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => (
+    ProtocolAdapterFactory
+      .getAdapter(protocol)
+      .isAccountAddressValid(value, networkType)
+    || tg('validation.addressGeneric', { protocol })
+  ),
 );
 
 defineRule(
@@ -82,18 +94,6 @@ defineRule(
 defineRule(
   'max_len',
   (value: string, [arg]: [number]) => (value && value.length <= arg) || tg('validation.maxLength', [arg]),
-);
-
-defineRule(
-  'address_btc',
-  (value: string, [network]: [string]) => isBtcAddressValid(value, network) || tg('validation.addressBtc'),
-);
-
-// TODO: implement eth address validation
-defineRule(
-  'address_eth',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (value: string, [network]: any) => isEthAddressValid(value),
 );
 
 defineRule(

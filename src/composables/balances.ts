@@ -72,9 +72,9 @@ export function useBalances() {
     );
     const rawBalances = await Promise.all(balancesPromises);
     balances.value = rawBalances.reduce(
-      (acc, val, index) => ({
+      (acc, rawBalance, index) => ({
         ...acc,
-        [accounts.value[index].address]: BigNumber(val),
+        [accounts.value[index].address]: BigNumber(rawBalance || 0),
       }),
       {},
     );
