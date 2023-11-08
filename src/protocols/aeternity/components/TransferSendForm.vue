@@ -69,7 +69,7 @@
         :validation-rules="{
           aens_name_registered_or_address_or_url: isUrlTippingEnabled,
           aens_name_registered_or_address: !isUrlTippingEnabled,
-          ...(isMultisig ? { address_not_same_as: multisigVaultAddress } : {}),
+          address_not_same_as: (isMultisig) ? [multisigVaultAddress, PROTOCOL_AETERNITY] : false,
           token_to_an_address: [!isAe],
         }"
         @openQrModal="openScanQrModal"
