@@ -8,6 +8,7 @@ import {
   Psbt,
   Transaction,
 } from 'bitcoinjs-lib';
+import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 
 import type {
@@ -19,9 +20,11 @@ import type {
   MarketData,
   NetworkTypeDefault,
   IFetchTransactionResult,
+  Protocol,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
+  NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
   PROTOCOL_BITCOIN,
 } from '@/constants';
@@ -46,6 +49,8 @@ import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetwor
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
+  protocol = PROTOCOL_BITCOIN as Protocol;
+
   protocolName = 'Bitcoin';
 
   coinPrecision = BTC_COIN_PRECISION;
@@ -87,7 +92,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_CONTRACT_ID;
   }
 
-  getNetworkSettings() {
+  override getNetworkSettings() {
     return this.networkSettings;
   }
 
@@ -128,6 +133,24 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return toBitcoin(
       Number(chainFunded) - Number(chainSpent) + Number(mempoolFunded) - Number(mempoolSpent),
     ).toString();
+  }
+
+  /**
+   * `networkType` is required to validate Bitcoin address on non mainnet networks
+   * because same account has different addresses on different networks.
+   */
+  override isAccountAddressValid(address: string, networkType?: NetworkTypeDefault) {
+    try {
+      const networksMap: Record<NetworkTypeDefault, keyof typeof networks> = {
+        [NETWORK_TYPE_MAINNET]: 'bitcoin',
+        [NETWORK_TYPE_TESTNET]: 'testnet',
+      };
+      const btcNetwork = networkType ? networks[networksMap[networkType]] : undefined;
+      toOutputScript(address, btcNetwork);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {

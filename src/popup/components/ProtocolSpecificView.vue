@@ -36,15 +36,13 @@ import type {
 import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import aeternityViews from '@/protocols/aeternity/views';
 import bitcoinViews from '@/protocols/bitcoin/views';
 import ethereumViews from '@/protocols/ethereum/views';
 
 import { useRoute, useRouter } from 'vue-router';
-import {
-  detectProtocolByOwner,
-} from '@/utils';
 import {
   onIonViewDidEnter,
   onIonViewDidLeave,
@@ -77,6 +75,7 @@ export default defineComponent({
     const route = useRoute();
     const routeMeta = route.meta as WalletRouteMeta;
     const routeParams = route.params;
+    const transactionOwner = routeParams.transactionOwner as string | undefined;
 
     const router = useRouter();
 
@@ -85,16 +84,23 @@ export default defineComponent({
 
     const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
 
-    const ownerProtocol = detectProtocolByOwner(
-      activeNetwork.value.type,
-      routeParams.transactionOwner as string,
-    );
+    const protocol = ((): Protocol => {
+      if (routeMeta.isMultisig) {
+        return PROTOCOL_AETERNITY;
+      }
+      if (transactionOwner) {
+        const ownerProtocol = ProtocolAdapterFactory.getAdapterByAccountAddress(
+          transactionOwner,
+          activeNetwork.value.type,
+        )?.protocol;
+        if (ownerProtocol) {
+          return ownerProtocol;
+        }
+      }
+      return activeAccount.value.protocol;
+    })();
 
-    const importViewComponent = views[
-      routeMeta.isMultisig
-        ? PROTOCOL_AETERNITY
-        : (ownerProtocol || activeAccount.value.protocol)
-    ]?.[props.viewComponentName!];
+    const importViewComponent = views[protocol]?.[props.viewComponentName!];
 
     if (!importViewComponent) {
       if (routeMeta.redirectIfNull) {

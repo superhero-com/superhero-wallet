@@ -5,6 +5,7 @@ import {
   Encoded,
   Encoding,
   getHdWalletAccountFromSeed,
+  isAddressValid,
   Tag,
 } from '@aeternity/aepp-sdk';
 
@@ -16,6 +17,7 @@ import type {
   NetworkTypeDefault,
   IFetchTransactionResult,
   ITransaction,
+  Protocol,
 } from '@/types';
 import { PROTOCOL_AETERNITY, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
@@ -47,6 +49,8 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
+  protocol = PROTOCOL_AETERNITY as Protocol;
+
   protocolName = AE_PROTOCOL_NAME;
 
   coinPrecision = AE_COIN_PRECISION;
@@ -135,6 +139,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const sdk = await getAeSdk();
     const balanceInAettos = await sdk.getBalance(address);
     return aettosToAe(balanceInAettos);
+  }
+
+  override isAccountAddressValid(address: string) {
+    return isAddressValid(address, Encoding.AccountAddress);
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
