@@ -27,7 +27,9 @@ import { useTransactionList } from '@/composables';
 import TransactionList from '@/popup/components/TransactionList.vue';
 
 export default defineComponent({
-  components: { TransactionList },
+  components: {
+    TransactionList,
+  },
   props: {
     address: { type: String, required: true },
     additionalTransactions: { type: Array as PropType<ITransaction[]>, default: null },
