@@ -178,7 +178,7 @@ export function useTransactionList({ store }: IDefaultComposableOptions) {
 
     let preparedTransactions = [
       ...pendingTransactions,
-      ...response.regularTransactions,
+      ...(response.regularTransactions || []),
     ]
       .filter(({ type }) => !type?.startsWith('Internal'))
       .map((transaction) => ({
