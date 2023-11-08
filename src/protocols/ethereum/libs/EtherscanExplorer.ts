@@ -1,4 +1,4 @@
-export class Etherscan {
+export class EtherscanExplorer {
   explorerUrl: string;
 
   constructor(explorerUrl: string) {
