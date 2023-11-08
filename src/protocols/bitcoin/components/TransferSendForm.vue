@@ -14,7 +14,7 @@
         :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
         :errors="errors"
         :protocol="PROTOCOL_BITCOIN"
-        :validation-rules="{ address_btc: [activeNetwork.type] }"
+        :validation-rules="{ account_address: [PROTOCOL_BITCOIN, activeNetwork.type] }"
         @openQrModal="openScanQrModal"
       />
     </template>

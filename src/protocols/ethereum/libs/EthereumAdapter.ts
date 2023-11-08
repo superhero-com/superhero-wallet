@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 
+import { isAddress } from 'web3-validator';
 import type {
   AdapterNetworkSettingList,
   ICoin,
@@ -7,7 +8,9 @@ import type {
   INetworkProtocolSettings,
   ITransaction,
   NetworkTypeDefault,
+  Protocol,
 } from '@/types';
+import { PROTOCOL_ETHEREUM } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
@@ -19,7 +22,11 @@ import {
 } from '../config';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
+  override protocol = PROTOCOL_ETHEREUM as Protocol;
+
   override protocolName = ETH_PROTOCOL_NAME;
+
+  override coinPrecision = ETH_COIN_PRECISION;
 
   networkSettings: AdapterNetworkSettingList = [
     {
@@ -111,6 +118,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return ''; // TODO
   }
 
+  override isAccountAddressValid(address: string) {
+    return isAddress(address);
+  }
+
   override async isAccountUsed() {
     return false; // TODO
   }
@@ -120,7 +131,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async discoverLastUsedAccountIndex() {
-    return 0; // TODO
+    return -1; // TODO
   }
 
   override async constructAndSignTx() {

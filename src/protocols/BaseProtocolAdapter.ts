@@ -8,11 +8,15 @@ import type {
   MarketData,
   NetworkTypeDefault,
   ITransaction,
+  Protocol,
+  NetworkType,
 } from '@/types';
 /**
  *  Represents common attributes and behavior of a protocol
  */
 export abstract class BaseProtocolAdapter {
+  abstract protocol: Protocol;
+
   abstract protocolName: string;
 
   abstract coinPrecision: number;
@@ -48,6 +52,11 @@ export abstract class BaseProtocolAdapter {
   abstract getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings;
 
   abstract fetchBalance(address: string): Promise<string>;
+
+  /**
+   * Validates if the account address matches the protocol.
+   */
+  abstract isAccountAddressValid(address: string, networkType?: NetworkType): boolean;
 
   /**
    * Check whether the network has encountered this account.
