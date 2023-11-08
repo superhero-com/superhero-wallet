@@ -1,8 +1,14 @@
 import type { ProtocolViewsConfig } from '@/types';
 
 const protocolViews: ProtocolViewsConfig = {
-  AccountDetails: null,
-  AccountDetailsTransactions: null,
+  AccountDetails: () => import(
+    /* webpackChunkName: "eth-account-details" */
+    './AccountDetails.vue'
+  ),
+  AccountDetailsTransactions: () => import(
+    /* webpackChunkName: "eth-account-details-transactions" */
+    './AccountDetailsTransactions.vue'
+  ),
   AccountDetailsTokens: null,
   AccountDetailsNames: null,
   TransactionDetails: null,
