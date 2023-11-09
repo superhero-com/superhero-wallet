@@ -210,5 +210,7 @@ module.exports = {
     return config;
   },
 
-  transpileDependencies: ['@aeternity/hd-wallet', '@download/blockies'],
+  transpileDependencies: [
+    '@aeternity/hd-wallet',
+  ],
 };
