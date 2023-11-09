@@ -2,6 +2,122 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.0.2...v2.1.0) (2023-10-27)
+
+
+### Features
+
+* add ionic router outlet & ionic pages ([1d2e1a2](https://github.com/Superhero-com/superhero-wallet/commit/1d2e1a2725ee926bf3bfb0c2e64792958cde02f4))
+* build extension with ionic ([de28e9e](https://github.com/Superhero-com/superhero-wallet/commit/de28e9e543894afb2252b9484a11283bdbe6e6b7))
+* convert QR code reader to TS & compositionAPI & update design ([fb71d25](https://github.com/Superhero-com/superhero-wallet/commit/fb71d2585af20dc765b3c584dcf80e465d5dd92e))
+* handle hardware back button ([97c4994](https://github.com/Superhero-com/superhero-wallet/commit/97c4994d71d841da2f87beebca5a94644e63fab2))
+* init ionic project, configs and update package ([2f3750a](https://github.com/Superhero-com/superhero-wallet/commit/2f3750aeb808bbfe488edbe37f17abd213ac9319))
+* init ionic project, configs and update package ([ee7b4a8](https://github.com/Superhero-com/superhero-wallet/commit/ee7b4a8adc093f6d34ee62d12ce0513481522489))
+* lock screen orientation in portrait ([c2a0b88](https://github.com/Superhero-com/superhero-wallet/commit/c2a0b88299f46c006dd2553d754e018c6a4410dd))
+* make transactions default view for account details ([4514e8c](https://github.com/Superhero-com/superhero-wallet/commit/4514e8c7a54234e1d0eefe51b08162541c42b1d3))
+* mount router when ready,  add ionic mode and styles ([81a1856](https://github.com/Superhero-com/superhero-wallet/commit/81a185685a40ef664d3add33cc453d2f0ee54555))
+* remove assets for landscape ([01c5a47](https://github.com/Superhero-com/superhero-wallet/commit/01c5a47cf75de585ada2a9795b17f3aa1af7172e))
+* remove cordova headercolor plugin ([463b38a](https://github.com/Superhero-com/superhero-wallet/commit/463b38a0ecd43094729450bcff3d905417231a8a))
+* replace default animations ([d3a80ab](https://github.com/Superhero-com/superhero-wallet/commit/d3a80abd86b0a582d59d8d42233944fc681ec7f4))
+* save and restore transfer state when user needs to give access to camera in extension ([1026b62](https://github.com/Superhero-com/superhero-wallet/commit/1026b62c7a39eb00ab66cb217ce76b811bfee906))
+* use capacitor plugin for network status ([afaa492](https://github.com/Superhero-com/superhero-wallet/commit/afaa49239a299bcabb0e45c140dc1fc1a7ec32b6))
+* use capacitor StatusBar ([0f0ac1d](https://github.com/Superhero-com/superhero-wallet/commit/0f0ac1dbbad111fd0a5d6089e979509bae1b4d10))
+* use ion-header for header component ([43547f1](https://github.com/Superhero-com/superhero-wallet/commit/43547f170b973dc231d8773bdcd9781fee5511ca))
+
+
+### Bug Fixes
+
+* account details doesnt always cover whole area ([1798162](https://github.com/Superhero-com/superhero-wallet/commit/1798162c159d573a356431d98d46c1b1d7dcb36e))
+* account details safe area top bug ([bec1ae1](https://github.com/Superhero-com/superhero-wallet/commit/bec1ae1b01be1edf8a14acbbc770a33cb8449b63))
+* add account card swiper issues ([5681688](https://github.com/Superhero-com/superhero-wallet/commit/5681688d7600275987a6192b1e6ca363db22647d))
+* add filter functionality on bitcoin details page ([10bdb3c](https://github.com/Superhero-com/superhero-wallet/commit/10bdb3cee2199ba18842f9c6c9eb8a3032bf18d7))
+* apps-browser custom url pointer issue ([782f3b9](https://github.com/Superhero-com/superhero-wallet/commit/782f3b92e8c17a2145e061f88e09b815f3abd1f4))
+* background ion-content color ([d7d6520](https://github.com/Superhero-com/superhero-wallet/commit/d7d6520ebd7ea7eb07e1807d7a9bb1a453885caa))
+* bitcoin transactions not loading ([01677db](https://github.com/Superhero-com/superhero-wallet/commit/01677db2fb097839f12a507363a2222f8c9e2555))
+* buttons on multisig propose ([5ee11cf](https://github.com/Superhero-com/superhero-wallet/commit/5ee11cfa2636db3a65a50c9fe3a57d0c8cb9bcaa))
+* different popup at extension sizing at macOS ([758eaf2](https://github.com/Superhero-com/superhero-wallet/commit/758eaf262f1f6521a765c11f5196483b70864660))
+* dont show 404 page when closing a page ([338f86b](https://github.com/Superhero-com/superhero-wallet/commit/338f86b1512ff55eac380ce1f8f8eb910dffe8cb))
+* extension not rendering properly on firefox ([97dddc3](https://github.com/Superhero-com/superhero-wallet/commit/97dddc3f7585a5b17b2d90b06a5a41d4f851f2b6))
+* filters functionality ([43a6347](https://github.com/Superhero-com/superhero-wallet/commit/43a63478139877b0e6c1851643424a9b77d2a62b))
+* fix refresh action in daepps browser. Issue arised on ios ([e002bee](https://github.com/Superhero-com/superhero-wallet/commit/e002beef18af86cd4009b2688fab472a859bb7fd))
+* font rendering issues ([396eca8](https://github.com/Superhero-com/superhero-wallet/commit/396eca81320e901d80544e5d2c0d7d87599bbc0e))
+* full screen loading ([c391825](https://github.com/Superhero-com/superhero-wallet/commit/c3918253cdc1213255aea2850457d7e572a700b5))
+* icons on index page ([adf6f4f](https://github.com/Superhero-com/superhero-wallet/commit/adf6f4fb15f68984154a95982c318ea1a7c29aa7))
+* inactive last used multisig account card ([c629e44](https://github.com/Superhero-com/superhero-wallet/commit/c629e44c40cc71cd9938ea163714e1b3a71133e7))
+* ionic caching wrong account details page ([2ec098a](https://github.com/Superhero-com/superhero-wallet/commit/2ec098aa6768c3ffa3732dc36d308b6e01ebe7c4))
+* ionic dynamic height tabs ([d2828df](https://github.com/Superhero-com/superhero-wallet/commit/d2828dff07cf65e85b0d8e23441abce7c5d3f5f4))
+* ionic jumping animation on firefox ([18b9471](https://github.com/Superhero-com/superhero-wallet/commit/18b9471abaf4222d16c89879cbc8c435db4082b1))
+* ionic lifecycle methods do not trigger ([47c6f13](https://github.com/Superhero-com/superhero-wallet/commit/47c6f13c2413833e7e571768ce2bf323d852add4))
+* ionic routing issues ([306d65e](https://github.com/Superhero-com/superhero-wallet/commit/306d65eef9bdf34545dde6a7e4091c05f10aff8e))
+* iOS header issue ([a96d881](https://github.com/Superhero-com/superhero-wallet/commit/a96d881604e9d96c94dd8836b73c5bfd41813602))
+* ios padding top on index.vue ([629f59b](https://github.com/Superhero-com/superhero-wallet/commit/629f59b9b0bcbbf9a5373630c03ccb2369554c3f))
+* linting issues ([dc3fc21](https://github.com/Superhero-com/superhero-wallet/commit/dc3fc21db11f115e7f13ef914a9fb8bc389c10d2))
+* load notifications and transactions in chunks ([8a3ecef](https://github.com/Superhero-com/superhero-wallet/commit/8a3ecefca900009bc16ed5911a85cd26e5567e0e))
+* multisig related ionic bugs ([869be02](https://github.com/Superhero-com/superhero-wallet/commit/869be023a5c7abb7236b2888a59b35e944557105))
+* network switcher visible during page transitions ([b20283b](https://github.com/Superhero-com/superhero-wallet/commit/b20283b7382b190bfb6295d1010b89eeca5683b1))
+* open external links on mobile correctly ([6881796](https://github.com/Superhero-com/superhero-wallet/commit/68817968282cbe51446ea2054d22f34be50cf53c))
+* paddings on settings pages ([689fcab](https://github.com/Superhero-com/superhero-wallet/commit/689fcab249b100099bf9b7a546e2faff5df67f07))
+* pass route params to prevent errors related with ionic router ([f387b3d](https://github.com/Superhero-com/superhero-wallet/commit/f387b3dfd04c6626458826e4997a3457a8a7509c))
+* place extension on center when open as tab ([3af898f](https://github.com/Superhero-com/superhero-wallet/commit/3af898fb055196d51688b3113cf794c4904ff1b4))
+* pr comments, scrollState and css ([8daf729](https://github.com/Superhero-com/superhero-wallet/commit/8daf72901a1243bcd6f93b7cbbc661ca71a83123))
+* qr scanner black screen issue ([1cdfc83](https://github.com/Superhero-com/superhero-wallet/commit/1cdfc839f104a0bcb1ce93320382060e87200c24))
+* qr scanner not showing ([eaaa9e1](https://github.com/Superhero-com/superhero-wallet/commit/eaaa9e199be30fa2f0df09ba8aada67c43282af7))
+* redirect if no multisig ([0ae9bab](https://github.com/Superhero-com/superhero-wallet/commit/0ae9bab955ec98196994af074030b00984c51e94))
+* reset wallet action ([4bccf5b](https://github.com/Superhero-com/superhero-wallet/commit/4bccf5b73ba020638ad071cfd4f7988a1eb1937e))
+* set correct version name for android app ([be4b57e](https://github.com/Superhero-com/superhero-wallet/commit/be4b57e9ec6ee9d1cf295371c7bdf4f4b753687e))
+* set full screen loader correctly ([95078c4](https://github.com/Superhero-com/superhero-wallet/commit/95078c4f19e562f89b256eafa52d03a1e178bbd4))
+* shifted tabs on tx list token/coin details ([cd86796](https://github.com/Superhero-com/superhero-wallet/commit/cd867967571776019a17230579c3aa713075c75e))
+* show correct address in the account selector ([c5b0fdc](https://github.com/Superhero-com/superhero-wallet/commit/c5b0fdcb68657be893f58a9c46cbe19fcc9bc209))
+* sort pending multisig transaction correctly ([f2fd1b3](https://github.com/Superhero-com/superhero-wallet/commit/f2fd1b32a62b0040bcf6e9e93b9568768591882f))
+* splash screen white screen issue ([1d47223](https://github.com/Superhero-com/superhero-wallet/commit/1d472238370e81a51d1f9dcb7a9568720bf2a99c))
+* svg animatios on ff extension ([f0a6f7e](https://github.com/Superhero-com/superhero-wallet/commit/f0a6f7e0a9a32273a605233d9788126afad198fe))
+* swiper on ionic ([bcb385e](https://github.com/Superhero-com/superhero-wallet/commit/bcb385e3b05af08206e618c433ca7e6d0e50aae4))
+* terms and conditions scrolling not working in ios. Removed overflow auto css property ([00c8325](https://github.com/Superhero-com/superhero-wallet/commit/00c8325a7648b60c943d32b5311af180ff4931e5))
+* **transaction-details-base:** copy correct hash ([ebbbfe0](https://github.com/Superhero-com/superhero-wallet/commit/ebbbfe0ce7e75a2709a760a947506f15a23fbc41))
+* use back transitions animations at back and close ([44f1cba](https://github.com/Superhero-com/superhero-wallet/commit/44f1cba98d7b42a7160fa0fd53bb42585713dd6f))
+* use correct back button logic ([bad1f8c](https://github.com/Superhero-com/superhero-wallet/commit/bad1f8cfa3cb45e65186eb0239c87a7b22eb34ac))
+* watch when building extension ([6316f5f](https://github.com/Superhero-com/superhero-wallet/commit/6316f5fe97fec129f4f8ab3069279916a6ff9a66))
+* weird account details page appearance ([738b328](https://github.com/Superhero-com/superhero-wallet/commit/738b3286e277d9a0eb741c1f64caf0b991bd82f5))
+
+
+### Performance
+
+* throttle scroll event handler ([fdf0e04](https://github.com/Superhero-com/superhero-wallet/commit/fdf0e046300f44e8ef5766beb9769cce67e681ba))
+
+
+### Tests
+
+* update snapshot ([44e01e9](https://github.com/Superhero-com/superhero-wallet/commit/44e01e9155b3aed2f45950a7ca1a5faa135bfc1c))
+
+
+### Maintenance
+
+* add capacitor-assets and initialize android assets ([f6d95a6](https://github.com/Superhero-com/superhero-wallet/commit/f6d95a6cfaf96c18f48702863be297f120cdd3e7))
+* add comments & use scss variables ([ad7b6e3](https://github.com/Superhero-com/superhero-wallet/commit/ad7b6e36735e00efec4afb57821b9b120ef09c72))
+* add ios platform folder ([404b217](https://github.com/Superhero-com/superhero-wallet/commit/404b217005f90aa2055977ff6279eee397d33788))
+* adjust page transitions ([9b21936](https://github.com/Superhero-com/superhero-wallet/commit/9b21936c116c07a01516be91160178ae14c2a8c7))
+* fix critical npm vulnerability issues ([98b2d94](https://github.com/Superhero-com/superhero-wallet/commit/98b2d948436510d5911ba8d7f1600ece71b62ce2))
+* fix transaction filters funtionality according to ionic elements ([fc287bf](https://github.com/Superhero-com/superhero-wallet/commit/fc287bfc18ee8ded3844130b10389638c3625091))
+* remove @ionic/pwa-elements and related files ([e9165e6](https://github.com/Superhero-com/superhero-wallet/commit/e9165e60f4773b7b6fd1fad5d99e2de9fdee6992))
+* remove preferences from config file ([1c6365f](https://github.com/Superhero-com/superhero-wallet/commit/1c6365f5a52fe47d051ce31ea9d15ec416c03fd9))
+* replace cordova clipboard plugin ([9590675](https://github.com/Superhero-com/superhero-wallet/commit/95906750f86aae3362aea5d3ae1c37d74baa0ed7))
+* replace cordova leftovers with Ionic ([f93c77e](https://github.com/Superhero-com/superhero-wallet/commit/f93c77ef02d335c273132ab9418ba3b8d60574d4))
+* replace cordova qr-scanner plugin with capacitor barcode-scanner ([2bf7c0a](https://github.com/Superhero-com/superhero-wallet/commit/2bf7c0a265b604b1493945b39e7807b644341a08))
+* replace cordova share plugin with ionic share ([d6d9b5d](https://github.com/Superhero-com/superhero-wallet/commit/d6d9b5df1f74dd725f07e7031d40c72bab1ba685))
+* replace IS_IONIC with IS_MOBILE_APP ([eeabb26](https://github.com/Superhero-com/superhero-wallet/commit/eeabb267b776d3ae40cd1afdd856aa6aa7dab507))
+* update action steps for ionic ([3517303](https://github.com/Superhero-com/superhero-wallet/commit/351730381973eda96a4f3b69fe1e4f4b119b7593))
+* update readme & scripts for signed android build ([b8d65c8](https://github.com/Superhero-com/superhero-wallet/commit/b8d65c8b5365a9bf89697846fc5d3d3f8c68c5a5))
+* update readme according to ionic ([0313fee](https://github.com/Superhero-com/superhero-wallet/commit/0313fee006c47d419c0646dd312cad49c17cfdc8))
+* update scripts ([ddc095e](https://github.com/Superhero-com/superhero-wallet/commit/ddc095eeb7948223817f86a82d3edeab364e7751))
+* updated ios files and android assets according to latest working settings ([78be82f](https://github.com/Superhero-com/superhero-wallet/commit/78be82fd0d6f1bde900ce5036b46ca57b0782b5b))
+* updated Readme instructions for ios Build ([88d5e07](https://github.com/Superhero-com/superhero-wallet/commit/88d5e07bea4f6537afd372957aeb93f4e56b5105))
+* use capacitor browser instead of cordova ([6d07fd4](https://github.com/Superhero-com/superhero-wallet/commit/6d07fd40c6d1abe178458bac4f4c26f06a8c81b2))
+* use capacitor status-bar ([4b99df1](https://github.com/Superhero-com/superhero-wallet/commit/4b99df121adcc042217f59ef5826db2d9d79f305))
+* use different notation ([0717cc1](https://github.com/Superhero-com/superhero-wallet/commit/0717cc1269f003ff00897c7a3d2717f073f0a2f0))
+* use latest ionic deeplinks implementation ([e4f53ba](https://github.com/Superhero-com/superhero-wallet/commit/e4f53ba1250040d201e2c110ffc729fa554634f0))
+* use router.replace instead of router.push, cause of ionic cache problems ([3ef754e](https://github.com/Superhero-com/superhero-wallet/commit/3ef754e1413957daeaed6bd4628ce8cedaafbb3b))
+* using composable to pass props fron TokenContainer to tabs instead of ion-router-outlet ([c0ab118](https://github.com/Superhero-com/superhero-wallet/commit/c0ab118aaf96e59f93797198185f174aa202e15b))
+
 ### [2.0.2](https://github.com/aeternity/superhero-wallet/compare/v2.0.1...v2.0.2) (2023-10-02)
 
 
