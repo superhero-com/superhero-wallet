@@ -36,6 +36,7 @@ import {
   MODAL_AE_ACCOUNT_CREATE,
   PROTOCOL_AETERNITY,
   PROTOCOL_BITCOIN,
+  PROTOCOL_ETHEREUM,
   PROTOCOLS,
 } from '@/constants';
 import {
@@ -74,14 +75,16 @@ export default defineComponent({
           break;
 
         case PROTOCOL_BITCOIN:
+        case PROTOCOL_ETHEREUM:
           idx = addRawAccount({
             isRestored: false,
-            protocol: PROTOCOL_BITCOIN,
+            protocol,
           });
-          setActiveAccountByProtocolAndIdx(PROTOCOL_BITCOIN, idx);
+          setActiveAccountByProtocolAndIdx(protocol, idx);
           break;
 
         default:
+          throw new Error(`createAccount not implemented for protocol: ${protocol}`);
       }
       setLoaderVisible(false);
       props.resolve();

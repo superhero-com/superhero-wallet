@@ -112,8 +112,8 @@ export interface IWallet {
 }
 
 export interface IHdWalletAccount {
-  publicKey: string;
-  secretKey: string;
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
   address: string;
 }
 
