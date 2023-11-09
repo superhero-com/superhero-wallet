@@ -99,7 +99,7 @@ export class AeAccountHdWallet extends AccountBase {
       : getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
     if (account && account.secretKey && account.protocol === PROTOCOL_AETERNITY) {
-      return sign(data, Buffer.from(account.secretKey, 'hex'));
+      return sign(data, account.secretKey);
     }
 
     throw new Error('Unsupported protocol');
