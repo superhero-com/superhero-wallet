@@ -114,7 +114,7 @@ export default defineComponent({
           t('transaction.spendType.in'),
         );
       } else if (
-        innerTx.value.contractId
+        innerTx.value?.contractId
         && [tippingV1, tippingV2].includes(innerTx.value.contractId)
         && includes([TX_FUNCTIONS.tip, TX_FUNCTIONS.retip], innerTx.value.function)
       ) {
@@ -149,7 +149,7 @@ export default defineComponent({
           txFunctionLabel.value,
           txTypeLabel.value,
         );
-      } else {
+      } else if (txTypeLabel.value !== arr?.[0]) {
         arr.push(txTypeLabel.value);
       }
 
