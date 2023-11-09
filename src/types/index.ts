@@ -94,11 +94,6 @@ export interface IPageableResponse<T> {
   next: string;
 }
 
-export type IKeyPair = {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-};
-
 export interface IAppData {
   name: string;
   url: string;
@@ -701,6 +696,8 @@ export interface TransferFormModel extends IFormModel {
   invoiceContract?: any;
   invoiceId?: any;
   note?: string;
+  maxPriorityFeePerGas?: string;
+  maxFeePerGas?: string;
   payload: string;
 }
 
