@@ -305,7 +305,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   ): Promise<{ hash: string }> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    return aeSdk.spendWithCustomOptions(amount, recipient as any, {
+    return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
       payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
     });
   }
