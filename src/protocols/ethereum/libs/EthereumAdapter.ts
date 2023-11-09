@@ -136,7 +136,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchTransactions() {
-    return {} as any; // TODO
+    // TODO
+    return {
+      regularTransactions: [],
+      pendingTransactions: [],
+      tipWithdrawnTransactions: [],
+      nextPageParams: null,
+    };
   }
 
   override spend() {
