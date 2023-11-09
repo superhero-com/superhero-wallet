@@ -156,6 +156,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const account = getHdWalletAccountFromSeed(seed, accountIndex);
     return {
       ...account,
+      publicKey: Buffer.from(account.publicKey),
+      secretKey: Buffer.from(account.secretKey, 'hex'),
       address: account.publicKey,
     };
   }
