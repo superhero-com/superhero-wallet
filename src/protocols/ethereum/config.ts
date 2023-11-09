@@ -13,7 +13,7 @@ export const ETH_NETWORK_DEFAULT_SETTINGS: INetworkTypeProtocolDefaultSettings =
     nodeUrl: 'https://eth.llamarpc.com', // TODO replace temp values - use our own node
   },
   [NETWORK_TYPE_TESTNET]: {
-    nodeUrl: 'https://ethereum-goerli.publicnode.com', // TODO replace temp values - use our own node
+    nodeUrl: 'https://ethereum-goerli.publicnode.com', // TODO replace temp values - use our own node also goerli will be deprecated EOY 2023
   },
 };
 
