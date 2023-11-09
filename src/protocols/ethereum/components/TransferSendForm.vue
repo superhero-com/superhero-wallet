@@ -87,6 +87,7 @@ import {
 } from '@/utils';
 import {
   ETH_COIN_NAME,
+  ETH_COIN_PRECISION,
   ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
 import { etherFromGwei } from '@/protocols/ethereum/helpers';
@@ -185,6 +186,10 @@ export default defineComponent({
     ]);
 
     const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
+    const maxFeePerGas = computed(() => feeList.value[feeSelectedIndex.value].maxFeePerGas);
+    const maxPriorityFeePerGas = computed(
+      () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
+    );
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
 
@@ -194,6 +199,8 @@ export default defineComponent({
       const inputPayload: TransferFormModel = {
         ...formModel.value,
         fee: fee.value as BigNumber,
+        maxFeePerGas: maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
+        maxPriorityFeePerGas: maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
         total: numericFee.value + +(formModel.value?.amount || 0),
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
