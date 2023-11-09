@@ -110,9 +110,9 @@ export interface IWallet {
 }
 
 export interface IHdWalletAccount {
-  publicKey: string;
-  secretKey: string;
-  address: string,
+  publicKey: string | Uint8Array;
+  secretKey: string | Uint8Array;
+  address: string;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
