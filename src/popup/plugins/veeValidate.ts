@@ -109,6 +109,18 @@ defineRule(
   },
 );
 
+defineRule(
+  'is_hex_format',
+  (value: string) => (
+    (
+      value.toString().startsWith('0x')
+      && value.length >= 3
+      && parseInt(value.slice(2), 16).toString(16) === value.slice(2).toLowerCase()
+    )
+    || tg('validation.hexFormat')
+  ),
+);
+
 export default () => {
   const { balance, updateBalances } = useBalances();
   const { currencyRates } = useCurrencies({ withoutPolling: true });
