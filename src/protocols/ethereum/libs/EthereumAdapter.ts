@@ -1,25 +1,36 @@
 /* eslint-disable class-methods-use-this */
 
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { isAddress } from 'web3-validator';
+import { toChecksumAddress, fromWei } from 'web3-utils';
+import { privateKeyToAddress } from 'web3-eth-accounts';
+import Web3Eth, { NUMBER_DATA_FORMAT, getBalance } from 'web3-eth';
+import { BIP32Factory } from 'bip32';
+
 import type {
   AdapterNetworkSettingList,
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
+  MarketData,
   NetworkTypeDefault,
   Protocol,
+  IFetchTransactionResult,
 } from '@/types';
 import { PROTOCOL_ETHEREUM } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  ETH_COINGECKO_COIN_ID,
+  ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_NETWORK_DEFAULT_SETTINGS,
-  ETH_PROTOCOL_NAME,
+  ETH_COINGECKO_COIN_ID,
+  ETH_CONTRACT_ID,
   ETH_SYMBOL,
-} from '../config';
+  ETH_PROTOCOL_NAME,
+} from '@/protocols/ethereum/config';
+import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOL_ETHEREUM as Protocol;
@@ -27,6 +38,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   override protocolName = ETH_PROTOCOL_NAME;
 
   override coinPrecision = ETH_COIN_PRECISION;
+
+  bip32 = BIP32Factory(ecc);
 
   networkSettings: AdapterNetworkSettingList = [
     {
@@ -41,7 +54,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return '0x';
   }
 
-  override getAmountPrecision() {
+  override getAmountPrecision(): number {
     return ETH_COIN_PRECISION;
   }
 
@@ -65,44 +78,26 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override getUrlTokenKey() {
-    return ''; // TODO
+  override getUrlTokenKey(): string {
+    return ETH_CONTRACT_ID;
   }
 
   override getDefaultAssetContractId() {
-    return ''; // TODO
+    return ETH_CONTRACT_ID;
   }
 
-  override getDefaultCoin(): ICoin {
-    // TODO: implement & remove this
+  override getDefaultCoin(
+    marketData: MarketData,
+    convertedBalance?: number,
+  ): ICoin {
+    // TODO Check if is correct
     return {
-      contractId: 'ethereum',
-      decimals: 18,
-      name: 'Ethereum',
-      symbol: 'ETH',
-      id: 'ethereum',
-      lastUpdated: '2021-10-20T21:00:00.000Z',
-      ath: 0,
-      athChangePercentage: 0,
-      athDate: '',
-      atl: 0,
-      atlChangePercentage: 0,
-      atlDate: '',
-      circulatingSupply: 0,
-      currentPrice: 0,
-      fullyDilutedValuation: 0,
-      high24h: 0,
-      low24h: 0,
-      marketCap: 0,
-      marketCapChange24h: 0,
-      marketCapChangePercentage24h: 0,
-      marketCapRank: 0,
-      maxSupply: 0,
-      priceChange24h: 0,
-      priceChangePercentage24h: 0,
-      roi: {},
-      totalSupply: 0,
-      totalVolume: 0,
+      ...(marketData?.[PROTOCOL_ETHEREUM] || {}),
+      contractId: ETH_CONTRACT_ID,
+      symbol: ETH_SYMBOL,
+      decimals: ETH_COIN_PRECISION,
+      name: ETH_COIN_NAME,
+      convertedBalance,
     };
   }
 
@@ -114,20 +109,37 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return ETH_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
-  override async fetchBalance() {
-    return ''; // TODO
+  override async fetchBalance(address: string): Promise<string> {
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { nodeUrl } = ethActiveNetworkSettings.value;
+    const web3Eth = new Web3Eth(nodeUrl);
+    const balanceInWei = await getBalance(web3Eth, address, 'latest', NUMBER_DATA_FORMAT);
+    return fromWei(balanceInWei, 'ether').toString();
   }
 
   override isAccountAddressValid(address: string) {
     return isAddress(address);
   }
 
-  override async isAccountUsed() {
+  override async isAccountUsed(): Promise<boolean> {
     return false; // TODO
   }
 
-  override getHdWalletAccountFromMnemonicSeed(): IHdWalletAccount {
-    return {} as any; // TODO
+  override getHdWalletAccountFromMnemonicSeed(
+    seed: Uint8Array,
+    accountIndex: number,
+  ): IHdWalletAccount {
+    const hdNodeWallet = this.bip32.fromSeed(Buffer.from(seed));
+    const path = `m/44'/60'/0'/0/${accountIndex}`;
+    const childWallet = hdNodeWallet.derivePath(path);
+
+    const address = toChecksumAddress(privateKeyToAddress(childWallet.privateKey!).toString());
+
+    return {
+      secretKey: childWallet.privateKey!,
+      publicKey: childWallet.publicKey,
+      address,
+    };
   }
 
   override async discoverLastUsedAccountIndex() {
@@ -146,7 +158,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return {} as any; // TODO
   }
 
-  override async fetchTransactions() {
+  override async fetchTransactions(): Promise<IFetchTransactionResult> {
     // TODO
     return {
       regularTransactions: [],
@@ -156,7 +168,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override spend() {
+  override async spend() {
     return {} as any; // TODO
   }
 }

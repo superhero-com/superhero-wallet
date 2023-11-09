@@ -179,8 +179,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     });
 
     return {
-      secretKey: child.privateKey as any,
-      publicKey: child.publicKey as any,
+      secretKey: child.privateKey!,
+      publicKey: child.publicKey,
       address: address!,
     };
   }
