@@ -2,9 +2,17 @@
 
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { isAddress } from 'web3-validator';
-import { toChecksumAddress, fromWei } from 'web3-utils';
-import { privateKeyToAddress } from 'web3-eth-accounts';
-import Web3Eth, { NUMBER_DATA_FORMAT, getBalance } from 'web3-eth';
+import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
+import {
+  privateKeyToAddress,
+  FeeMarketEIP1559Transaction,
+  FeeMarketEIP1559TxData,
+  bigIntToHex,
+} from 'web3-eth-accounts';
+import Web3Eth, {
+  NUMBER_DATA_FORMAT, getBalance, getTransactionCount, sendSignedTransaction,
+} from 'web3-eth';
+import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
 
 import type {
@@ -17,6 +25,7 @@ import type {
   NetworkTypeDefault,
   Protocol,
   IFetchTransactionResult,
+  IAccount,
 } from '@/types';
 import { PROTOCOL_ETHEREUM } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -45,6 +54,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       testId: 'url',
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
+    },
+    {
+      key: 'chainId',
+      required: true,
+      validationRules: {
+        invalid_hostname: false,
+        is_hex_format: true,
+      },
+      getPlaceholder: () => tg('pages.network.chainIdPlaceholder'),
+      getLabel: () => tg('pages.network.chainIdLabel'),
     },
   ];
 
@@ -166,7 +185,44 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async spend() {
-    return {} as any; // TODO
+  override async spend(
+    amount: number,
+    recipient: string,
+    options: {
+      fromAccount: IAccount;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
+  ): Promise<{ hash: string }> {
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { nodeUrl, chainId } = ethActiveNetworkSettings.value;
+    const web3Eth = new Web3Eth(nodeUrl);
+    const nonce = await getTransactionCount(web3Eth, options.fromAccount.address!, 'pending', NUMBER_DATA_FORMAT);
+
+    const hexAmount = bigIntToHex(BigInt(toWei(amount, 'ether')));
+    const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
+    const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
+
+    // All values are in wei
+    const txData: FeeMarketEIP1559TxData = {
+      chainId,
+      nonce,
+      to: recipient,
+      value: hexAmount,
+      data: '0x',
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      gasLimit: '0x5208', // 21000
+      type: '0x02',
+    };
+
+    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+
+    const signedTx = tx.sign(options.fromAccount.secretKey);
+
+    const serializedTx = signedTx.serialize();
+    const res = await sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+
+    return { hash: res.transactionHash };
   }
 }

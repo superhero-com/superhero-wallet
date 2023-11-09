@@ -29,6 +29,17 @@ defineRule('max_value', (value, [arg]) => value && BigNumber(value).isLessThanOr
 defineRule('max_redeem', (value, [arg]) => value && BigNumber(value).isLessThanOrEqualTo(arg));
 defineRule('max_value_vault', (value, [arg]) => BigNumber(value).isLessThanOrEqualTo(arg));
 defineRule('max_len', (value, [maxLength]) => value && value.length <= maxLength);
+defineRule(
+  'is_hex_format',
+  (value) => (
+    (
+      value.toString().startsWith('0x')
+      && value.length >= 3
+      && parseInt(value.slice(2), 16).toString(16) === value.slice(2).toLowerCase()
+    )
+    || tg('validation.hexFormat')
+  ),
+);
 
 configure({
   generateMessage: localize('en', {

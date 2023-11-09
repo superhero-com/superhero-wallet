@@ -172,6 +172,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const account = getHdWalletAccountFromSeed(seed, accountIndex);
     return {
       ...account,
+      publicKey: Buffer.from(account.publicKey),
+      secretKey: Buffer.from(account.secretKey, 'hex'),
       address: account.publicKey,
     };
   }
@@ -321,7 +323,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const store = this.getStore();
     const { getAeSdk } = useAeSdk({ store });
     const aeSdk = await getAeSdk();
-    return aeSdk.spendWithCustomOptions(amount, recipient as any, {
+    return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
       payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
       modal: false,
     });
