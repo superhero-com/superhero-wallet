@@ -37,7 +37,7 @@ function fallbackCopyTextToClipboard(text: string) {
 }
 
 export interface UseCopyOptions {
-  timeout?: number
+  timeout?: number;
 }
 
 export function useCopy({

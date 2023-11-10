@@ -215,10 +215,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     amountInBtc: number,
     recipient: string,
     options: {
-      address: string,
-      fee: number,
-      publicKey: Buffer,
-      secretKey: Buffer,
+      address: string;
+      fee: number;
+      publicKey: Buffer;
+      secretKey: Buffer;
     },
   ): Promise<Transaction> {
     const { activeNetwork } = useNetworks();
@@ -241,7 +241,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
      * Filter UTXos from mempool/unconfirmed
      */
     const fullUtxos = await Promise.all(utxos
-      .map(async ({ txid, vout, value }: { txid: string, vout: number, value: number }) => {
+      .map(async ({ txid, vout, value }: { txid: string; vout: number; value: number }) => {
         const rawTransactionBody = await fetch(`${nodeUrl}/tx/${txid}/hex`);
         return {
           txid,
@@ -321,10 +321,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: {
-      address: string,
-      fee: number,
-      publicKey: Buffer,
-      secretKey: Buffer,
+      address: string;
+      fee: number;
+      publicKey: Buffer;
+      secretKey: Buffer;
     },
   ): Promise<{ hash: string }> {
     const { activeNetwork } = useNetworks();

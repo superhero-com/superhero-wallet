@@ -99,7 +99,7 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.form;
     }
 
-    const steps: Record<TransferSendStep, { component: Component, onSuccess: () => void }> = {
+    const steps: Record<TransferSendStep, { component: Component; onSuccess: () => void }> = {
       [TRANSFER_SEND_STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,

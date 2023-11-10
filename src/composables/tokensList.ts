@@ -22,20 +22,20 @@ export interface UseTokensListOptions {
   /**
    * Restrict the list to tokens owned by the user
    */
-  ownedOnly?: boolean
+  ownedOnly?: boolean;
   /**
    * Restrict the list to tokens with convertedBalance greater than 0
    */
-  withBalanceOnly?: boolean
+  withBalanceOnly?: boolean;
   /**
    * Search the list by the symbol, name or contractId
    */
-  searchTerm?: Ref<string>
+  searchTerm?: Ref<string>;
 
   /**
    * Restrict the tokens list based on the account type.
    */
-  isMultisig?: boolean
+  isMultisig?: boolean;
 }
 
 export function useTokensList({

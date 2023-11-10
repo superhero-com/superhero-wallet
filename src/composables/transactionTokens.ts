@@ -21,10 +21,10 @@ import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin
 import { useFungibleTokens } from './fungibleTokens';
 
 interface UseTransactionTokensOptions {
-  transaction: ITransaction
-  direction: string
-  isAllowance: boolean
-  showDetailedAllowanceInfo?: boolean
+  transaction: ITransaction;
+  direction: string;
+  isAllowance: boolean;
+  showDetailedAllowanceInfo?: boolean;
 }
 
 export function useTransactionTokens({

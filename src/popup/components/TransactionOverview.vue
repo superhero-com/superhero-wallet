@@ -41,10 +41,10 @@ import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import TransactionInfo from './TransactionInfo.vue';
 
 interface TransactionData {
-  sender: IAccountOverview
-  recipient: IAccountOverview
-  title?: TranslateResult
-  function?: TxFunction
+  sender: IAccountOverview;
+  recipient: IAccountOverview;
+  title?: TranslateResult;
+  function?: TxFunction;
 }
 
 export default defineComponent({

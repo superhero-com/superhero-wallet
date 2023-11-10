@@ -9,9 +9,9 @@ import { AE_SYMBOL, AE_COIN_PRECISION } from '@/protocols/aeternity/config';
 
 /* eslint-disable no-unused-vars */
 interface TransactionResolverReturnData {
-  tokens: ITokenResolved[]
-  sender?: any
-  recipient?: any
+  tokens: ITokenResolved[];
+  sender?: any;
+  recipient?: any;
 }
 
 type TransactionResolver = (

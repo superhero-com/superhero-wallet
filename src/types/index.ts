@@ -10,6 +10,7 @@ import {
   Node,
   Tag,
 } from '@aeternity/aepp-sdk';
+import type { Animation } from '@ionic/vue';
 import {
   ALLOWED_ICON_STATUSES,
   INPUT_MESSAGE_STATUSES,
@@ -113,7 +114,7 @@ export interface IWallet {
 export interface IHdWalletAccount {
   publicKey: string;
   secretKey: string;
-  address: string,
+  address: string;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -122,9 +123,9 @@ export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
  * Input fields message prop type
  */
 export interface IInputMessage {
-  status?: InputMessageStatus
-  text?: string
-  hideMessage?: boolean
+  status?: InputMessageStatus;
+  text?: string;
+  hideMessage?: boolean;
 }
 
 export type IInputMessageRaw = string | IInputMessage;
@@ -148,7 +149,7 @@ export interface ITokenBalanceResponse {
 export interface IToken {
   contractId: Encoded.ContractAddress
     | typeof AE_CONTRACT_ID
-    | typeof BTC_CONTRACT_ID
+    | typeof BTC_CONTRACT_ID;
   contractTxi?: number;
   convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
@@ -384,37 +385,37 @@ export interface IGAMetaTx {
 }
 
 export interface ITx {
-  abiVersion?: number
-  accountId?: Encoded.AccountAddress
-  amount: number
+  abiVersion?: number;
+  accountId?: Encoded.AccountAddress;
+  amount: number;
   arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
-  call_data?: string // TODO incoming data is parsed with the use of camelcaseDeep, but not always
+  call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
-  code?: string
-  commitmentId?: any
+  code?: string;
+  commitmentId?: any;
   contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
-  fee: number
-  function?: TxFunction
+  fee: number;
+  function?: TxFunction;
   gaId?: string; // Generalized Account ID
-  gas?: number
-  gasPrice?: number
-  gasUsed?: number
-  log?: any[] // TODO find source
-  name?: any
-  nameFee?: number
-  nameId?: any
-  nameSalt?: string
-  nonce?: number
-  payerId?: string
+  gas?: number;
+  gasPrice?: number;
+  gasUsed?: number;
+  log?: any[]; // TODO find source
+  name?: any;
+  nameFee?: number;
+  nameId?: any;
+  nameSalt?: string;
+  nonce?: number;
+  payerId?: string;
   payload?: Encoded.Bytearray;
   pointers?: any;
   result?: string;
   return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
-  recipientId?: string
+  recipientId?: string;
   senderId?: Encoded.AccountAddress;
-  selectedTokenContractId?: string
+  selectedTokenContractId?: string;
   tag?: Tag;
   /**
    * Middleware represents the `type` with different case than the aeSdk.
@@ -425,7 +426,7 @@ export interface ITx {
   tx?: {
     signatures: string[];
     tx: ITx | IGAAttachTx | IGAMetaTx;
-  }
+  };
   VSN?: string;
 }
 
@@ -452,7 +453,7 @@ export interface ITransaction {
 }
 
 export interface IDashboardTransaction extends ITransaction {
-  direction?: 'received' | 'send'
+  direction?: 'received' | 'send';
 }
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
@@ -551,7 +552,7 @@ export interface IMiddleware {
   getNamePointees: GenericApiMethod;
   getNamePointers: GenericApiMethod;
   getNames: (
-    options: { owned_by: Encoded.AccountAddress, state: string, limit: number }
+    options: { owned_by: Encoded.AccountAddress; state: string; limit: number }
   ) => Promise<any>;
   getOracle: GenericApiMethod;
   getOracles: GenericApiMethod;
@@ -571,19 +572,19 @@ export interface IMiddleware {
 }
 
 export interface IMiddlewareStatus {
-  mdwAsyncTasks: Record<string, number>
-  mdwGensPerMinute: number
-  mdwHeight: number
-  mdwRevision: string
-  mdwSynced: boolean
-  mdwSyncing: boolean
-  mdwTxIndex: number
-  mdwVersion: string
-  nodeHeight: number
-  nodeProgress: number
-  nodeRevision: string
-  nodeSyncing: boolean
-  nodeVersion: string
+  mdwAsyncTasks: Record<string, number>;
+  mdwGensPerMinute: number;
+  mdwHeight: number;
+  mdwRevision: string;
+  mdwSynced: boolean;
+  mdwSyncing: boolean;
+  mdwTxIndex: number;
+  mdwVersion: string;
+  nodeHeight: number;
+  nodeProgress: number;
+  nodeRevision: string;
+  nodeSyncing: boolean;
+  nodeVersion: string;
 }
 
 export type PopupActionType = ObjectValues<typeof POPUP_ACTIONS>;
@@ -627,42 +628,42 @@ export interface TokenProps {
 }
 
 export interface IResponseChallenge {
-  challenge: string
-  payload: string
+  challenge: string;
+  payload: string;
 }
 
 export interface IRespondChallenge {
-  challenge: string
-  signature: string
+  challenge: string;
+  signature: string;
 }
 
 export interface IAuctionBid {
-  accountId: string
-  nameFee: BigNumber
+  accountId: string;
+  nameFee: BigNumber;
 }
 
 export interface IAuction {
-  bids: IAuctionBid[]
-  expiration: number
+  bids: IAuctionBid[];
+  expiration: number;
 }
 
 export interface IActiveAuctionBid {
-  accountId: string
-  fee: number
-  name: string
-  nameFee: string
-  nameId: string
-  nameSalt: number
-  nonce: number
-  ttl: number
-  type: string
-  version: number
+  accountId: string;
+  fee: number;
+  name: string;
+  nameFee: string;
+  nameId: string;
+  nameSalt: number;
+  nonce: number;
+  ttl: number;
+  type: string;
+  version: number;
 }
 
 export interface IActiveAuction {
-  expiration: number
-  lastBid: IActiveAuctionBid
-  name: string
+  expiration: number;
+  lastBid: IActiveAuctionBid;
+  name: string;
 }
 
 export type IMultisigCreationPhase = keyof typeof MULTISIG_CREATION_PHASES | null;
@@ -683,7 +684,7 @@ export interface IDefaultComposableOptions {
   /**
    * TODO: Temporary solution to avoid dependency circle
    */
-  store: Store<any>
+  store: Store<any>;
 }
 
 export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];
@@ -699,12 +700,12 @@ export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER
 export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
 
 export interface TransferFormModel extends IFormModel {
-  fee?: BigNumber
-  total?: number
-  invoiceContract?: any
-  invoiceId?: any
-  note?: string
-  payload: string
+  fee?: BigNumber;
+  total?: number;
+  invoiceContract?: any;
+  invoiceId?: any;
+  note?: string;
+  payload: string;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
@@ -756,3 +757,12 @@ export interface IHistoryItem {
   title?: string;
   image?: string;
 }
+
+/**
+ * Replacement for `AnimationBuilder` present in the ionic
+ * which does not have the typings for the `opts`.
+ */
+export type IonAnimationBuilder = (
+  baseEl: Element,
+  opts: { enteringEl: Element; leavingEl: Element }
+) => Animation;

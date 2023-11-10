@@ -1,7 +1,11 @@
-import { PAGE_TRANSITION_DURATION } from '@/constants';
 import { createAnimation } from '@ionic/vue';
+import type { IonAnimationBuilder } from '@/types';
+import { PAGE_TRANSITION_DURATION } from '@/constants';
 
-export const popOutAnimation = (_: Element, opts: { enteringEl: Element, leavingEl: Element }) => {
+export const popOutAnimation: IonAnimationBuilder = (
+  baseEl: Element,
+  opts: { enteringEl: Element; leavingEl: Element },
+) => {
   const enteringAnimation = createAnimation()
     .addElement(opts.enteringEl)
     .addElement(document.querySelector('#header') as HTMLElement)

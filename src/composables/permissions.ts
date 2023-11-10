@@ -45,7 +45,7 @@ const permissions = useStorageRef<PermissionRegistry>(
   },
 );
 
-const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType; }>> = {
+const modalAndPopupTypes: Partial<Record<METHODS, { modal: string; popup: PopupType }>> = {
   [METHODS.subscribeAddress]: {
     modal: MODAL_CONFIRM_CONNECT,
     popup: POPUP_TYPE_CONNECT,

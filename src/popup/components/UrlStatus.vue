@@ -48,7 +48,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { openModal } = useModals();
 
-    const statusData = computed((): { icon: StatusIconType, title: string, msg: string } | null => {
+    const statusData = computed((): { icon: StatusIconType; title: string; msg: string } | null => {
       switch (props.status) {
         case 'verified':
           return {
