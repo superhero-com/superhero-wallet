@@ -9,7 +9,7 @@
         <div class="item">
           <AccountItem
             :address="highestBid.accountId"
-            :name="getName(highestBid.accountId)"
+            :name="getName(highestBid.accountId).value"
             :protocol="PROTOCOL_AETERNITY"
           />
           <AuctionOverview :name="name" />
@@ -26,7 +26,7 @@
           <AccountItem
             :protocol="PROTOCOL_AETERNITY"
             :address="bid.accountId"
-            :name="getName(bid.accountId)"
+            :name="getName(bid.accountId).value"
           />
         </div>
       </div>
