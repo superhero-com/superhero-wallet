@@ -7,6 +7,7 @@ import {
   prepareStorageKey,
 } from '../../../src/utils';
 import {
+  NETWORK_NAME_TESTNET,
   PROTOCOL_AETERNITY,
   STORAGE_KEYS,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
@@ -15,7 +16,6 @@ import {
   AE_NETWORK_MAINNET_ID,
 } from '../../../src/protocols/aeternity/config';
 import { CoinGecko } from '../../../src/lib/CoinGecko';
-import runMigrations from '../../../src/store/migrations';
 
 export async function getLoginState({
   balance,
@@ -23,8 +23,7 @@ export async function getLoginState({
   network,
 }) {
   return {
-    ...(await runMigrations()),
-    current: { network: network || 'Testnet' },
+    current: { network: network || NETWORK_NAME_TESTNET },
     balance,
     ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
   };

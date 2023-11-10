@@ -39,8 +39,7 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { useAccounts, useNetworks } from '@/composables';
-import { useDispatch } from '@/composables/vuex';
+import { useAccounts, useAeSdk, useNetworks } from '@/composables';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 
 import Modal from '../Modal.vue';
@@ -63,14 +62,13 @@ export default defineComponent({
     const router = useRouter();
     const { resetAccounts } = useAccounts();
     const { resetNetworks } = useNetworks();
-
-    const resetVuex = useDispatch('reset');
+    const { resetConnectedDapps } = useAeSdk();
 
     async function onReset() {
       props.resolve();
       resetAccounts();
       resetNetworks();
-      resetVuex();
+      resetConnectedDapps();
       router.push({ name: ROUTE_INDEX });
     }
 

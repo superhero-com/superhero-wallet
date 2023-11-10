@@ -1,38 +1,21 @@
 import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
-import { METHODS } from '@aeternity/aepp-sdk';
 import { IN_FRAME } from '@/constants';
-import { useMiddleware, useAeSdk, useNetworks } from '@/composables';
-import store from '../store';
+import {
+  useMiddleware,
+  useAeSdk,
+  useNetworks,
+  useAccounts,
+} from '@/composables';
 import { FramesConnection } from './FramesConnection';
 
 let aeSdkBlocked = false;
-
-if (IN_FRAME) {
-  store.registerModule('sdk-frame-reset', {
-    actions: {
-      async reset() {
-        const { getAeSdk } = useAeSdk();
-        const aeSdk = await getAeSdk();
-
-        Object.values(aeSdk._clients).forEach((aepp) => {
-          if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
-            aepp.sendMessage(
-              { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
-              true,
-            );
-            aepp.disconnect();
-          }
-        });
-      },
-    },
-  });
-}
 
 export default async function initSdk() {
   const { activeNetwork } = useNetworks();
   const { getAeSdk, resetNode } = useAeSdk();
   const { getMiddleware } = useMiddleware();
+  const { activeAccountGlobalIdx } = useAccounts();
 
   const [aeSdk] = await Promise.all([getAeSdk(), getMiddleware()]);
 
@@ -55,8 +38,8 @@ export default async function initSdk() {
     },
   );
 
-  store.watch(
-    (state) => state.accounts?.activeIdx,
+  watch(
+    activeAccountGlobalIdx,
     async (oldVal, newVal) => {
       if (!isEqual(oldVal, newVal) && aeSdk) {
         aeSdk._pushAccountsToApps();

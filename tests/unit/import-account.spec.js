@@ -2,12 +2,6 @@ import { mount } from '@vue/test-utils';
 import { i18n } from '@/popup/plugins/i18n';
 import AccountImport from '../../src/popup/components/Modals/AccountImport.vue';
 
-jest.mock('vuex', () => ({
-  useStore: jest.fn(() => ({
-    commit: jest.fn(),
-  })),
-}));
-
 jest.mock('vue-router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),

@@ -1,5 +1,4 @@
 import { mount, RouterLinkStub } from '@vue/test-utils';
-import Vuex from 'vuex';
 import Index from '../../src/popup/pages/Index.vue';
 import About from '../../src/popup/pages/About.vue';
 import TermsOfService from '../../src/popup/pages/TermsOfService.vue';
@@ -7,8 +6,6 @@ import PrivacyPolicy from '../../src/popup/pages/PrivacyPolicy.vue';
 import * as environment from '../../src/constants/environment';
 
 const OLD_ENV = process.env;
-
-const store = new Vuex.Store({ state: {}, getters: {} });
 
 beforeEach(() => {
   jest.resetModules();
@@ -95,7 +92,6 @@ describe.each(testCases)('Pages', (test) => {
 
     const wrapper = mount(test.page, {
       global: {
-        plugins: [store],
         mocks: {
           $t: () => 'locale-specific-text',
           $tm: () => 'locale-specific-text',

@@ -65,11 +65,9 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { WalletRouteMeta } from '@/types';
-import { watchUntilTruthy } from '@/utils';
 import {
   APP_LINK_FIREFOX,
   APP_LINK_CHROME,
@@ -114,7 +112,6 @@ export default defineComponent({
     Loader,
   },
   setup() {
-    const store = useStore();
     const route = useRoute();
     const router = useRouter();
     const { t } = useI18n();
@@ -137,7 +134,6 @@ export default defineComponent({
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);
 
-    const isRestored = computed(() => store.state.isRestored);
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
 
@@ -183,7 +179,6 @@ export default defineComponent({
     }
 
     async function verifyBackedUpSeed() {
-      await watchUntilTruthy(isRestored);
       if (!isSeedBackedUp.value) {
         addWalletNotification({
           title: t('pages.account.secureYourAccount'),
