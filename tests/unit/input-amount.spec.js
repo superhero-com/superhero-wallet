@@ -1,4 +1,3 @@
-import Vuex from 'vuex';
 import BigNumber from 'bignumber.js';
 import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
@@ -8,19 +7,9 @@ import { PROTOCOL_AETERNITY } from '../../src/constants';
 
 const maxBalance = 10000;
 
-const store = new Vuex.Store({
-  getters: {
-    currentCurrencyRate: () => 3,
-    formatCurrency: () => (value) => (+value).toFixed(2),
-  },
-});
-
 config.global = {
   mocks: {
     $t: () => 'locale-specific-text',
-  },
-  provide: {
-    store,
   },
 };
 

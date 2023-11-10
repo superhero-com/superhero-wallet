@@ -3,7 +3,6 @@
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { Store } from 'vuex';
 import {
   AensName,
   Encoded,
@@ -678,13 +677,6 @@ export interface IRawMultisigTx {
   tx: Encoded.Transaction;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface IDefaultComposableOptions {
-  /**
-   * TODO: Temporary solution to avoid dependency circle
-   */
-  store: Store<any>;
 }
 
 export type StatusIconType = typeof ALLOWED_ICON_STATUSES[number];

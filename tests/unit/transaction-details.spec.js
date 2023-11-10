@@ -1,8 +1,6 @@
 import { mount } from '@vue/test-utils';
-import Vuex from 'vuex';
 import Loader from '../../src/popup/components/Loader.vue';
 import TransactionDetails from '../../src/protocols/aeternity/views/TransactionDetails.vue';
-import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
 
 const hash = 'th_fxSJErbUC3WAqiURFSWhafRdxJC6wzbj5yUKmLTUte6bNWLB8';
 
@@ -81,8 +79,6 @@ jest.mock('vue-router', () => ({
   })),
 }));
 
-jest.mock('../../src/store/index.js', () => ({}));
-
 jest.mock('../../src/composables/transactionList.ts', () => ({
   useTransactionList: jest.fn(() => ({
     getTransactionByHash: () => getTransaction(false),
@@ -96,48 +92,6 @@ jest.mock('../../src/composables/transactionList.ts', () => ({
 }));
 
 function mountComponent() {
-  const store = new Vuex.Store({
-    state: {
-      fungibleTokens: {
-        availableTokens: {
-          ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF: {
-            contract: 'ct_JDp175ruWd7mQggeHewSLS1PFXt9AzThCDaFedxon8mF8xTRF',
-            contract_txi: 27821843,
-            decimals: 18,
-            extensions: [
-              'allowances',
-            ],
-            name: 'Wrapped Aeternity',
-            symbol: 'WAE',
-          },
-          ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb: {
-            contract: 'ct_28w7VyXS6UDNbyWZxZLtxpDKJorfpYyBQM4f9quseFEByUeDpb',
-            contract_txi: 27821844,
-            decimals: 18,
-            extensions: [
-              'allowances',
-              'mintable',
-              'burnable',
-              'swappable',
-            ],
-            name: 'TestAEX9-WaeP',
-            symbol: 'TAEX9-WaeP',
-          },
-        },
-      },
-      accounts: {
-        list: [{ idx: 0, type: 'hd-wallet' }],
-      },
-    },
-    getters: {
-      getTxType: () => () => 'provide liquidity',
-      getTxSymbol: () => () => AE_SYMBOL,
-      getTxAmountTotal: () => () => 1,
-      isTransactionAex9: () => () => true,
-      wallet: () => {},
-    },
-  });
-
   return mount(TransactionDetails, {
     shallow: true,
     global: {
@@ -150,7 +104,6 @@ function mountComponent() {
       components: {
         Loader,
       },
-      plugins: [store],
       mocks: {
         $t: () => 'locale-specific-text',
         $te: () => true,

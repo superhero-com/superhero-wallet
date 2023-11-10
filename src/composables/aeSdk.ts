@@ -204,6 +204,22 @@ export function useAeSdk() {
     );
   }
 
+  async function resetConnectedDapps() {
+    if (!IN_FRAME) {
+      return;
+    }
+    const aeSdkLocal = await getAeSdk();
+    Object.values(aeSdkLocal._clients).forEach((aepp) => {
+      if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
+        aepp.sendMessage(
+          { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
+          true,
+        );
+        aepp.disconnect();
+      }
+    });
+  }
+
   return {
     isAeNodeReady,
     isAeNodeConnecting,
@@ -219,5 +235,6 @@ export function useAeSdk() {
     resetNode,
     fetchRespondChallenge,
     createNodeInstance,
+    resetConnectedDapps,
   };
 }

@@ -1,8 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import DashboardHeader from '../../src/popup/components/DashboardHeader.vue';
 
-jest.mock('../../src/store/index.js', () => ({}));
-
 jest.mock('../../src/composables/accounts.ts', () => ({
   useAccounts: jest.fn(() => ({
     accounts: [],

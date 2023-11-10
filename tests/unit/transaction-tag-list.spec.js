@@ -1,5 +1,4 @@
 import { mount } from '@vue/test-utils';
-import Vuex from 'vuex';
 import { i18n, tg } from '@/popup/plugins/i18n';
 import { useFungibleTokens } from '@/composables';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
@@ -11,10 +10,6 @@ import {
 import {
   AENS,
 } from '../../src/constants';
-
-const store = new Vuex.Store({
-  state: {},
-});
 
 const transactionLabels = {
   payForGaAttach: [
@@ -110,7 +105,7 @@ describe('TransactionTagList', () => {
   ${props.transaction?.tx?.type ?? props.customTitle}/${props.transaction?.tx?.function}`,
     () => {
       const wrapper = mount(TransactionTagList, {
-        global: { plugins: [i18n, store] },
+        global: { plugins: [i18n] },
         props,
       });
       const { availableTokens } = useFungibleTokens();

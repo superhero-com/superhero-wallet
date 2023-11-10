@@ -14,9 +14,9 @@ export type NetworkType = NetworkTypeDefault | typeof NETWORK_TYPE_CUSTOM;
 export type NetworkProtocolSettingsRequired = 'nodeUrl';
 
 /**
- * Every protocol besides the required settings can have it's own set of settings.
+ * Every protocol besides the required settings can have its own set of settings.
  * By default it's just a dictionary, but for the protocol-specific situations
- * we can narrow the list by pass the a list of the property names.
+ * we can narrow the list by passing a list of the property names.
  */
 export type INetworkProtocolSettings<T extends string = string> =
   Record<NetworkProtocolSettingsRequired, string>
