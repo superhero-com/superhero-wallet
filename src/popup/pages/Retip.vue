@@ -148,7 +148,7 @@ export default defineComponent({
     const { createOrChangeAllowance } = useFungibleTokens();
 
     const tipId = route.query.id;
-    const tip = ref<{ url: string, id: string }>({
+    const tip = ref<{ url: string; id: string }>({
       url: 'default',
       id: '',
     });

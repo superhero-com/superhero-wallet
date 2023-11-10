@@ -122,7 +122,7 @@ export default defineComponent({
       isPendingMultisigTxCompletedAndConfirmed,
     } = usePendingMultisigTransaction();
 
-    const infoBox = computed((): { content: TranslateResult, type: InfoBoxType } => {
+    const infoBox = computed((): { content: TranslateResult; type: InfoBoxType } => {
       if (props.proposalCompleted || isPendingMultisigTxCompletedAndConfirmed.value) {
         return {
           content: t('pages.proposalDetails.infoBox.completed'),

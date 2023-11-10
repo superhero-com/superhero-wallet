@@ -41,7 +41,7 @@ import { useBalances } from './balances';
 import { useAccounts } from './accounts';
 
 export interface MaxAmountOptions {
-  formModel: Ref<IFormModel>
+  formModel: Ref<IFormModel>;
 }
 
 /**

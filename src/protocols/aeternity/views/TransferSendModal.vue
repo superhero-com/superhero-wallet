@@ -135,8 +135,8 @@ export default defineComponent({
     }
 
     const steps: Record<
-        TransferSendStepExtended,
-        { component: Component, onSuccess: () => void }
+      TransferSendStepExtended,
+      { component: Component; onSuccess: () => void }
     > = {
       [TRANSFER_SEND_STEPS.form]: {
         component: TransferSendForm,

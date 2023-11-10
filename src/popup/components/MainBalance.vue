@@ -35,7 +35,7 @@ export default defineComponent({
       const { integer, fraction, decimal } = formatNumberParts(props.balance, {
         minimumFractionDigits: 2,
         maximumFractionDigits: decimals,
-      }).reduce<{ integer: string, fraction: string, decimal: string }>((acc, current) => {
+      }).reduce<{ integer: string; fraction: string; decimal: string }>((acc, current) => {
         if (current.type === 'decimal') {
           return { ...acc, decimal: current.value };
         }
