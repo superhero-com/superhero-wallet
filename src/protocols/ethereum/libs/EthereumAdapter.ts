@@ -10,7 +10,10 @@ import {
   bigIntToHex,
 } from 'web3-eth-accounts';
 import Web3Eth, {
-  NUMBER_DATA_FORMAT, getBalance, getTransactionCount, sendSignedTransaction,
+  NUMBER_DATA_FORMAT,
+  getBalance,
+  getTransactionCount,
+  sendSignedTransaction,
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
@@ -28,6 +31,7 @@ import type {
   IAccount,
 } from '@/types';
 import { PROTOCOL_ETHEREUM } from '@/constants';
+import { getLastNotEmptyAccountIndex } from '@/utils';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
@@ -66,6 +70,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       getLabel: () => tg('pages.network.chainIdLabel'),
     },
   ];
+
+  async getTransactionCount(address: string): Promise<number> {
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { nodeUrl } = ethActiveNetworkSettings.value;
+    const web3Eth = new Web3Eth(nodeUrl);
+    const txCount = await getTransactionCount(web3Eth, address, 'pending', NUMBER_DATA_FORMAT);
+    return txCount;
+  }
 
   override getAccountPrefix() {
     return '0x';
@@ -138,8 +150,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return isAddress(address);
   }
 
-  override async isAccountUsed(): Promise<boolean> {
-    return false; // TODO
+  override async isAccountUsed(address: string): Promise<boolean> {
+    const [balance, txCount] = await Promise.all([
+      await this.fetchBalance(address),
+      this.getTransactionCount(address),
+    ]);
+
+    return (parseFloat(balance) > 0 || txCount > 0);
   }
 
   override getHdWalletAccountFromMnemonicSeed(
@@ -147,7 +164,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     accountIndex: number,
   ): IHdWalletAccount {
     const hdNodeWallet = this.bip32.fromSeed(Buffer.from(seed));
-    const path = `m/44'/60'/0'/0/${accountIndex}`;
+    const path = `m/44'/60'/${accountIndex}'/0/0`;
     const childWallet = hdNodeWallet.derivePath(path);
 
     const address = toChecksumAddress(privateKeyToAddress(childWallet.privateKey!).toString());
@@ -159,8 +176,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async discoverLastUsedAccountIndex() {
-    return -1; // TODO
+  override async discoverLastUsedAccountIndex(seed: Uint8Array): Promise<number> {
+    return getLastNotEmptyAccountIndex(
+      this.isAccountUsed.bind(this),
+      this.getHdWalletAccountFromMnemonicSeed.bind(this),
+      seed,
+    );
   }
 
   override async constructAndSignTx() {
@@ -197,7 +218,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { nodeUrl, chainId } = ethActiveNetworkSettings.value;
     const web3Eth = new Web3Eth(nodeUrl);
-    const nonce = await getTransactionCount(web3Eth, options.fromAccount.address!, 'pending', NUMBER_DATA_FORMAT);
+    const nonce = await this.getTransactionCount(options.fromAccount.address!);
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount, 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
