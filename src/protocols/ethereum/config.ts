@@ -11,7 +11,7 @@ export const ETH_COINGECKO_COIN_ID = 'ethereum';
 
 export const ETH_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IEthNetworkSettings> = {
   [NETWORK_TYPE_MAINNET]: {
-    nodeUrl: 'https://eth.llamarpc.com', // TODO replace temp values - use our own node
+    nodeUrl: 'https://ethereum.publicnode.com', // TODO replace temp values - use our own node
     chainId: '0x1',
   },
   [NETWORK_TYPE_TESTNET]: {
