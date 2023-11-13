@@ -42,6 +42,7 @@ import {
   ETH_CONTRACT_ID,
   ETH_SYMBOL,
   ETH_PROTOCOL_NAME,
+  ETH_GAS_LIMIT,
 } from '@/protocols/ethereum/config';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 
@@ -235,7 +236,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       data: '0x',
       maxPriorityFeePerGas,
       maxFeePerGas,
-      gasLimit: '0x5208', // 21000
+      gasLimit: `0x${ETH_GAS_LIMIT.toString(16)}`,
       type: '0x02',
     };
 

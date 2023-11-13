@@ -8,6 +8,7 @@ export const ETH_COIN_NAME = 'Ethereum';
 export const ETH_PROTOCOL_NAME = 'Ethereum';
 export const ETH_COIN_PRECISION = 18; // Amount of decimals
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
+export const ETH_GAS_LIMIT = 21000;
 
 export const ETH_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IEthNetworkSettings> = {
   [NETWORK_TYPE_MAINNET]: {
