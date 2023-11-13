@@ -25,7 +25,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getAmountPrecision(args?: any): number;
 
-  abstract getCoinSymbol(getShort: boolean): string;
+  abstract getCoinSymbol(getShort?: boolean): string;
 
   abstract getUrlTokenKey(): string;
 

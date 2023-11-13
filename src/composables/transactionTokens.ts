@@ -6,8 +6,9 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { PROTOCOL_BITCOIN, TX_DIRECTION } from '@/constants';
+import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
 import { toShiftedBigNumber } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   AE_COIN_PRECISION,
   AE_SYMBOL,
@@ -17,8 +18,6 @@ import {
   getTransactionTokenInfoResolver,
   isTransactionAex9,
 } from '@/protocols/aeternity/helpers';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { getTxAmountTotal as getBitcoinTxAmountTotal } from '@/protocols/bitcoin/helpers';
 import { useFungibleTokens } from './fungibleTokens';
 
 interface UseTransactionTokensOptions extends IDefaultComposableOptions {
@@ -65,11 +64,14 @@ export function useTransactionTokens({
         ...otherToken,
       }));
     }
-    if (transaction.protocol === PROTOCOL_BITCOIN) {
+
+    if (transaction.protocol && transaction.protocol !== PROTOCOL_AETERNITY) {
+      const protocolAdapter = ProtocolAdapterFactory
+        .getAdapter(transaction.protocol);
       return [{
         ...innerTx.value || {},
-        amount: getBitcoinTxAmountTotal(transaction, direction === TX_DIRECTION.received),
-        symbol: BTC_SYMBOL,
+        symbol: protocolAdapter.getCoinSymbol(),
+        amount: getTxAmountTotal(transaction, direction),
         isReceived: direction === TX_DIRECTION.received,
       }];
     }

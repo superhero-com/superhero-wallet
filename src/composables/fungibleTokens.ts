@@ -258,6 +258,18 @@ export function useFungibleTokens({ store }: IDefaultComposableOptions) {
     transaction: ITransaction,
     direction: string = TX_DIRECTION.sent,
   ) {
+    const isReceived = direction === TX_DIRECTION.received;
+
+    // This is out of place but since we are treating new protocols as fungible tokens
+    // it is better to have it here than in the protocol specific helper file
+    if (transaction.protocol && transaction.protocol !== PROTOCOL_AETERNITY) {
+      return new BigNumber(
+        transaction.tx?.amount || 0,
+      )
+        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+        .toNumber();
+    }
+
     const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
     if (contractCallData && availableTokens.value[contractCallData.token!]) {
       return +toShiftedBigNumber(
@@ -265,7 +277,6 @@ export function useFungibleTokens({ store }: IDefaultComposableOptions) {
         -availableTokens.value[contractCallData.token!].decimals,
       );
     }
-    const isReceived = direction === TX_DIRECTION.received;
 
     const rawAmount = (
       transaction.tx?.amount
