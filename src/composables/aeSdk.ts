@@ -8,7 +8,9 @@ import {
   WALLET_TYPE,
   RpcRejectedByUserError,
   METHODS,
+  RPC_STATUS,
 } from '@aeternity/aepp-sdk';
+import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import type {
   INetwork,
   IResponseChallenge,
@@ -34,6 +36,10 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { usePermissions } from './permissions';
 
+/** AeSdkWallet / onConnected / params */
+type OnAeppConnectionParams = Omit<Parameters<WalletApi[METHODS.connect]>[0], 'version'>;
+type AeppInfoData = OnAeppConnectionParams & { origin: string };
+
 let aeSdk: AeSdkSuperhero;
 let aeSdkBlocked = false;
 let storedNetworkName: string;
@@ -45,7 +51,8 @@ const isAeNodeReady = ref(false);
 const isAeNodeConnecting = ref(false);
 const isAeNodeError = ref(false);
 
-const aeppInfo: Record<string, any> = {};
+/** List of connected dapps */
+const aeppInfo: Record<string, AeppInfoData> = {};
 
 let dryAeSdk: AeSdk;
 let dryAeSdkCurrentNodeNetworkId: string;
@@ -108,7 +115,7 @@ export function useAeSdk() {
         }],
         id: 'Superhero Wallet',
         type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
-        onConnection(aeppId: string, params: any, origin: string) {
+        onConnection(aeppId: string, params: OnAeppConnectionParams, origin: string) {
           aeppInfo[aeppId] = { ...params, origin };
         },
         onDisconnect(aeppId: string) {
@@ -204,20 +211,16 @@ export function useAeSdk() {
     );
   }
 
-  async function resetConnectedDapps() {
-    if (!IN_FRAME) {
-      return;
+  async function disconnectDapps() {
+    if (IN_FRAME) {
+      const aeSdkLocal = await getAeSdk();
+      aeSdkLocal._clients.forEach((aepp, aeppId) => {
+        if (aepp.status === RPC_STATUS.CONNECTED) {
+          aepp.rpc.notify(METHODS.closeConnection, null);
+        }
+        aeSdkLocal.removeRpcClient(aeppId);
+      });
     }
-    const aeSdkLocal = await getAeSdk();
-    Object.values(aeSdkLocal._clients).forEach((aepp) => {
-      if (aepp.info.status && aepp.info.status !== 'DISCONNECTED') {
-        aepp.sendMessage(
-          { method: METHODS.closeConnection, params: { reason: 'bye' }, jsonrpc: '2.0' },
-          true,
-        );
-        aepp.disconnect();
-      }
-    });
   }
 
   return {
@@ -235,6 +238,6 @@ export function useAeSdk() {
     resetNode,
     fetchRespondChallenge,
     createNodeInstance,
-    resetConnectedDapps,
+    disconnectDapps,
   };
 }

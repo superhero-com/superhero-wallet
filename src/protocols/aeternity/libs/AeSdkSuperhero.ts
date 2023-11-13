@@ -7,6 +7,7 @@ import {
   spend,
   Encoded,
 } from '@aeternity/aepp-sdk';
+import { Accounts } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import { Ref } from 'vue';
 import type { IWalletInfo } from '@/types';
 import { PROTOCOL_AETERNITY } from '@/constants';
@@ -36,12 +37,15 @@ export class AeSdkSuperhero extends AeSdkWallet {
   }
 
   getAccounts() {
+    const accounts: Accounts = { connected: {}, current: {} };
     const { getLastActiveProtocolAccount } = useAccounts();
     const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
-    return {
-      current: { [account.address]: {} },
-      connected: {},
-    };
+
+    if (account) {
+      accounts.current[account.address] = {};
+    }
+
+    return accounts;
   }
 
   addresses() {
