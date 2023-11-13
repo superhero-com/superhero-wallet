@@ -15,8 +15,8 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   TX_FUNCTIONS_MULTISIG,
 } from '@/protocols/aeternity/config';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
-import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
 import { useTopHeaderData } from './topHeader';
@@ -24,7 +24,7 @@ import { useTopHeaderData } from './topHeader';
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction() {
-  const { getMiddleware } = useMiddleware();
+  const { getMiddleware } = useAeMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts();
   const { fetchActiveMultisigTx } = useMultisigTransactions();
   const { topBlockHeight } = useTopHeaderData();

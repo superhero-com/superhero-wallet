@@ -109,6 +109,26 @@ export function errorHasValidationKey(error: any, expectedKey: string): boolean 
 }
 
 /**
+ * Create list of callbacks
+ */
+export function createCallbackRegistry<T extends(...args: any) => any>() {
+  let currentId = 0;
+  const callbackRegistry = new Map<number, T>();
+
+  return {
+    addCallback: (callback: T) => {
+      currentId += 1;
+      const savedId = currentId;
+      callbackRegistry.set(savedId, callback);
+      return () => callbackRegistry.delete(savedId);
+    },
+    runCallbacks: (...args: Parameters<T>) => {
+      callbackRegistry.forEach((callback) => callback?.(...args as Array<any>));
+    },
+  };
+}
+
+/**
  * Following function exists mostly to satisfy TypeScript engine and is a replacement for:
  * `.filter(Boolean)` => `.filter(excludeFalsy)`
  */

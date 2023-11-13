@@ -29,17 +29,18 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { useAccounts } from './accounts';
-import { createNetworkWatcher } from './networks';
-
-const POLLING_INTERVAL = 7000;
-
-const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
-const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
 
 export interface MultisigAccountsOptions {
   pollOnce?: boolean;
   pollingDisabled?: boolean;
 }
+
+let initialized = false;
+
+const POLLING_INTERVAL = 7000;
+
+const LOCAL_STORAGE_MULTISIG_KEY = 'multisig';
+const LOCAL_STORAGE_MULTISIG_PENDING_KEY = 'multisig-pending';
 
 function storeMultisigAccounts(
   multisigAccounts: IMultisigAccount[],
@@ -65,13 +66,12 @@ const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 export function useMultisigAccounts({
   pollOnce = false,
   pollingDisabled = false,
 }: MultisigAccountsOptions = {}) {
-  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+  const { aeActiveNetworkPredefinedSettings, onNetworkChange } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { aeAccounts } = useAccounts();
 
@@ -325,7 +325,13 @@ export function useMultisigAccounts({
     }
   }
 
-  onNetworkChange(() => updateMultisigAccounts());
+  if (!initialized) {
+    initialized = true;
+
+    onNetworkChange(() => {
+      updateMultisigAccounts();
+    });
+  }
 
   return {
     multisigAccounts: allMultisigAccounts,
