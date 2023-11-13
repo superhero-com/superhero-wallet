@@ -20,13 +20,11 @@ import {
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
-import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   usePopupProps,
-  useAeSdk,
   useUi,
 } from '@/composables';
 import { routes } from './routes';
@@ -92,12 +90,6 @@ router.beforeEach(async (to, from, next) => {
       next({ name: ROUTE_APPS_BROWSER });
       return;
     }
-  }
-
-  const { isAeSdkReady } = useAeSdk();
-
-  if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
-    initSdk();
   }
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {

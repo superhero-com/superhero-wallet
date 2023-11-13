@@ -30,12 +30,8 @@ import type {
 import { TX_DIRECTION } from '@/constants';
 import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import {
-  useAeSdk,
-  useMiddleware,
-  useTransactionTx,
-} from '@/composables';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeSdk, useTransactionTx } from '@/composables';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
@@ -62,7 +58,7 @@ export default defineComponent({
     const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk();
     const { getName } = useAeNames();
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | {}>({});

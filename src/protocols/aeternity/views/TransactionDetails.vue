@@ -171,7 +171,6 @@ import type { ITransaction, TxFunctionRaw } from '@/types';
 import {
   useAccounts,
   useFungibleTokens,
-  useMiddleware,
   useMultisigAccounts,
   useTransactionList,
   useTransactionTx,
@@ -194,7 +193,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
@@ -235,7 +234,7 @@ export default defineComponent({
     const route = useRoute();
 
     const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();

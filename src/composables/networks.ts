@@ -12,6 +12,7 @@ import {
   PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
+import { createCallbackRegistry } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { tg } from '@/popup/plugins/i18n';
 import { useModals } from './modals';
@@ -54,6 +55,11 @@ const networks = computed(
 
 const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
 
+const {
+  addCallback: onNetworkChange,
+  runCallbacks: runOnNetworkChangeCallbacks,
+} = createCallbackRegistry<(newNetwork: INetwork, oldNetwork: INetwork) => any>();
+
 function ensureDefaultNetworksExists() {
   if (defaultNetworks.length === 0) {
     const networkTypes: NetworkTypeDefault[] = [NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET];
@@ -81,7 +87,9 @@ export function useNetworks() {
 
   function switchNetwork(name: string) {
     if (networks.value[name]) {
+      const oldNetwork = activeNetwork.value;
       activeNetworkName.value = name;
+      runOnNetworkChangeCallbacks(activeNetwork.value, oldNetwork);
     } else {
       throw Error(`Could not switch to "${name}" network as it does not exist`);
     }
@@ -142,26 +150,6 @@ export function useNetworks() {
     updateCustomNetwork,
     deleteCustomNetwork,
     resetNetworks,
-  };
-}
-
-/**
- * Monitor the network state and compare it with stored custom state to know when
- * user changes the network.
- */
-export function createNetworkWatcher() {
-  ensureDefaultNetworksExists();
-
-  let storedNetworkName: string;
-
-  return {
-    onNetworkChange: (callback: (newNetwork: INetwork, oldNetwork: INetwork) => void) => {
-      if (!storedNetworkName) {
-        storedNetworkName = activeNetwork.value.name;
-      } else if (storedNetworkName !== activeNetwork.value.name) {
-        callback(activeNetwork.value, networks.value[storedNetworkName]);
-        storedNetworkName = activeNetwork.value.name;
-      }
-    },
+    onNetworkChange,
   };
 }

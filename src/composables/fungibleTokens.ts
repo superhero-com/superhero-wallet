@@ -18,16 +18,18 @@ import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 
 import { aettosToAe, calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
-import { useMiddleware } from './middleware';
 import { useTippingContracts } from './tippingContracts';
-import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
 
 type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;
+
+let initialized = false;
 
 /**
  * List of all custom tokens available (currently only AE network).
@@ -46,13 +48,13 @@ const tokenBalances = useStorageRef<Record<string, IToken[]>>(
   STORAGE_KEYS.fungibleTokenBalances,
 );
 
-const { onNetworkChange } = createNetworkWatcher();
 const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
 export function useFungibleTokens() {
+  const { onNetworkChange } = useNetworks();
   const { getAeSdk } = useAeSdk();
-  const { fetchFromMiddleware } = useMiddleware();
+  const { fetchFromMiddleware } = useAeMiddleware();
   const { tippingContractAddresses } = useTippingContracts();
   const {
     isLoggedIn,
@@ -278,15 +280,6 @@ export function useFungibleTokens() {
       .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0));
   }
 
-  onNetworkChange(async (network, oldNetwork) => {
-    const newMiddlewareUrl = network.protocols[PROTOCOL_AETERNITY].middlewareUrl;
-    const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOL_AETERNITY]?.middlewareUrl;
-    if (newMiddlewareUrl !== oldMiddlewareUrl) {
-      await loadAvailableTokens();
-      await loadTokenBalances();
-    }
-  });
-
   watch(aeAccounts, (val, oldVal) => {
     if (val !== oldVal) {
       loadTokenBalances();
@@ -295,6 +288,19 @@ export function useFungibleTokens() {
 
   availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
+
+  if (!initialized) {
+    initialized = true;
+
+    onNetworkChange(async (network, oldNetwork) => {
+      const newMiddlewareUrl = network.protocols[PROTOCOL_AETERNITY].middlewareUrl;
+      const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOL_AETERNITY]?.middlewareUrl;
+      if (newMiddlewareUrl !== oldMiddlewareUrl) {
+        await loadAvailableTokens();
+        await loadTokenBalances();
+      }
+    });
+  }
 
   return {
     availableTokens,

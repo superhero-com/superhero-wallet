@@ -23,17 +23,16 @@ import {
 
 import { AE_MDW_TO_NODE_APPROX_DELAY_TIME, AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useMiddleware } from './middleware';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
+import { useNetworks } from './networks';
 import { useBalances } from './balances';
-import { createNetworkWatcher } from './networks';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 import { useFungibleTokens } from './fungibleTokens';
 
-const { onNetworkChange } = createNetworkWatcher();
+let initialized = false;
 
 const transactions = ref<IAccountTransactionsState>({});
-let isInitialized = false;
 
 function generateEmptyTransactionState(): ITransactionsState {
   return {
@@ -72,11 +71,11 @@ function setTransactionsNextPage(address: string, url: string | null) {
 }
 
 export function useTransactionList() {
+  const { onNetworkChange } = useNetworks();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { isLoggedIn, accounts, getAccountByAddress } = useAccounts();
-  const { getMiddleware } = useMiddleware();
+  const { getMiddleware } = useAeMiddleware();
   const { balances } = useBalances();
-
   const { tokenBalances } = useFungibleTokens();
 
   function getAccountAllTransactions(address: Encoded.AccountAddress) {
@@ -309,16 +308,15 @@ export function useTransactionList() {
     { deep: true },
   );
 
-  onNetworkChange(() => {
-    updateAllTransactions();
-  });
+  if (!initialized) {
+    initialized = true;
 
-  (() => {
-    if (!isInitialized) {
-      isInitialized = true;
+    updateAllTransactions();
+
+    onNetworkChange(() => {
       updateAllTransactions();
-    }
-  })();
+    });
+  }
 
   return {
     tokenBalances,

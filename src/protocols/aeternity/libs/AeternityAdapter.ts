@@ -36,8 +36,7 @@ import {
   AE_SYMBOL_SHORT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { useMiddleware } from '@/composables/middleware';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import { aettosToAe } from '../helpers';
 
@@ -177,7 +176,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     nextPageUrl: string | null,
     limit: number,
   ) {
-    const { fetchFromMiddlewareCamelCased } = useMiddleware();
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
 
     const url = ([null, ''].includes(nextPageUrl))
       ? `/v2/accounts/${address}/activities?limit=${limit}`

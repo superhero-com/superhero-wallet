@@ -26,7 +26,7 @@ jest.mock('../../src/composables', () => ({
   useAccounts: jest.fn(() => ({
     accounts: [],
   })),
-  useMiddleware: jest.fn(() => ({
+  useAeMiddleware: jest.fn(() => ({
     fetchMiddlewareStatus: jest.fn(),
   })),
   useModals: jest.fn(() => ({

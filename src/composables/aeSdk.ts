@@ -35,6 +35,7 @@ import {
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
 import { usePermissions } from './permissions';
+import { useNetworks } from './networks';
 
 /** AeSdkWallet / onConnected / params */
 type OnAeppConnectionParams = Omit<Parameters<WalletApi[METHODS.connect]>[0], 'version'>;
@@ -58,6 +59,7 @@ let dryAeSdk: AeSdk;
 let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk() {
+  const { onNetworkChange } = useNetworks();
   const {
     aeActiveNetworkSettings,
     activeNetworkName,
@@ -67,6 +69,7 @@ export function useAeSdk() {
     accountsAddressList,
     isLoggedIn,
     getLastActiveProtocolAccount,
+    onAccountChange,
   } = useAccounts();
   const { checkOrAskPermission } = usePermissions();
 
@@ -99,6 +102,19 @@ export function useAeSdk() {
     }
     isAeNodeConnecting.value = false;
     return nodeInstance;
+  }
+
+  async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
+    aeSdkBlocked = true;
+    isAeSdkReady.value = false;
+    aeSdk.pool.delete(oldNetwork.name);
+    aeSdk.addNode(
+      newNetwork.name,
+      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
+      true,
+    );
+    aeSdkBlocked = false;
+    isAeSdkReady.value = true;
   }
 
   async function initAeSdk() {
@@ -151,6 +167,15 @@ export function useAeSdk() {
     if (IN_FRAME && !FramesConnection.initialized) {
       FramesConnection.init(aeSdk);
     }
+
+    onNetworkChange((newNetwork, oldNetwork) => {
+      resetNode(oldNetwork, newNetwork);
+    });
+
+    // Inform connected DAPPs about account change
+    onAccountChange(() => {
+      aeSdk._pushAccountsToApps();
+    });
 
     aeSdkBlocked = false;
     isAeSdkReady.value = true;
@@ -207,15 +232,6 @@ export function useAeSdk() {
       challenge: responseChallenge.challenge,
       signature: signedChallenge,
     };
-  }
-
-  async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
-    aeSdk.pool.delete(oldNetwork.name);
-    aeSdk.addNode(
-      newNetwork.name,
-      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
-      true,
-    );
   }
 
   async function disconnectDapps() {

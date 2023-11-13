@@ -7,7 +7,6 @@ export * from './deepLinkApi';
 export * from './invites';
 export * from './latestTransactionList';
 export * from './maxAmount';
-export * from './middleware';
 export * from './modals';
 export * from './multisigAccounts';
 export * from './multisigAccountCreate';

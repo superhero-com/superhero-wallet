@@ -6,7 +6,12 @@ import type { IAeNetworkPredefinedSettings, IAeNetworkSettings } from '@/protoco
 import { AE_NETWORK_ADDITIONAL_SETTINGS } from '@/protocols/aeternity/config';
 
 export function useAeNetworkSettings() {
-  const { activeNetwork, activeNetworkName, areNetworksRestored } = useNetworks();
+  const {
+    activeNetwork,
+    activeNetworkName,
+    areNetworksRestored,
+    onNetworkChange,
+  } = useNetworks();
 
   const aeActiveNetworkSettings = computed(
     () => activeNetwork.value.protocols.aeternity as IAeNetworkSettings,
@@ -27,5 +32,6 @@ export function useAeNetworkSettings() {
     aeActiveNetworkSettings,
     aeActiveNetworkPredefinedSettings,
     areNetworksRestored,
+    onNetworkChange,
   };
 }
