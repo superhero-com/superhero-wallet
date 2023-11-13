@@ -152,6 +152,7 @@ export const STUB_TX_PARAMS = {
 
 export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITransaction>>> = {
   spend: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 10000000000000,
       arguments: [],
@@ -164,6 +165,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   tip: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 10000000000000000,
       arguments: [
@@ -184,6 +186,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   retip: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 200000000000000000,
       arguments: [
@@ -200,6 +203,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   tipToken: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 0,
       arguments: [
@@ -228,6 +232,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   retipToken: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 0,
       arguments: [
@@ -252,6 +257,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   claim: {
+    protocol: PROTOCOL_AETERNITY,
     claim: true,
     tx: {
       amount: 0,
@@ -277,6 +283,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   transfer: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 0,
       arguments: [
@@ -297,6 +304,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   createAllowance: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 0,
       arguments: [
@@ -317,6 +325,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   changeAllowance: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       amount: 0,
       fee: 16780000000000,
@@ -336,6 +345,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   namePreclaim: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       accountId: STUB_ADDRESS,
       commitmentId: 'cm_21m1rLtN2fNT3ovBbWBQo88rPUhbmWWv6L96Z8KH2YGiEkabtZ',
@@ -344,6 +354,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   nameClaim: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       accountId: STUB_ADDRESS,
       fee: 16560000000000,
@@ -354,6 +365,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   nameTransfer: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       accountId: STUB_ADDRESS,
       fee: 17340000000000,
@@ -364,6 +376,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   incompleteTransfer: {
+    protocol: PROTOCOL_AETERNITY,
     incomplete: true,
     tx: {
       amount: 195697771897021980,
@@ -377,6 +390,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingSpend: {
+    protocol: PROTOCOL_AETERNITY,
     pending: true,
     tx: {
       amount: 743000000000000000,
@@ -387,6 +401,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTransfer: {
+    protocol: PROTOCOL_AETERNITY,
     pending: true,
     tx: {
       amount: 195697771897021980,
@@ -399,6 +414,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTipAe: {
+    protocol: PROTOCOL_AETERNITY,
     pending: true,
     tx: {
       amount: 195697771897021980,
@@ -411,6 +427,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTipToken: {
+    protocol: PROTOCOL_AETERNITY,
     pending: true,
     tipUrl: 'http://superhero.com',
     tx: {
@@ -424,6 +441,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   payForGaAttach: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       fee: 5560000000000,
       tx: {
@@ -437,6 +455,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   gaMetaSpend: {
+    protocol: PROTOCOL_AETERNITY,
     tx: {
       fee: 76440000000000,
       gaId: STUB_ADDRESS,
