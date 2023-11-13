@@ -12,16 +12,17 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAccounts } from './accounts';
-import { createNetworkWatcher } from './networks';
 import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
 
 type Balances = Record<AccountAddress, Balance>;
+
+let initialized = false;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
   serializer: {
@@ -36,6 +37,7 @@ const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
  */
 export function useBalances() {
   const { activeAccount, accounts } = useAccounts();
+  const { onNetworkChange } = useNetworks();
   const { getCurrentCurrencyRate } = useCurrencies();
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
@@ -78,11 +80,14 @@ export function useBalances() {
     ));
   }
 
-  onNetworkChange(() => {
-    updateBalances();
-  });
-
   initPollingWatcher(() => updateBalances());
+
+  if (!initialized) {
+    onNetworkChange(() => {
+      updateBalances();
+    });
+    initialized = true;
+  }
 
   return {
     balances,

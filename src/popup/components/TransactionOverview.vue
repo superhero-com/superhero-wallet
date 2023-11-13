@@ -29,14 +29,11 @@ import type {
 } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import {
-  useAeSdk,
-  useMiddleware,
-  useTransactionTx,
-} from '@/composables';
+import { useAeSdk, useTransactionTx } from '@/composables';
 
 import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import TransactionInfo from './TransactionInfo.vue';
@@ -61,7 +58,7 @@ export default defineComponent({
 
     const { getAeSdk } = useAeSdk();
     const { getName } = useAeNames();
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | {}>({});

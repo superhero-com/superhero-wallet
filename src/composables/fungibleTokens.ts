@@ -25,9 +25,9 @@ import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternit
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
-import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
 
 let initialized = false;
 
@@ -52,7 +52,6 @@ function getProtocolAvailableTokens(protocol: Protocol): AssetList {
   return tokensAvailable.value[protocol] || {} as AssetList;
 }
 
-const { onNetworkChange } = createNetworkWatcher();
 const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
@@ -62,6 +61,7 @@ let areTokenBalancesUpdating = false;
  * Store and provide the access to all protocol's fungible tokens.
  */
 export function useFungibleTokens() {
+  const { onNetworkChange } = useNetworks();
   const { getAeSdk } = useAeSdk();
   const { tippingContractAddresses } = useTippingContracts();
   const {
@@ -244,15 +244,6 @@ export function useFungibleTokens() {
       .plus(isReceived ? 0 : tx?.tx?.tx?.fee || 0));
   }
 
-  onNetworkChange(async (network, oldNetwork) => {
-    const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
-    const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
-    if (newMiddlewareUrl !== oldMiddlewareUrl) {
-      await loadAvailableTokens();
-      await loadTokenBalances();
-    }
-  });
-
   availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
 
@@ -263,6 +254,15 @@ export function useFungibleTokens() {
     watch(accounts, (val, oldVal) => {
       if (val.length !== oldVal.length) {
         loadTokenBalances();
+      }
+    });
+
+    onNetworkChange(async (network, oldNetwork) => {
+      const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
+      const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
+      if (newMiddlewareUrl !== oldMiddlewareUrl) {
+        await loadAvailableTokens();
+        await loadTokenBalances();
       }
     });
   }

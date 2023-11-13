@@ -26,11 +26,9 @@ import {
 } from '@/constants';
 import Logger from '@/lib/logger';
 import {
-  createNetworkWatcher,
   useAccounts,
   useAeSdk,
   useModals,
-  useMiddleware,
   useStorageRef,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
@@ -39,8 +37,9 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
+import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
+import { useAeMiddleware } from './aeMiddleware';
 
 const POLLING_INTERVAL = 10000;
 
@@ -75,7 +74,6 @@ const externalNamesRegistry = ref<NamesRegistry>({});
 const auctions = ref<Record<string, IAuction>>({});
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 /**
  * Aeternity Blockchain allows to match a .chain name to the addresses (AENS service).
@@ -84,7 +82,7 @@ const { onNetworkChange } = createNetworkWatcher();
  */
 export function useAeNames() {
   const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
-  const { aeActiveNetworkSettings } = useAeNetworkSettings();
+  const { aeActiveNetworkSettings, onNetworkChange } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
@@ -93,7 +91,7 @@ export function useAeNames() {
     isMiddlewareReady,
     getMiddleware,
     fetchFromMiddlewareCamelCased,
-  } = useMiddleware();
+  } = useAeMiddleware();
 
   function ensureExternalNameRegistryExists() {
     if (!externalNamesRegistry.value[nodeNetworkId.value!]) {
@@ -301,14 +299,6 @@ export function useAeNames() {
     }
   }
 
-  onNetworkChange(async () => {
-    await Promise.all([
-      updateOwnedNames(),
-      updateDefaultNames(),
-    ]);
-    await extendExpiringOwnedNames();
-  });
-
   watch(
     aeAccounts,
     async (val, oldVal) => {
@@ -325,12 +315,19 @@ export function useAeNames() {
     updateDefaultNames();
   });
 
-  (async () => {
-    if (!initialized) {
-      initialized = true;
-      retrieveCachedChainNames();
-    }
-  })();
+  if (!initialized) {
+    initialized = true;
+
+    retrieveCachedChainNames();
+
+    onNetworkChange(async () => {
+      await Promise.all([
+        updateOwnedNames(),
+        updateDefaultNames(),
+      ]);
+      await extendExpiringOwnedNames();
+    });
+  }
 
   return {
     ownedNames,

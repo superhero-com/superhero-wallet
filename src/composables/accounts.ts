@@ -17,6 +17,7 @@ import {
   RUNNING_IN_TESTS,
 } from '@/constants';
 import {
+  createCallbackRegistry,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
@@ -26,7 +27,12 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import { useStorageRef } from './storageRef';
 
-let isInitialized = false;
+let initialized = false;
+
+const {
+  addCallback: onAccountChange,
+  runCallbacks: runOnAccountChangeCallbacks,
+} = createCallbackRegistry<(newAccount: IAccount, oldAccount: IAccount) => any>();
 
 const areAccountsRestored = ref(false);
 
@@ -175,10 +181,13 @@ export function useAccounts() {
   }
 
   function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
-    const account = getAccountByGlobalIdx(globalIdx);
-    activeAccountGlobalIdx.value = account?.globalIdx || 0;
-    if (account) {
-      protocolLastActiveGlobalIdx.value[account.protocol] = account.globalIdx;
+    const accountCurrent = activeAccount.value;
+    const accountNew = getAccountByGlobalIdx(globalIdx);
+    activeAccountGlobalIdx.value = accountNew?.globalIdx || 0;
+
+    if (accountNew && accountCurrent.address !== accountNew.address) {
+      protocolLastActiveGlobalIdx.value[accountNew.protocol] = accountNew.globalIdx;
+      runOnAccountChangeCallbacks(accountNew, accountCurrent);
     }
   }
 
@@ -255,10 +264,10 @@ export function useAccounts() {
   }
 
   (async () => {
-    if (!isInitialized) {
-      await watchUntilTruthy(isLoggedIn);
+    if (!initialized) {
+      initialized = true;
 
-      isInitialized = true;
+      await watchUntilTruthy(isLoggedIn);
 
       protocolLastActiveGlobalIdx
         .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
@@ -285,6 +294,7 @@ export function useAccounts() {
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
+    onAccountChange,
     setActiveAccountByAddress,
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,
