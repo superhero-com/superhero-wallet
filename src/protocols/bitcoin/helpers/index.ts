@@ -7,6 +7,7 @@ export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
 }
 
+// TODO Duplicate in fungibleTokens.ts composable
 export function getTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
   return new BigNumber(
     transaction.tx?.amount || 0,
