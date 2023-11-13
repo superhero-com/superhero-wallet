@@ -11,9 +11,9 @@
         TODO: Find out better way of displaying coin icons related to protocols
       -->
       <ProtocolIcon
-        v-if="imgToken?.symbol === BTC_SYMBOL"
+        v-if="showProtocolIcon"
         class="icon-image"
-        :protocol="PROTOCOL_BITCOIN"
+        :protocol="imgTokenProtocol!"
         :icon-size="iconSize"
       />
       <img
@@ -49,7 +49,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { ITokenResolved } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import { PROTOCOL_AETERNITY, PROTOCOL_BITCOIN, PROTOCOL_ETHEREUM } from '@/constants';
 import {
   truncateString as truncateStringFactory,
 } from '@/utils';
@@ -60,11 +60,13 @@ import {
   AE_SYMBOL,
 } from '@/protocols/aeternity/config';
 import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { ETH_COIN_NAME, ETH_SYMBOL } from '@/protocols/ethereum/config';
 
 import AeIcon from '@/icons/tokens/ae.svg';
 import ProtocolIcon from './ProtocolIcon.vue';
 
 const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
+const PROTOCOL_SYMBOLS = [BTC_SYMBOL, ETH_SYMBOL];
 
 export type AllowedTokenIconSize = typeof SIZES[number];
 
@@ -121,6 +123,8 @@ export default defineComponent({
         name = props.fullSymbol ? AE_COIN_SYMBOL : AE_SYMBOL;
       } else if (token.symbol === BTC_SYMBOL) {
         name = props.fullSymbol ? BTC_COIN_NAME : BTC_SYMBOL;
+      } else if (token.symbol === ETH_SYMBOL) {
+        name = props.fullSymbol ? ETH_COIN_NAME : ETH_SYMBOL;
       }
 
       return {
@@ -137,13 +141,26 @@ export default defineComponent({
         ? mapToken(props.tokens[2])
         : fromToken.value
     ));
+    const showProtocolIcon = computed(() => PROTOCOL_SYMBOLS.includes(imgToken.value?.symbol!));
+    const imgTokenProtocol = computed(() => {
+      if (imgToken.value?.isAe || imgToken.value?.contractId === AE_CONTRACT_ID) {
+        return PROTOCOL_AETERNITY;
+      }
+      if (imgToken.value?.symbol === BTC_SYMBOL) {
+        return PROTOCOL_BITCOIN;
+      }
+      if (imgToken.value?.symbol === ETH_SYMBOL) {
+        return PROTOCOL_ETHEREUM;
+      }
+      return null;
+    });
 
     return {
-      PROTOCOL_BITCOIN,
-      BTC_SYMBOL, // TODO this components should not have any protocol specific logic
       fromToken,
       toToken,
       imgToken,
+      showProtocolIcon,
+      imgTokenProtocol,
       getTokenPlaceholderUrl,
       truncateString,
     };
