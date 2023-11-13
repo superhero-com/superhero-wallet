@@ -82,6 +82,7 @@ import {
   RUNNING_IN_TESTS,
   PAGE_TRANSITION_DURATION,
 } from '@/constants';
+import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
@@ -190,13 +191,6 @@ export default defineComponent({
       }
     }
 
-    const unwatchIsLoggedIn = watch(isLoggedIn, async (val) => {
-      if (val) {
-        unwatchIsLoggedIn();
-        verifyBackedUpSeed();
-      }
-    });
-
     watch(() => route.fullPath, () => {
       if (innerElement.value) {
         innerElement.value.scrollTop = 0;
@@ -244,10 +238,12 @@ export default defineComponent({
       }
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       setDocumentHeight();
       checkExtensionUpdates();
       restoreLanguage();
+      restoreTransferSendForm();
+      watchConnectionStatus();
 
       // Hide splash screen programmatically when app is ready
       // to avoid white screen on app start
@@ -259,13 +255,15 @@ export default defineComponent({
         }, 2000);
       }
 
-      watchConnectionStatus();
-
-      restoreTransferSendForm();
-
       if (!RUNNING_IN_POPUP) {
         loadCoinsData();
       }
+
+      watchUntilTruthy(isLoggedIn).then(() => {
+        setTimeout(() => {
+          verifyBackedUpSeed();
+        }, 100);
+      });
     });
 
     return {

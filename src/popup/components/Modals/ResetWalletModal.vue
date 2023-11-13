@@ -21,16 +21,14 @@
     <template #footer>
       <BtnMain
         variant="muted"
+        :text="$t('common.cancel')"
         @click="reject"
-      >
-        {{ $t('common.cancel') }}
-      </BtnMain>
+      />
       <BtnMain
         variant="danger"
+        :text="$t('pages.resetWallet.reset')"
         @click="onReset"
-      >
-        {{ $t('pages.resetWallet.reset') }}
-      </BtnMain>
+      />
     </template>
   </Modal>
 </template>
@@ -39,7 +37,12 @@
 import { defineComponent, PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { RejectCallback, ResolveCallback } from '@/types';
-import { useAccounts, useAeSdk, useNetworks } from '@/composables';
+import {
+  useAccounts,
+  useAeSdk,
+  useNetworks,
+  useUi,
+} from '@/composables';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
 
 import Modal from '../Modal.vue';
@@ -62,13 +65,15 @@ export default defineComponent({
     const router = useRouter();
     const { resetAccounts } = useAccounts();
     const { resetNetworks } = useNetworks();
-    const { resetConnectedDapps } = useAeSdk();
+    const { resetUiSettings } = useUi();
+    const { disconnectDapps } = useAeSdk();
 
     async function onReset() {
       props.resolve();
       resetAccounts();
       resetNetworks();
-      resetConnectedDapps();
+      resetUiSettings();
+      disconnectDapps();
       router.push({ name: ROUTE_INDEX });
     }
 

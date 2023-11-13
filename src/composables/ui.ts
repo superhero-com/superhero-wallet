@@ -41,6 +41,9 @@ const otherSettings = useStorageRef<IOtherSettings>(
   },
 );
 
+const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
+const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
+
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
     if (homeRouteName.value !== routeName) {
@@ -90,6 +93,11 @@ export function useUi() {
     });
   }
 
+  function resetUiSettings() {
+    hiddenCards.value = [];
+    otherSettings.value = {};
+  }
+
   return {
     homeRouteName,
     hiddenCards,
@@ -97,6 +105,8 @@ export function useUi() {
     loginTargetLocation,
     qrScannerOpen,
     isLoaderVisible,
+    isSeedBackedUp,
+    saveErrorLog,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
@@ -105,7 +115,6 @@ export function useUi() {
     setLoginTargetLocation,
     setQrScanner,
     setLoaderVisible,
-    isSeedBackedUp: computed(() => otherSettings.value.isSeedBackedUp || false),
-    saveErrorLog: computed(() => otherSettings.value.saveErrorLog || false),
+    resetUiSettings,
   };
 }
