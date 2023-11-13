@@ -66,3 +66,5 @@ export const IS_FIREFOX = userAgentLowerCase.includes('firefox');
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 export const UNFINISHED_FEATURES = !!process.env.UNFINISHED_FEATURES;
+
+export const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY!;

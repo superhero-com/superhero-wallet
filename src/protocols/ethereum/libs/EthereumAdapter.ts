@@ -23,15 +23,15 @@ import type {
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
-  ITransaction,
   MarketData,
   NetworkTypeDefault,
   Protocol,
   IFetchTransactionResult,
   IAccount,
+  ITransaction,
 } from '@/types';
-import { PROTOCOL_ETHEREUM } from '@/constants';
-import { getLastNotEmptyAccountIndex } from '@/utils';
+import { ETHERSCAN_API_KEY, PROTOCOL_ETHEREUM, TXS_PER_PAGE } from '@/constants';
+import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
@@ -46,6 +46,7 @@ import {
 } from '@/protocols/ethereum/config';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { Etherscan } from './Etherscan';
+import { normalizeTransactionStructure } from '../helpers';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOL_ETHEREUM as Protocol;
@@ -117,7 +118,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     marketData: MarketData,
     convertedBalance?: number,
   ): ICoin {
-    // TODO Check if is correct
     return {
       ...(marketData?.[PROTOCOL_ETHEREUM] || {}),
       contractId: ETH_CONTRACT_ID,
@@ -183,24 +183,50 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async constructAndSignTx() {
-    return {} as any; // TODO
+    // TODO if needed
+    return {} as any;
+  }
+
+  override async fetchPendingTransactions() {
+    // TODO if needed
+    return [];
   }
 
   override async getTransactionByHash() {
-    return {} as any; // TODO
+    // TODO if needed
+    return {} as any;
   }
 
-  override fetchPendingTransactions(): Promise<ITransaction[]> {
-    return {} as any; // TODO
+  /**
+   * nextPageParams - page number as string
+   */
+  async fetchTransactionsFromApi(
+    address: string,
+    nextPageParams: string = '1',
+    pageSize = TXS_PER_PAGE,
+  ) {
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
+
+    const res = await fetchJson(`${apiUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=${nextPageParams}&offset=${pageSize}&sort=asc&apikey=${ETHERSCAN_API_KEY}`);
+    if (res.message !== 'OK' || !res.result) {
+      return [];
+    }
+    const regularTransactions: ITransaction[] = res.result.map(
+      (t: any) => normalizeTransactionStructure(t, address),
+    );
+
+    return regularTransactions;
   }
 
-  override async fetchTransactions(): Promise<IFetchTransactionResult> {
-    // TODO
+  override async fetchTransactions(
+    address: string,
+    nextPageParams?: string | null,
+  ): Promise<IFetchTransactionResult> {
+    const regularTransactions = await this.fetchTransactionsFromApi(address, nextPageParams!);
     return {
-      regularTransactions: [],
-      pendingTransactions: [],
-      tipWithdrawnTransactions: [],
-      nextPageParams: null,
+      regularTransactions,
+      nextPageParams: nextPageParams ? String(Number(nextPageParams) + 1) : null,
     };
   }
 
