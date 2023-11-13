@@ -32,7 +32,6 @@ import JsonBig from '@/lib/json-big';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
-import { useMiddleware } from '@/composables/middleware';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
@@ -63,7 +62,7 @@ import {
   AEX9_TRANSFER_EVENT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import { aettosToAe } from '../helpers';
 
@@ -203,7 +202,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
-    const { fetchFromMiddleware } = useMiddleware();
+    const { fetchFromMiddleware } = useAeMiddleware();
     const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
       () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
       fetchFromMiddleware,
@@ -212,7 +211,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
-    const { fetchFromMiddleware } = useMiddleware();
+    const { fetchFromMiddleware } = useAeMiddleware();
     try {
       const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
         () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
@@ -260,9 +259,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     limit: number,
     nextPageUrl?: string,
   ) {
-    const { fetchFromMiddlewareCamelCased } = useMiddleware();
+    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
+
     /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
-    const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
+    const url = ([null, ''].includes(nextPageUrl!))
+      ? `/v2/accounts/${address}/activities?limit=${limit}`
+      : nextPageUrl!;
 
     try {
       const { data, next } = await fetchFromMiddlewareCamelCased(url);
