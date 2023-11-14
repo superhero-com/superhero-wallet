@@ -23,9 +23,9 @@ export const ETH_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IEthNetworkSe
 
 export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = { // TODO - type
   [NETWORK_TYPE_MAINNET]: {
-    explorerUrl: 'https://etherscan.io/', // TODO replace temp values
+    explorerUrl: 'https://etherscan.io',
   },
   [NETWORK_TYPE_TESTNET]: {
-    explorerUrl: 'https://sepolia.etherscan.io/', // TODO replace temp values
+    explorerUrl: 'https://sepolia.etherscan.io',
   },
 };
