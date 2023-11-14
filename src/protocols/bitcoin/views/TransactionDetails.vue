@@ -4,6 +4,7 @@
       <div class="transaction-details">
         <template v-if="transaction">
           <TransactionDetailsBase
+            :amount="getTxAmountTotal(transaction, true)"
             :transaction="transaction"
             :coin-symbol="BTC_SYMBOL"
             :transaction-fee="transactionFee"
@@ -83,7 +84,7 @@ export default defineComponent({
     const transactionFee = computed((): number => transaction.value?.tx?.fee ?? 0);
 
     const totalAmount = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, transaction.value.tx.recipientId === transactionOwner)
+      ? getTxAmountTotal(transaction.value, transaction.value.tx.senderId !== transactionOwner)
       : 0);
 
     const direction = computed(() => transactionOwner === transaction.value?.tx?.senderId
@@ -128,6 +129,7 @@ export default defineComponent({
       transactionFee,
       tokens,
       totalAmount,
+      getTxAmountTotal,
     };
   },
 });
