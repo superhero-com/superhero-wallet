@@ -1,4 +1,4 @@
-import type { Protocol } from '@/types';
+import type { Dictionary, Protocol } from '@/types';
 import {
   NETWORK_TYPE_CUSTOM,
   NETWORK_TYPE_MAINNET,
@@ -50,6 +50,11 @@ export interface IAdapterNetworkSetting<T = string> {
    */
   testId?: string;
   required?: boolean;
+  /**
+   * Can be used to override or add field validation rules
+   * A list of possible keys is available in the `veeValidate` rule definition file.
+   */
+  validationRules?: Dictionary;
 }
 
 export type AdapterNetworkSettingList<T = string> =

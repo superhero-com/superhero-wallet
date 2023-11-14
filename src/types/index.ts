@@ -92,11 +92,6 @@ export interface IPageableResponse<T> {
   next: string;
 }
 
-export type IKeyPair = {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-};
-
 export interface IAppData {
   name: string;
   url: string;
@@ -110,9 +105,9 @@ export interface IWallet {
 }
 
 export interface IHdWalletAccount {
-  publicKey: string;
-  secretKey: string;
-  address: string,
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+  address: string;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -203,7 +198,7 @@ export interface IAccountRaw {
 /**
  * Account stored on the application store.
  */
-export interface IAccount extends IKeyPair, IAccountRaw {
+export interface IAccount extends IHdWalletAccount, IAccountRaw {
   address: Encoded.AccountAddress; // TODO use `string` as we use not only AE protocol
   globalIdx: number;
   idx: number;
@@ -687,12 +682,14 @@ export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER
 export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
 
 export interface TransferFormModel extends IFormModel {
-  fee?: BigNumber
-  total?: number
-  invoiceContract?: any
-  invoiceId?: any
-  note?: string
-  payload: string
+  fee?: BigNumber;
+  maxPriorityFeePerGas?: string;
+  maxFeePerGas?: string;
+  total?: number;
+  invoiceContract?: any;
+  invoiceId?: any;
+  note?: string;
+  payload: string;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;

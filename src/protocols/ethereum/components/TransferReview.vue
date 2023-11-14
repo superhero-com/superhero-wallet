@@ -34,7 +34,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useModals, useUi } from '@/composables';
+import { useAccounts, useModals, useUi } from '@/composables';
 import type { TransferFormModel } from '@/types';
 import { PROTOCOL_ETHEREUM } from '@/constants';
 import { ETH_SYMBOL } from '@/protocols/ethereum/config';
@@ -42,6 +42,7 @@ import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   name: 'EthTransferReview',
@@ -61,6 +62,7 @@ export default defineComponent({
     const router = useRouter();
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
+    const { getLastActiveProtocolAccount } = useAccounts();
 
     const loading = ref<boolean>(false);
 
@@ -72,13 +74,19 @@ export default defineComponent({
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function transfer({ amount, recipient, selectedAsset }: any) {
+    async function transfer({ amount, recipient }: {amount: string, recipient: string}) {
+      const ethereumAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_ETHEREUM);
       try {
         loading.value = true;
-        // TODO
-        const hash = 'fake_hash';
-        console.error('ETH Transfer not implemented yet');
+        const { hash } = await ethereumAdapter.spend(
+          Number(amount),
+          recipient,
+          {
+            fromAccount: getLastActiveProtocolAccount(PROTOCOL_ETHEREUM),
+            maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
+            maxFeePerGas: props.transferData.maxFeePerGas,
+          },
+        );
         return hash;
       } catch (error: any) {
         openTransactionFailedModal(error.message);
@@ -92,17 +100,15 @@ export default defineComponent({
       const {
         amount,
         address: recipient,
-        selectedAsset,
       } = props.transferData;
 
-      if (!amount || !recipient || !selectedAsset) {
+      if (!amount || !recipient) {
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const hash = await transfer({
+
+      await transfer({
         amount,
         recipient,
-        selectedAsset,
       });
 
       // TODO - redirect after transfer function will be ready

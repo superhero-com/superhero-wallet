@@ -57,6 +57,7 @@
             :rules="{
               required: input.required === true,
               invalid_hostname: true,
+              ...input.validationRules
             }"
           >
             <InputField

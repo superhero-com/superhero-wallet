@@ -31,7 +31,7 @@ export default {
         : activeAccount.value;
 
       if (protocol === PROTOCOL_AETERNITY) {
-        return sign(data, Buffer.from(secretKey, 'hex'));
+        return sign(data, secretKey);
       }
 
       throw new Error('Unsupported protocol');

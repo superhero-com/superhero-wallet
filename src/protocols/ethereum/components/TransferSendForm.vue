@@ -87,6 +87,8 @@ import {
 } from '@/utils';
 import {
   ETH_COIN_NAME,
+  ETH_COIN_PRECISION,
+  ETH_GAS_LIMIT,
   ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
 import { etherFromGwei } from '@/protocols/ethereum/helpers';
@@ -149,12 +151,12 @@ export default defineComponent({
     const feeMedium = ref(new BigNumber(0.00000002));
     const feeHigh = ref(new BigNumber(0.00000002));
 
-    // max priority fee
+    // max priority fee per gas
     const maxPriorityFeePerGasSlow = ref(etherFromGwei(isTestnet ? 0.000001 : 0.1));
     const maxPriorityFeePerGasMedium = ref(etherFromGwei(isTestnet ? 0.000001 : 0.15));
     const maxPriorityFeePerGasFast = ref(etherFromGwei(isTestnet ? 0.000001 : 0.2));
 
-    // maximum fee that will be paid
+    // maximum fee per gas that will be paid
     const maxFeePerGasSlow = ref(new BigNumber(0));
     const maxFeePerGasMedium = ref(new BigNumber(0));
     const maxFeePerGasHigh = ref(new BigNumber(0));
@@ -185,6 +187,10 @@ export default defineComponent({
     ]);
 
     const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
+    const maxFeePerGas = computed(() => feeList.value[feeSelectedIndex.value].maxFeePerGas);
+    const maxPriorityFeePerGas = computed(
+      () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
+    );
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
 
@@ -194,6 +200,8 @@ export default defineComponent({
       const inputPayload: TransferFormModel = {
         ...formModel.value,
         fee: fee.value as BigNumber,
+        maxFeePerGas: maxFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
+        maxPriorityFeePerGas: maxPriorityFeePerGas.value?.toFormat(ETH_COIN_PRECISION),
         total: numericFee.value + +(formModel.value?.amount || 0),
         invoiceId: invoiceId.value,
         invoiceContract: invoiceContract.value,
@@ -221,9 +229,9 @@ export default defineComponent({
       maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
       maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
 
-      feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value);
-      feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value);
-      feeHigh.value = baseFee.plus(maxPriorityFeePerGasFast.value);
+      feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value).multipliedBy(ETH_GAS_LIMIT);
+      feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value).multipliedBy(ETH_GAS_LIMIT);
+      feeHigh.value = baseFee.plus(maxPriorityFeePerGasFast.value).multipliedBy(ETH_GAS_LIMIT);
     }
 
     let polling: NodeJS.Timer | null = null;
