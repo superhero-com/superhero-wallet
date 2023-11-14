@@ -45,6 +45,7 @@ import {
   ETH_GAS_LIMIT,
 } from '@/protocols/ethereum/config';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
+import { Etherscan } from './Etherscan';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOL_ETHEREUM as Protocol;
@@ -99,15 +100,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override getExplorer() {
-    // temp functions to avoid errors
-    return {
-      prepareUrlForHash(address: string): any {
-        return address; // TODO
-      },
-      prepareUrlForAccount(address: string): any {
-        return address; // TODO
-      },
-    };
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+
+    return new Etherscan(ethActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 
   override getUrlTokenKey(): string {
