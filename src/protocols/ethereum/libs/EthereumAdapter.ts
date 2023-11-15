@@ -42,6 +42,7 @@ import {
   ETH_SYMBOL,
   ETH_PROTOCOL_NAME,
   ETH_GAS_LIMIT,
+  ETH_NETWORK_DEFAULT_ENV_SETTINGS,
 } from '@/protocols/ethereum/config';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
@@ -60,12 +61,13 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     {
       key: 'nodeUrl',
       testId: 'url',
+      defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.nodeUrl,
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
     {
       key: 'chainId',
-      required: true,
+      defaultValue: ETH_NETWORK_DEFAULT_ENV_SETTINGS.chainId,
       validationRules: {
         url: false,
         is_hex_format: true,
