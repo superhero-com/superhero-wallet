@@ -35,3 +35,7 @@ export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = { /
     middlewareUrl: 'https://api-sepolia.etherscan.io/api', // TODO replace temp values
   },
 };
+
+export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
+  ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
+  : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
