@@ -262,9 +262,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const signedTx = tx.sign(options.fromAccount.secretKey);
 
     const serializedTx = signedTx.serialize();
-    const res = await sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
 
-    return { hash: res.transactionHash };
+    return { hash };
   }
 
   private getWeb3EthInstance(): Web3Eth {
