@@ -242,7 +242,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const web3Eth = new Web3Eth(nodeUrl);
     const nonce = await this.getTransactionCount(options.fromAccount.address!);
 
-    const hexAmount = bigIntToHex(BigInt(toWei(amount, 'ether')));
+    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
