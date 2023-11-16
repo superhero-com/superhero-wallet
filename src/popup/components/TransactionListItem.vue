@@ -112,7 +112,9 @@ export default defineComponent({
       () => (props.multisigTransaction || props.transaction),
     );
 
-    const transactionOwner = computed(() => props.transaction?.transactionOwner);
+    const transactionOwner = computed(() => props.multisigTransaction
+      ? props.multisigTransaction?.tx?.senderId
+      : props.transaction?.transactionOwner);
 
     const {
       direction,

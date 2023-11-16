@@ -3,7 +3,7 @@
     <AccountDetailsTransactionsBase
       v-bind="$attrs"
       :address="activeMultisigAccount.gaAccountId"
-      :additional-transactions="pendingMultisigTransaction"
+      :additional-transactions="pendingMultisigTransaction ? [pendingMultisigTransaction] : null"
       :ionic-lifecycle-status="ionicLifecycleStatus"
       is-multisig
     />
