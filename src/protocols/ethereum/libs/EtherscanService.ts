@@ -1,7 +1,7 @@
 import type { ITransaction } from '@/types';
 import { ETHERSCAN_API_KEY, TXS_PER_PAGE } from '@/constants';
 import { fetchJson } from '@/utils';
-import { normalizeTransactionStructure } from '@/protocols/ethereum/helpers';
+import { normalizeEtherscanTransactionStructure } from '@/protocols/ethereum/helpers';
 
 interface EtherscanDefaultResponse {
   status: '1' | '0';
@@ -51,7 +51,7 @@ export class EtherscanService {
 
     if (response?.status === '1' && response?.result?.length) {
       return response.result.map(
-        (transaction: any) => normalizeTransactionStructure(transaction, address),
+        (transaction: any) => normalizeEtherscanTransactionStructure(transaction, address),
       );
     }
 
