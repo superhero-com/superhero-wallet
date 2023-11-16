@@ -23,7 +23,6 @@
       <TokenAmount
         :amount="+(tokenData.convertedBalance ?? 0)"
         :symbol="tokenData.symbol"
-        :aex9="isTokenAeCoin"
         :protocol="PROTOCOLS.aeternity"
         dynamic-sizing
         no-symbol
