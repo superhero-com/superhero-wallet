@@ -27,16 +27,15 @@ import type {
   ITransaction,
   TxFunction,
 } from '@/types';
-import { TX_DIRECTION } from '@/constants';
-import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   useAeSdk,
   useMiddleware,
   useTransactionTx,
 } from '@/composables';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionInfo from './TransactionInfo.vue';
 
@@ -57,13 +56,15 @@ export default defineComponent({
   setup(props) {
     const { t, tm } = useI18n();
 
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk();
     const { getName } = useAeNames();
     const { getMiddleware } = useMiddleware();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
+
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+    const protocolExplorer = adapter.getExplorer();
 
     const {
       isDex,
@@ -81,14 +82,12 @@ export default defineComponent({
       return {
         address,
         label: t('transaction.overview.accountAddress'),
-        url: (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-          .prepareUrlByHash(address),
+        url: protocolExplorer.prepareUrlForHash(address),
       };
     }
 
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
-      const aeScan = new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
 
       const {
         senderId,
@@ -103,13 +102,13 @@ export default defineComponent({
             sender: {
               address: senderId,
               name: getName(senderId).value,
-              url: aeScan.prepareUrlByHash(senderId),
+              url: protocolExplorer.prepareUrlForHash(senderId),
               label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
               name: name.value || getName(recipientId).value,
-              url: aeScan.prepareUrlByHash(recipientId),
+              url: protocolExplorer.prepareUrlForHash(recipientId),
               label: t('transaction.overview.accountAddress'),
             },
             title: t('transaction.type.spendTx'),
@@ -117,7 +116,7 @@ export default defineComponent({
         case Tag.ContractCallTx: {
           const contract: IAccountOverview = {
             address: contractId,
-            url: aeScan.prepareUrlByHash(contractId),
+            url: protocolExplorer.prepareUrlForHash(contractId),
             label: isDex.value
               ? t('transaction.overview.superheroDex')
               : t('common.smartContract'),
@@ -174,7 +173,7 @@ export default defineComponent({
             sender: {
               address: innerTx.value.ownerId,
               name: getName(innerTx.value.ownerId).value,
-              url: aeScan.prepareUrlByHash(innerTx.value.ownerId),
+              url: protocolExplorer.prepareUrlForHash(innerTx.value.ownerId),
               label: t('multisig.multisigVault'),
             },
             recipient: {
@@ -189,13 +188,13 @@ export default defineComponent({
               sender: {
                 address: senderId,
                 name: getName(senderId).value,
-                url: aeScan.prepareUrlByHash(senderId),
+                url: protocolExplorer.prepareUrlForHash(senderId),
                 label: t('transaction.overview.accountAddress'),
               },
               recipient: {
                 address: recipientId,
                 name: name.value || getName(recipientId).value,
-                url: aeScan.prepareUrlByHash(recipientId),
+                url: protocolExplorer.prepareUrlForHash(recipientId),
                 label: t('transaction.overview.accountAddress'),
               },
               title: t('transaction.type.spendTx'),

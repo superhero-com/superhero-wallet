@@ -1,38 +1,29 @@
 <template>
   <span
     class="token-amount"
-    :class="[{ large, 'has-label': !!label, small }]"
+    :class="[{ large, small }]"
   >
-    <span>
+    <span
+      class="amount"
+      :style="dynamicSizing
+        ? { '--font-size': calculateFontSize(amountRounded) }
+        : {}"
+    >
+      {{ amountRounded }}
       <span
-        v-if="label"
-        class="label"
+        v-if="!noSymbol"
+        class="symbol"
       >
-        {{ label }}
-      </span>
-
-      <span
-        class="amount"
-        :style="dynamicSizing
-          ? { '--font-size': calculateFontSize(amountRounded) }
-          : {}"
-      >
-        {{ amountRounded }}
-        <span
-          v-if="!noSymbol"
-          class="symbol"
-        >
-          {{ symbol }}
-        </span>
+        {{ symbol }}
       </span>
     </span>
+
     <span
       v-if="amountFiat"
       class="fiat"
       :class="{ 'fiat-below': fiatBelow }"
-    >
-      {{ amountFiat }}
-    </span>
+      v-text="amountFiat"
+    />
   </span>
 </template>
 
@@ -54,18 +45,15 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
-    label: { type: String, default: null },
     symbol: { type: String, default: AE_SYMBOL },
-    aex9: { type: Boolean, default: false },
     fiatBelow: { type: Boolean, default: false },
+    protocol: { type: String as PropType<Protocol>, required: true },
     hideFiat: Boolean,
-    large: Boolean,
-    row: Boolean,
     noSymbol: Boolean,
     highPrecision: Boolean,
     dynamicSizing: Boolean,
+    large: Boolean,
     small: Boolean,
-    protocol: { type: String as PropType<Protocol>, required: true },
   },
   setup(props) {
     const { getFormattedAndRoundedFiat } = useCurrencies();
@@ -84,7 +72,7 @@ export default defineComponent({
     });
 
     const amountFiat = computed(
-      (): string => (props.hideFiat || props.aex9) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
+      (): string => (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
     );
 
     return {
@@ -104,13 +92,6 @@ export default defineComponent({
   @extend %face-sans-15-medium;
 
   color: variables.$color-white;
-
-  .label {
-    @extend %face-sans-14-medium;
-
-    color: rgba(variables.$color-white, 0.5);
-    display: block;
-  }
 
   .amount {
     font-size: var(--font-size);
@@ -134,13 +115,6 @@ export default defineComponent({
       padding-top: 4px;
       white-space: nowrap;
     }
-  }
-
-  &.has-label {
-    display: inline-flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    width: 100%;
   }
 
   &.large {

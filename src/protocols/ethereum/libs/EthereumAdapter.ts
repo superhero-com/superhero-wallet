@@ -13,7 +13,9 @@ import Web3Eth, {
   NUMBER_DATA_FORMAT,
   getBalance,
   getTransactionCount,
+  getTransaction,
   sendSignedTransaction,
+  getBlock,
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
@@ -47,15 +49,16 @@ import {
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
+import { normalizeWeb3EthTransactionStructure } from '../helpers';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.ethereum as Protocol;
 
   override protocolName = ETH_PROTOCOL_NAME;
 
-  bip32 = BIP32Factory(ecc);
+  private bip32 = BIP32Factory(ecc);
 
-  networkSettings: AdapterNetworkSettingList = [
+  private networkSettings: AdapterNetworkSettingList = [
     {
       key: 'nodeUrl',
       testId: 'url',
@@ -76,9 +79,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   ];
 
   async getTransactionCount(address: string): Promise<number> {
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
-    const { nodeUrl } = ethActiveNetworkSettings.value;
-    const web3Eth = new Web3Eth(nodeUrl);
+    const web3Eth = this.getWeb3EthInstance();
     const txCount = await getTransactionCount(web3Eth, address, 'pending', NUMBER_DATA_FORMAT);
     return txCount;
   }
@@ -135,9 +136,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchBalance(address: string): Promise<string> {
-    const { ethActiveNetworkSettings } = useEthNetworkSettings();
-    const { nodeUrl } = ethActiveNetworkSettings.value;
-    const web3Eth = new Web3Eth(nodeUrl);
+    const web3Eth = this.getWeb3EthInstance();
     const balanceInWei = await getBalance(web3Eth, address, 'latest', NUMBER_DATA_FORMAT);
     return fromWei(balanceInWei, 'ether').toString();
   }
@@ -190,9 +189,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return [];
   }
 
-  override async getTransactionByHash() {
-    // TODO if needed
-    return {} as any;
+  override async getTransactionByHash(hash: string) {
+    const web3Eth = this.getWeb3EthInstance();
+    const transaction = await getTransaction(web3Eth, hash, DEFAULT_RETURN_FORMAT);
+    const block = await getBlock(web3Eth, transaction?.blockHash, true, DEFAULT_RETURN_FORMAT);
+    const normalized = normalizeWeb3EthTransactionStructure(transaction, block);
+    return normalized;
   }
 
   override async fetchTransactions(
@@ -220,8 +222,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ): Promise<{ hash: string }> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
-    const { nodeUrl, chainId } = ethActiveNetworkSettings.value;
-    const web3Eth = new Web3Eth(nodeUrl);
+    const { chainId } = ethActiveNetworkSettings.value;
+    const web3Eth = this.getWeb3EthInstance();
     const nonce = await this.getTransactionCount(options.fromAccount.address!);
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
@@ -249,5 +251,11 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const res = await sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
 
     return { hash: res.transactionHash };
+  }
+
+  private getWeb3EthInstance(): Web3Eth {
+    const { ethActiveNetworkSettings } = useEthNetworkSettings();
+    const { nodeUrl } = ethActiveNetworkSettings.value;
+    return new Web3Eth(nodeUrl);
   }
 }

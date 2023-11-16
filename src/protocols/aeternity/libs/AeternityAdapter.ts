@@ -83,9 +83,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return `${Encoding.AccountAddress}_`;
   }
 
-  override getExplorer(): any {
+  override getExplorer() {
     const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-
     return new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 

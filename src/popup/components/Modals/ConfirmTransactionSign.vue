@@ -53,8 +53,7 @@
           <TokenAmount
             :amount="tokenAmount"
             :symbol="tokenSymbol"
-            :aex9="isTransactionAex9(transactionWrapped)"
-            :hide-fiat="!swapTokenAmountData.isAe"
+            :hide-fiat="!swapTokenAmountData.isAe || isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
@@ -75,7 +74,7 @@
           <TokenAmount
             :amount="executionCost || totalAmount"
             :symbol="getTxSymbol(popupProps?.tx)"
-            :aex9="isTransactionAex9(transactionWrapped)"
+            :hide-fiat="isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
