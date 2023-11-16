@@ -17,7 +17,7 @@
               large
               :protocol="PROTOCOLS.aeternity"
               :amount="convertedBalance"
-              :aex9="!isAe"
+              :hide-fiat="!isAe"
             />
           </div>
 

@@ -26,7 +26,6 @@
           class="price"
           hide-fiat
           no-symbol
-          aex9
           high-precision
         />
         <Tokens

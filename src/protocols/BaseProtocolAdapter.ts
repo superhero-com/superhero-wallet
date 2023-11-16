@@ -11,6 +11,7 @@ import type {
   Protocol,
   NetworkType,
 } from '@/types';
+import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 /**
  *  Represents common attributes and behavior of a protocol
  */
@@ -23,7 +24,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getAccountPrefix(): string;
 
-  abstract getExplorer(): any;
+  abstract getExplorer(): ProtocolExplorer;
 
   abstract getAmountPrecision(args?: any): number;
 
