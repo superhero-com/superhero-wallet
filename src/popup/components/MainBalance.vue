@@ -15,9 +15,9 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
+import type { Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { formatNumberParts } from '@/utils';
-import { Protocol } from '../../types';
 
 type TokenSize = 'lg' | 'md' | 'sm';
 

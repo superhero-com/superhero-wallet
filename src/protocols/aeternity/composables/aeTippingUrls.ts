@@ -35,8 +35,8 @@ export function useAeTippingUrls({ ensureFetchedOnInit } = { ensureFetchedOnInit
 
       setVerified(verified);
       setBlacklisted(graylist);
-    } catch (e) {
-      handleUnknownError(e);
+    } catch (error: any) {
+      handleUnknownError(error);
     }
   }
 

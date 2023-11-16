@@ -11,7 +11,10 @@ const protocolViews: ProtocolViewsConfig = {
   ),
   AccountDetailsTokens: null,
   AccountDetailsNames: null,
-  TransactionDetails: null,
+  TransactionDetails: () => import(
+    /* webpackChunkName: "eth-transaction-details" */
+    './TransactionDetails.vue'
+  ),
   TransferReceiveModal: () => import(
     /* webpackChunkName: "eth-transfer-receive-modal" */
     './TransferReceiveModal.vue'

@@ -13,7 +13,7 @@
         received: token.isReceived,
         'multiple-rows': multipleRows,
       }"
-      :style="{ '--font-size': calculateFontSize(token.amount) }"
+      :style="{ '--font-size': calculateFontSize(token.amount!) }"
     >
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
@@ -22,7 +22,7 @@
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ isRounded ? token.amount : amountRounded(token.amount) }}
+        {{ isRounded ? token.amount : amountRounded(token.amount!) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -60,6 +60,7 @@ export default defineComponent({
     direction: { type: String, default: '' },
     error: Boolean,
     isAllowance: Boolean,
+    /** If the amount is already rounded */
     isRounded: Boolean,
     reversed: Boolean,
     multipleRows: Boolean,
