@@ -4,6 +4,7 @@
       <div class="transaction-details">
         <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
+            :amount="getTxAmountTotal(transaction, TX_DIRECTION.received)"
             :transaction="transaction"
             :coin-symbol="AE_SYMBOL"
             :transaction-fee="+aettosToAe(transactionFee)"
@@ -176,7 +177,7 @@ import {
   useTransactionTx,
   useUi,
 } from '@/composables';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -378,6 +379,7 @@ export default defineComponent({
     return {
       AE_SYMBOL,
       PROTOCOL_AETERNITY,
+      TX_DIRECTION,
       transaction,
       isSwap,
       isPool,

@@ -129,7 +129,7 @@ describe('Transaction Details', () => {
     expect(wrapper.find('[data-cy=timestamp]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=block-height]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=nonce]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-cy=amount]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-cy=total]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=gas]').exists()).toBeTruthy();
     expect(wrapper.find('[data-cy=fee]').exists()).toBeTruthy();
     expect(wrapper.find('.explorer').exists()).toBeTruthy();

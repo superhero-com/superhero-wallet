@@ -105,13 +105,13 @@
           />
         </div>
         <DetailsItem
-          v-if="!hideAmount"
+          v-if="!hideAmount && amount"
           :label="$t('common.amount')"
           data-cy="amount"
         >
           <template #value>
             <TokenAmount
-              :amount="totalAmount"
+              :amount="amount"
               :symbol="tokenSymbol"
               :hide-fiat="isTransactionAex9"
               :high-precision="!!noneAeCoin"
@@ -133,6 +133,21 @@
               :symbol="coinSymbol"
               :protocol="protocol"
               :high-precision="!!noneAeCoin"
+            />
+          </template>
+        </DetailsItem>
+        <DetailsItem
+          v-if="!hideAmount"
+          :label="$t('common.total')"
+          data-cy="total"
+        >
+          <template #value>
+            <TokenAmount
+              :amount="totalAmount"
+              :symbol="tokenSymbol"
+              :hide-fiat="isTransactionAex9"
+              :high-precision="!!noneAeCoin"
+              :protocol="protocol"
             />
           </template>
         </DetailsItem>
@@ -176,6 +191,7 @@ export default defineComponent({
     ExternalLink,
   },
   props: {
+    amount: { type: Number, default: 0 },
     transaction: { type: Object as PropType<ITransaction | undefined>, required: true },
     coinSymbol: { type: String, required: true },
     transactionFee: { type: Number, required: true },
