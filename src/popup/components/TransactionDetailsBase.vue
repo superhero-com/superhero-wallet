@@ -6,11 +6,15 @@
     >
       <TransactionErrorStatus
         v-if="isErrorTransaction"
-        :return-type="transaction.tx.returnType"
+        :return-type="transaction?.tx?.returnType"
       />
       <slot name="tokens" />
     </div>
-    <div class="content">
+
+    <div
+      v-if="transaction"
+      class="content"
+    >
       <TransactionOverview :transaction="transaction" />
 
       <div class="explorer">
@@ -73,14 +77,7 @@
 
         <div class="span-3-columns">
           <DetailsItem
-            v-if="transaction.microTime && !transaction.pending"
-            :value="formatDate(transaction.microTime)"
-            :secondary="formatTime(transaction.microTime)"
-            :label="$t('pages.transactionDetails.timestamp')"
-            data-cy="timestamp"
-          />
-          <DetailsItem
-            v-else-if="transaction.pending"
+            v-if="transaction.pending"
             :label="$t('pages.transactionDetails.timestamp')"
             data-cy="timestamp"
           >
@@ -91,6 +88,13 @@
               {{ $t('common.pending') }}...
             </template>
           </DetailsItem>
+          <DetailsItem
+            v-else-if="transaction.microTime"
+            :value="formatDate(transaction.microTime)"
+            :secondary="formatTime(transaction.microTime)"
+            :label="$t('pages.transactionDetails.timestamp')"
+            data-cy="timestamp"
+          />
           <DetailsItem
             v-if="transaction.blockHeight && transaction.blockHeight > 0"
             :value="transaction.blockHeight"
@@ -104,8 +108,9 @@
             data-cy="nonce"
           />
         </div>
+
         <DetailsItem
-          v-if="!hideAmount && amount"
+          v-if="amount"
           :label="$t('common.amount')"
           data-cy="amount"
         >
@@ -113,7 +118,7 @@
             <TokenAmount
               :amount="amount"
               :symbol="tokenSymbol"
-              :hide-fiat="isTransactionAex9"
+              :hide-fiat="hideFiat"
               :high-precision="!!noneAeCoin"
               :protocol="protocol"
             />
@@ -123,29 +128,30 @@
         <slot name="gas" />
 
         <DetailsItem
-          v-if="transactionFee"
+          v-if="fee"
           :label="$t('transaction.fee')"
           data-cy="fee"
         >
           <template #value>
             <TokenAmount
-              :amount="transactionFee"
+              :amount="fee"
               :symbol="coinSymbol"
               :protocol="protocol"
               :high-precision="!!noneAeCoin"
             />
           </template>
         </DetailsItem>
+
         <DetailsItem
-          v-if="!hideAmount"
+          v-if="!hideAmountTotal"
           :label="$t('common.total')"
           data-cy="total"
         >
           <template #value>
             <TokenAmount
-              :amount="totalAmount"
+              :amount="amountTotal"
               :symbol="tokenSymbol"
-              :hide-fiat="isTransactionAex9"
+              :hide-fiat="hideFiat"
               :high-precision="!!noneAeCoin"
               :protocol="protocol"
             />
@@ -157,7 +163,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { computed, defineComponent, PropType } from 'vue';
 
 import type { Protocol, ITransaction } from '@/types';
 import {
@@ -165,6 +171,7 @@ import {
   formatTime,
   splitAddress,
 } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { isContract } from '@/protocols/aeternity/helpers';
 
 import TransactionOverview from '@/popup/components/TransactionOverview.vue';
@@ -191,29 +198,44 @@ export default defineComponent({
     ExternalLink,
   },
   props: {
-    amount: { type: Number, default: 0 },
     transaction: { type: Object as PropType<ITransaction | undefined>, required: true },
+    /**
+     * Amount without fee
+     */
+    amount: { type: Number, default: 0 },
+    /**
+     * Amount + Fee
+     * TODO calculate this value within the scope of this component
+     */
+    amountTotal: { type: Number, default: 0 },
+    fee: { type: Number, default: 0 },
     coinSymbol: { type: String, required: true },
-    transactionFee: { type: Number, required: true },
     tokenSymbol: { type: String, required: true },
-    totalAmount: { type: Number, required: true },
     payload: { type: String, default: '' },
-    explorerUrl: { type: String, required: true },
     contractId: { type: String, default: '' },
     hash: { type: String, required: true },
     noneAeCoin: { type: Array, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     isErrorTransaction: Boolean,
     showHeader: Boolean,
-    hideAmount: Boolean,
-    isTransactionAex9: Boolean,
+    hideAmountTotal: Boolean,
+    hideFiat: Boolean,
   },
-  setup: () => ({
-    formatDate,
-    formatTime,
-    splitAddress,
-    isContract,
-  }),
+  setup(props) {
+    const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+
+    const explorerUrl = computed(
+      () => adapter.getExplorer().prepareUrlForHash(props?.transaction?.hash || ''),
+    );
+
+    return {
+      formatDate,
+      formatTime,
+      splitAddress,
+      isContract,
+      explorerUrl,
+    };
+  },
 });
 </script>
 

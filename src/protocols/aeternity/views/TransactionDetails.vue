@@ -4,32 +4,29 @@
       <div class="transaction-details">
         <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
-            :amount="getTxAmountTotal(transaction, TX_DIRECTION.received)"
             :transaction="transaction"
+            :amount="amount"
+            :amount-total="getTxAmountTotal(transaction, direction)"
+            :fee="transactionFee"
             :coin-symbol="AE_SYMBOL"
-            :transaction-fee="+aettosToAe(transactionFee)"
             :token-symbol="getTxSymbol(transaction)"
-            :total-amount="getTxAmountTotal(transaction, direction)"
             :is-error-transaction="isErrorTransaction"
-            :is-transaction-aex9="isTransactionAex9(transaction)"
             :payload="getTransactionPayload(transaction)"
-            :explorer-url="explorerUrl || ''"
-            :is-local-account-address="isLocalAccountAddress"
             :contract-id="contractId"
             :show-header="!isDexAllowance"
-            :hide-amount="isDex || isDexAllowance || isMultisig"
+            :hide-amount-total="isDex || isDexAllowance || isMultisig"
+            :hide-fiat="isTransactionAex9(transaction)"
             :hash="hash"
             :protocol="PROTOCOLS.aeternity"
           >
             <template #tokens>
-              <TransactionTokens
+              <TransactionTokensRows
                 :transaction="transaction"
                 :direction="direction"
                 :is-allowance="isDexAllowance"
                 :error="isErrorTransaction"
                 :reversed="isPool"
                 icon-size="md"
-                :is-rounded="false"
                 multiple-rows
               />
             </template>
@@ -167,7 +164,7 @@ import {
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { ITransaction, TxFunctionRaw } from '@/types';
+import type { ITransaction, ITx, TxFunctionRaw } from '@/types';
 import {
   useAccounts,
   useFungibleTokens,
@@ -195,7 +192,6 @@ import {
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -207,7 +203,7 @@ import SwapRoute from '@/popup/components/SwapRoute.vue';
 import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
 import DialogBox from '@/popup/components/DialogBox.vue';
 import Avatar from '@/popup/components/Avatar.vue';
-import TransactionTokens from '@/popup/components/TransactionTokenRows.vue';
+import TransactionTokensRows from '@/popup/components/TransactionTokenRows.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
@@ -219,7 +215,7 @@ export default defineComponent({
     SwapRates,
     TransactionDetailsBase,
     TransactionDetailsPoolTokens,
-    TransactionTokens,
+    TransactionTokensRows,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -234,7 +230,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getMiddleware } = useMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
@@ -274,30 +270,25 @@ export default defineComponent({
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
+    const amount = computed((): number => transaction.value
+      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
+      : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-        .prepareUrlByHash(hash),
-    );
 
-    const gasPrice = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
-        return transaction.value.tx.tx.tx.gasPrice;
-      }
-      return transaction.value?.tx?.gasPrice;
-    });
+    const gasPrice = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasPrice
+      || transaction.value?.tx?.gasPrice
+    ));
 
-    const gasUsed = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasUsed' in transaction.value.tx.tx.tx) {
-        return transaction.value.tx.tx.tx.gasUsed;
-      }
-      return transaction.value?.tx?.gasUsed;
-    });
+    const gasUsed = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasUsed
+      || transaction.value?.tx?.gasUsed
+    ));
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
       if (outerTxTag.value !== Tag.PayingForTx) return null;
@@ -313,7 +304,7 @@ export default defineComponent({
       const { tx } = transaction.value ?? {};
       const fee = tx?.fee ?? 0;
       const extraFee = tx?.tx?.tx?.fee ?? 0;
-      return fee + extraFee;
+      return +aettosToAe(fee + extraFee);
     });
 
     onMounted(async () => {
@@ -381,6 +372,7 @@ export default defineComponent({
       PROTOCOLS,
       TX_DIRECTION,
       transaction,
+      amount,
       isSwap,
       isPool,
       getTxSymbol,
@@ -394,7 +386,6 @@ export default defineComponent({
       tipUrl,
       tipLink,
       direction,
-      explorerUrl,
       hash,
       splitAddress,
       aettosToAe,

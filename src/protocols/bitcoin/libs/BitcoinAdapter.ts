@@ -72,9 +72,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       : 'bc1q';
   }
 
-  override getExplorer(): any {
+  override getExplorer() {
     const { btcActiveNetworkPredefinedSettings } = useBtcNetworkSettings();
-
     return new Blockstream(btcActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 
