@@ -446,6 +446,12 @@ export interface ITransaction {
    * TODO "sent" field is used for removing local pending transaction - remove or rename it
    */
   sent?: boolean;
+  /**
+   * Custom property added to have the perspective from which we are looking at the transaction.
+   * For example when we send some assets from one owned account to another
+   * we are displaying the same transaction twice on the dashboard: as sent and received.
+   * TODO maybe this can be removed and calculated on the component level
+   */
   transactionOwner?: Encoded.AccountAddress;
   tx: ITx;
   type?: string;
