@@ -86,7 +86,7 @@ export function useMultisigAccounts({
   const activeMultisigAccountExplorerUrl = computed(
     () => (activeMultisigAccount.value)
       ? (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-        .prepareUrlByHash(activeMultisigAccount.value.contractId)
+        .prepareUrlForHash(activeMultisigAccount.value.contractId)
       : null,
   );
 

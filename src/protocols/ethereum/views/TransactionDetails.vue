@@ -8,18 +8,16 @@
             :amount="amount"
             :amount-total="amountTotal"
             :fee="fee"
-            :coin-symbol="BTC_SYMBOL"
-            :token-symbol="BTC_SYMBOL"
+            :coin-symbol="ETH_SYMBOL"
+            :token-symbol="ETH_SYMBOL"
             :hash="hash"
             :none-ae-coin="tokens"
-            :protocol="PROTOCOLS.bitcoin"
+            :protocol="PROTOCOLS.ethereum"
             show-header
           >
             <template #tokens>
               <TransactionTokensRows
                 :ext-tokens="tokens"
-                :is-rounded="!!tokens"
-                :transaction="transaction"
                 :direction="direction"
                 icon-size="md"
                 multiple-rows
@@ -47,9 +45,9 @@ import type { ITokenResolved, ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+
+import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import TransactionTokensRows from '@/popup/components/TransactionTokenRows.vue';
@@ -68,22 +66,24 @@ export default defineComponent({
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as string;
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
 
     const transaction = ref<ITransaction>();
 
-    const isReceived = computed(() => transaction.value?.tx?.senderId !== transactionOwner);
+    const direction = computed(
+      () => (transactionOwner === transaction.value?.tx?.senderId)
+        ? TX_DIRECTION.sent
+        : TX_DIRECTION.received,
+    );
+
+    // TODO move these calculations to base component after unifying ITransaction AE values
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
-    const amountTotal = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, isReceived.value)
-      : 0);
-
-    const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
+    const amountTotal = computed((): number => amount.value + fee.value);
 
     const tokens = computed((): ITokenResolved[] => [{
-      amount: amount.value,
-      symbol: BTC_SYMBOL,
+      amount: amountTotal.value,
+      symbol: ETH_SYMBOL,
       isReceived: direction.value === TX_DIRECTION.received,
       isAe: false,
     }]);
@@ -108,15 +108,16 @@ export default defineComponent({
     });
 
     return {
-      BTC_SYMBOL,
+      ETH_SYMBOL,
       PROTOCOLS,
       amount,
       amountTotal,
+      transactionOwner,
       direction,
-      fee,
       hash,
-      tokens,
       transaction,
+      fee,
+      tokens,
     };
   },
 });
