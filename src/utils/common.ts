@@ -61,7 +61,7 @@ export function blocksToRelativeTime(blocks: number) {
   return secondsToRelativeTime(blocks * 3 * 60);
 }
 
-export function calculateFontSize(amountValue: BigNumber | number) {
+export function calculateFontSize(amountValue: BigNumber | number | string) {
   const amountLength = amountRounded(amountValue).replace(/\D/g, '').length;
 
   if (amountLength <= 8) {
