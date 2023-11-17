@@ -75,7 +75,7 @@ export function useTransactionList() {
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { isLoggedIn, accounts, getAccountByAddress } = useAccounts();
   const { getMiddleware } = useMiddleware();
-  const { accountsTotalBalance } = useBalances();
+  const { balances } = useBalances();
 
   const { tokenBalances } = useFungibleTokens();
 
@@ -249,6 +249,10 @@ export function useTransactionList() {
     );
   }
 
+  async function updateAllTransactions() {
+    await Promise.all(accounts.value.map((account) => fetchTransactions(account.address, true)));
+  }
+
   watch(nodeNetworkId, (value, oldValue) => {
     if (value) {
       setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, oldValue!], transactions.value);
@@ -274,22 +278,25 @@ export function useTransactionList() {
     setLocalStorageItem([TRANSACTIONS_LOCAL_STORAGE_KEY, nodeNetworkId.value!], value);
   }, { deep: true, immediate: true });
 
-  async function updateAllTransactions() {
-    await Promise.all(accounts.value.map((account) => fetchTransactions(account.address, true)));
-  }
-
   /**
    * To avoid unnecessary data transfers instead of constant polling
-   * we are fetching the transactions only if the total balance of the accounts changes.
+   * we are fetching the transactions only if the balance of an account changes.
    */
   watch(
-    accountsTotalBalance,
-    (val, oldVal) => {
-      if (val !== oldVal) {
-        setTimeout(() => updateAllTransactions(), AE_MDW_TO_NODE_APPROX_DELAY_TIME);
-      }
+    balances,
+    (newBalances, oldBalances) => {
+      accounts.value.forEach((account) => {
+        const oldBalance = oldBalances[account.address];
+        const newBalance = newBalances[account.address];
+        if (oldBalance && newBalance && !newBalance.isEqualTo(oldBalance)) {
+          setTimeout(
+            () => fetchTransactions(account.address, true),
+            AE_MDW_TO_NODE_APPROX_DELAY_TIME,
+          );
+        }
+      });
     },
-    { immediate: true },
+    { deep: true },
   );
 
   watch(
