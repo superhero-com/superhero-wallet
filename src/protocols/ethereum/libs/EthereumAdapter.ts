@@ -80,6 +80,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  coinName = ETH_COIN_NAME;
+
+  coinSymbol = ETH_SYMBOL;
+
+  protocolSymbol = ETH_SYMBOL;
+
   async getTransactionCount(address: string): Promise<number> {
     const web3Eth = this.getWeb3EthInstance();
     const txCount = await getTransactionCount(web3Eth, address, 'pending', NUMBER_DATA_FORMAT);
@@ -92,10 +98,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision(): number {
     return ETH_COIN_PRECISION;
-  }
-
-  override getCoinSymbol() {
-    return ETH_SYMBOL;
   }
 
   override getCoinGeckoCoinId() {

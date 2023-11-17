@@ -7,21 +7,19 @@
       v-if="!noIcons"
       class="icon"
     >
-      <!--
-        TODO: Find out better way of displaying coin icons related to protocols
-      -->
       <ProtocolIcon
-        v-if="showProtocolIcon"
+        v-if="imgToken?.assetType === ASSET_TYPES.coin"
         class="icon-image"
-        :protocol="imgTokenProtocol!"
-        :icon-size="iconSize"
+        :protocol="protocol"
+        :icon-size="(iconSize as any)"
+        is-logo-icon
       />
       <img
         v-else
         class="icon-image"
-        :src="imgToken.image || getTokenPlaceholderUrl(imgToken)"
-        :class="{ 'with-border': !imgToken.image }"
-        :title="imgToken.symbol"
+        :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
+        :class="{ 'with-border': !imgToken?.image }"
+        :title="imgToken?.symbol"
       >
     </span>
 
@@ -48,25 +46,17 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { ITokenResolved } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import type { ITokenResolved, Protocol } from '@/types';
+import { ASSET_TYPES, PROTOCOLS } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
+  isCoin,
   truncateString as truncateStringFactory,
 } from '@/utils';
-import {
-  AE_AVATAR_URL,
-  AE_COIN_SYMBOL,
-  AE_CONTRACT_ID,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
-import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { ETH_COIN_NAME, ETH_SYMBOL } from '@/protocols/ethereum/config';
-
-import AeIcon from '@/icons/tokens/ae.svg';
+import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import ProtocolIcon from './ProtocolIcon.vue';
 
 const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
-const PROTOCOL_SYMBOLS = [BTC_SYMBOL, ETH_SYMBOL];
 
 export type AllowedTokenIconSize = typeof SIZES[number];
 
@@ -81,8 +71,12 @@ export default defineComponent({
     tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
+    /**
+     * TODO if protocol is not set, assume AE, but this should be set correctly
+     */
+    protocol: { type: String as PropType<Protocol>, required: true, default: PROTOCOLS.aeternity },
     iconSize: {
-      type: String,
+      type: String as PropType<AllowedTokenIconSize>,
       default: 'rg',
       validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
     },
@@ -108,29 +102,22 @@ export default defineComponent({
     }
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
+      // TODO Should not be protocol specific
       return `${AE_AVATAR_URL}${token.contractId}`;
     }
 
-    /**
-     * TODO These transformations should be performed by the adapters based on asset protocol
-     */
     function mapToken(token: ITokenResolved): ITokenResolved {
-      let { image } = token;
+      const isTokenCoin = isCoin(token.contractId!) || token.isAe;
+      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
       let name = token.symbol;
-
-      if (token.isAe || token.contractId === AE_CONTRACT_ID) {
-        image = AeIcon;
-        name = props.fullSymbol ? AE_COIN_SYMBOL : AE_SYMBOL;
-      } else if (token.symbol === BTC_SYMBOL) {
-        name = props.fullSymbol ? BTC_COIN_NAME : BTC_SYMBOL;
-      } else if (token.symbol === ETH_SYMBOL) {
-        name = props.fullSymbol ? ETH_COIN_NAME : ETH_SYMBOL;
+      if (isTokenCoin) {
+        name = props.fullSymbol ? adapter.coinName : adapter.protocolSymbol;
       }
 
       return {
         ...token,
         name,
-        image,
+        assetType: isTokenCoin ? ASSET_TYPES.coin : ASSET_TYPES.token,
       };
     }
 
@@ -141,26 +128,12 @@ export default defineComponent({
         ? mapToken(props.tokens[2])
         : fromToken.value
     ));
-    const showProtocolIcon = computed(() => PROTOCOL_SYMBOLS.includes(imgToken.value?.symbol!));
-    const imgTokenProtocol = computed(() => {
-      if (imgToken.value?.isAe || imgToken.value?.contractId === AE_CONTRACT_ID) {
-        return PROTOCOLS.aeternity;
-      }
-      if (imgToken.value?.symbol === BTC_SYMBOL) {
-        return PROTOCOLS.bitcoin;
-      }
-      if (imgToken.value?.symbol === ETH_SYMBOL) {
-        return PROTOCOLS.ethereum;
-      }
-      return null;
-    });
 
     return {
+      ASSET_TYPES,
       fromToken,
       toToken,
       imgToken,
-      showProtocolIcon,
-      imgTokenProtocol,
       getTokenPlaceholderUrl,
       truncateString,
     };

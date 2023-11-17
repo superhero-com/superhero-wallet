@@ -68,6 +68,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  coinName = BTC_COIN_NAME;
+
+  coinSymbol = BTC_SYMBOL;
+
+  protocolSymbol = BTC_SYMBOL;
+
   override getAccountPrefix() {
     const { activeNetwork } = useNetworks();
 
@@ -83,10 +89,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision(): number {
     return BTC_COIN_PRECISION;
-  }
-
-  override getCoinSymbol() {
-    return BTC_SYMBOL;
   }
 
   override getUrlTokenKey(): string {

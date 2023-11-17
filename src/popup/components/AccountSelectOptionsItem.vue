@@ -72,7 +72,7 @@ export default defineComponent({
     );
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(account!.protocol).getCoinSymbol(true),
+      () => ProtocolAdapterFactory.getAdapter(account!.protocol).coinSymbol,
     );
 
     return {
