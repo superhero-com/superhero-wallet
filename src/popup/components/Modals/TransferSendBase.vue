@@ -18,15 +18,15 @@
         :text="$t('common.edit')"
         class="button-action-secondary"
         data-cy="edit"
-        @click="editTransfer"
+        @click="$emit('step-prev')"
       />
       <BtnMain
         class="button-action-primary"
-        :disabled="primaryButtonDisabled"
+        :disabled="!isOnline || sendingDisabled"
         :icon="(showSendButton && !hideArrowSendIcon) ? ArrowSendIcon : null"
         :text="primaryButtonText"
         data-cy="next-step-button"
-        @click="proceedToNextStep"
+        @click="$emit('step-next')"
       />
     </template>
   </Modal>
@@ -38,13 +38,26 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { TransferSendStep } from '@/types';
+import type { ResolveCallback, TransferSendStep } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 import { TRANSFER_SEND_STEPS } from '@/constants';
+import { useConnection } from '@/composables';
+
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
+
+export const transferSendModalRequiredProps = {
+  /**
+   * Resolving means that the transfer has been initiated and the summary modal
+   * will be displayed by the `pendingTransactionHandler` after the transfer is finished.
+   */
+  resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
+  address: { type: String, default: undefined },
+  amount: { type: String, default: '' },
+  payload: { type: String, default: '' },
+};
 
 export default defineComponent({
   name: 'TransferSendBase',
@@ -53,15 +66,19 @@ export default defineComponent({
     BtnMain,
   },
   props: {
-    editTransfer: { type: Function, default: () => null },
-    proceedToNextStep: { type: Function, default: () => null },
     customPrimaryButtonText: { type: String, default: '' },
     currentStep: { type: String as PropType<TransferSendStep>, required: true },
-    primaryButtonDisabled: Boolean,
+    sendingDisabled: Boolean,
     hideArrowSendIcon: Boolean,
   },
+  emits: [
+    'close',
+    'step-prev',
+    'step-next',
+  ],
   setup(props) {
     const { t } = useI18n();
+    const { isOnline } = useConnection();
 
     const showEditButton = computed(() => [
       TRANSFER_SEND_STEPS.review,
@@ -81,6 +98,7 @@ export default defineComponent({
     });
 
     return {
+      isOnline,
       primaryButtonText,
       showEditButton,
       showSendButton,

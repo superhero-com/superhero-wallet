@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 
+import { Component } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -689,8 +690,13 @@ export interface IFormModel {
   payload?: string;
 }
 
-export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER_SEND_STEPS.review
-export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
+export type TransferSendStep = ObjectValues<typeof TRANSFER_SEND_STEPS>;
+export type TransferSendStepConfig = { component: Component; onSuccess: () => void };
+export type TransferSendStepConfigRegistry = {
+  [TRANSFER_SEND_STEPS.form]: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.review]: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.reviewTip]?: TransferSendStepConfig;
+}
 
 export interface TransferFormModel extends IFormModel {
   fee?: BigNumber;
