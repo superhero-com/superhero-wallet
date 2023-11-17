@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import type { UrlStatus } from '@/types';
-import { fetchJson, isUrlValid } from '@/utils';
+import { fetchJson, handleUnknownError, isUrlValid } from '@/utils';
 import { useAeNetworkSettings } from './aeNetworkSettings';
 
 function getTwitterAccountUrl(url: string) {
@@ -11,7 +11,7 @@ function getTwitterAccountUrl(url: string) {
 const verifiedUrls = ref<string[]>([]);
 const blacklistedUrls = ref<string[]>([]);
 
-export function useAeTippingUrls() {
+export function useAeTippingUrls({ ensureFetchedOnInit } = { ensureFetchedOnInit: true }) {
   function setVerified(verified: string[]) {
     verifiedUrls.value = verified;
   }
@@ -27,13 +27,17 @@ export function useAeTippingUrls() {
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
-    const [verified, graylist] = await Promise.all([
-      fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/verified`),
-      fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/static/wallet/graylist`),
-    ]);
+    try {
+      const [verified, graylist] = await Promise.all([
+        fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/verified`),
+        fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/static/wallet/graylist`),
+      ]);
 
-    setVerified(verified);
-    setBlacklisted(graylist);
+      setVerified(verified);
+      setBlacklisted(graylist);
+    } catch (e) {
+      handleUnknownError(e);
+    }
   }
 
   function getTippingUrlStatus(tipUrl?: string): UrlStatus {
@@ -55,7 +59,9 @@ export function useAeTippingUrls() {
     return 'not-verified';
   }
 
-  ensureFetched();
+  if (ensureFetchedOnInit) {
+    ensureFetched();
+  }
 
   return {
     getTippingUrlStatus,
