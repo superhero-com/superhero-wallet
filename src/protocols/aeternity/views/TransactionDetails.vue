@@ -26,6 +26,7 @@
                 :is-allowance="isDexAllowance"
                 :error="isErrorTransaction"
                 :reversed="isPool"
+                :protocol="PROTOCOLS.aeternity"
                 icon-size="md"
                 multiple-rows
               />
