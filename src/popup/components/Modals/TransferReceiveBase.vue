@@ -208,7 +208,7 @@ export default defineComponent({
         : t(
           'modals.receive.shareTextWithAmount',
           {
-            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).getCoinSymbol(false),
+            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).protocolSymbol,
             protocolName,
             address,
             walletLink,

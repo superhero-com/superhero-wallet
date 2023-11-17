@@ -63,14 +63,16 @@ export function useTransactionTokens({
       }));
     }
 
+    const isReceived = direction === TX_DIRECTION.received;
+    const adapter = ProtocolAdapterFactory
+      .getAdapter(transaction.protocol ?? PROTOCOLS.aeternity);
+
     if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
-      const protocolAdapter = ProtocolAdapterFactory
-        .getAdapter(transaction.protocol);
       return [{
         ...innerTx.value || {},
-        symbol: protocolAdapter.getCoinSymbol(),
+        symbol: adapter.protocolSymbol,
         amount: getTxAmountTotal(transaction, direction),
-        isReceived: direction === TX_DIRECTION.received,
+        isReceived,
       }];
     }
 
@@ -84,7 +86,7 @@ export function useTransactionTokens({
         ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
         : getTxAmountTotal(transaction, direction),
       isAe: isAllowance || (symbol === AE_SYMBOL && !isTransactionAex9(transaction)),
-      isReceived: direction === TX_DIRECTION.received,
+      isReceived,
       symbol,
     }];
   });
