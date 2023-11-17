@@ -13,16 +13,17 @@
         received: token.isReceived,
         'multiple-rows': multipleRows,
       }"
-      :style="{ '--font-size': calculateFontSize(token.amount) }"
+      :style="{ '--font-size': calculateFontSize(Number(token.amount)) }"
     >
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
+        :protocol="protocol"
         full-symbol
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ isRounded ? token.amount : amountRounded(token.amount) }}
+        {{ isRounded ? token.amount : amountRounded(Number(token.amount)) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -38,7 +39,7 @@ import {
   PropType,
   ref,
 } from 'vue';
-import type { ITokenResolved, ITransaction } from '@/types';
+import type { ITokenResolved, ITransaction, Protocol } from '@/types';
 import {
   amountRounded,
   calculateFontSize,
@@ -48,7 +49,7 @@ import { TX_DIRECTION } from '@/constants';
 import { useTransactionTokens } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
-import Tokens from './Tokens.vue';
+import Tokens, { AllowedTokenIconSize } from './Tokens.vue';
 
 export default defineComponent({
   name: 'TransactionTokenRows',
@@ -56,8 +57,9 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
     extTokens: { type: Array as PropType<ITokenResolved[] | undefined>, default: null },
-    iconSize: { type: String, default: 'rg' },
+    iconSize: { type: String as PropType<AllowedTokenIconSize>, default: 'rg' },
     direction: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, required: true },
     error: Boolean,
     isAllowance: Boolean,
     isRounded: Boolean,

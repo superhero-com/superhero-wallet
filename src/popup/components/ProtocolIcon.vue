@@ -17,12 +17,14 @@ import {
 import { PROTOCOLS } from '@/constants';
 import type { Protocol } from '@/types';
 import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
+import AeternityIconSecondary from '@/icons/coin/aeternity-secondary.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 
 const SIZES = ['sm', 'rg'] as const;
 
 export type AllowedProtocolIconSize = typeof SIZES[number];
+type AllowedProtocolIconVariations = 'default' | 'secondary';
 
 export default defineComponent({
   props: {
@@ -35,10 +37,21 @@ export default defineComponent({
       default: 'rg',
       validator: (val: AllowedProtocolIconSize) => SIZES.includes(val),
     },
+    /**
+     * Not all icons have secondary version
+     * Secondary version is used for example when displaying token icon
+     */
+    iconVariant: {
+      type: String as PropType<AllowedProtocolIconVariations>,
+      default: 'default',
+    },
   },
   setup(props) {
     const iconsMap: Record<Protocol, Component> = {
-      [PROTOCOLS.aeternity]: AeternityIcon,
+      [PROTOCOLS.aeternity]:
+        props.iconVariant === 'default'
+          ? AeternityIcon
+          : AeternityIconSecondary,
       [PROTOCOLS.bitcoin]: BitcoinIcon,
       [PROTOCOLS.ethereum]: EthereumIcon,
     };

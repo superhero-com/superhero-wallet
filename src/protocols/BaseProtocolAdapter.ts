@@ -11,6 +11,7 @@ import type {
   Protocol,
   NetworkType,
 } from '@/types';
+
 /**
  *  Represents common attributes and behavior of a protocol
  */
@@ -19,13 +20,17 @@ export abstract class BaseProtocolAdapter {
 
   abstract protocolName: string;
 
+  abstract coinName: string;
+
+  abstract coinSymbol: string;
+
+  abstract protocolSymbol: string;
+
   abstract getAccountPrefix(): string;
 
   abstract getExplorer(): any;
 
   abstract getAmountPrecision(args?: any): number;
-
-  abstract getCoinSymbol(getShort?: boolean): string;
 
   abstract getUrlTokenKey(): string;
 

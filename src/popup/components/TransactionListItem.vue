@@ -9,6 +9,7 @@
       <TransactionTokenRows
         :ext-tokens="tokens"
         :error="isErrorTransaction"
+        :protocol="transactionProtocol"
         icon-size="md"
       />
       <div class="footer">
@@ -108,9 +109,12 @@ export default defineComponent({
     let timerInterval: NodeJS.Timer;
     const transactionDate = ref();
 
-    const currentTransaction = computed(
-      () => (props.multisigTransaction || props.transaction),
+    const currentTransaction = computed<ITransaction>(
+      () => (props.multisigTransaction as ITransaction || props.transaction),
     );
+
+    // temp if protocol undefined assume it is aeternity
+    const transactionProtocol = computed(() => props.transaction?.protocol ?? PROTOCOL_AETERNITY);
 
     const transactionOwner = computed(() => props.multisigTransaction
       ? props.multisigTransaction?.tx?.senderId
@@ -185,6 +189,7 @@ export default defineComponent({
       isErrorTransaction,
       tokens,
       currentTransaction,
+      transactionProtocol,
       transactionOwner,
       direction,
       formatDate,

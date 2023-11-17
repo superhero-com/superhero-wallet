@@ -75,6 +75,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  coinName = ETH_COIN_NAME;
+
+  coinSymbol = ETH_SYMBOL;
+
+  protocolSymbol = ETH_SYMBOL;
+
   async getTransactionCount(address: string): Promise<number> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { nodeUrl } = ethActiveNetworkSettings.value;
@@ -89,10 +95,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision(): number {
     return ETH_COIN_PRECISION;
-  }
-
-  override getCoinSymbol() {
-    return ETH_SYMBOL;
   }
 
   override getCoinGeckoCoinId() {

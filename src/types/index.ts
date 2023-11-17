@@ -170,6 +170,7 @@ export interface ITokenResolved extends Partial<IToken> {
   isAe?: boolean;
   isPool?: boolean;
   isReceived?: boolean;
+  isCoin?: boolean;
   symbol: string; // Ensure its present in the current interface
 }
 

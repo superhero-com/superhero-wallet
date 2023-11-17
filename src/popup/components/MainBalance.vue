@@ -53,7 +53,9 @@ export default defineComponent({
     });
 
     const tokenSymbol = computed(
-      () => ProtocolAdapterFactory.getAdapter(props.protocol).getCoinSymbol(true),
+      () => ProtocolAdapterFactory
+        .getAdapter(props.protocol)
+        .coinSymbol,
     );
 
     const tokenFontSize = computed((): TokenSize | null => {

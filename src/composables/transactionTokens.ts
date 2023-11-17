@@ -68,7 +68,7 @@ export function useTransactionTokens({
         .getAdapter(transaction.protocol);
       return [{
         ...innerTx.value || {},
-        symbol: protocolAdapter.getCoinSymbol(),
+        symbol: protocolAdapter.protocolSymbol,
         amount: getTxAmountTotal(transaction, direction),
         isReceived: direction === TX_DIRECTION.received,
       }];
