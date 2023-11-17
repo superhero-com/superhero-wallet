@@ -44,6 +44,7 @@ module.exports = {
     '@intlify/vue-i18n/no-missing-keys': 'off',
     '@intlify/vue-i18n/no-raw-text': 'off',
     'vue/multi-word-component-names': 'off',
+    'vue/no-v-model-argument': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     '@typescript-eslint/member-delimiter-style': ['error'],
   },
