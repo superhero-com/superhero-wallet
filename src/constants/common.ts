@@ -405,3 +405,8 @@ export const BROWSER_ACTIONS = {
 export const PAGE_TRANSITION_DURATION = 150;
 
 export const MAX_BROWSER_HISTORY_ITEMS = 10;
+
+export const ASSET_TYPES = {
+  coin: 'coin',
+  token: 'token',
+} as const;

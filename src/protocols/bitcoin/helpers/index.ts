@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { BTC_COIN_PRECISION } from '../config';
+import { BTC_COIN_PRECISION, BTC_CONTRACT_ID } from '../config';
 
 export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
@@ -42,7 +42,7 @@ export function normalizeTransactionStructure(
       type: 'SpendTx', // TODO: create own types
       arguments: [],
       callerId: '' as any,
-      contractId: '' as any,
+      contractId: BTC_CONTRACT_ID as any,
     },
   };
 }
