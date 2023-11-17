@@ -29,6 +29,7 @@ import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
   AE_COIN_NAME,
   AE_COIN_PRECISION,
+  AE_COIN_SYMBOL,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
   AE_NETWORK_DEFAULT_ENV_SETTINGS,
@@ -79,6 +80,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     },
   ];
 
+  coinName = AE_COIN_SYMBOL;
+
+  coinSymbol = AE_SYMBOL_SHORT;
+
+  protocolSymbol = AE_SYMBOL;
+
   override getAccountPrefix() {
     return `${Encoding.AccountAddress}_`;
   }
@@ -90,10 +97,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override getAmountPrecision({ highPrecision, amount }: IAmountDecimalPlaces): number {
     return (highPrecision || (amount && amount < 0.01)) ? 9 : 2;
-  }
-
-  override getCoinSymbol(getShort = false) {
-    return getShort ? AE_SYMBOL_SHORT : AE_SYMBOL;
   }
 
   override getUrlTokenKey(): string {

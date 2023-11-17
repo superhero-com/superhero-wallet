@@ -17,6 +17,7 @@ import {
   NOTIFICATION_TYPES,
   POPUP_ACTIONS,
   POPUP_TYPES,
+  ASSET_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -163,6 +164,8 @@ export interface IToken {
 
 export type TokenPair = Record<'token0' | 'token1', IToken | null>
 
+export type IAssetType = ObjectValues<typeof ASSET_TYPES>;
+
 /**
  * In most cases it's the result of firing one of the `TransactionResolvers`.
  */
@@ -170,6 +173,7 @@ export interface ITokenResolved extends Partial<IToken> {
   isAe?: boolean;
   isPool?: boolean;
   isReceived?: boolean;
+  assetType?: IAssetType;
   symbol: string; // Ensure its present in the current interface
 }
 
