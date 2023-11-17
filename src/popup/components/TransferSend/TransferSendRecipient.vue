@@ -36,11 +36,11 @@
         </template>
       </FormTextarea>
     </Field>
-    <div class="status">
-      <UrlStatus
-        v-show="isTipUrl"
-        :status="urlStatus"
-      />
+    <div
+      v-if="isTipUrl"
+      class="status"
+    >
+      <UrlStatus :status="urlStatus" />
     </div>
   </div>
 </template>
@@ -55,7 +55,7 @@ import { Field } from 'vee-validate';
 
 import type { Protocol, IInputMessage } from '@/types';
 import { getMessageByFieldName } from '@/utils';
-import { MODAL_RECIPIENT_INFO } from '@/constants';
+import { MODAL_RECIPIENT_INFO, PROTOCOL_AETERNITY } from '@/constants';
 import {
   useAccounts,
   useModals,
@@ -83,9 +83,11 @@ export default defineComponent({
   },
   emits: ['openQrModal', 'update:modelValue'],
   setup(props) {
+    const isAe = computed(() => props.protocol === PROTOCOL_AETERNITY);
+
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
-    const { getTippingUrlStatus } = useAeTippingUrls();
+    const { getTippingUrlStatus } = useAeTippingUrls({ ensureFetchedOnInit: isAe.value });
 
     const urlStatus = computed(() => getTippingUrlStatus(props.modelValue));
 
