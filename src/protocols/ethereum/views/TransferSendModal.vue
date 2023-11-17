@@ -1,11 +1,10 @@
-<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <TransferSendBase
     :current-step="currentStep"
-    :edit-transfer="editTransfer"
-    :proceed-to-next-step="proceedToNextStep"
-    :primary-button-disabled="error || !transferData.address || !transferData.amount"
+    :sending-disabled="error || !transferData.address || !transferData.amount"
     @close="resolve"
+    @step-next="proceedToNextStep"
+    @step-prev="editTransfer"
   >
     <template #content>
       <component
@@ -13,7 +12,7 @@
         ref="currentRenderedComponent"
         v-model:transferData="transferData"
         @success="currentStepConfig.onSuccess"
-        @error="(val) => error = val"
+        @error="(val: any) => error = val"
       />
     </template>
   </TransferSendBase>
@@ -24,14 +23,12 @@ import {
   Component,
   computed,
   defineComponent,
-  PropType,
   ref,
 } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk';
 import type {
-  ResolveCallback,
   TransferFormModel,
   TransferSendStep,
+  TransferSendStepConfigRegistry,
 } from '@/types';
 import {
   PROTOCOL_ETHEREUM,
@@ -44,7 +41,7 @@ import {
   useCurrencies,
 } from '@/composables';
 
-import TransferSendBase from '@/popup/components/Modals/TransferSendBase.vue';
+import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
 import TransferReview from '../components/TransferReview.vue';
 import TransferSendForm from '../components/TransferSendForm.vue';
 
@@ -53,13 +50,7 @@ export default defineComponent({
   components: {
     TransferSendBase,
   },
-  props: {
-    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
-    tokenContractId: { type: String, default: null },
-    address: { type: String as PropType<Encoded.AccountAddress>, default: null },
-    amount: { type: String, default: '' },
-    payload: { type: String, default: '' },
-  },
+  props: transferSendModalRequiredProps,
   setup(props) {
     const { marketData } = useCurrencies();
     const { balance } = useBalances();
@@ -68,11 +59,12 @@ export default defineComponent({
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
+      address: props.address as any, // TODO change to string globally
       amount: props.amount,
+      payload: props.payload,
       selectedAsset: ProtocolAdapterFactory
         .getAdapter(PROTOCOL_ETHEREUM)
         .getDefaultCoin(marketData.value!, +balance.value),
-      payload: props.payload,
     });
 
     function proceedToNextStep() {
@@ -83,36 +75,23 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.review;
     }
 
-    /**
-     * Review success means that the transfer has been initiated
-     * and the summary modal will be displayed by the `pendingTransactionHandler`
-     * after the transfer is finished.
-     */
-    function handleReviewSuccess() {
-      props.resolve();
-    }
-
     function editTransfer() {
       error.value = false;
       currentStep.value = TRANSFER_SEND_STEPS.form;
     }
 
-    const steps: Record<TransferSendStep, { component: Component; onSuccess: () => void }> = {
+    const steps: TransferSendStepConfigRegistry = {
       [TRANSFER_SEND_STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,
       },
       [TRANSFER_SEND_STEPS.review]: {
         component: TransferReview,
-        onSuccess: handleReviewSuccess,
+        onSuccess: props.resolve,
       },
     };
 
-    const currentStepConfig = computed(() => steps[currentStep.value]);
-
-    if (props.address) {
-      transferData.value.address = props.address;
-    }
+    const currentStepConfig = computed(() => steps[currentStep.value]!);
 
     return {
       TRANSFER_SEND_STEPS,
