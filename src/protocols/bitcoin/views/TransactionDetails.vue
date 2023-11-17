@@ -21,6 +21,7 @@
                 :is-rounded="!!tokens"
                 :transaction="transaction"
                 :direction="direction"
+                :protocol="PROTOCOLS.bitcoin"
                 icon-size="md"
                 multiple-rows
               />
