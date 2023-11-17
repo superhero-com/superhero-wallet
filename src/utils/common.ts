@@ -19,6 +19,7 @@ import type {
   IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
+  IToken,
   ITransaction,
   StorageKeysInput,
   Truthy,
@@ -29,6 +30,7 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
+  PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
@@ -419,5 +421,13 @@ export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
 
   return [query['x-success'], query['x-cancel']].every(
     (value) => value && (value as string).startsWith(slicedAggregatorUrl),
+  );
+}
+
+export function isCoin(contractId: IToken['contractId']): boolean {
+  return PROTOCOL_LIST.some(
+    (protocol) => ProtocolAdapterFactory
+      .getAdapter(protocol)
+      .getDefaultAssetContractId() === contractId,
   );
 }
