@@ -4,19 +4,18 @@ import BigNumber from 'bignumber.js';
 import { Contract, Encoded, Encoding } from '@aeternity/aepp-sdk';
 import { fetchAllPages, handleUnknownError, toShiftedBigNumber } from '@/utils';
 import type {
-  BigNumberPublic,
   IToken,
   ITokenBalanceResponse,
   ITokenList,
   ITransaction,
   TokenPair,
 } from '@/types';
-import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, STORAGE_KEYS } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 
-import { aettosToAe, calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
+import { calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import { useAccounts } from './accounts';
@@ -50,6 +49,10 @@ const { onNetworkChange } = createNetworkWatcher();
 const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
+/**
+ * AE network AEX-9 fungible tokens
+ * TODO With the addition of ERC-20 tokens we should rename this to useAex9Tokens
+ */
 export function useFungibleTokens() {
   const { getAeSdk } = useAeSdk();
   const { fetchFromMiddleware } = useMiddleware();
@@ -249,46 +252,6 @@ export function useFungibleTokens() {
     return availableTokens.value[contractCallData?.token!]?.symbol || AE_SYMBOL;
   }
 
-  function getTxAmountTotal(
-    transaction: ITransaction,
-    direction: string = TX_DIRECTION.sent,
-  ) {
-    const isReceived = direction === TX_DIRECTION.received;
-
-    // This is out of place but since we are treating new protocols as fungible tokens
-    // it is better to have it here than in the protocol specific helper file
-    if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
-      return new BigNumber(
-        transaction.tx?.amount || 0,
-      )
-        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
-        .toNumber();
-    }
-
-    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (contractCallData && availableTokens.value[contractCallData.token!]) {
-      return +toShiftedBigNumber(
-        contractCallData.amount || 0,
-        -availableTokens.value[contractCallData.token!].decimals,
-      );
-    }
-
-    const rawAmount = (
-      transaction.tx?.amount
-      || (transaction.tx?.tx?.tx as any)?.amount
-      || transaction.tx?.nameFee
-      || 0
-    );
-
-    const amount: BigNumberPublic = (typeof rawAmount === 'object')
-      ? rawAmount
-      : new BigNumber(Number(rawAmount));
-
-    return +aettosToAe(amount
-      .plus(isReceived ? 0 : transaction.tx?.fee || 0)
-      .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0));
-  }
-
   onNetworkChange(async (network, oldNetwork) => {
     const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
     const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
@@ -315,7 +278,6 @@ export function useFungibleTokens() {
     getAccountTokenBalances,
     getContractTokenPairs,
     getTxSymbol,
-    getTxAmountTotal,
     transferToken,
     loadTokenBalances,
     loadAvailableTokens,

@@ -4,7 +4,7 @@
       <div class="transaction-details">
         <template v-if="transaction">
           <TransactionDetailsBase
-            :amount="getTxAmountTotal(transaction, true)"
+            :amount="transaction.tx.amount"
             :transaction="transaction"
             :coin-symbol="BTC_SYMBOL"
             :transaction-fee="transactionFee"
@@ -22,6 +22,7 @@
                 :is-rounded="!!tokens"
                 :transaction="transaction"
                 :direction="direction"
+                :protocol="PROTOCOLS.bitcoin"
                 icon-size="md"
                 multiple-rows
               />
@@ -48,7 +49,6 @@ import type { ITransaction } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
-import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import { useUi } from '@/composables';
 
@@ -72,19 +72,19 @@ export default defineComponent({
 
     const transactionOwner = route.params.transactionOwner as string;
 
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
+
     const transaction = ref<ITransaction>();
 
     const explorerUrl = computed(
-      () => ProtocolAdapterFactory
-        .getAdapter(PROTOCOLS.bitcoin)
-        .getExplorer()
-        .prepareUrlForHash(transaction.value?.hash),
+      () => adapter.getExplorer().prepareUrlForHash(transaction.value?.hash),
     );
 
     const transactionFee = computed((): number => transaction.value?.tx?.fee ?? 0);
 
     const totalAmount = computed((): number => transaction.value?.tx
-      ? getTxAmountTotal(transaction.value, transaction.value.tx.senderId !== transactionOwner)
+      ? adapter
+        .getTxAmountTotal(transaction.value, transaction.value.tx.senderId !== transactionOwner)
       : 0);
 
     const direction = computed(() => transactionOwner === transaction.value?.tx?.senderId
@@ -109,9 +109,8 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
         transaction.value = {
-          ...await bitcoinAdapter.getTransactionByHash(hash),
+          ...await adapter.getTransactionByHash(hash),
           transactionOwner,
         };
       } catch (e) {
@@ -129,7 +128,6 @@ export default defineComponent({
       transactionFee,
       tokens,
       totalAmount,
-      getTxAmountTotal,
     };
   },
 });

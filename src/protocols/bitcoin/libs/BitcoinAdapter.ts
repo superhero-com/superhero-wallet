@@ -2,6 +2,7 @@
 
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { BIP32Factory } from 'bip32';
+import BigNumber from 'bignumber.js';
 import {
   payments,
   networks,
@@ -377,5 +378,14 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return {
       hash: transactionId,
     };
+  }
+
+  override getTxAmountTotal(
+    transaction: ITransaction,
+    isReceived: boolean = false,
+  ) {
+    return new BigNumber(transaction.tx?.amount || 0)
+      .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+      .toNumber();
   }
 }

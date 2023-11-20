@@ -33,7 +33,7 @@ export function useTransactionTokens({
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
   const innerTx = computed(() => getInnerTransaction(transaction.tx));
-  const { availableTokens, getTxAmountTotal, getTxSymbol } = useFungibleTokens();
+  const { availableTokens, getTxSymbol } = useFungibleTokens();
 
   const transactionFunction = computed(() => {
     if (innerTx.value?.function) {
@@ -63,14 +63,16 @@ export function useTransactionTokens({
       }));
     }
 
+    const isReceived = direction === TX_DIRECTION.received;
+    const adapter = ProtocolAdapterFactory
+      .getAdapter(transaction.protocol ?? PROTOCOLS.aeternity);
+
     if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
-      const protocolAdapter = ProtocolAdapterFactory
-        .getAdapter(transaction.protocol);
       return [{
         ...innerTx.value || {},
-        symbol: protocolAdapter.protocolSymbol,
-        amount: getTxAmountTotal(transaction, direction),
-        isReceived: direction === TX_DIRECTION.received,
+        symbol: adapter.protocolSymbol,
+        amount: adapter.getTxAmountTotal(transaction, isReceived),
+        isReceived,
       }];
     }
 
@@ -78,9 +80,9 @@ export function useTransactionTokens({
       ...innerTx.value || {},
       amount: isAllowance
         ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
-        : getTxAmountTotal(transaction, direction),
+        : adapter.getTxAmountTotal(transaction, isReceived, { availableTokens }),
       symbol: isAllowance ? AE_SYMBOL : getTxSymbol(transaction),
-      isReceived: direction === TX_DIRECTION.received,
+      isReceived,
       isAe:
         isAllowance
         || (

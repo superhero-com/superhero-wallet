@@ -1,19 +1,9 @@
-import BigNumber from 'bignumber.js';
 import type { ITransaction } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { BTC_COIN_PRECISION, BTC_CONTRACT_ID } from '../config';
 
 export function satoshiToBtc(amount: number) {
   return amount / 10 ** BTC_COIN_PRECISION;
-}
-
-// TODO Duplicate in fungibleTokens.ts composable
-export function getTxAmountTotal(transaction: ITransaction, isReceived: boolean): number {
-  return new BigNumber(
-    transaction.tx?.amount || 0,
-  )
-    .plus(isReceived ? 0 : transaction.tx?.fee || 0)
-    .toNumber();
 }
 
 export function normalizeTransactionStructure(

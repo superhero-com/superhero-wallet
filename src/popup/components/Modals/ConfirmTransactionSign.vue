@@ -142,6 +142,7 @@ import type {
 } from '@/types';
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   PROTOCOLS,
   TX_DIRECTION,
@@ -218,7 +219,7 @@ export default defineComponent({
     const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, setPopupProps } = usePopupProps();
-    const { availableTokens, getTxSymbol, getTxAmountTotal } = useFungibleTokens();
+    const { availableTokens, getTxSymbol } = useFungibleTokens();
 
     const {
       direction,
@@ -269,7 +270,13 @@ export default defineComponent({
     });
 
     const totalAmount = computed(
-      () => getTxAmountTotal(transactionWrapped.value as ITransaction, direction.value),
+      () => ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getTxAmountTotal(
+          transactionWrapped.value as ITransaction,
+          direction.value === TX_DIRECTION.received,
+          { availableTokens },
+        ),
     );
 
     const singleToken = computed((): ITokenResolved => ({

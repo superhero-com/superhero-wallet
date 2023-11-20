@@ -13,6 +13,7 @@
             <TransactionTokens
               v-if="multisigTx"
               :transaction="{ tx: multisigTx }"
+              :protocol="PROTOCOL_AETERNITY"
               icon-size="md"
             />
           </div>

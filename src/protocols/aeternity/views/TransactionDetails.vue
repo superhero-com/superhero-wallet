@@ -4,12 +4,12 @@
       <div class="transaction-details">
         <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
-            :amount="getTxAmountTotal(transaction, TX_DIRECTION.received)"
+            :amount="amount"
             :transaction="transaction"
             :coin-symbol="AE_SYMBOL"
             :transaction-fee="+aettosToAe(transactionFee)"
             :token-symbol="getTxSymbol(transaction)"
-            :total-amount="getTxAmountTotal(transaction, direction)"
+            :total-amount="totalAmount"
             :is-error-transaction="isErrorTransaction"
             :is-transaction-aex9="isTransactionAex9(transaction)"
             :payload="getTransactionPayload(transaction)"
@@ -28,6 +28,7 @@
                 :is-allowance="isDexAllowance"
                 :error="isErrorTransaction"
                 :reversed="isPool"
+                :protocol="PROTOCOL_AETERNITY"
                 icon-size="md"
                 :is-rounded="false"
                 multiple-rows
@@ -194,6 +195,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
@@ -239,7 +241,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens();
+    const { getTxSymbol, availableTokens } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -316,6 +318,26 @@ export default defineComponent({
       return fee + extraFee;
     });
 
+    const totalAmount = computed(
+      (): number => ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getTxAmountTotal(
+          transaction?.value!,
+          direction.value === TX_DIRECTION.received,
+          { availableTokens },
+        ),
+    );
+
+    const amount = computed(
+      (): number => ProtocolAdapterFactory
+        .getAdapter(PROTOCOL_AETERNITY)
+        .getTxAmountTotal(
+          transaction?.value!,
+          true,
+          { availableTokens },
+        ),
+    );
+
     onMounted(async () => {
       let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
 
@@ -384,7 +406,8 @@ export default defineComponent({
       isSwap,
       isPool,
       getTxSymbol,
-      getTxAmountTotal,
+      totalAmount,
+      amount,
       isErrorTransaction,
       isDexAllowance,
       isDex,

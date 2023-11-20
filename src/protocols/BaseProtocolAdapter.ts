@@ -110,4 +110,13 @@ export abstract class BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<{ hash: string }>;
+
+  /**
+   * @param options Protocol specific parameters
+   */
+  abstract getTxAmountTotal(
+    transaction: ITransaction,
+    isReceived: boolean,
+    options?: Record<string, any>,
+  ): number;
 }

@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
+import BigNumber from 'bignumber.js';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
 import {
@@ -28,6 +29,7 @@ import type {
   Protocol,
   IFetchTransactionResult,
   IAccount,
+  ITransaction,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex } from '@/utils';
@@ -251,5 +253,14 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const res = await sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
 
     return { hash: res.transactionHash };
+  }
+
+  override getTxAmountTotal(
+    transaction: ITransaction,
+    isReceived: boolean = false,
+  ) {
+    return new BigNumber(transaction.tx?.amount || 0)
+      .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+      .toNumber();
   }
 }

@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { useFungibleTokens } from '@/composables';
-import { TX_DIRECTION } from '../../../src/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { PROTOCOL_AETERNITY } from '../../../src/constants';
 import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
 
@@ -53,7 +54,8 @@ const tests = [{
 ];
 
 describe('getTxAmountTotal', () => {
-  const { availableTokens, getTxAmountTotal } = useFungibleTokens();
+  const { availableTokens } = useFungibleTokens();
+  const { getTxAmountTotal } = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
 
   availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {
     decimals: TEST_TOKEN_DECIMALS,
@@ -64,15 +66,12 @@ describe('getTxAmountTotal', () => {
 ${test.transaction.tx.type}/${test.transaction.tx.function}`,
     () => {
       expect(
-        new BigNumber(getTxAmountTotal(test.transaction, TX_DIRECTION.sent))
+        new BigNumber(getTxAmountTotal(test.transaction, false, { availableTokens }))
           .isEqualTo(test.resultSent),
-      ).toBeTruthy();
-      expect(
-        new BigNumber(getTxAmountTotal(test.transaction)).isEqualTo(test.resultSent),
       ).toBeTruthy();
       if (test.resultReceived !== undefined) {
         expect(
-          new BigNumber(getTxAmountTotal(test.transaction, TX_DIRECTION.received))
+          new BigNumber(getTxAmountTotal(test.transaction, true, { availableTokens }))
             .isEqualTo(test.resultReceived),
         ).toBeTruthy();
       }

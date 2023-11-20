@@ -1,5 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import JsonBig from '@/lib/json-big';
+import BigNumber from 'bignumber.js';
+import { Ref } from 'vue';
 import {
   encode,
   Encoded,
@@ -18,12 +20,14 @@ import type {
   IFetchTransactionResult,
   ITransaction,
   Protocol,
+  BigNumberPublic,
+  ITokenList,
 } from '@/types';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
-import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
+import { fetchJson, getLastNotEmptyAccountIndex, toShiftedBigNumber } from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -42,7 +46,7 @@ import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { useMiddleware } from '@/composables/middleware';
 
-import { aettosToAe } from '../helpers';
+import { aettosToAe, categorizeContractCallTxObject } from '../helpers';
 
 interface IAmountDecimalPlaces {
   highPrecision?: boolean;
@@ -309,5 +313,34 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
       payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
     });
+  }
+
+  override getTxAmountTotal(
+    transaction: ITransaction,
+    isReceived: boolean = false,
+    { availableTokens }: { availableTokens?: Ref<ITokenList> },
+  ) {
+    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
+    if (contractCallData && availableTokens?.value[contractCallData.token!]) {
+      return +toShiftedBigNumber(
+        contractCallData.amount || 0,
+        -availableTokens.value[contractCallData.token!].decimals,
+      );
+    }
+
+    const rawAmount = (
+      transaction.tx?.amount
+      || (transaction.tx?.tx?.tx as any)?.amount
+      || transaction.tx?.nameFee
+      || 0
+    );
+
+    const amount: BigNumberPublic = (typeof rawAmount === 'object')
+      ? rawAmount
+      : new BigNumber(Number(rawAmount));
+
+    return +aettosToAe(amount
+      .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+      .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0));
   }
 }
