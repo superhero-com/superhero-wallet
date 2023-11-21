@@ -67,7 +67,7 @@ import {
   PERMISSION_DEFAULTS,
   POPUP_CONNECT_ADDRESS_PERMISSION,
   POPUP_CONNECT_TRANSACTIONS_PERMISSION,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { useAccounts, usePopupProps } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
@@ -98,7 +98,7 @@ export default defineComponent({
     const { popupProps, sender, setPopupProps } = usePopupProps();
     const { permissions, addPermission } = usePermissions();
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const permission = computed(() => {
       const host = popupProps.value?.app?.host;

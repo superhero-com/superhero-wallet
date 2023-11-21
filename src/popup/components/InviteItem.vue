@@ -3,7 +3,7 @@
     <div class="invite-info">
       <TokenAmount
         :amount="inviteLinkBalance"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
       />
       <span class="date">{{ formatDate(createdAt) }}</span>
     </div>
@@ -59,7 +59,7 @@
           class="input-amount"
           :label="$t('pages.invite.top-up-with')"
           :message="errorMessage"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           readonly
         />
         <div class="centered-buttons">
@@ -100,7 +100,7 @@ import type { IFormModel } from '@/types';
 import { formatDate } from '@/utils';
 import {
   APP_LINK_WEB,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { ROUTE_INVITE_CLAIM } from '@/popup/router/routeNames';
 import {
@@ -142,7 +142,7 @@ export default defineComponent({
     const formModel = ref<IFormModel>({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
     const { max } = useMaxAmount({ formModel });
@@ -183,7 +183,7 @@ export default defineComponent({
       try {
         await claimInvite({
           secretKey: Buffer.from(props.secretKey),
-          recipientId: getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address!,
+          recipientId: getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address!,
           isMax: true,
         });
         await updateBalance();
@@ -235,7 +235,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       formModel,
       max,
       topUp,

@@ -33,7 +33,7 @@ import type {
   ProtocolView,
   ProtocolViewsConfig,
 } from '@/types';
-import { DISTINCT_PROTOCOL_VIEWS, PROTOCOL_AETERNITY } from '@/constants';
+import { DISTINCT_PROTOCOL_VIEWS, PROTOCOLS } from '@/constants';
 import { useAccounts, useNetworks } from '@/composables';
 import Logger from '@/lib/logger';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -86,7 +86,7 @@ export default defineComponent({
 
     const protocol = ((): Protocol => {
       if (routeMeta.isMultisig) {
-        return PROTOCOL_AETERNITY;
+        return PROTOCOLS.aeternity;
       }
       if (transactionOwner) {
         const ownerProtocol = ProtocolAdapterFactory.getAdapterByAccountAddress(

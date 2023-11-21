@@ -15,7 +15,7 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
@@ -86,8 +86,8 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // In-app browser only works with AE accounts
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
       setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
       next({ name: ROUTE_APPS_BROWSER });
       return;

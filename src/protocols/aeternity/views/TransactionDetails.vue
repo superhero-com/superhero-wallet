@@ -19,7 +19,7 @@
             :show-header="!isDexAllowance"
             :hide-amount="isDex || isDexAllowance || isMultisig"
             :hash="hash"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           >
             <template #tokens>
               <TransactionTokens
@@ -137,7 +137,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(gasPrice)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     hide-fiat
                   />
                 </template>
@@ -178,7 +178,7 @@ import {
   useTransactionTx,
   useUi,
 } from '@/composables';
-import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -380,7 +380,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_DIRECTION,
       transaction,
       isSwap,

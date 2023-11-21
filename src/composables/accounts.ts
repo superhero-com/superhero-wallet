@@ -11,8 +11,8 @@ import type {
 } from '@/types';
 import {
   ACCOUNT_HD_WALLET,
-  PROTOCOL_AETERNITY,
   PROTOCOLS,
+  PROTOCOL_LIST,
   STORAGE_KEYS,
   IS_IOS,
   IS_MOBILE_APP,
@@ -80,7 +80,7 @@ const accounts = computed((): IAccount[] => {
     return [];
   }
 
-  const idxList = Object.fromEntries(PROTOCOLS.map(((protocol) => [protocol, 0])));
+  const idxList = Object.fromEntries(PROTOCOL_LIST.map(((protocol) => [protocol, 0])));
 
   return accountsRaw.value
     .map((account, globalIdx) => {
@@ -115,7 +115,7 @@ const accountsGroupedByProtocol = computed(
 );
 
 const aeAccounts = computed(
-  (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOL_AETERNITY] || [],
+  (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOLS.aeternity] || [],
 );
 
 const accountsAddressList = computed(
@@ -233,14 +233,14 @@ export function useAccounts() {
    */
   async function discoverAccounts() {
     const lastUsedAccountIndexRegistry: number[] = await Promise.all(
-      PROTOCOLS.map(
+      PROTOCOL_LIST.map(
         (protocol) => ProtocolAdapterFactory
           .getAdapter(protocol)
           .discoverLastUsedAccountIndex(mnemonicSeed.value),
       ),
     );
 
-    PROTOCOLS.forEach((protocol, index) => {
+    PROTOCOL_LIST.forEach((protocol, index) => {
       for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
         addRawAccount({ isRestored: true, protocol });
       }

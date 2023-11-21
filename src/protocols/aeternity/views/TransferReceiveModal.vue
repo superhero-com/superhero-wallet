@@ -9,14 +9,14 @@
     :account-name="activeAccountName"
     :tokens="availableTokens"
     :disable-asset-selection="isMultisig"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
   />
 </template>
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
@@ -45,7 +45,7 @@ export default defineComponent({
     const activeAccountName = props.isMultisig ? undefined : getName(activeAccount.value.address);
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       availableTokens,
       activeAccountAddress,
       activeAccountName,

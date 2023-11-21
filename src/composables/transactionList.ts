@@ -12,7 +12,7 @@ import type {
   IAccountTransactionsState,
 } from '@/types';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
   TXS_PER_PAGE,
 } from '@/constants';
@@ -99,7 +99,7 @@ export function useTransactionList() {
 
   function setPendingTransactionSentByHash(address: Encoded.AccountAddress, hash: string) {
     if (transactions.value[address].localPendingTransaction !== null
-        && transactions.value[address].localPendingTransaction?.hash === hash
+      && transactions.value[address].localPendingTransaction?.hash === hash
     ) {
       (transactions.value[address].localPendingTransaction as ITransaction).sent = true;
     }
@@ -138,7 +138,7 @@ export function useTransactionList() {
     isMultisig?: boolean,
   ): Promise<ITransaction[]> {
     const { protocol } = isMultisig
-      ? { protocol: PROTOCOL_AETERNITY as Protocol }
+      ? { protocol: PROTOCOLS.aeternity as Protocol }
       : getAccountByAddress(address) || {};
     await getAeSdk(); // Ensure the `nodeNetworkId` is established
 

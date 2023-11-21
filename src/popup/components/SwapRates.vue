@@ -22,7 +22,7 @@
       <div>
         <TokenAmount
           :amount="rate.price"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           class="price"
           hide-fiat
           no-symbol
@@ -44,7 +44,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { camelCase } from 'lodash-es';
 
 import {
@@ -115,7 +115,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       availableTokens,
       isSwapTx,
       rates,

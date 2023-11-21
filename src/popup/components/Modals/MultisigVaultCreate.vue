@@ -38,7 +38,7 @@
           :name="`signer-address-${index}`"
           :rules="{
             required: true,
-            account_address: [PROTOCOL_AETERNITY],
+            account_address: [PROTOCOLS.aeternity],
           }"
         >
           <FormTextarea
@@ -193,7 +193,7 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import {
   MODAL_READ_QR_CODE,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   excludeFalsy,
@@ -435,7 +435,7 @@ export default defineComponent({
       PlusCircleIcon,
       MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
       MULTISIG_CREATION_PHASES,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       STEPS,
       currentMultisigAccountId,
       aeAccountsSelectOptions,

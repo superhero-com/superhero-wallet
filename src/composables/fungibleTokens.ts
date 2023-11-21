@@ -11,7 +11,7 @@ import type {
   ITransaction,
   TokenPair,
 } from '@/types';
-import { PROTOCOL_AETERNITY, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
@@ -61,7 +61,7 @@ export function useFungibleTokens() {
   } = useAccounts();
 
   function getAccountTokenBalances(address?: string): IToken[] {
-    const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
     return tokenBalances.value[address || account?.address!] || [];
   }
 
@@ -115,7 +115,7 @@ export function useFungibleTokens() {
 
   async function createOrChangeAllowance(contractId: string, amount: number | string) {
     const aeSdk = await getAeSdk();
-    const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
     const selectedToken = tokenBalances.value?.[account?.address!]
       ?.find((token) => token?.contractId === contractId);
 
@@ -155,7 +155,7 @@ export function useFungibleTokens() {
   ): Promise<Partial<TokenPair> & Record<string, any>> {
     try {
       const aeSdk = await getAeSdk();
-      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+      const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
       const tokenContract = await aeSdk.initializeContract({
         aci: AedexV2PairACI,
         address,
@@ -253,7 +253,7 @@ export function useFungibleTokens() {
 
     // This is out of place but since we are treating new protocols as fungible tokens
     // it is better to have it here than in the protocol specific helper file
-    if (transaction.protocol && transaction.protocol !== PROTOCOL_AETERNITY) {
+    if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
       return new BigNumber(
         transaction.tx?.amount || 0,
       )
@@ -291,8 +291,8 @@ export function useFungibleTokens() {
   }
 
   onNetworkChange(async (network, oldNetwork) => {
-    const newMiddlewareUrl = network.protocols[PROTOCOL_AETERNITY].middlewareUrl;
-    const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOL_AETERNITY]?.middlewareUrl;
+    const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
+    const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
     if (newMiddlewareUrl !== oldMiddlewareUrl) {
       await loadAvailableTokens();
       await loadTokenBalances();

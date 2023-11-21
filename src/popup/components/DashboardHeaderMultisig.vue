@@ -29,7 +29,7 @@ import {
   defineComponent,
 } from 'vue';
 import BigNumber from 'bignumber.js';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   useCurrencies,
   useMultisigAccounts,
@@ -69,7 +69,7 @@ export default defineComponent({
           .reduce((total, balance) => total.plus(balance), new BigNumber(0))
           .toFixed();
 
-        return getFiat(+totalBalance, PROTOCOL_AETERNITY);
+        return getFiat(+totalBalance, PROTOCOLS.aeternity);
       },
     );
 

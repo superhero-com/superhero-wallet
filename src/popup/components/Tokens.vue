@@ -49,7 +49,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { ITokenResolved } from '@/types';
-import { PROTOCOL_AETERNITY, PROTOCOL_BITCOIN, PROTOCOL_ETHEREUM } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   truncateString as truncateStringFactory,
 } from '@/utils';
@@ -144,13 +144,13 @@ export default defineComponent({
     const showProtocolIcon = computed(() => PROTOCOL_SYMBOLS.includes(imgToken.value?.symbol!));
     const imgTokenProtocol = computed(() => {
       if (imgToken.value?.isAe || imgToken.value?.contractId === AE_CONTRACT_ID) {
-        return PROTOCOL_AETERNITY;
+        return PROTOCOLS.aeternity;
       }
       if (imgToken.value?.symbol === BTC_SYMBOL) {
-        return PROTOCOL_BITCOIN;
+        return PROTOCOLS.bitcoin;
       }
       if (imgToken.value?.symbol === ETH_SYMBOL) {
-        return PROTOCOL_ETHEREUM;
+        return PROTOCOLS.ethereum;
       }
       return null;
     });

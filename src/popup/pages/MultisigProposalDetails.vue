@@ -74,7 +74,7 @@
                   <div class="row">
                     <AccountItem
                       :address="activeMultisigAccount.proposedBy"
-                      :protocol="PROTOCOL_AETERNITY"
+                      :protocol="PROTOCOLS.aeternity"
                     />
                     <DialogBox
                       v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
@@ -137,7 +137,7 @@
                 <template #value>
                   <TokenAmount
                     :amount="+(aettosToAe(multisigTx.gasPrice))"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     :symbol="AE_SYMBOL"
                     hide-fiat
                   />
@@ -151,7 +151,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.gasPrice)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -169,7 +169,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(multisigTx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -182,7 +182,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -196,7 +196,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(totalSpent)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     high-precision
                   />
                 </template>
@@ -292,7 +292,7 @@ import type {
 } from '@/types';
 import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   blocksToRelativeTime,
@@ -529,7 +529,7 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,

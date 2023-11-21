@@ -110,8 +110,7 @@ import type {
 } from '@/types';
 import {
   IS_MOBILE_DEVICE,
-  PROTOCOL_BITCOIN,
-  PROTOCOL_ETHEREUM,
+  PROTOCOLS,
 } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy } from '@/composables';
@@ -244,8 +243,7 @@ export default defineComponent({
     })();
 
     return {
-      PROTOCOL_BITCOIN,
-      PROTOCOL_ETHEREUM,
+      PROTOCOLS,
       IS_MOBILE_DEVICE,
       ShareIcon,
       amount,
