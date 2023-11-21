@@ -3,7 +3,7 @@
     :base-token-symbol="ETH_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
-    :protocol="PROTOCOL_ETHEREUM"
+    :protocol="PROTOCOLS.ethereum"
     class="transfer-review"
     show-fiat
   >
@@ -16,7 +16,7 @@
           <TokenAmount
             :amount="+transferData.total"
             :symbol="ETH_SYMBOL"
-            :protocol="PROTOCOL_ETHEREUM"
+            :protocol="PROTOCOLS.ethereum"
             data-cy="review-total"
             high-precision
           />
@@ -36,7 +36,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useModals, useUi } from '@/composables';
 import type { TransferFormModel } from '@/types';
-import { PROTOCOL_ETHEREUM } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
@@ -75,14 +75,14 @@ export default defineComponent({
     }
 
     async function transfer({ amount, recipient }: { amount: string; recipient: string }) {
-      const ethereumAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_ETHEREUM);
+      const ethereumAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
       try {
         loading.value = true;
         const { hash } = await ethereumAdapter.spend(
           Number(amount),
           recipient,
           {
-            fromAccount: getLastActiveProtocolAccount(PROTOCOL_ETHEREUM),
+            fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum),
             maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
             maxFeePerGas: props.transferData.maxFeePerGas,
           },
@@ -117,7 +117,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_ETHEREUM,
+      PROTOCOLS,
       ETH_SYMBOL,
       loading,
       submit,

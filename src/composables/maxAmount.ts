@@ -25,7 +25,7 @@ import {
   handleUnknownError,
   isUrlValid,
 } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   STUB_CALLDATA,
   STUB_CONTRACT_ADDRESS,
@@ -70,7 +70,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
   });
 
   function getAccount() {
-    return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+    return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
   }
 
   watch(

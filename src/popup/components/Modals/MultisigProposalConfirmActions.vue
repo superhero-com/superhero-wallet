@@ -36,7 +36,7 @@
         <div class="active-account">
           <AccountItem
             :address="activeAccount.address"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </div>
 
@@ -90,7 +90,7 @@ import { prepareAccountSelectOptions } from '@/utils';
 import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import Modal from '../Modal.vue';
 import FormSelect from '../form/FormSelect.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -175,7 +175,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       statusIcon,
       closeModal,

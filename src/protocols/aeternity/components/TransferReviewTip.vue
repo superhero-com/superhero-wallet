@@ -34,7 +34,7 @@
         <AddressTruncated
           show-explorer-link
           :address="activeAccount.address"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </div>
     </div>
@@ -45,7 +45,7 @@
         :amount="+transferData.amount"
         :symbol="tokenSymbol"
         :hide-fiat="isAex9"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         data-cy="review-total"
       />
       <span class="lowercase">{{ $t('pages.send.to') }}</span>
@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import { AGGREGATOR_URL, PROTOCOL_AETERNITY } from '@/constants';
+import { AGGREGATOR_URL, PROTOCOLS } from '@/constants';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useAccounts } from '@/composables';
 import { getDefaultAccountLabel } from '@/utils';
@@ -116,7 +116,7 @@ export default {
     return {
       AGGREGATOR_URL,
       AE_CONTRACT_ID,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       note: '',
       noteMaxLength: 280,
     };

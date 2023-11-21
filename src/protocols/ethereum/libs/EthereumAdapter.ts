@@ -29,7 +29,7 @@ import type {
   IFetchTransactionResult,
   IAccount,
 } from '@/types';
-import { PROTOCOL_ETHEREUM } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex } from '@/utils';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -49,7 +49,7 @@ import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOL_ETHEREUM as Protocol;
+  override protocol = PROTOCOLS.ethereum as Protocol;
 
   override protocolName = ETH_PROTOCOL_NAME;
 
@@ -117,7 +117,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOL_ETHEREUM] || {}),
+      ...(marketData?.[PROTOCOLS.ethereum] || {}),
       contractId: ETH_CONTRACT_ID,
       symbol: ETH_SYMBOL,
       decimals: ETH_COIN_PRECISION,

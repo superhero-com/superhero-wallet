@@ -99,7 +99,7 @@
                 name="transactionSignLimit"
                 label=" "
                 :selected-asset="selectedAsset"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
                 readonly
               />
             </Field>
@@ -108,21 +108,21 @@
               <TokenAmount
                 :label="$t('pages.permissions.spent-today')"
                 :amount="permission.transactionSignSpent"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.left-today')"
                 :amount="permission.transactionSignLimit - permission.transactionSignSpent"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.account.balance')"
                 :amount="+balance"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
           </div>
@@ -171,7 +171,7 @@ import { IonPage, IonContent } from '@ionic/vue';
 import type { IPermission } from '@/types';
 import {
   PERMISSION_DEFAULTS,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { useBalances, useCurrencies } from '@/composables';
 import { usePermissions } from '@/composables/permissions';
@@ -214,7 +214,7 @@ export default defineComponent({
     const selectedAsset = computed(() => ({
       contractId: AE_CONTRACT_ID,
       symbol: AE_SYMBOL,
-      currentPrice: getCurrentCurrencyRate(PROTOCOL_AETERNITY),
+      currentPrice: getCurrentCurrencyRate(PROTOCOLS.aeternity),
     }));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
@@ -264,7 +264,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       ROUTE_PERMISSIONS_SETTINGS,
       DeleteIcon,
       editView,
