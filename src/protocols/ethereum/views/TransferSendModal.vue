@@ -21,6 +21,7 @@
 <script lang="ts">
 import {
   Component,
+  PropType,
   computed,
   defineComponent,
   ref,
@@ -29,17 +30,15 @@ import type {
   TransferFormModel,
   TransferSendStep,
   TransferSendStepConfigRegistry,
+  AssetList,
+  AssetContractId,
 } from '@/types';
 import {
-  PROTOCOL_VIEW_TRANSFER_SEND,
   PROTOCOLS,
+  PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import {
-  useBalances,
-  useCurrencies,
-} from '@/composables';
+import { useFungibleTokens } from '@/composables';
 
 import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
 import TransferReview from '../components/TransferReview.vue';
@@ -50,10 +49,14 @@ export default defineComponent({
   components: {
     TransferSendBase,
   },
-  props: transferSendModalRequiredProps,
+  props: {
+    ...transferSendModalRequiredProps,
+    tokenContractId: { type: String as PropType<AssetContractId>, default: null },
+  },
   setup(props) {
-    const { marketData } = useCurrencies();
-    const { balance } = useBalances();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
+
+    const ethTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.ethereum));
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
@@ -62,9 +65,9 @@ export default defineComponent({
       address: props.address as any, // TODO change to string globally
       amount: props.amount,
       payload: props.payload,
-      selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOLS.ethereum)
-        .getDefaultCoin(marketData.value!, +balance.value),
+      selectedAsset: (props.tokenContractId)
+        ? ethTokensAvailable.value[props.tokenContractId as keyof AssetList]
+        : undefined,
     });
 
     function proceedToNextStep() {
