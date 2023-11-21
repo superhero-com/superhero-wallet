@@ -35,7 +35,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useModals, useUi } from '@/composables';
-import type { TransferFormModel } from '@/types';
+import type { ITransferArgs, TransferFormModel } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -84,7 +84,7 @@ export default defineComponent({
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function transfer({ amount, recipient, selectedAsset }: any) {
+    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
       const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
         loading.value = true;

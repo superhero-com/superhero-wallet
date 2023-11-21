@@ -533,6 +533,14 @@ export type ITransactionsState = {
 
 export type IAccountTransactionsState = Record<string, ITransactionsState>
 
+export interface IFeeItem {
+  fee: BigNumberPublic;
+  time: number; // time in seconds
+  label: string;
+  maxPriorityFee?: BigNumberPublic;
+  maxFeePerGas?: BigNumberPublic;
+}
+
 /**
  * Browser popup window names
  */
@@ -743,6 +751,12 @@ export interface TransferFormModel extends IFormModel {
   maxPriorityFeePerGas?: string;
   maxFeePerGas?: string;
   payload: string;
+}
+
+export interface ITransferArgs {
+  amount: string | BigNumberPublic;
+  recipient: AccountAddress;
+  selectedAsset: IAsset;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;

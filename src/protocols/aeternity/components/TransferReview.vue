@@ -57,7 +57,7 @@
 
     <template #total>
       <DetailsItem
-        v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
+        v-if="transferData?.selectedAsset?.contractId === AE_CONTRACT_ID"
         :label="$t('common.total')"
         class="details-item"
       >
@@ -85,7 +85,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
-import type { TransferFormModel, ITransaction } from '@/types';
+import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -169,7 +169,7 @@ export default defineComponent({
       });
     }
 
-    async function transfer({ amount, recipient, selectedAsset }: any) {
+    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -178,22 +178,22 @@ export default defineComponent({
 
         if (props.transferData.invoiceId !== null) {
           actionResult = await burnTriggerPoS(
-            selectedAsset.contractId,
-            amount,
+            selectedAsset.contractId as Encoded.ContractAddress,
+            amount.toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
             { waitMined: false },
           );
         } else if (!isSelectedAssetAeCoin) {
           actionResult = await transferToken(
-            selectedAsset.contractId,
-            recipient,
-            amount,
+            selectedAsset.contractId as Encoded.ContractAddress,
+            recipient as Encoded.AccountAddress,
+            Number(amount),
             { waitMined: false },
           );
         } else {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          actionResult = await aeternityAdapter.spend(amount, recipient, {
+          actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
             payload: props.transferData.payload,
           });
         }
@@ -205,9 +205,9 @@ export default defineComponent({
             pending: true,
             transactionOwner: activeAccount.value.address,
             tx: {
-              amount,
+              amount: Number(amount),
               callerId: activeAccount.value.address,
-              contractId: selectedAsset.contractId,
+              contractId: selectedAsset.contractId as Encoded.ContractAddress,
               type: Tag[Tag.ContractCallTx],
               function: TX_FUNCTIONS.transfer,
               recipientId: recipient,
@@ -222,9 +222,9 @@ export default defineComponent({
             pending: true,
             transactionOwner: activeAccount.value.address,
             tx: {
-              amount,
+              amount: Number(amount),
               callerId: activeAccount.value.address,
-              contractId: selectedAsset.contractId,
+              contractId: selectedAsset.contractId as Encoded.ContractAddress,
               senderId: activeAccount.value.address,
               recipientId: recipient,
               type: Tag[Tag.SpendTx],
