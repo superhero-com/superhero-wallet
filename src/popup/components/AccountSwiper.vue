@@ -74,7 +74,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore from 'swiper';
 import { Virtual } from 'swiper/modules';
 import { getAddressColor } from '@/utils';
-import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -138,7 +138,7 @@ export default defineComponent({
 
     return {
       IS_MOBILE_APP,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       currentIdx,
       customSwiper,
       getAccountColor,

@@ -2,11 +2,12 @@ import {
   PROTOCOLS,
   DISTINCT_PROTOCOL_VIEWS,
 } from '@/constants';
+import type { ObjectValues } from '.';
 
 /**
  * Blockchain protocol slug name
  */
-export type Protocol = typeof PROTOCOLS[number];
+export type Protocol = ObjectValues<typeof PROTOCOLS>;
 
 /**
  * List of views (pages and modals) that are required by all of the protocols.

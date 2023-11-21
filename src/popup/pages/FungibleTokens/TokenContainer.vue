@@ -15,7 +15,7 @@
               no-symbol
               fiat-below
               large
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
               :amount="convertedBalance"
               :aex9="!isAe"
             />
@@ -104,7 +104,7 @@ import { Encoded } from '@aeternity/aepp-sdk';
 import type { IToken, TokenPair } from '@/types';
 import {
   IS_IOS,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
   IS_FIREFOX,
 } from '@/constants';
@@ -221,7 +221,7 @@ export default defineComponent({
     const tokenData = computed((): IToken => {
       if (isAe) {
         return ProtocolAdapterFactory
-          .getAdapter(PROTOCOL_AETERNITY)
+          .getAdapter(PROTOCOLS.aeternity)
           .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
       }
       return getAccountTokenBalances().find(
@@ -283,7 +283,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       UNFINISHED_FEATURES,
       IS_IOS,
       AE_DEX_URL,

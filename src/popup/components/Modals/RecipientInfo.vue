@@ -76,7 +76,7 @@ import {
   ResolveCallback,
 } from '@/types';
 import { AE_BLOG_CLAIM_TIP_URL } from '@/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import Default from './Default.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -92,7 +92,7 @@ export default defineComponent({
     close: { type: Function, default: null },
   },
   setup(props) {
-    const isProtocolAe = computed(() => props.protocol === PROTOCOL_AETERNITY);
+    const isProtocolAe = computed(() => props.protocol === PROTOCOLS.aeternity);
     const protocolName = computed(
       () => ProtocolAdapterFactory.getAdapter(props.protocol).protocolName,
     );

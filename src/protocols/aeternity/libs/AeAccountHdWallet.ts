@@ -15,7 +15,7 @@ import { Ref } from 'vue';
 import type { ITx } from '@/types';
 import { useAccounts } from '@/composables/accounts';
 import { usePermissions } from '@/composables/permissions';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 
 interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
@@ -29,7 +29,7 @@ export class AeAccountHdWallet extends AccountBase {
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super();
     const { getLastActiveProtocolAccount } = useAccounts();
-    this.address = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
+    this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
     this.nodeNetworkId = nodeNetworkId;
   }
 
@@ -96,9 +96,9 @@ export class AeAccountHdWallet extends AccountBase {
     const { getLastActiveProtocolAccount, getAccountByAddress } = useAccounts();
     const account = (options?.fromAccount)
       ? getAccountByAddress(options.fromAccount)
-      : getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+      : getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
-    if (account && account.secretKey && account.protocol === PROTOCOL_AETERNITY) {
+    if (account && account.secretKey && account.protocol === PROTOCOLS.aeternity) {
       return sign(data, account.secretKey);
     }
 

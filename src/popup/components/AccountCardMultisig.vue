@@ -12,7 +12,7 @@
     <template #middle>
       <BalanceInfo
         :balance="+account.balance"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
       />
     </template>
 
@@ -34,7 +34,7 @@ import {
   PropType,
 } from 'vue';
 import type { IMultisigAccount } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
@@ -66,7 +66,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isPendingAccount,
       convertMultisigAccountToAccount,
     };

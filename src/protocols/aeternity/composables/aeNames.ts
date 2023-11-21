@@ -21,7 +21,7 @@ import {
 import { Encoded, NAME_TTL } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
 import Logger from '@/lib/logger';
@@ -122,7 +122,7 @@ export function useAeNames() {
 
     if (
       isLocalAccountAddress(address)
-      || getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address === address
+      || getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address === address
     ) {
       return computed(() => defaultNamesRegistry.value[nodeNetworkId.value!]?.[address] || '');
     }
@@ -172,7 +172,7 @@ export function useAeNames() {
   }
 
   function fetchPendingNameClaimTransactions(address: Encoded.AccountAddress) {
-    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
+    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
     return aeternityAdapter.fetchPendingTransactions(address)
       .then(
         (transactions: ITransaction[]) => (transactions)
