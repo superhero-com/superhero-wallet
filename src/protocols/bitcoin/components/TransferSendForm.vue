@@ -4,17 +4,17 @@
     :transfer-data="transferData"
     :fee="numericFee"
     :fee-symbol="BTC_SYMBOL"
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     :custom-title="$t('modals.send.sendAsset', { name: BTC_COIN_NAME })"
     class="transfer-send-form"
   >
     <template #recipient>
       <TransferSendRecipient
         v-model.trim="formModel.address"
-        :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_BITCOIN })"
+        :placeholder="$t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.bitcoin })"
         :errors="errors"
-        :protocol="PROTOCOL_BITCOIN"
-        :validation-rules="{ account_address: [PROTOCOL_BITCOIN, activeNetwork.type] }"
+        :protocol="PROTOCOLS.bitcoin"
+        :validation-rules="{ account_address: [PROTOCOLS.bitcoin, activeNetwork.type] }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -25,7 +25,7 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         readonly
-        :protocol="PROTOCOL_BITCOIN"
+        :protocol="PROTOCOLS.bitcoin"
         :validation-rules="{
           ...+balance.minus(fee) > 0
             ? { max_value: max.toString() }
@@ -85,7 +85,7 @@ import {
   useNetworks,
 } from '@/composables';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { NETWORK_TYPE_TESTNET, PROTOCOL_BITCOIN } from '@/constants';
+import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import {
   executeAndSetInterval,
   fetchJson,
@@ -132,7 +132,7 @@ export default defineComponent({
     'error',
   ],
   setup(props, { emit }) {
-    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+    const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
 
     const route = useRoute();
     const { t } = useI18n();
@@ -155,7 +155,7 @@ export default defineComponent({
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
-      protocol: PROTOCOL_BITCOIN,
+      protocol: PROTOCOLS.bitcoin,
     });
 
     const feeSelectedIndex = ref(1);
@@ -275,7 +275,7 @@ export default defineComponent({
       BTC_SYMBOL,
       BTC_COIN_NAME,
       DUST_AMOUNT,
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       NETWORK_TYPE_TESTNET,
       hasMultisigTokenWarning,
       formModel,

@@ -13,7 +13,7 @@ import {
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_TESTNET,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -184,7 +184,7 @@ export default () => {
   defineRule(
     'ae_min_tip_amount',
     (value: string) => {
-      const aeMinTipAmount = 0.01 / (currencyRates.value?.[PROTOCOL_AETERNITY].usd || 1);
+      const aeMinTipAmount = 0.01 / (currencyRates.value?.[PROTOCOLS.aeternity].usd || 1);
       return BigNumber(value).isGreaterThan(aeMinTipAmount) || tg('pages.tipPage.minAmountError');
     },
   );

@@ -31,8 +31,8 @@ import type {
   TransferSendStepConfigRegistry,
 } from '@/types';
 import {
-  PROTOCOL_ETHEREUM,
   PROTOCOL_VIEW_TRANSFER_SEND,
+  PROTOCOLS,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -63,7 +63,7 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_ETHEREUM)
+        .getAdapter(PROTOCOLS.ethereum)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
@@ -95,7 +95,6 @@ export default defineComponent({
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOL_ETHEREUM,
       currentRenderedComponent,
       steps,
       currentStep,

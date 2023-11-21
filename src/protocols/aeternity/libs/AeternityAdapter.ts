@@ -19,7 +19,7 @@ import type {
   ITransaction,
   Protocol,
 } from '@/types';
-import { PROTOCOL_AETERNITY, TXS_PER_PAGE } from '@/constants';
+import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
@@ -49,7 +49,7 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
-  protocol = PROTOCOL_AETERNITY as Protocol;
+  protocol = PROTOCOLS.aeternity as Protocol;
 
   protocolName = AE_PROTOCOL_NAME;
 
@@ -116,7 +116,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOL_AETERNITY] || {}),
+      ...(marketData?.[PROTOCOLS.aeternity] || {}),
       contractId: AE_CONTRACT_ID,
       // TODO - check usages why sometimes it's a bignumber
       decimals: AE_COIN_PRECISION,

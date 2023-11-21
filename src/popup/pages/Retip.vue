@@ -4,7 +4,7 @@
       <div class="retip">
         <BalanceInfo
           :balance="numericBalance"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
 
         <DetailsItem
@@ -42,7 +42,7 @@
             class="amount-input"
             readonly
             :message="errorMessage"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </Field>
 
@@ -105,7 +105,7 @@ import {
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useAeTippingBackend, useAeTippingUrls } from '@/protocols/aeternity/composables';
 
 import InputAmount from '../components/InputAmount.vue';
@@ -163,7 +163,7 @@ export default defineComponent({
         ? (formModel.value.selectedAsset as IToken).decimals
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
-      const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+      const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
       setLoaderVisible(true);
       try {
         const { tippingV1, tippingV2 } = await getTippingContracts();
@@ -234,7 +234,7 @@ export default defineComponent({
     onMounted(async () => {
       setLoaderVisible(true);
       formModel.value.selectedAsset = ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value);
 
       if (!tipId) throw new Error('"id" param is missing');
@@ -249,7 +249,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       tip,
       formModel,
       urlStatus,

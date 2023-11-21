@@ -10,7 +10,7 @@ import {
 import { Accounts } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import { Ref } from 'vue';
 import type { IWalletInfo } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useAccounts } from '@/composables/accounts';
 import { AeAccountHdWallet } from './AeAccountHdWallet';
 
@@ -39,7 +39,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
   getAccounts() {
     const accounts: Accounts = { connected: {}, current: {} };
     const { getLastActiveProtocolAccount } = useAccounts();
-    const account = getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!;
+    const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
 
     if (account) {
       accounts.current[account.address] = {};

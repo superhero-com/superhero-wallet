@@ -89,7 +89,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
-import { BUG_REPORT_URL, PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import { BUG_REPORT_URL, PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useAccounts, useAeSdk } from '@/composables';
 import { AE_DEX_URL, AE_SIMPLEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl } from '@/protocols/aeternity/helpers';
@@ -123,7 +123,7 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
 
-    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
     const activeAccountFaucetUrl = computed(
       () => (isActiveAccountAe.value) ? buildAeFaucetUrl(activeAccount.value.address) : null,
     );
