@@ -34,7 +34,7 @@
             :label="$t('pages.invite.tip-attached')"
             :message="errorMessage"
             readonly
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             :selected-asset="formModel.selectedAsset"
             @asset-selected="(val) => formModel.selectedAsset = val"
           />
@@ -58,7 +58,7 @@
           <InviteItem
             v-for="link in invites"
             v-bind="link ?? null"
-            :key="link.secretKey"
+            :key="link.secretKey.toString()"
             @loading="(val) => setLoaderVisible(val)"
           />
         </div>
@@ -75,7 +75,7 @@ import { generateKeyPair, AE_AMOUNT_FORMATS } from '@aeternity/aepp-sdk';
 
 import type { IFormModel } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useAeSdk,
@@ -115,7 +115,7 @@ export default defineComponent({
     const formModel = ref<IFormModel>({
       amount: '',
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
@@ -147,7 +147,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       PlusCircleFillIcon,
       activeAccount,
       balance,

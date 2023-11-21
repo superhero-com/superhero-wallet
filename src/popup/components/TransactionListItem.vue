@@ -63,7 +63,7 @@ import type {
   IActiveMultisigTransaction,
   ITransaction,
 } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   amountRounded,
   executeAndSetInterval,
@@ -162,7 +162,7 @@ export default defineComponent({
               : aeToken.amount
           )!,
         ),
-        PROTOCOL_AETERNITY,
+        PROTOCOLS.aeternity,
       );
     });
 

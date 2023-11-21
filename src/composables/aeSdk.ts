@@ -25,7 +25,7 @@ import {
   IS_EXTENSION,
   IS_EXTENSION_BACKGROUND,
   RUNNING_IN_TESTS,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   AE_NETWORK_MAINNET_ID,
@@ -131,7 +131,7 @@ export function useAeSdk() {
           const aepp = aeppInfo[aeppId];
           const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
           if (await checkOrAskPermission(host, METHODS.subscribeAddress)) {
-            return getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address;
+            return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
         },

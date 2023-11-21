@@ -26,7 +26,7 @@ import { useNetworks } from '@/composables/networks';
 import {
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -49,7 +49,7 @@ import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetwor
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
-  protocol = PROTOCOL_BITCOIN as Protocol;
+  protocol = PROTOCOLS.bitcoin as Protocol;
 
   protocolName = 'Bitcoin';
 
@@ -113,7 +113,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOL_BITCOIN] || {}),
+      ...(marketData?.[PROTOCOLS.bitcoin] || {}),
       contractId: BTC_CONTRACT_ID,
       symbol: BTC_SYMBOL,
       decimals: BTC_COIN_PRECISION,

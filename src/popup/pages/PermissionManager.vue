@@ -100,7 +100,7 @@
                 name="transactionSignLimit"
                 label=" "
                 :selected-asset="selectedAsset"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
                 readonly
               />
             </Field>
@@ -109,21 +109,21 @@
               <TokenAmount
                 :label="$t('pages.permissions.spent-today')"
                 :amount="permission.transactionSignSpent"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.permissions.left-today')"
                 :amount="permission.transactionSignLimit - permission.transactionSignSpent"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
             <div class="limit-info">
               <TokenAmount
                 :label="$t('pages.account.balance')"
                 :amount="+balance"
-                :protocol="PROTOCOL_AETERNITY"
+                :protocol="PROTOCOLS.aeternity"
               />
             </div>
           </div>
@@ -172,7 +172,7 @@ import { IonPage, IonContent } from '@ionic/vue';
 import type { IPermission } from '@/types';
 import {
   PERMISSION_DEFAULTS,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { useBalances, useCurrencies, usePermissions } from '@/composables';
 import { ROUTE_NOT_FOUND, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
@@ -212,7 +212,7 @@ export default defineComponent({
     const permissionChanged = ref(false);
 
     const selectedAsset = computed(() => ProtocolAdapterFactory
-      .getAdapter(PROTOCOL_AETERNITY)
+      .getAdapter(PROTOCOLS.aeternity)
       .getDefaultCoin(marketData.value!, +balance.value));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
@@ -262,7 +262,7 @@ export default defineComponent({
     }, { deep: true });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       ROUTE_PERMISSIONS_SETTINGS,
       DeleteIcon,
       editView,

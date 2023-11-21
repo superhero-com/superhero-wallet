@@ -43,7 +43,7 @@
           >
             <AccountItem
               :address="signer.address"
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
             />
             <DialogBox
               v-if="isLocalAccountAddress(signer.address)"
@@ -65,7 +65,7 @@
           <TokenAmount
             :amount="fee"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
       </DetailsItem>
@@ -103,7 +103,7 @@ import type {
   ICreateMultisigAccount,
   IMultisigCreationPhase,
 } from '@/types';
-import { MODAL_CONSENSUS_INFO, PROTOCOL_AETERNITY } from '@/constants';
+import { MODAL_CONSENSUS_INFO, PROTOCOLS } from '@/constants';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { handleUnknownError } from '@/utils';
 import {
@@ -205,7 +205,7 @@ export default defineComponent({
       callData,
       notEnoughBalanceToCreateMultisig,
       openConsensusInfoModal,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
     };
   },
 });

@@ -9,7 +9,7 @@ import {
   NETWORK_NAME_TESTNET,
   NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
-  PROTOCOLS,
+  PROTOCOL_LIST,
   STORAGE_KEYS,
 } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -60,7 +60,7 @@ function ensureDefaultNetworksExists() {
     networkTypes.forEach((type) => {
       defaultNetworks.push({
         name: (type === NETWORK_TYPE_MAINNET) ? NETWORK_NAME_MAINNET : NETWORK_NAME_TESTNET,
-        protocols: Object.fromEntries(PROTOCOLS.map((protocol) => [
+        protocols: Object.fromEntries(PROTOCOL_LIST.map((protocol) => [
           protocol, ProtocolAdapterFactory.getAdapter(protocol).getNetworkTypeDefaultValues(type),
         ])) as NetworkProtocolsSettings,
         type,

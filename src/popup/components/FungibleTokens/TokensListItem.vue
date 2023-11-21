@@ -21,10 +21,10 @@
         bright
       />
       <TokenAmount
-        :amount="+tokenData.convertedBalance || 0"
+        :amount="+(tokenData.convertedBalance ?? 0)"
         :symbol="tokenData.symbol"
         :aex9="isTokenAeCoin"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         dynamic-sizing
         no-symbol
         hide-fiat
@@ -48,7 +48,7 @@
 import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useCurrencies } from '@/composables';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
 
@@ -79,9 +79,9 @@ export default defineComponent({
     /**
      * price and balanceFormatted are applicable only for AE Coin
      */
-    const price = computed(() => formatCurrency(getCurrentCurrencyRate(PROTOCOL_AETERNITY)));
+    const price = computed(() => formatCurrency(getCurrentCurrencyRate(PROTOCOLS.aeternity)));
     const balanceFormatted = computed(
-      () => getFormattedFiat(props.tokenData.convertedBalance || 0, PROTOCOL_AETERNITY),
+      () => getFormattedFiat(props.tokenData.convertedBalance || 0, PROTOCOLS.aeternity),
     );
 
     const isTokenAeCoin = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
@@ -97,7 +97,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isTokenAeCoin,
       price,
       targetRouteName,

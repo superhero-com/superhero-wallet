@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :loading="loading"
     show-fiat
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     class="transfer-review"
   >
     <template #total>
@@ -17,7 +17,7 @@
             :amount="+transferData.total"
             :symbol="BTC_SYMBOL"
             high-precision
-            :protocol="PROTOCOL_BITCOIN"
+            :protocol="PROTOCOLS.bitcoin"
             data-cy="review-total"
           />
         </template>
@@ -36,7 +36,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useModals, useUi } from '@/composables';
 import type { TransferFormModel } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
@@ -85,7 +85,7 @@ export default defineComponent({
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async function transfer({ amount, recipient, selectedAsset }: any) {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
         loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
@@ -124,7 +124,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       BTC_SYMBOL,
       loading,
       submit,
