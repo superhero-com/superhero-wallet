@@ -2,7 +2,7 @@
   <TransferReceiveBase
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
-    :protocol="PROTOCOL_ETHEREUM"
+    :protocol="protocol"
     disable-asset-selection
   />
 </template>
@@ -10,7 +10,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import {
-  PROTOCOL_ETHEREUM,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts } from '@/composables';
@@ -27,9 +27,9 @@ export default defineComponent({
     const { activeAccount } = useAccounts();
 
     return {
-      PROTOCOL_ETHEREUM,
+      protocol: PROTOCOLS.ethereum,
       activeAccount,
-      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOL_ETHEREUM).protocolName,
+      protocolName: ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum).protocolName,
     };
   },
 });

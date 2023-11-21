@@ -128,8 +128,8 @@ import type {
 import {
   NETWORK_NAME_MAX_LENGTH,
   NETWORK_TYPE_CUSTOM,
+  PROTOCOL_LIST,
   PROTOCOLS,
-  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { ROUTE_NETWORK_EDIT, ROUTE_NETWORK_SETTINGS } from '@/popup/router/routeNames';
 import { useNetworks } from '@/composables';
@@ -163,7 +163,7 @@ export default defineComponent({
     /**
      * The form is divided to blocks, where each block has the settings for one protocol.
      */
-    const formStructure: IFormBlock[] = PROTOCOLS.map((protocol) => {
+    const formStructure: IFormBlock[] = PROTOCOL_LIST.map((protocol) => {
       const adapter = ProtocolAdapterFactory.getAdapter(protocol);
       return {
         protocol,
@@ -189,7 +189,7 @@ export default defineComponent({
       ? customNetworks.value.findIndex(({ name }) => name === savedNetworkName)
       : null;
 
-    const emptyNetworkSettings = PROTOCOLS.reduce(
+    const emptyNetworkSettings = PROTOCOL_LIST.reduce(
       (result, protocol) => ({ ...result, [protocol]: {} }),
       {},
     );
@@ -223,7 +223,7 @@ export default defineComponent({
      * Every protocol has it's own default values for each of the setting.
      */
     function fillInFieldsWithDefaultValues() {
-      PROTOCOLS.forEach((protocol) => {
+      PROTOCOL_LIST.forEach((protocol) => {
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         const settings = adapter.getNetworkSettings();
         newNetworkProtocols.value[protocol] = settings
@@ -251,7 +251,7 @@ export default defineComponent({
           const val = route.query[key];
 
           if (val && typeof val === 'string') {
-            newNetworkProtocols.value[PROTOCOL_AETERNITY][key] = val;
+            newNetworkProtocols.value[PROTOCOLS.aeternity][key] = val;
             isNetworkPrefilled.value = true;
           }
         });
@@ -266,7 +266,7 @@ export default defineComponent({
       const veeValidateValues: Record<string, string> = {
         name: newNetworkName.value,
       };
-      PROTOCOLS.forEach((protocol) => {
+      PROTOCOL_LIST.forEach((protocol) => {
         const settings = newNetworkProtocols.value[protocol];
         Object.keys(settings).forEach((key) => {
           veeValidateValues[`${protocol}-${key}`] = settings[key];

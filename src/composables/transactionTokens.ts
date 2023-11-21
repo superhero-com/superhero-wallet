@@ -5,7 +5,7 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { toShiftedBigNumber } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
@@ -63,7 +63,7 @@ export function useTransactionTokens({
       }));
     }
 
-    if (transaction.protocol && transaction.protocol !== PROTOCOL_AETERNITY) {
+    if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
       const protocolAdapter = ProtocolAdapterFactory
         .getAdapter(transaction.protocol);
       return [{

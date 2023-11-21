@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :fee="+fee.toFixed()"
     :fee-symbol="AE_SYMBOL"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
     class="transfer-send-form"
   >
     <template
@@ -50,7 +50,7 @@
           <template #value>
             <AccountItem
               :address="multisigVaultAddress"
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
             />
           </template>
         </DetailsItem>
@@ -62,14 +62,14 @@
         v-model.trim="formModel.address"
         :errors="errors"
         :is-tip-url="isTipUrl"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :placeholder="(isUrlTippingEnabled)
           ? $t('modals.send.recipientPlaceholderUrl')
           : $t('modals.send.recipientPlaceholder')"
         :validation-rules="{
           aens_name_registered_or_address_or_url: isUrlTippingEnabled,
           aens_name_registered_or_address: !isUrlTippingEnabled,
-          address_not_same_as: (isMultisig) ? [multisigVaultAddress, PROTOCOL_AETERNITY] : false,
+          address_not_same_as: (isMultisig) ? [multisigVaultAddress, PROTOCOLS.aeternity] : false,
           token_to_an_address: [!isAe],
         }"
         @openQrModal="openScanQrModal"
@@ -83,7 +83,7 @@
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
         :readonly="isMultisig"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :validation-rules="{
           ...+balance.minus(fee) > 0 && !isMultisig ? { max_value: max } : {},
           ...isMultisig ? { enough_ae_signer: fee.toString() } : { enough_coin: fee.toString() },
@@ -168,7 +168,7 @@ import type {
 } from '@/types';
 import {
   MODAL_PAYLOAD_FORM,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   checkIfSuperheroCallbackUrl,
@@ -261,7 +261,7 @@ export default defineComponent({
 
     function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_AETERNITY)
+        .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value);
 
       if (tokenContractId) {
@@ -290,7 +290,7 @@ export default defineComponent({
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
-      protocol: PROTOCOL_AETERNITY,
+      protocol: PROTOCOLS.aeternity,
     });
 
     const { max, fee } = useMaxAmount({ formModel });
@@ -419,7 +419,7 @@ export default defineComponent({
     return {
       INFO_BOX_TYPES,
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isAe,
       hasMultisigTokenWarning,
       multisigVaultAddress,

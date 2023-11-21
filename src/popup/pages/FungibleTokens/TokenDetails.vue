@@ -27,7 +27,7 @@
           <template #text>
             <AddressTruncated
               show-explorer-link
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
               :address="tokenData.contractId"
             />
           </template>
@@ -168,7 +168,7 @@ import {
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import {
@@ -228,7 +228,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       AE_DEX_URL,
       UNFINISHED_FEATURES,
       displayDexUrl,

@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onUnmounted } from 'vue';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { RejectedByUserError } from '@/lib/errors';
 import { useAccounts, usePopupProps } from '@/composables';
 
@@ -82,7 +82,7 @@ export default defineComponent({
     const { popupProps, sender, setPopupProps } = usePopupProps();
     const { getLastActiveProtocolAccount } = useAccounts();
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const dataAsString = computed((): string => popupProps.value?.txBase64?.toString() || '');
 

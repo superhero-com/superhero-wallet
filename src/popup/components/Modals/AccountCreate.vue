@@ -17,7 +17,7 @@
       </p>
 
       <BtnSubheader
-        v-for="protocol in PROTOCOLS"
+        v-for="protocol in PROTOCOL_LIST"
         :key="protocol"
         :header="getProtocolName(protocol)"
         :subheader="$t(
@@ -34,10 +34,8 @@ import { defineComponent, onMounted, PropType } from 'vue';
 import type { Protocol, ResolveCallback } from '@/types';
 import {
   MODAL_AE_ACCOUNT_CREATE,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
-  PROTOCOL_ETHEREUM,
   PROTOCOLS,
+  PROTOCOL_LIST,
 } from '@/constants';
 import {
   useAccounts,
@@ -70,12 +68,12 @@ export default defineComponent({
 
       // TODO each of the blocks of this switch should be moved to the specific adapter
       switch (protocol) {
-        case PROTOCOL_AETERNITY:
+        case PROTOCOLS.aeternity:
           await openModal(MODAL_AE_ACCOUNT_CREATE);
           break;
 
-        case PROTOCOL_BITCOIN:
-        case PROTOCOL_ETHEREUM:
+        case PROTOCOLS.bitcoin:
+        case PROTOCOLS.ethereum:
           idx = addRawAccount({
             isRestored: false,
             protocol,
@@ -99,9 +97,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOLS,
-      PROTOCOL_AETERNITY,
-      PROTOCOL_BITCOIN,
+      PROTOCOL_LIST,
       isOnline,
       createAccount,
       getProtocolName,

@@ -11,7 +11,7 @@ import type {
 } from '@/types';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useCurrencies } from './currencies';
 import { useFungibleTokens } from './fungibleTokens';
 import { useAccounts } from './accounts';
@@ -72,7 +72,7 @@ export function useTokensList({
    */
   const aeToken = computed(
     (): ICoin => ProtocolAdapterFactory
-      .getAdapter(PROTOCOL_AETERNITY)
+      .getAdapter(PROTOCOLS.aeternity)
       .getDefaultCoin(marketData.value!, +aeTokenBalance.value),
   );
 
