@@ -78,7 +78,7 @@ import { useRoute } from 'vue-router';
 import BigNumber from 'bignumber.js';
 import { toBitcoin } from 'satoshi-bitcoin';
 
-import type { TransferFormModel } from '@/types';
+import type { IFeeItem, TransferFormModel } from '@/types';
 import {
   useAccounts,
   useBalances,
@@ -103,7 +103,7 @@ import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
-import TransactionSpeedPicker, { FeeItem } from '@/popup/components/TransactionSpeedPicker.vue';
+import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
 
 import EditIcon from '@/icons/pencil.svg?vue-component';
@@ -163,7 +163,7 @@ export default defineComponent({
     const feeMedium = ref(new BigNumber(0.00002));
     const feeHigh = ref(new BigNumber(0.00002));
 
-    const feeList = computed((): FeeItem[] => [
+    const feeList = computed((): IFeeItem[] => [
       { fee: feeSlow.value, time: 3540, label: t('common.transferSpeed.slow') },
       { fee: feeMedium.value, time: 600, label: t('common.transferSpeed.medium') },
       { fee: feeHigh.value, time: 25, label: t('common.transferSpeed.fast') },
