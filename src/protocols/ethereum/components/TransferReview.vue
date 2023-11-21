@@ -15,7 +15,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total"
+            :amount="+transferData.total!"
             :symbol="ETH_SYMBOL"
             :protocol="PROTOCOLS.ethereum"
             data-cy="review-total"
@@ -29,6 +29,7 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   PropType,
   ref,
@@ -67,6 +68,12 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
+    const ethAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+
+    const isSelectedAssetEthCoin = computed(
+      () => props.transferData?.selectedAsset?.contractId === ethAdapter.getCoinContractId(),
+    );
+
     function openTransactionFailedModal(msg: string) {
       openDefaultModal({
         title: t('modals.transaction-failed.msg'),
@@ -75,44 +82,43 @@ export default defineComponent({
       });
     }
 
-    async function transfer({ amount, recipient }: { amount: string; recipient: string }) {
-      const ethereumAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.ethereum);
+    async function submit(): Promise<void> {
+      const {
+        amount,
+        address: recipient,
+        selectedAsset,
+      } = props.transferData;
+
+      if (!amount || !recipient || !selectedAsset) {
+        return;
+      }
+
+      loading.value = true;
+
       try {
-        loading.value = true;
-        const { hash } = await ethereumAdapter.spend(
-          Number(amount),
-          recipient,
-          {
-            fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum),
-            maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
-            maxFeePerGas: props.transferData.maxFeePerGas,
-          },
-        );
-        return hash;
+        if (!isSelectedAssetEthCoin.value) {
+          // TODO - implement
+          // transferToken(amount, recipient, selectedAsset)
+          console.log('transferToken()', amount, recipient, selectedAsset);
+          throw new Error('Not implemented');
+        } else {
+          await ethAdapter.spend(
+            Number(amount),
+            recipient,
+            {
+              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum),
+              maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
+              maxFeePerGas: props.transferData.maxFeePerGas,
+            },
+          );
+        }
       } catch (error: any) {
         openTransactionFailedModal(error.message);
         throw error;
       } finally {
         loading.value = false;
       }
-    }
 
-    async function submit(): Promise<void> {
-      const {
-        amount,
-        address: recipient,
-      } = props.transferData;
-
-      if (!amount || !recipient) {
-        return;
-      }
-
-      await transfer({
-        amount,
-        recipient,
-      });
-
-      // TODO - redirect after transfer function will be ready
       router.push({ name: homeRouteName.value });
       emit('success');
     }
