@@ -14,11 +14,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import {
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
-  PROTOCOL_ETHEREUM,
-} from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import type { Protocol } from '@/types';
 import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
@@ -42,9 +38,9 @@ export default defineComponent({
   },
   setup(props) {
     const iconsMap: Record<Protocol, Component> = {
-      [PROTOCOL_AETERNITY]: AeternityIcon,
-      [PROTOCOL_BITCOIN]: BitcoinIcon,
-      [PROTOCOL_ETHEREUM]: EthereumIcon,
+      [PROTOCOLS.aeternity]: AeternityIcon,
+      [PROTOCOLS.bitcoin]: BitcoinIcon,
+      [PROTOCOLS.ethereum]: EthereumIcon,
     };
 
     const selectedIcon = computed((): Component => iconsMap[props.protocol]);

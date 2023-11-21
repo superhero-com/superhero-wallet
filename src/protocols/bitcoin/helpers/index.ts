@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import type { ITransaction } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { BTC_COIN_PRECISION } from '../config';
 
 export function satoshiToBtc(amount: number) {
@@ -29,7 +29,7 @@ export function normalizeTransactionStructure(
   } = transaction;
 
   return {
-    protocol: PROTOCOL_BITCOIN,
+    protocol: PROTOCOLS.bitcoin,
     transactionOwner: transactionOwner as any,
     hash: txid, // TODO: we can go with additional field
     microTime: status.block_time * 1000,

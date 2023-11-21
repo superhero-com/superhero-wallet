@@ -1,6 +1,6 @@
 <template>
   <TransferSendBase
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
     :current-step="currentStep"
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
@@ -39,7 +39,7 @@ import type {
   TransferSendStepConfigRegistry,
 } from '@/types';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -136,7 +136,7 @@ export default defineComponent({
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       currentRenderedComponent,
       steps,
       currentStep,

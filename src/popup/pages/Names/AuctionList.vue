@@ -26,7 +26,7 @@
                 {{ name }}
                 <TokenAmount
                   :amount="getAeFee(lastBid.nameFee)"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                 />
               </div>
               <div
@@ -76,7 +76,7 @@ import {
   useTopHeaderData,
 } from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 
 import Filters from '@/popup/components/Filters.vue';
 import NameRow from '@/popup/components/NameRow.vue';
@@ -159,7 +159,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       blocksToRelativeTime,
       loading,
       displayMode,

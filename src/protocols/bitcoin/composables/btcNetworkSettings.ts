@@ -3,7 +3,7 @@ import type { NetworkTypeDefault } from '@/types';
 import {
   NETWORK_TYPE_CUSTOM,
   NETWORK_TYPE_TESTNET,
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
 } from '@/constants';
 import { useNetworks } from '@/composables/networks';
 import { BTC_NETWORK_ADDITIONAL_SETTINGS } from '@/protocols/bitcoin/config';
@@ -12,7 +12,7 @@ export function useBtcNetworkSettings() {
   const { activeNetwork, activeNetworkName } = useNetworks();
 
   const btcActiveNetworkSettings = computed(
-    () => activeNetwork.value.protocols[PROTOCOL_BITCOIN] as any, // TODO - type btc network
+    () => activeNetwork.value.protocols[PROTOCOLS.bitcoin] as any, // TODO - type btc network
   );
 
   const btcActiveNetworkPredefinedSettings = computed(

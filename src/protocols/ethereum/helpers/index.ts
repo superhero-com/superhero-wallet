@@ -1,7 +1,7 @@
 import { fromWei, toChecksumAddress, toWei } from 'web3-utils';
 import BigNumber from 'bignumber.js';
 import { ITransaction } from '@/types';
-import { PROTOCOL_ETHEREUM } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
 
 /**
@@ -33,7 +33,7 @@ export function normalizeTransactionStructure(
   const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
   const microTime = timeStamp * 1000;
   return {
-    protocol: PROTOCOL_ETHEREUM,
+    protocol: PROTOCOLS.ethereum,
     transactionOwner: transactionOwner as any,
     hash,
     microTime,

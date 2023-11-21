@@ -32,7 +32,7 @@
       <AddressTruncated
         v-if="!chainName && address"
         :address="address"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         class="address"
       />
       <Truncate
@@ -72,7 +72,7 @@ import {
   IS_MOBILE_DEVICE,
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_TYPES,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
@@ -155,7 +155,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       IS_MOBILE_DEVICE,
       createdAt,
       message,
