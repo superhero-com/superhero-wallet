@@ -4,7 +4,7 @@
       <template #value>
         <TokenAmount
           :amount="amount"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </template>
     </DetailsItem>
@@ -21,7 +21,7 @@
 import { computed, defineComponent } from 'vue';
 import { blocksToRelativeTime } from '@/utils';
 import { useTopHeaderData } from '@/composables';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import DetailsItem from './DetailsItem.vue';
@@ -46,7 +46,7 @@ export default defineComponent({
     const endHeight = computed(() => blocksToRelativeTime(blocksToExpiry.value));
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       blocksToRelativeTime,
       auction,
       amount,

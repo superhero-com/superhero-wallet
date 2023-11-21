@@ -99,7 +99,7 @@ import {
   IS_WEB,
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   useAccounts,
@@ -135,7 +135,7 @@ export default defineComponent({
       setGeneratedMnemonic();
       addRawAccount({
         isRestored: false,
-        protocol: PROTOCOL_AETERNITY,
+        protocol: PROTOCOLS.aeternity,
       });
       router.push(loginTargetLocation.value);
     }

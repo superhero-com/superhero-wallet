@@ -42,7 +42,7 @@ import {
   watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useTransactionAndTokenFilter,
@@ -81,7 +81,7 @@ export default defineComponent({
     const transactionFilterEl = ref<HTMLDivElement>();
     const resizeObserver = ref<ResizeObserver>();
 
-    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOL_AETERNITY);
+    const isActiveAccountAe = computed(() => activeAccount.value.protocol === PROTOCOLS.aeternity);
 
     const openHeight = computed(() => (
       props.showFilters

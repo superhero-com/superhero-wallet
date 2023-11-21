@@ -27,7 +27,7 @@ import type {
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import { HASH_REGEX, PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import { HASH_REGEX, PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   compareCaseInsensitive,
   errorHasValidationKey,
@@ -140,7 +140,7 @@ export function convertMultisigAccountToAccount(
 ): Partial<IAccount> {
   return {
     address: multisigAccount.gaAccountId,
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     idx: 0,
     globalIdx: 0,
   };

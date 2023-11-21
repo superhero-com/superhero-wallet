@@ -4,7 +4,7 @@ import type {
   Protocol,
   ProtocolRecord,
 } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { PROTOCOL_LIST } from '@/constants';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 
 /**
@@ -43,7 +43,7 @@ export const ProtocolAdapterFactory = (() => {
     address: string,
     networkType?: NetworkType,
   ): BaseProtocolAdapter | undefined {
-    return PROTOCOLS.reduce((returnData, protocol) => {
+    return PROTOCOL_LIST.reduce((returnData, protocol) => {
       if (!returnData) {
         const adapter = getAdapter(protocol);
         if (adapter.isAccountAddressValid(address, networkType)) {
