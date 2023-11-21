@@ -3,7 +3,6 @@
     :heading="$t('modals.receive.title', { name: protocolName })"
     :account-address="activeAccount.address"
     :protocol="protocol"
-    disable-asset-selection
   />
 </template>
 
