@@ -4,8 +4,8 @@ import { useAccounts, useModals } from '@/composables';
 import {
   APP_LINK_WEB,
   MODAL_TRANSFER_SEND,
+  PROTOCOL_LIST,
   PROTOCOLS,
-  PROTOCOL_AETERNITY,
 } from '@/constants';
 import { ROUTE_NETWORK_ADD } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -52,7 +52,7 @@ export const RouteQueryActionsController = (() => {
       // Determine the active protocol for the current transfer
       const token = query[TOKEN_PROP];
 
-      const currentActionProtocol = PROTOCOLS.find((protocol) => {
+      const currentActionProtocol = PROTOCOL_LIST.find((protocol) => {
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         return adapter.getUrlTokenKey() === token;
       });
@@ -64,7 +64,7 @@ export const RouteQueryActionsController = (() => {
        * Bitcoin: https://wallet...?op=transferSend&token=bitcoin&amount=0.0002103&account=
        * AEX9 tokens: https://wallet...?op=transferSend&token=ct_mijZGKXeqQBS1dDmdJbbrDzKRrP58XLjJ2u5edkwafzfcXMsY&amount=1&account=
        */
-      setActiveAccountByProtocol(currentActionProtocol || PROTOCOL_AETERNITY);
+      setActiveAccountByProtocol(currentActionProtocol || PROTOCOLS.aeternity);
 
       openModal(MODAL_TRANSFER_SEND);
       return true;

@@ -25,7 +25,7 @@ import {
   POPUP_TYPE_MESSAGE_SIGN,
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_SIGN,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from './common';
 
 export const STUB_ADDRESS: Encoded.AccountAddress = 'ak_enAPooFqpTQKkhJmU47J16QZu9HbPQQPwWBVeGnzDbDnv9dxp';
@@ -40,7 +40,7 @@ export const STUB_TIPPING_CONTRACT_ID_V2 = 'ct_2ZEoCKcqXkbz2uahRrsWeaPooZs9SdCv6
 export const STUB_ACCOUNT = {
   mnemonic: 'media view gym mystery all fault truck target envelope kit drop fade',
   address: 'ak_2fxchiLvnj9VADMAXHBiKPsaCEsTFehAspcmWJ3ZzF3pFK1hB5' as Encoded.AccountAddress,
-  protocol: PROTOCOL_AETERNITY,
+  protocol: PROTOCOLS.aeternity,
 };
 
 export const recipientId: Encoded.AccountAddress = 'ak_2ELPCWzcTdiyYuumjaV4D7kE843d1Ts27zH1Y2LBMKDbNtfq1Q';
@@ -152,7 +152,7 @@ export const STUB_TX_PARAMS = {
 
 export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITransaction>>> = {
   spend: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 10000000000000,
       arguments: [],
@@ -165,7 +165,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   tip: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 10000000000000000,
       arguments: [
@@ -186,7 +186,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   retip: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 200000000000000000,
       arguments: [
@@ -203,7 +203,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   tipToken: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 0,
       arguments: [
@@ -232,7 +232,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   retipToken: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 0,
       arguments: [
@@ -257,7 +257,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   claim: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     claim: true,
     tx: {
       amount: 0,
@@ -283,7 +283,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   transfer: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 0,
       arguments: [
@@ -304,7 +304,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   createAllowance: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 0,
       arguments: [
@@ -325,7 +325,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   changeAllowance: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       amount: 0,
       fee: 16780000000000,
@@ -345,7 +345,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   namePreclaim: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       accountId: STUB_ADDRESS,
       commitmentId: 'cm_21m1rLtN2fNT3ovBbWBQo88rPUhbmWWv6L96Z8KH2YGiEkabtZ',
@@ -354,7 +354,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   nameClaim: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       accountId: STUB_ADDRESS,
       fee: 16560000000000,
@@ -365,7 +365,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   nameTransfer: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       accountId: STUB_ADDRESS,
       fee: 17340000000000,
@@ -376,7 +376,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     },
   },
   incompleteTransfer: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     incomplete: true,
     tx: {
       amount: 195697771897021980,
@@ -390,7 +390,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingSpend: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     pending: true,
     tx: {
       amount: 743000000000000000,
@@ -401,7 +401,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTransfer: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     pending: true,
     tx: {
       amount: 195697771897021980,
@@ -414,7 +414,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTipAe: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     pending: true,
     tx: {
       amount: 195697771897021980,
@@ -427,7 +427,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   pendingTipToken: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     pending: true,
     tipUrl: 'http://superhero.com',
     tx: {
@@ -441,7 +441,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   payForGaAttach: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       fee: 5560000000000,
       tx: {
@@ -455,7 +455,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
     microTime: new Date().getTime(),
   },
   gaMetaSpend: {
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     tx: {
       fee: 76440000000000,
       gaId: STUB_ADDRESS,

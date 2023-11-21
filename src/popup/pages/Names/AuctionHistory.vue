@@ -10,7 +10,7 @@
           <AccountItem
             :address="highestBid.accountId"
             :name="getName(highestBid.accountId).value"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="protocol"
           />
           <AuctionOverview :name="name" />
         </div>
@@ -21,10 +21,10 @@
         >
           <TokenAmount
             :amount="+bid.nameFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="protocol"
           />
           <AccountItem
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="protocol"
             :address="bid.accountId"
             :name="getName(bid.accountId).value"
           />
@@ -38,7 +38,7 @@
 import { IonPage, IonContent } from '@ionic/vue';
 import { defineComponent, computed } from 'vue';
 
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import AccountItem from '../../components/AccountItem.vue';
@@ -66,7 +66,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      protocol: PROTOCOLS.aeternity,
       getName,
       highestBid,
       previousBids,

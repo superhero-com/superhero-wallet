@@ -17,7 +17,7 @@
         <template #balance>
           <BalanceInfo
             :balance="+(activeMultisigAccount.balance || 0)"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
 
@@ -43,7 +43,7 @@
 <script lang="ts">
 import { IonContent, IonPage } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
@@ -80,7 +80,7 @@ export default defineComponent({
 
     return {
       UNFINISHED_FEATURES,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       activeMultisigAccount,
       simplexLink,
       CreditCardIcon,

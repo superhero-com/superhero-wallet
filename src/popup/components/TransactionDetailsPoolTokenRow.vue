@@ -8,7 +8,7 @@
         <TokenAmount
           v-if="!hideAmount"
           :amount="amount"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           hide-fiat
           no-symbol
         />
@@ -21,7 +21,7 @@
             v-if="token.contractId"
             show-explorer-link
             :address="token.contractId"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </div>
       </div>
@@ -32,7 +32,7 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { toShiftedBigNumber } from '@/utils';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Tokens from './Tokens.vue';
@@ -71,7 +71,7 @@ export default defineComponent({
     ));
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       amount,
     };
   },

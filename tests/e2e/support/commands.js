@@ -8,7 +8,7 @@ import {
 } from '../../../src/utils';
 import {
   NETWORK_NAME_TESTNET,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   STORAGE_KEYS,
   TRANSACTIONS_LOCAL_STORAGE_KEY,
 } from '../../../src/constants';
@@ -99,7 +99,7 @@ Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = 
       [prepareStorageKey([STORAGE_KEYS.mnemonic])]: STUB_ACCOUNT.mnemonic,
       [prepareStorageKey([STORAGE_KEYS.accountsRaw])]: [{
         idx: 0,
-        protocol: PROTOCOL_AETERNITY,
+        protocol: PROTOCOLS.aeternity,
         isRestored: true,
         type: 'hd-wallet',
       }],

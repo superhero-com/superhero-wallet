@@ -13,7 +13,7 @@
             :explorer-url="explorerUrl"
             :hash="hash"
             :none-ae-coin="tokens"
-            :protocol="PROTOCOL_BITCOIN"
+            :protocol="PROTOCOLS.bitcoin"
             show-header
           >
             <template #tokens>
@@ -46,7 +46,7 @@ import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITransaction } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { TX_DIRECTION, PROTOCOL_BITCOIN } from '@/constants';
+import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
@@ -76,7 +76,7 @@ export default defineComponent({
 
     const explorerUrl = computed(
       () => ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_BITCOIN)
+        .getAdapter(PROTOCOLS.bitcoin)
         .getExplorer()
         .prepareUrlForHash(transaction.value?.hash),
     );
@@ -109,7 +109,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+        const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
         transaction.value = {
           ...await bitcoinAdapter.getTransactionByHash(hash),
           transactionOwner,
@@ -121,7 +121,7 @@ export default defineComponent({
 
     return {
       BTC_SYMBOL,
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       direction,
       explorerUrl,
       hash,
