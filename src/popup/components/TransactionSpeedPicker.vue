@@ -26,25 +26,17 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 
-import type { BigNumberPublic } from '@/types';
+import type { IFeeItem } from '@/types';
 import { secondsToRelativeTime } from '@/utils';
 import { UNFINISHED_FEATURES } from '@/constants';
 
 import RadioButton from '@/popup/components/RadioButton.vue';
 
-export type FeeItem = {
-  fee: BigNumberPublic;
-  time: number; // time in seconds
-  label: string;
-  maxPriorityFee?: BigNumberPublic;
-  maxFeePerGas?: BigNumberPublic;
-}
-
 export default defineComponent({
   components: { RadioButton },
   props: {
     feeList: {
-      type: Array as PropType<FeeItem[]>,
+      type: Array as PropType<IFeeItem[]>,
       required: true,
       validate: (val: string[]) => val.length === 3,
     },

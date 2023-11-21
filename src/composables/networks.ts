@@ -54,6 +54,8 @@ const networks = computed(
 
 const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
 
+const isActiveNetworkTestnet = computed(() => activeNetwork.value.type === NETWORK_TYPE_TESTNET);
+
 function ensureDefaultNetworksExists() {
   if (defaultNetworks.length === 0) {
     const networkTypes: NetworkTypeDefault[] = [NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET];
@@ -136,6 +138,7 @@ export function useNetworks() {
     customNetworks,
     defaultNetworks,
     activeNetwork,
+    isActiveNetworkTestnet,
     activeNetworkName,
     switchNetwork,
     addCustomNetwork,

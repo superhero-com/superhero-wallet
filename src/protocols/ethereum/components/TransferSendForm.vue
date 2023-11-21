@@ -27,16 +27,15 @@
         :protocol="PROTOCOLS.ethereum"
         :validation-rules="{
           ...+balance.minus(fee) > 0
-            ? { max_value: max.toString() }
+            ? { max_value: max }
             : {},
           enough_coin: [fee.toString(), ETH_SYMBOL],
         }"
-        readonly
         @asset-selected="handleAssetChange"
       >
         <template #label-after>
           <BtnMaxAmount
-            :is-max="formModel?.amount?.toString() === max.toString()"
+            :is-max="formModel?.amount?.toString() === max"
             @click="setMaxAmount"
           />
         </template>
@@ -67,38 +66,37 @@ import {
   onMounted,
   onUnmounted,
   PropType,
-  ref,
   watch,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import BigNumber from 'bignumber.js';
 
-import type { TransferFormModel } from '@/types';
+import type { AssetContractId, IAsset, TransferFormModel } from '@/types';
 import {
   useBalances,
+  useCurrencies,
   useNetworks,
+  useFungibleTokens,
 } from '@/composables';
-import { useEthBaseFee } from '@/protocols/ethereum/composables/ethBaseFee';
+import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useTransferSendForm } from '@/composables/transferSendForm';
 import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
-import {
-  executeAndSetInterval,
-} from '@/utils';
+import { executeAndSetInterval } from '@/utils';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
-  ETH_GAS_LIMIT,
   ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
-import { etherFromGwei } from '@/protocols/ethereum/helpers';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
 import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendRecipient.vue';
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
-import TransactionSpeedPicker, { FeeItem } from '@/popup/components/TransactionSpeedPicker.vue';
+import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
+import { useEthMaxAmount } from '../composables/ethMaxAmount';
 
 export default defineComponent({
   name: 'EthTransferSendForm',
@@ -125,8 +123,30 @@ export default defineComponent({
     const route = useRoute();
     const { t } = useI18n();
     const { activeNetwork } = useNetworks();
+    const { marketData } = useCurrencies();
     const { balance } = useBalances();
-    const { getBaseFee } = useEthBaseFee();
+    const {
+      fee,
+      feeList,
+      feeSelectedIndex,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      updateFeeList,
+    } = useEthFeeCalculation();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
+
+    const ethTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.ethereum));
+
+    function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
+      if (assetContractId) {
+        return ethTokensAvailable.value[assetContractId];
+      } if (!selectedAsset) {
+        return ProtocolAdapterFactory
+          .getAdapter(PROTOCOLS.ethereum)
+          .getDefaultCoin(marketData.value!, +balance.value);
+      }
+      return undefined;
+    }
 
     const {
       formModel,
@@ -139,60 +159,13 @@ export default defineComponent({
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
+      getSelectedAssetValue,
       protocol: PROTOCOLS.ethereum,
     });
 
-    const isTestnet = activeNetwork.value.type === NETWORK_TYPE_TESTNET;
+    const { max } = useEthMaxAmount({ formModel, fee });
 
-    const feeSelectedIndex = ref(1);
-
-    // total fee
-    const feeSlow = ref(new BigNumber(0.00000002));
-    const feeMedium = ref(new BigNumber(0.00000002));
-    const feeHigh = ref(new BigNumber(0.00000002));
-
-    // max priority fee per gas
-    const maxPriorityFeePerGasSlow = ref(etherFromGwei(isTestnet ? 0.000001 : 0.1));
-    const maxPriorityFeePerGasMedium = ref(etherFromGwei(isTestnet ? 0.000001 : 0.15));
-    const maxPriorityFeePerGasFast = ref(etherFromGwei(isTestnet ? 0.000001 : 0.2));
-
-    // maximum fee per gas that will be paid
-    const maxFeePerGasSlow = ref(new BigNumber(0));
-    const maxFeePerGasMedium = ref(new BigNumber(0));
-    const maxFeePerGasHigh = ref(new BigNumber(0));
-
-    // TODO - set correct time values
-    const feeList = computed((): FeeItem[] => [
-      {
-        fee: feeSlow.value,
-        time: 3540,
-        label: t('common.transferSpeed.slow'),
-        maxPriorityFee: maxPriorityFeePerGasSlow.value,
-        maxFeePerGas: maxFeePerGasSlow.value,
-      },
-      {
-        fee: feeMedium.value,
-        time: 600,
-        label: t('common.transferSpeed.medium'),
-        maxPriorityFee: maxPriorityFeePerGasMedium.value,
-        maxFeePerGas: maxFeePerGasMedium.value,
-      },
-      {
-        fee: feeHigh.value,
-        time: 25,
-        label: t('common.transferSpeed.fast'),
-        maxPriorityFee: maxPriorityFeePerGasFast.value,
-        maxFeePerGas: maxFeePerGasHigh.value,
-      },
-    ]);
-
-    const fee = computed(() => feeList.value[feeSelectedIndex.value].fee);
-    const maxFeePerGas = computed(() => feeList.value[feeSelectedIndex.value].maxFeePerGas);
-    const maxPriorityFeePerGas = computed(
-      () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
-    );
     const numericFee = computed(() => +fee.value.toFixed());
-    const max = computed(() => balance.value.minus(fee.value));
 
     const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })} ${t('modals.send.recipientPlaceholderENS')}`;
 
@@ -219,19 +192,7 @@ export default defineComponent({
     }
 
     function setMaxAmount() {
-      formModel.value.amount = max.value.isPositive() ? max.value.toString() : '0';
-    }
-
-    async function updateFeeList() {
-      const baseFee = new BigNumber(await getBaseFee());
-
-      maxFeePerGasSlow.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasSlow.value);
-      maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
-      maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
-
-      feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value).multipliedBy(ETH_GAS_LIMIT);
-      feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value).multipliedBy(ETH_GAS_LIMIT);
-      feeHigh.value = baseFee.plus(maxPriorityFeePerGasFast.value).multipliedBy(ETH_GAS_LIMIT);
+      formModel.value.amount = max.value;
     }
 
     let polling: NodeJS.Timer | null = null;

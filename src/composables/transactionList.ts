@@ -235,7 +235,7 @@ export function useTransactionList() {
       : preparedTransactions;
 
     transactions.value[address].loaded = uniqBy(
-      [...transactions.value[address].loaded, ...preparedTransactions],
+      [...transactions.value[address]?.loaded, ...preparedTransactions],
       'hash',
     );
 
