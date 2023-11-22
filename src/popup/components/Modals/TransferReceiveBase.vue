@@ -41,7 +41,6 @@
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
               :address="accountAddressToDisplay"
-              :split-address="splitAddress"
             />
           </Scrollable>
         </CopyText>
@@ -134,9 +133,6 @@ import AccountItem from '../AccountItem.vue';
 
 import ShareIcon from '../../../icons/share.svg?vue-component';
 
-// TODO - validate all addresses instead of 'splitAddress' prop, see AddressFormatted.vue
-const SPLIT_PROTOCOL_ADDRESS = [PROTOCOL_BITCOIN, PROTOCOL_ETHEREUM];
-
 export default defineComponent({
   name: 'TransferReceiveBase',
   components: {
@@ -190,10 +186,6 @@ export default defineComponent({
       selectedAsset.value?.decimals
       ?? ProtocolAdapterFactory.getAdapter(props.protocol).coinPrecision
     ));
-
-    const splitAddress = computed(
-      () => SPLIT_PROTOCOL_ADDRESS.includes(props.protocol) && !amount.value,
-    );
 
     const accountAddressToCopy = computed(
       () => (amount.value && +amount.value > 0)
@@ -259,7 +251,6 @@ export default defineComponent({
       amount,
       selectedAsset,
       assetDecimals,
-      splitAddress,
       share,
       handleAssetChange,
       copyAddress,
