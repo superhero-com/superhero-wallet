@@ -8,15 +8,13 @@ export const MOBILE_WIDTH = 480;
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
-export const PROTOCOL_AETERNITY = 'aeternity';
-export const PROTOCOL_BITCOIN = 'bitcoin';
-export const PROTOCOL_ETHEREUM = 'ethereum';
+export const PROTOCOLS = {
+  aeternity: 'aeternity',
+  bitcoin: 'bitcoin',
+  ethereum: 'ethereum',
+} as const;
 
-export const PROTOCOLS = [
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
-  PROTOCOL_ETHEREUM,
-] as const;
+export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS = 'AccountDetailsTransactions';

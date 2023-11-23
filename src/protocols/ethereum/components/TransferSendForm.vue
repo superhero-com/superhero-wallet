@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :fee="numericFee"
     :fee-symbol="ETH_SYMBOL"
-    :protocol="PROTOCOL_ETHEREUM"
+    :protocol="PROTOCOLS.ethereum"
     :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
     class="transfer-send-form"
   >
@@ -13,8 +13,8 @@
         v-model.trim="formModel.address"
         :placeholder="recipientPlaceholderText"
         :errors="errors"
-        :protocol="PROTOCOL_ETHEREUM"
-        :validation-rules="{ account_address: [PROTOCOL_ETHEREUM] }"
+        :protocol="PROTOCOLS.ethereum"
+        :validation-rules="{ account_address: [PROTOCOLS.ethereum] }"
         @openQrModal="openScanQrModal"
       />
     </template>
@@ -24,7 +24,7 @@
         v-model="formModel.amount"
         :errors="errors"
         :selected-asset="formModel.selectedAsset"
-        :protocol="PROTOCOL_ETHEREUM"
+        :protocol="PROTOCOLS.ethereum"
         :validation-rules="{
           ...+balance.minus(fee) > 0
             ? { max_value: max.toString() }
@@ -81,7 +81,7 @@ import {
 } from '@/composables';
 import { useEthBaseFee } from '@/protocols/ethereum/composables/ethBaseFee';
 import { useTransferSendForm } from '@/composables/transferSendForm';
-import { NETWORK_TYPE_TESTNET, PROTOCOL_ETHEREUM } from '@/constants';
+import { NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import {
   executeAndSetInterval,
 } from '@/utils';
@@ -139,7 +139,7 @@ export default defineComponent({
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
-      protocol: PROTOCOL_ETHEREUM,
+      protocol: PROTOCOLS.ethereum,
     });
 
     const isTestnet = activeNetwork.value.type === NETWORK_TYPE_TESTNET;
@@ -194,7 +194,7 @@ export default defineComponent({
     const numericFee = computed(() => +fee.value.toFixed());
     const max = computed(() => balance.value.minus(fee.value));
 
-    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOL_ETHEREUM })} ${t('modals.send.recipientPlaceholderENS')}`;
+    const recipientPlaceholderText = `${t('modals.send.recipientPlaceholderProtocol', { name: PROTOCOLS.ethereum })} ${t('modals.send.recipientPlaceholderENS')}`;
 
     function emitCurrentFormModelState() {
       const inputPayload: TransferFormModel = {
@@ -271,7 +271,7 @@ export default defineComponent({
     return {
       ETH_COIN_NAME,
       ETH_SYMBOL,
-      PROTOCOL_ETHEREUM,
+      PROTOCOLS,
       NETWORK_TYPE_TESTNET,
       formModel,
       activeNetwork,

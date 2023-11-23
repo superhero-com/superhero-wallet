@@ -8,7 +8,7 @@
     :loading="loading"
     :avatar-name="isAddressChain ? transferData.address : undefined"
     :show-fiat="isSelectedAssetAex9"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
     class="transfer-review"
   >
     <template #subheader>
@@ -18,7 +18,7 @@
       >
         <AccountItem
           :address="activeMultisigAccount.gaAccountId"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </div>
     </template>
@@ -46,7 +46,7 @@
           <TokenAmount
             :amount="PROPOSE_TRANSACTION_FEE"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             hide-fiat
             high-precision
             data-cy="multisig-review-fee"
@@ -65,7 +65,7 @@
           <TokenAmount
             :amount="+transferData.total"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             high-precision
             data-cy="review-total"
           />
@@ -104,7 +104,7 @@ import {
 } from '@/composables';
 import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { aeToAettos } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -192,7 +192,7 @@ export default defineComponent({
             { waitMined: false },
           );
         } else {
-          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
+          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
           actionResult = await aeternityAdapter.spend(amount, recipient, {
             payload: props.transferData.payload,
           });
@@ -379,7 +379,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isSelectedAssetAex9,
       activeMultisigAccount,
       AE_SYMBOL,

@@ -40,7 +40,7 @@
         <template #value>
           <TokenAmount
             :amount="nameAeFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
       </DetailsItem>
@@ -55,7 +55,7 @@
             :symbol="tokenSymbol"
             :aex9="isTransactionAex9(transactionWrapped)"
             :hide-fiat="!swapTokenAmountData.isAe"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
         </DetailsItem>
@@ -63,7 +63,7 @@
         <DetailsItem :label="$t('transaction.fee')">
           <TokenAmount
             :amount="txAeFee"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="fee"
           />
         </DetailsItem>
@@ -76,7 +76,7 @@
             :amount="executionCost || totalAmount"
             :symbol="getTxSymbol(popupProps?.tx)"
             :aex9="isTransactionAex9(transactionWrapped)"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
         </DetailsItem>
@@ -143,7 +143,7 @@ import type {
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   TX_DIRECTION,
 } from '@/constants';
 import {
@@ -248,7 +248,7 @@ export default defineComponent({
     const txAeFee = computed(() => getAeFee(popupProps.value?.tx?.fee!));
     const nameAeFee = computed(() => getAeFee(popupProps.value?.tx?.nameFee!));
 
-    const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    const activeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
 
     const swapDirection = computed(() => {
       if (isMaxSpent.value) {
@@ -469,7 +469,7 @@ export default defineComponent({
     return {
       AnimatedSpinner,
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_FIELDS_TO_DISPLAY,
       error,
       executionCost,

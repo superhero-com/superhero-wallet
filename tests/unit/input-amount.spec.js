@@ -3,7 +3,7 @@ import { config, mount } from '@vue/test-utils';
 import { defineRule } from 'vee-validate';
 import InputAmount from '../../src/popup/components/InputAmount.vue';
 import { AE_SYMBOL } from '../../src/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY } from '../../src/constants';
+import { PROTOCOLS } from '../../src/constants';
 
 const maxBalance = 10000;
 
@@ -15,7 +15,7 @@ config.global = {
 
 describe('InputAmount', () => {
   it('should render', async () => {
-    const wrapper = mount(InputAmount, { props: { protocol: PROTOCOL_AETERNITY } });
+    const wrapper = mount(InputAmount, { props: { protocol: PROTOCOLS.aeternity } });
     expect(wrapper.classes()).toContain('input-amount');
   });
 
@@ -70,7 +70,7 @@ describe('InputAmount', () => {
     const wrapper = mount(InputAmount, {
       props: {
         modelValue: test.value,
-        protocol: PROTOCOL_AETERNITY,
+        protocol: PROTOCOLS.aeternity,
         ...test.props,
       },
     });

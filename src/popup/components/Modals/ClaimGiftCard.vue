@@ -29,7 +29,7 @@
         <AccountItem
           v-else-if="!isCardEmpty"
           :address="recipientId"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </template>
     </DetailsItem>
@@ -39,7 +39,7 @@
       </span>
       <BalanceInfo
         :balance="balance.toNumber()"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         :class="{
           gray: balance.toNumber() === 0,
         }"
@@ -56,7 +56,7 @@
       v-model="amount"
       :errors="errors"
       readonly
-      :protocol="PROTOCOL_AETERNITY"
+      :protocol="PROTOCOLS.aeternity"
       :custom-label="$t('modals.claimGiftCard.amount')"
       :validation-rules="{
         max_redeem: max.toString(),
@@ -120,7 +120,7 @@ import {
 } from '@/composables';
 import { AE_COIN_PRECISION, AE_SYMBOL } from '@/protocols/aeternity/config';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import CheckCircleIcon from '@/icons/check-circle.svg?vue-component';
 
 import DetailsItem from '../DetailsItem.vue';
@@ -172,7 +172,7 @@ export default defineComponent({
     const isCardEmpty = ref(false);
     const loading = ref(false);
 
-    const currencyFormatted = computed(() => getFormattedFiat(+amount.value, PROTOCOL_AETERNITY));
+    const currencyFormatted = computed(() => getFormattedFiat(+amount.value, PROTOCOLS.aeternity));
     const mainButtonText = computed(() => {
       switch (step.value) {
         case STEPS.initial:
@@ -283,7 +283,7 @@ export default defineComponent({
       loading,
       mainButtonText,
       max,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       recipientId,
       setMaxAmount,
       step,

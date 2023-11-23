@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOL_AETERNITY } from '@/constants';
+import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOLS } from '@/constants';
 import { useAccounts, useConnection, useModals } from '@/composables';
 
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
@@ -70,9 +70,9 @@ export default defineComponent({
     async function createPlainAccount() {
       const idx = addRawAccount({
         isRestored: false,
-        protocol: PROTOCOL_AETERNITY,
+        protocol: PROTOCOLS.aeternity,
       });
-      setActiveAccountByProtocolAndIdx(PROTOCOL_AETERNITY, idx);
+      setActiveAccountByProtocolAndIdx(PROTOCOLS.aeternity, idx);
       props.resolve();
     }
 

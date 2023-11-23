@@ -18,7 +18,7 @@
               v-model="amount"
               name="amount"
               :message="amountError || errorMessage"
-              :protocol="PROTOCOL_AETERNITY"
+              :protocol="PROTOCOLS.aeternity"
               readonly
             />
           </Field>
@@ -27,7 +27,7 @@
               <template #value>
                 <TokenAmount
                   :amount="+txFee"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                   hide-fiat
                 />
               </template>
@@ -36,7 +36,7 @@
               <template #value>
                 <TokenAmount
                   :amount="+amountTotal"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                 />
               </template>
             </DetailsItem>
@@ -76,7 +76,7 @@ import {
 import { useForm, useFieldError, Field } from 'vee-validate';
 
 import { useModals, useAeSdk, useUi } from '@/composables';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { STUB_ADDRESS, STUB_NONCE } from '@/constants/stubs';
 import {
   AE_AENS_BID_MIN_RATIO,
@@ -169,7 +169,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       amount,
       amountTotal,
       amountError,

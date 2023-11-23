@@ -1,6 +1,6 @@
 <template>
   <TransferSendBase
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     :current-step="currentStep"
     :sending-disabled="error || !transferData.address || !transferData.amount"
     @close="resolve"
@@ -32,7 +32,7 @@ import type {
   TransferSendStepConfigRegistry,
 } from '@/types';
 import {
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -64,7 +64,7 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: ProtocolAdapterFactory
-        .getAdapter(PROTOCOL_BITCOIN)
+        .getAdapter(PROTOCOLS.bitcoin)
         .getDefaultCoin(marketData.value!, +balance.value),
     });
 
@@ -96,7 +96,7 @@ export default defineComponent({
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       currentRenderedComponent,
       steps,
       currentStep,
