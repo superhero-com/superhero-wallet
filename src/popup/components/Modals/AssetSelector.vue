@@ -28,8 +28,8 @@
       :class="['appearing-element', { visible: !loading }]"
     >
       <TokensListItem
-        v-for="token in filteredTokens"
-        :key="token.contractId || token.id"
+        v-for="token in tokensToDisplay"
+        :key="token.contractId"
         :token-data="token"
         :selected="isTokenSelected(token)"
         show-current-price
@@ -43,12 +43,18 @@
 
 <script lang="ts">
 import {
+  computed,
   defineComponent,
   nextTick,
   PropType,
   ref,
 } from 'vue';
-import type { IToken, RejectCallback, ResolveCallback } from '@/types';
+import type {
+  IToken,
+  Protocol,
+  RejectCallback,
+  ResolveCallback,
+} from '@/types';
 import { useTokensList } from '@/composables';
 
 import Modal from '../Modal.vue';
@@ -70,6 +76,7 @@ export default defineComponent({
     resolve: { type: Function as PropType<ResolveCallback>, required: true },
     reject: { type: Function as PropType<RejectCallback>, required: true },
     selectedToken: { type: Object as PropType<IToken | null>, default: null },
+    protocol: { type: String as PropType<Protocol>, default: null },
     showTokensWithBalance: Boolean,
   },
   setup(props) {
@@ -81,6 +88,10 @@ export default defineComponent({
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });
+
+    const tokensToDisplay = computed(() => (props.protocol)
+      ? filteredTokens.value.filter(({ protocol }) => protocol === props.protocol)
+      : filteredTokens.value);
 
     function isTokenSelected(token: IToken): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
@@ -102,7 +113,7 @@ export default defineComponent({
       loading,
       searchTerm,
       isFullyOpen,
-      filteredTokens,
+      tokensToDisplay,
       isTokenSelected,
       onModalOpen,
     };

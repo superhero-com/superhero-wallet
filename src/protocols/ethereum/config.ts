@@ -1,5 +1,5 @@
-import type { IDefaultNetworkTypeData } from '@/types';
-import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
+import type { IDefaultNetworkTypeData, IToken } from '@/types';
+import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
 import type { IEthNetworkSettings } from './types';
 
 export const ETH_CONTRACT_ID = 'ethereum';
@@ -9,6 +9,7 @@ export const ETH_PROTOCOL_NAME = 'Ethereum';
 export const ETH_COIN_PRECISION = 18; // Amount of decimals
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
 export const ETH_GAS_LIMIT = 21000;
+
 /**
  * Amount of confirmations to consider transaction safe & not pending
  */
@@ -39,3 +40,15 @@ export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = { /
 export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
   ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
   : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
+
+/**
+ * TODO Remove after implementing the ETH fungible tokens fetching
+ */
+export const DUMMY_ERC20_TOKEN: IToken = {
+  protocol: PROTOCOLS.ethereum,
+  contractId: 'ct_123',
+  decimals: 4,
+  name: 'Dummy ERC20 Token',
+  symbol: 'DUMMY',
+  convertedBalance: 1000,
+};
