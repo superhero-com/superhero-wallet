@@ -140,17 +140,23 @@ export interface ITokenBalanceResponse {
   txType: string;
 }
 
+export interface ITokenBalance {
+  amount?: number | string;
+  convertedBalance?: number; // Amount of the token that is owned
+}
+
 /**
  * Fungible tokens that are available in currently used network.
+ * TODO stop extending the interface with `ITokenBalance` because the token data
+ *   should not hold any account related information like the balance.
  */
-export interface IToken {
+export interface IToken extends ITokenBalance {
   contractId:
     | Encoded.ContractAddress
     | typeof AE_CONTRACT_ID
     | typeof BTC_CONTRACT_ID
     | typeof ETH_CONTRACT_ID;
   contractTxi?: number;
-  convertedBalance?: number; // Amount of the token that is owned
   decimals: number;
   event_supply?: number;
   extensions?: string[];
@@ -158,8 +164,8 @@ export interface IToken {
   image?: string;
   initialSupply?: number;
   name: string;
+  protocol: Protocol;
   symbol: string;
-  amount?: number | string;
 }
 
 export type TokenPair = Record<'token0' | 'token1', IToken | null>

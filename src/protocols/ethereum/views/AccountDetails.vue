@@ -1,7 +1,16 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details" />
+      <AccountDetailsBase class="account-details">
+        <template #navigation>
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_ACCOUNT_DETAILS,
+              ROUTE_ACCOUNT_DETAILS_ASSETS,
+            ]"
+          />
+        </template>
+      </AccountDetailsBase>
     </IonContent>
   </IonPage>
 </template>
@@ -10,7 +19,10 @@
 import { defineComponent } from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
 import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
+import { ROUTE_ACCOUNT_DETAILS, ROUTE_ACCOUNT_DETAILS_ASSETS } from '@/popup/router/routeNames';
+
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
+import AccountDetailsNavigation from '@/popup/components/AccountDetailsNavigation.vue';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_ACCOUNT_DETAILS,
@@ -18,6 +30,13 @@ export default defineComponent({
     AccountDetailsBase,
     IonPage,
     IonContent,
+    AccountDetailsNavigation,
+  },
+  setup() {
+    return {
+      ROUTE_ACCOUNT_DETAILS,
+      ROUTE_ACCOUNT_DETAILS_ASSETS,
+    };
   },
 });
 </script>
