@@ -21,6 +21,7 @@ import type {
   NetworkTypeDefault,
   IFetchTransactionResult,
   Protocol,
+  IToken,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
@@ -49,9 +50,9 @@ import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetwor
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
-  protocol = PROTOCOLS.bitcoin as Protocol;
+  override protocol = PROTOCOLS.bitcoin as Protocol;
 
-  protocolName = 'Bitcoin';
+  override protocolName = 'Bitcoin';
 
   coinPrecision = BTC_COIN_PRECISION;
 
@@ -99,7 +100,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return this.networkSettings;
   }
 
-  getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
     return BTC_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
@@ -117,6 +118,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   ): ICoin {
     return {
       ...(marketData?.[PROTOCOLS.bitcoin] || {}),
+      protocol: PROTOCOLS.bitcoin,
       contractId: BTC_CONTRACT_ID,
       symbol: BTC_SYMBOL,
       decimals: BTC_COIN_PRECISION,
@@ -196,6 +198,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     );
   }
 
+  override async fetchAvailableTokens(): Promise<IToken[]> {
+    return []; // Bitcoin holds only the BTC Coin
+  }
+
   override async fetchPendingTransactions() {
     // TODO if needed
     return [];
@@ -221,9 +227,11 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
   }
 
-  async getTransactionByHash(hash: string) { // it is not actually a hash it's an id
+  /**
+   * @param hash it is not actually a hash it's an id
+   */
+  override async fetchTransactionByHash(hash: string): Promise<ITransaction> {
     const { activeNetwork } = useNetworks();
-
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const rawTransaction = await fetchJson(`${nodeUrl}/tx/${hash}`);
     return normalizeTransactionStructure(rawTransaction);

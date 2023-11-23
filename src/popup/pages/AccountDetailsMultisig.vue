@@ -33,7 +33,13 @@
         </template>
 
         <template #navigation>
-          <AccountDetailsNavigation is-multisig />
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_MULTISIG_DETAILS,
+              ROUTE_MULTISIG_DETAILS_INFO,
+              ROUTE_MULTISIG_DETAILS_ASSETS,
+            ]"
+          />
         </template>
       </AccountDetailsBase>
     </IonContent>
@@ -50,6 +56,11 @@ import {
 import { computed, defineComponent, ref } from 'vue';
 import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
+import {
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+} from '@/popup/router/routeNames';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
@@ -96,6 +107,9 @@ export default defineComponent({
     return {
       UNFINISHED_FEATURES,
       PROTOCOLS,
+      ROUTE_MULTISIG_DETAILS,
+      ROUTE_MULTISIG_DETAILS_INFO,
+      ROUTE_MULTISIG_DETAILS_ASSETS,
       activeMultisigAccount,
       isPageActive,
       simplexLink,
