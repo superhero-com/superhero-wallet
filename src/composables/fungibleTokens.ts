@@ -15,6 +15,7 @@ import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { aettosToAe, calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
@@ -57,6 +58,7 @@ export function useFungibleTokens() {
   const {
     isLoggedIn,
     aeAccounts,
+    protocolsInUse,
     getLastActiveProtocolAccount,
   } = useAccounts();
 
@@ -66,16 +68,16 @@ export function useFungibleTokens() {
   }
 
   async function loadAvailableTokens() {
-    const response: IToken[] = camelCaseKeysDeep(await fetchAllPages(
-      () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
-      fetchFromMiddleware,
-    ));
+    const tokensFetchPromises = protocolsInUse.value.map(
+      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens(),
+    );
+    const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).flat();
 
-    if (!response.length) {
+    if (!tokens.length) {
       availableTokens.value = {};
     }
 
-    availableTokens.value = response.reduce((accumulator, token) => {
+    availableTokens.value = tokens.reduce((accumulator, token) => {
       // eslint-disable-next-line no-param-reassign
       accumulator[token.contractId] = token;
       return accumulator;

@@ -98,7 +98,8 @@ export function useTransactionList() {
   }
 
   function setPendingTransactionSentByHash(address: Encoded.AccountAddress, hash: string) {
-    if (transactions.value[address].localPendingTransaction !== null
+    if (
+      transactions.value[address].localPendingTransaction !== null
       && transactions.value[address].localPendingTransaction?.hash === hash
     ) {
       (transactions.value[address].localPendingTransaction as ITransaction).sent = true;
@@ -321,7 +322,6 @@ export function useTransactionList() {
   })();
 
   return {
-    tokenBalances,
     transactions,
     fetchTransactions,
     getAccountAllTransactions,
