@@ -28,7 +28,13 @@
         </template>
 
         <template #navigation>
-          <AccountDetailsNavigation />
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_ACCOUNT_DETAILS,
+              ROUTE_ACCOUNT_DETAILS_ASSETS,
+              ROUTE_ACCOUNT_DETAILS_NAMES,
+            ]"
+          />
         </template>
       </AccountDetailsBase>
     </IonContent>
@@ -56,7 +62,12 @@ import {
   useConnection,
   useAeSdk,
 } from '@/composables';
-import { ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
+import {
+  ROUTE_ACCOUNT_DETAILS,
+  ROUTE_ACCOUNT_DETAILS_ASSETS,
+  ROUTE_ACCOUNT_DETAILS_NAMES,
+  ROUTE_APPS_BROWSER,
+} from '@/popup/router/routeNames';
 import { AE_DEX_URL } from '@/protocols/aeternity/config';
 import { buildAeFaucetUrl, buildSimplexLink } from '@/protocols/aeternity/helpers';
 
@@ -102,6 +113,9 @@ export default defineComponent({
     return {
       UNFINISHED_FEATURES,
       ROUTE_APPS_BROWSER,
+      ROUTE_ACCOUNT_DETAILS,
+      ROUTE_ACCOUNT_DETAILS_ASSETS,
+      ROUTE_ACCOUNT_DETAILS_NAMES,
       AE_DEX_URL,
       IS_MOBILE_APP,
       IS_IOS,
