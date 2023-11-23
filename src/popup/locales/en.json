@@ -289,7 +289,12 @@
       "nameFee": "Name fee",
       "nameId": "Name ID",
       "pointers": "Pointers",
-      "data-sign": "Data to sign"
+      "data-sign": "Data to sign",
+      "functionName": "Function name",
+      "arguments": "Arguments",
+      "superheroChat": "Superhero Chat",
+      "unableToExecute": "This transaction can not be executed.",
+      "confirmSigning": "would like you to confirm a transaction."
     },
     "confirm-raw-sign": {
       "title": "Sign raw transaction",

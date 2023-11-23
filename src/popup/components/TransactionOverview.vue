@@ -6,6 +6,7 @@
     :recipient="preparedTransaction.recipient"
     :transaction-function="preparedTransaction.function"
     :transaction="transaction"
+    :additional-tag="additionalTag"
   />
 </template>
 
@@ -28,6 +29,7 @@ import type {
   TxFunction,
 } from '@/types';
 import { TX_DIRECTION } from '@/constants';
+import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import {
   useAeSdk,
@@ -53,6 +55,7 @@ export default defineComponent({
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
+    additionalTag: { type: String, default: null },
   },
   setup(props) {
     const { t, tm } = useI18n();
@@ -219,10 +222,10 @@ export default defineComponent({
 
       const bytecodeContractCallEncoder = new BytecodeContractCallEncoder(bytecode);
 
-      const txParams = bytecodeContractCallEncoder.decodeCall(calldata) as any;
+      const txParams = bytecodeContractCallEncoder.decodeCall(calldata) as AeDecodedCallData;
       if (!txParams) return undefined;
 
-      return txParams.args?.[0];
+      return txParams.args?.[0] as Encoded.AccountAddress;
     }
 
     onMounted(async () => {
