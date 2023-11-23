@@ -17,7 +17,7 @@ const convertValuesToBigNumbers = (value) => {
     bn.toJSON = () => bn.toString(10);
     return bn;
   }
-  return value;
+  return value.toString();
 };
 
 export default {
