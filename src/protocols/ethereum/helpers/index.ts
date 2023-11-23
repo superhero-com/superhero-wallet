@@ -53,7 +53,7 @@ export function normalizeWeb3EthTransactionStructure(
 
 /**
  * Convert address to checksum address if is prefixed with 0x
- * to avoid erros in cases like contractId="ethereum"
+ * to avoid errors in cases like contractId="ethereum"
  */
 export function toEthChecksumAddress(address: string) {
   if (!address) return address;

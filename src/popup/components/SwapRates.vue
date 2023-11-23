@@ -1,12 +1,9 @@
 <template>
-  <div
+  <DetailsItem
     v-if="rates.length"
     class="swap-rates"
+    :label="$t('pages.transactionDetails.rates')"
   >
-    <div class="title">
-      {{ $t('pages.transactionDetails.rates') }}
-    </div>
-
     <div
       v-for="(rate, idx) of rates"
       :key="idx"
@@ -34,7 +31,7 @@
         />
       </div>
     </div>
-  </div>
+  </DetailsItem>
 </template>
 
 <script lang="ts">
@@ -57,11 +54,13 @@ import {
 } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens } from '@/composables';
 
+import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
 import TokenAmount from './TokenAmount.vue';
 
 export default defineComponent({
   components: {
+    DetailsItem,
     Tokens,
     TokenAmount,
   },
@@ -131,13 +130,6 @@ export default defineComponent({
 
 .swap-rates {
   width: 100%;
-
-  .title {
-    color: variables.$color-grey-dark;
-    padding-bottom: 8px;
-
-    @extend %face-sans-14-medium;
-  }
 
   .rate {
     padding-bottom: 6px;

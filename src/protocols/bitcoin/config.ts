@@ -7,7 +7,7 @@ export const BTC_COIN_NAME = 'Bitcoin';
 export const BTC_COIN_PRECISION = 8; // Amount of decimals
 export const BTC_COINGECKO_COIN_ID = 'bitcoin';
 /**
- * Lower cap is 294 for segwit transactions and 546 uppercap for non-sewgit transactions
+ * Lower cap is 294 for segwit transactions and 546 upper cap for non-segwit transactions
  * https://github.com/bitcoin/bitcoin/blob/25.x/src/policy/policy.cpp#L36C1-L36C1
  */
 export const DUST_AMOUNT = 546;

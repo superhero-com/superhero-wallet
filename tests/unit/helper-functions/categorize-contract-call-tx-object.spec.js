@@ -2,9 +2,9 @@ import { STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 import { categorizeContractCallTxObject } from '../../../src/protocols/aeternity/helpers';
 
 const expectedKeys = {
-  retip_token: ['url', 'amount', 'token'],
-  tip_token: ['url', 'note', 'amount', 'token'],
-  other: ['to', 'amount', 'token'],
+  retip_token: ['url', 'amount', 'assetContractId'],
+  tip_token: ['url', 'note', 'amount', 'assetContractId'],
+  other: ['to', 'amount', 'assetContractId'],
 };
 
 const testCases = ({ retipToken, tipToken, ...otherTxs }) => [

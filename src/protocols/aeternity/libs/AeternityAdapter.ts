@@ -50,7 +50,6 @@ import type {
 import {
   AE_COIN_NAME,
   AE_COIN_PRECISION,
-  AE_COIN_SYMBOL,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
   AE_MDW_TO_NODE_APPROX_DELAY_TIME,
@@ -58,8 +57,6 @@ import {
   AE_NETWORK_DEFAULT_SETTINGS,
   AE_PROTOCOL_NAME,
   AE_SYMBOL,
-  AE_SYMBOL_SHORT,
-  AEX9_TRANSFER_EVENT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -71,11 +68,9 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   override protocolName = AE_PROTOCOL_NAME;
 
-  override protocolSymbol = AE_SYMBOL;
+  override coinName = AE_COIN_NAME;
 
-  override coinName = AE_COIN_SYMBOL;
-
-  override coinSymbol = AE_SYMBOL_SHORT;
+  override coinSymbol = AE_SYMBOL;
 
   override coinContractId = AE_CONTRACT_ID;
 
@@ -137,12 +132,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOLS.aeternity] || {}),
+      ...(marketData?.[PROTOCOLS.aeternity] || {} as MarketData),
       protocol: PROTOCOLS.aeternity,
       contractId: this.coinContractId,
-      decimals: AE_COIN_PRECISION,
-      name: AE_COIN_NAME,
-      symbol: AE_SYMBOL,
+      decimals: this.coinPrecision,
+      name: this.coinName,
+      symbol: this.coinSymbol,
       convertedBalance,
     };
   }
@@ -253,8 +248,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     limit: number,
     nextPageUrl?: string,
   ) {
-    const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
-
+    const {
+      fetchFromMiddlewareCamelCased,
+      normalizeMiddlewareTransactionStructure,
+    } = useAeMiddleware();
     /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
     const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
 
@@ -262,25 +259,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       const { data, next } = await fetchFromMiddlewareCamelCased(url);
       let regularTransactions = (data || [])
         .filter(({ type }: any) => !type?.startsWith('Internal'))
-        .map(({ payload, type }: any): ITransaction => {
-          const transaction: ITransaction = {
-            ...payload,
-            transactionOwner: address,
-            protocol: PROTOCOLS.aeternity,
-          };
-
-          // AEX9 transfer has no TX property so we need to normalize it
-          if (type === AEX9_TRANSFER_EVENT) {
-            transaction.hash = payload.txHash;
-            transaction.tx = {
-              ...payload,
-              callerId: payload.senderId,
-              type: Tag[Tag.ContractCallTx],
-            };
-          }
-
-          return transaction;
-        });
+        .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
 
       // Filter out the doubled AEX9 transfer entries
       regularTransactions = uniqBy(regularTransactions.reverse(), 'hash').reverse();

@@ -18,7 +18,7 @@
             :tokens="token.isPool ? tokens : [token]"
           />
           <AddressTruncated
-            v-if="token.contractId"
+            v-if="token.contractId && !isAssetCoin(token.contractId)"
             show-explorer-link
             :address="token.contractId"
             :protocol="PROTOCOLS.aeternity"
@@ -30,9 +30,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import { toShiftedBigNumber } from '@/utils';
+import { PropType, computed, defineComponent } from 'vue';
+import type { ITokenResolved } from '@/types';
+import { isAssetCoin, toShiftedBigNumber } from '@/utils';
 import { PROTOCOLS } from '@/constants';
+
 import DetailsItem from './DetailsItem.vue';
 import TokenAmount from './TokenAmount.vue';
 import Tokens from './Tokens.vue';
@@ -46,31 +48,20 @@ export default defineComponent({
     Tokens,
   },
   props: {
-    label: {
-      type: String,
-      default: '',
-    },
-    token: {
-      type: Object,
-      required: true,
-    },
-    tokens: {
-      type: Array,
-      required: true,
-    },
-    hideAmount: {
-      type: Boolean,
-      default: false,
-    },
+    label: { type: String, default: '' },
+    token: { type: Object as PropType<ITokenResolved>, required: true },
+    tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
+    hideAmount: Boolean,
   },
   setup(props) {
     const amount = computed(() => +(
       props.token.decimals
-        ? toShiftedBigNumber(props.token.amount, -props.token.decimals)
-        : props.token.amount
+        ? toShiftedBigNumber(props.token.amount!, -props.token.decimals)
+        : props.token.amount!
     ));
 
     return {
+      isAssetCoin,
       PROTOCOLS,
       amount,
     };
@@ -95,10 +86,6 @@ export default defineComponent({
       width: 22px;
       height: 22px;
     }
-  }
-
-  .details-item.label:deep() {
-    margin-bottom: 4px;
   }
 
   .token-info {

@@ -239,7 +239,7 @@ export default () => {
     (value: string, [comparedAddress, protocol]: [string, Protocol]) => (
       value !== comparedAddress
       || tg('validation.addressNotSameAs', [(protocol)
-        ? ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol
+        ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
         : tg('common.tokens')])
     ),
   );

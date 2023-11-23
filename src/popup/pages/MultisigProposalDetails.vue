@@ -7,12 +7,10 @@
           class="spinner"
         />
         <template v-else>
-          <div
-            class="header"
-          >
-            <TransactionTokenRows
+          <div class="header">
+            <TransactionAssetRows
               v-if="multisigTx"
-              :transaction="{ tx: multisigTx }"
+              :assets="transactionAssets"
               :protocol="PROTOCOLS.aeternity"
               icon-size="rg"
             />
@@ -306,10 +304,11 @@ import {
 import {
   useAccounts,
   useFungibleTokens,
-  useMultisigAccounts,
-  usePendingMultisigTransaction,
-  useMultisigTransactions,
   useModals,
+  useMultisigAccounts,
+  useMultisigTransactions,
+  usePendingMultisigTransaction,
+  useTransactionData,
   useUi,
 } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
@@ -333,7 +332,7 @@ import PayloadDetails from '../components/PayloadDetails.vue';
 import DialogBox from '../components/DialogBox.vue';
 import MultisigProposalConsensus from '../components/MultisigProposalConsensus.vue';
 import Avatar from '../components/Avatar.vue';
-import TransactionTokenRows from '../components/TransactionTokenRows.vue';
+import TransactionAssetRows from '../components/TransactionAssetRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
@@ -341,7 +340,7 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 export default defineComponent({
   components: {
     PayloadDetails,
-    TransactionTokenRows,
+    TransactionAssetRows,
     MultisigProposalConsensus,
     TransactionInfo,
     DialogBox,
@@ -395,6 +394,8 @@ export default defineComponent({
     const transaction = ref<ITransaction | null>(null);
     const proposalCompleted = ref<boolean>(false);
 
+    const { transactionAssets, setActiveTransaction } = useTransactionData();
+
     const totalSpent = computed(() => {
       if (!proposalCompleted.value || !transaction.value) {
         return 0;
@@ -429,6 +430,8 @@ export default defineComponent({
         tag: Tag.GaMetaTx,
       } as any;
       // TODO: remove `any` by adding returned type from `unpackTx` aeSdk function to `ITx` type
+
+      setActiveTransaction({ tx: multisigTx.value } as ITransaction);
     }
 
     function handleInsufficientBalanceError(
@@ -541,6 +544,7 @@ export default defineComponent({
       activeMultisigAccountExplorerUrl,
       multisigTx,
       transaction,
+      transactionAssets,
       totalSpent,
       getTxAssetSymbol,
       getTransactionPayload,

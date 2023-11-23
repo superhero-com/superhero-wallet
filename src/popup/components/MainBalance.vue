@@ -1,11 +1,11 @@
 <template>
   <div
     class="main-balance"
-    :class="[tokenFontSize]"
+    :class="[assetFontSize]"
   >
-    <span class="token-symbol">{{ tokenSymbol }}</span>
-    <span class="token-integer">{{ balanceParts.integer }}{{ balanceParts.decimal }}</span>
-    <span class="token-fractional">{{ balanceParts.fraction }}</span>
+    <span class="asset-symbol">{{ assetSymbol }}</span>
+    <span class="asset-integer">{{ balanceParts.integer }}{{ balanceParts.decimal }}</span>
+    <span class="asset-fractional">{{ balanceParts.fraction }}</span>
   </div>
 </template>
 
@@ -19,7 +19,7 @@ import type { Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { formatNumberParts } from '@/utils';
 
-type TokenSize = 'lg' | 'md' | 'sm';
+type AssetSize = 'lg' | 'md' | 'sm';
 
 export default defineComponent({
   props: {
@@ -52,11 +52,11 @@ export default defineComponent({
       };
     });
 
-    const tokenSymbol = computed(
+    const assetSymbol = computed(
       () => ProtocolAdapterFactory.getAdapter(props.protocol).coinSymbol,
     );
 
-    const tokenFontSize = computed((): TokenSize | null => {
+    const assetFontSize = computed((): AssetSize | null => {
       const { fraction, integer } = balanceParts.value;
       const length = integer.length + fraction.length;
       if (length >= 16) {
@@ -72,9 +72,9 @@ export default defineComponent({
     });
 
     return {
-      tokenSymbol,
+      assetSymbol,
       balanceParts,
-      tokenFontSize,
+      assetFontSize,
     };
   },
 });
@@ -82,7 +82,7 @@ export default defineComponent({
 
 <style lang="scss">
 @use '../../styles/typography';
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .main-balance {
   --font-size-token: 30px;
@@ -90,30 +90,8 @@ export default defineComponent({
 
   display: flex;
   align-items: baseline;
-
-  .token-symbol {
-    @extend %face-sans-24-semi-bold;
-
-    font-size: var(--font-size-symbol);
-    color: variables.$color-white;
-    margin-right: 4px;
-    text-transform: uppercase;
-  }
-
-  .token-integer {
-    @extend %face-sans-30-semi-bold;
-
-    font-size: var(--font-size-token);
-    color: variables.$color-white;
-  }
-
-  .token-fractional {
-    @extend %face-sans-24-semi-bold;
-
-    font-size: var(--font-size-symbol);
-    color: rgba(variables.$color-white, 0.75);
-    opacity: 0.75;
-  }
+  font-family: $font-sans;
+  font-size: var(--font-size-symbol);
 
   &.lg {
     --font-size-token: 28px;
@@ -130,9 +108,28 @@ export default defineComponent({
     --font-size-symbol: 18px;
   }
 
-  .token-symbol,
-  .token-integer,
-  .token-fractional {
+  .asset-symbol {
+    font-weight: 500;
+    color: $color-white;
+    margin-right: 4px;
+    text-transform: uppercase;
+  }
+
+  .asset-integer {
+    font-size: var(--font-size-token);
+    font-weight: 600;
+    color: $color-white;
+  }
+
+  .asset-fractional {
+    font-weight: 600;
+    color: rgba($color-white, 0.75);
+    opacity: 0.75;
+  }
+
+  .asset-symbol,
+  .asset-integer,
+  .asset-fractional {
     line-height: 32px;
   }
 }

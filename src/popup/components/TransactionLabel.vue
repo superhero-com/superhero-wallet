@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 import type { ITransaction } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { getDefaultAccountLabel } from '@/utils';
-import { useAccounts, useFungibleTokens, useTransactionTx } from '@/composables';
+import { useAccounts, useFungibleTokens, useTransactionData } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import {
   TX_FUNCTIONS,
@@ -123,8 +123,8 @@ export default defineComponent({
       isErrorTransaction,
       isTip,
       txTypeListLabel,
-    } = useTransactionTx({
-      tx: props.transaction.tx,
+    } = useTransactionData({
+      transaction: props.transaction,
       externalAddress: props.transaction.transactionOwner,
     });
 

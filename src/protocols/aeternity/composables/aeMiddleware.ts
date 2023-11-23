@@ -1,14 +1,21 @@
 import { computed, ref } from 'vue';
 import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { camelCase } from 'lodash-es';
+import { Tag } from '@aeternity/aepp-sdk';
 import type {
+  AccountAddress,
   IMiddleware,
   IMiddlewareStatus,
+  ITransaction,
 } from '@/types';
-import { genSwaggerClient, mapObject } from '@/lib/swagger';
+import { PROTOCOLS } from '@/constants';
 import { fetchJson, watchUntilTruthy } from '@/utils';
+import { genSwaggerClient, mapObject } from '@/lib/swagger';
+
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
+import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from './aeNetworkSettings';
+import { categorizeContractCallTxObject } from '../helpers';
 
 const middleware = ref<IMiddleware | null>(null);
 const initializing = ref(false);
@@ -77,12 +84,44 @@ export function useAeMiddleware() {
     return middleware;
   }
 
+  function normalizeMiddlewareTransactionStructure(
+    { payload, type }: any, // Response data
+    transactionOwner?: AccountAddress,
+  ): ITransaction {
+    const normalizedTransaction: ITransaction = {
+      ...payload,
+      tx: payload.tx || {}, // Ensure `tx` property is defined
+      transactionOwner,
+      protocol: PROTOCOLS.aeternity,
+    };
+
+    // AEX9 transfer has no TX property so we need to normalize it
+    if (type === AEX9_TRANSFER_EVENT) {
+      normalizedTransaction.hash = payload.txHash;
+      normalizedTransaction.tx = {
+        ...payload,
+        callerId: payload.senderId,
+        type: Tag[Tag.ContractCallTx],
+      };
+    }
+
+    const contractCallData = categorizeContractCallTxObject(normalizedTransaction);
+    if (contractCallData) {
+      normalizedTransaction.tx.amount = contractCallData.amount;
+      normalizedTransaction.tx.contractId = contractCallData.assetContractId;
+      normalizedTransaction.url = contractCallData.url;
+    }
+
+    return normalizedTransaction;
+  }
+
   return {
     getMiddleware,
     getMiddlewareRef,
     fetchFromMiddleware,
     fetchFromMiddlewareCamelCased,
     fetchMiddlewareStatus,
+    normalizeMiddlewareTransactionStructure,
     isMiddlewareReady,
   };
 }

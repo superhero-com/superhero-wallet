@@ -1,9 +1,12 @@
 import { computed, ref } from 'vue';
 import { Tag } from '@aeternity/aepp-sdk';
+import { camelCase } from 'lodash-es';
 import type {
   AccountAddress,
-  ITx,
+  ITokenResolved,
+  ITransaction,
   ObjectValues,
+  TxFunctionParsed,
   TxFunctionRaw,
   TxType,
 } from '@/types';
@@ -12,8 +15,11 @@ import {
   getTxFunctionLabel,
   getTxTypeLabel,
   getTxTypeListLabel,
+  toShiftedBigNumber,
+  isAssetCoin,
 } from '@/utils';
-import { PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { ASSET_TYPES, PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
@@ -26,12 +32,12 @@ import {
   getTxDirection,
   getTxOwnerAddress,
   getTxTag,
-  isContainingNestedTx,
   isTxDex,
   isTxFunctionDexAddLiquidity,
   isTxFunctionDexAllowance,
   isTxFunctionDexRemoveLiquidity,
   isTxFunctionDexPool,
+  getTransactionTokenInfoResolver,
 } from '@/protocols/aeternity/helpers';
 import { useFungibleTokens } from '@/composables/fungibleTokens';
 import { useAccounts } from './accounts';
@@ -40,29 +46,32 @@ import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions {
-  tx?: ITx;
+  transaction?: ITransaction;
   externalAddress?: AccountAddress;
+  showDetailedAllowanceInfo?: boolean;
 }
 
-export function useTransactionTx({
-  tx,
+/**
+ * Provide detailed information for the provided transaction based on other app states.
+ */
+export function useTransactionData({
+  transaction,
   externalAddress,
-}: UseTransactionOptions) {
+  showDetailedAllowanceInfo = false,
+}: UseTransactionOptions = {}) {
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
-  const { getProtocolAvailableTokens } = useFungibleTokens();
+  const { getProtocolAvailableTokens, getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
 
-  const outerTx = ref<ITx | undefined>(tx);
-  const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
+  const activeTransaction = ref(transaction);
   const ownerAddress = ref<AccountAddress | undefined>(externalAddress);
 
-  const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
-  const innerTxTag = computed((): Tag | null => innerTx.value ? getTxTag(innerTx.value) : null);
-  const outerTxTag = computed((): Tag | null => tx ? getTxTag(tx) : null);
-  const txType = computed(
-    (): TxType | null => outerTxTag.value ? Tag[outerTxTag.value] as TxType : null,
-  );
+  const outerTx = computed(() => activeTransaction.value?.tx);
+  const innerTx = computed(() => outerTx.value ? getInnerTransaction(outerTx.value) : undefined);
+  const outerTxTag = computed(() => outerTx.value ? getTxTag(outerTx.value) : null);
+  const innerTxTag = computed(() => innerTx.value ? getTxTag(innerTx.value) : null);
+  const txType = computed(() => outerTxTag.value ? Tag[outerTxTag.value] as TxType : null);
 
   /**
    * Transaction TX type value converted into human readable label
@@ -86,6 +95,10 @@ export function useTransactionTx({
     (): string => (outerTx.value?.function)
       ? getTxFunctionLabel(outerTx.value.function as TxFunctionRaw)
       : '',
+  );
+
+  const isTransactionCoin = computed(
+    (): boolean => outerTx.value?.contractId ? isAssetCoin(outerTx.value.contractId) : true,
   );
 
   const isDex = computed((): boolean => isTxDex(innerTx.value, dexContracts.value));
@@ -158,9 +171,77 @@ export function useTransactionTx({
       ),
   );
 
-  function setTransactionTx(newTx: ITx) {
-    outerTx.value = newTx;
-    innerTx.value = getInnerTransaction(newTx);
+  /**
+   * List of assets used within the transaction.
+   * Contains more than one item if the transaction is for example a swapping event.
+   */
+  const transactionAssets = computed((): ITokenResolved[] => {
+    if (!activeTransaction.value?.tx) {
+      return [];
+    }
+
+    const { protocol = PROTOCOLS.aeternity } = activeTransaction.value;
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const protocolTokens = getProtocolAvailableTokens(protocol);
+
+    // AE DEX and wrapped AE (WAE)
+    // TODO move this logic to adapter and store resolved data in the transactions
+    if (
+      innerTx.value?.function
+      && (!isDexAllowance.value || showDetailedAllowanceInfo)
+    ) {
+      const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
+      const functionResolver = getTransactionTokenInfoResolver(functionName);
+
+      if (functionResolver) {
+        return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
+          .tokens
+          .map(({
+            amount,
+            decimals,
+            ...otherAssetData
+          }) => ({
+            amount: +toShiftedBigNumber(amount!, -decimals!),
+            ...otherAssetData,
+          }));
+      }
+    }
+
+    const amount = (isDexAllowance.value)
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision)
+      : getTxAmountTotal(activeTransaction.value, direction.value);
+    const isReceived = direction.value === TX_DIRECTION.received;
+
+    if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value) {
+      return [{
+        ...innerTx.value || {},
+        amount,
+        assetType: ASSET_TYPES.coin,
+        contractId: adapter.coinContractId,
+        isReceived,
+        name: adapter.coinName,
+        protocol,
+        symbol: adapter.coinSymbol,
+      }];
+    }
+
+    const token = protocolTokens[outerTx.value!.contractId];
+
+    return [{
+      ...innerTx.value || {},
+      ...token || {},
+      amount,
+      assetType: ASSET_TYPES.token,
+      contractId: outerTx.value?.contractId,
+      isReceived,
+      name: token?.name,
+      protocol,
+      symbol: getTxAssetSymbol(activeTransaction.value),
+    }];
+  });
+
+  function setActiveTransaction(newTransaction: ITransaction) {
+    activeTransaction.value = newTransaction;
   }
 
   function setExternalAddress(address: AccountAddress) {
@@ -184,7 +265,6 @@ export function useTransactionTx({
   }
 
   return {
-    hasNestedTx,
     outerTxTag,
     innerTxTag,
     innerTx: innerTx as any,
@@ -199,9 +279,11 @@ export function useTransactionTx({
     isDexRemoveLiquidity,
     isMultisig,
     isTip,
+    isTransactionCoin,
     direction,
+    transactionAssets,
     getOwnershipAddress,
-    setTransactionTx,
+    setActiveTransaction,
     setExternalAddress,
   };
 }

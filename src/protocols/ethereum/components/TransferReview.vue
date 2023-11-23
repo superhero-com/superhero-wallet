@@ -1,6 +1,6 @@
 <template>
   <TransferReviewBase
-    :base-token-symbol="ETH_SYMBOL"
+    :base-token-symbol="ETH_COIN_SYMBOL"
     :transfer-data="transferData"
     :loading="loading"
     :protocol="PROTOCOLS.ethereum"
@@ -16,7 +16,7 @@
         <template #value>
           <TokenAmount
             :amount="+transferData.total!"
-            :symbol="ETH_SYMBOL"
+            :symbol="ETH_COIN_SYMBOL"
             :protocol="PROTOCOLS.ethereum"
             data-cy="review-total"
             high-precision
@@ -45,7 +45,7 @@ import {
   useUi,
 } from '@/composables';
 import { PROTOCOLS } from '@/constants';
-import { ETH_SYMBOL } from '@/protocols/ethereum/config';
+import { ETH_COIN_SYMBOL } from '@/protocols/ethereum/config';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -160,7 +160,7 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      ETH_SYMBOL,
+      ETH_COIN_SYMBOL,
       loading,
       isSelectedAssetEthCoin,
       submit,

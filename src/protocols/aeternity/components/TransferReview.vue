@@ -289,6 +289,7 @@ export default defineComponent({
         const transaction: ITransaction = {
           hash: txResult.hash,
           pending: true,
+          protocol: PROTOCOLS.aeternity,
           tipUrl: recipient,
           transactionOwner: activeAccount.value.address,
           tx: {

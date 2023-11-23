@@ -118,9 +118,9 @@
           <template #value>
             <TokenAmount
               :amount="amount"
-              :symbol="tokenSymbol"
+              :symbol="assetSymbol"
               :hide-fiat="hideFiat"
-              :high-precision="!!noneAeCoin"
+              :high-precision="!!nonAeAssets"
               :protocol="protocol"
             />
           </template>
@@ -138,7 +138,7 @@
               :amount="fee"
               :symbol="coinSymbol"
               :protocol="protocol"
-              :high-precision="!!noneAeCoin"
+              :high-precision="!!nonAeAssets"
             />
           </template>
         </DetailsItem>
@@ -151,9 +151,9 @@
           <template #value>
             <TokenAmount
               :amount="amountTotal"
-              :symbol="tokenSymbol"
+              :symbol="assetSymbol"
               :hide-fiat="hideFiat"
-              :high-precision="!!noneAeCoin"
+              :high-precision="!!nonAeAssets"
               :protocol="protocol"
             />
           </template>
@@ -166,13 +166,14 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 
-import type { Protocol, ITransaction } from '@/types';
+import type { Protocol, ITransaction, ITokenResolved } from '@/types';
 import {
   formatDate,
   formatTime,
   splitAddress,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useFungibleTokens } from '@/composables';
 import { isContract } from '@/protocols/aeternity/helpers';
 
 import TransactionOverview from '@/popup/components/TransactionOverview.vue';
@@ -197,7 +198,7 @@ export default defineComponent({
     AnimatedPending,
   },
   props: {
-    transaction: { type: Object as PropType<ITransaction | undefined>, required: true },
+    transaction: { type: Object as PropType<ITransaction>, default: null },
     /**
      * Amount without fee
      */
@@ -208,12 +209,9 @@ export default defineComponent({
      */
     amountTotal: { type: Number, default: 0 },
     fee: { type: Number, default: 0 },
-    coinSymbol: { type: String, required: true },
-    tokenSymbol: { type: String, required: true },
     payload: { type: String, default: '' },
-    contractId: { type: String, default: '' },
     hash: { type: String, required: true },
-    noneAeCoin: { type: Array, default: null },
+    nonAeAssets: { type: Array as PropType<ITokenResolved[]>, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     isErrorTransaction: Boolean,
     showHeader: Boolean,
@@ -222,16 +220,26 @@ export default defineComponent({
   },
   setup(props) {
     const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+    const { coinSymbol } = adapter;
+
+    const { getTxAssetSymbol } = useFungibleTokens();
 
     const explorerUrl = computed(
       () => adapter.getExplorer().prepareUrlForHash(props?.transaction?.hash || ''),
     );
+
+    const contractId = computed(() => props.transaction?.tx?.contractId);
+
+    const assetSymbol = computed(() => getTxAssetSymbol(props.transaction));
 
     return {
       formatDate,
       formatTime,
       splitAddress,
       isContract,
+      assetSymbol,
+      coinSymbol,
+      contractId,
       explorerUrl,
     };
   },

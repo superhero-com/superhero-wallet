@@ -4,7 +4,7 @@
       <div class="token-details">
         <DetailsRow
           v-if="assetData?.symbol"
-          :label="isAssetCoin ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
+          :label="isCoin ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
           :text="assetData?.symbol"
         >
           <template #text>
@@ -29,7 +29,7 @@
         />
 
         <DetailsRow
-          v-if="assetData?.contractId && !isAssetCoin"
+          v-if="assetData?.contractId && !isCoin"
           :label="$t('common.smartContract')"
         >
           <template #text>
@@ -198,7 +198,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   amountRounded,
   formatNumber,
-  isCoin,
+  isAssetCoin,
   toShiftedBigNumber,
 } from '@/utils';
 import { useAssetDetails, useCurrencies } from '@/composables';
@@ -229,7 +229,7 @@ export default defineComponent({
     const tokens = computed(() => sharedAssetDetails.tokens);
     const tokenPairs = computed(() => sharedAssetDetails.tokenPairs || {});
     const tokenBalance = computed(() => sharedAssetDetails.tokenBalance);
-    const isAssetCoin = computed(() => isCoin(assetContractId.value));
+    const isCoin = computed(() => isAssetCoin(assetContractId.value));
     const decimals = computed(() => assetData.value?.decimals || tokenBalance.value?.decimals);
     const coinGeckoLinkUrl = computed(() => `https://www.coingecko.com/en/coins/${adapter.value.getCoinGeckoCoinId()}`);
     const coinGeckoLinkLabel = computed(() => coinGeckoLinkUrl.value.replace('https://', '').replace('en/coins', '...'));
@@ -249,7 +249,7 @@ export default defineComponent({
     return {
       PROTOCOLS,
       UNFINISHED_FEATURES,
-      isAssetCoin,
+      isCoin,
       poolShare,
       getPooledTokenAmount,
       formatCurrency,

@@ -1,9 +1,9 @@
 <template>
   <div class="tokens-list">
     <AssetListItem
-      v-for="token in accountAssetsFiltered"
-      :key="token.contractId"
-      :token-data="token"
+      v-for="asset in accountAssetsFiltered"
+      :key="asset.contractId"
+      :asset="asset"
       :is-multisig="isMultisig"
     />
   </div>

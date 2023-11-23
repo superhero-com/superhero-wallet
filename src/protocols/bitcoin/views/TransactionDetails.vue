@@ -8,19 +8,15 @@
             :amount="amount"
             :amount-total="amountTotal"
             :fee="fee"
-            :coin-symbol="BTC_SYMBOL"
-            :token-symbol="BTC_SYMBOL"
             :hash="hash"
-            :none-ae-coin="tokens"
+            :non-ae-assets="assets"
             :protocol="PROTOCOLS.bitcoin"
             show-header
           >
             <template #tokens>
-              <TransactionTokenRows
-                :ext-tokens="tokens"
-                :is-rounded="!!tokens"
-                :transaction="transaction"
-                :direction="direction"
+              <TransactionAssetRows
+                :assets="assets"
+                :is-rounded="!!assets"
                 :protocol="PROTOCOLS.bitcoin"
                 icon-size="rg"
                 multiple-rows
@@ -53,12 +49,12 @@ import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
-import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
+import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
 
 export default defineComponent({
   components: {
     TransactionDetailsBase,
-    TransactionTokenRows,
+    TransactionAssetRows,
     IonContent,
     IonPage,
   },
@@ -82,12 +78,11 @@ export default defineComponent({
 
     const direction = computed(() => isReceived.value ? TX_DIRECTION.received : TX_DIRECTION.sent);
 
-    const tokens = computed((): ITokenResolved[] => [{
+    const assets = computed((): ITokenResolved[] => [{
       amount: amount.value,
       symbol: BTC_SYMBOL,
       isReceived: direction.value === TX_DIRECTION.received,
       contractId: adapter.coinContractId,
-      isAe: false,
     }]);
 
     watch(
@@ -118,7 +113,7 @@ export default defineComponent({
       direction,
       fee,
       hash,
-      tokens,
+      assets,
       transaction,
     };
   },
