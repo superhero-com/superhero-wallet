@@ -8,6 +8,7 @@ import {
   isAddressValid,
   Tag,
 } from '@aeternity/aepp-sdk';
+import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import type {
   AdapterNetworkSettingList,
@@ -18,12 +19,13 @@ import type {
   IFetchTransactionResult,
   ITransaction,
   Protocol,
+  IToken,
 } from '@/types';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
-import { fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
+import { fetchAllPages, fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -50,9 +52,9 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
-  protocol = PROTOCOLS.aeternity as Protocol;
+  override protocol = PROTOCOLS.aeternity as Protocol;
 
-  protocolName = AE_PROTOCOL_NAME;
+  override protocolName = AE_PROTOCOL_NAME;
 
   networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
     {
@@ -117,6 +119,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   ): ICoin {
     return {
       ...(marketData?.[PROTOCOLS.aeternity] || {}),
+      protocol: PROTOCOLS.aeternity,
       contractId: AE_CONTRACT_ID,
       // TODO - check usages why sometimes it's a bignumber
       decimals: AE_COIN_PRECISION,
@@ -180,7 +183,16 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // TODO
   }
 
-  override async getTransactionByHash(): Promise<any> {
+  override async fetchAvailableTokens(): Promise<IToken[]> {
+    const { fetchFromMiddleware } = useMiddleware();
+    const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
+      () => fetchFromMiddleware('/v2/aex9?by=name&limit=100&direction=forward'),
+      fetchFromMiddleware,
+    ));
+    return (response || []).map((token) => ({ ...token, protocol: PROTOCOLS.aeternity }));
+  }
+
+  override async fetchTransactionByHash() {
     // TODO
   }
 
@@ -227,8 +239,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
 
   async fetchTipWithdrawnTransactions(address: string, recent: boolean) {
     try {
-      const { getAeSdk } = useAeSdk();
       const { aeActiveNetworkSettings } = useAeNetworkSettings();
+      const { getAeSdk } = useAeSdk();
       await getAeSdk();
 
       const response = await fetchJson(

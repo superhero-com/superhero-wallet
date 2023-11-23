@@ -7,8 +7,9 @@
       >
         <TokensList
           v-if="isOnline"
-          class="tokens-list"
           :search-term="searchPhrase"
+          class="tokens-list"
+          owned-only
         />
         <MessageOffline
           v-else
@@ -31,9 +32,10 @@ import {
   PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
+import type { IonicLifecycleStatus } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
-import { IonicLifecycleStatus } from '@/types';
+
 import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 

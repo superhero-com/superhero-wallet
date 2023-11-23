@@ -100,7 +100,7 @@ export default defineComponent({
     onMounted(async () => {
       try {
         transaction.value = {
-          ...await adapter.getTransactionByHash(hash),
+          ...await adapter.fetchTransactionByHash(hash),
           transactionOwner,
         };
       } catch (e) {

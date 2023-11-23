@@ -10,6 +10,7 @@ import type {
   ITransaction,
   Protocol,
   NetworkType,
+  IToken,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -55,8 +56,6 @@ export abstract class BaseProtocolAdapter {
    */
   abstract getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings;
 
-  abstract fetchBalance(address: string): Promise<string>;
-
   /**
    * Validates if the account address matches the protocol.
    */
@@ -91,7 +90,11 @@ export abstract class BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any>;
 
-  abstract getTransactionByHash(hash: string): Promise<any>
+  abstract fetchAvailableTokens(): Promise<IToken[]>;
+
+  abstract fetchBalance(address: string): Promise<string>;
+
+  abstract fetchTransactionByHash(hash: string): Promise<any>
 
   abstract fetchPendingTransactions(
     address: string
