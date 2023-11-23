@@ -30,21 +30,23 @@ import type {
   Protocol,
   IFetchTransactionResult,
   IAccount,
+  IToken,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex } from '@/utils';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
+  DUMMY_ERC20_TOKEN,
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
-  ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_COINGECKO_COIN_ID,
   ETH_CONTRACT_ID,
-  ETH_SYMBOL,
-  ETH_PROTOCOL_NAME,
   ETH_GAS_LIMIT,
+  ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_NETWORK_DEFAULT_ENV_SETTINGS,
+  ETH_PROTOCOL_NAME,
+  ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
@@ -123,6 +125,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   ): ICoin {
     return {
       ...(marketData?.[PROTOCOLS.ethereum] || {}),
+      protocol: PROTOCOLS.ethereum,
       contractId: ETH_CONTRACT_ID,
       symbol: ETH_SYMBOL,
       decimals: ETH_COIN_PRECISION,
@@ -188,12 +191,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return {} as any;
   }
 
+  override async fetchAvailableTokens(): Promise<IToken[]> {
+    return [DUMMY_ERC20_TOKEN]; // TODO replace with real tokens fetching
+  }
+
   override async fetchPendingTransactions() {
     // TODO if needed
     return [];
   }
 
-  override async getTransactionByHash(hash: string) {
+  override async fetchTransactionByHash(hash: string) {
     const web3Eth = this.getWeb3EthInstance();
     const transaction = await getTransaction(web3Eth, hash, DEFAULT_RETURN_FORMAT);
     const block = await getBlock(web3Eth, transaction?.blockHash, true, DEFAULT_RETURN_FORMAT);

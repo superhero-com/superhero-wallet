@@ -91,13 +91,14 @@ import {
   useUi,
   useScrollConfig,
 } from '@/composables';
+import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+
 import OpenTransferReceiveModalButton from '@/popup/components/OpenTransferReceiveModalButton.vue';
 import OpenTransferSendModalButton from '@/popup/components/OpenTransferSendModalButton.vue';
 import BalanceInfo from '@/popup/components/BalanceInfo.vue';
 import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
-import { popOutAnimation, fadeAnimation } from '@/popup/animations';
 
 export default defineComponent({
   name: 'AccountDetailsBase',
