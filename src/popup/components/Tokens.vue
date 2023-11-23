@@ -1,45 +1,39 @@
 <template>
   <span
     class="tokens"
-    :class="[iconSize, { vertical, bright }]"
+    :class="{ vertical, bright }"
   >
-    <span
-      v-if="!noIcons"
+    <AssetIcon
+      v-if="!noIcons && imgAsset"
       class="icon"
-    >
-      <AssetIcon
-        v-if="imgToken"
-        class="icon-image"
-        :contract-id="getDisplayTokenContractId(imgToken)!"
-        :icon-size="(iconSize as any)"
-      >
-        <template #fallback>
-          <img
-            class="icon-image"
-            :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
-            :class="{ 'with-border': !imgToken?.image }"
-            :title="imgToken?.symbol"
-          >
-        </template>
-      </AssetIcon>
-    </span>
+      :asset="imgAsset"
+      :icon-size="iconSize"
+    />
 
     <span class="symbols">
       <span
-        v-if="fromToken"
+        v-if="fromAsset"
         class="symbol"
-        v-text="truncateString(fromToken?.name ?? fromToken?.symbol)"
+        :title="fromAsset?.name || fromAsset?.symbol"
+        v-text="(
+          truncateString(fullSymbol ? fromAsset?.name! : fromAsset?.symbol!)
+          || $t('common.unrecognized')
+        )"
       />
       <span
-        v-if="fromToken && toToken"
+        v-if="fromAsset && targetAsset"
         class="separator"
       >
         /
       </span>
       <span
-        v-if="toToken"
+        v-if="targetAsset"
         class="symbol"
-        v-text="truncateString(toToken?.name ?? toToken?.symbol)"
+        :title="targetAsset?.name || targetAsset?.symbol"
+        v-text="(
+          truncateString(fullSymbol ? targetAsset?.name! : targetAsset?.symbol!)
+          || $t('common.unrecognized')
+        )"
       />
     </span>
   </span>
@@ -53,18 +47,11 @@ import {
   ICON_SIZES,
   PROTOCOLS,
 } from '@/constants';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
-  isCoin,
   truncateString as truncateStringFactory,
 } from '@/utils';
-import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 
-import AssetIcon from './AssetIcon.vue';
-
-const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
-
-export type AllowedTokenIconSize = typeof SIZES[number];
+import AssetIcon, { AllowedAssetIconSize } from './AssetIcon.vue';
 
 export default defineComponent({
   components: {
@@ -81,11 +68,7 @@ export default defineComponent({
      * TODO if protocol is not set, assume AE, but this should be set correctly
      */
     protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.aeternity },
-    iconSize: {
-      type: String as PropType<AllowedTokenIconSize>,
-      default: ICON_SIZES.sm,
-      validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
-    },
+    iconSize: { type: String as PropType<AllowedAssetIconSize>, default: ICON_SIZES.sm },
     vertical: Boolean,
     noIcons: Boolean,
     fullSymbol: Boolean,
@@ -97,7 +80,7 @@ export default defineComponent({
         return props.symbolLength;
       }
       const shorterNameLength = props.tokens
-        .map(({ symbol }) => symbol.length)
+        .map(({ symbol }) => symbol?.length || 0)
         .find((length) => length < props.doubleSymbolLength);
       return shorterNameLength ? props.symbolLength - shorterNameLength : props.doubleSymbolLength;
     }
@@ -107,53 +90,15 @@ export default defineComponent({
       return truncateStringFactory(text, maxLength);
     }
 
-    function getTokenPlaceholderUrl(token: ITokenResolved) {
-      // TODO Should not be protocol specific
-      return `${AE_AVATAR_URL}${token.contractId}`;
-    }
-
-    /**
-     * Some transactions are contract calls, but we still want to display the coin icon
-     * Thus if the transaction should display a coin, we use the protocol as contractId
-     */
-    function getDisplayTokenContractId(token: ITokenResolved) {
-      const protocolCoinContractId = ProtocolAdapterFactory
-        .getAdapter(token?.protocol ?? props.protocol).coinContractId;
-      return token.assetType === ASSET_TYPES.coin ? protocolCoinContractId : token.contractId;
-    }
-
-    function mapToken(token: ITokenResolved): ITokenResolved {
-      const isTokenCoin = isCoin(token.contractId!) || token.isAe;
-      const protocol = token.protocol || props.protocol;
-      const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-      let name = token.symbol;
-      if (isTokenCoin) {
-        name = props.fullSymbol ? adapter.coinName : adapter.protocolSymbol;
-      }
-
-      return {
-        ...token,
-        name,
-        protocol,
-        assetType: isTokenCoin ? ASSET_TYPES.coin : ASSET_TYPES.token,
-      };
-    }
-
-    const fromToken = computed(() => (props.tokens?.[0] ? mapToken(props.tokens[0]) : null));
-    const toToken = computed(() => (props.tokens?.[1] ? mapToken(props.tokens[1]) : null));
-    const imgToken = computed(() => (
-      props.tokens?.[2]
-        ? mapToken(props.tokens[2])
-        : fromToken.value
-    ));
+    const fromAsset = computed(() => props.tokens?.[0]);
+    const targetAsset = computed(() => props.tokens?.[1]);
+    const imgAsset = computed(() => props.tokens?.[2] || fromAsset.value);
 
     return {
       ASSET_TYPES,
-      fromToken,
-      toToken,
-      imgToken,
-      getTokenPlaceholderUrl,
-      getDisplayTokenContractId,
+      fromAsset,
+      targetAsset,
+      imgAsset,
       truncateString,
     };
   },
@@ -165,8 +110,6 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .tokens {
-  --icon-size: var(--icon-size-sm);
-
   @extend %face-sans-16-semi-bold;
 
   color: rgba(variables.$color-white, 0.75);
@@ -187,18 +130,8 @@ export default defineComponent({
   .icon {
     user-select: none;
     width: max-content;
-
-    .icon-image {
-      width: var(--icon-size);
-      height: var(--icon-size);
-      border-radius: calc(var(--icon-size) / 2);
-      vertical-align: middle;
-      margin-right: 4px;
-
-      &.with-border {
-        border: 0.25px solid rgba(variables.$color-white, 0.75);
-      }
-    }
+    vertical-align: middle;
+    margin-right: 4px;
   }
 
   .symbol {
@@ -215,18 +148,6 @@ export default defineComponent({
     vertical-align: middle;
   }
 
-  &.rg {
-    --icon-size: var(--icon-size-rg);
-  }
-
-  &.lg {
-    --icon-size: var(--icon-size-lg);
-  }
-
-  &.xxl {
-    --icon-size: var(--icon-size-xxl);
-  }
-
   &.vertical {
     flex-direction: column;
 
@@ -239,14 +160,8 @@ export default defineComponent({
     }
 
     .icon {
+      margin-right: 0;
       margin-bottom: 8px;
-
-      .icon-image {
-        width: 44px;
-        height: 44px;
-        margin: 0;
-        border-radius: 22px;
-      }
     }
   }
 }

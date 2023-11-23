@@ -58,8 +58,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override protocolName = 'Bitcoin';
 
-  override protocolSymbol = BTC_SYMBOL;
-
   override coinName = BTC_COIN_NAME;
 
   override coinSymbol = BTC_SYMBOL;

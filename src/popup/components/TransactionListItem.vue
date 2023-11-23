@@ -2,12 +2,12 @@
   <ListItemWrapper
     class="transaction-item"
     :to="redirectRoute"
-    replace
     :data-cy="currentTransaction.pending ? 'pending-txs' : null"
+    replace
   >
     <div class="body">
-      <TransactionTokenRows
-        :ext-tokens="tokens"
+      <TransactionAssetRows
+        :assets="transactionAssets"
         :error="isErrorTransaction"
         :protocol="transactionProtocol"
         icon-size="rg"
@@ -34,15 +34,15 @@
         />
 
         <template v-if="!multisigTransaction">
-          <span v-if="fiatAmount && !showTransactionOwner">
-            {{ fiatAmount }}
-          </span>
+          <span
+            v-if="fiatAmount && !showTransactionOwner"
+            v-text="fiatAmount"
+          />
           <span
             v-else-if="showTransactionOwner"
             class="date"
-          >
-            {{ transactionDate }}
-          </span>
+            v-text="transactionDate"
+          />
         </template>
       </div>
     </div>
@@ -75,8 +75,7 @@ import {
 } from '@/utils';
 import {
   useCurrencies,
-  useTransactionTokens,
-  useTransactionTx,
+  useTransactionData,
 } from '@/composables';
 import {
   ROUTE_MULTISIG_TX_DETAILS,
@@ -84,7 +83,7 @@ import {
   ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS,
 } from '@/popup/router/routeNames';
 
-import TransactionTokenRows from './TransactionTokenRows.vue';
+import TransactionAssetRows from './TransactionAssetRows.vue';
 import TransactionLabel from './TransactionLabel.vue';
 import ListItemWrapper from './ListItemWrapper.vue';
 import ConsensusApprovedLabel from './ConsensusApprovedLabel.vue';
@@ -93,7 +92,7 @@ export default defineComponent({
   components: {
     ConsensusApprovedLabel,
     TransactionLabel,
-    TransactionTokenRows,
+    TransactionAssetRows,
     ListItemWrapper,
   },
   props: {
@@ -110,7 +109,7 @@ export default defineComponent({
     const transactionDate = ref();
 
     const currentTransaction = computed(
-      (): ITransaction => (props.multisigTransaction as ITransaction || props.transaction),
+      (): ITransaction => (props.multisigTransaction as any || props.transaction),
     );
 
     // temp if protocol undefined assume it is aeternity
@@ -122,19 +121,12 @@ export default defineComponent({
 
     const {
       direction,
-      isDexAllowance,
       isDexPool,
       isErrorTransaction,
-    } = useTransactionTx({
-      tx: currentTransaction.value.tx,
-      externalAddress: transactionOwner.value,
-    });
-
-    const { tokens } = useTransactionTokens({
-      direction: direction.value,
-      isAllowance: isDexAllowance.value,
-      // TODO - refactor useTransactionTokens to use only tx
+      transactionAssets,
+    } = useTransactionData({
       transaction: currentTransaction.value,
+      externalAddress: transactionOwner.value,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -154,7 +146,9 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
-      const protocolCoin = tokens.value?.find(({ assetType }) => assetType === ASSET_TYPES.coin);
+      const protocolCoin = transactionAssets.value?.find(
+        ({ assetType }) => assetType === ASSET_TYPES.coin,
+      );
       if (!protocolCoin || isErrorTransaction.value || isDexPool.value || !protocolCoin.protocol) {
         return 0;
       }
@@ -187,8 +181,8 @@ export default defineComponent({
       fiatAmount,
       transactionDate,
       isErrorTransaction,
-      tokens,
       currentTransaction,
+      transactionAssets,
       transactionProtocol,
       transactionOwner,
       direction,

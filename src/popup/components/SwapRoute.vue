@@ -1,33 +1,29 @@
 <template>
-  <div
-    v-if="tokenList.length > 1"
+  <DetailsItem
+    v-if="assetList.length > 1"
     class="swap-route"
+    :label="$t('pages.transactionDetails.swapRoute')"
   >
-    <div class="title">
-      {{ $t('pages.transactionDetails.swapRoute') }}
-    </div>
-    <div class="swap-wrapper">
+    <div class="swap-steps">
       <span
-        v-for="(token, idx) of tokenList"
+        v-for="(asset, idx) of assetList"
         :key="idx"
-        class="swap"
+        class="swap-steps-item"
       >
         <span
           v-if="idx"
-          class="divider"
+          class="step-fee"
         >
-          <span class="space" />
-          {{ checkWaeAeTx(idx - 1)
-            ? 0 : `${(idx > 1 && checkWaeAeTx(idx - 2)) || idx === 1 ? '' : '<'}0.3` }}%
+          <span class="line" />
+          {{ getSwapStepFee(idx) }}%
           {{ $t('pages.transactionDetails.poolFee') }}
-          <span class="arrow">
-            <ArrowHead />
-          </span>
+          <span class="arrow" />
         </span>
-        <Tokens :tokens="[token]" />
+
+        <Tokens :tokens="[asset]" />
       </span>
     </div>
-  </div>
+  </DetailsItem>
 </template>
 
 <script lang="ts">
@@ -36,28 +32,32 @@ import { camelCase } from 'lodash-es';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
+  ITokenResolved,
   ITransaction,
   TxFunction,
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useAeSdk, useFungibleTokens } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
 import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
 
+import DetailsItem from './DetailsItem.vue';
 import Tokens from './Tokens.vue';
-import ArrowHead from '../../icons/arrow-head.svg?vue-component';
 
 export default defineComponent({
   components: {
+    DetailsItem,
     Tokens,
-    ArrowHead,
   },
   props: {
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
+    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+
     const { nodeNetworkId } = useAeSdk();
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
@@ -69,10 +69,14 @@ export default defineComponent({
       return camelCase(functionName) as TxFunctionParsed;
     }
 
-    const tokenList = computed(() => {
+    // TODO replace with `transactionTokens` taken from `transactionData` composable
+    const assetList = computed(() => {
       const txFunction = getTxFunction(props.transaction.tx.function!);
 
-      if (!isTxFunctionDexSwap(txFunction)) {
+      if (
+        !isTxFunctionDexSwap(txFunction)
+        && !isTxFunctionDexSwap(props.transaction.tx.function!)
+      ) {
         return [];
       }
       const resolver = getTransactionTokenInfoResolver(txFunction);
@@ -93,45 +97,65 @@ export default defineComponent({
           tokens[1],
         ];
       }
+
+      // If swapping coin into token (or opposite) there is an additional step of swapping the coin
+      // into wrapped coin token. Here we are prepending or appending the asset list to indicate it.
       if (
-        tokens[0].isAe
-        && waeContract
+        tokens[0].isWrappedCoin
         && !waeContract?.includes(tokens[1].contractId as Encoded.ContractAddress)
       ) {
+        tokens[0].isWrappedCoin = false;
         tokens.unshift({
           ...tokens[0],
-          isAe: true,
+          ...adapter.getDefaultCoin({} as any),
+          isWrappedCoin: false,
         });
-        tokens[1].isAe = false;
-      }
-      if (
-        tokens[tokenLastIndex].isAe && waeContract
+      } else if (
+        tokens[tokenLastIndex].isWrappedCoin
         && !waeContract?.includes(tokens[tokenLastIndex - 1].contractId as Encoded.ContractAddress)
       ) {
-        tokens[tokenLastIndex].isAe = false;
-        tokens.push({ ...tokens[tokenLastIndex], isAe: true });
+        tokens[tokenLastIndex].isWrappedCoin = false;
+        tokens.push({
+          ...tokens[tokenLastIndex],
+          ...adapter.getDefaultCoin({} as any),
+          isWrappedCoin: true,
+        });
       }
       return tokens;
     });
 
-    function checkWaeAeTx(idx: number) {
-      if (idx === tokenList.value.length - 1) {
-        return false;
-      }
-      const contracts = DEX_CONTRACTS[nodeNetworkId.value!];
-
+    function isAssetWrappedCoin(asset: ITokenResolved): boolean {
       return (
-        contracts?.wae?.includes(tokenList.value[idx].contractId as Encoded.ContractAddress)
-        && tokenList.value[idx + 1].isAe
-      ) || (
-        contracts?.wae?.includes(tokenList.value[idx + 1].contractId as Encoded.ContractAddress)
-        && tokenList.value[idx].isAe
+        !!asset.contractId
+        && DEX_CONTRACTS[nodeNetworkId.value!]?.wae?.includes(asset.contractId)
       );
     }
 
+    function getSwapStepFee(idx: number): string {
+      const sourceAsset = assetList.value[idx - 1];
+      const destAsset = assetList.value[idx];
+
+      // Exchanging the coin to token first requires to swap it to wrapped coin token.
+      // This operation is free (no fee involved)
+      if (
+        sourceAsset.contractId === adapter.coinContractId
+        || destAsset.contractId === adapter.coinContractId
+      ) {
+        return '0';
+      }
+
+      // Transactions involving wrapped coin
+      if (isAssetWrappedCoin(sourceAsset) || isAssetWrappedCoin(destAsset)) {
+        return '0.3';
+      }
+
+      // Other transactions
+      return '<0.3';
+    }
+
     return {
-      tokenList,
-      checkWaeAeTx,
+      assetList,
+      getSwapStepFee,
     };
   },
 });
@@ -143,83 +167,72 @@ export default defineComponent({
 @use '../../styles/mixins';
 
 .swap-route {
-  width: 100%;
-  overflow: hidden;
-
-  .title {
-    color: variables.$color-grey-dark;
-    padding-bottom: 8px;
-
-    @extend %face-sans-14-medium;
-  }
-
-  .swap-wrapper {
-    @include mixins.flex(flex-start, flex-start, row);
-
+  .swap-steps {
+    display: flex;
     flex-wrap: wrap;
-    row-gap: 4px;
+    gap: 4px;
+    padding-top: 2px;
+    overflow: hidden;
 
-    :last-of-type {
-      flex: 1;
+    .swap-steps-item {
+      position: relative;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      height: 24px;
 
-      .tokens:deep() {
-        width: 100%;
+      .step-fee {
+        @extend %face-sans-13-medium;
+
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px 5px;
+        border-radius: 20px;
+        color: variables.$color-white;
+        background: variables.$color-bg-3;
+        white-space: nowrap;
       }
     }
   }
 
-  .swap {
-    @include mixins.flex(flex-start, center, row);
-
-    flex: 0;
+  .line,
+  .arrow {
+    display: inline-flex;
+    align-items: center;
     position: relative;
-    height: 24px;
-
-    .divider,
-    .tokens:deep() {
-      background: variables.$color-bg-4;
-      z-index: 1;
-      padding-right: 4px;
-    }
+    margin-inline: 1px;
+    min-width: 10px;
+    height: 100%;
+    opacity: 0.3;
 
     &::before {
-      content: "";
-      background-image: linear-gradient(variables.$color-white 2px, transparent 1px);
+      content: '';
       position: absolute;
       top: calc(50% - 1px);
-      height: 24px;
-      width: 100vh;
+      width: 100%;
+      height: 2px;
+      background-color: variables.$color-white;
+      transform: scaleY(0.8); // Make the line thinner
     }
+  }
 
-    .divider {
-      @extend %face-sans-13-medium;
+  .arrow {
+    justify-content: end;
+    width: 100%;
+    min-width: 12px;
 
-      @include mixins.flex(center, center, row);
-
-      gap: 2px;
-      color: variables.$color-white;
-      white-space: nowrap;
-
-      .space,
-      .arrow {
-        background-image: linear-gradient(variables.$color-white 2px, transparent 1px);
-        width: 12px;
-        height: 24px;
-        transform: translateY(calc(50% - 1px));
-        position: relative;
-      }
-
-      .arrow {
-        margin-right: 4px;
-
-        svg {
-          position: absolute;
-          transform: translateY(-5px);
-          left: 7px;
-          width: 9px;
-          height: 12px;
-        }
-      }
+    // Arrowhead
+    &::after {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-style: solid;
+      border-color: variables.$color-white;
+      border-width: 2px 2px 0 0;
+      border-radius: 1px;
+      transform: rotate(45deg);
     }
   }
 }

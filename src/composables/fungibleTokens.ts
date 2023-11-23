@@ -3,7 +3,7 @@
 import { computed, watch } from 'vue';
 import BigNumber from 'bignumber.js';
 import { Encoding } from '@aeternity/aepp-sdk';
-import { toShiftedBigNumber } from '@/utils';
+import { isAssetCoin, toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
   AssetContractId,
@@ -15,6 +15,7 @@ import type {
   ProtocolRecord,
   Protocol,
   Dictionary,
+  ITx,
 } from '@/types';
 import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -223,23 +224,13 @@ export function useFungibleTokens() {
     );
   }
 
-  function getTxAssetSymbol(transaction?: ITransaction) {
-    const { protocol = PROTOCOLS.aeternity } = transaction || {};
+  function getTxAssetSymbol(transaction?: ITransaction): string | undefined {
+    const { protocol = PROTOCOLS.aeternity, tx = {} as ITx } = transaction || {};
     const protocolTokens = getProtocolAvailableTokens(protocol);
-    let assetContractId = transaction?.tx?.contractId as AssetContractId;
 
-    // TODO move this logic to the AE adapter or transaction normalizer
-    if (protocol === PROTOCOLS.aeternity) {
-      const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
-      if (contractCallData?.token) {
-        assetContractId = contractCallData.token;
-      }
-    }
-
-    return (
-      protocolTokens[assetContractId]?.symbol
-      || ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol
-    );
+    return (isAssetCoin(tx.contractId) || !tx.contractId)
+      ? ProtocolAdapterFactory.getAdapter(protocol).coinSymbol
+      : protocolTokens[tx.contractId]?.symbol;
   }
 
   /**
@@ -260,9 +251,10 @@ export function useFungibleTokens() {
         .toNumber();
     }
 
-    const contractCallData = transaction && tx && categorizeContractCallTxObject(transaction);
+    const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
 
-    const tokenData = protocol && getProtocolAvailableTokens(protocol)[contractCallData?.token!];
+    const tokenData = protocol
+      && getProtocolAvailableTokens(protocol)[contractCallData?.assetContractId!];
     if (contractCallData && tokenData) {
       return +toShiftedBigNumber(
         contractCallData.amount || 0,

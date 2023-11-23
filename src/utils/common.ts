@@ -471,7 +471,7 @@ export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
   );
 }
 
-export function isCoin(assetContractId: AssetContractId): boolean {
+export function isAssetCoin(assetContractId: AssetContractId): boolean {
   return PROTOCOL_LIST.some(
     (protocol) => ProtocolAdapterFactory
       .getAdapter(protocol)

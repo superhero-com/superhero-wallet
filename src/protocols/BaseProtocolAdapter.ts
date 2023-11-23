@@ -28,8 +28,6 @@ export abstract class BaseProtocolAdapter {
 
   abstract protocolName: string;
 
-  abstract protocolSymbol: string;
-
   abstract coinName: string;
 
   abstract coinSymbol: string;

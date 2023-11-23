@@ -47,13 +47,13 @@ import {
   ERC20_ABI,
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
+  ETH_COIN_SYMBOL,
   ETH_COINGECKO_COIN_ID,
   ETH_CONTRACT_ID,
   ETH_GAS_LIMIT,
   ETH_NETWORK_DEFAULT_SETTINGS,
   ETH_NETWORK_DEFAULT_ENV_SETTINGS,
   ETH_PROTOCOL_NAME,
-  ETH_SYMBOL,
   ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
@@ -72,11 +72,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override protocolName = ETH_PROTOCOL_NAME;
 
-  override protocolSymbol = ETH_SYMBOL;
-
   override coinName = ETH_COIN_NAME;
 
-  override coinSymbol = ETH_SYMBOL;
+  override coinSymbol = ETH_COIN_SYMBOL;
 
   override coinContractId = ETH_CONTRACT_ID;
 

@@ -7,6 +7,8 @@
             <Tokens
               :tokens="tokens"
               :symbol-length="22"
+              :icon-size="ICON_SIZES.xxl"
+              full-symbol
               vertical
             />
 
@@ -107,10 +109,11 @@ import { Encoded } from '@aeternity/aepp-sdk';
 
 import type { AssetContractId, IToken, TokenPair } from '@/types';
 import {
+  ICON_SIZES,
+  IS_FIREFOX,
   IS_IOS,
   PROTOCOLS,
   UNFINISHED_FEATURES,
-  IS_FIREFOX,
 } from '@/constants';
 import { excludeFalsy } from '@/utils';
 import {
@@ -379,6 +382,7 @@ export default defineComponent({
     return {
       PROTOCOLS,
       UNFINISHED_FEATURES,
+      ICON_SIZES,
       IS_FIREFOX,
       IS_IOS,
       AE_DEX_URL,

@@ -74,7 +74,7 @@
           <TokenAmount
             :amount="tokenAmount"
             :symbol="tokenSymbol"
-            :hide-fiat="!swapTokenAmountData.isAe || isTransactionAex9(transactionWrapped)"
+            :hide-fiat="!swapTokenAmountData.isWrappedCoin || isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
             data-cy="total"
           />
@@ -94,7 +94,7 @@
         >
           <TokenAmount
             :amount="executionCost || totalAmount"
-            :symbol="getTxAssetSymbol(popupProps?.tx)"
+            :symbol="singleToken.symbol"
             :hide-fiat="isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
             data-cy="total"
@@ -192,7 +192,7 @@ import {
   useAeSdk,
   useFungibleTokens,
   usePopupProps,
-  useTransactionTx,
+  useTransactionData,
 } from '@/composables';
 import {
   AE_SYMBOL,
@@ -261,9 +261,9 @@ export default defineComponent({
       direction,
       isDexAllowance,
       isDex,
-      setTransactionTx,
-    } = useTransactionTx({
-      tx: popupProps.value?.tx,
+      setActiveTransaction,
+    } = useTransactionData({
+      transaction: { tx: popupProps.value?.tx } as ITransaction,
     });
 
     const showAdvanced = ref(false);
@@ -342,7 +342,7 @@ export default defineComponent({
     ));
 
     const tokenSymbol = computed(
-      () => swapTokenAmountData.value.isAe ? AE_SYMBOL : swapTokenAmountData.value.symbol,
+      () => swapTokenAmountData.value.isWrappedCoin ? AE_SYMBOL : swapTokenAmountData.value.symbol,
     );
 
     const completeTransaction = computed(
@@ -479,12 +479,14 @@ export default defineComponent({
               value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
             })) as TxArguments[],
           };
+          const tx: ITx = { ...txParams, ...popupProps.value.tx };
 
           txFunction.value = txParams.function;
 
-          setTransactionTx({ ...txParams, ...popupProps.value.tx });
+          // TODO temporary solution to create transaction boilerplate
+          setActiveTransaction({ tx } as ITransaction);
 
-          const allTokens = getTokens({ ...txParams, ...popupProps.value.tx });
+          const allTokens = getTokens(tx);
 
           tokenList.value = allTokens.map((token) => ({
             ...token,
@@ -545,6 +547,7 @@ export default defineComponent({
       nameAeFee,
       popupProps,
       showAdvanced,
+      singleToken,
       swapDirection,
       swapDirectionTranslation,
       swapTokenAmountData,

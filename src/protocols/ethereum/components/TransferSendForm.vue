@@ -3,7 +3,7 @@
     v-bind="$attrs"
     :transfer-data="transferData"
     :fee="numericFee"
-    :fee-symbol="ETH_SYMBOL"
+    :fee-symbol="ETH_COIN_SYMBOL"
     :protocol="PROTOCOLS.ethereum"
     :custom-title="$t('modals.send.sendAsset', { name: ETH_COIN_NAME })"
     class="transfer-send-form"
@@ -29,7 +29,7 @@
           ...+balance.minus(fee) > 0
             ? { max_value: max }
             : {},
-          enough_coin: [fee.toString(), ETH_SYMBOL],
+          enough_coin: [fee.toString(), ETH_COIN_SYMBOL],
         }"
         @asset-selected="handleAssetChange"
       >
@@ -87,8 +87,9 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
-  ETH_SYMBOL,
+  ETH_COIN_SYMBOL,
 } from '@/protocols/ethereum/config';
+import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
 
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TransferSendFormBase from '@/popup/components/TransferSendFormBase.vue';
@@ -96,7 +97,6 @@ import TransferSendRecipient from '@/popup/components/TransferSend/TransferSendR
 import TransferSendAmount from '@/popup/components/TransferSend/TransferSendAmount.vue';
 import TransactionSpeedPicker from '@/popup/components/TransactionSpeedPicker.vue';
 import BtnMaxAmount from '@/popup/components/buttons/BtnMaxAmount.vue';
-import { useEthMaxAmount } from '../composables/ethMaxAmount';
 
 export default defineComponent({
   name: 'EthTransferSendForm',
@@ -228,7 +228,7 @@ export default defineComponent({
 
     return {
       ETH_COIN_NAME,
-      ETH_SYMBOL,
+      ETH_COIN_SYMBOL,
       PROTOCOLS,
       NETWORK_TYPE_TESTNET,
       formModel,

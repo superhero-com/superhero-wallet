@@ -6,13 +6,10 @@
           <TransactionDetailsBase
             :transaction="transaction"
             :amount="amount"
-            :amount-total="getTxAmountTotal(transaction, direction)"
+            :amount-total="amountTotal"
             :fee="transactionFee"
-            :coin-symbol="AE_SYMBOL"
-            :token-symbol="getTxAssetSymbol(transaction)"
             :is-error-transaction="isErrorTransaction"
             :payload="getTransactionPayload(transaction)!"
-            :contract-id="contractId"
             :show-header="!isDexAllowance"
             :hide-amount-total="(
               isDex
@@ -25,12 +22,10 @@
             :protocol="PROTOCOLS.aeternity"
           >
             <template #tokens>
-              <TransactionTokenRows
-                :transaction="transaction"
-                :direction="direction"
-                :is-allowance="isDexAllowance"
+              <TransactionAssetRows
+                :assets="transactionAssets"
                 :error="isErrorTransaction"
-                :reversed="isPool"
+                :is-reversed="isPool"
                 :protocol="PROTOCOLS.aeternity"
                 icon-size="rg"
                 multiple-rows
@@ -49,9 +44,7 @@
               <TransactionDetailsPoolTokens
                 v-if="(isPool || isDexAllowance)"
                 :transaction="transaction"
-                :direction="direction"
-                :tx-function="transaction.tx.function"
-                :is-allowance="isDexAllowance"
+                :tokens="transactionAssets"
                 :reversed="isPool"
               />
 
@@ -182,11 +175,12 @@ import {
   useAccounts,
   useFungibleTokens,
   useMultisigAccounts,
+  useTransactionData,
   useTransactionList,
-  useTransactionTx,
   useUi,
 } from '@/composables';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -208,9 +202,8 @@ import SwapRoute from '@/popup/components/SwapRoute.vue';
 import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
 import DialogBox from '@/popup/components/DialogBox.vue';
 import Avatar from '@/popup/components/Avatar.vue';
-import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
+import TransactionAssetRows from '@/popup/components/TransactionAssetRows.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   components: {
@@ -221,7 +214,7 @@ export default defineComponent({
     SwapRates,
     TransactionDetailsBase,
     TransactionDetailsPoolTokens,
-    TransactionTokenRows,
+    TransactionAssetRows,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -230,7 +223,7 @@ export default defineComponent({
     IonPage,
   },
   props: {
-    multisigDashboard: { type: Boolean },
+    multisigDashboard: Boolean,
   },
   setup(props) {
     const router = useRouter();
@@ -240,7 +233,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
+    const { getTxAmountTotal } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -260,15 +253,17 @@ export default defineComponent({
 
     const {
       setExternalAddress,
-      setTransactionTx,
+      setActiveTransaction,
       direction,
       isErrorTransaction,
       isDex,
       isDexAllowance,
       isMultisig,
       outerTxTag,
-    } = useTransactionTx({
+      transactionAssets,
+    } = useTransactionData({
       externalAddress: externalAddress.value,
+      showDetailedAllowanceInfo: true,
     });
 
     const transaction = ref<ITransaction>();
@@ -277,8 +272,10 @@ export default defineComponent({
     const amount = computed((): number => transaction.value
       ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
       : 0);
+    const amountTotal = computed((): number => transaction.value
+      ? getTxAmountTotal(transaction.value, direction.value)
+      : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
-    const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
@@ -352,7 +349,7 @@ export default defineComponent({
         };
 
         setExternalAddress(externalAddress.value);
-        setTransactionTx(transaction.value.tx);
+        setActiveTransaction(transaction.value);
       }
 
       if (outerTxTag.value === Tag.GaMetaTx) {
@@ -382,10 +379,9 @@ export default defineComponent({
       TX_DIRECTION,
       transaction,
       amount,
+      amountTotal,
       isSwap,
       isPool,
-      getTxAssetSymbol,
-      getTxAmountTotal,
       isErrorTransaction,
       isDexAllowance,
       isDex,
@@ -401,10 +397,10 @@ export default defineComponent({
       isLocalAccountAddress,
       gasPrice,
       gasUsed,
-      contractId,
       multisigTransactionFeePaidBy,
       multisigContractId,
       transactionFee,
+      transactionAssets,
     };
   },
 });

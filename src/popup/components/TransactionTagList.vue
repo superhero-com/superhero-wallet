@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n';
 import { Tag } from '@aeternity/aepp-sdk';
 
 import type { ITransaction } from '@/types';
-import { useFungibleTokens, useTippingContracts, useTransactionTx } from '@/composables';
+import { useFungibleTokens, useTippingContracts, useTransactionData } from '@/composables';
 import { excludeFalsy, includes } from '@/utils';
 import {
   AENS,
@@ -54,8 +54,8 @@ export default defineComponent({
       txFunctionLabel,
       isDex,
       isDexAllowance,
-    } = useTransactionTx({
-      tx: props.transaction?.tx,
+    } = useTransactionData({
+      transaction: props.transaction,
       externalAddress: props.transaction?.transactionOwner,
     });
 

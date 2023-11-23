@@ -150,6 +150,8 @@ export const STUB_TX_PARAMS = {
   },
 };
 
+const microTime = new Date().getTime();
+
 export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITransaction>>> = {
   spend: {
     protocol: PROTOCOLS.aeternity,
@@ -387,7 +389,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       function: 'transfer',
       type: 'ContractCallTx',
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   pendingSpend: {
     protocol: PROTOCOLS.aeternity,
@@ -398,7 +400,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       recipientId: STUB_ACCOUNT.address,
       type: 'SpendTx',
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   pendingTransfer: {
     protocol: PROTOCOLS.aeternity,
@@ -411,7 +413,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       function: 'transfer',
       type: 'ContractCallTx',
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   pendingTipAe: {
     protocol: PROTOCOLS.aeternity,
@@ -424,7 +426,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       type: 'ContractCallTx',
       selectedTokenContractId: AE_CONTRACT_ID,
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   pendingTipToken: {
     protocol: PROTOCOLS.aeternity,
@@ -438,7 +440,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       type: 'ContractCallTx',
       selectedTokenContractId: STUB_TOKEN_CONTRACT_ADDRESS,
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   payForGaAttach: {
     protocol: PROTOCOLS.aeternity,
@@ -452,7 +454,7 @@ export const STUB_TRANSACTIONS: Partial<Record<TxFunctionParsed, PartialDeep<ITr
       },
       type: 'PayingForTx',
     },
-    microTime: new Date().getTime(),
+    microTime,
   },
   gaMetaSpend: {
     protocol: PROTOCOLS.aeternity,

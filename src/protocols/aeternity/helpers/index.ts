@@ -86,24 +86,27 @@ export function calculateSupplyAmount(balance: number, totalSupply: number, rese
 }
 
 export function categorizeContractCallTxObject(transaction: ITransaction): {
-  amount?: string | number;
+  amount: number;
+  assetContractId: AssetContractId;
   to?: string;
-  token?: AssetContractId;
   url?: string;
   note?: string;
 } | null {
   const { tx, incomplete, pending } = transaction || {};
-
   if (!compareCaseInsensitive(tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
+
   if (incomplete || pending) {
     return {
       amount: tx.amount,
-      token: tx.selectedTokenContractId ?? tx.contractId,
+      assetContractId: tx.selectedTokenContractId ?? tx.contractId,
       to: incomplete ? tx.recipientId : tx.callerId,
     };
   }
+
+  // TODO Consider picking the argument by the `type` value instead of the array index value.
+  const txArgValues = (tx.arguments || []).map((arg) => arg.value);
 
   switch (tx.function) {
     case TX_FUNCTIONS.transfer:
@@ -111,22 +114,22 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
     case TX_FUNCTIONS.changeAllowance:
     case TX_FUNCTIONS.createAllowance:
       return {
-        to: tx.arguments[0].value,
-        amount: tx.arguments[1].value,
-        token: tx.contractId,
+        to: txArgValues[0],
+        amount: txArgValues[1],
+        assetContractId: tx.contractId,
       };
     case TX_FUNCTIONS.tipToken:
       return {
-        url: tx.arguments[0].value,
-        note: tx.arguments[1].value,
-        amount: tx.arguments[3].value,
-        token: tx.arguments[2].value,
+        url: txArgValues[0],
+        note: txArgValues[1],
+        amount: txArgValues[3],
+        assetContractId: txArgValues[2],
       };
     case TX_FUNCTIONS.retipToken:
       return {
-        url: tx.arguments[0].value,
-        amount: tx.arguments[2].value,
-        token: tx.arguments[1].value,
+        url: txArgValues[0],
+        amount: txArgValues[2],
+        assetContractId: txArgValues[1],
       };
     default:
       return null;
@@ -184,7 +187,7 @@ export function getInnerTransaction(tx?: ITx): any {
 export function getMultisigTransaction(
   transaction: ICommonTransaction,
 ): IActiveMultisigTransaction | undefined {
-  return (transaction as any).isMultisigTransaction
+  return (transaction.isMultisig)
     ? transaction as IActiveMultisigTransaction
     : undefined;
 }
@@ -205,7 +208,7 @@ export function getOwnershipStatus(
 }
 
 export function getTransaction(transaction: ICommonTransaction): ITransaction | undefined {
-  return (transaction as any).isMultisigTransaction
+  return (transaction.isMultisig)
     ? undefined
     : transaction as ITransaction;
 }
@@ -232,7 +235,6 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
       )
       && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString()
     )
-    || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
 }
@@ -300,10 +302,7 @@ export function isAensNameValid(value: string) {
  * Check if transaction does not refers to AE Coin.
  */
 export function isTransactionAex9(transaction: ITransaction): boolean {
-  if (transaction.tx?.aexnType === 'aex9') {
-    return true;
-  }
-  const contractId = categorizeContractCallTxObject(transaction)?.token;
+  const contractId = categorizeContractCallTxObject(transaction)?.assetContractId;
   return !!transaction.tx && !!contractId && contractId !== AE_CONTRACT_ID;
 }
 
@@ -311,11 +310,10 @@ export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {
   const { wae = [], router = [] } = dexContracts || {};
 
   return !!(
-    tx
-    && tx.contractId
-    && tx.function
+    tx?.contractId
+    && tx?.function
     && Object.values(TX_FUNCTIONS_TYPE_DEX).flat().includes(tx.function as TxFunctionRaw)
-    && [...wae, ...router].includes(tx.contractId)
+    && [...wae, ...router].includes(tx.contractId as Encoded.ContractAddress)
   );
 }
 

@@ -1,12 +1,12 @@
 <template>
   <ListItemWrapper
-    v-if="tokenData"
+    v-if="asset"
     v-bind="$attrs"
     class="tokens-list-item"
     :to="preventNavigation ? null : {
       name: targetRouteName,
       params: {
-        id: tokenData.contractId,
+        id: asset.contractId,
       },
     }"
     replace
@@ -15,14 +15,14 @@
   >
     <div class="row">
       <Tokens
-        :tokens="[tokenData]"
+        :tokens="[asset]"
         icon-size="lg"
         full-symbol
         bright
       />
       <TokenAmount
-        :amount="+(tokenData.convertedBalance ?? 0)"
-        :symbol="tokenData.symbol"
+        :amount="+(asset.convertedBalance ?? 0)"
+        :symbol="asset.symbol"
         :protocol="PROTOCOLS.aeternity"
         dynamic-sizing
         no-symbol
@@ -30,7 +30,7 @@
       />
     </div>
     <div
-      v-if="isAssetCoin"
+      v-if="isCoin"
       class="row bottom"
     >
       <div class="price">
@@ -45,9 +45,9 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { IToken } from '@/types';
+import type { IAsset } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { isCoin } from '@/utils';
+import { isAssetCoin } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
 
@@ -62,7 +62,7 @@ export default defineComponent({
     ListItemWrapper,
   },
   props: {
-    tokenData: { type: Object as PropType<IToken>, default: null },
+    asset: { type: Object as PropType<IAsset>, default: null },
     preventNavigation: Boolean,
     showCurrentPrice: Boolean,
     selected: Boolean,
@@ -78,18 +78,18 @@ export default defineComponent({
     /**
      * price and balanceFormatted are applicable only for AE Coin
      */
-    const price = computed(() => formatCurrency(getCurrentCurrencyRate(props.tokenData.protocol)));
+    const price = computed(() => formatCurrency(getCurrentCurrencyRate(props.asset.protocol)));
     const balanceFormatted = computed(
-      () => getFormattedFiat(props.tokenData.convertedBalance || 0, props.tokenData.protocol),
+      () => getFormattedFiat(props.asset.convertedBalance || 0, props.asset.protocol),
     );
 
-    const isAssetCoin = computed(() => isCoin(props.tokenData.contractId));
+    const isCoin = computed(() => isAssetCoin(props.asset.contractId));
 
     const targetRouteName = computed(() => {
       if (props.isMultisig) {
         return ROUTE_MULTISIG_COIN;
       }
-      if (isAssetCoin.value) {
+      if (isCoin.value) {
         return ROUTE_COIN;
       }
       return ROUTE_TOKEN;
@@ -97,7 +97,7 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      isAssetCoin,
+      isCoin,
       price,
       targetRouteName,
       balanceFormatted,

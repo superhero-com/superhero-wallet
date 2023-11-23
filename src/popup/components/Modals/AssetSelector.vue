@@ -32,7 +32,7 @@
       <AssetListItem
         v-for="asset in accountAssetsToDisplay"
         :key="asset.contractId"
-        :token-data="asset"
+        :asset="asset"
         :selected="isTokenSelected(asset)"
         show-current-price
         prevent-navigation

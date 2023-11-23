@@ -205,6 +205,7 @@ export default defineComponent({
           hash: retipResponse.hash,
           tipUrl: tip.value.url,
           pending: true,
+          protocol: PROTOCOLS.aeternity,
           transactionOwner: account.address,
           tx: {
             amount,

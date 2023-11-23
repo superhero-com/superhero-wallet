@@ -180,6 +180,8 @@ export interface ITokenBalance {
 
 /**
  * Fungible tokens that are available in currently used network.
+ * TODO stop extending the interface with `ITokenBalance` because the token data
+ *   should not hold any account related information like the balance.
  */
 export interface IToken {
   amount?: number | string; // TODO consider removing data specific to an account
@@ -209,11 +211,20 @@ export type IAssetType = ObjectValues<typeof ASSET_TYPES>;
  * In most cases it's the result of firing one of the `TransactionResolvers`.
  */
 export interface ITokenResolved extends Partial<IToken> {
-  isAe?: boolean;
+  assetType?: IAssetType;
   isPool?: boolean;
   isReceived?: boolean;
-  assetType?: IAssetType;
-  symbol: string; // Ensure its present in the current interface
+  /**
+   * Decides if the token should be treated as a coin (eg. Wrapped Aeternity).
+   * For example when swapping the coin for any token we first need to
+   * exchange the coin for wrapped coin and then swap this token for the desired one.
+   * As the balance of wrapped coin tokens adds to the actual coin balance we are displaying
+   * the coin instead ot the token and leave the token's contractId to allow of displaying
+   * the swap route (see SwapRoute component).
+   */
+  isWrappedCoin?: boolean;
+  name?: string;
+  symbol?: string;
 }
 
 /**
@@ -443,7 +454,7 @@ export interface ITx {
   callerId?: AccountAddress;
   code?: Encoded.ContractBytearray;
   commitmentId?: any;
-  contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
+  contractId: AssetContractId; // TODO: make contractId optional, spendTx doesn't have it
   fee: number;
   function?: TxFunction;
   gaId?: string; // Generalized Account ID
@@ -488,7 +499,7 @@ export interface ITransaction {
   microIndex?: number;
   microTime?: number;
   pending: boolean;
-  protocol?: Protocol;
+  protocol: Protocol;
   rawTx?: any; // TODO find type
   tipUrl?: string;
   /**
@@ -505,6 +516,7 @@ export interface ITransaction {
   tx: ITx;
   type?: string;
   url?: string;
+  isMultisig?: false; // TODO Consider merging the ITransaction with IActiveMultisigTransaction
 }
 
 export interface IDashboardTransaction extends ITransaction {
@@ -515,8 +527,9 @@ export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
   hash: string;
   tx?: ITx;
-  isMultisigTransaction: boolean;
+  isMultisig: true;
   microTime?: number;
+  protocol: Protocol; // Required to match `ITransaction`
 }
 
 export interface ITransactionOverview {
@@ -527,8 +540,12 @@ export interface ITransactionOverview {
 }
 
 export interface IDexContracts {
-  router: Encoded.ContractAddress[];
-  wae: Encoded.ContractAddress[];
+  router: AssetContractId[];
+  /**
+   * Wrapped AE token contractIds.
+   * WAE token values mirrors the real AE value so can be exchanged 1:1 wit them.
+   */
+  wae: AssetContractId[];
 }
 
 export type DexFunctionType =

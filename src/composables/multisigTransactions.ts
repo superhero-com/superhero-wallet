@@ -17,6 +17,7 @@ import type {
   TxFunctionMultisig,
   IRawMultisigTx,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
@@ -86,8 +87,9 @@ export function useMultisigTransactions() {
         totalConfirmations: activeMultisigAccount.value.confirmedBy.length,
         hash: txHash,
         tx: rawTx ? unpackTx(rawTx.tx) as any : undefined,
-        isMultisigTransaction: true,
+        isMultisig: true,
         microTime: rawTx ? Date.now() : undefined,
+        protocol: PROTOCOLS.aeternity,
       };
     }
     return null;

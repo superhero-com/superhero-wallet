@@ -30,7 +30,7 @@ import type {
 } from '@/types';
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { useAeSdk, useTransactionTx } from '@/composables';
+import { useAeSdk, useTransactionData } from '@/composables';
 
 import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
@@ -77,8 +77,8 @@ export default defineComponent({
       direction,
       getOwnershipAddress,
       innerTx,
-    } = useTransactionTx({
-      tx: props.transaction.tx,
+    } = useTransactionData({
+      transaction: props.transaction,
       externalAddress: props.transaction?.transactionOwner,
     });
 

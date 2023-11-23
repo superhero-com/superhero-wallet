@@ -63,6 +63,7 @@ import { throttle } from 'lodash-es';
 
 import type { ICommonTransaction, ITransaction } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT, TX_DIRECTION } from '@/constants';
+import { pipe, sortTransactionsByDate } from '@/utils';
 import {
   useAccounts,
   useAeSdk,
@@ -72,6 +73,7 @@ import {
   useTransactionAndTokenFilter,
   useViewport,
 } from '@/composables';
+
 import {
   getInnerTransaction,
   getMultisigTransaction,
@@ -81,13 +83,6 @@ import {
   getTxOwnerAddress,
   isTxDex,
 } from '@/protocols/aeternity/helpers';
-
-import {
-  includesCaseInsensitive,
-  pipe,
-  sortTransactionsByDate,
-} from '@/utils';
-
 import { AE_TRANSACTION_OWNERSHIP_STATUS } from '@/protocols/aeternity/config';
 
 import MessageOffline from '@/popup/components/MessageOffline.vue';
@@ -135,6 +130,8 @@ export default defineComponent({
       () => innerScrollElem.value?.parentElement,
     );
 
+    const searchPhraseLowerCase = computed(() => searchPhrase.value.toLocaleLowerCase());
+
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {
         const outerTx = transaction.tx!;
@@ -171,22 +168,12 @@ export default defineComponent({
     }
 
     function filterTransactionsBySearchPhrase(transactionList: ICommonTransaction[]) {
-      return transactionList.filter(
-        (transaction) => (
-          !searchPhrase.value
-          || includesCaseInsensitive(
-            getTxAssetSymbol(getTransaction(transaction)),
-            searchPhrase.value.toLocaleLowerCase(),
-          )
-          || (
-            transaction.tx?.contractId
-            && includesCaseInsensitive(
-              transaction.tx.contractId,
-              searchPhrase.value.toLocaleLowerCase(),
-            )
-          )
-        ),
-      );
+      return transactionList.filter((transaction) => (
+        !searchPhrase.value
+        || transaction.tx?.contractId?.includes(searchPhraseLowerCase.value)
+        || getTxAssetSymbol(transaction as ITransaction)?.toLocaleLowerCase()
+          .includes(searchPhraseLowerCase.value)
+      ));
     }
 
     const filteredTransactions = computed(
