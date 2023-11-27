@@ -1,7 +1,6 @@
 import { computed, ref } from 'vue';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type {
-  IAccountOverview,
   ITx,
   ObjectValues,
   TxFunctionRaw,
@@ -167,18 +166,20 @@ export function useTransactionTx({
     ownerAddress.value = address;
   }
 
-  function getOwnershipAccount(externalOwnerAddress?: Encoded.AccountAddress): IAccountOverview {
+  function getOwnershipAddress(
+    externalOwnerAddress?: Encoded.AccountAddress,
+  ): Encoded.AccountAddress {
     const { current, subAccount } = AE_TRANSACTION_OWNERSHIP_STATUS;
     switch (ownershipStatus.value) {
       case current:
-        return activeAccount.value;
+        return activeAccount.value.address;
       case subAccount: {
         const { accountId, callerId } = innerTx.value || {};
-        return accounts.value.find(({ address }) => [accountId, callerId].includes(address))!;
+        return accounts.value
+          .find(({ address }) => [accountId, callerId].includes(address))?.address!;
       }
       default: {
-        const address = externalOwnerAddress || txOwnerAddress.value!;
-        return { address };
+        return externalOwnerAddress || txOwnerAddress.value!;
       }
     }
   }
@@ -200,7 +201,7 @@ export function useTransactionTx({
     isMultisig,
     isTip,
     direction,
-    getOwnershipAccount,
+    getOwnershipAddress,
     setTransactionTx,
     setExternalAddress,
   };

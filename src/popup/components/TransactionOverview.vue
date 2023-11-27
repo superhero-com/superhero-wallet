@@ -23,7 +23,6 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
-  IAccount,
   IAccountOverview,
   ITransaction,
   TxFunction,
@@ -66,14 +65,14 @@ export default defineComponent({
     const { getMiddleware } = useMiddleware();
 
     const name = ref('');
-    const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
+    const ownershipAccount = ref<IAccountOverview | {}>({});
 
     const {
       isDex,
       outerTxTag,
       innerTxTag,
       direction,
-      getOwnershipAccount,
+      getOwnershipAddress,
       innerTx,
     } = useTransactionTx({
       tx: props.transaction.tx,
@@ -237,7 +236,12 @@ export default defineComponent({
       if (innerTx.value.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
-      ownershipAccount.value = getOwnershipAccount(transactionOwnerAddress);
+      const ownerAddress = getOwnershipAddress(transactionOwnerAddress);
+      ownershipAccount.value = {
+        address: ownerAddress,
+        name: getName(ownerAddress as Encoded.AccountAddress).value,
+        label: t('transaction.overview.accountAddress'),
+      };
     });
 
     return {
