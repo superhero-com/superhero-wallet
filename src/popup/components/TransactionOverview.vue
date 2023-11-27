@@ -24,7 +24,6 @@ import { useStore } from 'vuex';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
-  IAccount,
   IAccountOverview,
   ITransaction,
   TxFunction,
@@ -67,7 +66,7 @@ export default defineComponent({
     const { getMiddleware } = useMiddleware();
 
     const name = ref('');
-    const ownershipAccount = ref<IAccountOverview | IAccount | {}>({});
+    const ownershipAccount = ref<IAccountOverview | {}>({});
 
     const getPreferredName = useGetter('names/getPreferred');
 
@@ -241,7 +240,10 @@ export default defineComponent({
       if (innerTx.value.function === TX_FUNCTIONS.claim) {
         transactionOwnerAddress = await decodeClaimTransactionAccount();
       }
-      ownershipAccount.value = getOwnershipAccount(transactionOwnerAddress);
+      ownershipAccount.value = {
+        ...getOwnershipAccount(transactionOwnerAddress),
+        label: t('transaction.overview.accountAddress'),
+      };
     });
 
     return {
