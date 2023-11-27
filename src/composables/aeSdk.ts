@@ -55,7 +55,6 @@ const isAeNodeError = ref(false);
 const aeppInfo: Record<string, AeppInfoData> = {};
 
 let dryAeSdk: AeSdk;
-let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk() {
   const {
@@ -182,15 +181,16 @@ export function useAeSdk() {
           instance: nodeInstance,
         }],
       });
-      dryAeSdkCurrentNodeNetworkId = await nodeInstance.getNetworkId();
+      storedNetworkName = activeNetworkName.value;
       return dryAeSdk;
     }
-    const networkId = await dryAeSdk.api.getNetworkId();
-    if (dryAeSdkCurrentNodeNetworkId !== networkId) {
-      dryAeSdk.pool.delete(storedNetworkName);
+
+    if (storedNetworkName !== activeNetworkName.value) {
       const nodeInstance = new Node(aeActiveNetworkSettings.value.nodeUrl, { ignoreVersion: true });
-      dryAeSdk.addNode(activeNetworkName.value, nodeInstance!, true);
-      dryAeSdkCurrentNodeNetworkId = networkId;
+      dryAeSdk.pool.delete(storedNetworkName);
+      // remove the new network if it exists to avoid errors
+      dryAeSdk.pool.delete(activeNetworkName.value);
+      dryAeSdk.addNode(activeNetworkName.value, nodeInstance, true);
     }
     return dryAeSdk;
   }
