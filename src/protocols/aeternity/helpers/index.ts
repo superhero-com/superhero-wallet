@@ -157,7 +157,7 @@ export function getAeFee(value: number | string) {
 }
 
 export function getTxOwnerAddress(innerTx?: ITx) {
-  return innerTx?.accountId || innerTx?.callerId;
+  return innerTx?.accountId || innerTx?.callerId || innerTx?.ownerId;
 }
 
 export function isContainingNestedTx(tx: ITx): boolean {
