@@ -391,7 +391,7 @@ export interface ITx {
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
   callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
-  code?: string;
+  code?: Encoded.ContractBytearray;
   commitmentId?: any;
   contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
   fee: number;
@@ -406,6 +406,7 @@ export interface ITx {
   nameId?: any;
   nameSalt?: string;
   nonce?: number;
+  ownerId?: Encoded.AccountAddress;
   payerId?: string;
   payload?: Encoded.Bytearray;
   pointers?: any;
