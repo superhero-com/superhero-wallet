@@ -1,41 +1,26 @@
-<template>
-  <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
-      <Connect
-        :access="[POPUP_CONNECT_ADDRESS_PERMISSION]"
-      />
-    </IonContent>
-  </IonPage>
-</template>
-
 <script lang="ts">
-import { IonContent, IonPage } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import type { IAppData } from '@/types';
 import {
   useAccounts,
   useDeepLinkApi,
   useAeSdk,
-  usePopupProps,
+  useModals,
 } from '@/composables';
-import { POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
-import Connect from './Popups/Connect.vue';
+import { handleUnknownError } from '@/utils';
+import { RejectedByUserError } from '@/lib/errors';
+import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/constants';
 
 export default defineComponent({
   name: 'Address',
-  components: {
-    Connect,
-    IonContent,
-    IonPage,
-  },
   setup() {
     const store = useStore();
 
     const { nodeNetworkId } = useAeSdk({ store });
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
     const { activeAccount } = useAccounts({ store });
-    const { setPopupProps } = usePopupProps();
+    const { openModal } = useModals();
 
     const app = computed((): IAppData => callbackOrigin.value ? {
       name: callbackOrigin.value.hostname,
@@ -43,22 +28,26 @@ export default defineComponent({
       host: callbackOrigin.value.host,
     } : {} as IAppData);
 
-    const onResolve = () => openCallbackOrGoHome(true, {
-      address: activeAccount.value.address,
-      networkId: nodeNetworkId.value!,
+    onMounted(async () => {
+      try {
+        await openModal(MODAL_CONFIRM_CONNECT, {
+          access: [POPUP_CONNECT_ADDRESS_PERMISSION],
+          app: app.value,
+        });
+        openCallbackOrGoHome(true, {
+          address: activeAccount.value.address,
+          networkId: nodeNetworkId.value!,
+        });
+      } catch (error: any) {
+        openCallbackOrGoHome(false);
+        if (error instanceof RejectedByUserError) {
+          handleUnknownError(error);
+        }
+      }
     });
-
-    const onReject = () => openCallbackOrGoHome(false);
-
-    setPopupProps({
-      app: app.value as IAppData,
-      resolve: onResolve,
-      reject: onReject,
-    });
-
-    return {
-      POPUP_CONNECT_ADDRESS_PERMISSION,
-    };
+  },
+  render() {
+    return null as any;
   },
 });
 </script>
