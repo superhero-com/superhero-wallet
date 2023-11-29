@@ -45,7 +45,7 @@ export default defineComponent({
         }
 
         const signedTransaction = await aeSdk.signTransaction(
-          transaction as Encoded.Transaction,
+          decodeURIComponent(transaction as string) as Encoded.Transaction,
           {
             networkId,
             aeppOrigin: callbackOrigin.value?.toString(),
