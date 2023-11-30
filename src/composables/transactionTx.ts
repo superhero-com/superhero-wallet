@@ -12,7 +12,7 @@ import {
   getTxTypeLabel,
   getTxTypeListLabel,
 } from '@/utils';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
@@ -50,7 +50,7 @@ export function useTransactionTx({
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
-  const { availableTokens } = useFungibleTokens();
+  const { getProtocolAvailableTokens } = useFungibleTokens();
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
@@ -92,7 +92,7 @@ export function useTransactionTx({
   const isDexAllowance = computed((): boolean => (
     !!innerTx.value
     && isTxFunctionDexAllowance(innerTx.value?.function)
-    && !!availableTokens.value[innerTx.value.contractId]
+    && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
   const isDexAddLiquidity = computed(

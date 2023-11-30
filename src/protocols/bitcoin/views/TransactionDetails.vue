@@ -16,7 +16,7 @@
             show-header
           >
             <template #tokens>
-              <TransactionTokensRows
+              <TransactionTokenRows
                 :ext-tokens="tokens"
                 :is-rounded="!!tokens"
                 :transaction="transaction"
@@ -53,12 +53,12 @@ import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
-import TransactionTokensRows from '@/popup/components/TransactionTokenRows.vue';
+import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
 
 export default defineComponent({
   components: {
     TransactionDetailsBase,
-    TransactionTokensRows,
+    TransactionTokenRows,
     IonContent,
     IonPage,
   },
