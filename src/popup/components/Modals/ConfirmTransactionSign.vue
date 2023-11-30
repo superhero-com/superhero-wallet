@@ -121,7 +121,7 @@
           v-for="key in filteredTxFields"
           :key="key"
           :label="getTxKeyLabel(key)"
-          :value="popupProps?.tx?.[key]"
+          :value="key === PAYLOAD_FIELD ? decodedPayload : popupProps?.tx?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
       </DetailsItem>
@@ -161,7 +161,7 @@ import { camelCase } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
+import { decode, Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import JsonBig from '@/lib/json-big';
@@ -220,6 +220,8 @@ import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vu
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
 type ITxKey = keyof ITx;
+
+const PAYLOAD_FIELD = 'payload';
 
 const TX_FIELDS_TO_DISPLAY: Partial<Record<ITxKey, () => string>> = {
   callData: () => tg('common.callData'),
@@ -324,9 +326,15 @@ export default defineComponent({
       symbol: getTxSymbol.value(popupProps.value?.tx),
     }));
 
+    const decodedPayload = computed(() => popupProps.value?.tx?.payload
+      ? decode(popupProps.value?.tx?.payload).toString()
+      : undefined);
+
     const filteredTxFields = computed(
       () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
-        .filter((field) => !!popupProps.value?.tx?.[field]),
+        .filter((field) => field === PAYLOAD_FIELD
+          ? !!decodedPayload.value
+          : !!popupProps.value?.tx?.[field]),
     );
 
     const swapTokenAmountData = computed((): ITokenResolved => {
@@ -521,11 +529,13 @@ export default defineComponent({
     return {
       AE_SYMBOL,
       AnimatedSpinner,
+      PAYLOAD_FIELD,
       PROTOCOL_AETERNITY,
       TX_FIELDS_TO_DISPLAY,
       cancel,
       completeTransaction,
       decodedCallData,
+      decodedPayload,
       error,
       executionCost,
       filteredTxFields,
