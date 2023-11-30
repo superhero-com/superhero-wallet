@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.0...v2.1.1) (2023-11-30)
+
+
+### Features
+
+* present more info on contract call signing ([39a341a](https://github.com/Superhero-com/superhero-wallet/commit/39a341a5524c12586bf2ab55524cc1ffde504f6c))
+
+
+### Bug Fixes
+
+* be able to see the address deeplink ([7802f2b](https://github.com/Superhero-com/superhero-wallet/commit/7802f2b3c7e3085e44661b5cd052591d95a85b78))
+* be able to sign transaction via deeplink ([79049f0](https://github.com/Superhero-com/superhero-wallet/commit/79049f0eee3b5c85414326158b0dea5c93769eb5))
+* show correct label for a transaction owner ([f85a443](https://github.com/Superhero-com/superhero-wallet/commit/f85a4431718350af298cd5570af25e970141de29))
+* show owner address correctly in create contract transaction ([ab49592](https://github.com/Superhero-com/superhero-wallet/commit/ab49592d86596bb4b518872ded3f2ddc1260c743))
+
+
+### Maintenance
+
+* show decoded payload on transaction signing ([187afe6](https://github.com/Superhero-com/superhero-wallet/commit/187afe62c75e8ca8f2b8f703a0a81196b2d2bc1e))
+
 ## [2.1.0](https://github.com/Superhero-com/superhero-wallet/compare/v2.0.2...v2.1.0) (2023-10-27)
 
 
