@@ -151,7 +151,7 @@ export default defineComponent({
       FILTER_MODE,
     } = useTransactionAndTokenFilter();
 
-    const { getTxSymbol } = useFungibleTokens();
+    const { getTxAssetSymbol } = useFungibleTokens();
 
     function filterTransactionsByDisplayMode(transactionList: ICommonTransaction[]) {
       return transactionList.filter((transaction) => {
@@ -193,7 +193,7 @@ export default defineComponent({
         (transaction) => (
           !searchPhrase.value
           || includesCaseInsensitive(
-            getTxSymbol(getTransaction(transaction)),
+            getTxAssetSymbol(getTransaction(transaction)),
             searchPhrase.value.toLocaleLowerCase(),
           )
         ),

@@ -33,62 +33,60 @@ export function useTransactionTokens({
   showDetailedAllowanceInfo = false,
 }: UseTransactionTokensOptions) {
   const innerTx = computed(() => getInnerTransaction(transaction.tx));
-  const { availableTokens, getTxAmountTotal, getTxSymbol } = useFungibleTokens();
-
-  const transactionFunction = computed(() => {
-    if (innerTx.value?.function) {
-      const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
-
-      // TODO this line needs refactoring in TransactionResolver
-      return getTransactionTokenInfoResolver(functionName);
-    }
-    return null;
-  });
+  const { getTxAmountTotal, getTxAssetSymbol, getProtocolAvailableTokens } = useFungibleTokens();
 
   const tokens = computed((): ITokenResolved[] => {
     if (!transaction) {
       return [];
     }
+
+    const { protocol = PROTOCOLS.aeternity } = transaction || {};
+
+    // AE DEX and wrapped AE (WAE)
+    // TODO move this logic to adapter and store resolved data in the transactions
     if (
-      innerTx.value
-      && transactionFunction.value
+      innerTx.value?.function
       && (!isAllowance || showDetailedAllowanceInfo)
     ) {
-      return transactionFunction.value(
-        transaction,
-        availableTokens.value,
-      ).tokens.map(({ amount, decimals, ...otherToken }) => ({
-        amount: +toShiftedBigNumber(amount!, -decimals!),
-        ...otherToken,
-      }));
+      const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
+      const functionResolver = getTransactionTokenInfoResolver(functionName);
+
+      if (functionResolver) {
+        const resolved = functionResolver(
+          transaction,
+          getProtocolAvailableTokens(PROTOCOLS.aeternity),
+        );
+        return resolved.tokens.map(({ amount, decimals, ...otherToken }) => ({
+          amount: +toShiftedBigNumber(amount!, -decimals!),
+          ...otherToken,
+        }));
+      }
     }
 
     const isReceived = direction === TX_DIRECTION.received;
-    const adapter = ProtocolAdapterFactory
-      .getAdapter(transaction.protocol ?? PROTOCOLS.aeternity);
+    const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const amount = (isAllowance)
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
+      : getTxAmountTotal(transaction, direction);
 
-    if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
+    if (protocol !== PROTOCOLS.aeternity) {
       return [{
         ...innerTx.value || {},
+        amount,
         symbol: adapter.protocolSymbol,
-        amount: getTxAmountTotal(transaction, direction),
         isReceived,
+        isAe: false,
       }];
     }
 
+    const symbol = (isAllowance) ? AE_SYMBOL : getTxAssetSymbol(transaction);
+
     return [{
       ...innerTx.value || {},
-      amount: isAllowance
-        ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
-        : getTxAmountTotal(transaction, direction),
-      symbol: isAllowance ? AE_SYMBOL : getTxSymbol(transaction),
+      amount,
+      symbol,
       isReceived,
-      isAe:
-        isAllowance
-        || (
-          getTxSymbol(transaction) === AE_SYMBOL
-          && !isTransactionAex9(transaction)
-        ),
+      isAe: isAllowance || (symbol === AE_SYMBOL && !isTransactionAex9(transaction)),
     }];
   });
 

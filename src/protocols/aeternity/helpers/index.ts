@@ -15,6 +15,7 @@ import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import BigNumber from 'bignumber.js';
 
 import type {
+  AssetContractId,
   IAccount,
   IActiveMultisigTransaction,
   ICommonTransaction,
@@ -86,7 +87,7 @@ export function calculateSupplyAmount(balance: number, totalSupply: number, rese
 export function categorizeContractCallTxObject(transaction: ITransaction): {
   amount?: string | number;
   to?: string;
-  token?: string;
+  token?: AssetContractId;
   url?: string;
   note?: string;
 } | null {
@@ -97,7 +98,7 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
     const { tx } = transaction;
     return {
       amount: tx.amount,
-      token: tx.selectedTokenContractId ?? tx.contractId,
+      token: (tx.selectedTokenContractId ?? tx.contractId) as AssetContractId,
       to: transaction.incomplete ? tx.recipientId : tx.callerId,
     };
   }
@@ -291,9 +292,12 @@ export function isAensNameValid(value: string) {
   );
 }
 
+/**
+ * Check if transaction does not refers to AE Coin.
+ */
 export function isTransactionAex9(transaction: ITransaction): boolean {
-  const token = categorizeContractCallTxObject(transaction)?.token;
-  return !!transaction.tx && !!token && token !== AE_CONTRACT_ID;
+  const contractId = categorizeContractCallTxObject(transaction)?.token;
+  return !!transaction.tx && !!contractId && contractId !== AE_CONTRACT_ID;
 }
 
 export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {

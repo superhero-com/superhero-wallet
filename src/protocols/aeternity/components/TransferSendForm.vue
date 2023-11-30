@@ -49,7 +49,7 @@
         >
           <template #value>
             <AccountItem
-              :address="multisigVaultAddress"
+              :address="(multisigVaultAddress as string)"
               :protocol="PROTOCOLS.aeternity"
             />
           </template>
@@ -162,6 +162,7 @@ import BigNumber from 'bignumber.js';
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
+  AssetContractId,
   IAsset,
   IFormSelectOption,
   TransferFormModel,
@@ -257,20 +258,20 @@ export default defineComponent({
       setActiveAccountByAddress,
     } = useAccounts();
 
-    const { availableTokens, getAccountTokenBalances } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
-    function getSelectedAssetValue(tokenContractId?: string, selectedAsset?: IAsset) {
+    function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       const aeCoin = ProtocolAdapterFactory
         .getAdapter(PROTOCOLS.aeternity)
         .getDefaultCoin(marketData.value!, +balance.value);
 
-      if (tokenContractId) {
-        if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(tokenContractId)) {
+      if (assetContractId) {
+        if (props.isMultisig && ![AE_SYMBOL, AE_CONTRACT_ID].includes(assetContractId)) {
           hasMultisigTokenWarning.value = true;
           return undefined;
         }
         hasMultisigTokenWarning.value = false;
-        return availableTokens.value[tokenContractId] || aeCoin;
+        return getProtocolAvailableTokens(PROTOCOLS.aeternity)[assetContractId] || aeCoin;
       } if (!selectedAsset) {
         return aeCoin;
       }
@@ -300,8 +301,6 @@ export default defineComponent({
     const isAe = computed(
       () => formModel.value.selectedAsset?.contractId === AE_CONTRACT_ID,
     );
-
-    const tokenBalances = computed(() => getAccountTokenBalances());
 
     const isTipUrl = computed(() => (
       !!formModel.value.address
@@ -437,7 +436,7 @@ export default defineComponent({
       activeAccount,
       editPayload,
       clearPayload,
-      openScanQrModal: () => openScanQrModal(tokenBalances.value),
+      openScanQrModal,
       handleAssetChange,
       selectAccount,
       setMaxValue,
