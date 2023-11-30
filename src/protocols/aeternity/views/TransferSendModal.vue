@@ -29,11 +29,13 @@ import {
   Component,
   computed,
   defineComponent,
+  PropType,
   ref,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type {
+  AssetContractId,
   TransferFormModel,
   TransferSendStep,
   TransferSendStepConfigRegistry,
@@ -59,13 +61,13 @@ export default defineComponent({
   },
   props: {
     ...transferSendModalRequiredProps,
-    tokenContractId: { type: String, default: null },
+    tokenContractId: { type: String as PropType<AssetContractId>, default: null },
     isMultisig: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
     const { isAeNodeReady } = useAeSdk();
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const currentRenderedComponent = ref<Component>();
     const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
@@ -75,7 +77,7 @@ export default defineComponent({
       amount: props.amount,
       payload: props.payload,
       selectedAsset: (props.tokenContractId)
-        ? availableTokens.value[props.tokenContractId]
+        ? getProtocolAvailableTokens(PROTOCOLS.aeternity)[props.tokenContractId]
         : undefined,
     });
 

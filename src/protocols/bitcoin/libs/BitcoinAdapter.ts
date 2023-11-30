@@ -13,6 +13,7 @@ import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 
 import type {
   AdapterNetworkSettingList,
+  AssetContractId,
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
@@ -20,8 +21,6 @@ import type {
   MarketData,
   NetworkTypeDefault,
   IFetchTransactionResult,
-  Protocol,
-  IToken,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
@@ -50,7 +49,7 @@ import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetwor
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOLS.bitcoin as Protocol;
+  override protocol = PROTOCOLS.bitcoin;
 
   override protocolName = 'Bitcoin';
 
@@ -104,7 +103,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_COINGECKO_COIN_ID;
   }
 
-  override getDefaultAssetContractId() {
+  override getCoinContractId(): AssetContractId {
     return BTC_CONTRACT_ID;
   }
 
@@ -115,9 +114,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return {
       ...(marketData?.[PROTOCOLS.bitcoin] || {}),
       protocol: PROTOCOLS.bitcoin,
-      contractId: BTC_CONTRACT_ID,
-      symbol: BTC_SYMBOL,
-      decimals: BTC_COIN_PRECISION,
+      contractId: this.getCoinContractId(),
+      symbol: this.coinSymbol,
+      decimals: this.getAmountPrecision(),
       name: BTC_COIN_NAME,
       convertedBalance,
     };
@@ -194,8 +193,12 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     );
   }
 
-  override async fetchAvailableTokens(): Promise<IToken[]> {
-    return []; // Bitcoin holds only the BTC Coin
+  override async fetchAvailableTokens() {
+    return []; // Bitcoin protocol has no fungible tokens
+  }
+
+  override async fetchAccountTokenBalances() {
+    return []; // Bitcoin protocol has no fungible tokens
   }
 
   override async fetchPendingTransactions() {
@@ -224,7 +227,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
   }
 
   /**
-   * @param hash it is not actually a hash it's an id
+   * @param hash - transaction id
    */
   override async fetchTransactionByHash(hash: string): Promise<ITransaction> {
     const { activeNetwork } = useNetworks();

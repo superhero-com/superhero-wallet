@@ -1,15 +1,20 @@
+/* eslint-disable no-param-reassign */
+
 import { watch } from 'vue';
-import camelCaseKeysDeep from 'camelcase-keys-deep';
 import BigNumber from 'bignumber.js';
 import { Contract, Encoded, Encoding } from '@aeternity/aepp-sdk';
-import { fetchAllPages, handleUnknownError, toShiftedBigNumber } from '@/utils';
+import { toShiftedBigNumber } from '@/utils';
 import type {
+  AccountAddress,
+  AssetContractId,
+  AssetList,
   BigNumberPublic,
   IToken,
-  ITokenBalanceResponse,
-  ITokenList,
+  ITokenBalance,
   ITransaction,
+  ProtocolRecord,
   TokenPair,
+  Protocol,
 } from '@/types';
 import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
@@ -22,7 +27,6 @@ import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
-import { useMiddleware } from './middleware';
 import { useTippingContracts } from './tippingContracts';
 import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
@@ -31,40 +35,55 @@ import { useStorageRef } from './storageRef';
 type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;
 
 /**
- * List of all custom tokens available (currently only AE network).
+ * List of all fungible tokens available on user's protocols.
  * As this list is quite big (hundreds of items) it requires processing optimizations.
  */
-const availableTokens = useStorageRef<ITokenList>(
+const tokensAvailable = useStorageRef<ProtocolRecord<AssetList>>(
   {},
   STORAGE_KEYS.fungibleTokenList,
 );
 
 /**
- * List of tokens (assets) owned by active account with the balance value
+ * List of user account's token asset balances.
  */
-const tokenBalances = useStorageRef<Record<string, IToken[]>>(
-  {},
+const tokenBalances = useStorageRef<ITokenBalance[]>(
+  [],
   STORAGE_KEYS.fungibleTokenBalances,
 );
+
+function getProtocolAvailableTokens(protocol: Protocol): AssetList {
+  return tokensAvailable.value[protocol] || {} as AssetList;
+}
 
 const { onNetworkChange } = createNetworkWatcher();
 const availableTokensPooling = createPollingBasedOnMountedComponents(60000);
 const tokenBalancesPooling = createPollingBasedOnMountedComponents(10000);
 
+let areTokenBalancesUpdating = false;
+
+/**
+ * Store and provide the access to all protocol's fungible tokens.
+ */
 export function useFungibleTokens() {
   const { getAeSdk } = useAeSdk();
-  const { fetchFromMiddleware } = useMiddleware();
   const { tippingContractAddresses } = useTippingContracts();
   const {
-    isLoggedIn,
+    accounts,
     aeAccounts,
     protocolsInUse,
     getLastActiveProtocolAccount,
   } = useAccounts();
 
-  function getAccountTokenBalances(address?: string): IToken[] {
-    const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-    return tokenBalances.value[address || account?.address!] || [];
+  function getAccountTokenBalances(address: AccountAddress): ITokenBalance[] {
+    return tokenBalances.value.filter((token) => token.address === address) || [];
+  }
+
+  function getAccountTokenBalance(
+    address: AccountAddress,
+    contractId: string,
+  ): ITokenBalance | undefined {
+    return getAccountTokenBalances(address)
+      .find((tokenBalance) => tokenBalance.contractId === contractId);
   }
 
   async function loadAvailableTokens() {
@@ -74,60 +93,41 @@ export function useFungibleTokens() {
     const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).flat();
 
     if (!tokens.length) {
-      availableTokens.value = {};
+      tokensAvailable.value = {};
     }
 
-    availableTokens.value = tokens.reduce((accumulator, token) => {
-      // eslint-disable-next-line no-param-reassign
-      accumulator[token.contractId] = token;
+    tokensAvailable.value = tokens.reduce((accumulator, token) => {
+      const { contractId, protocol } = token;
+      if (!accumulator[protocol]) {
+        accumulator[protocol] = {} as AssetList;
+      }
+      accumulator[protocol]![contractId] = token;
       return accumulator;
-    }, {} as ITokenList);
+    }, {} as typeof tokensAvailable.value);
   }
 
   async function loadTokenBalances() {
-    if (!isLoggedIn.value) {
+    if (areTokenBalancesUpdating) {
       return;
     }
-    const addresses = aeAccounts.value.map((account) => account.address);
 
-    await Promise.all(addresses.map(async (address) => {
-      try {
-        const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
-          () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
-          fetchFromMiddleware,
-        ));
-        if (!tokens.length) {
-          return;
-        }
-
-        tokenBalances.value[address] = tokens
-          .filter(({ contractId }) => availableTokens.value[contractId])
-          .map(({ amount, contractId }): IToken => {
-            const availableToken = availableTokens.value[contractId];
-            const balance = toShiftedBigNumber(amount!, -availableToken.decimals);
-            const convertedBalance = Number(balance.toFixed(2));
-
-            return {
-              ...availableToken, // TODO store the balance and amount separately from asset data
-              amount,
-              convertedBalance,
-            };
-          });
-      } catch (error) {
-        handleUnknownError(error);
-      }
-    }));
+    areTokenBalancesUpdating = true;
+    const tokenBalancesFetchPromises = accounts.value.map(
+      ({ address, protocol }) => ProtocolAdapterFactory.getAdapter(protocol)
+        .fetchAccountTokenBalances(address),
+    );
+    tokenBalances.value = (await Promise.all(tokenBalancesFetchPromises)).flat();
+    areTokenBalancesUpdating = false;
   }
 
-  async function createOrChangeAllowance(contractId: string, amount: number | string) {
+  async function createOrChangeAllowance(contractId: AssetContractId, amount: number | string) {
     const aeSdk = await getAeSdk();
     const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-    const selectedToken = tokenBalances.value?.[account?.address!]
-      ?.find((token) => token?.contractId === contractId);
+    const tokenData = getProtocolAvailableTokens(PROTOCOLS.aeternity)[contractId];
 
     const tokenContract = await aeSdk.initializeContract({
       aci: FungibleTokenFullInterfaceACI,
-      address: selectedToken?.contractId as any,
+      address: contractId as any,
     });
 
     const { decodedResult } = await tokenContract.allowance({
@@ -138,10 +138,9 @@ export function useFungibleTokens() {
     const allowanceAmount = (decodedResult !== undefined)
       ? new BigNumber(decodedResult)
         .multipliedBy(-1)
-        .plus(toShiftedBigNumber(amount, selectedToken?.decimals!))
+        .plus(toShiftedBigNumber(amount, tokenData?.decimals!))
         .toNumber()
-      : toShiftedBigNumber(amount, selectedToken?.decimals!)
-        .toNumber();
+      : toShiftedBigNumber(amount, tokenData?.decimals!).toNumber();
 
     const getContractFunction = (tokenContract.methods as any)[
       decodedResult !== undefined ? 'change_allowance' : 'create_allowance'
@@ -166,6 +165,8 @@ export function useFungibleTokens() {
         aci: AedexV2PairACI,
         address,
       });
+      const protocolTokens: AssetList = tokensAvailable.value?.[PROTOCOLS.aeternity]
+        || {} as AssetList;
 
       const [
         { decodedResult: balances },
@@ -184,22 +185,26 @@ export function useFungibleTokens() {
       ]);
 
       return {
-        token0: {
-          ...availableTokens.value?.[token0],
-          amount: calculateSupplyAmount(
-            balance,
-            totalSupply,
-            reserves.reserve0,
-          ),
-        },
-        token1: {
-          ...availableTokens.value?.[token1],
-          amount: calculateSupplyAmount(
-            balance,
-            totalSupply,
-            reserves.reserve1,
-          ),
-        },
+        token0: (protocolTokens[token0])
+          ? {
+            ...protocolTokens[token0],
+            amount: calculateSupplyAmount(
+              balance,
+              totalSupply,
+              reserves.reserve0,
+            )!,
+          }
+          : undefined,
+        token1: (protocolTokens[token1])
+          ? {
+            ...protocolTokens[token1],
+            amount: calculateSupplyAmount(
+              balance,
+              totalSupply,
+              reserves.reserve1,
+            )!,
+          }
+          : undefined,
         totalSupply,
         balance,
         balances,
@@ -243,12 +248,19 @@ export function useFungibleTokens() {
     );
   }
 
-  function getTxSymbol(transaction?: ITransaction) {
-    const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
-    const assetContractId = (contractCallData)
-      ? contractCallData.token
-      : transaction?.tx?.contractId;
-    return availableTokens.value[assetContractId!]?.symbol || AE_SYMBOL;
+  function getTxAssetSymbol(transaction?: ITransaction) {
+    const { protocol = PROTOCOLS.aeternity } = transaction || {};
+
+    if (protocol === PROTOCOLS.aeternity) {
+      const protocolTokens = getProtocolAvailableTokens(protocol);
+      const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
+      const assetContractId = (contractCallData)
+        ? contractCallData.token
+        : transaction?.tx?.contractId;
+      return protocolTokens[assetContractId!]?.symbol || AE_SYMBOL;
+    }
+
+    return ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol;
   }
 
   function getTxAmountTotal(
@@ -256,29 +268,30 @@ export function useFungibleTokens() {
     direction: string = TX_DIRECTION.sent,
   ) {
     const isReceived = direction === TX_DIRECTION.received;
+    const { protocol, tx } = transaction || {};
 
     // This is out of place but since we are treating new protocols as fungible tokens
     // it is better to have it here than in the protocol specific helper file
-    if (transaction.protocol && transaction.protocol !== PROTOCOLS.aeternity) {
-      return new BigNumber(
-        transaction.tx?.amount || 0,
-      )
-        .plus(isReceived ? 0 : transaction.tx?.fee || 0)
+    if (protocol && protocol !== PROTOCOLS.aeternity) {
+      return new BigNumber(tx?.amount || 0)
+        .plus(isReceived ? 0 : tx?.fee || 0)
         .toNumber();
     }
 
-    const contractCallData = transaction.tx && categorizeContractCallTxObject(transaction);
-    if (contractCallData && availableTokens.value[contractCallData.token!]) {
+    const contractCallData = transaction && tx && categorizeContractCallTxObject(transaction);
+
+    const tokenData = protocol && getProtocolAvailableTokens(protocol)[contractCallData?.token!];
+    if (contractCallData && tokenData) {
       return +toShiftedBigNumber(
         contractCallData.amount || 0,
-        -availableTokens.value[contractCallData.token!].decimals,
+        -tokenData.decimals,
       );
     }
 
     const rawAmount = (
-      transaction.tx?.amount
-      || (transaction.tx?.tx?.tx as any)?.amount
-      || transaction.tx?.nameFee
+      tx?.amount
+      || (tx?.tx?.tx as any)?.amount
+      || tx?.nameFee
       || 0
     );
 
@@ -287,8 +300,8 @@ export function useFungibleTokens() {
       : new BigNumber(Number(rawAmount));
 
     return +aettosToAe(amount
-      .plus(isReceived ? 0 : transaction.tx?.fee || 0)
-      .plus(isReceived ? 0 : transaction.tx?.tx?.tx?.fee || 0));
+      .plus(isReceived ? 0 : tx?.fee || 0)
+      .plus(isReceived ? 0 : tx?.tx?.tx?.fee || 0));
   }
 
   onNetworkChange(async (network, oldNetwork) => {
@@ -301,7 +314,7 @@ export function useFungibleTokens() {
   });
 
   watch(aeAccounts, (val, oldVal) => {
-    if (val !== oldVal) {
+    if (val.length !== oldVal.length) {
       loadTokenBalances();
     }
   });
@@ -310,13 +323,15 @@ export function useFungibleTokens() {
   tokenBalancesPooling(() => loadTokenBalances());
 
   return {
-    availableTokens,
     tokenBalances,
+    tokensAvailable,
     burnTriggerPoS,
     createOrChangeAllowance,
+    getAccountTokenBalance,
     getAccountTokenBalances,
+    getProtocolAvailableTokens,
     getContractTokenPairs,
-    getTxSymbol,
+    getTxAssetSymbol,
     getTxAmountTotal,
     transferToken,
     loadTokenBalances,

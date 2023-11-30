@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import {
-  ITokenList,
+  AssetList,
   ITokenResolved,
   ITransaction,
   TxFunctionParsed,
@@ -16,7 +16,7 @@ interface TransactionResolverReturnData {
 
 type TransactionResolver = (
   transaction: ITransaction,
-  tokens: ITokenList | null
+  tokens?: AssetList | null
 ) => TransactionResolverReturnData;
 
 type TransactionResolverGenerator = (

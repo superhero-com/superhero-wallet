@@ -2,13 +2,13 @@ import { mount } from '@vue/test-utils';
 import { i18n, tg } from '@/popup/plugins/i18n';
 import { useFungibleTokens } from '@/composables';
 import TransactionTagList from '../../src/popup/components/TransactionTagList.vue';
-
 import {
   STUB_TOKEN_CONTRACT_ADDRESS,
   STUB_TRANSACTIONS,
 } from '../../src/constants/stubs';
 import {
   AENS,
+  PROTOCOLS,
 } from '../../src/constants';
 
 const transactionLabels = {
@@ -108,8 +108,9 @@ describe('TransactionTagList', () => {
         global: { plugins: [i18n] },
         props,
       });
-      const { availableTokens } = useFungibleTokens();
-      availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {};
+      const { tokensAvailable } = useFungibleTokens();
+      tokensAvailable.value[PROTOCOLS.aeternity] = {};
+      tokensAvailable.value[PROTOCOLS.aeternity][STUB_TOKEN_CONTRACT_ADDRESS] = {};
 
       wrapper.findAll('.transaction-tag').forEach((el, index) => {
         expect(el.text()).toEqual(labels[index] || '');

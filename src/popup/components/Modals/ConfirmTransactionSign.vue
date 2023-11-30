@@ -94,7 +94,7 @@
         >
           <TokenAmount
             :amount="executionCost || totalAmount"
-            :symbol="getTxSymbol(popupProps?.tx)"
+            :symbol="getTxAssetSymbol(popupProps?.tx)"
             :hide-fiat="isTransactionAex9(transactionWrapped)"
             :protocol="PROTOCOLS.aeternity"
             data-cy="total"
@@ -253,7 +253,7 @@ export default defineComponent({
     const { getAeSdk } = useAeSdk();
     const { getLastActiveProtocolAccount } = useAccounts();
     const { popupProps, setPopupProps } = usePopupProps();
-    const { availableTokens, getTxSymbol, getTxAmountTotal } = useFungibleTokens();
+    const { getProtocolAvailableTokens, getTxAssetSymbol, getTxAmountTotal } = useFungibleTokens();
 
     const {
       direction,
@@ -315,7 +315,7 @@ export default defineComponent({
     const singleToken = computed((): ITokenResolved => ({
       isReceived: direction.value === TX_DIRECTION.received,
       amount: totalAmount.value,
-      symbol: getTxSymbol(popupProps.value?.tx as any),
+      symbol: getTxAssetSymbol(popupProps.value?.tx as any),
     }));
 
     const decodedPayload = computed(() => popupProps.value?.tx?.payload
@@ -366,7 +366,7 @@ export default defineComponent({
       }
       const tokens = resolver(
         { tx: { ...txParams, ...popupProps.value?.tx } } as ITransaction,
-        availableTokens.value,
+        getProtocolAvailableTokens(PROTOCOLS.aeternity),
       )?.tokens;
       if (!isPool.value) {
         return tokens;
@@ -531,7 +531,7 @@ export default defineComponent({
       filteredTxFields,
       getLabels,
       getTxKeyLabel,
-      getTxSymbol,
+      getTxAssetSymbol,
       isAeppChatSuperhero,
       isDex,
       isDexAllowance,

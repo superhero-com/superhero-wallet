@@ -7,7 +7,7 @@
     "
     :account-address="activeAccountAddress"
     :account-name="activeAccountName"
-    :tokens="availableTokens"
+    :tokens="tokens"
     :disable-asset-selection="isMultisig"
     :protocol="PROTOCOLS.aeternity"
   />
@@ -20,9 +20,9 @@ import {
   PROTOCOL_VIEW_TRANSFER_RECEIVE,
 } from '@/constants';
 import { useAccounts, useFungibleTokens, useMultisigAccounts } from '@/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import TransferReceiveBase from '@/popup/components/Modals/TransferReceiveBase.vue';
-import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 export default defineComponent({
   name: PROTOCOL_VIEW_TRANSFER_RECEIVE,
@@ -36,7 +36,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount } = useAccounts();
     const { getName } = useAeNames();
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const activeAccountAddress = computed(() => props.isMultisig
       ? activeMultisigAccountId.value
@@ -44,9 +44,11 @@ export default defineComponent({
 
     const activeAccountName = props.isMultisig ? undefined : getName(activeAccount.value.address);
 
+    const tokens = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
+
     return {
       PROTOCOLS,
-      availableTokens,
+      tokens,
       activeAccountAddress,
       activeAccountName,
     };

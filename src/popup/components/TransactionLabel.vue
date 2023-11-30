@@ -78,7 +78,7 @@ import { Tag } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 
 import type { ITransaction } from '@/types';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { getDefaultAccountLabel } from '@/utils';
 import { useAccounts, useFungibleTokens, useTransactionTx } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -128,7 +128,7 @@ export default defineComponent({
       externalAddress: props.transaction.transactionOwner,
     });
 
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const label = computed((): {
       text: string;
@@ -167,7 +167,7 @@ export default defineComponent({
         text = t('transaction.listType.tipSent');
       } else if (
         outerTxTag.value === Tag.ContractCallTx
-        && availableTokens.value[innerTx.value.contractId]
+        && getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
         && (
           innerTx.value.function === TX_FUNCTIONS.transfer
           || props.transaction.incomplete
