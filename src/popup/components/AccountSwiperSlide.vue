@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import { RouteLocation } from 'vue-router';
+import { RouteLocationNamedRaw } from 'vue-router';
 
 import { getAddressColor } from '@/utils';
 
@@ -48,7 +48,7 @@ export default defineComponent({
   props: {
     idx: { type: Number, default: -1 },
     address: { type: String, default: '' },
-    to: { type: Object as PropType<RouteLocation>, default: null },
+    to: { type: Object as PropType<RouteLocationNamedRaw>, default: null },
     active: Boolean,
     hideNext: Boolean,
   },

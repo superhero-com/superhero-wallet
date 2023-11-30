@@ -1,6 +1,6 @@
 <template>
   <div class="tokens-list">
-    <TokensListItem
+    <AssetListItem
       v-for="token in accountAssetsFiltered"
       :key="token.contractId"
       :token-data="token"
@@ -12,11 +12,11 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useAccountAssetsList } from '@/composables';
-import TokensListItem from './TokensListItem.vue';
+import AssetListItem from './AssetListItem.vue';
 
 export default defineComponent({
   components: {
-    TokensListItem,
+    AssetListItem,
   },
   props: {
     searchTerm: { type: String, default: '' },

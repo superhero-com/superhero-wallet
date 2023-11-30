@@ -121,9 +121,9 @@ import {
   useAccounts,
   useAccountAssetsList,
   useAeSdk,
+  useAssetDetails,
   useCurrencies,
   useFungibleTokens,
-  useTokenProps,
   useUi,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -145,7 +145,7 @@ import BuyIcon from '../../../icons/credit-card.svg?vue-component';
 import FaucetIcon from '../../../icons/faucet.svg?vue-component';
 
 export default defineComponent({
-  name: 'TokenContainer',
+  name: 'AssetDetails',
   components: {
     TransactionAndTokenFilter,
     TokenAmount,
@@ -162,7 +162,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setTokenProps } = useTokenProps();
+    const { setTokenProps } = useAssetDetails();
     const { setLoaderVisible } = useUi();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
@@ -210,7 +210,7 @@ export default defineComponent({
     const stickyTabsWrapperEl = ref<HTMLDivElement>();
 
     const fungibleToken = computed(
-      () => getProtocolAvailableTokens(PROTOCOLS.aeternity)[contractId],
+      () => getProtocolAvailableTokens(activeAccount.value.protocol)[contractId],
     );
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
@@ -222,9 +222,9 @@ export default defineComponent({
     );
 
     const assetData = computed((): IToken | undefined => {
-      if (isAe) {
+      if (isCoin) {
         return ProtocolAdapterFactory
-          .getAdapter(PROTOCOLS.aeternity)
+          .getAdapter(activeAccount.value.protocol)
           .getDefaultCoin(marketData.value!);
       }
       return fungibleToken.value;
@@ -236,7 +236,7 @@ export default defineComponent({
       return result.filter(excludeFalsy);
     });
 
-    const assetBalance = computed((): number => (isAe)
+    const assetBalance = computed((): number => (isCoin)
       ? protocolCoinBalance.value.toNumber()
       : getAccountTokenBalance(activeAccount.value.address, contractId)?.convertedBalance || 0);
 
@@ -298,6 +298,7 @@ export default defineComponent({
       SwapIcon,
 
       assetBalance,
+      assetData,
       contractId,
       stickyTabsWrapperEl,
       fungibleToken,

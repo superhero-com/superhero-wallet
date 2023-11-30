@@ -12,8 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
-import type { TranslateResult } from 'vue-i18n';
+import { defineComponent } from 'vue';
 import InputSearch from './InputSearch.vue';
 
 const SHOW_SEARCH_THRESHOLD = 3;
@@ -24,7 +23,7 @@ export default defineComponent({
     value: { type: String, default: '' },
     title: { type: String, default: '' },
     optionsLength: { type: Number, default: 0 },
-    searchPlaceholder: { type: String as PropType<String | TranslateResult>, default: '' },
+    searchPlaceholder: { type: String, default: '' },
   },
   setup(props, { emit }) {
     function filterOptions(searchPhrase: string) {
