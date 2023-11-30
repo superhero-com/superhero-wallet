@@ -41,6 +41,7 @@ export default defineComponent({
   props: {
     customTitle: { type: String, default: null },
     transaction: { type: Object as PropType<ITransaction>, default: null },
+    additionalTag: { type: String, default: null },
     dense: Boolean,
   },
   setup(props) {
@@ -83,6 +84,10 @@ export default defineComponent({
       const { tippingV1, tippingV2 } = tippingContractAddresses.value;
 
       const arr: string[] = [];
+
+      if (props.additionalTag) {
+        arr.push(props.additionalTag);
+      }
 
       if (outerTxTag.value === Tag.GaMetaTx) {
         arr.push(t('transaction.type.gaMetaTx'));

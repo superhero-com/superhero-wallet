@@ -297,6 +297,7 @@ export const APP_LINK_IOS = 'https://apps.apple.com/us/app/superhero-wallet/id15
 
 export const BUG_REPORT_URL = 'https://spgrrc00ymg.typeform.com/to/Kk3Zyjdr';
 export const AGGREGATOR_URL = 'https://superhero.com/';
+export const SUPERHERO_CHAT_URL = 'https://chat.superhero.com';
 export const CONTACT_EMAIL = 'superherowallet@protonmail.com';
 
 export const MODAL_ACCOUNT_CREATE = 'account-create';

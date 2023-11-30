@@ -50,3 +50,8 @@ export interface AeTippingContractAddresses {
   tippingV1?: Encoded.ContractAddress;
   tippingV2?: Encoded.ContractAddress;
 }
+
+export interface AeDecodedCallData {
+  functionName: string;
+  args: string[];
+}

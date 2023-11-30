@@ -13,13 +13,34 @@
     <template v-else>
       <TransactionOverview
         :transaction="completeTransaction"
+        :additional-tag="isAeppChatSuperhero
+          ? $t('modals.confirmTransactionSign.superheroChat')
+          : null"
       />
+      <div
+        v-if="isAeppChatSuperhero || error"
+        class="subtitle"
+        :class="{ warning: !!error }"
+      >
+        <template v-if="!!error">
+          {{ $t('modals.confirmTransactionSign.unableToExecute') }}
+        </template>
+        <template v-else>
+          <span class="app-name">{{ $t('modals.confirmTransactionSign.superheroChat') }}</span>
+          {{ $t('modals.confirmTransactionSign.confirmSigning') }}
+        </template>
+      </div>
       <DetailsItem
         v-if="!!error"
         :label="$t('pages.transactionDetails.reason')"
         :value="error"
         class="reason"
         data-cy="reason"
+      />
+      <DetailsItem
+        v-if="decodedCallData?.functionName"
+        :label="$t('modals.confirmTransactionSign.functionName')"
+        :value="decodedCallData.functionName"
       />
 
       <template v-if="(isDex || isDexAllowance) && tokenList.length">
@@ -87,10 +108,20 @@
         :label="$t('transaction.advancedDetails')"
       >
         <DetailsItem
+          v-if="decodedCallData?.functionName"
+          :label="$t('modals.confirmTransactionSign.functionName')"
+          :value="decodedCallData.functionName"
+        />
+        <DetailsItem
+          v-if="transactionArguments"
+          :label="$t('modals.confirmTransactionSign.arguments')"
+          :value="transactionArguments"
+        />
+        <DetailsItem
           v-for="key in filteredTxFields"
           :key="key"
           :label="getTxKeyLabel(key)"
-          :value="popupProps?.tx?.[key]"
+          :value="key === PAYLOAD_FIELD ? decodedPayload : popupProps?.tx?.[key]"
           :class="{ 'hash-field': isHash(key) }"
         />
       </DetailsItem>
@@ -130,9 +161,10 @@ import { camelCase } from 'lodash-es';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
+import { decode, Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
+import JsonBig from '@/lib/json-big';
 import type {
   ITokenResolved,
   ITransaction,
@@ -142,8 +174,10 @@ import type {
   TxFunctionRaw,
 } from '@/types';
 import { tg } from '@/store/plugins/languages';
+import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { RejectedByUserError } from '@/lib/errors';
 import {
+  SUPERHERO_CHAT_URL,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -186,6 +220,8 @@ import TransactionDetailsPoolTokenRow from '../TransactionDetailsPoolTokenRow.vu
 import AnimatedSpinner from '../../../icons/animated-spinner.svg?skip-optimize';
 
 type ITxKey = keyof ITx;
+
+const PAYLOAD_FIELD = 'payload';
 
 const TX_FIELDS_TO_DISPLAY: Partial<Record<ITxKey, () => string>> = {
   callData: () => tg('common.callData'),
@@ -241,10 +277,15 @@ export default defineComponent({
     const loading = ref(false);
     const error = ref('');
     const verifying = ref(false);
+    const decodedCallData = ref<AeDecodedCallData | undefined>();
 
     const availableTokens = useState('fungibleTokens', 'availableTokens');
     const getTxSymbol = useGetter('getTxSymbol');
     const getTxAmountTotal = useGetter('getTxAmountTotal');
+
+    const isAeppChatSuperhero = computed(
+      () => `${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}` === SUPERHERO_CHAT_URL,
+    );
 
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as ITx }),
@@ -285,9 +326,15 @@ export default defineComponent({
       symbol: getTxSymbol.value(popupProps.value?.tx),
     }));
 
+    const decodedPayload = computed(() => popupProps.value?.tx?.payload
+      ? decode(popupProps.value?.tx?.payload).toString()
+      : undefined);
+
     const filteredTxFields = computed(
       () => (Object.keys(TX_FIELDS_TO_DISPLAY) as ITxKey[])
-        .filter((field) => !!popupProps.value?.tx?.[field]),
+        .filter((field) => field === PAYLOAD_FIELD
+          ? !!decodedPayload.value
+          : !!popupProps.value?.tx?.[field]),
     );
 
     const swapTokenAmountData = computed((): ITokenResolved => {
@@ -311,6 +358,10 @@ export default defineComponent({
     const isProvideLiquidity = computed(
       () => txFunction.value && DEX_TRANSACTION_TAGS[txFunction.value] === DEX_PROVIDE_LIQUIDITY,
     );
+
+    const transactionArguments = computed(() => decodedCallData.value?.args?.length
+      ? JsonBig.stringify(decodedCallData.value.args)
+      : undefined);
 
     function getTokens(txParams: ITx): ITokenResolved[] {
       if (!isDex.value && !isDexAllowance.value) {
@@ -404,7 +455,7 @@ export default defineComponent({
       }
     }
 
-    async function loadAdditionalDexInfo() {
+    async function loadAdditionalContractCallInfo() {
       if (popupProps.value?.tx?.contractId && popupProps.value.tx.callData) {
         try {
           loading.value = true;
@@ -420,13 +471,15 @@ export default defineComponent({
 
           const bytecodeContractCallEncoder = new BytecodeContractCallEncoder(bytecode);
 
-          const rawTxParams = bytecodeContractCallEncoder.decodeCall(
+          decodedCallData.value = bytecodeContractCallEncoder.decodeCall(
             popupProps.value.tx.callData,
-          ) as any;
+          ) as AeDecodedCallData;
+
+          if (!decodedCallData.value) return;
 
           const txParams = {
-            function: rawTxParams.functionName as TxFunctionRaw,
-            arguments: rawTxParams.args.map((arg: any) => ({
+            function: decodedCallData.value.functionName as TxFunctionRaw,
+            arguments: decodedCallData.value.args.map((arg: any) => ({
               type: Array.isArray(arg) ? 'list' : 'any',
               value: Array.isArray(arg) ? arg.map((element) => ({ value: element })) : arg,
             })) as TxArguments[],
@@ -462,7 +515,7 @@ export default defineComponent({
       if (popupProps.value) {
         await Promise.all([
           verifyTransaction(),
-          loadAdditionalDexInfo(),
+          loadAdditionalContractCallInfo(),
         ]);
       } else {
         error.value = t('modals.transaction-failed.msg');
@@ -474,37 +527,42 @@ export default defineComponent({
     });
 
     return {
-      AnimatedSpinner,
       AE_SYMBOL,
+      AnimatedSpinner,
+      PAYLOAD_FIELD,
       PROTOCOL_AETERNITY,
       TX_FIELDS_TO_DISPLAY,
+      cancel,
+      completeTransaction,
+      decodedCallData,
+      decodedPayload,
       error,
       executionCost,
-      verifying,
-      loading,
-      showAdvanced,
-      transactionWrapped,
-      popupProps,
       filteredTxFields,
-      completeTransaction,
-      tokenList,
-      tokenAmount,
-      tokenSymbol,
-      totalAmount,
-      swapDirection,
-      swapDirectionTranslation,
-      isSwap,
+      getLabels,
+      getTxKeyLabel,
+      getTxSymbol,
+      isAeppChatSuperhero,
       isDex,
       isDexAllowance,
       isHash,
+      isSwap,
       isTransactionAex9,
-      swapTokenAmountData,
-      getTxSymbol,
-      txAeFee,
+      loading,
       nameAeFee,
-      getLabels,
-      cancel,
-      getTxKeyLabel,
+      popupProps,
+      showAdvanced,
+      swapDirection,
+      swapDirectionTranslation,
+      swapTokenAmountData,
+      tokenAmount,
+      tokenList,
+      tokenSymbol,
+      totalAmount,
+      transactionArguments,
+      transactionWrapped,
+      txAeFee,
+      verifying,
     };
   },
 });
@@ -521,6 +579,19 @@ export default defineComponent({
     margin: 0 auto;
     width: 56px;
     height: 56px;
+  }
+
+  .subtitle {
+    margin: 8px 0;
+    color: variables.$color-grey-light;
+
+    &.warning {
+      color: variables.$color-warning;
+    }
+
+    .app-name {
+      color: variables.$color-white;
+    }
   }
 
   .transaction-overview {
