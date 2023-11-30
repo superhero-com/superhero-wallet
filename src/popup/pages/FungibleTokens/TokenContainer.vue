@@ -16,7 +16,7 @@
               fiat-below
               large
               :protocol="PROTOCOLS.aeternity"
-              :amount="convertedBalance"
+              :amount="assetBalance"
               :hide-fiat="!isAe"
             />
           </div>
@@ -24,11 +24,11 @@
           <div class="token-actions">
             <OpenTransferReceiveModalButton
               :is-multisig="isMultisig"
-              :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+              :token-contract-id="fungibleToken?.contractId"
             />
             <OpenTransferSendModalButton
               :is-multisig="isMultisig"
-              :token-contract-id="fungibleToken ? fungibleToken.contractId : null"
+              :token-contract-id="fungibleToken?.contractId"
             />
             <BtnBox
               v-if="isAe && isNodeMainnet && UNFINISHED_FEATURES"
@@ -108,6 +108,7 @@ import {
   UNFINISHED_FEATURES,
   IS_FIREFOX,
 } from '@/constants';
+import { excludeFalsy } from '@/utils';
 import {
   ROUTE_COIN,
   ROUTE_COIN_DETAILS,
@@ -118,17 +119,17 @@ import {
 } from '@/popup/router/routeNames';
 import {
   useAccounts,
+  useAccountAssetsList,
   useAeSdk,
   useCurrencies,
   useFungibleTokens,
-  useTokensList,
   useTokenProps,
   useUi,
 } from '@/composables';
-import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
-import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
+import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -168,14 +169,14 @@ export default defineComponent({
 
     const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
     const { activeAccount } = useAccounts();
-    const { aeTokenBalance } = useTokensList({
+    const { protocolCoinBalance } = useAccountAssetsList({
       isMultisig: isMultisig.value,
     });
     const { marketData } = useCurrencies();
     const {
+      getAccountTokenBalance,
       getContractTokenPairs,
-      availableTokens,
-      getAccountTokenBalances,
+      getProtocolAvailableTokens,
     } = useFungibleTokens();
 
     const isCoin: boolean = !!route.matched.find(
@@ -208,7 +209,9 @@ export default defineComponent({
     const tokenPairs = ref<Partial<TokenPair>>({ token0: null, token1: null });
     const stickyTabsWrapperEl = ref<HTMLDivElement>();
 
-    const fungibleToken = computed(() => availableTokens.value[contractId]);
+    const fungibleToken = computed(
+      () => getProtocolAvailableTokens(PROTOCOLS.aeternity)[contractId],
+    );
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
     const activeAccountFaucetUrl = computed(
@@ -218,23 +221,24 @@ export default defineComponent({
       () => (isAe) ? buildSimplexLink(activeAccount.value.address) : null,
     );
 
-    const tokenData = computed((): IToken => {
+    const assetData = computed((): IToken | undefined => {
       if (isAe) {
         return ProtocolAdapterFactory
           .getAdapter(PROTOCOLS.aeternity)
-          .getDefaultCoin(marketData.value!, aeTokenBalance.value.toNumber());
+          .getDefaultCoin(marketData.value!);
       }
-      return getAccountTokenBalances().find(
-        (token) => token.contractId === contractId,
-      ) || { ...fungibleToken.value, contractId };
+      return fungibleToken.value;
     });
 
     const tokens = computed((): IToken[] => {
       const [token0, token1] = [tokenPairs.value.token0, tokenPairs.value.token1];
-      return (token0 && token1) ? [token0!, token1!, tokenData.value] : [tokenData.value];
+      const result = (token0 && token1) ? [token0, token1, assetData.value] : [assetData.value];
+      return result.filter(excludeFalsy);
     });
 
-    const convertedBalance = computed(() => +tokenData.value.convertedBalance! || 0);
+    const assetBalance = computed((): number => (isAe)
+      ? protocolCoinBalance.value.toNumber()
+      : getAccountTokenBalance(activeAccount.value.address, contractId)?.convertedBalance || 0);
 
     function calculateRouterHeight() {
       nextTick(() => {
@@ -272,7 +276,7 @@ export default defineComponent({
       setTokenProps({
         contractId,
         tokenPairs: tokenPairs.value,
-        tokenData: tokenData.value,
+        tokenData: assetData.value,
         tokens: tokens.value,
         isMultisig: isMultisig.value,
       });
@@ -285,30 +289,31 @@ export default defineComponent({
     return {
       PROTOCOLS,
       UNFINISHED_FEATURES,
+      IS_FIREFOX,
       IS_IOS,
       AE_DEX_URL,
-      stickyTabsWrapperEl,
+
       BuyIcon,
-      SwapIcon,
       FaucetIcon,
-      fungibleToken,
+      SwapIcon,
+
+      assetBalance,
       contractId,
+      stickyTabsWrapperEl,
+      fungibleToken,
       isAe,
       isNodeMainnet,
       isNodeTestnet,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
       tabs,
-      tokenData,
       tokenPairs,
       tokens,
       showFilterBar,
-      convertedBalance,
       routeName,
       isMultisig,
       route,
       routerHeight,
-      IS_FIREFOX,
       fadeAnimation,
     };
   },

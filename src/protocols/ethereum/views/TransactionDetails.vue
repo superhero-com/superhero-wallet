@@ -16,7 +16,7 @@
             show-header
           >
             <template #tokens>
-              <TransactionTokensRows
+              <TransactionTokenRows
                 :ext-tokens="tokens"
                 :direction="direction"
                 icon-size="md"
@@ -50,12 +50,12 @@ import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
-import TransactionTokensRows from '@/popup/components/TransactionTokenRows.vue';
+import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
 
 export default defineComponent({
   components: {
     TransactionDetailsBase,
-    TransactionTokensRows,
+    TransactionTokenRows,
     IonContent,
     IonPage,
   },

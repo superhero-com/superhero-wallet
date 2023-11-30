@@ -1,6 +1,10 @@
 <template>
   <div class="transaction-info">
-    <TransactionTagList v-bind="$attrs" />
+    <TransactionTagList
+      v-bind="$attrs"
+      :transaction="transaction"
+    />
+
     <div class="parties">
       <Avatar
         v-if="sender.address"
@@ -58,7 +62,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import type { IAccountOverview } from '../../types';
+import type { IAccountOverview, ITransaction } from '@/types';
 import TriangleRight from '../../icons/triangle-right.svg?vue-component';
 import ActionIcon from '../../icons/action.svg?vue-component';
 import AensIcon from '../../icons/aens.svg?vue-component';
@@ -80,6 +84,7 @@ export default defineComponent({
     SHLogo,
   },
   props: {
+    transaction: { type: Object as PropType<ITransaction>, default: null },
     sender: { type: Object as PropType<IAccountOverview>, required: true },
     recipient: { type: Object as PropType<IAccountOverview>, required: true },
   },
