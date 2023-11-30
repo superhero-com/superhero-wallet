@@ -11,6 +11,7 @@ import { Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
+  AssetContractId,
   BigNumberPublic,
   IAccount,
   ICommonTransaction,
@@ -19,7 +20,6 @@ import type {
   IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
-  IToken,
   ITransaction,
   StorageKeysInput,
   Truthy,
@@ -424,10 +424,10 @@ export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
   );
 }
 
-export function isCoin(contractId: IToken['contractId']): boolean {
+export function isCoin(assetContractId: AssetContractId): boolean {
   return PROTOCOL_LIST.some(
     (protocol) => ProtocolAdapterFactory
       .getAdapter(protocol)
-      .getDefaultAssetContractId() === contractId,
+      .getCoinContractId() === assetContractId,
   );
 }

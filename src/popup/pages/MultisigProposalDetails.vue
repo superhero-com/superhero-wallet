@@ -10,7 +10,7 @@
           <div
             class="header"
           >
-            <TransactionTokens
+            <TransactionTokenRows
               v-if="multisigTx"
               :transaction="{ tx: multisigTx }"
               :protocol="PROTOCOLS.aeternity"
@@ -330,7 +330,7 @@ import PayloadDetails from '../components/PayloadDetails.vue';
 import DialogBox from '../components/DialogBox.vue';
 import MultisigProposalConsensus from '../components/MultisigProposalConsensus.vue';
 import Avatar from '../components/Avatar.vue';
-import TransactionTokens from '../components/TransactionTokenRows.vue';
+import TransactionTokenRows from '../components/TransactionTokenRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
@@ -338,7 +338,7 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 export default defineComponent({
   components: {
     PayloadDetails,
-    TransactionTokens,
+    TransactionTokenRows,
     MultisigProposalConsensus,
     TransactionInfo,
     DialogBox,
@@ -384,7 +384,7 @@ export default defineComponent({
       callContractMethod,
     } = useMultisigTransactions();
 
-    const { getTxSymbol } = useFungibleTokens();
+    const { getTxAssetSymbol } = useFungibleTokens();
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
@@ -537,7 +537,7 @@ export default defineComponent({
       multisigTx,
       transaction,
       totalSpent,
-      getTxSymbol,
+      getTxAssetSymbol,
       getTransactionPayload,
       splitAddress,
       aettosToAe,

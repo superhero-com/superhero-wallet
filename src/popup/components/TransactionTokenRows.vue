@@ -37,7 +37,6 @@ import {
   computed,
   defineComponent,
   PropType,
-  ref,
 } from 'vue';
 import type { ITokenResolved, ITransaction, Protocol } from '@/types';
 import {
@@ -68,21 +67,15 @@ export default defineComponent({
     multipleRows: Boolean,
   },
   setup(props) {
-    const localTokens = ref();
-
-    if (!props.extTokens && !!props.transaction) {
-      const { tokens } = useTransactionTokens({
-        transaction: props.transaction,
-        direction: props.direction,
-        isAllowance: props.isAllowance,
-        showDetailedAllowanceInfo: true,
-      });
-
-      localTokens.value = tokens.value;
-    }
+    const { tokens } = useTransactionTokens({
+      transaction: props.transaction!,
+      direction: props.direction,
+      isAllowance: props.isAllowance,
+      showDetailedAllowanceInfo: true,
+    });
 
     const filteredTokens = computed<ITokenResolved[]>(
-      () => (props.extTokens || localTokens.value)?.filter(
+      () => (props.extTokens || tokens.value)?.filter(
         ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
       ) || [],
     );

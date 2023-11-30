@@ -12,20 +12,28 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 
 import type {
   AdapterNetworkSettingList,
+  AssetContractId,
   ICoin,
   IHdWalletAccount,
   MarketData,
   NetworkTypeDefault,
   IFetchTransactionResult,
   ITransaction,
-  Protocol,
   IToken,
+  ITokenBalance,
+  ITokenBalanceResponse,
 } from '@/types';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
-import { fetchAllPages, fetchJson, getLastNotEmptyAccountIndex } from '@/utils';
+import {
+  fetchAllPages,
+  fetchJson,
+  getLastNotEmptyAccountIndex,
+  handleUnknownError,
+  toShiftedBigNumber,
+} from '@/utils';
 
 import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
 import {
@@ -52,7 +60,7 @@ interface IAmountDecimalPlaces {
 }
 
 export class AeternityAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOLS.aeternity as Protocol;
+  override protocol = PROTOCOLS.aeternity;
 
   override protocolName = AE_PROTOCOL_NAME;
 
@@ -109,7 +117,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return AE_COINGECKO_COIN_ID;
   }
 
-  override getDefaultAssetContractId() {
+  override getCoinContractId(): AssetContractId {
     return AE_CONTRACT_ID;
   }
 
@@ -120,8 +128,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return {
       ...(marketData?.[PROTOCOLS.aeternity] || {}),
       protocol: PROTOCOLS.aeternity,
-      contractId: AE_CONTRACT_ID,
-      // TODO - check usages why sometimes it's a bignumber
+      contractId: this.getCoinContractId(),
       decimals: AE_COIN_PRECISION,
       name: AE_COIN_NAME,
       symbol: AE_SYMBOL,
@@ -192,6 +199,26 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return (response || []).map((token) => ({ ...token, protocol: PROTOCOLS.aeternity }));
   }
 
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+    const { fetchFromMiddleware } = useMiddleware();
+    try {
+      const tokens: ITokenBalanceResponse[] = camelCaseKeysDeep(await fetchAllPages(
+        () => fetchFromMiddleware(`/v2/aex9/account-balances/${address}?limit=100`),
+        fetchFromMiddleware,
+      ));
+      return tokens.map(({ amount, contractId, decimals }) => ({
+        address,
+        amount,
+        contractId,
+        convertedBalance: +toShiftedBigNumber(amount!, -decimals).toFixed(2),
+        protocol: PROTOCOLS.aeternity,
+      }));
+    } catch (error: any) {
+      handleUnknownError(error);
+    }
+    return [];
+  }
+
   override async fetchTransactionByHash() {
     // TODO
   }
@@ -211,7 +238,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       const { data, next } = await fetchFromMiddlewareCamelCased(url);
 
       return {
-        regularTransactions: data || [],
+        regularTransactions: (data || []).map((transaction: ITransaction) => ({
+          ...transaction,
+          protocol: PROTOCOLS.aeternity,
+        })),
         nextPageParams: next,
       };
     } catch (error) {
@@ -270,6 +300,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         microTime: new Date(t.createdAt).getTime(),
         blockHeight: height,
         claim: true,
+        protocol: PROTOCOLS.aeternity,
       }));
 
       return tipWithdrawnTransactions;
