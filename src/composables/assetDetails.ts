@@ -9,10 +9,10 @@ type ITokenTransaction = Pick<TokenProps, 'contractId' | 'isMultisig'>
 const tokenProps = ref<ITokenProps | null>(null);
 
 /**
- *  Data coming from a coin that will be passed to the tab components
- *  TokenDetails and TokenTransaction when the user clicks in particular token asset.
+ * Share the asset (coin or token) details data between the asset details page
+ * and the child pages: AssetDetailsTransactions and AssetDetailsInfo.
  */
-export function useTokenProps() {
+export function useAssetDetails() {
   function setTokenProps(props: ITokenProps | null) {
     tokenProps.value = props;
   }

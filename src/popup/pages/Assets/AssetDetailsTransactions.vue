@@ -24,23 +24,23 @@ import type {
 import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
+  useAssetDetails,
   useFungibleTokens,
   useMultisigAccounts,
   useTransactionList,
-  useTokenProps,
 } from '@/composables';
 import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { getInnerTransaction } from '@/protocols/aeternity/helpers';
 import TransactionList from '@/popup/components/TransactionList.vue';
 
 export default defineComponent({
-  name: 'TokenTransactions',
+  name: 'AssetDetailsTransactions',
   components: {
     IonPage,
     TransactionList,
   },
   setup() {
-    const { tokenProps } = useTokenProps();
+    const { tokenProps } = useAssetDetails();
 
     const { activeAccount } = useAccounts();
     const { activeMultisigAccount } = useMultisigAccounts();

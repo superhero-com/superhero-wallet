@@ -3,9 +3,9 @@
     <IonContent class="ion-padding ion-content-bg">
       <div class="token-details">
         <DetailsRow
-          v-if="tokenData?.symbol"
-          :label="isAe ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
-          :text="tokenData?.symbol"
+          v-if="assetData?.symbol"
+          :label="isAssetCoin ? $t('pages.token-details.coin') : $t('pages.token-details.token')"
+          :text="assetData?.symbol"
         >
           <template #text>
             <Tokens
@@ -15,44 +15,51 @@
             />
           </template>
         </DetailsRow>
+
         <DetailsRow
-          v-if="tokenData?.decimals"
+          v-if="assetData?.decimals"
           :label="$t('pages.token-details.decimals')"
-          :text="tokenData.decimals"
+          :text="assetData.decimals"
         />
+
         <DetailsRow
-          v-if="tokenData?.contractId && !isAe"
+          v-if="assetData?.contractId && !isAssetCoin"
           :label="$t('common.smartContract')"
         >
           <template #text>
             <AddressTruncated
               show-explorer-link
-              :protocol="PROTOCOLS.aeternity"
-              :address="tokenData.contractId"
+              :protocol="assetData.protocol"
+              :address="assetData.contractId"
             />
           </template>
         </DetailsRow>
+
         <DetailsRow
-          v-if="tokenData?.circulatingSupply"
+          v-if="assetData?.circulatingSupply"
           :label="$t('pages.token-details.max-supply')"
-          :text="formatNumber(tokenData.circulatingSupply)"
+          :text="formatNumber(assetData.circulatingSupply)"
         />
+
         <DetailsRow
-          v-if="tokenData?.totalSupply"
+          v-if="assetData?.totalSupply"
           :label="$t('pages.token-details.total-supply')"
-          :text="formatNumber(tokenData.totalSupply)"
+          :text="formatNumber(assetData.totalSupply)"
         />
+
         <DetailsRow
-          v-if="tokenData?.marketCap"
+          v-if="assetData?.marketCap"
           :label="$t('pages.token-details.market-cap')"
           class="price"
-          :text="formatCurrency(tokenData.marketCap)"
+          :text="formatCurrency(assetData.marketCap)"
         />
+
         <DetailsRow
           v-if="tokenPairs.balances"
           :label="$t('pages.token-details.holders')"
           :text="tokenPairs.balances.size"
         />
+
         <DetailsRow
           v-if="tokenPairs.token0 && tokenPairs.token0.amount > 0"
           :text="getPooledTokenAmount(tokenPairs.token0)"
@@ -78,82 +85,76 @@
           :label="$t('pages.token-details.poolShare')"
           :text="poolShare"
         />
+
         <DetailsRow
-          v-if="!isAe && UNFINISHED_FEATURES"
-          :label="$t('pages.token-details.transactions')"
+          v-if="assetData?.totalVolume"
+          :label="$t('pages.token-details.volume')"
+          :text="formatCurrency(assetData.totalVolume)"
         />
 
         <DetailsRow
-          v-if="tokenData?.totalVolume"
-          :label="$t('pages.token-details.volume')"
-          :text="formatCurrency(tokenData.totalVolume)"
-        />
-        <DetailsRow
-          v-if="tokenData?.marketCapChange24h"
+          v-if="assetData?.marketCapChange24h"
           class="price"
           :label="$t('pages.token-details.volumeDaily')"
         >
           <template #text>
             <span
               :class="{
-                green: tokenData?.marketCapChangePercentage24h > 0,
-                red: tokenData?.marketCapChangePercentage24h < 0,
+                green: assetData?.marketCapChangePercentage24h > 0,
+                red: assetData?.marketCapChangePercentage24h < 0,
               }"
             >
-              {{ Number(tokenData.marketCapChangePercentage24h).toFixed(2) }}%
+              {{ Number(assetData.marketCapChangePercentage24h).toFixed(2) }}%
             </span>
-            {{ formatCurrency(tokenData?.marketCapChange24h) }}
+            {{ formatCurrency(assetData?.marketCapChange24h) }}
           </template>
         </DetailsRow>
-        <DetailsRow
-          v-if="!isAe && UNFINISHED_FEATURES"
-          :label="$t('pages.token-details.feeDaily')"
-        />
+
+        <!--
+          TODO decide if we still need this
+        -->
+        <template v-if="UNFINISHED_FEATURES">
+          <DetailsRow
+            :label="$t('pages.token-details.transactions')"
+          />
+
+          <DetailsRow
+            :label="$t('pages.token-details.feeDaily')"
+          />
+
+          <DetailsRow
+            :label="$t('pages.token-details.priceAe')"
+          />
+        </template>
 
         <DetailsRow
-          v-if="!isAe"
-          class="link"
-          :label="$t('pages.token-details.chart')"
-        >
-          <template #text>
-            <LinkButton
-              :to="AE_DEX_URL"
-            >
-              {{ displayDexUrl }}
-              <ExternalLink />
-            </LinkButton>
-          </template>
-        </DetailsRow>
-        <DetailsRow
-          v-if="!isAe && UNFINISHED_FEATURES"
-          :label="$t('pages.token-details.price-ae')"
-        />
-        <DetailsRow
-          v-if="tokenData?.currentPrice"
+          v-if="assetData?.currentPrice"
           class="price"
           :label="$t('pages.token-details.price')"
         >
           <template #text>
             <span
               :class="{
-                green: tokenData.priceChangePercentage24h > 0,
-                red: tokenData.priceChangePercentage24h < 0,
+                green: assetData.priceChangePercentage24h > 0,
+                red: assetData.priceChangePercentage24h < 0,
               }"
             >
-              {{ Number(tokenData.priceChangePercentage24h).toFixed(2) }}%
+              {{ Number(assetData.priceChangePercentage24h).toFixed(2) }}%
             </span>
-            {{ formatCurrency(tokenData.currentPrice) }}
+            {{ formatCurrency(assetData.currentPrice) }}
           </template>
         </DetailsRow>
+
         <DetailsRow
-          v-if="tokenData?.ath"
+          v-if="assetData?.ath"
           :label="$t('pages.token-details.ath-change')"
-          :text="formatCurrency(tokenData.ath)"
+          :text="formatCurrency(assetData.ath)"
         />
+
         <DetailsRow
-          v-if="tokenData?.atl"
+          v-if="assetData?.atl"
           :label="$t('pages.token-details.atl-change')"
-          :text="formatCurrency(tokenData.atl)"
+          :text="formatCurrency(assetData.atl)"
         />
       </div>
     </IonContent>
@@ -167,6 +168,7 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
+import type { IAsset } from '@/types';
 import {
   PROTOCOLS,
   UNFINISHED_FEATURES,
@@ -174,53 +176,45 @@ import {
 import {
   amountRounded,
   formatNumber,
+  isCoin,
   toShiftedBigNumber,
 } from '@/utils';
-import { useCurrencies, useTokenProps } from '@/composables';
-import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
+import { useAssetDetails, useCurrencies } from '@/composables';
 
-import LinkButton from '@/popup/components/LinkButton.vue';
-import DetailsRow from '@/popup/components/FungibleTokens/DetailsRow.vue';
+import DetailsRow from '@/popup/components/Assets/DetailsRow.vue';
 import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 import Tokens from '@/popup/components/Tokens.vue';
-import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
-  name: 'TokenDetails',
+  name: 'AssetDetailsInfo',
   components: {
     DetailsRow,
     AddressTruncated,
     Tokens,
-    ExternalLink,
-    LinkButton,
     IonPage,
     IonContent,
   },
 
   setup() {
-    const { tokenDetails } = useTokenProps();
-    const {
-      tokenData,
-      contractId,
-      tokens,
-      tokenPairs,
-    } = tokenDetails.value;
+    const { tokenDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
 
-    const displayDexUrl = AE_DEX_URL.replace('https://', '');
-
-    const isAe = computed(() => tokenData?.contractId === AE_CONTRACT_ID);
+    const assetData = computed((): IAsset => tokenDetails.value.tokenData || {});
+    const assetContractId = computed(() => assetData.value.contractId);
+    const tokens = computed(() => tokenDetails.value.tokens);
+    const tokenPairs = computed(() => tokenDetails.value.tokenPairs);
+    const isAssetCoin = computed(() => isCoin(assetContractId.value));
 
     const poolShare = computed(() => {
       if (
         !tokenPairs
-        || !tokenPairs.balance
-        || !tokenPairs.totalSupply
+        || !tokenPairs.value.balance
+        || !tokenPairs.value.totalSupply
       ) {
         return null;
       }
-      return `${amountRounded((new BigNumber(tokenPairs.balance))
-        .times(100).div(tokenPairs.totalSupply))}%`;
+      return `${amountRounded((new BigNumber(tokenPairs.value.balance))
+        .times(100).div(tokenPairs.value.totalSupply))}%`;
     });
 
     const getPooledTokenAmount = (token: any) => amountRounded(
@@ -229,18 +223,16 @@ export default defineComponent({
 
     return {
       PROTOCOLS,
-      AE_DEX_URL,
       UNFINISHED_FEATURES,
-      displayDexUrl,
-      isAe,
+      isAssetCoin,
       poolShare,
       getPooledTokenAmount,
       formatCurrency,
       formatNumber,
-      contractId,
       tokens,
+      tokenDetails,
       tokenPairs,
-      tokenData,
+      assetData,
     };
   },
 });
