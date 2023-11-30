@@ -58,7 +58,11 @@ let dryAeSdk: AeSdk;
 let dryAeSdkCurrentNodeNetworkId: string;
 
 export function useAeSdk() {
-  const { aeActiveNetworkSettings, activeNetworkName } = useAeNetworkSettings();
+  const {
+    aeActiveNetworkSettings,
+    activeNetworkName,
+    areNetworksRestored,
+  } = useAeNetworkSettings();
   const {
     accountsAddressList,
     isLoggedIn,
@@ -101,7 +105,10 @@ export function useAeSdk() {
     aeSdkBlocked = true;
     isAeSdkReady.value = false;
 
-    await watchUntilTruthy(isLoggedIn);
+    await Promise.all([
+      watchUntilTruthy(isLoggedIn),
+      watchUntilTruthy(areNetworksRestored),
+    ]);
 
     storedNetworkName = activeNetworkName.value;
     const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);

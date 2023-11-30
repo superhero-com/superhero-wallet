@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type {
   INetwork,
   NetworkProtocolsSettings,
@@ -17,7 +17,10 @@ import { tg } from '@/popup/plugins/i18n';
 import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 
+let initialized = false;
+
 const defaultNetworks: INetwork[] = [];
+const areNetworksRestored = ref(false);
 
 /**
  * Networks added by the user by providing some custom URLs for each of the protocols.
@@ -34,7 +37,12 @@ const customNetworks = useStorageRef<INetwork[]>(
 const activeNetworkName = useStorageRef<string>(
   NETWORK_NAME_MAINNET,
   STORAGE_KEYS.activeNetworkName,
-  { backgroundSync: true },
+  {
+    backgroundSync: true,
+    onRestored: () => {
+      areNetworksRestored.value = true;
+    },
+  },
 );
 
 const networks = computed(
@@ -45,8 +53,6 @@ const networks = computed(
 );
 
 const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
-
-let initialized = false;
 
 function ensureDefaultNetworksExists() {
   if (defaultNetworks.length === 0) {
@@ -125,6 +131,7 @@ export function useNetworks() {
   }
 
   return {
+    areNetworksRestored,
     networks,
     customNetworks,
     defaultNetworks,
