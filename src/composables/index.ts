@@ -19,7 +19,7 @@ export * from './popupProps';
 export * from './aeSdk';
 export * from './storageRef';
 export * from './tippingContracts';
-export * from './tokensList';
+export * from './accountAssetsList';
 export * from './topHeader';
 export * from './transactionAndTokenFilter';
 export * from './transactionTx';

@@ -59,7 +59,8 @@ export function useBalances() {
   }
 
   async function updateBalances() {
-    const balancesPromises = accounts.value.map(
+    const accountsCached = accounts.value; // Store the accounts for the time of update process
+    const balancesPromises = accountsCached.map(
       async ({
         address,
         protocol,
@@ -72,7 +73,7 @@ export function useBalances() {
     );
     const rawBalances = await Promise.all(balancesPromises);
     balances.value = Object.fromEntries(rawBalances.map(
-      (val, index) => [accounts.value[index].address, BigNumber(val || 0)],
+      (val, index) => [accountsCached[index].address, BigNumber(val || 0)],
     ));
   }
 

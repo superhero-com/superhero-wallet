@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { useFungibleTokens } from '@/composables';
-import { TX_DIRECTION } from '../../../src/constants';
+import { PROTOCOLS, TX_DIRECTION } from '../../../src/constants';
 import { STUB_TOKEN_CONTRACT_ADDRESS, STUB_TRANSACTIONS } from '../../../src/constants/stubs';
 import { AE_COIN_PRECISION } from '../../../src/protocols/aeternity/config';
 
@@ -53,9 +53,10 @@ const tests = [{
 ];
 
 describe('getTxAmountTotal', () => {
-  const { availableTokens, getTxAmountTotal } = useFungibleTokens();
+  const { tokensAvailable, getTxAmountTotal } = useFungibleTokens();
 
-  availableTokens.value[STUB_TOKEN_CONTRACT_ADDRESS] = {
+  tokensAvailable.value[PROTOCOLS.aeternity] = {};
+  tokensAvailable.value[PROTOCOLS.aeternity][STUB_TOKEN_CONTRACT_ADDRESS] = {
     decimals: TEST_TOKEN_DECIMALS,
   };
 

@@ -133,7 +133,7 @@ export function usePendingMultisigTransaction() {
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
     aeAccounts.value.filter(
-      (_account) => pendingMultisigTxSigners.value.includes(_account.address),
+      ({ address }) => pendingMultisigTxSigners.value.includes(address),
     )
   ));
 
@@ -143,7 +143,8 @@ export function usePendingMultisigTransaction() {
    */
   const pendingMultisigTxConfirmedByLocalSigners = computed((): boolean => (
     pendingMultisigTxLocalSigners.value.filter(
-      (acc) => activeMultisigAccount.value?.confirmedBy?.includes(acc.address),
+      ({ address }) => activeMultisigAccount.value?.confirmedBy
+        ?.includes(address),
     ).length === pendingMultisigTxLocalSigners.value.length
   ));
 

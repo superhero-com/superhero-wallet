@@ -9,7 +9,7 @@
             :amount-total="getTxAmountTotal(transaction, direction)"
             :fee="transactionFee"
             :coin-symbol="AE_SYMBOL"
-            :token-symbol="getTxSymbol(transaction)"
+            :token-symbol="getTxAssetSymbol(transaction)"
             :is-error-transaction="isErrorTransaction"
             :payload="getTransactionPayload(transaction)"
             :contract-id="contractId"
@@ -20,7 +20,7 @@
             :protocol="PROTOCOLS.aeternity"
           >
             <template #tokens>
-              <TransactionTokensRows
+              <TransactionTokenRows
                 :transaction="transaction"
                 :direction="direction"
                 :is-allowance="isDexAllowance"
@@ -205,7 +205,7 @@ import SwapRoute from '@/popup/components/SwapRoute.vue';
 import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
 import DialogBox from '@/popup/components/DialogBox.vue';
 import Avatar from '@/popup/components/Avatar.vue';
-import TransactionTokensRows from '@/popup/components/TransactionTokenRows.vue';
+import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
 
 export default defineComponent({
@@ -217,7 +217,7 @@ export default defineComponent({
     SwapRates,
     TransactionDetailsBase,
     TransactionDetailsPoolTokens,
-    TransactionTokensRows,
+    TransactionTokenRows,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -237,7 +237,7 @@ export default defineComponent({
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens();
+    const { getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -378,7 +378,7 @@ export default defineComponent({
       amount,
       isSwap,
       isPool,
-      getTxSymbol,
+      getTxAssetSymbol,
       getTxAmountTotal,
       isErrorTransaction,
       isDexAllowance,

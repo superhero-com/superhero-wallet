@@ -89,6 +89,12 @@ export type BigNumberPublic = PublicPart<BigNumber> | BigNumber;
 export type Balance = BigNumberPublic;
 export type BalanceRaw = string;
 
+/**
+ * Each protocol has it's own address schema. This is only a generic placeholder.
+ * TODO replace the value with only the `string`.
+ */
+export type AccountAddress = Encoded.AccountAddress | string;
+
 export type NetworkId = string;
 
 export interface IPageableResponse<T> {
@@ -111,7 +117,7 @@ export interface IWallet {
 export interface IHdWalletAccount {
   publicKey: Uint8Array;
   secretKey: Uint8Array;
-  address: string;
+  address: AccountAddress;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -140,23 +146,32 @@ export interface ITokenBalanceResponse {
   txType: string;
 }
 
+export type AssetContractId =
+  | Encoded.ContractAddress
+  | typeof AE_CONTRACT_ID
+  | typeof BTC_CONTRACT_ID
+  | typeof ETH_CONTRACT_ID;
+
+/**
+ * Account's fungible token balance data
+ */
 export interface ITokenBalance {
-  amount?: number | string;
-  convertedBalance?: number; // Amount of the token that is owned
+  address: AccountAddress;
+  amount: number | string;
+  contractId: AssetContractId;
+  /** Amount of the token that is owned */
+  convertedBalance?: number;
+  protocol: Protocol;
 }
 
 /**
  * Fungible tokens that are available in currently used network.
- * TODO stop extending the interface with `ITokenBalance` because the token data
- *   should not hold any account related information like the balance.
  */
-export interface IToken extends ITokenBalance {
-  contractId:
-    | Encoded.ContractAddress
-    | typeof AE_CONTRACT_ID
-    | typeof BTC_CONTRACT_ID
-    | typeof ETH_CONTRACT_ID;
+export interface IToken {
+  amount?: number | string; // TODO consider removing data specific to an account
+  contractId: AssetContractId;
   contractTxi?: number;
+  convertedBalance?: number; // TODO consider removing data specific to an account
   decimals: number;
   event_supply?: number;
   extensions?: string[];
@@ -183,8 +198,6 @@ export interface ITokenResolved extends Partial<IToken> {
   symbol: string; // Ensure its present in the current interface
 }
 
-export type ITokenList = Record<string, IToken>
-
 /**
  * Coins are specific to the network user can connect to. We assume each network
  * can have only one coin and many tokens.
@@ -196,6 +209,14 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
  * In general the "Asset" is any form of coin or fungible token we use in the app.
  */
 export type IAsset = ICoin | IToken;
+
+/**
+ * Asset data with account related amounts and balances.
+ * TODO should replace overused IToken in places where the amount and balance is needed.
+ */
+export type IAccountAsset = Partial<ITokenBalance> & IToken;
+
+export type AssetList = Record<AssetContractId, IToken>;
 
 export type AccountType = 'hd-wallet';
 
@@ -213,7 +234,7 @@ export interface IAccountRaw {
  * Account stored on the application store.
  */
 export interface IAccount extends IHdWalletAccount, IAccountRaw {
-  address: Encoded.AccountAddress; // TODO use `string` as we use not only AE protocol
+  address: Encoded.AccountAddress;
   globalIdx: number;
   idx: number;
 }
@@ -231,7 +252,7 @@ export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'
 // TODO This interface is too loose. Empty object should not be valid.
 export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   // TODO: use a proper type for an address since it can be a url
-  address?: Encoded.AccountAddress | string;
+  address?: AccountAddress;
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
@@ -425,7 +446,7 @@ export interface ITx {
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string;
   senderId?: Encoded.AccountAddress;
-  selectedTokenContractId?: string;
+  selectedTokenContractId?: AssetContractId;
   tag?: Tag;
   /**
    * Middleware represents the `type` with different case than the aeSdk.

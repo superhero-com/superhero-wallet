@@ -22,15 +22,16 @@ import { BIP32Factory } from 'bip32';
 
 import type {
   AdapterNetworkSettingList,
+  AssetContractId,
   ICoin,
   IHdWalletAccount,
   INetworkProtocolSettings,
   MarketData,
   NetworkTypeDefault,
-  Protocol,
   IFetchTransactionResult,
   IAccount,
   IToken,
+  ITokenBalance,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex } from '@/utils';
@@ -54,7 +55,7 @@ import { EtherscanService } from './EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '../helpers';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
-  override protocol = PROTOCOLS.ethereum as Protocol;
+  override protocol = PROTOCOLS.ethereum;
 
   override protocolName = ETH_PROTOCOL_NAME;
 
@@ -115,7 +116,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return ETH_CONTRACT_ID;
   }
 
-  override getDefaultAssetContractId() {
+  override getCoinContractId(): AssetContractId {
     return ETH_CONTRACT_ID;
   }
 
@@ -126,9 +127,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return {
       ...(marketData?.[PROTOCOLS.ethereum] || {}),
       protocol: PROTOCOLS.ethereum,
-      contractId: ETH_CONTRACT_ID,
-      symbol: ETH_SYMBOL,
-      decimals: ETH_COIN_PRECISION,
+      contractId: this.getCoinContractId(),
+      symbol: this.coinSymbol,
+      decimals: this.getAmountPrecision(),
       name: ETH_COIN_NAME,
       convertedBalance,
     };
@@ -193,6 +194,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
     return [DUMMY_ERC20_TOKEN]; // TODO replace with real tokens fetching
+  }
+
+  override async fetchAccountTokenBalances(): Promise<ITokenBalance[]> {
+    return []; // TODO implement ERC-20 token balance fetching
   }
 
   override async fetchPendingTransactions() {
