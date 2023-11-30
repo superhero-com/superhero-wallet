@@ -23,22 +23,22 @@ import { BIP32Factory } from 'bip32';
 import type {
   AdapterNetworkSettingList,
   AssetContractId,
+  IAccount,
   ICoin,
+  IFetchTransactionResult,
   IHdWalletAccount,
   INetworkProtocolSettings,
-  MarketData,
-  NetworkTypeDefault,
-  IFetchTransactionResult,
-  IAccount,
   IToken,
   ITokenBalance,
+  MarketData,
+  NetworkTypeDefault,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { getLastNotEmptyAccountIndex } from '@/utils';
+import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  DUMMY_ERC20_TOKEN,
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COINGECKO_COIN_ID,
@@ -53,6 +53,7 @@ import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '../helpers';
+import { EthplorerService } from './EthplorerService';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.ethereum;
@@ -193,11 +194,29 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
-    return [DUMMY_ERC20_TOKEN]; // TODO replace with real tokens fetching
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    try {
+      // Temporary solution for fetching the ERC-20 tokens.
+      // TODO Replace with our own node API
+      return new EthplorerService(apiUrl).fetchTopTokens();
+    } catch (error: any) {
+      Logger.write(error);
+      return [];
+    }
   }
 
-  override async fetchAccountTokenBalances(): Promise<ITokenBalance[]> {
-    return []; // TODO implement ERC-20 token balance fetching
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    try {
+      // Temporary solution for fetching the ERC-20 token balances.
+      // TODO Replace with our own node API
+      return new EthplorerService(apiUrl).fetchAccountTokenBalances(address);
+    } catch (error: any) {
+      Logger.write(error);
+      return [];
+    }
   }
 
   override async fetchPendingTransactions() {
