@@ -21,6 +21,7 @@ import type {
   IonicLifecycleStatus,
   ITx,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   useAccounts,
   useFungibleTokens,
@@ -49,10 +50,12 @@ export default defineComponent({
       getAccountTransactionsState,
     } = useTransactionList();
 
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
-    const tokensContractIds = computed((): string[] => Object.keys(availableTokens.value));
+    const tokensContractIds = computed(
+      (): string[] => Object.keys(getProtocolAvailableTokens(PROTOCOLS.aeternity)),
+    );
     const currentAddress = computed(
       () => (tokenProps.value?.isMultisig)
         ? activeMultisigAccount.value?.gaAccountId

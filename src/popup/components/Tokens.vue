@@ -8,9 +8,9 @@
       class="icon"
     >
       <ProtocolIcon
-        v-if="imgToken?.assetType === ASSET_TYPES.coin"
+        v-if="imgToken && imgToken.assetType === ASSET_TYPES.coin"
         class="icon-image"
-        :protocol="protocol"
+        :protocol="imgToken?.protocol || protocol"
         :icon-size="(iconSize as any)"
         is-logo-icon
       />
@@ -108,7 +108,8 @@ export default defineComponent({
 
     function mapToken(token: ITokenResolved): ITokenResolved {
       const isTokenCoin = isCoin(token.contractId!) || token.isAe;
-      const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+      const protocol = token.protocol || props.protocol;
+      const adapter = ProtocolAdapterFactory.getAdapter(protocol);
       let name = token.symbol;
       if (isTokenCoin) {
         name = props.fullSymbol ? adapter.coinName : adapter.protocolSymbol;
@@ -117,6 +118,7 @@ export default defineComponent({
       return {
         ...token,
         name,
+        protocol,
         assetType: isTokenCoin ? ASSET_TYPES.coin : ASSET_TYPES.token,
       };
     }

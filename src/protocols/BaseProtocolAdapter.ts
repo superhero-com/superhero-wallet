@@ -11,6 +11,8 @@ import type {
   Protocol,
   NetworkType,
   IToken,
+  ITokenBalance,
+  AssetContractId,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
@@ -38,7 +40,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract getCoinGeckoCoinId(): string;
 
-  abstract getDefaultAssetContractId(): string;
+  abstract getCoinContractId(): AssetContractId;
 
   abstract getDefaultCoin(
     marketData: MarketData,
@@ -91,6 +93,8 @@ export abstract class BaseProtocolAdapter {
   ): Promise<any>;
 
   abstract fetchAvailableTokens(): Promise<IToken[]>;
+
+  abstract fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]>;
 
   abstract fetchBalance(address: string): Promise<string>;
 

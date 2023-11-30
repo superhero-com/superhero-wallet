@@ -21,20 +21,22 @@
     </template>
 
     <Loader
-      :class="['appearing-element', { visible: loading }]"
+      class="appearing-element"
+      :class="{ visible: loading }"
     />
     <div
       v-show="isFullyOpen"
-      :class="['appearing-element', { visible: !loading }]"
+      class="appearing-element"
+      :class="{ visible: !loading }"
     >
       <TokensListItem
-        v-for="token in tokensToDisplay"
-        :key="token.contractId"
-        :token-data="token"
-        :selected="isTokenSelected(token)"
+        v-for="asset in accountAssetsToDisplay"
+        :key="asset.contractId"
+        :token-data="asset"
+        :selected="isTokenSelected(asset)"
         show-current-price
         prevent-navigation
-        @click="resolve(token)"
+        @click="resolve(asset)"
       />
     </div>
     <BackToTop />
@@ -55,7 +57,7 @@ import type {
   RejectCallback,
   ResolveCallback,
 } from '@/types';
-import { useTokensList } from '@/composables';
+import { useAccountAssetsList } from '@/composables';
 
 import Modal from '../Modal.vue';
 import TokensListItem from '../FungibleTokens/TokensListItem.vue';
@@ -84,14 +86,14 @@ export default defineComponent({
     const searchTerm = ref('');
     const isFullyOpen = ref(false);
 
-    const { filteredTokens } = useTokensList({
+    const { accountAssetsFiltered } = useAccountAssetsList({
       searchTerm,
       withBalanceOnly: props.showTokensWithBalance,
     });
 
-    const tokensToDisplay = computed(() => (props.protocol)
-      ? filteredTokens.value.filter(({ protocol }) => protocol === props.protocol)
-      : filteredTokens.value);
+    const accountAssetsToDisplay = computed(() => (props.protocol)
+      ? accountAssetsFiltered.value.filter(({ protocol }) => protocol === props.protocol)
+      : accountAssetsFiltered.value);
 
     function isTokenSelected(token: IToken): boolean {
       return !!props.selectedToken && props.selectedToken.contractId === token.contractId;
@@ -113,7 +115,7 @@ export default defineComponent({
       loading,
       searchTerm,
       isFullyOpen,
-      tokensToDisplay,
+      accountAssetsToDisplay,
       isTokenSelected,
       onModalOpen,
     };
