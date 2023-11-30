@@ -29,7 +29,7 @@
       class="appearing-element"
       :class="{ visible: !loading }"
     >
-      <TokensListItem
+      <AssetListItem
         v-for="asset in accountAssetsToDisplay"
         :key="asset.contractId"
         :token-data="asset"
@@ -60,7 +60,7 @@ import type {
 import { useAccountAssetsList } from '@/composables';
 
 import Modal from '../Modal.vue';
-import TokensListItem from '../FungibleTokens/TokensListItem.vue';
+import AssetListItem from '../Assets/AssetListItem.vue';
 import InputSearch from '../InputSearch.vue';
 import BackToTop from '../BackToTop.vue';
 import Loader from '../Loader.vue';
@@ -68,8 +68,8 @@ import Loader from '../Loader.vue';
 export default defineComponent({
   name: 'AssetSelector',
   components: {
+    AssetListItem,
     BackToTop,
-    TokensListItem,
     Modal,
     InputSearch,
     Loader,
