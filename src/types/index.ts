@@ -660,7 +660,7 @@ export interface IModalProps extends Partial<IPopupProps> {
 export interface TokenProps {
   contractId?: string;
   tokenPairs?: any; // TODO: replace any with TokenPair & resolve issues
-  tokenData?: any; // TODO: replace any with IToken & resolve issues
+  tokenData?: any; // TODO: replace any with IAsset & resolve issues
   tokens?: IToken[];
   isMultisig?: boolean;
 }

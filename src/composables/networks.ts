@@ -147,18 +147,23 @@ export function useNetworks() {
  * user changes the network.
  */
 export function createNetworkWatcher() {
-  ensureDefaultNetworksExists();
+  // Delay the networks fill in to allow the protocol adapters to be created first
+  setTimeout(() => {
+    ensureDefaultNetworksExists();
+  }, 0);
 
   let storedNetworkName: string;
 
   return {
     onNetworkChange: (callback: (newNetwork: INetwork, oldNetwork: INetwork) => void) => {
-      if (!storedNetworkName) {
-        storedNetworkName = activeNetwork.value.name;
-      } else if (storedNetworkName !== activeNetwork.value.name) {
-        callback(activeNetwork.value, networks.value[storedNetworkName]);
-        storedNetworkName = activeNetwork.value.name;
-      }
+      setTimeout(() => {
+        if (!storedNetworkName) {
+          storedNetworkName = activeNetwork.value.name;
+        } else if (storedNetworkName !== activeNetwork.value.name) {
+          callback(activeNetwork.value, networks.value[storedNetworkName]);
+          storedNetworkName = activeNetwork.value.name;
+        }
+      }, 0);
     },
   };
 }

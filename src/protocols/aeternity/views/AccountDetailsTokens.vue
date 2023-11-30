@@ -5,7 +5,7 @@
         ref="innerScrollElem"
         class="account-details-tokens"
       >
-        <TokensList
+        <AssetList
           v-if="isOnline"
           :search-term="searchPhrase"
           class="tokens-list"
@@ -36,12 +36,12 @@ import type { IonicLifecycleStatus } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
 
-import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
+import AssetList from '@/popup/components/Assets/AssetList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 
 export default defineComponent({
   components: {
-    TokensList,
+    AssetList,
     MessageOffline,
     IonPage,
     IonContent,

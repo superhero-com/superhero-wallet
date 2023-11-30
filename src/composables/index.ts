@@ -1,4 +1,5 @@
 export * from './accounts';
+export * from './assetDetails';
 export * from './balances';
 export * from './copy';
 export * from './connection';
@@ -28,7 +29,6 @@ export * from './transactionList';
 export * from './ui';
 export * from './viewport';
 export * from './fungibleTokens';
-export * from './coinTokensProps';
 export * from './scrollTransactions';
 export * from './languages';
 export * from './permissions';
