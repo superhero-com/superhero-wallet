@@ -5,7 +5,7 @@
         ref="innerScrollElem"
         class="account-details-tokens"
       >
-        <TokensList
+        <AssetList
           v-if="isOnline"
           class="tokens-list"
           :search-term="searchPhrase"
@@ -31,12 +31,12 @@ import type { IonicLifecycleStatus } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter } from '@/composables';
 
-import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
+import AssetList from '@/popup/components/Assets/AssetList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
 
 export default defineComponent({
   components: {
-    TokensList,
+    AssetList,
     MessageOffline,
     IonPage,
     IonContent,

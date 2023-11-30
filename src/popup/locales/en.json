@@ -658,7 +658,7 @@
       "total-supply": "Total supply",
       "max-supply": "Max supply",
       "supply": "Supply",
-      "price-ae": "Price (AE)",
+      "priceAe": "Price (AE)",
       "price": "Price",
       "volume": "Total Volume",
       "volumeDaily": "Volume (24h)",
