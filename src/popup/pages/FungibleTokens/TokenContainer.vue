@@ -64,7 +64,7 @@
               />
             </Tabs>
             <TransactionAndTokenFilter
-              :key="routeName!"
+              :key="routeName"
               :show-filters="showFilterBar"
             />
           </div>
