@@ -176,7 +176,7 @@ import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { tg } from '@/popup/plugins/i18n';
 import { RejectedByUserError } from '@/lib/errors';
 import {
-  SUPERHERO_CHAT_URL,
+  SUPERHERO_CHAT_URLS,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -275,7 +275,8 @@ export default defineComponent({
     const decodedCallData = ref<AeDecodedCallData | undefined>();
 
     const isAeppChatSuperhero = computed(
-      () => `${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}` === SUPERHERO_CHAT_URL,
+      () => SUPERHERO_CHAT_URLS
+        .includes(`${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}`),
     );
     const transactionWrapped = computed(
       (): Partial<ITransaction> => ({ tx: popupProps.value?.tx as any }),
