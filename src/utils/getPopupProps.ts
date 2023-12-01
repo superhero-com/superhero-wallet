@@ -5,7 +5,6 @@ import type {
   IPopupActions,
   IPopupData,
   IPopupProps,
-  PopupActionType,
   TxType,
 } from '@/types';
 import { STUB_TX_PARAMS, STUB_POPUP_PROPS } from '@/constants/stubs';
@@ -16,11 +15,7 @@ import {
   POPUP_TYPE,
   RUNNING_IN_TESTS,
 } from '@/constants';
-
-interface PopupMessageData {
-  type: PopupActionType;
-  payload?: any;
-}
+import { PopupMessageData } from '@/background';
 
 export function buildTx(txType: TxType) {
   const params = {

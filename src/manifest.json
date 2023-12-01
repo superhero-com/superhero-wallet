@@ -5,20 +5,6 @@
   "content_security_policy": {
     "extension_pages": "default-src 'self'; script-src 'self'; connect-src *; font-src * data:; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
   },
-  "applications": {
-    "gecko": {
-      "strict_min_version": "53.0"
-    }
-  },
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "ruleset_1",
-        "enabled": true,
-        "path": "rules_1.json"
-      }
-    ]
-  },
   "permissions": [
     "storage",
     "unlimitedStorage",
@@ -48,8 +34,7 @@
     "default_popup": "index.html"
   },
   "background": {
-    "service_worker": "js/background.js",
-    "type": "module"
+    "service_worker": "js/background.js"
   },
   "content_scripts": [
     {

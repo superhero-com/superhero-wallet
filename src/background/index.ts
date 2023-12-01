@@ -1,11 +1,13 @@
 import '@/lib/initPolyfills';
+import { PopupActionType } from '@/types';
 import { openPopup, removePopup, getPopup } from './bgPopupHandler';
 
-let creating; // A global promise to avoid concurrency issues
-async function setupOffscreenDocument(path) {
+let creating: Promise<void> | null; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path: string) {
   // Check all windows controlled by the service worker to see if one
   // of them is the offscreen document with the given path
   const offscreenUrl = browser.runtime.getURL(path);
+  // @ts-expect-error
   const existingContexts = await browser.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT'],
     documentUrls: [offscreenUrl],
@@ -19,6 +21,7 @@ async function setupOffscreenDocument(path) {
   if (creating) {
     await creating;
   } else {
+    // @ts-expect-error
     creating = browser.offscreen.createDocument({
       url: path,
       reasons: ['LOCAL_STORAGE'],
@@ -31,8 +34,17 @@ async function setupOffscreenDocument(path) {
 
 setupOffscreenDocument(browser.runtime.getURL('offscreen.html'));
 
-// TODO type msg.target and msg.method
-function handleMessage(msg, sender, sendResponse) {
+// TODO type
+export type PopupMessageData = {
+  target?: 'background' | 'offscreen';
+  method?: 'openPopup' | 'removePopup' | 'getPopup';
+  type?: PopupActionType;
+  uuid?: string;
+  params?: any;
+  payload?: any;
+};
+
+function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
     if (msg.method === 'openPopup') {
       const { popupType, aepp, params } = msg.params;
@@ -48,11 +60,34 @@ function handleMessage(msg, sender, sendResponse) {
   }
 
   // forward messages to the offscreen page
-  // TODO type msg.target
-  browser.runtime.sendMessage({
+  browser.runtime.sendMessage<PopupMessageData>({
     ...msg,
     target: 'offscreen',
   });
 }
 
 browser.runtime.onMessage.addListener(handleMessage);
+
+browser.runtime.onInstalled.addListener(() => {
+  const extUrl = browser.runtime.getURL('./index.html');
+  // @ts-ignore
+  browser.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [1],
+    addRules: [
+      {
+        id: 1,
+        priority: 1,
+        condition: {
+          regexFilter: '^https://wallet.superhero.com/(.*)',
+          resourceTypes: ['main_frame'],
+        },
+        action: {
+          type: 'redirect',
+          redirect: {
+            regexSubstitution: `${extUrl}#/\\1`,
+          },
+        },
+      },
+    ],
+  });
+});

@@ -57,7 +57,7 @@ module.exports = {
         },
         componentOptions: {
           background: {
-            entry: 'src/background/index.js',
+            entry: 'src/background/index.ts',
           },
           contentScripts: {
             entries: {

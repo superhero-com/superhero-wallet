@@ -5,6 +5,8 @@ jest.mock('../../src/composables/accounts.ts', () => ({
   useAccounts: jest.fn(() => ({
     accounts: [],
     protocolsInUse: [],
+    accountsAddressList: [],
+    activeAccountGlobalIdx: 0,
   })),
 }));
 

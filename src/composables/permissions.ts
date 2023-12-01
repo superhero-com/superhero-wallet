@@ -22,7 +22,7 @@ import {
   STORAGE_KEYS,
 } from '@/constants';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
-import { openPopup } from '@/background/popupHandler';
+import { openPopup } from '@/background/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
 import { useStorageRef } from './storageRef';
 import { useModals } from './modals';

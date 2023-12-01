@@ -1,7 +1,7 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
 import { UNFINISHED_FEATURES } from '@/constants/environment';
-import * as wallet from '../background/wallet';
+import * as wallet from '../background/offscreen/wallet';
 import { useAccounts } from '../composables/accounts';
 
 browser.runtime.onMessage.addListener(async (msg: any) => {

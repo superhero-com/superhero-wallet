@@ -1,4 +1,4 @@
-import { openPopup, getPopup, removePopup } from '../../../src/background/popupHandler';
+import { openPopup, getPopup, removePopup } from '../../../src/background/bgPopupHandler';
 import {
   POPUP_TYPE_SIGN,
   POPUP_TYPE_RAW_SIGN,

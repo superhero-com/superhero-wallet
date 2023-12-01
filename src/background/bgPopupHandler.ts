@@ -10,6 +10,15 @@ interface IPopupConfig {
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
 }
 
+/**
+ * We need to duplicate these constants here because
+ * importing from constants.ts causes error in background script
+ * due to undefined window object
+ */
+const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
+const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;
+const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
+
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 
 const popups: Dictionary<IPopupConfig> = {};
@@ -39,7 +48,7 @@ export const openPopup = async (
 
   const extUrl = browser.runtime.getURL('./index.html');
   const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
-  const isMacOsExtension = browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
+  const isMacOsExtension = IS_EXTENSION && browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
 
   const popupWindow = await browser.windows.create({
     url: popupUrl,

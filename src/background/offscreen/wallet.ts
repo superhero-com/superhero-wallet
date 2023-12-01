@@ -1,20 +1,22 @@
 import { watch } from 'vue';
 import { isEqual } from 'lodash-es';
+import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
-import { useAccounts, useAeSdk, useNetworks } from '../composables';
+import { useAccounts, useAeSdk, useNetworks } from '../../composables';
+import { PopupMessageData } from '..';
 
 window.browser = require('webextension-polyfill');
 
 let isAeSdkBlocked = false;
-let connectionsQueue = [];
+let connectionsQueue: Runtime.Port[] = [];
 
-const addAeppConnection = async (port) => {
+const addAeppConnection = async (port: Runtime.Port) => {
   const { getAeSdk } = useAeSdk();
   const aeSdk = await getAeSdk();
-  const connection = new BrowserRuntimeConnection({ port });
+  const connection = new BrowserRuntimeConnection({ port, debug: false });
   const clientId = aeSdk.addRpcClient(connection);
   await aeSdk.shareWalletInfo(clientId);
   const shareWalletInfo = setInterval(
@@ -30,41 +32,37 @@ export async function init() {
   const { isAeSdkReady, getAeSdk, resetNode } = useAeSdk();
 
   browser.runtime.onConnect.addListener(async (port) => {
-    if (port.sender.id !== browser.runtime.id) return;
+    if (port?.sender?.id !== browser.runtime.id) return;
 
-    switch (detectConnectionType(port)) {
+    switch (detectConnectionType(port as Runtime.Port)) {
       case CONNECTION_TYPES.POPUP: {
-        port.onMessage.addListener(async (msg) => {
-          const id = new URL(port.sender.url).searchParams.get('id');
-          const popup = await getPopup(id);
+        const id = new URL(port?.sender?.url!).searchParams.get('id');
+        port.onMessage.addListener(async (msg: PopupMessageData) => {
+          const popup = await getPopup(id!);
 
           if (msg.type === POPUP_ACTIONS.getProps) {
             port.postMessage({ uuid: msg.uuid, res: popup?.props });
             return;
           }
-          if (popup?.actions?.[msg.type]) {
+          if (msg.type && popup?.actions?.[msg.type]) {
             popup.actions[msg.type]();
           }
         });
 
-        port.onDisconnect.addListener(() => {
-          if (id) {
-            removePopup(id);
-          }
-        });
+        port.onDisconnect.addListener(() => removePopup(id!));
         break;
       }
       case CONNECTION_TYPES.OTHER: {
         if (!isAeSdkReady.value) {
           if (!connectionsQueue) connectionsQueue = [];
-          connectionsQueue.push(port);
+          connectionsQueue.push(port as Runtime.Port);
           port.onDisconnect.addListener(() => {
             connectionsQueue = connectionsQueue.filter((p) => p !== port);
           });
           return;
         }
 
-        await addAeppConnection(port);
+        await addAeppConnection(port as Runtime.Port);
         break;
       }
       default:
@@ -110,9 +108,9 @@ export async function disconnect() {
     if (aepp.status && aepp.status !== 'DISCONNECTED') {
       aepp.rpc.connection.sendMessage(
         { method: 'connection.close', params: { reason: 'bye' }, jsonrpc: '2.0' },
-        true,
       );
       aepp.rpc.connection.disconnect();
+      // @ts-ignore
       browser.tabs.reload(aepp.rpc.connection.port.sender.tab.id);
     }
     aeSdk.removeRpcClient(aeppId);
