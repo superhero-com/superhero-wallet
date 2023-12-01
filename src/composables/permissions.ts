@@ -8,7 +8,7 @@ import type {
   PopupType,
 } from '@/types';
 import {
-  IS_EXTENSION_BACKGROUND,
+  IS_OFFSCREEN_TAB,
   MODAL_CONFIRM_ACCOUNT_LIST,
   MODAL_CONFIRM_CONNECT,
   MODAL_CONFIRM_RAW_SIGN,
@@ -174,9 +174,8 @@ export function usePermissions() {
         modal = MODAL_CONFIRM_RAW_SIGN;
         popup = POPUP_TYPE_RAW_SIGN;
       }
-
       await (
-        (IS_EXTENSION_BACKGROUND)
+        (IS_OFFSCREEN_TAB)
           ? openPopup(popup, url.href, props)
           : openModal(modal, props)
       );

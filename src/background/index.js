@@ -1,41 +1,58 @@
 import '@/lib/initPolyfills';
-import '@/protocols/registerAdapters';
-import { UNFINISHED_FEATURES } from '@/constants';
-import initDeeplinkHandler from './deeplinkHandler';
-import * as wallet from './wallet';
-import Logger from '../lib/logger';
-import { useAccounts } from '../composables';
+import { openPopup, removePopup, getPopup } from './bgPopupHandler';
 
-Logger.init({ background: true });
-initDeeplinkHandler();
+let creating; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path) {
+  // Check all windows controlled by the service worker to see if one
+  // of them is the offscreen document with the given path
+  const offscreenUrl = browser.runtime.getURL(path);
+  const existingContexts = await browser.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT'],
+    documentUrls: [offscreenUrl],
+  });
 
-browser.runtime.onMessage.addListener(async (msg) => {
-  const { method } = msg;
-
-  if (method === 'reload') {
-    wallet.disconnect();
-    window.location.reload();
-    return null;
+  if (existingContexts.length > 0) {
+    return;
   }
 
-  if (method === 'checkHasAccount') {
-    const { isLoggedIn } = useAccounts();
-    return isLoggedIn.value;
+  // create offscreen document
+  if (creating) {
+    await creating;
+  } else {
+    creating = browser.offscreen.createDocument({
+      url: path,
+      reasons: ['LOCAL_STORAGE'],
+      justification: 'handle wallet-aepp communication',
+    });
+    await creating;
+    creating = null;
   }
+}
 
-  if (UNFINISHED_FEATURES && method === 'paste') {
-    let result = '';
-    const textarea = document.createElement('textarea');
-    document.body.appendChild(textarea);
-    textarea.focus();
-    if (document.execCommand('paste')) {
-      result = textarea.value;
+setupOffscreenDocument(browser.runtime.getURL('offscreen.html'));
+
+// TODO type msg.target and msg.method
+function handleMessage(msg, sender, sendResponse) {
+  if (msg.target === 'background') {
+    if (msg.method === 'openPopup') {
+      const { popupType, aepp, params } = msg.params;
+      openPopup(popupType, aepp, params);
+      return;
+    } if (msg.method === 'removePopup') {
+      removePopup(msg.params.id);
+      return;
+    } if (msg.method === 'getPopup') {
+      sendResponse(getPopup(msg.params.id));
+      return;
     }
-    document.body.removeChild(textarea);
-    return result;
   }
 
-  return true;
-});
+  // forward messages to the offscreen page
+  // TODO type msg.target
+  browser.runtime.sendMessage({
+    ...msg,
+    target: 'offscreen',
+  });
+}
 
-wallet.init();
+browser.runtime.onMessage.addListener(handleMessage);

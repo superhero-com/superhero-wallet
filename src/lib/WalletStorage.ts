@@ -1,6 +1,10 @@
 import { isEqual } from 'lodash-es';
 import type { StorageKeysInput } from '@/types';
-import { IS_EXTENSION, RUNNING_IN_TESTS } from '@/constants';
+import {
+  IS_EXTENSION_BACKGROUND,
+  IS_OFFSCREEN_TAB,
+  RUNNING_IN_TESTS,
+} from '@/constants';
 import { composeStorageKeys } from '@/utils';
 
 interface IWalletStorage {
@@ -11,7 +15,7 @@ interface IWalletStorage {
 }
 
 /**
- * Extension Storage
+ * Extension Background Script Storage
  * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage
  */
 function createBrowserStorageInterface(): IWalletStorage {
@@ -36,7 +40,8 @@ function createBrowserStorageInterface(): IWalletStorage {
 }
 
 /**
- * Default web browser Storage
+ * Default web browser Storage.
+ * Also used by the offscreen tab
  */
 function createLocalStorageInterface(): IWalletStorage {
   return {
@@ -50,6 +55,25 @@ function createLocalStorageInterface(): IWalletStorage {
     remove: (keys) => new Promise(
       (resolve) => resolve(localStorage.removeItem(composeStorageKeys(keys))),
     ),
+    /**
+     * Sync state between the app and the offscreen tab. `watch` should not be
+     * called in the app. Only in the offscreen tab.
+     */
+    watch: (keys, callback) => {
+      if (!IS_OFFSCREEN_TAB) {
+        return;
+      }
+      window.addEventListener('storage', (event) => {
+        if (
+          composeStorageKeys(keys) === event.key
+          || composeStorageKeys(keys).includes(event.key!)
+        ) {
+          if (event && !isEqual(event.newValue, event.oldValue)) {
+            callback(JSON.parse(event.newValue!));
+          }
+        }
+      });
+    },
   };
 }
 
@@ -58,6 +82,10 @@ function createLocalStorageInterface(): IWalletStorage {
  * Exposes methods that allows to manipulate or watch the device storage.
  * Allows also to synchronize the state between the app and the extension background.
  */
-export const WalletStorage: IWalletStorage = (!RUNNING_IN_TESTS && IS_EXTENSION && browser)
+export const WalletStorage: IWalletStorage = (
+  !RUNNING_IN_TESTS
+  && !IS_OFFSCREEN_TAB
+  && IS_EXTENSION_BACKGROUND
+  && browser)
   ? createBrowserStorageInterface()
   : createLocalStorageInterface();

@@ -1,37 +1,55 @@
 {
   "name": "Superhero",
   "description": "Superhero Wallet",
-  "manifest_version": 2,
-  "content_security_policy": "default-src 'self'; script-src 'self' 'sha256-BCCVwoZgDUk/cw+Ln2/t3z9bm8qy+sICaZP5BWQIyUg='; connect-src *; font-src * data:; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; ",
+  "manifest_version": 3,
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; connect-src *; font-src * data:; img-src * data:; style-src-elem * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+  },
   "applications": {
     "gecko": {
       "strict_min_version": "53.0"
     }
   },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules_1.json"
+      }
+    ]
+  },
   "permissions": [
     "storage",
     "unlimitedStorage",
     "activeTab",
-    "clipboardWrite",
     "contextMenus",
     "notifications",
     "tabs",
+    "offscreen",
     "webRequest",
-    "webRequestBlocking",
     "webNavigation",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "optional_permissions": [
+    "clipboardWrite"
+  ],
+  "host_permissions": [
     "https://wallet.superhero.com/*"
   ],
   "icons": {
     "48": "./icons/icon_48.png",
     "128": "./icons/icon_128.png"
   },
-  "browser_action": {
+  "action": {
     "default_title": "Superhero",
     "default_popup": "index.html"
   },
   "background": {
-    "scripts": ["js/background.js"],
-    "persistent": true
+    "service_worker": "js/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -42,8 +60,18 @@
     }
   ],
   "web_accessible_resources": [
-    "js/inject.js",
-    "CameraRequestPermission.html",
-    "index.html"
+    {
+      "resources": [
+        "CameraRequestPermission.html",
+        "index.html"
+      ],
+      "matches": ["https://wallet.superhero.com/*"]
+    },
+    {
+      "resources": [
+        "js/inject.js"
+      ],
+      "matches": ["*://*/*"]
+    }
   ]
 }

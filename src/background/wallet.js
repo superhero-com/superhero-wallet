@@ -34,20 +34,24 @@ export async function init() {
 
     switch (detectConnectionType(port)) {
       case CONNECTION_TYPES.POPUP: {
-        const id = new URL(port.sender.url).searchParams.get('id');
-        const popup = getPopup(id);
+        port.onMessage.addListener(async (msg) => {
+          const id = new URL(port.sender.url).searchParams.get('id');
+          const popup = await getPopup(id);
 
-        port.onMessage.addListener((msg) => {
           if (msg.type === POPUP_ACTIONS.getProps) {
             port.postMessage({ uuid: msg.uuid, res: popup?.props });
             return;
           }
-          if (popup?.actions) {
+          if (popup?.actions?.[msg.type]) {
             popup.actions[msg.type]();
           }
         });
 
-        port.onDisconnect.addListener(() => removePopup(id));
+        port.onDisconnect.addListener(() => {
+          if (id) {
+            removePopup(id);
+          }
+        });
         break;
       }
       case CONNECTION_TYPES.OTHER: {

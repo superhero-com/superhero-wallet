@@ -37,6 +37,12 @@ module.exports = {
         title: 'cameraPermissions',
         filename: 'CameraRequestPermission.html',
       },
+      offscreen: {
+        template: 'src/popup/offscreen.html',
+        entry: 'src/popup/offscreen.ts',
+        title: 'offscreen',
+        filename: 'offscreen.html',
+      },
     },
   },
 
@@ -129,6 +135,7 @@ module.exports = {
             { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
             { from: 'public/icons/cameraRequestPermission', to: 'icons/cameraRequestPermission' },
             { from: 'src/icons/logo.svg', to: 'icons/cameraRequestPermission/logo.svg' },
+            { from: 'src/rules_1.json', to: 'rules_1.json' },
           ],
         }])
         .end();

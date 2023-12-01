@@ -1,78 +1,40 @@
-import { v4 as uuid } from 'uuid';
+import '@/lib/initPolyfills';
 import type {
-  Dictionary,
   IPopupProps,
   PopupType,
 } from '@/types';
-import {
-  POPUP_TYPE_CONNECT,
-  IS_EXTENSION,
-} from '@/constants';
-
-interface IPopupConfig {
-  actions: Pick<IPopupProps, 'resolve' | 'reject'>;
-  props: Omit<IPopupProps, 'resolve' | 'reject'>;
-}
-
-const popups: Dictionary<IPopupConfig> = {};
-
-export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | object,
   params: Partial<IPopupProps> = {},
 ) => {
-  const id = uuid();
-  const { href, protocol, host } = (typeof aepp === 'object') ? getAeppUrl(aepp) : new URL(aepp);
-  const { name = host } = (typeof aepp === 'object') ? aepp : {} as any;
-
-  const tabs = await browser.tabs.query({ active: true });
-
-  // @ts-ignore
-  tabs.forEach(({ url: tabURL, id: tabId }) => {
-    const tabUrl = new URL(tabURL as string);
-    if (
-      tabUrl.searchParams.get('type') === POPUP_TYPE_CONNECT
-      && decodeURIComponent(tabUrl.searchParams.get('url') || '') === href
-    ) {
-      browser.tabs.remove(tabId as number);
-    }
-  });
-
-  const extUrl = browser.runtime.getURL('./index.html');
-  const popupUrl = `${extUrl}?id=${id}&type=${popupType}&url=${encodeURIComponent(href)}`;
-  const isMacOsExtension = IS_EXTENSION && window.browser.runtime.getPlatformInfo().then(({ os }) => os === 'mac');
-
-  const popupWindow = await browser.windows.create({
-    url: popupUrl,
-    type: 'popup',
-    height: 630,
-    width: await isMacOsExtension ? 360 : 375,
-  });
-
-  return new Promise((resolve, reject) => {
-    if (!popupWindow) {
-      reject();
-    }
-
-    popups[id] = {
-      actions: { resolve, reject },
-      props: {
-        app: {
-          url: href,
-          name,
-          protocol,
-          host,
-        },
-        message: params.message,
-        tx: params.tx,
-        txBase64: params.txBase64,
-      },
-    };
+  browser.runtime.sendMessage({
+    target: 'background',
+    method: 'openPopup',
+    params: {
+      popupType,
+      aepp,
+      params,
+    },
   });
 };
 
-export const removePopup = (id: string) => delete popups[id];
+export const removePopup = (id: string) => browser.runtime.sendMessage({
+  target: 'background',
+  method: 'removePopup',
+  params: {
+    id,
+  },
+});
 
-export const getPopup = (id: string): IPopupConfig => popups[id];
+export const getPopup = async (id: string) => {
+  const res = await browser.runtime.sendMessage({
+    target: 'background',
+    method: 'getPopup',
+    params: {
+      id,
+    },
+  });
+  return res;
+};

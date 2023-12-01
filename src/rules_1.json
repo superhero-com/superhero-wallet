@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "url": "https://wallet.superhero.com/index.html#"
+      }
+    },
+    "condition": {
+      "urlFilter": "||wallet.superhero.com",
+      "resourceTypes": ["main_frame"]
+    }
+  }
+]

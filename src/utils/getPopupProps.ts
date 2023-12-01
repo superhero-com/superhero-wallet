@@ -108,8 +108,10 @@ export async function getPopupProps(): Promise<IPopupProps> {
     window.close();
     setTimeout(() => window.close(), 1000);
   };
+
+  const popupProps = await internalPostMessage({ type: POPUP_ACTIONS.getProps });
   return {
-    ...(await internalPostMessage({ type: POPUP_ACTIONS.getProps })) || {},
+    ...popupProps || {},
     resolve: closingWrapper(resolve),
     reject: closingWrapper(reject),
   };
