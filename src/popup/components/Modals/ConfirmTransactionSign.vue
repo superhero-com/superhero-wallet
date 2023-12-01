@@ -177,7 +177,7 @@ import { tg } from '@/store/plugins/languages';
 import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { RejectedByUserError } from '@/lib/errors';
 import {
-  SUPERHERO_CHAT_URL,
+  SUPERHERO_CHAT_URLS,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -286,7 +286,8 @@ export default defineComponent({
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const isAeppChatSuperhero = computed(
-      () => callbackOrigin.value?.origin === SUPERHERO_CHAT_URL,
+      () => callbackOrigin.value?.origin
+        && SUPERHERO_CHAT_URLS.includes(callbackOrigin.value.origin),
     );
 
     const transactionWrapped = computed(
