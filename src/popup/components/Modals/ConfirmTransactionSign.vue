@@ -177,7 +177,7 @@ import { tg } from '@/store/plugins/languages';
 import { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { RejectedByUserError } from '@/lib/errors';
 import {
-  SUPERHERO_CHAT_URL,
+  SUPERHERO_CHAT_URLS,
   PROTOCOL_AETERNITY,
   TX_DIRECTION,
 } from '@/constants';
@@ -190,6 +190,7 @@ import {
 import {
   useAccounts,
   useAeSdk,
+  useDeepLinkApi,
   usePopupProps,
   useTransactionTx,
 } from '@/composables';
@@ -255,6 +256,7 @@ export default defineComponent({
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk({ store });
     const { getLastActiveProtocolAccount } = useAccounts({ store });
+    const { callbackOrigin } = useDeepLinkApi();
 
     const activeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
 
@@ -284,7 +286,8 @@ export default defineComponent({
     const getTxAmountTotal = useGetter('getTxAmountTotal');
 
     const isAeppChatSuperhero = computed(
-      () => `${popupProps.value?.app?.protocol}//${popupProps.value?.app?.name}` === SUPERHERO_CHAT_URL,
+      () => callbackOrigin.value?.origin
+        && SUPERHERO_CHAT_URLS.includes(callbackOrigin.value.origin),
     );
 
     const transactionWrapped = computed(
