@@ -3,14 +3,14 @@ import type {
   IPopupProps,
   PopupType,
 } from '@/types';
-import { sendMessageToBackground } from './utils';
+import { executeOrSendMessageToBackground } from './utils';
 
 export const openPopup = async (
   popupType: PopupType,
   aepp: string | object,
   params: Partial<IPopupProps> = {},
 ) => {
-  sendMessageToBackground(
+  executeOrSendMessageToBackground(
     'openPopup',
     {
       popupType,
@@ -20,6 +20,6 @@ export const openPopup = async (
   );
 };
 
-export const removePopup = (id: string) => sendMessageToBackground('removePopup', { id });
+export const removePopup = (id: string) => executeOrSendMessageToBackground('removePopup', { id });
 
-export const getPopup = async (id: string) => sendMessageToBackground('getPopup', { id });
+export const getPopup = async (id: string) => executeOrSendMessageToBackground('getPopup', { id });

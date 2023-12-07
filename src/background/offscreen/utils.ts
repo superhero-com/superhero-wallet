@@ -1,5 +1,6 @@
 import { CONNECTION_TYPES, IS_FIREFOX } from '@/constants';
 import type { Runtime } from 'webextension-polyfill';
+import { openPopup, removePopup, getPopup } from '../bgPopupHandler';
 import { PopupMessageData } from '..';
 
 export const detectConnectionType = (port: Runtime.Port) => {
@@ -13,7 +14,27 @@ export const detectConnectionType = (port: Runtime.Port) => {
   return CONNECTION_TYPES.OTHER;
 };
 
-export async function sendMessageToBackground(method: PopupMessageData['method'], params: PopupMessageData['params']) {
+/**
+ *
+ * If browser is FF we cannot send messaged to the background page
+ * because we "are" on the background page
+ * instead call the function directly from bgPopupHandler.ts
+ */
+export async function executeOrSendMessageToBackground(method: PopupMessageData['method'], params: PopupMessageData['params']) {
+  if (IS_FIREFOX) {
+    console.log('is firefox, method', method);
+    switch (method) {
+      case 'openPopup':
+        return openPopup(params.popupType, params.aepp, params.params);
+      case 'removePopup':
+        return removePopup(params.id);
+      case 'getPopup':
+        return getPopup(params.id);
+      default:
+        return null;
+    }
+  }
+
   return browser.runtime.sendMessage<PopupMessageData>({
     target: 'background',
     method,

@@ -1,6 +1,7 @@
 import '@/lib/initPolyfills';
 import { PopupActionType } from '@/types';
 import { openPopup, removePopup, getPopup } from './bgPopupHandler';
+import updateDynamicRules from './redirectRule';
 
 let creating: Promise<void> | null; // A global promise to avoid concurrency issues
 async function setupOffscreenDocument(path: string) {
@@ -34,7 +35,6 @@ async function setupOffscreenDocument(path: string) {
 
 setupOffscreenDocument(browser.runtime.getURL('offscreen.html'));
 
-// TODO type
 export type PopupMessageData = {
   target?: 'background' | 'offscreen';
   method?: 'openPopup' | 'removePopup' | 'getPopup';
@@ -67,27 +67,4 @@ function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
 }
 
 browser.runtime.onMessage.addListener(handleMessage);
-
-browser.runtime.onInstalled.addListener(() => {
-  const extUrl = browser.runtime.getURL('./index.html');
-  // @ts-ignore
-  browser.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [1],
-    addRules: [
-      {
-        id: 1,
-        priority: 1,
-        condition: {
-          regexFilter: '^https://wallet.superhero.com/(.*)',
-          resourceTypes: ['main_frame'],
-        },
-        action: {
-          type: 'redirect',
-          redirect: {
-            regexSubstitution: `${extUrl}#/\\1`,
-          },
-        },
-      },
-    ],
-  });
-});
+browser.runtime.onInstalled.addListener(updateDynamicRules);

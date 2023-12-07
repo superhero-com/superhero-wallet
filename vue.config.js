@@ -13,11 +13,12 @@ const parseBool = (val) => (val ? JSON.parse(val) : false);
 
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
+const IS_FIREFOX_EXT = parseBool(process.env.IS_FIREFOX_EXT);
 
 module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
   outputDir: {
-    extension: 'dist/extension',
+    extension: IS_FIREFOX_EXT ? 'dist/extension/firefox' : 'dist/extension/chrome',
     ionic: 'www',
     web: 'dist/web/root',
   }[PLATFORM],
@@ -67,6 +68,13 @@ module.exports = {
         },
         manifestTransformer: (manifest) => {
           manifest.permissions.push(...UNFINISHED_FEATURES ? ['clipboardRead'] : []);
+          manifest.permissions.push(...!IS_FIREFOX_EXT ? ['offscreen'] : []);
+          if (IS_FIREFOX_EXT) {
+            // eslint-disable-next-line no-param-reassign
+            manifest.background.page = '/offscreen.html';
+            // eslint-disable-next-line no-param-reassign
+            delete manifest.background.service_worker;
+          }
           return manifest;
         },
       },
@@ -135,7 +143,6 @@ module.exports = {
             { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
             { from: 'public/icons/cameraRequestPermission', to: 'icons/cameraRequestPermission' },
             { from: 'src/icons/logo.svg', to: 'icons/cameraRequestPermission/logo.svg' },
-            { from: 'src/rules_1.json', to: 'rules_1.json' },
           ],
         }])
         .end();

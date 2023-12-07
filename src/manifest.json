@@ -12,7 +12,6 @@
     "contextMenus",
     "notifications",
     "tabs",
-    "offscreen",
     "webRequest",
     "webNavigation",
     "declarativeNetRequest",
