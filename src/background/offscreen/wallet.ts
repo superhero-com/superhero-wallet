@@ -38,7 +38,7 @@ export async function init() {
       case CONNECTION_TYPES.POPUP: {
         const id = new URL(port?.sender?.url!).searchParams.get('id');
         port.onMessage.addListener(async (msg: PopupMessageData) => {
-          const popup = await getPopup(id!);
+          const popup = getPopup(id!);
 
           if (msg.type === POPUP_ACTIONS.getProps) {
             port.postMessage({ uuid: msg.uuid, res: popup?.props });

@@ -22,7 +22,6 @@ export const detectConnectionType = (port: Runtime.Port) => {
  */
 export async function executeOrSendMessageToBackground(method: PopupMessageData['method'], params: PopupMessageData['params']) {
   if (IS_FIREFOX) {
-    console.log('is firefox, method', method);
     switch (method) {
       case 'openPopup':
         return openPopup(params.popupType, params.aepp, params.params);
@@ -34,7 +33,6 @@ export async function executeOrSendMessageToBackground(method: PopupMessageData[
         return null;
     }
   }
-
   return browser.runtime.sendMessage<PopupMessageData>({
     target: 'background',
     method,

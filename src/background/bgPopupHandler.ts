@@ -5,8 +5,8 @@ import type {
   PopupType,
 } from '@/types';
 
-interface IPopupConfig {
-  actions: Pick<IPopupProps, 'resolve' | 'reject'>;
+interface IPopupConfigNoActions {
+  id: string;
   props: Omit<IPopupProps, 'resolve' | 'reject'>;
 }
 
@@ -21,7 +21,7 @@ const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 const POPUP_TYPE_CONNECT = 'connectConfirm';
 
-const popups: Dictionary<IPopupConfig> = {};
+const popups: Dictionary<IPopupConfigNoActions> = {};
 
 export const getAeppUrl = (v: any) => new URL(v.connection.port.sender.url);
 
@@ -57,28 +57,27 @@ export const openPopup = async (
     width: await isMacOsExtension ? 360 : 375,
   });
 
-  return new Promise((resolve, reject) => {
-    if (!popupWindow) {
-      reject();
-    }
+  if (!popupWindow) {
+    return null;
+  }
 
-    popups[id] = {
-      actions: { resolve, reject },
-      props: {
-        app: {
-          url: href,
-          name,
-          protocol,
-          host,
-        },
-        message: params.message,
-        tx: params.tx,
-        txBase64: params.txBase64,
+  popups[id] = {
+    id,
+    props: {
+      app: {
+        url: href,
+        name,
+        protocol,
+        host,
       },
-    };
-  });
+      message: params.message,
+      tx: params.tx,
+      txBase64: params.txBase64,
+    },
+  };
+  return popups[id];
 };
 
 export const removePopup = (id: string) => delete popups[id];
 
-export const getPopup = (id: string): IPopupConfig => popups[id];
+export const getPopup = (id: string): IPopupConfigNoActions => popups[id];

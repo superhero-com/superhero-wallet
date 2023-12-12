@@ -44,18 +44,23 @@ export type PopupMessageData = {
   payload?: any;
 };
 
+/**
+ *   ? see https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
+ */
 function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
   if (msg.target === 'background') {
     if (msg.method === 'openPopup') {
       const { popupType, aepp, params } = msg.params;
-      openPopup(popupType, aepp, params);
-      return;
+      openPopup(popupType, aepp, params).then((popupConfig) => {
+        sendResponse(popupConfig);
+      });
+      return true;
     } if (msg.method === 'removePopup') {
-      removePopup(msg.params.id);
-      return;
+      sendResponse(removePopup(msg.params.id));
+      return false;
     } if (msg.method === 'getPopup') {
       sendResponse(getPopup(msg.params.id));
-      return;
+      return false;
     }
   }
 
@@ -64,6 +69,7 @@ function handleMessage(msg: PopupMessageData, _: any, sendResponse: Function) {
     ...msg,
     target: 'offscreen',
   });
+  return true;
 }
 
 browser.runtime.onMessage.addListener(handleMessage);
