@@ -1,3 +1,5 @@
+import { ContractAbi } from 'web3-types';
+
 import type { IDefaultNetworkTypeData } from '@/types';
 import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 import type { IEthNetworkPredefinedSettings, IEthNetworkSettings } from './types';
@@ -10,6 +12,46 @@ export const ETH_PROTOCOL_NAME = 'Ethereum';
 export const ETH_COIN_PRECISION = 18; // Amount of decimals
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
 export const ETH_GAS_LIMIT = 21000;
+
+export const ERC20_ABI: ContractAbi = [
+  {
+    constant: true,
+    inputs: [],
+    name: 'decimals',
+    outputs: [
+      {
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_to',
+        type: 'address',
+      },
+      {
+        name: '_value',
+        type: 'uint256',
+      },
+    ],
+    name: 'transfer',
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+      },
+    ],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
 
 /**
  * Amount of confirmations to consider transaction safe & not pending
