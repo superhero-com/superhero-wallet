@@ -77,4 +77,10 @@ export class EthplorerService {
       protocol: PROTOCOLS.ethereum,
     })) || [];
   }
+
+  async fetchTokenInfo(contractId: string): Promise<IToken | undefined> {
+    const token = await this.fetchFromApi(`/getTokenInfo/${contractId}`);
+
+    return token?.error ? undefined : this.normalizeTokenStructure(token);
+  }
 }
