@@ -4,11 +4,12 @@
     :transfer-data="transferData"
     :loading="loading"
     :protocol="PROTOCOLS.ethereum"
+    :show-fiat="isSelectedAssetEthCoin"
     class="transfer-review"
-    show-fiat
   >
     <template #total>
       <DetailsItem
+        v-if="isSelectedAssetEthCoin"
         :label="$t('common.total')"
         class="details-item"
       >
@@ -120,6 +121,7 @@ export default defineComponent({
       PROTOCOLS,
       ETH_SYMBOL,
       loading,
+      isSelectedAssetEthCoin,
       submit,
     };
   },
