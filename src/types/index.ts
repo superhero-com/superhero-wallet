@@ -803,3 +803,7 @@ export type IonAnimationBuilder = (
   baseEl: Element,
   opts: { enteringEl: Element; leavingEl: Element }
 ) => Animation;
+
+export interface ITransferResponse {
+  hash: string;
+}

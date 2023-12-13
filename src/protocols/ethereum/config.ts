@@ -1,5 +1,5 @@
-import type { IDefaultNetworkTypeData, IToken } from '@/types';
-import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET, PROTOCOLS } from '@/constants';
+import type { IDefaultNetworkTypeData } from '@/types';
+import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
 import type { IEthNetworkSettings } from './types';
 
 export const ETH_CONTRACT_ID = 'ethereum';
@@ -9,6 +9,46 @@ export const ETH_PROTOCOL_NAME = 'Ethereum';
 export const ETH_COIN_PRECISION = 18; // Amount of decimals
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
 export const ETH_GAS_LIMIT = 21000;
+
+export const ERC20_ABI = [
+  {
+    constant: true,
+    inputs: [],
+    name: 'decimals',
+    outputs: [
+      {
+        name: '',
+        type: 'uint8',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_to',
+        type: 'address',
+      },
+      {
+        name: '_value',
+        type: 'uint256',
+      },
+    ],
+    name: 'transfer',
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+      },
+    ],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+];
 
 /**
  * Amount of confirmations to consider transaction safe & not pending
@@ -30,25 +70,15 @@ export const ETH_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<any> = { /
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://etherscan.io',
     middlewareUrl: 'https://api.etherscan.io/api', // TODO replace temp values
+    tokenMiddlewareUrl: 'https://api.ethplorer.io/',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://sepolia.etherscan.io',
     middlewareUrl: 'https://api-sepolia.etherscan.io/api', // TODO replace temp values
+    tokenMiddlewareUrl: 'https://sepolia-api.ethplorer.io/',
   },
 };
 
 export const ETH_NETWORK_DEFAULT_ENV_SETTINGS = (process.env.NETWORK === 'Testnet')
   ? ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_MAINNET]
   : ETH_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET];
-
-/**
- * TODO Remove after implementing the ETH fungible tokens fetching
- */
-export const DUMMY_ERC20_TOKEN: IToken = {
-  protocol: PROTOCOLS.ethereum,
-  contractId: 'ct_123',
-  decimals: 4,
-  name: 'Dummy ERC20 Token',
-  symbol: 'DUMMY',
-  convertedBalance: 1000,
-};

@@ -22,6 +22,7 @@ import type {
   IToken,
   ITokenBalance,
   ITokenBalanceResponse,
+  ITransferResponse,
 } from '@/types';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
@@ -223,6 +224,15 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // TODO
   }
 
+  override async fetchTokenInfo(): Promise<IToken | undefined> {
+    // TODO if needed
+    return undefined;
+  }
+
+  override async transferToken() {
+    return undefined;
+  }
+
   async fetchTransactionsFromMiddleware(
     address: string,
     nextPageUrl: string | null,
@@ -345,7 +355,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: { payload: string },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {

@@ -3,6 +3,7 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
+import { Contract } from 'web3-eth-contract';
 import {
   privateKeyToAddress,
   FeeMarketEIP1559Transaction,
@@ -32,13 +33,14 @@ import type {
   IAccount,
   IToken,
   ITokenBalance,
+  ITransferResponse,
 } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { getLastNotEmptyAccountIndex } from '@/utils';
+import { getLastNotEmptyAccountIndex, fetchJson, toShiftedBigNumber } from '@/utils';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
-  DUMMY_ERC20_TOKEN,
+  ERC20_ABI,
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COINGECKO_COIN_ID,
@@ -53,6 +55,7 @@ import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '../helpers';
+import type { EthRawToken } from '../types';
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.ethereum;
@@ -191,11 +194,124 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   }
 
   override async fetchAvailableTokens(): Promise<IToken[]> {
-    return [DUMMY_ERC20_TOKEN]; // TODO replace with real tokens fetching
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    const res = await fetchJson(`${apiUrl}getTop?apiKey=freekey`);
+    if (res.error) {
+      throw res.error.message;
+    }
+    return res.tokens ? res.tokens.map((token: any) => ({
+      contractId: token.address,
+      decimals: token.decimals || undefined,
+      image: token.image ? `https://ethplorer.io/${token.image}` : undefined,
+      name: token.name,
+      protocol: PROTOCOLS.ethereum,
+      symbol: token.symbol,
+    })) : [];
   }
 
-  override async fetchAccountTokenBalances(): Promise<ITokenBalance[]> {
-    return []; // TODO implement ERC-20 token balance fetching
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    const res = await fetchJson(`${apiUrl}getAddressInfo/${address}?showETHTotals=false&showTxsCount=false&apiKey=freekey`);
+    if (res.error) {
+      throw res.error.message;
+    }
+    return res.tokens?.map(({
+      rawBalance, tokenInfo: { address: contractId, decimals },
+    }: EthRawToken) => ({
+      address,
+      amount: rawBalance,
+      contractId,
+      convertedBalance: +toShiftedBigNumber(rawBalance, -decimals).toFixed(2),
+      protocol: PROTOCOLS.ethereum,
+    })) || [];
+  }
+
+  override async fetchTokenInfo(contractId: string): Promise<IToken> {
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    const res = await fetchJson(`${apiUrl}getTokenInfo/${contractId}?apiKey=freekey`);
+    if (res.error) {
+      throw res.error.message;
+    }
+    return {
+      contractId: res.address,
+      decimals: res.decimals || undefined,
+      image: res.image ? `https://ethplorer.io/${res.image}` : undefined,
+      name: res.name,
+      protocol: PROTOCOLS.ethereum,
+      symbol: res.symbol,
+    };
+  }
+
+  override async transferToken(
+    amount: number,
+    recipient: string,
+    contractId: string,
+    options: {
+      fromAccount: IAccount;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
+  ): Promise<ITransferResponse> {
+    const {
+      ethActiveNetworkSettings,
+      ethActiveNetworkPredefinedSettings,
+    } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
+
+    const contractAbi = (await new EtherscanService(apiUrl)
+      .fetchFromApi({
+        module: 'contract',
+        action: 'getabi',
+        address: contractId,
+      }));
+
+    const contract = new Contract(
+      contractAbi && Array.isArray(contractAbi?.result) ? contractAbi.result : ERC20_ABI,
+      contractId,
+      { from: options.fromAccount.address! },
+    );
+
+    const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
+    contract.setProvider(nodeUrl);
+
+    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
+      Number(await contract.methods.decimals().call()),
+    ), 'ether')));
+    const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
+    const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
+
+    const [nonce, gasLimit] = await Promise.all([
+      this.getTransactionCount(options.fromAccount.address!),
+      // @ts-expect-error
+      contract.methods.transfer(recipient, hexAmount).estimateGas(),
+    ]);
+
+    // All values are in wei
+    const txData: FeeMarketEIP1559TxData = {
+      chainId,
+      nonce,
+      to: contractId,
+      // @ts-expect-error
+      data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
+      value: 0x0,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      gasLimit: `0x${gasLimit.toString(16)}`,
+      type: '0x02',
+    };
+
+    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+
+    const signedTx = tx.sign(options.fromAccount.secretKey);
+
+    const serializedTx = signedTx.serialize();
+    const web3Eth = this.getWeb3EthInstance();
+    const res = await sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+
+    return { hash: res.transactionHash };
   }
 
   override async fetchPendingTransactions() {
@@ -234,7 +350,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { chainId } = ethActiveNetworkSettings.value;
     const web3Eth = this.getWeb3EthInstance();
