@@ -150,7 +150,8 @@ export type AssetContractId =
   | Encoded.ContractAddress
   | typeof AE_CONTRACT_ID
   | typeof BTC_CONTRACT_ID
-  | typeof ETH_CONTRACT_ID;
+  | typeof ETH_CONTRACT_ID
+  | string;
 
 /**
  * Account's fungible token balance data
@@ -815,3 +816,7 @@ export type IonAnimationBuilder = (
   baseEl: Element,
   opts: { enteringEl: Element; leavingEl: Element }
 ) => Animation;
+
+export interface ITransferResponse {
+  hash: string;
+}
