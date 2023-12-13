@@ -18,9 +18,11 @@ import type {
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
+  IToken,
   MarketData,
   NetworkTypeDefault,
   IFetchTransactionResult,
+  ITransferResponse,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
@@ -208,6 +210,15 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return [];
   }
 
+  override async fetchTokenInfo(): Promise<IToken | undefined> {
+    return undefined;
+  }
+
+  override async transferToken() {
+    // has no tokens
+    return undefined;
+  }
+
   override async fetchTransactions(
     address: string,
     lastTxId: string | null,
@@ -363,7 +374,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: Buffer;
       secretKey: Buffer;
     },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
