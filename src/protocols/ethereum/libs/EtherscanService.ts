@@ -11,7 +11,7 @@ interface EtherscanDefaultResponse {
 
 interface EtherscanApiCallParams {
   module: 'account' | 'contract' | 'transaction' | 'block' | 'logs' | 'proxy' | 'stats' | 'gastracker';
-  action: 'txlist'; // Extend in the future
+  action: 'txlist' | 'getabi'; // Extend in the future
   [key: string]: string;
 }
 
