@@ -7,7 +7,7 @@
     :transfer-data="transferData"
     :loading="loading"
     :avatar-name="isAddressChain ? transferData.address : undefined"
-    :show-fiat="isSelectedAssetAex9"
+    :show-fiat="!isSelectedAssetAex9"
     :protocol="PROTOCOLS.aeternity"
     class="transfer-review"
   >
@@ -57,7 +57,7 @@
 
     <template #total>
       <DetailsItem
-        v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
+        v-if="!isSelectedAssetAex9"
         :label="$t('common.total')"
         class="details-item"
       >
