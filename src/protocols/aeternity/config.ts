@@ -30,6 +30,8 @@ export const AE_NETWORK_TESTNET_ID = 'ae_uat';
 export const AE_NETWORK_MAINNET_NODE_URL = 'https://mainnet.aeternity.io';
 export const AE_NETWORK_TESTNET_NODE_URL = 'https://testnet.aeternity.io';
 
+export const AE_COMPILER_URL = 'https://compiler.aeternity.io';
+
 export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSettings> = {
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: AE_NETWORK_MAINNET_NODE_URL,

@@ -9,6 +9,7 @@ import {
   RpcRejectedByUserError,
   METHODS,
   RPC_STATUS,
+  CompilerHttp,
 } from '@aeternity/aepp-sdk';
 import { WalletApi } from '@aeternity/aepp-sdk/es/aepp-wallet-communication/rpc/types';
 import type {
@@ -28,6 +29,7 @@ import {
   PROTOCOL_AETERNITY,
 } from '@/constants';
 import {
+  AE_COMPILER_URL,
   AE_NETWORK_MAINNET_ID,
   AE_NETWORK_TESTNET_ID,
   DEX_CONTRACTS,
@@ -120,6 +122,7 @@ export function useAeSdk() {
           name: activeNetworkName.value,
           instance: nodeInstance!,
         }],
+        onCompiler: new CompilerHttp(AE_COMPILER_URL),
         id: 'Superhero Wallet',
         type: IS_EXTENSION ? WALLET_TYPE.extension : WALLET_TYPE.window,
         onConnection(aeppId: string, params: OnAeppConnectionParams, origin: string) {
