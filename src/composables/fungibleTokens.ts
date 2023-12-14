@@ -242,11 +242,11 @@ export function useFungibleTokens() {
   }
 
   function getTxSymbol(transaction?: ITransaction) {
-    if (transaction?.pendingTokenTx) {
-      return availableTokens.value[transaction.tx.contractId]?.symbol;
-    }
     const contractCallData = transaction?.tx && categorizeContractCallTxObject(transaction);
-    return availableTokens.value[contractCallData?.token!]?.symbol || AE_SYMBOL;
+    const assetContractId = (contractCallData)
+      ? contractCallData.token
+      : transaction?.tx?.contractId;
+    return availableTokens.value[assetContractId!]?.symbol || AE_SYMBOL;
   }
 
   function getTxAmountTotal(

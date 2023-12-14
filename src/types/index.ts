@@ -386,6 +386,7 @@ export interface IGAMetaTx {
 export interface ITx {
   abiVersion?: number;
   accountId?: Encoded.AccountAddress;
+  aexnType?: 'aex9';
   amount: number;
   arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;

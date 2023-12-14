@@ -90,18 +90,19 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   url?: string;
   note?: string;
 } | null {
-  if (!compareCaseInsensitive(transaction.tx.type, Tag[Tag.ContractCallTx])) {
+  const { tx, incomplete, pending } = transaction || {};
+
+  if (!compareCaseInsensitive(tx.type, Tag[Tag.ContractCallTx])) {
     return null;
   }
-  if (transaction.incomplete || transaction.pending) {
-    const { tx } = transaction;
+  if (incomplete || pending) {
     return {
       amount: tx.amount,
       token: tx.selectedTokenContractId ?? tx.contractId,
-      to: transaction.incomplete ? tx.recipientId : tx.callerId,
+      to: incomplete ? tx.recipientId : tx.callerId,
     };
   }
-  const { tx } = transaction as ITransaction;
+
   switch (tx.function) {
     case 'transfer':
     case 'transfer_payload':
@@ -226,7 +227,8 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
         [TX_FUNCTIONS.tip, TX_FUNCTIONS.claim],
         transaction.tx.function,
       )
-      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString())
+      && decode(transaction.tx.log[0].data as Encoded.ContractBytearray).toString()
+    )
     || categorizeContractCallTxObject(transaction)?.url
     || ''
   );
@@ -292,6 +294,9 @@ export function isAensNameValid(value: string) {
 }
 
 export function isTransactionAex9(transaction: ITransaction): boolean {
+  if (transaction.tx?.aexnType === 'aex9') {
+    return true;
+  }
   const token = categorizeContractCallTxObject(transaction)?.token;
   return !!transaction.tx && !!token && token !== AE_CONTRACT_ID;
 }
