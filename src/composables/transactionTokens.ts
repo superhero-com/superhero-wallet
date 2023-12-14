@@ -72,19 +72,18 @@ export function useTransactionTokens({
       }];
     }
 
+    const symbol = isAllowance ? AE_SYMBOL : getTxSymbol(transaction);
+    const token = availableTokens.value[transaction.tx.contractId];
+
     return [{
       ...innerTx.value || {},
+      ...token || {},
       amount: isAllowance
         ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
         : getTxAmountTotal(transaction, direction),
-      symbol: isAllowance ? AE_SYMBOL : getTxSymbol(transaction),
+      isAe: isAllowance || (symbol === AE_SYMBOL && !isTransactionAex9(transaction)),
       isReceived: direction === TX_DIRECTION.received,
-      isAe:
-        isAllowance
-        || (
-          getTxSymbol(transaction) === AE_SYMBOL
-          && !isTransactionAex9(transaction)
-        ),
+      symbol,
     }];
   });
 
