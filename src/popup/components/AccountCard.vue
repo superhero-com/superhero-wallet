@@ -53,10 +53,10 @@ export default defineComponent({
     account: { type: Object as PropType<IAccount>, required: true },
     selected: Boolean,
   },
-  setup() {
-    const { balance } = useBalances();
+  setup(props) {
+    const { getAccountBalance } = useBalances();
 
-    const numericBalance = computed<number>(() => balance.value.toNumber());
+    const numericBalance = computed(() => getAccountBalance(props.account.address).toNumber());
 
     return {
       PROTOCOL_AETERNITY,
