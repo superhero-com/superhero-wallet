@@ -10,7 +10,6 @@ import type {
   ITransaction,
   Protocol,
   NetworkType,
-  IAccount,
   IToken,
   ITokenBalance,
   ITransferResponse,
@@ -105,7 +104,7 @@ export abstract class BaseProtocolAdapter {
     recipient: string,
     contractId: AssetContractId,
     options: {
-      fromAccount: IAccount;
+      fromAccount: string;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
