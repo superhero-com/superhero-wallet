@@ -2,7 +2,7 @@
 
 import { watch } from 'vue';
 import BigNumber from 'bignumber.js';
-import { Contract, Encoded, Encoding } from '@aeternity/aepp-sdk';
+import { Encoded, Encoding } from '@aeternity/aepp-sdk';
 import { toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
@@ -22,6 +22,7 @@ import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
 import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
 import { aettosToAe, calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
@@ -31,8 +32,6 @@ import { useTippingContracts } from './tippingContracts';
 import { createNetworkWatcher } from './networks';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
-
-type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;
 
 /**
  * List of all fungible tokens available on user's protocols.
@@ -223,20 +222,6 @@ export function useFungibleTokens() {
     }
   }
 
-  async function transferToken(
-    tokenContractId: Encoded.ContractAddress,
-    toAccount: Encoded.AccountAddress,
-    amount: number,
-    options: ContractInitializeOptions,
-  ) {
-    const aeSdk = await getAeSdk();
-    const tokenContract = await aeSdk.initializeContract({
-      aci: FungibleTokenFullInterfaceACI,
-      address: tokenContractId,
-    });
-    return tokenContract.transfer(toAccount, amount.toFixed(), options);
-  }
-
   async function burnTriggerPoS(
     address: Encoded.ContractAddress,
     posAddress: string,
@@ -345,7 +330,6 @@ export function useFungibleTokens() {
     getContractTokenPairs,
     getTxAssetSymbol,
     getTxAmountTotal,
-    transferToken,
     loadTokenBalances,
     loadAvailableTokens,
   };
