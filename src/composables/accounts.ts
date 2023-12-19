@@ -143,7 +143,7 @@ const protocolsInUse = computed(
  * The wallets's data is created in fly with the use of computed properties.
  */
 export function useAccounts() {
-  function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
+  function getAccountByAddress(address: string): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
 
