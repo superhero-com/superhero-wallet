@@ -150,7 +150,6 @@ export default defineComponent({
     const {
       createOrChangeAllowance,
       burnTriggerPoS,
-      transferToken,
     } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
@@ -185,10 +184,11 @@ export default defineComponent({
             { waitMined: false },
           );
         } else if (!isSelectedAssetAeCoin) {
-          actionResult = await transferToken(
-            selectedAsset.contractId as Encoded.ContractAddress,
-            recipient as Encoded.AccountAddress,
+          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+          actionResult = await aeternityAdapter.transferToken(
             Number(amount),
+            recipient,
+            selectedAsset.contractId as Encoded.ContractAddress,
             { waitMined: false },
           );
         } else {
@@ -237,7 +237,7 @@ export default defineComponent({
           upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
         }
         emit('success');
-        return actionResult.hash;
+        return actionResult?.hash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
