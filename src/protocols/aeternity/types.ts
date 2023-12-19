@@ -55,3 +55,5 @@ export interface AeDecodedCallData {
   functionName: string;
   args: string[];
 }
+
+export type ContractInitializeOptions = Omit<Parameters<typeof Contract.initialize>[0], 'onNode'>;

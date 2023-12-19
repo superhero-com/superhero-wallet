@@ -103,11 +103,7 @@ export abstract class BaseProtocolAdapter {
     amount: number,
     recipient: string,
     contractId: AssetContractId,
-    options: {
-      fromAccount: string;
-      maxPriorityFeePerGas: string;
-      maxFeePerGas: string;
-    },
+    options: Record<string, any>,
   ): Promise<ITransferResponse | undefined>;
 
   abstract fetchTokenInfo(contractId: AssetContractId): Promise<IToken | undefined>;
