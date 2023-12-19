@@ -24,7 +24,6 @@ import { BIP32Factory } from 'bip32';
 import type {
   AdapterNetworkSettingList,
   AssetContractId,
-  IAccount,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
@@ -52,6 +51,7 @@ import {
   ETH_PROTOCOL_NAME,
   ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
+import { useAccounts } from '@/composables';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
@@ -238,7 +238,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     recipient: string,
     contractId: AssetContractId,
     options: {
-      fromAccount: IAccount;
+      fromAccount: string;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
@@ -247,6 +247,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       ethActiveNetworkSettings,
       ethActiveNetworkPredefinedSettings,
     } = useEthNetworkSettings();
+    const { getAccountByAddress } = useAccounts();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
 
     const contractAbi = await new EtherscanService(apiUrl)
@@ -259,7 +260,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const contract = new Contract(
       contractAbi && Array.isArray(contractAbi?.result) ? contractAbi.result : ERC20_ABI,
       contractId,
-      { from: options.fromAccount.address! },
+      { from: options.fromAccount },
     );
 
     const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
@@ -272,7 +273,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
 
     const [nonce, gasLimit] = await Promise.all([
-      this.getTransactionCount(options.fromAccount.address!),
+      this.getTransactionCount(options.fromAccount),
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
 
@@ -291,7 +292,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
 
-    const signedTx = tx.sign(options.fromAccount.secretKey);
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
+    const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
     const web3Eth = this.getWeb3EthInstance();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
@@ -332,15 +338,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: {
-      fromAccount: IAccount;
+      fromAccount: string;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
   ): Promise<ITransferResponse> {
+    const { getAccountByAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { chainId } = ethActiveNetworkSettings.value;
     const web3Eth = this.getWeb3EthInstance();
-    const nonce = await this.getTransactionCount(options.fromAccount.address!);
+    const nonce = await this.getTransactionCount(options.fromAccount);
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
@@ -361,7 +368,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
 
-    const signedTx = tx.sign(options.fromAccount.secretKey);
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
+    const signedTx = tx.sign(account.secretKey);
 
     const serializedTx = signedTx.serialize();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
