@@ -16,7 +16,6 @@ import type {
   IRawMultisigAccount,
 } from '@/types';
 import { DEFAULT_WAITING_HEIGHT } from '@/constants';
-import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import {
   MULTISIG_CREATION_PHASES,
   MULTISIG_SIMPLE_GA_BYTECODE,
@@ -25,6 +24,8 @@ import {
 import {
   aettosToAe,
 } from '@/protocols/aeternity/helpers';
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
+
 import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useBalances } from './balances';
