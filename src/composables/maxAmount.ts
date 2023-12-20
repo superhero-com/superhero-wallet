@@ -18,7 +18,6 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import type { IFormModel } from '@/types';
 import {
   executeAndSetInterval,
@@ -35,6 +34,7 @@ import {
   AE_CONTRACT_ID,
 } from '@/protocols/aeternity/config';
 import { isAensNameValid } from '@/protocols/aeternity/helpers';
+import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 
 import { useAeSdk } from './aeSdk';
 import { useBalances } from './balances';
