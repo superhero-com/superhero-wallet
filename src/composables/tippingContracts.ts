@@ -2,8 +2,8 @@ import { computed, ref } from 'vue';
 import { Contract } from '@aeternity/aepp-sdk';
 
 import { NETWORK_TYPE_MAINNET, NETWORK_TYPE_TESTNET } from '@/constants';
-import TippingV1ACI from '@/lib/contracts/TippingV1ACI.json';
-import TippingV2ACI from '@/lib/contracts/TippingV2ACI.json';
+import TippingV1ACI from '@/protocols/aeternity/aci/TippingV1ACI.json';
+import TippingV2ACI from '@/protocols/aeternity/aci/TippingV2ACI.json';
 import { watchUntilTruthy } from '@/utils';
 import {
   AeTippingContractAddresses,

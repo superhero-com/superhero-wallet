@@ -24,9 +24,10 @@ import type {
   ITransferResponse,
 } from '@/types';
 import JsonBig from '@/lib/json-big';
-import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
+import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
+import { useMiddleware } from '@/composables/middleware';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
@@ -55,7 +56,6 @@ import {
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { useMiddleware } from '@/composables/middleware';
 
 import { aettosToAe } from '../helpers';
 

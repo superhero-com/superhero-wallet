@@ -10,7 +10,7 @@ import {
 } from '@aeternity/aepp-sdk';
 
 // aeternity/ga-multisig-contract#b09c381c7845a92ea5471d1721b091cca943bfee
-import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 
 import type {
   IActiveMultisigTransaction,
