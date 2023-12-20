@@ -86,6 +86,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -93,6 +94,7 @@ import {
 } from '@/utils';
 import {
   useAccounts,
+  useAeSdk,
   useDeepLinkApi,
   useFungibleTokens,
   useModals,
@@ -102,11 +104,13 @@ import {
   useTransactionList,
   useUi,
 } from '@/composables';
-import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
-import { PROTOCOLS } from '@/constants';
-import { aeToAettos } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
+
+import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
+import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
+import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
@@ -141,6 +145,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { upsertCustomPendingTransactionForAccount } = useTransactionList();
     const { activeAccount } = useAccounts();
+    const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
@@ -149,7 +154,6 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts();
     const {
       createOrChangeAllowance,
-      burnTriggerPoS,
     } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
@@ -166,6 +170,26 @@ export default defineComponent({
         title: t('modals.transaction-failed.msg'),
         icon: 'critical',
       });
+    }
+
+    async function burnTriggerPoS(
+      address: Encoded.ContractAddress,
+      posAddress: string,
+      invoiceId: string,
+      amount: number,
+      options: ContractInitializeOptions,
+    ) {
+      const aeSdk = await getAeSdk();
+      const tokenContract = await aeSdk.initializeContract({
+        aci: ZeitTokenACI,
+        address,
+      });
+      return tokenContract.burn_trigger_pos(
+        amount.toFixed(),
+        posAddress,
+        invoiceId,
+        options,
+      );
     }
 
     async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {

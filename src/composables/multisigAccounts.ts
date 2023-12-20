@@ -4,7 +4,6 @@ import camelCaseKeysDeep from 'camelcase-keys-deep';
 import { DryRunError, Encoded } from '@aeternity/aepp-sdk';
 import BigNumber from 'bignumber.js';
 // aeternity/ga-multisig-contract#02831f1fe0818d4b5c6edb342aea252479df028b
-import SimpleGAMultiSigAci from '@/lib/contracts/SimpleGAMultiSigACI.json';
 import type {
   IMultisigAccount,
   IMultisigConsensus,
@@ -17,6 +16,8 @@ import {
   setLocalStorageItem,
   toShiftedBigNumber,
 } from '@/utils';
+
+import SimpleGAMultiSigAci from '@/protocols/aeternity/aci/SimpleGAMultiSigACI.json';
 import {
   AE_COIN_PRECISION,
   MULTISIG_SUPPORTED_CONTRACT_VERSION,

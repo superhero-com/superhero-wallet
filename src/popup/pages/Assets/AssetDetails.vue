@@ -128,8 +128,14 @@ import {
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { fadeAnimation } from '@/popup/animations';
+import AedexV2PairACI from '@/protocols/aeternity/aci/AedexV2PairACI.json';
 import { AE_CONTRACT_ID, AE_DEX_URL } from '@/protocols/aeternity/config';
-import { buildAeFaucetUrl, buildSimplexLink, isContract } from '@/protocols/aeternity/helpers';
+import {
+  buildAeFaucetUrl,
+  buildSimplexLink,
+  calculateSupplyAmount,
+  isContract,
+} from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../../components/buttons/BtnBox.vue';
 import TokenAmount from '../../components/TokenAmount.vue';
@@ -168,14 +174,13 @@ export default defineComponent({
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
 
     const { isNodeMainnet, isNodeTestnet, getAeSdk } = useAeSdk();
-    const { activeAccount } = useAccounts();
+    const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
     const { protocolCoinBalance } = useAccountAssetsList({
       isMultisig: isMultisig.value,
     });
     const { marketData } = useCurrencies();
     const {
       getAccountTokenBalance,
-      getContractTokenPairs,
       getProtocolAvailableTokens,
     } = useFungibleTokens();
 
@@ -260,6 +265,64 @@ export default defineComponent({
         calculateRouterHeight();
       });
       resizeObserver.observe(stickyTabsWrapperEl.value!);
+    }
+
+    async function getContractTokenPairs(
+      address: Encoded.ContractAddress,
+    ): Promise<Partial<TokenPair> & Record<string, any>> {
+      try {
+        const aeSdk = await getAeSdk();
+        const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+        const tokenContract = await aeSdk.initializeContract({
+          aci: AedexV2PairACI,
+          address,
+        });
+        const protocolTokens = getProtocolAvailableTokens(PROTOCOLS.aeternity);
+
+        const [
+          { decodedResult: balances },
+          { decodedResult: balance },
+          { decodedResult: token0 },
+          { decodedResult: token1 },
+          { decodedResult: reserves },
+          { decodedResult: totalSupply },
+        ] = await Promise.all([
+          tokenContract.balances(),
+          tokenContract.balance(account?.address),
+          tokenContract.token0(),
+          tokenContract.token1(),
+          tokenContract.get_reserves(),
+          tokenContract.total_supply(),
+        ]);
+
+        return {
+          token0: (protocolTokens[token0])
+            ? {
+              ...protocolTokens[token0],
+              amount: calculateSupplyAmount(
+                balance,
+                totalSupply,
+                reserves.reserve0,
+              )!,
+            }
+            : undefined,
+          token1: (protocolTokens[token1])
+            ? {
+              ...protocolTokens[token1],
+              amount: calculateSupplyAmount(
+                balance,
+                totalSupply,
+                reserves.reserve1,
+              )!,
+            }
+            : undefined,
+          totalSupply,
+          balance,
+          balances,
+        };
+      } catch (error) {
+        return {};
+      }
     }
 
     onMounted(async () => {
