@@ -2,7 +2,7 @@
 
 import { watch } from 'vue';
 import BigNumber from 'bignumber.js';
-import { Encoded, Encoding } from '@aeternity/aepp-sdk';
+import { Encoding } from '@aeternity/aepp-sdk';
 import { toShiftedBigNumber } from '@/utils';
 import type {
   AccountAddress,
@@ -13,18 +13,14 @@ import type {
   ITokenBalance,
   ITransaction,
   ProtocolRecord,
-  TokenPair,
   Protocol,
   Dictionary,
 } from '@/types';
 import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
-import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
-import AedexV2PairACI from '@/lib/contracts/AedexV2PairACI.json';
-import ZeitTokenACI from '@/lib/contracts/FungibleTokenFullACI.json';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
-import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
-import { aettosToAe, calculateSupplyAmount, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
+import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
+import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
 import { useAccounts } from './accounts';
@@ -180,85 +176,6 @@ export function useFungibleTokens() {
     );
   }
 
-  async function getContractTokenPairs(
-    address: Encoded.ContractAddress,
-  ): Promise<Partial<TokenPair> & Record<string, any>> {
-    try {
-      const aeSdk = await getAeSdk();
-      const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
-      const tokenContract = await aeSdk.initializeContract({
-        aci: AedexV2PairACI,
-        address,
-      });
-      const protocolTokens: AssetList = tokensAvailable.value?.[PROTOCOLS.aeternity]
-        || {} as AssetList;
-
-      const [
-        { decodedResult: balances },
-        { decodedResult: balance },
-        { decodedResult: token0 },
-        { decodedResult: token1 },
-        { decodedResult: reserves },
-        { decodedResult: totalSupply },
-      ] = await Promise.all([
-        tokenContract.balances(),
-        tokenContract.balance(account?.address),
-        tokenContract.token0(),
-        tokenContract.token1(),
-        tokenContract.get_reserves(),
-        tokenContract.total_supply(),
-      ]);
-
-      return {
-        token0: (protocolTokens[token0])
-          ? {
-            ...protocolTokens[token0],
-            amount: calculateSupplyAmount(
-              balance,
-              totalSupply,
-              reserves.reserve0,
-            )!,
-          }
-          : undefined,
-        token1: (protocolTokens[token1])
-          ? {
-            ...protocolTokens[token1],
-            amount: calculateSupplyAmount(
-              balance,
-              totalSupply,
-              reserves.reserve1,
-            )!,
-          }
-          : undefined,
-        totalSupply,
-        balance,
-        balances,
-      };
-    } catch (error) {
-      return {};
-    }
-  }
-
-  async function burnTriggerPoS(
-    address: Encoded.ContractAddress,
-    posAddress: string,
-    invoiceId: string,
-    amount: number,
-    options: ContractInitializeOptions,
-  ) {
-    const aeSdk = await getAeSdk();
-    const tokenContract = await aeSdk.initializeContract({
-      aci: ZeitTokenACI,
-      address,
-    });
-    return tokenContract.burn_trigger_pos(
-      amount.toFixed(),
-      posAddress,
-      invoiceId,
-      options,
-    );
-  }
-
   function getTxAssetSymbol(transaction?: ITransaction) {
     const { protocol = PROTOCOLS.aeternity } = transaction || {};
 
@@ -274,6 +191,9 @@ export function useFungibleTokens() {
     return ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol;
   }
 
+  /**
+   * TODO move this function to utilities and make it not dependant on token list
+   */
   function getTxAmountTotal(
     transaction: ITransaction,
     direction: string = TX_DIRECTION.sent,
@@ -339,12 +259,10 @@ export function useFungibleTokens() {
   return {
     tokenBalances,
     tokensAvailable,
-    burnTriggerPoS,
     createOrChangeAllowance,
     getAccountTokenBalance,
     getAccountTokenBalances,
     getProtocolAvailableTokens,
-    getContractTokenPairs,
     getTxAssetSymbol,
     getTxAmountTotal,
     loadTokenBalances,
