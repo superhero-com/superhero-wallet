@@ -357,7 +357,7 @@ export default defineComponent({
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : toShiftedBigNumber(amountRaw, selectedAsset.decimals);
+        : toShiftedBigNumber(amountRaw, selectedAsset.decimals!);
 
       if (props.isMultisig) {
         await proposeMultisigTransaction();
