@@ -17,9 +17,15 @@
         </DetailsRow>
 
         <DetailsRow
-          v-if="assetData?.decimals"
+          v-if="assetData?.name"
+          :label="$t('pages.token-details.name')"
+          :text="assetData.name"
+        />
+
+        <DetailsRow
+          v-if="decimals"
           :label="$t('pages.token-details.decimals')"
-          :text="assetData.decimals"
+          :text="decimals"
         />
 
         <DetailsRow
@@ -196,21 +202,19 @@ export default defineComponent({
   },
 
   setup() {
-    const { tokenDetails } = useAssetDetails();
+    const { sharedAssetDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
 
-    const assetData = computed((): IAsset => tokenDetails.value.tokenData || {});
+    const assetData = computed((): IAsset => sharedAssetDetails.value.tokenData || {});
     const assetContractId = computed(() => assetData.value.contractId);
-    const tokens = computed(() => tokenDetails.value.tokens);
-    const tokenPairs = computed(() => tokenDetails.value.tokenPairs);
+    const tokens = computed(() => sharedAssetDetails.value.tokens);
+    const tokenPairs = computed(() => sharedAssetDetails.value.tokenPairs);
+    const tokenBalance = computed(() => sharedAssetDetails.value.tokenBalance);
     const isAssetCoin = computed(() => isCoin(assetContractId.value));
+    const decimals = computed(() => assetData.value?.decimals || tokenBalance.value?.decimals);
 
     const poolShare = computed(() => {
-      if (
-        !tokenPairs
-        || !tokenPairs.value.balance
-        || !tokenPairs.value.totalSupply
-      ) {
+      if (!tokenPairs.value?.balance || !tokenPairs.value?.totalSupply) {
         return null;
       }
       return `${amountRounded((new BigNumber(tokenPairs.value.balance))
@@ -230,9 +234,10 @@ export default defineComponent({
       formatCurrency,
       formatNumber,
       tokens,
-      tokenDetails,
       tokenPairs,
+      tokenBalance,
       assetData,
+      decimals,
     };
   },
 });

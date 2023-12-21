@@ -280,7 +280,7 @@ export function useFungibleTokens() {
     if (contractCallData && tokenData) {
       return +toShiftedBigNumber(
         contractCallData.amount || 0,
-        -tokenData.decimals,
+        -tokenData.decimals!,
       );
     }
 

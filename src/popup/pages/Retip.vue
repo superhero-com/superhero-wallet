@@ -160,7 +160,7 @@ export default defineComponent({
 
     async function sendTip() {
       const precision = (formModel.value.selectedAsset?.contractId !== AE_CONTRACT_ID)
-        ? (formModel.value.selectedAsset as IToken).decimals
+        ? (formModel.value.selectedAsset as IToken).decimals!
         : AE_COIN_PRECISION;
       const amount = toShiftedBigNumber(+(formModel.value.amount || 0), precision).toNumber();
       const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
