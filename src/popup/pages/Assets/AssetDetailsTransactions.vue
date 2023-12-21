@@ -6,7 +6,7 @@
       :fetch-more-transactions="fetchMoreTransactions"
       :can-load-more="canLoadMore"
       :transactions="filteredTransactions"
-      :is-multisig="tokenProps?.isMultisig"
+      :is-multisig="isMultisig"
       :is-initial-loading="isInitialLoading"
     />
   </IonPage>
@@ -40,8 +40,7 @@ export default defineComponent({
     TransactionList,
   },
   setup() {
-    const { tokenProps } = useAssetDetails();
-
+    const { sharedAssetDetails } = useAssetDetails();
     const { activeAccount } = useAccounts();
     const { activeMultisigAccount } = useMultisigAccounts();
     const {
@@ -53,11 +52,16 @@ export default defineComponent({
     const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
+
     const tokensContractIds = computed(
       (): string[] => Object.keys(getProtocolAvailableTokens(PROTOCOLS.aeternity)),
     );
+
+    const isMultisig = computed((): boolean => !!sharedAssetDetails.value.isMultisig);
+    const assetContractId = computed(() => sharedAssetDetails.value.contractId);
+
     const currentAddress = computed(
-      () => (tokenProps.value?.isMultisig)
+      () => (isMultisig.value)
         ? activeMultisigAccount.value?.gaAccountId
         : activeAccount.value.address,
     );
@@ -79,12 +83,12 @@ export default defineComponent({
     }
 
     function narrowTransactionsToDefinedToken(transactionList: ICommonTransaction[]) {
-      if (tokenProps.value?.contractId) {
+      if (assetContractId.value) {
         return transactionList.filter((transaction) => {
           const innerTx = getInnerTransaction(transaction.tx);
 
-          if (tokenProps.value?.contractId !== AE_CONTRACT_ID) {
-            return innerTx?.contractId === tokenProps.value?.contractId;
+          if (assetContractId.value !== AE_CONTRACT_ID) {
+            return innerTx?.contractId === assetContractId.value;
           }
 
           return !innerTx.contractId || !isFungibleTokenTx(innerTx);
@@ -98,11 +102,11 @@ export default defineComponent({
     );
 
     async function fetchRecentTransactions() {
-      await fetchTransactions(currentAddress.value!, true, tokenProps.value?.isMultisig);
+      await fetchTransactions(currentAddress.value!, true, isMultisig.value);
     }
 
     async function fetchMoreTransactions() {
-      await fetchTransactions(currentAddress.value!, false, tokenProps.value?.isMultisig);
+      await fetchTransactions(currentAddress.value!, false, isMultisig.value);
     }
 
     onIonViewDidEnter(() => {
@@ -119,7 +123,7 @@ export default defineComponent({
       filteredTransactions,
       ionicLifecycleStatus,
       isInitialLoading,
-      tokenProps,
+      isMultisig,
       fetchMoreTransactions,
       fetchRecentTransactions,
     };

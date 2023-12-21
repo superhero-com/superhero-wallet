@@ -7,9 +7,10 @@
       >
         <AssetList
           v-if="isOnline"
-          class="tokens-list"
           :search-term="searchPhrase"
           :protocol="PROTOCOLS.ethereum"
+          class="tokens-list"
+          owned-only
         />
         <MessageOffline
           v-else

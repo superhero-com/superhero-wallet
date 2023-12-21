@@ -101,7 +101,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
 
-import type { IToken, TokenPair } from '@/types';
+import type { AssetContractId, IToken, TokenPair } from '@/types';
 import {
   IS_IOS,
   PROTOCOLS,
@@ -162,7 +162,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setTokenProps } = useAssetDetails();
+    const { setAssetDetails } = useAssetDetails();
     const { setLoaderVisible } = useUi();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
@@ -182,7 +182,7 @@ export default defineComponent({
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
     );
-    const contractId = route.params.id as Encoded.ContractAddress | typeof AE_CONTRACT_ID;
+    const contractId = route.params.id as AssetContractId;
     const isAe = contractId === AE_CONTRACT_ID;
 
     const detailsRouteName = isCoin ? ROUTE_COIN_DETAILS : ROUTE_TOKEN_DETAILS;
@@ -211,6 +211,9 @@ export default defineComponent({
 
     const fungibleToken = computed(
       () => getProtocolAvailableTokens(activeAccount.value.protocol)[contractId],
+    );
+    const fungibleTokenBalance = computed(
+      () => (isCoin) ? undefined : getAccountTokenBalance(activeAccount.value.address, contractId),
     );
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
@@ -263,7 +266,7 @@ export default defineComponent({
       if (isContract(contractId) && !isAe) {
         setLoaderVisible(true);
         await getAeSdk();
-        tokenPairs.value = await getContractTokenPairs(contractId);
+        tokenPairs.value = await getContractTokenPairs(contractId as Encoded.ContractAddress);
         setLoaderVisible(false);
       }
       setTimeout(() => {
@@ -273,17 +276,18 @@ export default defineComponent({
     });
 
     onIonViewDidEnter(() => {
-      setTokenProps({
+      setAssetDetails({
         contractId,
         tokenPairs: tokenPairs.value,
         tokenData: assetData.value,
+        tokenBalance: fungibleTokenBalance.value,
         tokens: tokens.value,
         isMultisig: isMultisig.value,
       });
     });
 
     onIonViewDidLeave(() => {
-      setTokenProps(null);
+      setAssetDetails(null);
     });
 
     return {
