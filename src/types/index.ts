@@ -159,6 +159,7 @@ export interface ITokenBalance {
   address: AccountAddress;
   amount: number | string;
   contractId: AssetContractId;
+  decimals?: number;
   /** Amount of the token that is owned */
   convertedBalance?: number;
   protocol: Protocol;
@@ -172,8 +173,12 @@ export interface IToken {
   contractId: AssetContractId;
   contractTxi?: number;
   convertedBalance?: number; // TODO consider removing data specific to an account
-  decimals: number;
-  event_supply?: number;
+  /**
+   * Precision required to calculate amounts.
+   * It's optional for the token because some protocols does not provide this
+   * when fetching the tokens data. Instead it is available for the token balance.
+   */
+  decimals?: number;
   extensions?: string[];
   holders?: number;
   image?: string;
@@ -654,14 +659,6 @@ export interface IPopupProps extends IPopupActions, IPopupData {
 
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
-}
-
-export interface TokenProps {
-  contractId?: string;
-  tokenPairs?: any; // TODO: replace any with TokenPair & resolve issues
-  tokenData?: any; // TODO: replace any with IAsset & resolve issues
-  tokens?: IToken[];
-  isMultisig?: boolean;
 }
 
 export interface IResponseChallenge {

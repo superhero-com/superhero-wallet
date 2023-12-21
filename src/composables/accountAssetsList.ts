@@ -8,7 +8,6 @@ import type {
   ICoin,
 } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
 import { useCurrencies } from './currencies';
 import { useFungibleTokens } from './fungibleTokens';
 import { useAccounts } from './accounts';
@@ -100,15 +99,19 @@ export function useAccountAssetsList({
   const accountAssetsFiltered = computed<IAsset[]>(() => {
     const searchTermParsed = (searchTerm?.value || '').trim().toLowerCase();
     const isSearchTermContract = searchTermParsed.startsWith('ct_');
+    const protocolCoinContractId = ProtocolAdapterFactory
+      .getAdapter(activeAccount.value.protocol)
+      .getCoinContractId();
+
     return accountAssets.value
       .filter(({ contractId }) => (
         !ownedOnly
-        || contractId === AE_CONTRACT_ID
+        || contractId === protocolCoinContractId
         || accountTokenBalancesContractIds.value.includes(contractId)
       ))
       .filter(({ contractId, convertedBalance }) => (
         !withBalanceOnly
-        || contractId === AE_CONTRACT_ID
+        || contractId === protocolCoinContractId
         || +(convertedBalance || 0)
       ))
       .filter(({ contractId, symbol, name }) => (

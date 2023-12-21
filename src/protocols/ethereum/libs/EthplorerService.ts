@@ -58,6 +58,7 @@ export class EthplorerService {
       amount: rawBalance,
       contractId,
       convertedBalance: +toShiftedBigNumber(rawBalance, -decimals).toFixed(2),
+      decimals,
       protocol: PROTOCOLS.ethereum,
     })) || [];
   }
