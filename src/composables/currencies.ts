@@ -26,6 +26,8 @@ export interface UseCurrenciesOptions {
   withoutPolling?: boolean;
 }
 
+let composableInitialized = false;
+
 const POLLING_INTERVAL = 3600000;
 const LOCAL_STORAGE_CURRENCY_KEY = 'currency';
 const DEFAULT_CURRENCY_CODE: CurrencyCode = 'usd';
@@ -153,11 +155,15 @@ export function useCurrencies({
     initPollingWatcher(() => loadCurrencyRates());
   }
 
-  watch(() => protocolsInUse.value, (currentValue, oldValue) => {
-    if (difference(currentValue, oldValue).length && !isLoadingCurrencies.value) {
-      loadCurrencyRates();
-    }
-  });
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    watch(protocolsInUse, (currentValue, oldValue) => {
+      if (difference(currentValue, oldValue).length && !isLoadingCurrencies.value) {
+        loadCurrencyRates();
+      }
+    });
+  }
 
   return {
     CURRENCIES,

@@ -18,7 +18,7 @@ import { tg } from '@/popup/plugins/i18n';
 import { useModals } from './modals';
 import { useStorageRef } from './storageRef';
 
-let initialized = false;
+let composableInitialized = false;
 
 const {
   addCallback: onNetworkChange,
@@ -129,12 +129,14 @@ export function useNetworks() {
     activeNetworkName.value = NETWORK_NAME_MAINNET;
   }
 
-  if (!initialized) {
+  if (!composableInitialized) {
+    composableInitialized = true;
+
     ensureDefaultNetworksExists();
+
     if (!activeNetwork.value) {
       switchNetwork(NETWORK_NAME_MAINNET);
     }
-    initialized = true;
   }
 
   return {

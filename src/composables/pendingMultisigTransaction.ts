@@ -21,6 +21,8 @@ import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
 import { useTopHeaderData } from './topHeader';
 
+let composableInitialized = false;
+
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction() {
@@ -187,19 +189,23 @@ export function usePendingMultisigTransaction() {
     }
   }
 
-  watch(
-    () => activeMultisigAccount.value,
-    (newValue, oldValue) => {
-      if (!isEqual(newValue, oldValue)) {
-        assignPendingMultisigTx();
+  if (!composableInitialized) {
+    composableInitialized = true;
 
-        if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
-          fetchLatestMultisigAccountTransaction();
+    watch(
+      activeMultisigAccount,
+      (newValue, oldValue) => {
+        if (!isEqual(newValue, oldValue)) {
+          assignPendingMultisigTx();
+
+          if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
+            fetchLatestMultisigAccountTransaction();
+          }
         }
-      }
-    },
-    { immediate: true },
-  );
+      },
+      { immediate: true },
+    );
+  }
 
   return {
     pendingMultisigTransaction,

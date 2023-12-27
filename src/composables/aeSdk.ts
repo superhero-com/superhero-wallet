@@ -42,13 +42,13 @@ import { useNetworks } from './networks';
 type OnAeppConnectionParams = Omit<Parameters<WalletApi[METHODS.connect]>[0], 'version'>;
 type AeppInfoData = OnAeppConnectionParams & { origin: string };
 
+let composableInitialized = false;
 let aeSdk: AeSdkSuperhero;
-let aeSdkBlocked = false;
 let storedNetworkName: string;
 
 const nodeNetworkId = ref<NetworkId>();
 
-const isAeSdkReady = ref(false);
+const isAeSdkUpdating = ref(false);
 const isAeNodeReady = ref(false);
 const isAeNodeConnecting = ref(false);
 const isAeNodeError = ref(false);
@@ -58,6 +58,7 @@ const aeppInfo: Record<string, AeppInfoData> = {};
 
 let dryAeSdk: AeSdk;
 
+const isAeSdkReady = computed(() => !isAeSdkUpdating.value && aeSdk);
 const isNodeMainnet = computed(() => nodeNetworkId.value === AE_NETWORK_MAINNET_ID);
 const isNodeTestnet = computed(() => nodeNetworkId.value === AE_NETWORK_TESTNET_ID);
 const isNodeCustomNetwork = computed(() => !isNodeMainnet.value && !isNodeTestnet.value);
@@ -105,21 +106,18 @@ export function useAeSdk() {
   }
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
-    aeSdkBlocked = true;
-    isAeSdkReady.value = false;
+    isAeSdkUpdating.value = true;
     aeSdk.pool.delete(oldNetwork.name);
     aeSdk.addNode(
       newNetwork.name,
       (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
       true,
     );
-    aeSdkBlocked = false;
-    isAeSdkReady.value = true;
+    isAeSdkUpdating.value = false;
   }
 
   async function initAeSdk() {
-    aeSdkBlocked = true;
-    isAeSdkReady.value = false;
+    isAeSdkUpdating.value = true;
 
     await Promise.all([
       watchUntilTruthy(isLoggedIn),
@@ -168,17 +166,7 @@ export function useAeSdk() {
       FramesConnection.init(aeSdk);
     }
 
-    onNetworkChange((newNetwork, oldNetwork) => {
-      resetNode(oldNetwork, newNetwork);
-    });
-
-    // Inform connected DAPPs about account change
-    onAccountChange(() => {
-      aeSdk._pushAccountsToApps();
-    });
-
-    aeSdkBlocked = false;
-    isAeSdkReady.value = true;
+    isAeSdkUpdating.value = false;
   }
 
   /**
@@ -186,8 +174,8 @@ export function useAeSdk() {
    * TODO: this probably could be replaced with a computed prop.
    */
   async function getAeSdk(): Promise<AeSdkSuperhero> {
-    if (aeSdkBlocked) {
-      await watchUntilTruthy(isAeSdkReady);
+    if (isAeSdkUpdating.value) {
+      await watchUntilTruthy(() => !isAeSdkUpdating.value);
     } else if (!aeSdk) {
       await initAeSdk();
     }
@@ -250,6 +238,20 @@ export function useAeSdk() {
   async function waitTransactionMined(hash: Encoded.TxHash) {
     const aeSdkLocal = await getAeSdk();
     return aeSdkLocal.poll(hash);
+  }
+
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    onNetworkChange((newNetwork, oldNetwork) => {
+      resetNode(oldNetwork, newNetwork);
+    });
+
+    // Inform connected DAPPs about account change
+    onAccountChange(async () => {
+      const aeSdkLocal = await getAeSdk();
+      aeSdkLocal._pushAccountsToApps();
+    });
   }
 
   return {
