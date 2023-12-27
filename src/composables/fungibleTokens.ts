@@ -29,7 +29,7 @@ import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
 
-let initialized = false;
+let composableInitialized = false;
 
 /**
  * List of all fungible tokens available on user's protocols.
@@ -247,8 +247,8 @@ export function useFungibleTokens() {
   availableTokensPooling(() => loadAvailableTokens());
   tokenBalancesPooling(() => loadTokenBalances());
 
-  if (!initialized) {
-    initialized = true;
+  if (!composableInitialized) {
+    composableInitialized = true;
 
     // Refresh balances when new account is added
     watch(accounts, (val, oldVal) => {

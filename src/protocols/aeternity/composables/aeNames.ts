@@ -58,7 +58,7 @@ interface IAuctionEntryParams {
 
 type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
-let initialized = false;
+let composableInitialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const pendingAutoExtendNames = ref<ChainName[]>([]);
@@ -300,24 +300,12 @@ export function useAeNames() {
     }
   }
 
-  watch(
-    aeAccounts,
-    async (val, oldVal) => {
-      if (isMiddlewareReady.value && val !== oldVal) {
-        await Promise.all([
-          updateOwnedNames(),
-          updateDefaultNames(),
-        ]);
-      }
-    },
-  );
-
   initPollingWatcher(() => {
     updateDefaultNames();
   });
 
-  if (!initialized) {
-    initialized = true;
+  if (!composableInitialized) {
+    composableInitialized = true;
 
     retrieveCachedChainNames();
 
@@ -328,6 +316,18 @@ export function useAeNames() {
       ]);
       await extendExpiringOwnedNames();
     });
+
+    watch(
+      aeAccounts,
+      async (val, oldVal) => {
+        if (isMiddlewareReady.value && val !== oldVal) {
+          await Promise.all([
+            updateOwnedNames(),
+            updateDefaultNames(),
+          ]);
+        }
+      },
+    );
   }
 
   return {

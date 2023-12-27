@@ -28,7 +28,7 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import { useStorageRef } from './storageRef';
 
-let initialized = false;
+let composableInitialized = false;
 
 const {
   addCallback: onAccountChange,
@@ -263,8 +263,8 @@ export function useAccounts() {
   }
 
   (async () => {
-    if (!initialized) {
-      initialized = true;
+    if (!composableInitialized) {
+      composableInitialized = true;
 
       await watchUntilTruthy(isLoggedIn);
 
