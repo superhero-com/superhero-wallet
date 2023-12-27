@@ -155,6 +155,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override async fetchBalance(address: Encoded.AccountAddress): Promise<string> {
     const { getAeSdk } = useAeSdk();
     const sdk = await getAeSdk();
+
     const balanceInAettos = await sdk.getBalance(address);
     return aettosToAe(balanceInAettos);
   }
@@ -259,9 +260,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     const { fetchFromMiddlewareCamelCased } = useAeMiddleware();
 
     /** @link https://github.com/aeternity/ae_mdw?tab=readme-ov-file#v2accountsidactivities */
-    const url = ([null, ''].includes(nextPageUrl!))
-      ? `/v2/accounts/${address}/activities?limit=${limit}`
-      : nextPageUrl!;
+    const url = nextPageUrl || `/v2/accounts/${address}/activities?limit=${limit}`;
 
     try {
       const { data, next } = await fetchFromMiddlewareCamelCased(url);

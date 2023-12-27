@@ -116,6 +116,10 @@ export function createCallbackRegistry<T extends(...args: any) => any>() {
   const callbackRegistry = new Map<number, T>();
 
   return {
+    /**
+     * Add callback that will be fired when `runCallbacks` is ran.
+     * @returns function that allows to remove the callback from registry.
+     */
     addCallback: (callback: T) => {
       currentId += 1;
       const savedId = currentId;

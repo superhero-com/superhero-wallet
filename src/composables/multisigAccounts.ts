@@ -34,7 +34,7 @@ export interface MultisigAccountsOptions {
   pollingDisabled?: boolean;
 }
 
-let initialized = false;
+let composableInitialized = false;
 
 const POLLING_INTERVAL = 7000;
 
@@ -324,8 +324,8 @@ export function useMultisigAccounts({
     }
   }
 
-  if (!initialized) {
-    initialized = true;
+  if (!composableInitialized) {
+    composableInitialized = true;
 
     onNetworkChange(() => {
       updateMultisigAccounts();

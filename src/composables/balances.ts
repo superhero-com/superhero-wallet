@@ -17,7 +17,7 @@ import { useNetworks } from './networks';
 
 type Balances = Record<AccountAddress, Balance>;
 
-let initialized = false;
+let composableInitialized = false;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;
@@ -82,11 +82,12 @@ export function useBalances() {
 
   initPollingWatcher(() => updateBalances());
 
-  if (!initialized) {
+  if (!composableInitialized) {
+    composableInitialized = true;
+
     onNetworkChange(() => {
       updateBalances();
     });
-    initialized = true;
   }
 
   return {

@@ -20,7 +20,7 @@ import { useFungibleTokens } from './fungibleTokens';
 
 type AccountsTransactionList = Record<AccountAddress, ICommonTransaction[]>;
 
-let initialized = false;
+let composableInitialized = false;
 
 /**
  * First page of the transactions done for each of the accounts
@@ -60,7 +60,7 @@ const allLatestTransactions = computed((): ICommonTransaction[] => {
  */
 export function useLatestTransactionList() {
   const { accounts, getAccountByAddress } = useAccounts();
-  const { activeNetwork } = useNetworks();
+  const { onNetworkChange } = useNetworks();
   const { balances } = useBalances();
   const { tokenBalances } = useFungibleTokens();
   const { waitTransactionMined } = useAeSdk();
@@ -121,8 +121,9 @@ export function useLatestTransactionList() {
     }
   }
 
-  if (!initialized) {
-    initialized = true;
+  if (!composableInitialized) {
+    composableInitialized = true;
+
     loadAllLatestTransactions();
 
     /**
@@ -175,13 +176,13 @@ export function useLatestTransactionList() {
     /**
      * Reset all cached transactions and fetch again when user switched the network.
      */
-    watch(activeNetwork, (newNetwork, oldNetwork) => {
+    onNetworkChange((newNetwork, oldNetwork) => {
       if (newNetwork.name !== oldNetwork.name) {
         accountsTransactionsLatest.value = {};
         accountsTransactionsPending.value = {};
         loadAllLatestTransactions();
       }
-    }, { deep: true });
+    });
   }
 
   return {

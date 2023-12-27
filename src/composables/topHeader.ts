@@ -6,7 +6,7 @@ import { useAeSdk } from './aeSdk';
 
 const POLLING_INTERVAL = 30000;
 
-let initialized = false;
+let composableInitialized = false;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 const topHeaderData = ref<ITopHeader>();
@@ -32,8 +32,8 @@ export function useTopHeaderData() {
 
   initPollingWatcher(() => updateTopHeaderData());
 
-  if (!initialized) {
-    initialized = true;
+  if (!composableInitialized) {
+    composableInitialized = true;
 
     onNetworkChange(() => {
       updateTopHeaderData();
