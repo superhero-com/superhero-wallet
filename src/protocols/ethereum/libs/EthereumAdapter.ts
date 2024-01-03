@@ -193,7 +193,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return {} as any;
   }
 
-  override async fetchAvailableTokens(): Promise<IToken[]> {
+  override async fetchAvailableTokens(): Promise<IToken[] | null> {
     const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     try {
@@ -202,11 +202,11 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       return new EthplorerService(apiUrl).fetchTopTokens();
     } catch (error: any) {
       Logger.write(error);
-      return [];
+      return null;
     }
   }
 
-  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
+  override async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null> {
     const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
     try {
@@ -215,7 +215,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       return new EthplorerService(apiUrl).fetchAccountTokenBalances(address);
     } catch (error: any) {
       Logger.write(error);
-      return [];
+      return null;
     }
   }
 

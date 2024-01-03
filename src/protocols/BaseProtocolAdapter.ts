@@ -94,9 +94,9 @@ export abstract class BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any>;
 
-  abstract fetchAvailableTokens(): Promise<IToken[]>;
+  abstract fetchAvailableTokens(): Promise<IToken[] | null>;
 
-  abstract fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]>;
+  abstract fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null>;
 
   abstract fetchBalance(address: string): Promise<string>;
 
