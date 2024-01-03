@@ -30,7 +30,7 @@
         :readonly="readonly"
         :selected-asset="selectedAsset"
         @update:modelValue="$emit('update:modelValue', $event)"
-        @asset-selected="(asset) => $emit('assetSelected', asset)"
+        @asset-selected="(asset) => $emit('asset-selected', asset)"
       >
         <template #label-after>
           <slot name="label-after" />
