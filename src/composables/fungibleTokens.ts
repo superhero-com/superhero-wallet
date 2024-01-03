@@ -90,7 +90,13 @@ export function useFungibleTokens() {
     const tokensFetchPromises = protocolsInUse.value.map(
       (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens(),
     );
-    const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).flat();
+    // for each promise check if it returned null, if so, use cached data
+    // because it means that we couldn't fetch new data
+    const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
+      (protocolTokens, index) => protocolTokens
+        || (tokensAvailable.value as ProtocolRecord<IToken[]>)[protocolsInUse.value[index]]
+        || [],
+    ).flat();
 
     if (!tokens.length) {
       tokensAvailable.value = {};
@@ -116,7 +122,14 @@ export function useFungibleTokens() {
       ({ address, protocol }) => ProtocolAdapterFactory.getAdapter(protocol)
         .fetchAccountTokenBalances(address),
     );
-    tokenBalances.value = (await Promise.all(tokenBalancesFetchPromises)).flat();
+
+    // for each promise check if it returned null, if so, use cached data
+    // because it means that we couldn't fetch new data
+    const cachedTokenBalances = tokenBalances.value;
+
+    tokenBalances.value = (await Promise.all(tokenBalancesFetchPromises)).map(
+      (balances, index) => balances || cachedTokenBalances[index] || [],
+    ).flat();
     areTokenBalancesUpdating = false;
   }
 

@@ -4,6 +4,11 @@ import { fetchJson, toShiftedBigNumber } from '@/utils';
 import { ETH_CONTRACT_ID_EXTERNAL } from '../config';
 
 const ETHPLORER_API_KEY = 'freekey';
+/**
+ * Standard HTTP status code for too many requests
+ * ? https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+ */
+const TOO_MANY_REQUESTS_ERROR_CODE = 429;
 
 /**
  * @link https://github.com/EverexIO/Ethplorer/wiki/Ethplorer-API
@@ -37,8 +42,13 @@ export class EthplorerService {
     };
   }
 
-  async fetchTopTokens(): Promise<IToken[]> {
-    const tokens = (await this.fetchFromApi('/getTopTokens'))?.tokens || [];
+  async fetchTopTokens(): Promise<IToken[] | null> {
+    const res = await this.fetchFromApi('/getTopTokens');
+    if (res?.error?.code === TOO_MANY_REQUESTS_ERROR_CODE) {
+      // return null to indicate that we didn't get any new data
+      return null;
+    }
+    const tokens = res.tokens || [];
 
     return tokens
       .filter(({ address, name, symbol }: any) => (address && name && symbol))
@@ -47,8 +57,13 @@ export class EthplorerService {
       .map((token: any): IToken => this.normalizeTokenStructure(token));
   }
 
-  async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[]> {
-    const tokens = (await this.fetchFromApi(`/getAddressInfo/${address}`))?.tokens || [];
+  async fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null> {
+    const res = await this.fetchFromApi(`/getAddressInfo/${address}`);
+    if (res?.error?.code === TOO_MANY_REQUESTS_ERROR_CODE) {
+      // return null to indicate that we didn't get any new data
+      return null;
+    }
+    const tokens = res.tokens || [];
 
     return tokens.map(({
       rawBalance,
