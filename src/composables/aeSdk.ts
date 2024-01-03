@@ -210,10 +210,11 @@ export function useAeSdk() {
   }
 
   async function resetNode(oldNetwork: INetwork, newNetwork: INetwork) {
+    const nodeInstance = await createNodeInstance(aeActiveNetworkSettings.value.nodeUrl);
     aeSdk.pool.delete(oldNetwork.name);
     aeSdk.addNode(
       newNetwork.name,
-      (await createNodeInstance(newNetwork.protocols.aeternity.nodeUrl))!,
+      nodeInstance!,
       true,
     );
   }
