@@ -99,7 +99,6 @@ export default defineComponent({
         if (!isSelectedAssetEthCoin.value) {
           // TODO - implement
           // transferToken(amount, recipient, selectedAsset)
-          console.log('transferToken()', amount, recipient, selectedAsset);
           throw new Error('Not implemented');
         } else {
           await ethAdapter.spend(
