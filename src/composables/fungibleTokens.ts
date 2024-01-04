@@ -15,6 +15,7 @@ import type {
   ProtocolRecord,
   TokenPair,
   Protocol,
+  Dictionary,
 } from '@/types';
 import { PROTOCOLS, STORAGE_KEYS, TX_DIRECTION } from '@/constants';
 import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
@@ -93,8 +94,7 @@ export function useFungibleTokens() {
     // because it means that we couldn't fetch new data
     const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
       (protocolTokens, index) => protocolTokens
-        || (tokensAvailable.value as ProtocolRecord<IToken[]>)[protocolsInUse.value[index]]
-        || [],
+        || Object.values(tokensAvailable.value[protocolsInUse.value[index]] || {}),
     ).flat();
 
     if (!tokens.length) {
@@ -117,18 +117,35 @@ export function useFungibleTokens() {
     }
 
     areTokenBalancesUpdating = true;
-    const tokenBalancesFetchPromises = accounts.value.map(
-      ({ address, protocol }) => ProtocolAdapterFactory.getAdapter(protocol)
-        .fetchAccountTokenBalances(address),
+    const tokenBalancesFetchPromisesByAddress: Dictionary<Promise<ITokenBalance[] | null>> = {};
+    accounts.value.map(
+      ({ address, protocol }) => {
+        tokenBalancesFetchPromisesByAddress[address] = ProtocolAdapterFactory
+          .getAdapter(protocol).fetchAccountTokenBalances(address);
+        return null;
+      },
     );
 
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
     const cachedTokenBalances = tokenBalances.value;
 
-    tokenBalances.value = (await Promise.all(tokenBalancesFetchPromises)).map(
-      (balances, index) => balances || cachedTokenBalances[index] || [],
-    ).flat();
+    const cachedTokenBalancesByAddress: Dictionary<ITokenBalance[]> = {};
+    cachedTokenBalances.map(
+      (tokenBalance) => {
+        if (!cachedTokenBalancesByAddress[tokenBalance.address]) {
+          cachedTokenBalancesByAddress[tokenBalance.address] = [];
+        }
+        cachedTokenBalancesByAddress[tokenBalance.address].push(tokenBalance);
+        return null;
+      },
+    );
+
+    tokenBalances.value = (await Promise.all(
+      (Object.entries(tokenBalancesFetchPromisesByAddress)).map(
+        async ([address, promise]) => await promise || cachedTokenBalancesByAddress[address] || [],
+      ),
+    )).flat();
     areTokenBalancesUpdating = false;
   }
 
