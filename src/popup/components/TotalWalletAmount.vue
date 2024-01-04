@@ -37,16 +37,12 @@ export default defineComponent({
 @use '../../styles/variables';
 
 .total-amount {
-  @extend %face-sans-16-bold;
-
   color: variables.$color-white;
-  line-height: 18px;
+  // line-height: 18px;
 
   .label {
-    @extend %face-sans-14-medium;
-
-    margin-left: 6px;
-    line-height: 18px;
+    margin-left: 4px;
+    // line-height: 18px;
     opacity: 0.5;
   }
 }

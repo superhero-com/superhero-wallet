@@ -1,38 +1,30 @@
 <template>
   <div class="dashboard-base">
-    <div class="dashboard-header">
-      <div
-        v-if="accounts.length > 1"
-        class="dashboard-header-info"
-      >
-        <TotalWalletAmount
-          :total-balance="balancesTotal"
-          class="total-amount"
-        />
-
-        <BtnPill
-          class="account-select-btn"
-          hollow
+    <div style="padding: 0 16px; margin-bottom: var(--gap);">
+      <Tabs>
+        <Tab
+          :to="{ name: ROUTE_ACCOUNT }"
         >
-          <FormSelect
-            v-if="accounts.length > 5 && accountsSelectOptions"
-            :default-text="$t('dashboard.selectAccount')"
-            :options="accountsSelectOptions"
-            :model-value="activeAccountAddress"
-            class="account-select-input"
-            unstyled
-            account-select
-            @update:model-value="(address: string) => $emit('select-account', address)"
-          >
-            <template #current-text>
-              <div class="account-number">
-                <span class="account-number-current">{{ activeIdx + 1 }}</span>
-                / {{ accounts.length }}
-              </div>
-            </template>
-          </FormSelect>
-        </BtnPill>
-      </div>
+          <div style="line-height: 1.3em;">
+            Accounts<br>
+            <TotalWalletAmount
+              :total-balance="balancesTotal"
+              style="font-size: 13px; font-weight: normal;"
+              class="total-amount"
+            />
+          </div>
+        </Tab>
+        <Tab
+          :to="{ name: ROUTE_MULTISIG_ACCOUNT }"
+        >
+          <div style="line-height: 1.3em; text-align: center;">
+            Multisig Vaults<br>
+            <span style="font-size: 12px; opacity: 0.4; font-weight: normal;">
+              Switch to see amount
+            </span>
+          </div>
+        </Tab>
+      </Tabs>
     </div>
 
     <div class="dashboard-base-swiper">
@@ -69,21 +61,22 @@
 import { PropType, defineComponent } from 'vue';
 import type { IAccount, IFormSelectOption } from '@/types';
 import { useUi } from '@/composables';
+import { ROUTE_ACCOUNT, ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 
 import DashboardCard from './DashboardCard.vue';
 import TotalWalletAmount from './TotalWalletAmount.vue';
-import FormSelect from './form/FormSelect.vue';
-import BtnPill from './buttons/BtnPill.vue';
+import Tab from './tabs/Tab.vue';
+import Tabs from './tabs/Tabs.vue';
 
 import WarningTriangleIcon from '../../icons/warning-triangle.svg?vue-component';
 
 export default defineComponent({
   name: 'DashboardBase',
   components: {
-    BtnPill,
     DashboardCard,
-    FormSelect,
     TotalWalletAmount,
+    Tab,
+    Tabs,
   },
   props: {
     accounts: { type: Array as PropType<IAccount[]>, default: () => [] },
@@ -100,6 +93,8 @@ export default defineComponent({
     const { isSeedBackedUp } = useUi();
 
     return {
+      ROUTE_ACCOUNT,
+      ROUTE_MULTISIG_ACCOUNT,
       isSeedBackedUp,
       WarningTriangleIcon,
     };
@@ -115,30 +110,6 @@ export default defineComponent({
 .dashboard-base {
   display: flex;
   flex-direction: column;
-
-  .dashboard-header-info {
-    padding-inline: 24px 20px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: flex-end;
-
-    .account-select-btn {
-      padding: 0;
-      margin-left: auto;
-    }
-
-    .account-select-input {
-      padding: 4px 10px;
-    }
-
-    .account-number {
-      @extend %face-sans-14-medium;
-
-      margin-right: 2px;
-      opacity: 0.4;
-      line-height: 1;
-    }
-  }
 
   .dashboard-base-cards {
     display: flex;
