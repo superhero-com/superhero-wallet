@@ -1,12 +1,21 @@
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import type { TokenProps } from '@/types';
+import { STORAGE_KEYS } from '@/constants';
+import { useStorageRef } from './storageRef';
 
 type ITokenProps = Partial<TokenProps>;
 
 type ITokenDetail = Omit<TokenProps, 'isMultisig'>
 type ITokenTransaction = Pick<TokenProps, 'contractId' | 'isMultisig'>
 
-const tokenProps = ref<ITokenProps | null>(null);
+/**
+ * Save last used token props in local storage
+ * in order to have data available if user refreshes the page
+ */
+const tokenProps = useStorageRef<ITokenProps | null>(
+  null,
+  STORAGE_KEYS.tokenProps,
+);
 
 /**
  *  Data coming from a coin that will be passed to the tab components

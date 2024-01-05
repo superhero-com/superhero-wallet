@@ -121,6 +121,7 @@ export const STORAGE_KEYS = {
   fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
+  tokenProps: 'token-props',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [

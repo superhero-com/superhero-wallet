@@ -96,6 +96,7 @@ import {
   onMounted,
   ref,
   nextTick,
+  watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -161,7 +162,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { t } = useI18n();
-    const { setTokenProps } = useTokenProps();
+    const { tokenProps, setTokenProps } = useTokenProps();
     const { setLoaderVisible } = useUi();
 
     const isMultisig = computed((): boolean => !!route?.meta?.isMultisig);
@@ -281,6 +282,12 @@ export default defineComponent({
     onIonViewDidLeave(() => {
       setTokenProps(null);
     });
+
+    watch(route, () => {
+      if (route.params.id !== tokenProps.value?.contractId) {
+        setTokenProps(null);
+      }
+    }, { immediate: true });
 
     return {
       PROTOCOL_AETERNITY,
