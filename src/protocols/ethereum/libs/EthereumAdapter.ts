@@ -250,6 +250,11 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     const { getAccountByAddress } = useAccounts();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
 
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
     const contractAbi = await new EtherscanService(apiUrl)
       .fetchFromApi({
         module: 'contract',
@@ -293,11 +298,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
-
-    const account = getAccountByAddress(options.fromAccount);
-    if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
-    }
 
     const signedTx = tx.sign(account.secretKey!);
     const serializedTx = signedTx.serialize();
@@ -347,6 +347,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   ): Promise<ITransferResponse> {
     const { getAccountByAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
+
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
     const { chainId } = ethActiveNetworkSettings.value;
     const web3Eth = this.getWeb3EthInstance();
     const nonce = await this.getTransactionCount(options.fromAccount);
@@ -369,11 +375,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
-
-    const account = getAccountByAddress(options.fromAccount);
-    if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
-    }
 
     const signedTx = tx.sign(account.secretKey);
 
