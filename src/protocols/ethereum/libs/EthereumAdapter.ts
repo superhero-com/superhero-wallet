@@ -3,6 +3,7 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs';
 import { isAddress } from 'web3-validator';
 import { toChecksumAddress, fromWei, toWei } from 'web3-utils';
+import { Contract } from 'web3-eth-contract';
 import {
   privateKeyToAddress,
   FeeMarketEIP1559Transaction,
@@ -23,13 +24,13 @@ import { BIP32Factory } from 'bip32';
 import type {
   AdapterNetworkSettingList,
   AssetContractId,
-  IAccount,
   ICoin,
   IFetchTransactionResult,
   IHdWalletAccount,
   INetworkProtocolSettings,
   IToken,
   ITokenBalance,
+  ITransferResponse,
   MarketData,
   NetworkTypeDefault,
 } from '@/types';
@@ -39,6 +40,7 @@ import Logger from '@/lib/logger';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
+  ERC20_ABI,
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COINGECKO_COIN_ID,
@@ -49,6 +51,7 @@ import {
   ETH_PROTOCOL_NAME,
   ETH_SYMBOL,
 } from '@/protocols/ethereum/config';
+import { useAccounts } from '@/composables';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
 import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
@@ -217,6 +220,94 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     }
   }
 
+  override async fetchTokenInfo(contractId: string): Promise<IToken | undefined> {
+    const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
+    try {
+      // Temporary solution for fetching the ERC-20 token info.
+      // TODO Replace with our own node API
+      return new EthplorerService(apiUrl).fetchTokenInfo(contractId);
+    } catch (error: any) {
+      Logger.write(error);
+      return undefined;
+    }
+  }
+
+  override async transferToken(
+    amount: number,
+    recipient: string,
+    contractId: AssetContractId,
+    options: {
+      fromAccount: string;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
+  ): Promise<ITransferResponse> {
+    const {
+      ethActiveNetworkSettings,
+      ethActiveNetworkPredefinedSettings,
+    } = useEthNetworkSettings();
+    const { getAccountByAddress } = useAccounts();
+    const apiUrl = ethActiveNetworkPredefinedSettings.value.middlewareUrl;
+
+    const contractAbi = await new EtherscanService(apiUrl)
+      .fetchFromApi({
+        module: 'contract',
+        action: 'getabi',
+        address: contractId,
+      });
+
+    const contract = new Contract(
+      contractAbi && Array.isArray(contractAbi?.result) ? contractAbi.result : ERC20_ABI,
+      contractId,
+      { from: options.fromAccount },
+    );
+
+    const { chainId, nodeUrl } = ethActiveNetworkSettings.value;
+    contract.setProvider(nodeUrl);
+
+    const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(
+      Number(await contract.methods.decimals().call()),
+    ), 'ether')));
+    const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
+    const maxFeePerGas = bigIntToHex(BigInt(toWei(options.maxFeePerGas, 'ether')));
+
+    const [nonce, gasLimit] = await Promise.all([
+      this.getTransactionCount(options.fromAccount),
+      // @ts-expect-error
+      contract.methods.transfer(recipient, hexAmount).estimateGas(),
+    ]);
+
+    // All values are in wei
+    const txData: FeeMarketEIP1559TxData = {
+      chainId,
+      nonce,
+      to: contractId,
+      // @ts-expect-error
+      data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
+      value: 0x0,
+      maxPriorityFeePerGas,
+      maxFeePerGas,
+      gasLimit: `0x${gasLimit.toString(16)}`,
+      type: '0x02',
+    };
+
+    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
+    const signedTx = tx.sign(account.secretKey!);
+    const serializedTx = signedTx.serialize();
+    const web3Eth = this.getWeb3EthInstance();
+    const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+    sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
+
+    return { hash };
+  }
+
   override async fetchPendingTransactions() {
     // TODO if needed
     return [];
@@ -249,15 +340,16 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: {
-      fromAccount: IAccount;
+      fromAccount: string;
       maxPriorityFeePerGas: string;
       maxFeePerGas: string;
     },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
+    const { getAccountByAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
     const { chainId } = ethActiveNetworkSettings.value;
     const web3Eth = this.getWeb3EthInstance();
-    const nonce = await this.getTransactionCount(options.fromAccount.address!);
+    const nonce = await this.getTransactionCount(options.fromAccount);
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
@@ -278,7 +370,12 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
 
-    const signedTx = tx.sign(options.fromAccount.secretKey);
+    const account = getAccountByAddress(options.fromAccount);
+    if (!account || account.protocol !== PROTOCOLS.ethereum) {
+      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+    }
+
+    const signedTx = tx.sign(account.secretKey);
 
     const serializedTx = signedTx.serialize();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;

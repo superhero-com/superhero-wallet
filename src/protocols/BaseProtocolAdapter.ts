@@ -12,6 +12,7 @@ import type {
   NetworkType,
   IToken,
   ITokenBalance,
+  ITransferResponse,
   AssetContractId,
 } from '@/types';
 import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
@@ -96,6 +97,15 @@ export abstract class BaseProtocolAdapter {
 
   abstract fetchAccountTokenBalances(address: string): Promise<ITokenBalance[] | null>;
 
+  abstract transferToken(
+    amount: number,
+    recipient: string,
+    contractId: AssetContractId,
+    options: Record<string, any>,
+  ): Promise<ITransferResponse | undefined>;
+
+  abstract fetchTokenInfo(contractId: AssetContractId): Promise<IToken | undefined>;
+
   abstract fetchBalance(address: string): Promise<string>;
 
   abstract fetchTransactionByHash(hash: string): Promise<any>
@@ -117,5 +127,5 @@ export abstract class BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: Record<string, any>,
-  ): Promise<{ hash: string }>;
+  ): Promise<ITransferResponse>;
 }

@@ -1,5 +1,4 @@
 /* eslint-disable class-methods-use-this */
-import JsonBig from '@/lib/json-big';
 import {
   encode,
   Encoded,
@@ -22,7 +21,10 @@ import type {
   IToken,
   ITokenBalance,
   ITokenBalanceResponse,
+  ITransferResponse,
 } from '@/types';
+import JsonBig from '@/lib/json-big';
+import FungibleTokenFullInterfaceACI from '@/lib/contracts/FungibleTokenFullInterfaceACI.json';
 import { PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -35,7 +37,10 @@ import {
   toShiftedBigNumber,
 } from '@/utils';
 
-import type { AeNetworkProtocolSettings } from '@/protocols/aeternity/types';
+import type {
+  AeNetworkProtocolSettings,
+  ContractInitializeOptions,
+} from '@/protocols/aeternity/types';
 import {
   AE_COIN_NAME,
   AE_COIN_PRECISION,
@@ -223,6 +228,26 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     // TODO
   }
 
+  override async fetchTokenInfo(): Promise<IToken | undefined> {
+    // TODO if needed
+    return undefined;
+  }
+
+  override async transferToken(
+    amount: number,
+    recipient: string,
+    contractId: string,
+    options: ContractInitializeOptions,
+  ) {
+    const { getAeSdk } = useAeSdk();
+    const aeSdk = await getAeSdk();
+    const tokenContract = await aeSdk.initializeContract({
+      aci: FungibleTokenFullInterfaceACI,
+      address: contractId as Encoded.ContractAddress,
+    });
+    return tokenContract.transfer(recipient, amount.toFixed(), options);
+  }
+
   async fetchTransactionsFromMiddleware(
     address: string,
     nextPageUrl: string | null,
@@ -345,7 +370,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     amount: number,
     recipient: string,
     options: { payload: string },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
     return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
