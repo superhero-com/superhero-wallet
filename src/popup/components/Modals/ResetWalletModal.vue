@@ -74,7 +74,11 @@ export default defineComponent({
       resetNetworks();
       resetUiSettings();
       disconnectDapps();
-      router.push({ name: ROUTE_INDEX });
+
+      await browser.storage.local.clear();
+      localStorage.clear();
+      await router.push({ name: ROUTE_INDEX });
+      window.location.reload();
     }
 
     return {
