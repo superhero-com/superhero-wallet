@@ -15,6 +15,16 @@ export const detectConnectionType = (port: Runtime.Port) => {
 };
 
 /**
+ * Clean params from members that cause issues when sending messages
+ */
+function getCleanParams(params: PopupMessageData['params']) {
+  const cleanedParams = { ...params };
+  delete cleanedParams.params?.onCompiler;
+  delete cleanedParams.params?.onNode;
+  return cleanedParams;
+}
+
+/**
  *
  * If browser is FF we cannot send messaged to the background page
  * because we "are" on the background page
@@ -33,9 +43,10 @@ export async function executeOrSendMessageToBackground(method: PopupMessageData[
         return null;
     }
   }
+  const cleanParams = getCleanParams(params);
   return browser.runtime.sendMessage<PopupMessageData>({
     target: 'background',
     method,
-    params,
+    params: cleanParams,
   });
 }
