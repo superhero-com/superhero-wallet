@@ -97,9 +97,16 @@ export default defineComponent({
 
       try {
         if (!isSelectedAssetEthCoin.value) {
-          // TODO - implement
-          // transferToken(amount, recipient, selectedAsset)
-          throw new Error('Not implemented');
+          ethAdapter.transferToken(
+            Number(amount),
+            recipient,
+            selectedAsset.contractId,
+            {
+              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum)?.address,
+              maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
+              maxFeePerGas: props.transferData.maxFeePerGas,
+            },
+          );
         } else {
           await ethAdapter.spend(
             Number(amount),
