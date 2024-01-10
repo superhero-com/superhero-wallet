@@ -19,6 +19,7 @@
               <TransactionTokenRows
                 :ext-tokens="tokens"
                 :direction="direction"
+                :protocol="PROTOCOLS.ethereum"
                 icon-size="md"
                 multiple-rows
               />
@@ -85,6 +86,7 @@ export default defineComponent({
       amount: amountTotal.value,
       symbol: ETH_SYMBOL,
       isReceived: direction.value === TX_DIRECTION.received,
+      contractId: adapter.getCoinContractId(),
       isAe: false,
     }]);
 

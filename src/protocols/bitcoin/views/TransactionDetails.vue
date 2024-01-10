@@ -86,6 +86,7 @@ export default defineComponent({
       amount: amount.value,
       symbol: BTC_SYMBOL,
       isReceived: direction.value === TX_DIRECTION.received,
+      contractId: adapter.getCoinContractId(),
       isAe: false,
     }]);
 
