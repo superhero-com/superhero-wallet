@@ -112,7 +112,7 @@ export default defineComponent({
             Number(amount),
             recipient,
             {
-              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum),
+              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum)?.address,
               maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
               maxFeePerGas: props.transferData.maxFeePerGas,
             },
