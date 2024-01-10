@@ -23,7 +23,7 @@
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ isRounded ? token.amount : amountRounded(token.amount!) }}
+        {{ amountFormatted({ token, isRounded }) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -82,11 +82,19 @@ export default defineComponent({
 
     const getTokenName = (token: ITokenResolved) => token?.isAe ? AE_SYMBOL : token.symbol;
 
+    const amountFormatted = ({ token, isRounded }: {token: ITokenResolved; isRounded: boolean}) => {
+      // if amount is in scientific notation it is not rounded
+      if (token.amount && (!isRounded || token.amount?.toString().indexOf('e') !== -1)) {
+        return amountRounded(token.amount);
+      }
+      return token.amount;
+    };
+
     return {
       filteredTokens,
       truncateString,
       getTokenName,
-      amountRounded,
+      amountFormatted,
       calculateFontSize,
       TX_DIRECTION,
     };

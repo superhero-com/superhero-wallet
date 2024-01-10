@@ -8,10 +8,7 @@ import type {
 import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import { toShiftedBigNumber } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import {
-  AE_COIN_PRECISION,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
+import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
   getInnerTransaction,
   getTransactionTokenInfoResolver,
@@ -64,7 +61,7 @@ export function useTransactionTokens({
     const isReceived = direction === TX_DIRECTION.received;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const amount = (isAllowance)
-      ? toShiftedBigNumber(innerTx.value?.fee || 0, -AE_COIN_PRECISION)
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.getAmountPrecision())
       : getTxAmountTotal(transaction, direction);
 
     if (protocol !== PROTOCOLS.aeternity) {
