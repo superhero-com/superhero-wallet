@@ -25,8 +25,8 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
+import { IonPage, IonContent } from '@ionic/vue';
+import { computed, defineComponent, onUnmounted } from 'vue';
 import { executeAndSetInterval } from '@/utils';
 import { useAccounts, useUi } from '@/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
@@ -60,7 +60,7 @@ export default defineComponent({
       }
     }, POLLING_INTERVAL);
 
-    onIonViewWillLeave(() => {
+    onUnmounted(() => {
       clearInterval(id);
     });
 
