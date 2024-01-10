@@ -19,13 +19,11 @@ import { CoinGecko } from '../../../src/lib/CoinGecko';
 
 export async function getLoginState({
   balance,
-  name,
   network,
 }) {
   return {
     current: { network: network || NETWORK_NAME_TESTNET },
     balance,
-    ...(name && { names: { defaults: { [`${account.address}-${AE_NETWORK_MAINNET_ID}`]: name } } }),
   };
 }
 

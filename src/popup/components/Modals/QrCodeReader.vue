@@ -86,6 +86,7 @@ export default defineComponent({
   },
   setup(props) {
     // allow camera while QRScanner is loading to not show cameraNotAllowed before actual check
+    // eslint-disable-next-line no-undef
     const cameraStatus = ref<PermissionState>(
       IS_MOBILE_APP ? 'granted' : 'denied',
     );
@@ -245,6 +246,7 @@ export default defineComponent({
 
       await initBrowserReader();
       const status = navigator.permissions
+        // eslint-disable-next-line no-undef
         && (await navigator.permissions.query({ name: 'camera' as PermissionName }).catch((error) => {
           const firefoxExceptionMessage = "'camera' (value of 'name' member of PermissionDescriptor) is not a valid value for enumeration PermissionName.";
           if (error.message !== firefoxExceptionMessage) {
