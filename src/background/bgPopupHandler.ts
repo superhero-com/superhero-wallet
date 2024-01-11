@@ -14,6 +14,7 @@ interface IPopupConfigNoActions {
  * We need to duplicate these constants here because
  * importing from constants.ts causes error in background script
  * due to undefined window object
+ * (it cannot be present in background script & will throw an error when installing the extension)
  */
 const PLATFORM = process.env.PLATFORM as 'web' | 'extension' | 'ionic';
 const RUNNING_IN_TESTS = !!process.env.RUNNING_IN_TESTS;

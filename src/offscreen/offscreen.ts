@@ -1,9 +1,9 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
 import { IS_FIREFOX, UNFINISHED_FEATURES } from '@/constants/environment';
-import * as wallet from '../background/offscreen/wallet';
+import * as wallet from './wallet';
 import { useAccounts } from '../composables/accounts';
-import updateDynamicRules from '../background/redirectRule';
+import { updateDynamicRules } from '../background/redirectRule';
 
 // If browser is FF, load the redirectRule script because background is not loaded from the manifest
 // in FF we have to use the offscreen.html as background page

@@ -3,10 +3,10 @@ import { isEqual } from 'lodash-es';
 import type { Runtime } from 'webextension-polyfill';
 import { BrowserRuntimeConnection } from '@aeternity/aepp-sdk';
 import { CONNECTION_TYPES, POPUP_ACTIONS } from '@/constants';
+import { PopupMessageData } from '@/background';
+import { useAccounts, useAeSdk, useNetworks } from '@/composables';
 import { removePopup, getPopup } from './popupHandler';
 import { detectConnectionType } from './utils';
-import { useAccounts, useAeSdk, useNetworks } from '../../composables';
-import { PopupMessageData } from '..';
 
 window.browser = require('webextension-polyfill');
 

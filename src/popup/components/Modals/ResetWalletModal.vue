@@ -44,6 +44,7 @@ import {
   useUi,
 } from '@/composables';
 import { ROUTE_INDEX } from '@/popup/router/routeNames';
+import { WalletStorage } from '@/lib/WalletStorage';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -75,8 +76,7 @@ export default defineComponent({
       resetUiSettings();
       disconnectDapps();
 
-      await browser.storage.local.clear();
-      localStorage.clear();
+      await WalletStorage.clear();
       await router.push({ name: ROUTE_INDEX });
       window.location.reload();
     }

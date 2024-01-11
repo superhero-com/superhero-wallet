@@ -1,13 +1,15 @@
 import { CONNECTION_TYPES, IS_FIREFOX } from '@/constants';
 import type { Runtime } from 'webextension-polyfill';
-import { openPopup, removePopup, getPopup } from '../bgPopupHandler';
-import { PopupMessageData } from '..';
+import { openPopup, removePopup, getPopup } from '@/background/bgPopupHandler';
+import { PopupMessageData } from '@/background';
 
 export const detectConnectionType = (port: Runtime.Port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
   const [senderUrl] = port?.sender?.url?.split('?')!;
-  const isExtensionSender = senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
-    || IS_FIREFOX;
+  const isExtensionSender = (
+    senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
+    || IS_FIREFOX
+  );
   if (CONNECTION_TYPES.POPUP === port.name && isExtensionSender) {
     return port.name;
   }
@@ -25,7 +27,6 @@ function getCleanParams(params: PopupMessageData['params']) {
 }
 
 /**
- *
  * If browser is FF we cannot send messaged to the background page
  * because we "are" on the background page
  * instead call the function directly from bgPopupHandler.ts

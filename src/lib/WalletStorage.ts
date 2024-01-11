@@ -12,6 +12,7 @@ interface IWalletStorage {
   get: <T = Record<string, any>>(keys: StorageKeysInput) => Promise<T | null>;
   remove: (keys: StorageKeysInput) => Promise<void>;
   watch?: (keys: StorageKeysInput, callback: (val: any) => void) => void;
+  clear: () => Promise<void>;
 }
 
 /**
@@ -36,6 +37,7 @@ function createBrowserStorageInterface(): IWalletStorage {
         }
       });
     },
+    clear: () => browserStorage.clear(),
   };
 }
 
@@ -64,16 +66,14 @@ function createLocalStorageInterface(): IWalletStorage {
         return;
       }
       window.addEventListener('storage', (event) => {
-        if (
-          composeStorageKeys(keys) === event.key
-          || composeStorageKeys(keys).includes(event.key!)
-        ) {
+        if (composeStorageKeys(keys).includes(event.key!)) {
           if (event && !isEqual(event.newValue, event.oldValue)) {
             callback(JSON.parse(event.newValue!));
           }
         }
       });
     },
+    clear: async () => localStorage.clear(),
   };
 }
 
@@ -86,6 +86,7 @@ export const WalletStorage: IWalletStorage = (
   !RUNNING_IN_TESTS
   && !IS_OFFSCREEN_TAB
   && IS_EXTENSION_BACKGROUND
-  && browser)
+  && browser
+)
   ? createBrowserStorageInterface()
   : createLocalStorageInterface();

@@ -39,8 +39,8 @@ module.exports = {
         filename: 'CameraRequestPermission.html',
       },
       offscreen: {
-        template: 'src/popup/offscreen.html',
-        entry: 'src/popup/offscreen.ts',
+        template: 'src/offscreen/offscreen.html',
+        entry: 'src/offscreen/offscreen.ts',
         title: 'offscreen',
         filename: 'offscreen.html',
       },
