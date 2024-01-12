@@ -19,7 +19,7 @@
       "
       :icon="(network.type === NETWORK_TYPE_MAINNET) ? GlobeIcon : GlobeCogIcon"
       :selected="network.name === activeNetwork.name"
-      icon-size="lg"
+      icon-size="xl"
       @click="switchNetworkAndClose(network.name)"
     />
 

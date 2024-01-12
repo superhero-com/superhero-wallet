@@ -14,7 +14,7 @@
               v-if="multisigTx"
               :transaction="{ tx: multisigTx }"
               :protocol="PROTOCOLS.aeternity"
-              icon-size="md"
+              icon-size="rg"
             />
           </div>
           <div class="content">

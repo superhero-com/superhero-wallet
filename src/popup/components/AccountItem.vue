@@ -17,7 +17,7 @@
       <ProtocolIcon
         v-if="protocol"
         :protocol="protocol"
-        icon-size="sm"
+        icon-size="xs"
         class="protocol-icon"
       />
     </div>
