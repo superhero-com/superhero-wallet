@@ -22,14 +22,15 @@
 <script lang="ts">
 import { Component, PropType, defineComponent } from 'vue';
 import ProtocolIcon from '@/popup/components/ProtocolIcon.vue';
+import { ICON_SIZES } from '@/constants';
 
-const ALLOWED_ICON_SIZES = ['rg', 'lg'] as const;
+const ALLOWED_ICON_SIZES = [ICON_SIZES.lg, ICON_SIZES.xl] as const;
 
 type IconSize = typeof ALLOWED_ICON_SIZES[number];
 
 export const iconSizeProp = {
   type: String as PropType<IconSize>,
-  default: 'rg',
+  default: ICON_SIZES.lg,
   validator: (val: IconSize) => ALLOWED_ICON_SIZES.includes(val),
 };
 
@@ -57,7 +58,7 @@ export default defineComponent({
 
 .icon-wrapper {
   --wrapper-size: 36px;
-  --icon-size: 24px; // rg
+  --icon-size: var(--icon-size-lg);
 
   display: inline-flex;
   align-items: center;
@@ -84,8 +85,8 @@ export default defineComponent({
   }
 
   &.icon-size {
-    &-lg {
-      --icon-size: 28px;
+    &-xl {
+      --icon-size: var(--icon-size-xl);
     }
   }
 }

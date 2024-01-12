@@ -14,14 +14,14 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { PROTOCOLS } from '@/constants';
+import { ICON_SIZES, PROTOCOLS } from '@/constants';
 import type { Protocol } from '@/types';
 import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import AeternityLogo from '@/icons/logo/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 
-const SIZES = ['sm', 'rg'] as const;
+const SIZES = [ICON_SIZES.xs, ICON_SIZES.md, ICON_SIZES.lg] as const;
 
 export type AllowedProtocolIconSize = typeof SIZES[number];
 
@@ -33,7 +33,7 @@ export default defineComponent({
     },
     iconSize: {
       type: String as PropType<AllowedProtocolIconSize>,
-      default: 'rg',
+      default: ICON_SIZES.md,
       validator: (val: AllowedProtocolIconSize) => SIZES.includes(val),
     },
     isLogoIcon: { type: Boolean, default: false },
@@ -59,14 +59,18 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .protocol-icon {
-  --icon-size: 20px;
+  --icon-size: var(--icon-size-md);
 
   display: inline-block;
   width: var(--icon-size);
   height: var(--icon-size);
 
-  &.sm {
-    --icon-size: 12px;
+  &.xs {
+    --icon-size: var(--icon-size-xs);
+  }
+
+  &.lg {
+    --icon-size: var(--icon-size-lg);
   }
 }
 </style>
