@@ -220,7 +220,7 @@ exports[`Pages Index 1`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -228,7 +228,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -257,7 +257,7 @@ exports[`Pages Index 1`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -265,7 +265,7 @@ exports[`Pages Index 1`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -369,7 +369,7 @@ exports[`Pages Index 2`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -377,7 +377,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -406,7 +406,7 @@ exports[`Pages Index 2`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -414,7 +414,7 @@ exports[`Pages Index 2`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -518,7 +518,7 @@ exports[`Pages Index 3`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -526,7 +526,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
@@ -555,7 +555,7 @@ exports[`Pages Index 3`] = `
             extend=""
             header="locale-specific-text"
             icon="[object Object]"
-            iconsize="rg"
+            iconsize="lg"
             subheader="locale-specific-text"
           >
             
@@ -563,7 +563,7 @@ exports[`Pages Index 3`] = `
               class="box"
             >
               <div
-                class="icon-wrapper icon-size-rg is-boxed"
+                class="icon-wrapper icon-size-lg is-boxed"
               >
                 <svg
                   class="icon-wrapper-icon"
