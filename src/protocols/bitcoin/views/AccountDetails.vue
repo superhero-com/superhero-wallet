@@ -1,14 +1,23 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details" />
+      <AccountDetailsBase
+        v-if="isPageActive"
+        class="account-details"
+      />
     </IonContent>
   </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import {
+  PropType,
+  defineComponent,
+  ref,
+  watch,
+} from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
+import { IonicLifecycleStatus } from '@/types';
 import { PROTOCOL_VIEW_ACCOUNT_DETAILS } from '@/constants';
 import AccountDetailsBase from '@/popup/components/AccountDetailsBase.vue';
 
@@ -18,6 +27,24 @@ export default defineComponent({
     AccountDetailsBase,
     IonPage,
     IonContent,
+  },
+  props: {
+    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
+  },
+  setup(props) {
+    const isPageActive = ref(false);
+
+    watch(() => props.ionicLifecycleStatus, (status) => {
+      if (status === 'didEnter') {
+        isPageActive.value = true;
+      } else if (status === 'didLeave') {
+        isPageActive.value = false;
+      }
+    });
+
+    return {
+      isPageActive,
+    };
   },
 });
 </script>
