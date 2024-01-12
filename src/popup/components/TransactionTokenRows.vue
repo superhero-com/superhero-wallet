@@ -56,7 +56,7 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
     extTokens: { type: Array as PropType<ITokenResolved[] | undefined>, default: null },
-    iconSize: { type: String as PropType<AllowedTokenIconSize>, default: 'rg' },
+    iconSize: { type: String as PropType<AllowedTokenIconSize>, default: 'sm' },
     direction: { type: String, default: '' },
     protocol: { type: String as PropType<Protocol>, required: true },
     error: Boolean,

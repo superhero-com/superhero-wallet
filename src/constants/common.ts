@@ -382,6 +382,19 @@ export const ALLOWED_ICON_STATUSES = [
   'warning',
 ] as const;
 
+/**
+ * Pixel size is defined in css variables in global.scss
+ */
+export const ICON_SIZES = {
+  xs: 'xs', // 12px
+  sm: 'sm', // 16px
+  rg: 'rg', // 18px
+  md: 'md', // 20px
+  lg: 'lg', // 24px
+  xl: 'xl', // 28px
+  xxl: 'xxl', // 30px
+} as const;
+
 export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';
 export const TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY = 'transfer-send-data';
 

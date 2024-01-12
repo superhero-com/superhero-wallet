@@ -47,7 +47,7 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { ITokenResolved, Protocol } from '@/types';
-import { ASSET_TYPES, PROTOCOLS } from '@/constants';
+import { ASSET_TYPES, ICON_SIZES, PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   isCoin,
@@ -56,7 +56,7 @@ import {
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import ProtocolIcon from './ProtocolIcon.vue';
 
-const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
+const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
 
 export type AllowedTokenIconSize = typeof SIZES[number];
 
@@ -77,7 +77,7 @@ export default defineComponent({
     protocol: { type: String as PropType<Protocol>, required: true, default: PROTOCOLS.aeternity },
     iconSize: {
       type: String as PropType<AllowedTokenIconSize>,
-      default: 'rg',
+      default: ICON_SIZES.sm,
       validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
     },
     vertical: Boolean,
@@ -148,7 +148,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .tokens {
-  --icon-size: 16px;
+  --icon-size: var(--icon-size-sm);
 
   @extend %face-sans-16-semi-bold;
 
@@ -198,16 +198,16 @@ export default defineComponent({
     vertical-align: middle;
   }
 
-  &.md {
-    --icon-size: 18px;
+  &.rg {
+    --icon-size: var(--icon-size-rg);
   }
 
   &.lg {
-    --icon-size: 24px;
+    --icon-size: var(--icon-size-lg);
   }
 
-  &.xl {
-    --icon-size: 30px;
+  &.xxl {
+    --icon-size: var(--icon-size-xxl);
   }
 
   &.vertical {
