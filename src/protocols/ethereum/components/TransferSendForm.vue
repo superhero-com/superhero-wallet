@@ -74,10 +74,10 @@ import BigNumber from 'bignumber.js';
 
 import type { AssetContractId, IAsset, TransferFormModel } from '@/types';
 import {
+  useAccountAssetsList,
   useBalances,
   useCurrencies,
   useNetworks,
-  useFungibleTokens,
 } from '@/composables';
 import { useEthFeeCalculation } from '@/protocols/ethereum/composables/ethFeeCalculation';
 import { useTransferSendForm } from '@/composables/transferSendForm';
@@ -133,13 +133,11 @@ export default defineComponent({
       maxPriorityFeePerGas,
       updateFeeList,
     } = useEthFeeCalculation();
-    const { getProtocolAvailableTokens } = useFungibleTokens();
-
-    const ethTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.ethereum));
+    const { accountAssets } = useAccountAssetsList();
 
     function getSelectedAssetValue(assetContractId?: AssetContractId, selectedAsset?: IAsset) {
       if (assetContractId) {
-        return ethTokensAvailable.value[assetContractId];
+        return accountAssets.value.find(({ contractId }) => contractId === assetContractId);
       } if (!selectedAsset) {
         return ProtocolAdapterFactory
           .getAdapter(PROTOCOLS.ethereum)
@@ -205,7 +203,7 @@ export default defineComponent({
       const { query } = route;
       updateFormModelValues({
         ...query,
-        token: query.token,
+        token: query.token || props.transferData.selectedAsset?.contractId,
       });
     });
 
