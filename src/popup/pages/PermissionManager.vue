@@ -133,7 +133,7 @@
             <BtnMain
               variant="muted"
               :text="$t('common.cancel')"
-              :to="{ name: ROUTE_PERMISSIONS_SETTINGS }"
+              :to="{ name: ROUTE_PERMISSIONS_SETTINGS, replace: true }"
             />
             <BtnMain
               class="confirm"
@@ -221,7 +221,7 @@ export default defineComponent({
 
     function removePermissionAndRedirect() {
       removePermission(routeHost);
-      router.push({ name: ROUTE_PERMISSIONS_SETTINGS });
+      router.replace({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     async function savePermission() {
@@ -242,7 +242,7 @@ export default defineComponent({
       }
 
       addPermission({ ...permission.value, host });
-      router.push({ name: ROUTE_PERMISSIONS_SETTINGS });
+      router.replace({ name: ROUTE_PERMISSIONS_SETTINGS });
     }
 
     if (editView) {
