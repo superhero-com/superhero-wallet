@@ -275,8 +275,22 @@ export const routes: WalletAppRouteConfig[] = [
         },
       },
       {
-        path: 'coins/:id',
+        /**
+         * When a route is defined with a parameter and user leaves this route, vue-router will
+         * throw a "missing required param" error even though the parameter was set for the route
+         * Making the parameter optional & checking for it in the beforeEnter hook fixes the issue
+         *
+         * @see https://github.com/vuejs/router/issues/845
+         */
+        path: 'coins/:id?',
         component: TokenContainer,
+        beforeEnter: (to, from, next) => {
+          if (!to.params.id) {
+            next({ name: ROUTE_MULTISIG_ACCOUNT });
+            return;
+          }
+          next();
+        },
         children: [
           {
             name: ROUTE_MULTISIG_COIN,
@@ -625,8 +639,16 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/coins/:id',
+    // see https://github.com/vuejs/router/issues/845
+    path: '/coins/:id?',
     component: TokenContainer,
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: ROUTE_ACCOUNT });
+        return;
+      }
+      next();
+    },
     children: [
       {
         name: ROUTE_COIN,
@@ -655,8 +677,16 @@ export const routes: WalletAppRouteConfig[] = [
     ],
   },
   {
-    path: '/tokens/:id',
+    // see https://github.com/vuejs/router/issues/845
+    path: '/tokens/:id?',
     component: TokenContainer,
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: ROUTE_ACCOUNT });
+        return;
+      }
+      next();
+    },
     children: [
       {
         name: ROUTE_TOKEN,
