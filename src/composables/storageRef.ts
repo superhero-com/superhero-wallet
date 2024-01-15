@@ -77,8 +77,8 @@ export function useStorageRef<T = string | object | any[]>(
 
     /**
      * Two way binding between the extension and the background
-     * Whenever the app saves the state to browser storage the extension background picks this
-     * and synchronizes own state with the change.
+     * Whenever the app saves the state to browser storage the extension background
+     * and the offscreen tab pick this and synchronize their own state with the change.
      */
     if (backgroundSync) {
       WalletStorage.watch?.(storageKey, (val) => setLocalState(val));

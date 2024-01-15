@@ -44,6 +44,12 @@ export const IS_EXTENSION = PLATFORM === 'extension' && !RUNNING_IN_TESTS;
 
 export const IS_EXTENSION_BACKGROUND = IS_EXTENSION && window.location.href.endsWith('_generated_background_page.html');
 
+/**
+ * The Offscreen API allows the extension to use DOM APIs in a hidden document.
+ * The runtime API is the only extensions API supported by offscreen documents.
+ */
+export const IS_OFFSCREEN_TAB = window.location.pathname === '/offscreen.html';
+
 export const IS_IOS = isPlatform('ios');
 
 export const IS_ANDROID = isPlatform('android');

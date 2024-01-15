@@ -13,11 +13,12 @@ const parseBool = (val) => (val ? JSON.parse(val) : false);
 
 const RUNNING_IN_TESTS = parseBool(process.env.RUNNING_IN_TESTS);
 const UNFINISHED_FEATURES = parseBool(process.env.UNFINISHED_FEATURES);
+const IS_FIREFOX_EXT = parseBool(process.env.IS_FIREFOX_EXT);
 
 module.exports = {
   publicPath: { web: '/', extension: '../' }[PLATFORM] || './',
   outputDir: {
-    extension: 'dist/extension',
+    extension: IS_FIREFOX_EXT ? 'dist/extension/firefox' : 'dist/extension/chrome',
     ionic: 'www',
     web: 'dist/web/root',
   }[PLATFORM],
@@ -37,6 +38,12 @@ module.exports = {
         title: 'cameraPermissions',
         filename: 'CameraRequestPermission.html',
       },
+      offscreen: {
+        template: 'src/offscreen/offscreen.html',
+        entry: 'src/offscreen/offscreen.ts',
+        title: 'offscreen',
+        filename: 'offscreen.html',
+      },
     },
   },
 
@@ -51,7 +58,7 @@ module.exports = {
         },
         componentOptions: {
           background: {
-            entry: 'src/background/index.js',
+            entry: 'src/background/index.ts',
           },
           contentScripts: {
             entries: {
@@ -61,6 +68,13 @@ module.exports = {
         },
         manifestTransformer: (manifest) => {
           manifest.permissions.push(...UNFINISHED_FEATURES ? ['clipboardRead'] : []);
+          manifest.permissions.push(...!IS_FIREFOX_EXT ? ['offscreen'] : []);
+          if (IS_FIREFOX_EXT) {
+            // eslint-disable-next-line no-param-reassign
+            manifest.background.page = '/offscreen.html';
+            // eslint-disable-next-line no-param-reassign
+            delete manifest.background.service_worker;
+          }
           return manifest;
         },
       },

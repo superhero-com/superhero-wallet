@@ -8,9 +8,10 @@ import {
 window.browser = require('webextension-polyfill');
 
 const runContentScript = () => {
-  const sendToBackground = (method, params) => new Promise((resolve) => {
+  const sendToOffscreen = (method, params) => new Promise((resolve) => {
     browser.runtime
       .sendMessage({
+        target: 'offscreen',
         jsonrpc: '2.0',
         id: params.id || null,
         method,
@@ -26,9 +27,9 @@ const runContentScript = () => {
       let { method } = data;
       if (!method) method = 'pageMessage';
 
-      // Handle message from page and redirect to background script
+      // Handle message from page and redirect to offscreen page
       if (!data.resolve) {
-        sendToBackground(method, data);
+        sendToOffscreen(method, data);
       }
     },
     false,

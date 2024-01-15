@@ -1,3 +1,4 @@
+import { IS_OFFSCREEN_TAB } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { ref } from 'vue';
 
@@ -12,7 +13,7 @@ export const collectVuexState = (() => {
     if (window?.browser) {
       if (isCollecting.value) {
         await watchUntilTruthy(isCollecting);
-      } else if (!vuexState) {
+      } else if (!vuexState && !IS_OFFSCREEN_TAB) {
         isCollecting.value = true;
         vuexState = (await window.browser.storage.local.get('state'))?.state as any;
         isCollecting.value = false;

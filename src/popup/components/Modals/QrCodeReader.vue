@@ -187,7 +187,7 @@ export default defineComponent({
             cameraStatus.value = 'granted';
           }).catch(() => {
             openInNewWindow(
-              browser.extension.getURL('./CameraRequestPermission.html'),
+              browser.runtime.getURL('./CameraRequestPermission.html'),
             );
             props.reject(new NoUserMediaPermissionError());
           });

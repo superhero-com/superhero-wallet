@@ -1,6 +1,9 @@
-window.browser = process.env.IS_EXTENSION
-  ? require('webextension-polyfill')
-  : {
+if (process.env.IS_EXTENSION) {
+  import('webextension-polyfill').then((webExtensionPolyfill) => {
+    browser = webExtensionPolyfill;
+  });
+} else {
+  window.browser = {
     runtime: {
       getURL: (url) => url,
     },
@@ -35,3 +38,4 @@ window.browser = process.env.IS_EXTENSION
       },
     },
   };
+}

@@ -1,15 +1,17 @@
 import '@/lib/initPolyfills';
 import '@/protocols/registerAdapters';
-import { UNFINISHED_FEATURES } from '@/constants';
-import initDeeplinkHandler from './deeplinkHandler';
+import { IS_FIREFOX, UNFINISHED_FEATURES } from '@/constants/environment';
 import * as wallet from './wallet';
-import Logger from '../lib/logger';
-import { useAccounts } from '../composables';
+import { useAccounts } from '../composables/accounts';
+import { updateDynamicRules } from '../background/redirectRule';
 
-Logger.init({ background: true });
-initDeeplinkHandler();
+// If browser is FF, load the redirectRule script because background is not loaded from the manifest
+// in FF we have to use the offscreen.html as background page
+if (IS_FIREFOX) {
+  browser.runtime.onInstalled.addListener(updateDynamicRules);
+}
 
-browser.runtime.onMessage.addListener(async (msg) => {
+browser.runtime.onMessage.addListener(async (msg: any) => {
   const { method } = msg;
 
   if (method === 'reload') {
