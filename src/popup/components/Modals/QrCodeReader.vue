@@ -307,6 +307,11 @@ export default defineComponent({
 
     .video {
       height: var(--camera-size);
+
+      @include mixins.mobile {
+        height: unset;
+        width: var(--camera-size);
+      }
     }
 
     .video-loader {
