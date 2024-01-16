@@ -158,7 +158,6 @@ export default defineComponent({
     } = useTransferSendForm({
       transferData: props.transferData,
       getSelectedAssetValue,
-      protocol: PROTOCOLS.ethereum,
     });
 
     const { max } = useEthMaxAmount({ formModel, fee });

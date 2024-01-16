@@ -52,7 +52,11 @@ export function useTransferSendForm({
   const { save: saveFormData } = useTransferSendHandler();
   const { accountAssets } = useAccountAssetsList();
 
-  const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
+  const hasError = computed(
+    (): boolean => ['address', 'amount'].some(
+      (errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error',
+    ),
+  );
 
   function clearPayload() {
     formModel.value.payload = '';
