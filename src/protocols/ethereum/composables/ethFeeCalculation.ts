@@ -10,9 +10,14 @@ import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetwo
 import { ETH_GAS_LIMIT } from '../config';
 import { etherFromGwei } from '../helpers';
 
+const MAX_PRIORITY_FEE_PER_GAS_SLOW = 0.1;
+const MAX_PRIORITY_FEE_PER_GAS_MED = 0.15;
+const MAX_PRIORITY_FEE_PER_GAS_FAST = 0.2;
+const MAX_PRIORITY_FEE_PER_GAS_TESTNET = 0.000001;
+
 export function useEthFeeCalculation() {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
-  const { isActiveNetworkTestnet } = useNetworks();
+  const { isActiveNetworkTestnet: isTestnet } = useNetworks();
   const { t } = useI18n();
 
   const feeSelectedIndex = ref(1);
@@ -24,13 +29,13 @@ export function useEthFeeCalculation() {
 
   // max priority fee per gas
   const maxPriorityFeePerGasSlow = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.1),
+    etherFromGwei(isTestnet ? MAX_PRIORITY_FEE_PER_GAS_TESTNET : MAX_PRIORITY_FEE_PER_GAS_SLOW),
   );
   const maxPriorityFeePerGasMedium = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.15),
+    etherFromGwei(isTestnet ? MAX_PRIORITY_FEE_PER_GAS_TESTNET : MAX_PRIORITY_FEE_PER_GAS_MED),
   );
   const maxPriorityFeePerGasFast = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.2),
+    etherFromGwei(isTestnet ? MAX_PRIORITY_FEE_PER_GAS_TESTNET : MAX_PRIORITY_FEE_PER_GAS_FAST),
   );
 
   // maximum fee per gas that will be paid
@@ -82,9 +87,23 @@ export function useEthFeeCalculation() {
   async function updateFeeList() {
     const baseFee = new BigNumber(await fetchBaseFee());
 
-    maxFeePerGasSlow.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasSlow.value);
-    maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
-    maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
+    /**
+     * maxFeePerGas is not included in the fee when calculating the max amount
+     * thus if maxFeePerGas is too high, it can happen that max amount transactions
+     * do not go through because of insufficient funds
+     * In testnet we can use lower max fees.
+     * maxFeePerGas = 2 * baseFee + maxPriorityFeePerGas is the recommended value
+     * Lowering it in mainnet should be tested
+     */
+    maxFeePerGasSlow.value = baseFee
+      .multipliedBy(isTestnet ? 1 : 2)
+      .plus(maxPriorityFeePerGasSlow.value);
+    maxFeePerGasMedium.value = baseFee
+      .multipliedBy(isTestnet ? 1 : 2)
+      .plus(maxPriorityFeePerGasMedium.value);
+    maxFeePerGasHigh.value = baseFee
+      .multipliedBy(isTestnet ? 1 : 2)
+      .plus(maxPriorityFeePerGasFast.value);
 
     feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value).multipliedBy(ETH_GAS_LIMIT);
     feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value).multipliedBy(ETH_GAS_LIMIT);
