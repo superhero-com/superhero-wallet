@@ -32,6 +32,7 @@
     <PlusCircleIcon
       class="add-icon"
       :class="{ active: currentIdx === optionsSize }"
+      data-cy="bullet-switcher-add"
       @click="$emit('change', optionsSize)"
     />
   </div>

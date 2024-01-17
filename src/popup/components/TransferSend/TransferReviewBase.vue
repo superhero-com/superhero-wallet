@@ -49,6 +49,7 @@
           :symbol="tokenSymbol"
           :protocol="protocol"
           :hide-fiat="!showFiat"
+          data-cy="review-amount"
         />
       </template>
     </DetailsItem>
@@ -74,6 +75,7 @@
 
     <PayloadDetails
       class="details-item"
+      data-cy="review-payload"
       :payload="transferData.payload"
     />
 

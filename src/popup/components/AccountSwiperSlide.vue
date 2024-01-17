@@ -12,6 +12,7 @@
       <BtnPlain
         v-if="idx !== 0"
         class="swiper-button prev"
+        data-cy="account-swiper-prev"
         @click.prevent="$emit('slide', idx - 1)"
       >
         <ChevronIcon />
@@ -20,6 +21,7 @@
       <BtnPlain
         v-if="!hideNext"
         class="swiper-button next"
+        data-cy="account-swiper-next"
         @click.prevent="$emit('slide', idx + 1)"
       >
         <ChevronIcon />

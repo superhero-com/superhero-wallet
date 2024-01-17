@@ -1,5 +1,8 @@
 <template>
-  <div class="account-details">
+  <div
+    class="account-details"
+    :data-account-address="activeAccount.address"
+  >
     <div class="account-info-wrapper">
       <slot
         v-if="$slots['account-info']"
