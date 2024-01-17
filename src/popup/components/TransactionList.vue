@@ -196,6 +196,13 @@ export default defineComponent({
             getTxSymbol(getTransaction(transaction)),
             searchPhrase.value.toLocaleLowerCase(),
           )
+          || (
+            transaction.tx?.contractId
+            && includesCaseInsensitive(
+              transaction.tx.contractId,
+              searchPhrase.value.toLocaleLowerCase(),
+            )
+          )
         ),
       );
     }
