@@ -20,6 +20,7 @@
           v-model="formModel.amount"
           name="amount"
           :rules="{
+            does_not_exceed_decimals: formModel.selectedAsset?.decimals,
             min_value_exclusive: 0,
             ...+balance.minus(fee) > 0 ? { max_value: max } : {},
             enough_coin: fee.toString(),

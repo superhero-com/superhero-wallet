@@ -11,6 +11,7 @@
             :rules="{
               enough_coin: amountTotal.toString(),
               required: true,
+              does_not_exceed_decimals: AE_COIN_PRECISION,
             }"
           >
             <InputAmount
@@ -170,6 +171,7 @@ export default defineComponent({
 
     return {
       PROTOCOL_AETERNITY,
+      AE_COIN_PRECISION,
       amount,
       amountTotal,
       amountError,

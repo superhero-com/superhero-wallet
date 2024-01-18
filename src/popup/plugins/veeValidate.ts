@@ -239,4 +239,13 @@ export default () => {
       return balance.value.isGreaterThanOrEqualTo(arg) || tg('validation.enoughAeSigner');
     },
   );
+
+  defineRule(
+    'does_not_exceed_decimals',
+    (value: string, [decimals]: [number]) => (
+      !value
+      || BigNumber(value).dp()! <= decimals
+      || tg('validation.doesNotExceedDecimals', [decimals])
+    ),
+  );
 };

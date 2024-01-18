@@ -46,6 +46,7 @@
         :rules="{
           required: true,
           max_value: max,
+          does_not_exceed_decimals: formModel.selectedAsset?.decimals,
         }"
       >
         <InputAmount

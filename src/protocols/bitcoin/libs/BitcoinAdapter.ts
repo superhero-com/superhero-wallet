@@ -48,6 +48,8 @@ import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 export class BitcoinAdapter extends BaseProtocolAdapter {
   protocolName = 'Bitcoin';
 
+  coinPrecision = BTC_COIN_PRECISION;
+
   bip32 = BIP32Factory(ecc);
 
   networkSettings: AdapterNetworkSettingList = [

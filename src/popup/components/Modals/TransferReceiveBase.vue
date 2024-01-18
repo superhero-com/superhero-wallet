@@ -54,6 +54,7 @@
           name="amount"
           :rules="{
             min_value_exclusive: 0,
+            does_not_exceed_decimals: assetDecimals,
           }"
         >
           <InputAmount
@@ -181,6 +182,11 @@ export default defineComponent({
         : '';
     }
 
+    const assetDecimals = computed(() => (
+      selectedAsset.value?.decimals
+      ?? ProtocolAdapterFactory.getAdapter(props.protocol).coinPrecision
+    ));
+
     const accountAddressToCopy = computed(
       () => (amount.value && +amount.value > 0)
         ? getAccountLink(props.accountAddress)
@@ -243,6 +249,7 @@ export default defineComponent({
       ShareIcon,
       amount,
       selectedAsset,
+      assetDecimals,
       share,
       handleAssetChange,
       copyAddress,

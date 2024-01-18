@@ -49,6 +49,8 @@ interface IAmountDecimalPlaces {
 export class AeternityAdapter extends BaseProtocolAdapter {
   protocolName = AE_PROTOCOL_NAME;
 
+  coinPrecision = AE_COIN_PRECISION;
+
   networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
     {
       key: 'nodeUrl',
