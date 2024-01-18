@@ -209,8 +209,9 @@ export function getTransaction(transaction: ICommonTransaction): ITransaction | 
 }
 
 export function getTransactionPayload(transaction: ITransaction) {
-  return (transaction.tx?.payload)
-    ? decode(transaction.tx?.payload).toString()
+  const innerTx = getInnerTransaction(transaction.tx);
+  return (innerTx?.payload)
+    ? decode(innerTx?.payload).toString()
     : null;
 }
 
