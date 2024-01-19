@@ -164,6 +164,7 @@ import {
   onMounted,
   watch,
 } from 'vue';
+import { merge } from 'lodash-es';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
@@ -319,10 +320,11 @@ export default defineComponent({
     onMounted(async () => {
       let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
 
-      if (!rawTransaction || rawTransaction.incomplete) {
+      // Claim transactions have missing data that needs to be fetched from the middleware
+      if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
         const middleware = await getMiddleware();
         try {
-          rawTransaction = await middleware.getTx(hash);
+          rawTransaction = merge(rawTransaction, await middleware.getTx(hash));
         } catch (e) {
           // This case is for pending transaction
           await fetchAllPendingTransactions();

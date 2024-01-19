@@ -104,23 +104,23 @@ export function categorizeContractCallTxObject(transaction: ITransaction): {
   }
 
   switch (tx.function) {
-    case 'transfer':
-    case 'transfer_payload':
-    case 'change_allowance':
-    case 'create_allowance':
+    case TX_FUNCTIONS.transfer:
+    case TX_FUNCTIONS.transferPayload:
+    case TX_FUNCTIONS.changeAllowance:
+    case TX_FUNCTIONS.createAllowance:
       return {
         to: tx.arguments[0].value,
         amount: tx.arguments[1].value,
         token: tx.contractId,
       };
-    case 'tip_token':
+    case TX_FUNCTIONS.tipToken:
       return {
         url: tx.arguments[0].value,
         note: tx.arguments[1].value,
         amount: tx.arguments[3].value,
         token: tx.arguments[2].value,
       };
-    case 'retip_token':
+    case TX_FUNCTIONS.retipToken:
       return {
         url: tx.arguments[0].value,
         amount: tx.arguments[2].value,

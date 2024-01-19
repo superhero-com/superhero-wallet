@@ -260,12 +260,18 @@ export function useFungibleTokens() {
         -availableTokens.value[contractCallData.token!].decimals,
       );
     }
+
+    const claimTipAmout = (transaction.tx.function === 'claim')
+      ? transaction.tx.log?.[0]?.topics[2]
+      : null;
+
     const isReceived = direction === TX_DIRECTION.received;
 
     const rawAmount = (
       transaction.tx?.amount
       || (transaction.tx?.tx?.tx as any)?.amount
       || transaction.tx?.nameFee
+      || claimTipAmout
       || 0
     );
 
