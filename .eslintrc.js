@@ -3,6 +3,10 @@ module.exports = {
   parserOptions: {
     parser: '@typescript-eslint/parser',
   },
+  globals: {
+    NodeJS: true,
+    browser: true,
+  },
   env: {
     browser: true,
   },
