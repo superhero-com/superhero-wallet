@@ -34,12 +34,12 @@ export const AE_NETWORK_DEFAULT_SETTINGS: IDefaultNetworkTypeData<IAeNetworkSett
   [NETWORK_TYPE_MAINNET]: {
     nodeUrl: AE_NETWORK_MAINNET_NODE_URL,
     middlewareUrl: 'https://mainnet.aeternity.io/mdw',
-    backendUrl: 'https://raendom-backend.z52da5wt.xyz',
+    backendUrl: 'https://superhero-backend-mainnet.prd.service.aepps.com',
   },
   [NETWORK_TYPE_TESTNET]: {
     nodeUrl: AE_NETWORK_TESTNET_NODE_URL,
     middlewareUrl: 'https://testnet.aeternity.io/mdw',
-    backendUrl: 'https://testnet.superhero.aeternity.art',
+    backendUrl: 'https://superhero-backend-testnet.prd.service.aepps.com',
   },
 };
 
