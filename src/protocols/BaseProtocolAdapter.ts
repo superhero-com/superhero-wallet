@@ -15,6 +15,8 @@ import type {
 export abstract class BaseProtocolAdapter {
   abstract protocolName: string;
 
+  abstract coinPrecision: number;
+
   abstract getAccountPrefix(): string;
 
   abstract getExplorer(): any;

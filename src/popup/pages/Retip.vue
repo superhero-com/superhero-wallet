@@ -29,6 +29,7 @@
           :rules="{
             required: true,
             min_value_exclusive: 0,
+            does_not_exceed_decimals: formModel?.selectedAsset?.decimals,
             ae_min_tip_amount: true,
             ...+balance.minus(fee) > 0 ? { max_value: max } : {},
             enough_coin: fee.toString(),
@@ -148,7 +149,7 @@ export default defineComponent({
     const { createOrChangeAllowance } = useFungibleTokens();
 
     const tipId = route.query.id;
-    const tip = ref<{ url: string; id: string }>({
+    const tip = ref<{ url: string; id: string; title?: string }>({
       url: 'default',
       id: '',
     });

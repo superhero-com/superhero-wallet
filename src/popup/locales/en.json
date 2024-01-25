@@ -1211,6 +1211,7 @@
     "maxValueVault": "Amount is exceeding the vault's balance: {0}",
     "notToken": "Tokens are currently not allowed, please switch to AE",
     "invalidAddressChainUrl": "Invalid address, .chain name or URL",
-    "invalidAddress": "Invalid account address"
+    "invalidAddress": "Invalid account address",
+    "doesNotExceedDecimals": "Amount should not exceed {0} decimals"
   }
 }

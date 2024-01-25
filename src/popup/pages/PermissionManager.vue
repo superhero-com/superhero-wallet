@@ -90,6 +90,7 @@
               name="transactionSignLimit"
               :rules="{
                 min_value_exclusive: 0,
+                does_not_exceed_decimals: selectedAsset.decimals,
               }"
             >
               <InputAmount
@@ -173,10 +174,9 @@ import {
   PERMISSION_DEFAULTS,
   PROTOCOL_AETERNITY,
 } from '@/constants';
-import { useBalances, useCurrencies } from '@/composables';
-import { usePermissions } from '@/composables/permissions';
+import { useBalances, useCurrencies, usePermissions } from '@/composables';
 import { ROUTE_NOT_FOUND, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
-import { AE_CONTRACT_ID, AE_SYMBOL } from '@/protocols/aeternity/config';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmount.vue';
@@ -202,7 +202,7 @@ export default defineComponent({
     const { validate, setValues } = useForm();
 
     const { balance } = useBalances();
-    const { getCurrentCurrencyRate } = useCurrencies();
+    const { marketData } = useCurrencies();
     const { permissions, addPermission, removePermission } = usePermissions();
 
     const routeHost = route.params.host as string;
@@ -211,11 +211,9 @@ export default defineComponent({
     const permission = ref<IPermission>({ ...PERMISSION_DEFAULTS });
     const permissionChanged = ref(false);
 
-    const selectedAsset = computed(() => ({
-      contractId: AE_CONTRACT_ID,
-      symbol: AE_SYMBOL,
-      currentPrice: getCurrentCurrencyRate(PROTOCOL_AETERNITY),
-    }));
+    const selectedAsset = computed(() => ProtocolAdapterFactory
+      .getAdapter(PROTOCOL_AETERNITY)
+      .getDefaultCoin(marketData.value!, +balance.value));
 
     const permissionHostValidation = computed(() => !permission.value.host?.includes('localhost'));
 

@@ -31,3 +31,4 @@ export * from './fungibleTokens';
 export * from './coinTokensProps';
 export * from './scrollTransactions';
 export * from './languages';
+export * from './permissions';
