@@ -19,6 +19,7 @@ export function useLanguages() {
       i18n.global.setLocaleMessage(languageCode, messages);
     }
     (i18n.global.locale as any).value = languageCode;
+    document.documentElement.setAttribute('lang', languageCode);
 
     WalletStorage.set(ACTIVE_LANGUAGE_KEY, languageCode);
   }
@@ -27,6 +28,8 @@ export function useLanguages() {
     const storedLanguage = await WalletStorage.get<SupportedLanguage>(ACTIVE_LANGUAGE_KEY);
     if (storedLanguage) {
       switchLanguage(storedLanguage);
+    } else {
+      document.documentElement.setAttribute('lang', (i18n.global.locale as any).value);
     }
   }
 
