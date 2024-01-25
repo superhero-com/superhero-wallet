@@ -110,7 +110,13 @@ export default defineComponent({
             ? t('transaction.dexType.pool')
             : t('common.swap'),
         );
-      } else if (props.transaction.claim) {
+      } else if (
+        props.transaction.claim
+        || (
+          [tippingV1, tippingV2].includes(innerTx.value.contractId)
+          && innerTx.value.function === TX_FUNCTIONS.claim
+        )
+      ) {
         arr.push(
           t('pages.token-details.tip'),
           t('transaction.spendType.in'),
