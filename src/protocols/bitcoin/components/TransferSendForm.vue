@@ -155,7 +155,6 @@ export default defineComponent({
       updateFormModelValues,
     } = useTransferSendForm({
       transferData: props.transferData,
-      protocol: PROTOCOLS.bitcoin,
     });
 
     const feeSelectedIndex = ref(1);

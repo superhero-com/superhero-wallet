@@ -10,7 +10,6 @@ import type {
   Dictionary,
   IAsset,
   IToken,
-  Protocol,
   TransferFormModel,
 } from '@/types';
 import { useModals } from '@/composables/modals';
@@ -19,9 +18,8 @@ import {
   IS_PRODUCTION,
   MODAL_READ_QR_CODE,
 } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
 import Logger from '@/lib/logger';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { NoUserMediaPermissionError } from '@/lib/errors';
 import { useTransferSendHandler } from './transferSendHandler';
 import { useAccountAssetsList } from './accountAssetsList';
@@ -34,13 +32,11 @@ type SelectedAssetValueFunction = (
 interface UseTransferSendFormParams {
   transferData: TransferFormModel;
   getSelectedAssetValue?: SelectedAssetValueFunction;
-  protocol: Protocol;
 }
 
 export function useTransferSendForm({
   transferData,
   getSelectedAssetValue,
-  protocol,
 }: UseTransferSendFormParams) {
   const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
@@ -52,7 +48,11 @@ export function useTransferSendForm({
   const { save: saveFormData } = useTransferSendHandler();
   const { accountAssets } = useAccountAssetsList();
 
-  const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
+  const hasError = computed(
+    (): boolean => ['address', 'amount'].some(
+      (errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error',
+    ),
+  );
 
   function clearPayload() {
     formModel.value.payload = '';
@@ -160,11 +160,10 @@ export function useTransferSendForm({
       }
       updateFormModelValues([
         ...new URL(
-          (scanResult.startsWith(ProtocolAdapterFactory.getAdapter(protocol).getAccountPrefix()))
-            ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
-            : scanResult,
-        )
-          .searchParams.entries(),
+          isUrlValid(scanResult)
+            ? scanResult
+            : `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`,
+        ).searchParams.entries(),
       ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
       invoiceId.value = null;
     }
