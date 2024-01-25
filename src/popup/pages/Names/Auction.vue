@@ -74,7 +74,7 @@ export default defineComponent({
       const middleware = await getMiddleware();
       try {
         const res = await middleware.getName(props.name);
-        const { auctionEnd, bids } = res.auction ?? res.info;
+        const { auctionEnd, bids } = res.info;
         const loadedBids = await Promise.all(bids.map(async (txId: number) => {
           const { tx } = await middleware.getTx(txId.toString());
           return {
