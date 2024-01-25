@@ -31,7 +31,10 @@
             />
           </div>
 
-          <div class="phraser bright">
+          <div
+            ref="phraserLightEl"
+            class="phraser bright"
+          >
             <template v-if="!selectedWordIds.length">
               <SeedPhraseBadge
                 v-for="(word, index) in examplePhrase"
@@ -63,6 +66,7 @@
           <SeedPhraseNotification
             v-if="showNotification"
             :has-error="hasError"
+            :phraser-el="phraserLightEl"
           />
         </FixedScreenFooter>
       </div>
@@ -98,6 +102,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const phraserLightEl = ref<HTMLElement | undefined>(undefined);
+
     const router = useRouter();
     const { t } = useI18n();
 
@@ -125,7 +131,7 @@ export default defineComponent({
 
       setTimeout(() => {
         showNotification.value = false;
-        router.push({ name: ROUTE_ACCOUNT });
+        router.replace({ name: ROUTE_ACCOUNT });
       }, 3000);
     }
 
@@ -136,6 +142,7 @@ export default defineComponent({
     }
 
     return {
+      phraserLightEl,
       selectedWordIds,
       showNotification,
       hasError,
@@ -168,7 +175,7 @@ export default defineComponent({
 
   .phraser {
     padding: 0;
-    margin: 18px -4px 0 0; // -4px to compensate margin-right on badge
+    margin: 18px 0 0 0;
 
     &.bright {
       background: rgba(variables.$color-white, 0.15);

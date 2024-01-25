@@ -1,5 +1,8 @@
 <template>
-  <div :class="['seed-phrase-notification', { error: hasError }]">
+  <div
+    :class="['seed-phrase-notification', { error: hasError }]"
+    :style="{ bottom: `${positionBottom}px`, minHeight: `${phraserElHeight}px` }"
+  >
     <div class="icon-wrapper">
       <AlertIcon v-if="hasError" />
       <CheckCircleIcon v-else />
@@ -13,7 +16,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import {
+  defineComponent,
+  computed,
+  onMounted,
+  ref,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import CheckCircleIcon from '../../icons/check-circle.svg?vue-component';
 import AlertIcon from '../../icons/alert.svg?vue-component';
@@ -25,16 +33,31 @@ export default defineComponent({
   },
   props: {
     hasError: Boolean,
+    phraserEl: { type: HTMLElement, default: null },
   },
   setup(props) {
     const { t } = useI18n();
+
+    const positionBottom = ref(90);
+    const phraserElHeight = ref(176);
 
     const notificationMessage = computed(() => props.hasError
       ? t('pages.seed-phrase-settings.seed-phrase-incorrect')
       : t('pages.seed-phrase-settings.seed-phrase-correct'));
 
+    onMounted(() => {
+      if (props.phraserEl) {
+        phraserElHeight.value = props.phraserEl.getBoundingClientRect().height;
+        const { bottom } = props.phraserEl.getBoundingClientRect();
+        const ionicWrapperBottom = document.querySelector('#app-wrapper')?.getBoundingClientRect()?.bottom;
+        positionBottom.value = Math.floor(ionicWrapperBottom! - bottom - 2); // 2px is border width
+      }
+    });
+
     return {
       notificationMessage,
+      positionBottom,
+      phraserElHeight,
     };
   },
 });
@@ -45,12 +68,10 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .seed-phrase-notification {
-  min-height: 176px;
   border: 2px solid variables.$color-success-dark;
   border-radius: variables.$border-radius-card;
   background: rgba(variables.$color-black, 0.85);
   position: absolute;
-  bottom: 90px;
   width: calc(100% - (2 * var(--screen-padding-x)));
   display: flex;
   flex-direction: column;
