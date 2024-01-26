@@ -10,7 +10,7 @@ import {
   watch,
 } from 'vue';
 import QRCodeStyling from 'qr-code-styling';
-import SHLogo from '../../icons/logo-small-blue.png';
+import SHLogo from '../../icons/logo-small-blue.webp';
 
 export default defineComponent({
   name: 'QrCode',

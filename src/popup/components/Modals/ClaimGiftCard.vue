@@ -356,7 +356,7 @@ export default defineComponent({
     .balance-info {
       padding: 8px 0 16px 0;
       border-radius: 10px;
-      background-image: url("../../../image/dashboard/buy-ae.jpg");
+      background-image: url("../../../image/dashboard/buy-ae.webp");
 
       &.gray {
         filter: grayscale(1);

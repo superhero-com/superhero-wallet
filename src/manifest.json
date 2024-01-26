@@ -25,8 +25,8 @@
     "https://wallet.superhero.com/*"
   ],
   "icons": {
-    "48": "./icons/icon_48.png",
-    "128": "./icons/icon_128.png"
+    "48": "./icons/icon_48.webp",
+    "128": "./icons/icon_128.webp"
   },
   "action": {
     "default_title": "Superhero",
