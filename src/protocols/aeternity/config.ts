@@ -52,11 +52,11 @@ export const AE_NETWORK_ADDITIONAL_SETTINGS: IDefaultNetworkTypeData<
 > = {
   [NETWORK_TYPE_MAINNET]: {
     explorerUrl: 'https://aescan.io',
-    multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.aepps.com',
+    multisigBackendUrl: 'https://ga-multisig-backend-mainnet.prd.service.aepps.com',
   },
   [NETWORK_TYPE_TESTNET]: {
     explorerUrl: 'https://testnet.aescan.io',
-    multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.aepps.com',
+    multisigBackendUrl: 'https://ga-multisig-backend-testnet.prd.service.aepps.com',
   },
 };
 
