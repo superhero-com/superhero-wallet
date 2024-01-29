@@ -932,6 +932,7 @@
           </div>
         </AccordionItem>
       </div>
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
@@ -950,6 +951,7 @@ import {
 } from '@/constants';
 import AccordionItem from '../components/AccordionItem.vue';
 import LinkButton from '../components/LinkButton.vue';
+import BackToTop from '../components/BackToTop.vue';
 
 export default defineComponent({
   components: {
@@ -957,6 +959,7 @@ export default defineComponent({
     LinkButton,
     IonPage,
     IonContent,
+    BackToTop,
   },
   setup() {
     return {
