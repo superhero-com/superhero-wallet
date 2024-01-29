@@ -43,7 +43,7 @@
         show-explorer-link
         show-protocol-icon
         :address="modelValue.toString()"
-        :protocol="selectedAccount?.protocol"
+        :protocol="selectedAccount?.protocol!"
         class="address-truncated"
       />
     </div>
