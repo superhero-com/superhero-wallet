@@ -1514,6 +1514,18 @@ exports[`Pages PrivacyPolicy 1`] = `
         </li>
       </ol>
     </div>
+    <div
+      class="back-to-top"
+    >
+      <transition-stub
+        appear="false"
+        css="true"
+        name="fade-transition"
+        persisted="false"
+      >
+        <!--v-if-->
+      </transition-stub>
+    </div>
   </ion-content>
 </div>
 `;
@@ -2001,6 +2013,18 @@ exports[`Pages TermsOfService 1`] = `
             <!--v-if-->
           </transition-stub>
         </div>
+      </div>
+      <div
+        class="back-to-top"
+      >
+        <transition-stub
+          appear="false"
+          css="true"
+          name="fade-transition"
+          persisted="false"
+        >
+          <!--v-if-->
+        </transition-stub>
       </div>
     </ion-content>
   </div>
