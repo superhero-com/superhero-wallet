@@ -86,9 +86,9 @@ import ArrowReceiveIcon from '@/icons/arrow-receive.svg?vue-component';
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
 import CardIcon from '@/icons/credit-card.svg?vue-component';
 import MenuCardIcon from '@/icons/menu-card-fill.svg?vue-component';
-import buyBackground from '@/image/dashboard/buy-ae.jpg';
-import chainNameBackground from '@/image/dashboard/chain-name.jpg';
-import daeppBrowserBackground from '@/image/dashboard/aepp-browser.jpg';
+import buyBackground from '@/image/dashboard/buy-ae.webp';
+import chainNameBackground from '@/image/dashboard/chain-name.webp';
+import daeppBrowserBackground from '@/image/dashboard/aepp-browser.webp';
 import GlobeIcon from '@/icons/globe-small.svg?vue-component';
 
 export default defineComponent({

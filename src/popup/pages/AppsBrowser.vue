@@ -110,7 +110,7 @@ const DAPPS_LIST = [
   {
     title: 'Aeternity Governance',
     url: 'https://governance.aeternity.com/',
-    image: 'Governance.png',
+    image: 'Governance.webp',
   },
   {
     title: 'Graffiti Aepp',
