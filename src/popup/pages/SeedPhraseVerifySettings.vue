@@ -57,12 +57,17 @@
         </div>
         <FixedScreenFooter>
           <BtnMain
+            v-if="hasError || !showNotification"
             class="verify-button"
-            :disabled="!selectedWordIds || selectedWordIds.length !== mnemonicShuffled.length"
+            :disabled="isVerifyButtonDisabled"
+            :text="$t('pages.seedPhrase.verify')"
             @click="verifyLastStep"
-          >
-            {{ $t('pages.seedPhrase.verify') }}
-          </BtnMain>
+          />
+          <BtnMain
+            v-else
+            :text="$t('common.backToHome')"
+            :to="{name: ROUTE_ACCOUNT}"
+          />
           <SeedPhraseNotification
             v-if="showNotification"
             :has-error="hasError"
@@ -81,9 +86,8 @@ import {
   computed,
 } from 'vue';
 import { shuffle } from 'lodash-es';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { IonPage, IonContent } from '@ionic/vue';
+import { IonPage, IonContent, onIonViewWillLeave } from '@ionic/vue';
 import { useAccounts, useNotifications, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 
@@ -104,7 +108,6 @@ export default defineComponent({
   setup() {
     const phraserLightEl = ref<HTMLElement | undefined>(undefined);
 
-    const router = useRouter();
     const { t } = useI18n();
 
     const { setBackedUpSeed } = useUi();
@@ -117,6 +120,11 @@ export default defineComponent({
     const examplePhrase = ref([t('pages.seedPhrase.first'), t('pages.seedPhrase.second'), '...']);
 
     const mnemonicShuffled = computed((): string[] => shuffle(mnemonic.value.split(' ')));
+    const isVerifyButtonDisabled = computed(() => (
+      !selectedWordIds.value.length
+      || selectedWordIds.value.length !== mnemonicShuffled.value.length
+      || (hasError.value && showNotification.value)
+    ));
 
     function verifyLastStep() {
       const mnemonicSelected = selectedWordIds.value
@@ -124,15 +132,14 @@ export default defineComponent({
         .join(' ');
       showNotification.value = true;
       hasError.value = mnemonic.value !== mnemonicSelected;
-      if (mnemonic.value === mnemonicSelected) {
+      if (!hasError.value) {
         setBackedUpSeed(true);
         removeIsSeedBackedUpNotification();
+      } else {
+        setTimeout(() => {
+          showNotification.value = false;
+        }, 3000);
       }
-
-      setTimeout(() => {
-        showNotification.value = false;
-        router.replace({ name: ROUTE_ACCOUNT });
-      }, 3000);
     }
 
     function onSelectWord(index: number) {
@@ -141,7 +148,14 @@ export default defineComponent({
       }
     }
 
+    onIonViewWillLeave(() => {
+      selectedWordIds.value = [];
+      showNotification.value = false;
+      hasError.value = false;
+    });
+
     return {
+      ROUTE_ACCOUNT,
       phraserLightEl,
       selectedWordIds,
       showNotification,
@@ -149,6 +163,7 @@ export default defineComponent({
       examplePhrase,
       mnemonic,
       mnemonicShuffled,
+      isVerifyButtonDisabled,
       verifyLastStep,
       onSelectWord,
     };
