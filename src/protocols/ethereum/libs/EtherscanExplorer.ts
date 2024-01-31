@@ -9,7 +9,7 @@ export class EtherscanExplorer extends ProtocolExplorer {
   }
 
   override prepareUrlForHash(hash: string) {
-    return `${this.explorerUrl}/address/${hash}`;
+    return `${this.explorerUrl}/tx/${hash}`;
   }
 
   override prepareUrlForAccount(address: string) {
