@@ -66,7 +66,10 @@ export default defineComponent({
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | {}>({});
 
-    const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+    const adapter = ProtocolAdapterFactory.getAdapter(
+      props.transaction.protocol
+      || PROTOCOLS.aeternity,
+    );
     const protocolExplorer = adapter.getExplorer();
 
     const {
@@ -85,7 +88,7 @@ export default defineComponent({
       return {
         address,
         label: t('transaction.overview.accountAddress'),
-        url: protocolExplorer.prepareUrlForHash(address),
+        url: protocolExplorer.prepareUrlForAccount(address),
       };
     }
 
@@ -105,13 +108,13 @@ export default defineComponent({
             sender: {
               address: senderId,
               name: getName(senderId).value,
-              url: protocolExplorer.prepareUrlForHash(senderId),
+              url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
               name: name.value || getName(recipientId).value,
-              url: protocolExplorer.prepareUrlForHash(recipientId),
+              url: protocolExplorer.prepareUrlForAccount(recipientId),
               label: t('transaction.overview.accountAddress'),
             },
             title: t('transaction.type.spendTx'),
@@ -176,7 +179,7 @@ export default defineComponent({
             sender: {
               address: innerTx.value.ownerId,
               name: getName(innerTx.value.ownerId).value,
-              url: protocolExplorer.prepareUrlForHash(innerTx.value.ownerId),
+              url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
               label: t('multisig.multisigVault'),
             },
             recipient: {
@@ -191,13 +194,13 @@ export default defineComponent({
               sender: {
                 address: senderId,
                 name: getName(senderId).value,
-                url: protocolExplorer.prepareUrlForHash(senderId),
+                url: protocolExplorer.prepareUrlForAccount(senderId),
                 label: t('transaction.overview.accountAddress'),
               },
               recipient: {
                 address: recipientId,
                 name: name.value || getName(recipientId).value,
-                url: protocolExplorer.prepareUrlForHash(recipientId),
+                url: protocolExplorer.prepareUrlForAccount(recipientId),
                 label: t('transaction.overview.accountAddress'),
               },
               title: t('transaction.type.spendTx'),

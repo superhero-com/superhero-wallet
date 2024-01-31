@@ -37,7 +37,7 @@ export class AeScan extends ProtocolExplorer {
     return (endpoint) ? `${this.explorerUrl}/${endpoint}/${hash}` : undefined;
   }
 
-  override prepareUrlForAccount(address: string) {
-    return `${this.explorerUrl}/accounts/${address}`;
+  override prepareUrlForAccount(addressOrName: string) {
+    return this.prepareUrlForHash(addressOrName) || `${this.explorerUrl}/accounts/${addressOrName}`;
   }
 }
