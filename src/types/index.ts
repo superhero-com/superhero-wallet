@@ -508,6 +508,7 @@ export interface INameEntryFetched {
  * @link https://testnet.aeternity.io/mdw/swagger/
  */
 export interface IMiddleware {
+  getAccountActivities: GenericApiMethod;
   getActiveNames: GenericApiMethod;
   getActiveOracles: GenericApiMethod;
   getAllAuctions: GenericApiMethod;
