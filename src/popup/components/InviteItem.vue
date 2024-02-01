@@ -22,6 +22,7 @@
         v-if="inviteLinkBalance > 0"
         class="button"
         variant="muted"
+        data-cy="invite-claim"
         :text="$t('pages.invite.claim')"
         @click="claim"
       />
@@ -29,11 +30,13 @@
         v-else
         class="button"
         variant="muted"
+        data-cy="invite-delete"
         :text="$t('pages.invite.delete')"
         @click="deleteItem"
       />
       <BtnMain
         class="button"
+        data-cy="invite-top-up"
         :text="$t('pages.invite.top-up')"
         @click="topUp = true"
       />

@@ -3,7 +3,7 @@
     class="transaction-item"
     :to="redirectRoute"
     replace
-    :data-cy="currentTransaction.pending && 'pending-txs'"
+    :data-cy="currentTransaction.pending ? 'pending-txs' : null"
   >
     <div class="body">
       <TransactionTokenRows

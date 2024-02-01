@@ -20,6 +20,7 @@
       <div
         v-for="(signer, index) in signers"
         :key="`signer${index}`"
+        :data-signer-idx="`signer-address-${index}`"
       >
         <FormSelect
           v-if="index === 0"
@@ -78,12 +79,14 @@
         <BtnText
           :icon="PlusCircleIcon"
           :text="$t('modals.createMultisigAccount.addSigner')"
+          data-cy="add-signer-btn"
           @click="addNewSigner"
         />
 
         <BtnHelp
           :title="$t('multisig.authorizedSigners')"
           :msg="$t('modals.createMultisigAccount.addSignerHelpMsg')"
+          data-cy="add-signer-btn-help"
         />
       </div>
 
@@ -96,6 +99,7 @@
           <FormNumberSelect
             v-model="confirmationsRequired"
             :size="signers.length"
+            data-cy="multisig-num-of-signers-selector"
           />
 
           <i18n-t
@@ -110,6 +114,7 @@
           <BtnHelp
             :title="$t('modals.createMultisigAccount.consensusRequiredHelpTitle')"
             :msg="$t('modals.createMultisigAccount.consensusRequiredHelpMsg')"
+            data-cy="multisig-num-of-signers-selector-help"
           />
         </div>
       </div>

@@ -599,6 +599,7 @@ exports[`Pages PrivacyPolicy 1`] = `
 >
   <ion-content
     class="ion-padding ion-content-bg"
+    data-cy="privacy-policy"
   >
     <div
       class="privacy-policy"
@@ -1528,6 +1529,7 @@ exports[`Pages TermsOfService 1`] = `
   >
     <ion-content
       class="ion-padding ion-content-bg"
+      data-cy="terms-of-service"
     >
       <div
         class="terms-of-service"

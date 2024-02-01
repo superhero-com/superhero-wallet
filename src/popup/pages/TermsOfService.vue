@@ -1,7 +1,10 @@
 <template>
   <!-- eslint-disable max-len -->
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
+    <IonContent
+      class="ion-padding ion-content-bg"
+      data-cy="terms-of-service"
+    >
       <div class="terms-of-service">
         <!-- header -->
         <p class="italic">

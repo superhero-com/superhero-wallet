@@ -42,6 +42,7 @@
             extend
             :icon="PlusCircleFillIcon"
             :disabled="!formModel.amount || !!errorMessage"
+            data-cy="invite-generate"
             @click="generate"
           >
             {{ $t('pages.invite.generate') }}

@@ -1,7 +1,10 @@
 <!-- eslint-disable max-len -->
 <template>
   <IonPage>
-    <IonContent class="ion-padding ion-content-bg">
+    <IonContent
+      class="ion-padding ion-content-bg"
+      data-cy="privacy-policy"
+    >
       <div class="privacy-policy">
         <p><em>The present Privacy Policy is effective since on 9th April 2020.</em></p>
         <ol class="policy-list">

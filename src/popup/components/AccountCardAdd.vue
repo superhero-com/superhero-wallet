@@ -1,6 +1,7 @@
 <template>
   <BtnBase
     class="account-card-add"
+    data-cy="account-card-add"
     @click="openCreateAccountModal()"
   >
     <div class="wrapper">
