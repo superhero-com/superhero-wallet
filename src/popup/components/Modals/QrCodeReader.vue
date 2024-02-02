@@ -17,7 +17,7 @@
     />
     <div
       class="subtitle"
-      v-text="cameraAllowed ? title : $t('modals.qrCodeReader.subtitle')"
+      v-text="subtitle"
     />
 
     <div class="camera">
@@ -53,6 +53,7 @@ import {
   ref,
   watch,
   defineComponent,
+  onBeforeMount,
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
@@ -61,7 +62,7 @@ import type { BrowserQRCodeReader as BrowserQRCodeReaderType, IScannerControls }
 import { useI18n } from 'vue-i18n';
 
 import { IS_EXTENSION, IS_MOBILE_APP } from '@/constants';
-import { handleUnknownError, openInNewWindow } from '@/utils';
+import { checkDeviceHasWebcam, handleUnknownError, openInNewWindow } from '@/utils';
 import { NoUserMediaPermissionError, RejectedByUserError } from '@/lib/errors';
 import { useUi } from '@/composables';
 
@@ -95,6 +96,7 @@ export default defineComponent({
     const browserReader = ref<BrowserQRCodeReaderType>();
     const browserReaderControls = ref<IScannerControls>();
     const qrCodeVideoEl = ref<HTMLVideoElement>();
+    const hasDeviceWebcam = ref(false);
 
     const route = useRoute();
     const { t } = useI18n();
@@ -102,8 +104,22 @@ export default defineComponent({
 
     const cameraAllowed = computed(() => cameraStatus.value === 'granted');
     const heading = computed(() => {
-      if (cameraStatus.value === 'granted') return t('modals.qrCodeReader.scanQr');
+      if (!hasDeviceWebcam.value) {
+        return t('modals.qrCodeReader.noWebcam');
+      }
+      if (cameraAllowed.value) {
+        return t('modals.qrCodeReader.scanQr');
+      }
       return t('modals.qrCodeReader.grantPermission');
+    });
+    const subtitle = computed(() => {
+      if (!hasDeviceWebcam.value) {
+        return t('modals.qrCodeReader.noWebcamSubtitle');
+      }
+      if (cameraAllowed.value) {
+        return props.title;
+      }
+      return t('modals.qrCodeReader.subtitle');
     });
 
     async function initBrowserReader() {
@@ -235,6 +251,10 @@ export default defineComponent({
       props.resolve();
     });
 
+    onBeforeMount(async () => {
+      hasDeviceWebcam.value = await checkDeviceHasWebcam();
+    });
+
     onMounted(async () => {
       if (IS_MOBILE_APP) {
         if (await hasPermission()) {
@@ -273,14 +293,16 @@ export default defineComponent({
     });
 
     return {
+      hasDeviceWebcam,
       cameraAllowed,
       browserReader,
       IS_MOBILE_APP,
       heading,
+      subtitle,
       QrScanIcon,
+      qrCodeVideoEl,
       cancelReading,
       openSettings,
-      qrCodeVideoEl,
     };
   },
 });
