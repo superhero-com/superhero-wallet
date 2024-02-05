@@ -168,7 +168,7 @@ export default defineComponent({
 
     onMounted(() => {
       timerInterval = executeAndSetInterval(() => {
-        transactionDate.value = (props.transaction)
+        transactionDate.value = (props.transaction?.microTime)
           ? relativeTimeTo(dayjs(props.transaction.microTime).toISOString())
           : undefined;
       }, 5000);
