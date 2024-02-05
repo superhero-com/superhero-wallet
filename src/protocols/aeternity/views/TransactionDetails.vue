@@ -314,7 +314,10 @@ export default defineComponent({
       if (!rawTransaction || rawTransaction.incomplete) {
         const middleware = await getMiddleware();
         try {
-          rawTransaction = await middleware.getTx(hash);
+          rawTransaction = {
+            ...await middleware.getTx(hash),
+            protocol: PROTOCOLS.aeternity,
+          };
         } catch (e) {
           // This case is for pending transaction
           await fetchAllPendingTransactions();
