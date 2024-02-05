@@ -162,7 +162,6 @@ import {
   onMounted,
   watch,
 } from 'vue';
-import { merge } from 'lodash-es';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
@@ -316,7 +315,11 @@ export default defineComponent({
       if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
         const middleware = await getMiddleware();
         try {
-          rawTransaction = merge(rawTransaction, await middleware.getTx(hash));
+          rawTransaction = {
+            ...(rawTransaction || {}), // Claim transaction data
+            ...await middleware.getTx(hash),
+            protocol: PROTOCOLS.aeternity,
+          };
         } catch (e) {
           // This case is for pending transaction
           await fetchAllPendingTransactions();

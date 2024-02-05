@@ -183,6 +183,7 @@ export function useTransactionList() {
       .filter(({ type }) => !type?.startsWith('Internal'))
       .map((transaction) => ({
         ...(transaction.payload || transaction),
+        protocol: transaction.protocol,
         transactionOwner: address,
         ...(transaction.type === AEX9_TRANSFER_EVENT
           ? {
