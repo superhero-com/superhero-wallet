@@ -75,11 +75,7 @@ export function useFungibleTokens() {
       availableTokens.value = {};
     }
 
-    availableTokens.value = response.reduce((accumulator, token) => {
-      // eslint-disable-next-line no-param-reassign
-      accumulator[token.contractId] = token;
-      return accumulator;
-    }, {} as ITokenList);
+    availableTokens.value = Object.fromEntries(response.map((token) => [token.contractId, token]));
   }
 
   async function loadTokenBalances() {
