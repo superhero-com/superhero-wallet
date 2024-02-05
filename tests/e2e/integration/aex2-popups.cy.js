@@ -50,6 +50,8 @@ describe('Tests cases for AEX-2 popups', () => {
     cy.openAex2Popup(POPUP_TYPE_RAW_SIGN)
       .get('[data-cy=warning]')
       .should('be.visible')
+      .get('[data-cy=popup-aex2] > .container')
+      .scrollTo('bottom')
       .get('[data-cy=data]')
       .should('be.visible')
       .should('contain', props2.txBase64)
