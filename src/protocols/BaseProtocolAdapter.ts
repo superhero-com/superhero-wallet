@@ -43,6 +43,11 @@ export abstract class BaseProtocolAdapter {
    */
   abstract hasTokensSupport: boolean;
 
+  /**
+   * Estimated time we need to wait for the middleware to sync it's state with the node.
+   */
+  abstract mdwToNodeApproxDelayTime: number;
+
   abstract getAccountPrefix(): string;
 
   abstract getExplorer(): ProtocolExplorer;
@@ -150,4 +155,6 @@ export abstract class BaseProtocolAdapter {
     recipient: string,
     options: Record<string, any>,
   ): Promise<ITransferResponse>;
+
+  abstract waitTransactionMined(hash: string): Promise<any>;
 }
