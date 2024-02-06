@@ -20,7 +20,7 @@
                 :ext-tokens="tokens"
                 :direction="direction"
                 :protocol="PROTOCOLS.ethereum"
-                icon-size="md"
+                icon-size="rg"
                 multiple-rows
               />
             </template>

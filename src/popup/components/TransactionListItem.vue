@@ -10,7 +10,7 @@
         :ext-tokens="tokens"
         :error="isErrorTransaction"
         :protocol="transactionProtocol"
-        icon-size="md"
+        icon-size="rg"
       />
       <div class="footer">
         <div

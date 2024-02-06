@@ -27,7 +27,7 @@
                 :error="isErrorTransaction"
                 :reversed="isPool"
                 :protocol="PROTOCOLS.aeternity"
-                icon-size="md"
+                icon-size="rg"
                 multiple-rows
               />
             </template>

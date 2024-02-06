@@ -22,7 +22,7 @@
                 :transaction="transaction"
                 :direction="direction"
                 :protocol="PROTOCOLS.bitcoin"
-                icon-size="md"
+                icon-size="rg"
                 multiple-rows
               />
             </template>
