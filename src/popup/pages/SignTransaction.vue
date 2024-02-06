@@ -1,8 +1,11 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-} from 'vue';
+import { IonPage } from '@ionic/vue';
+
+import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import { useI18n } from 'vue-i18n';
@@ -19,6 +22,9 @@ import {
 
 export default defineComponent({
   name: 'SignTransaction',
+  components: {
+    IonPage,
+  },
   setup() {
     const store = useStore();
     const route = useRoute();
@@ -72,9 +78,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>
