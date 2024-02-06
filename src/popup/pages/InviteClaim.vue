@@ -1,21 +1,36 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import {
+  useIonRouter,
+  IonPage,
+  onIonViewDidEnter,
+} from '@ionic/vue';
+
+import { defineComponent } from 'vue';
 import { decode } from '@aeternity/aepp-sdk';
 import { useStore } from 'vuex';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import { MODAL_CLAIM_GIFT_CARD } from '@/constants';
-import { useModals } from '../../composables';
+import { useModals, useUi } from '@/composables';
 import { ROUTE_ACCOUNT } from '../router/routeNames';
 
 export default defineComponent({
+  components: {
+    IonPage,
+  },
   setup() {
     const store = useStore();
-    const router = useRouter();
+    const router = useIonRouter();
     const route = useRoute();
     const { openDefaultModal, openModal } = useModals();
+    const { setLoaderVisible } = useUi();
 
-    onMounted(async () => {
+    onIonViewDidEnter(async () => {
+      setLoaderVisible(true);
       router.push({ name: ROUTE_ACCOUNT });
 
       try {
@@ -37,11 +52,10 @@ export default defineComponent({
           return;
         }
         throw error;
+      } finally {
+        setLoaderVisible(false);
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>

@@ -158,17 +158,16 @@ if (IS_MOBILE_APP) {
     await Promise.all([deviceReadyPromise, routerReadyPromise]);
 
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
-      const prefix = ['superhero:', `${APP_LINK_WEB}/`].find((p) => event.url.startsWith(p));
-      if (!prefix) throw new Error(`Unknown url: ${event.url}`);
+      const deepllinkUrl = new URL(event.url);
+      const prefix = ['superhero:', APP_LINK_WEB].find((p) => deepllinkUrl.origin === p);
+      if (!prefix) throw new Error(`Unknown url: ${deepllinkUrl.origin}`);
 
       try {
-        const path = `/${event.url.slice(prefix?.length).split('?')[0]}`;
-        const query = event.url.slice(prefix?.length).split('?')[1].split('&').reduce((acc, param) => {
-          const [key, value] = param.split('=');
-          return { ...acc, [key]: value };
-        }, {});
-
-        router.push({ path, query });
+        router.push({
+          path: deepllinkUrl.pathname,
+          hash: deepllinkUrl.hash,
+          query: Object.fromEntries(deepllinkUrl.searchParams.entries()),
+        });
       } catch (error: any) {
         if (error.name !== 'NavigationDuplicated') throw error;
       }
