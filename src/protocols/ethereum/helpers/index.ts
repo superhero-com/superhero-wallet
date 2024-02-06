@@ -33,7 +33,7 @@ export function normalizeWeb3EthTransactionStructure(
     protocol: PROTOCOLS.ethereum,
     hash: hash as any,
     microTime: timestamp ? new Date(Number(timestamp) * 1000).getTime() : undefined,
-    pending: false,
+    pending: blockNumber === null, // if blockNumber is null, transaction is pending
     blockHeight: Number(blockNumber),
     tx: {
       amount: Number(fromWei(value || 0, 'ether')),

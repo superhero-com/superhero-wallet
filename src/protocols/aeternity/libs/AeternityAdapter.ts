@@ -54,6 +54,7 @@ import {
   AE_COIN_SYMBOL,
   AE_COINGECKO_COIN_ID,
   AE_CONTRACT_ID,
+  AE_MDW_TO_NODE_APPROX_DELAY_TIME,
   AE_NETWORK_DEFAULT_ENV_SETTINGS,
   AE_NETWORK_DEFAULT_SETTINGS,
   AE_PROTOCOL_NAME,
@@ -82,6 +83,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   override coinPrecision = AE_COIN_PRECISION;
 
   override hasTokensSupport = true;
+
+  override mdwToNodeApproxDelayTime = AE_MDW_TO_NODE_APPROX_DELAY_TIME;
 
   private networkSettings: AdapterNetworkSettingList<AeNetworkProtocolSettings> = [
     {
@@ -431,5 +434,9 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
       payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
     });
+  }
+
+  override async waitTransactionMined(hash: string): Promise<any> {
+    return useAeSdk().waitTransactionMined(hash as Encoded.TxHash);
   }
 }

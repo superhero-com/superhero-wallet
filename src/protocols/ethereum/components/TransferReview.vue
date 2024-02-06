@@ -36,15 +36,20 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAccounts, useModals, useUi } from '@/composables';
-import type { TransferFormModel } from '@/types';
+import type { ITransaction, TransferFormModel } from '@/types';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import {
+  useAccounts,
+  useLatestTransactionList,
+  useModals,
+  useUi,
+} from '@/composables';
 import { PROTOCOLS } from '@/constants';
 import { ETH_SYMBOL } from '@/protocols/ethereum/config';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   name: 'EthTransferReview',
@@ -65,6 +70,7 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { getLastActiveProtocolAccount } = useAccounts();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
 
     const loading = ref<boolean>(false);
 
@@ -94,29 +100,52 @@ export default defineComponent({
       }
 
       loading.value = true;
+      let actionResult;
+      const lastActiveEthAccount = getLastActiveProtocolAccount(PROTOCOLS.ethereum);
 
       try {
         if (!isSelectedAssetEthCoin.value) {
-          ethAdapter.transferToken(
+          actionResult = await ethAdapter.transferToken(
             Number(amount),
             recipient,
             selectedAsset.contractId,
             {
-              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum)?.address,
+              fromAccount: lastActiveEthAccount?.address,
               maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
               maxFeePerGas: props.transferData.maxFeePerGas,
             },
           );
         } else {
-          await ethAdapter.spend(
+          actionResult = await ethAdapter.spend(
             Number(amount),
             recipient,
             {
-              fromAccount: getLastActiveProtocolAccount(PROTOCOLS.ethereum)?.address,
+              fromAccount: lastActiveEthAccount?.address,
               maxPriorityFeePerGas: props.transferData.maxPriorityFeePerGas,
               maxFeePerGas: props.transferData.maxFeePerGas,
             },
           );
+        }
+
+        if (actionResult) {
+          const transaction: ITransaction = {
+            hash: actionResult.hash as any,
+            pending: true,
+            transactionOwner: lastActiveEthAccount?.address,
+            protocol: PROTOCOLS.ethereum,
+            tx: {
+              amount: Number(amount),
+              callerId: lastActiveEthAccount?.address!,
+              contractId: selectedAsset.contractId as any,
+              senderId: lastActiveEthAccount?.address,
+              type: (isSelectedAssetEthCoin.value) ? 'SpendTx' : 'ContractCallTx',
+              function: 'transfer',
+              recipientId: recipient,
+              arguments: [],
+              fee: 0,
+            },
+          };
+          addAccountPendingTransaction(lastActiveEthAccount?.address!, transaction);
         }
       } catch (error: any) {
         openTransactionFailedModal(error.message);

@@ -227,6 +227,7 @@ export default defineComponent({
             hash: actionResult.hash as Encoded.TxHash,
             pending: true,
             transactionOwner: activeAccount.value.address,
+            protocol: PROTOCOLS.aeternity,
             tx: {
               amount: Number(amount),
               callerId: activeAccount.value.address,

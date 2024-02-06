@@ -17,6 +17,7 @@ import Web3Eth, {
   getTransaction,
   sendSignedTransaction,
   getBlock,
+  getTransactionReceipt,
 } from 'web3-eth';
 import { DEFAULT_RETURN_FORMAT } from 'web3-types';
 import { BIP32Factory } from 'bip32';
@@ -53,6 +54,7 @@ import {
   ETH_NETWORK_DEFAULT_ENV_SETTINGS,
   ETH_PROTOCOL_NAME,
   ETH_SYMBOL,
+  ETH_MDW_TO_NODE_APPROX_DELAY_TIME,
 } from '@/protocols/ethereum/config';
 import { useAccounts } from '@/composables';
 import { useEthNetworkSettings } from '../composables/ethNetworkSettings';
@@ -60,6 +62,10 @@ import { EtherscanExplorer } from './EtherscanExplorer';
 import { EtherscanService } from './EtherscanService';
 import { normalizeWeb3EthTransactionStructure } from '../helpers';
 import { EthplorerService } from './EthplorerService';
+
+const TRANSACTION_POLLING_INTERVAL = 6000;
+const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
+const BLOCKS_TO_WAIT = 3;
 
 export class EthereumAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.ethereum;
@@ -77,6 +83,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
   override coinPrecision = ETH_COIN_PRECISION;
 
   override hasTokensSupport = true;
+
+  override mdwToNodeApproxDelayTime = ETH_MDW_TO_NODE_APPROX_DELAY_TIME;
 
   private bip32 = BIP32Factory(ecc);
 
@@ -444,6 +452,36 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
 
     return { hash };
+  }
+
+  override async waitTransactionMined(hash: string): Promise<any> {
+    const web3Eth = this.getWeb3EthInstance();
+
+    return new Promise((resolve) => {
+      let attemptNo = 0;
+      const interval = setInterval(async () => {
+        attemptNo += 1;
+        const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
+
+        const minedTransaction = await getTransactionReceipt(web3Eth, hash, DEFAULT_RETURN_FORMAT);
+        const currentBlock = await getBlock(web3Eth, 'latest', true, DEFAULT_RETURN_FORMAT);
+
+        if (
+          minedTransaction?.blockNumber
+            && (
+              currentBlock?.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
+              || isLastAttempt
+            )
+        ) {
+          clearInterval(interval);
+          return resolve(minedTransaction);
+        } if (isLastAttempt) {
+          clearInterval(interval);
+          return resolve(null);
+        }
+        return null;
+      }, TRANSACTION_POLLING_INTERVAL);
+    });
   }
 
   private getWeb3EthInstance(): Web3Eth {
