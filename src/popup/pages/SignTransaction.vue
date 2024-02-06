@@ -1,8 +1,11 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-} from 'vue';
+import { IonPage } from '@ionic/vue';
+
+import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded } from '@aeternity/aepp-sdk';
@@ -18,6 +21,9 @@ import {
 
 export default defineComponent({
   name: 'SignTransaction',
+  components: {
+    IonPage,
+  },
   setup() {
     const route = useRoute();
     const { t } = useI18n();
@@ -70,9 +76,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>

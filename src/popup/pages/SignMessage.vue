@@ -1,6 +1,12 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
+import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
@@ -8,6 +14,9 @@ import { useDeepLinkApi, useModals, useAeSdk } from '@/composables';
 
 export default defineComponent({
   name: 'SignMessage',
+  components: {
+    IonPage,
+  },
   setup() {
     const route = useRoute();
 
@@ -41,9 +50,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>

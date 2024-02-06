@@ -1,9 +1,6 @@
 import { ref } from 'vue';
-import {
-  useRouter,
-  useRoute,
-  RouteLocationNormalized as Route,
-} from 'vue-router';
+import { useRoute, RouteLocationNormalized as Route } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import { checkIfSuperheroCallbackUrl } from '@/utils';
@@ -11,7 +8,7 @@ import { IS_MOBILE_APP, MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables/modals';
 
 export function useDeepLinkApi() {
-  const router = useRouter();
+  const router = useIonRouter();
   const route = useRoute();
 
   const callbackOrigin = ref<URL | null>(
