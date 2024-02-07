@@ -38,6 +38,7 @@
         :text="$t('modals.accountDetails.transactionsNotAvailable')"
       />
     </div>
+    <BackToTop />
   </IonContent>
 </template>
 
@@ -88,6 +89,7 @@ import MessageOffline from '@/popup/components/MessageOffline.vue';
 import TransactionListItem from './TransactionListItem.vue';
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import InfiniteScroll from './InfiniteScroll.vue';
+import BackToTop from './BackToTop.vue';
 
 export default defineComponent({
   components: {
@@ -96,6 +98,7 @@ export default defineComponent({
     InfiniteScroll,
     MessageOffline,
     IonContent,
+    BackToTop,
   },
   props: {
     fetchRecentTransactions: { type: Function, required: true },

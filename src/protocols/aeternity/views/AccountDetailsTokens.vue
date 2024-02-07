@@ -17,6 +17,7 @@
           :text="$t('modals.accountDetails.assetsNotAvailable')"
         />
       </div>
+      <BackToTop v-if="isOnline" />
     </IonContent>
   </IonPage>
 </template>
@@ -38,6 +39,7 @@ import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/
 
 import AssetList from '@/popup/components/Assets/AssetList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
+import BackToTop from '@/popup/components/BackToTop.vue';
 
 export default defineComponent({
   components: {
@@ -45,6 +47,7 @@ export default defineComponent({
     MessageOffline,
     IonPage,
     IonContent,
+    BackToTop,
   },
   props: {
     showFilters: Boolean,

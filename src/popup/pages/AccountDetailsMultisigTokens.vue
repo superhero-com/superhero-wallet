@@ -7,6 +7,7 @@
           is-multisig
         />
       </div>
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
@@ -17,12 +18,14 @@ import { defineComponent } from 'vue';
 import { useTransactionAndTokenFilter } from '@/composables';
 
 import AssetList from '../components/Assets/AssetList.vue';
+import BackToTop from '../components/BackToTop.vue';
 
 export default defineComponent({
   components: {
     AssetList,
     IonPage,
     IonContent,
+    BackToTop,
   },
   props: {
     showFilters: Boolean,

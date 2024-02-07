@@ -59,6 +59,8 @@
           <slot />
         </div>
 
+        <BackToTop sticky />
+
         <FixedScreenFooter
           v-if="$slots.footer"
           v-bind="$attrs"
@@ -86,11 +88,13 @@ import { BackButtonEvent } from '@ionic/vue';
 import { IS_FIREFOX, IS_EXTENSION } from '@/constants';
 import BtnClose from './buttons/BtnClose.vue';
 import FixedScreenFooter from './FixedScreenFooter.vue';
+import BackToTop from './BackToTop.vue';
 
 export default defineComponent({
   components: {
     FixedScreenFooter,
     BtnClose,
+    BackToTop,
   },
   props: {
     show: Boolean,
