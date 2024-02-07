@@ -1,4 +1,9 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
+import { IonPage } from '@ionic/vue';
 import { defineComponent, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -9,6 +14,9 @@ import { useDeepLinkApi, useModals, useAeSdk } from '@/composables';
 
 export default defineComponent({
   name: 'SignMessage',
+  components: {
+    IonPage,
+  },
   setup() {
     const store = useStore();
     const route = useRoute();
@@ -42,9 +50,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>

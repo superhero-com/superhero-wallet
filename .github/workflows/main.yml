@@ -77,7 +77,7 @@ jobs:
           REMOTE_USER: root
           REMOTE_PORT: 2022
           TARGET: ${{ format('/data/{0}/{1}', env.APP_NAME, env.GITHUB_REF_SLUG_URL) }}
-      - uses: unsplash/comment-on-pr@85a56be792d927ac4bfa2f4326607d38e80e6e60
+      - uses: unsplash/comment-on-pr@a9bf050e744c8282dee4bb0dbcf063186d8316c4
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

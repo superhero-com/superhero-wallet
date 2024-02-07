@@ -35,6 +35,8 @@ import {
 import BigNumber from 'bignumber.js';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { produceNameId } from '@aeternity/aepp-sdk';
+
 import { executeAndSetInterval } from '@/utils';
 import { aettosToAe } from '@/protocols/aeternity/helpers';
 import { useMiddleware, useUi } from '@/composables';
@@ -69,19 +71,26 @@ export default defineComponent({
     async function updateAuctionEntry() {
       const middleware = await getMiddleware();
       try {
-        const res = await middleware.getName(props.name);
-        const { auctionEnd, bids } = res.auction ?? res.info;
-        const loadedBids = await Promise.all(bids.map(async (txId: number) => {
-          const { tx } = await middleware.getTx(txId.toString());
-          return {
-            nameFee: new BigNumber(aettosToAe(tx.nameFee)),
-            accountId: tx.accountId,
-          };
-        }));
+        const nameId = produceNameId(props.name as any);
+        const [auctionInfo, accountActivities] = await Promise.all([
+          middleware.getName(props.name),
+          // TODO: show more than 100 bids
+          middleware.getAccountActivities(nameId, { limit: 100 }),
+        ]);
+
+        const { auctionEnd } = auctionInfo.info;
+
+        const bids = accountActivities.data
+          .filter(({ type }: any) => type === 'NameClaimEvent')
+          .filter(({ payload: { sourceTxType } }: any) => sourceTxType === 'NameClaimTx')
+          .map(({ payload: { tx: { accountId, nameFee } } }: any) => ({
+            nameFee: new BigNumber(aettosToAe(nameFee)),
+            accountId,
+          }));
         store.commit('names/setAuctionEntry', {
           name: props.name,
           expiration: auctionEnd,
-          bids: loadedBids,
+          bids,
         });
       } catch (error) {
         router.push({ name: 'auction-bid' });

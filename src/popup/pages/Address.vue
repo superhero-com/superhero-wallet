@@ -1,4 +1,9 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
+import { IonPage } from '@ionic/vue';
 import { computed, defineComponent, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import type { IAppData } from '@/types';
@@ -14,6 +19,9 @@ import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/const
 
 export default defineComponent({
   name: 'Address',
+  components: {
+    IonPage,
+  },
   setup() {
     const store = useStore();
 
@@ -45,9 +53,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>
