@@ -1,4 +1,9 @@
+<template>
+  <IonPage />
+</template>
+
 <script lang="ts">
+import { IonPage } from '@ionic/vue';
 import { computed, defineComponent, onMounted } from 'vue';
 import type { IAppData } from '@/types';
 import {
@@ -13,6 +18,9 @@ import { MODAL_CONFIRM_CONNECT, POPUP_CONNECT_ADDRESS_PERMISSION } from '@/const
 
 export default defineComponent({
   name: 'Address',
+  components: {
+    IonPage,
+  },
   setup() {
     const { nodeNetworkId } = useAeSdk();
     const { openCallbackOrGoHome, callbackOrigin } = useDeepLinkApi();
@@ -42,9 +50,6 @@ export default defineComponent({
         }
       }
     });
-  },
-  render() {
-    return null as any;
   },
 });
 </script>
