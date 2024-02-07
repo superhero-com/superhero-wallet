@@ -74,16 +74,12 @@ export function useCurrencies({
         currentCurrencyCode.value,
       ) || [];
 
-      const convertedMarketData = fetchedMarketData.reduce(
-        (o, coinMarketData) => {
-          // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
-          const protocol = coinMarketData.id;
-          return { ...o, [protocol]: coinMarketData };
-        },
-        {},
-      );
+      // TODO Temporary solution. We need to map the coingecko IDs to our protocols.
+      const convertedMarketData = Object.fromEntries(fetchedMarketData.map(
+        (coinMarketData) => [coinMarketData.id as Protocol, coinMarketData],
+      ));
 
-      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData;
+      marketData.value = isEmpty(convertedMarketData) ? null : convertedMarketData as MarketData;
     } catch (e) {
       handleUnknownError(e);
       marketData.value = null;

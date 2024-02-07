@@ -61,7 +61,7 @@
 
 <script lang="ts">
 import { PropType, computed, defineComponent } from 'vue';
-import type { INetwork, INetworkProtocolSettings, Protocol } from '@/types';
+import type { INetwork, Protocol } from '@/types';
 import { NETWORK_TYPE_CUSTOM } from '@/constants';
 import { ROUTE_NETWORK_EDIT } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -89,15 +89,11 @@ export default defineComponent({
   setup(props) {
     // Filter out the network protocol settings that has no `nodeUrl` default property
     const networkSettingsToDisplay = computed(
-      () => (Object.keys(props.network.protocols) as Protocol[])
-        .reduce((networks, protocol) => {
+      () => Object.fromEntries((Object.keys(props.network.protocols) as Protocol[])
+        .map((protocol) => {
           const settings = props.network.protocols[protocol];
-          if (settings.nodeUrl) {
-            // eslint-disable-next-line no-param-reassign
-            networks[protocol] = settings;
-          }
-          return networks;
-        }, {} as Record<Protocol, INetworkProtocolSettings>),
+          return settings.nodeUrl ? [protocol, settings] : [];
+        })),
     );
 
     function getProtocolName(protocol: Protocol) {

@@ -46,10 +46,10 @@ const activeNetworkName = useStorageRef<string>(
 );
 
 const networks = computed(
-  (): Record<string, INetwork> => [
+  (): Record<string, INetwork> => Object.fromEntries([
     ...defaultNetworks,
     ...customNetworks.value,
-  ].reduce((acc, network) => ({ ...acc, [network.name]: network }), {}),
+  ].map((network) => [network.name, network])),
 );
 
 const activeNetwork = computed(() => networks.value[activeNetworkName.value]);
@@ -60,12 +60,9 @@ function ensureDefaultNetworksExists() {
     networkTypes.forEach((type) => {
       defaultNetworks.push({
         name: (type === NETWORK_TYPE_MAINNET) ? NETWORK_NAME_MAINNET : NETWORK_NAME_TESTNET,
-        protocols: PROTOCOLS.reduce((accumulator, protocol) => {
-          // eslint-disable-next-line no-param-reassign
-          accumulator[protocol] = ProtocolAdapterFactory.getAdapter(protocol)
-            .getNetworkTypeDefaultValues(type);
-          return accumulator;
-        }, {} as NetworkProtocolsSettings),
+        protocols: Object.fromEntries(PROTOCOLS.map((protocol) => [
+          protocol, ProtocolAdapterFactory.getAdapter(protocol).getNetworkTypeDefaultValues(type),
+        ])) as NetworkProtocolsSettings,
         type,
       });
     });

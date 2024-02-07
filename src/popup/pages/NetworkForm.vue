@@ -119,7 +119,6 @@ import { IonPage, IonContent } from '@ionic/vue';
 import type {
   AdapterNetworkSettingList,
   INetwork,
-  INetworkProtocolSettings,
   NetworkProtocolSettingsRequired,
   NetworkProtocolsSettings,
   Protocol,
@@ -188,10 +187,7 @@ export default defineComponent({
       ? customNetworks.value.findIndex(({ name }) => name === savedNetworkName)
       : null;
 
-    const emptyNetworkSettings = PROTOCOLS.reduce(
-      (result, protocol) => ({ ...result, [protocol]: {} }),
-      {},
-    );
+    const emptyNetworkSettings = Object.fromEntries(PROTOCOLS.map((protocol) => [protocol, {}]));
     const newNetworkName = ref('');
     const newNetworkProtocols = ref<NetworkProtocolsSettings>(emptyNetworkSettings as any);
     const isNetworkPrefilled = ref(false);
@@ -225,13 +221,8 @@ export default defineComponent({
       PROTOCOLS.forEach((protocol) => {
         const adapter = ProtocolAdapterFactory.getAdapter(protocol);
         const settings = adapter.getNetworkSettings();
-        newNetworkProtocols.value[protocol] = settings
-          .reduce((accumulator, { key, defaultValue }) => {
-            if (defaultValue) {
-              accumulator[key] = defaultValue; // eslint-disable-line no-param-reassign
-            }
-            return accumulator;
-          }, {} as INetworkProtocolSettings);
+        newNetworkProtocols.value[protocol] = Object.fromEntries(settings
+          .map(({ key, defaultValue }) => defaultValue ? [key, defaultValue] : []));
       });
     }
 

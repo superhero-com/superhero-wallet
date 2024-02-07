@@ -76,10 +76,7 @@ const accounts = computed((): IAccount[] => {
     return [];
   }
 
-  const idxList = PROTOCOLS.reduce(
-    (list, protocol) => ({ ...list, [protocol]: 0 }),
-    {} as Record<Protocol, number>,
-  );
+  const idxList = Object.fromEntries(PROTOCOLS.map(((protocol) => [protocol, 0])));
 
   return accountsRaw.value
     .map((account, globalIdx) => {

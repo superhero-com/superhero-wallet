@@ -102,10 +102,10 @@ export async function genSwaggerClient(
     }]),
   );
 
-  const opSpecs = Object.values(spec.paths)
+  const opSpecs = Object.fromEntries(Object.values(spec.paths)
     .map((paths) => Object.values(paths))
     .flat()
-    .reduce((acc, n) => ({ ...acc, [n.operationId]: n }), {});
+    .map((n) => [n.operationId, n]));
 
   const requestQueues = {};
   const api = mapObject(combinedApi, ([opId, handler]) => {

@@ -71,13 +71,9 @@ export function useBalances() {
       }),
     );
     const rawBalances = await Promise.all(balancesPromises);
-    balances.value = rawBalances.reduce(
-      (acc, val, index) => ({
-        ...acc,
-        [accounts.value[index].address]: BigNumber(val),
-      }),
-      {},
-    );
+    balances.value = Object.fromEntries(rawBalances.map(
+      (val, index) => [accounts.value[index].address, BigNumber(val)],
+    ));
   }
 
   onNetworkChange(() => {

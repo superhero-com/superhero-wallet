@@ -157,14 +157,14 @@ export function useTransferSendForm({
       if (!scanResult) {
         return;
       }
-      updateFormModelValues([
+      updateFormModelValues(Object.fromEntries([
         ...new URL(
           (scanResult.startsWith(ProtocolAdapterFactory.getAdapter(protocol).getAccountPrefix()))
             ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
             : scanResult,
         )
           .searchParams.entries(),
-      ].reduce((o, [k, v]) => ({ ...o, [k]: v }), {}));
+      ].map(([k, v]) => [k, v])));
       invoiceId.value = null;
     }
     if (!formModel.value.address) {
