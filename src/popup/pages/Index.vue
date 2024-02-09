@@ -90,12 +90,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent } from '@ionic/vue';
 import {
   IN_FRAME,
   IS_MOBILE_DEVICE,
+  IS_MOBILE_APP,
   IS_WEB,
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
@@ -106,6 +107,7 @@ import {
   useModals,
   useUi,
 } from '@/composables';
+import { watchUntilTruthy } from '@/utils';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -125,7 +127,14 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const { addRawAccount, setGeneratedMnemonic } = useAccounts();
+    const {
+      isLoggedIn,
+      addRawAccount,
+      setGeneratedMnemonic,
+      mnemonic,
+      discoverAccounts,
+      setActiveAccountByGlobalIdx,
+    } = useAccounts();
     const { openModal } = useModals();
     const { loginTargetLocation } = useUi();
 
@@ -143,6 +152,22 @@ export default defineComponent({
     async function importWallet() {
       return openModal(MODAL_ACCOUNT_IMPORT);
     }
+
+    /**
+     * TMP: for IOS Migration
+     */
+    onMounted(async () => {
+      if (IS_IOS && IS_MOBILE_APP) {
+        await watchUntilTruthy(mnemonic);
+        if (mnemonic.value) {
+          await discoverAccounts();
+          setActiveAccountByGlobalIdx(0);
+          if (isLoggedIn.value) {
+            router.push(loginTargetLocation.value);
+          }
+        }
+      }
+    });
 
     return {
       PlusCircleIcon,
