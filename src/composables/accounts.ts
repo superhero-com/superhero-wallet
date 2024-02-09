@@ -14,6 +14,7 @@ import {
   PROTOCOL_AETERNITY,
   PROTOCOLS,
   STORAGE_KEYS,
+  RUNNING_IN_TESTS,
 } from '@/constants';
 import {
   prepareAccountSelectOptions,
@@ -22,6 +23,7 @@ import {
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import migrateAccountsVuexToComposable from '@/migrations/001-accounts-vuex-to-composable';
 import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-composable';
+import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import { useStorageRef } from './storageRef';
 
 let isInitialized = false;
@@ -37,8 +39,11 @@ const mnemonic = useStorageRef<string>(
   STORAGE_KEYS.mnemonic,
   {
     backgroundSync: true,
-    migrations: [
+    migrations: RUNNING_IN_TESTS ? [
       migrateMnemonicVuexToComposable,
+    ] : [
+      migrateMnemonicVuexToComposable,
+      migrateMnemonicCordovaToIonic,
     ],
   },
 );
