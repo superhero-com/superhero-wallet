@@ -10,7 +10,12 @@ import { useStore } from 'vuex';
 import { MODAL_MESSAGE_SIGN } from '@/constants';
 import { handleUnknownError } from '@/utils';
 import { RejectedByUserError } from '@/lib/errors';
-import { useDeepLinkApi, useModals, useAeSdk } from '@/composables';
+import {
+  useDeepLinkApi,
+  useModals,
+  useAeSdk,
+  useUi,
+} from '@/composables';
 
 export default defineComponent({
   name: 'SignMessage',
@@ -25,8 +30,10 @@ export default defineComponent({
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
       const { getAeSdk } = useAeSdk({ store });
       const { openModal } = useModals();
+      const { setLoaderVisible } = useUi();
 
       try {
+        setLoaderVisible(true);
         const aeSdk = await getAeSdk();
         const { message } = route.query;
 
@@ -48,6 +55,8 @@ export default defineComponent({
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
         }
+      } finally {
+        setLoaderVisible(false);
       }
     });
   },

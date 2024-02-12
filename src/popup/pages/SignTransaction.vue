@@ -18,6 +18,7 @@ import {
   useDeepLinkApi,
   useModals,
   useAeSdk,
+  useUi,
 } from '@/composables';
 
 export default defineComponent({
@@ -34,8 +35,10 @@ export default defineComponent({
       const { callbackOrigin, openCallbackOrGoHome } = useDeepLinkApi();
       const { nodeNetworkId, getAeSdk } = useAeSdk({ store });
       const { openDefaultModal } = useModals();
+      const { setLoaderVisible } = useUi();
 
       try {
+        setLoaderVisible(true);
         const aeSdk = await getAeSdk();
         const { transaction, networkId, broadcast } = route.query;
 
@@ -76,6 +79,8 @@ export default defineComponent({
         if (error instanceof RejectedByUserError) {
           handleUnknownError(error);
         }
+      } finally {
+        setLoaderVisible(false);
       }
     });
   },
