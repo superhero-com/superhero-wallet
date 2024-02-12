@@ -1,7 +1,7 @@
 PODS:
   - Capacitor (5.0.4):
     - CapacitorCordova
-  - CapacitorApp (5.0.2):
+  - CapacitorApp (5.0.6):
     - Capacitor
   - CapacitorCamera (5.0.7):
     - Capacitor
@@ -24,7 +24,7 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (5.0.2):
     - Capacitor
-  - CordovaPlugins (5.0.4):
+  - CordovaPlugins (5.6.0):
     - CapacitorCordova
 
 DEPENDENCIES:
@@ -75,7 +75,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Capacitor: d3d4463573438b9fa65326d1f3549da6f4c21634
-  CapacitorApp: 28fef1fd75b2b3686e875216806fb8416d421097
+  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
   CapacitorCamera: 084b0b228bba7d00587910337b1c89e93b1d32ab
   CapacitorClipboard: 77edf49827ea21da2a9c05c690a4a6a4d07199c4
   CapacitorCommunityBarcodeScanner: 7feb206489c8555a8ca0c74c57ddf49ead774eb8
@@ -87,8 +87,8 @@ SPEC CHECKSUMS:
   CapacitorShare: cd41743331cb71d217c029de54b681cbd91e0fcc
   CapacitorSplashScreen: 5fa2ab5e46cf5cc530cf16a51c80c7a986579ccd
   CapacitorStatusBar: 48f2899f6846cc7d8431b251ebfc58e1c10e3d58
-  CordovaPlugins: 6b563e3308b51cf0759ffbe31980db7e1e99d86b
+  CordovaPlugins: dae7dac59b3cce58f5a7ce3894709d8f0f824656
 
-PODFILE CHECKSUM: 0bc26f0c0f1e9146e487acd5ab2aedd0bad24941
+PODFILE CHECKSUM: 3def7d0c4fed5e243238a546e365273910a500af
 
 COCOAPODS: 1.14.3
