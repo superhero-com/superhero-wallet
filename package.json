@@ -1,6 +1,6 @@
 {
   "name": "superhero-wallet",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Superhero wallet",
   "author": "Superhero",
   "license": "MIT",
@@ -46,6 +46,7 @@
     "@capacitor/haptics": "5.0.2",
     "@capacitor/ios": "5.0.4",
     "@capacitor/keyboard": "5.0.2",
+    "@capacitor/filesystem": "^5.1.4",
     "@capacitor/network": "^5.0.6",
     "@capacitor/share": "^5.0.5",
     "@capacitor/splash-screen": "^5.0.6",
