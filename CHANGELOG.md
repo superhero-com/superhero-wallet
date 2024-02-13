@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.4...v2.1.5) (2024-02-13)
+
+
+### Features
+
+* associated wallet domain ([cd89955](https://github.com/Superhero-com/superhero-wallet/commit/cd89955fefe2d5b4906c2585fbc5143ef8dc9699))
+* mnemonic migrator cordova to ionic ([b2b6dca](https://github.com/Superhero-com/superhero-wallet/commit/b2b6dcaa59f5bfb5cbe72d655a68b48afbe8a4cb))
+* show a loader on deeplink signing ([edc5f9c](https://github.com/Superhero-com/superhero-wallet/commit/edc5f9ccd8da4b1d337a276d716370de02596903))
+
+
+### Bug Fixes
+
+* open callback url on ios ([8c357dc](https://github.com/Superhero-com/superhero-wallet/commit/8c357dccedcf4f607440f5772d413cdfa133efb2))
+
 ### [2.1.4](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.2...v2.1.4) (2024-02-07)
 
 
