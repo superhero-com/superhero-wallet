@@ -57,9 +57,9 @@ export default {
     &::#{$name} {
       height: 12px;
       width: 12px;
-      border: 4px solid map-get($colors, track-color);
+      border: 4px solid map.get($colors, track-color);
       border-radius: 48px;
-      background: map-get($colors, thumb-color);
+      background: map.get($colors, thumb-color);
       box-shadow: 0 0 8px variables.$color-black;
       cursor: pointer;
     }

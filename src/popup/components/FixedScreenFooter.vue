@@ -43,6 +43,7 @@ export default defineComponent({
   }
 
   // Semi-transparent and gradient-like cover under the buttons
+
   &::before {
     content: '';
     position: absolute;
@@ -55,6 +56,7 @@ export default defineComponent({
   }
 
   // Make the footer bottom rounded corners the same as the container
+
   &,
   &::before {
     border-bottom-left-radius: inherit;

@@ -116,12 +116,14 @@ export default defineComponent({
   }
 
   // The background layer
+
   &::before {
     background-color: var(--screen-bg-color);
     opacity: 0;
   }
 
   // The outline layer
+
   &::after {
     opacity: var(--outline-opacity);
     box-shadow: inset 0 0 0 var(--outline-size) var(--outline-color);

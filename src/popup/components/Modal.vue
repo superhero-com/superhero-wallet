@@ -256,7 +256,6 @@ export default defineComponent({
 
   &.full-screen {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: 0; // needed to overwrite .app-wrapper .main styles
     padding-bottom: env(safe-area-inset-bottom); // needed to overwrite .app-wrapper .main styles
 
     @include mixins.desktop {
@@ -298,6 +297,7 @@ export default defineComponent({
   }
 
   // This is not working correctly in Firefox extension
+
   &.blur-bg {
     backdrop-filter: blur(5px);
   }
