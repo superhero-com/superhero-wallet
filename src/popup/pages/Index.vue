@@ -90,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import { generateMnemonic } from '@aeternity/bip39';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
@@ -98,6 +98,7 @@ import { IonPage, IonContent } from '@ionic/vue';
 import {
   IN_FRAME,
   IS_MOBILE_DEVICE,
+  IS_MOBILE_APP,
   IS_WEB,
   IS_IOS,
   MODAL_ACCOUNT_IMPORT,
@@ -106,6 +107,7 @@ import {
   useModals,
   useUi,
 } from '@/composables';
+import { getRestoreMnemonicFromCordova, cleanMnemonicFiles } from '@/utils/storeMigrator';
 
 import CheckBox from '../components/CheckBox.vue';
 import BtnSubheader from '../components/buttons/BtnSubheader.vue';
@@ -127,7 +129,7 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const { openModal } = useModals();
-    const { loginTargetLocation } = useUi();
+    const { loginTargetLocation, setLoaderVisible } = useUi();
 
     const termsAgreed = ref(false);
 
@@ -139,6 +141,22 @@ export default defineComponent({
     async function importWallet() {
       return openModal(MODAL_ACCOUNT_IMPORT);
     }
+
+    /**
+     * TMP: for IOS Migration
+     */
+    onMounted(async () => {
+      if (IS_IOS && IS_MOBILE_APP) {
+        setLoaderVisible(true);
+        const mnemonic = await getRestoreMnemonicFromCordova();
+        setLoaderVisible(false);
+        if (mnemonic) {
+          store.commit('setMnemonic', mnemonic);
+          cleanMnemonicFiles();
+          router.push(loginTargetLocation.value);
+        }
+      }
+    });
 
     return {
       PlusCircleIcon,
