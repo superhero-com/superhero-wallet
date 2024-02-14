@@ -136,7 +136,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       protocol: PROTOCOLS.ethereum,
       contractId: this.coinContractId,
       symbol: this.coinSymbol,
-      decimals: this.getAmountPrecision(),
+      decimals: this.coinPrecision,
       name: ETH_COIN_NAME,
       convertedBalance,
     };
