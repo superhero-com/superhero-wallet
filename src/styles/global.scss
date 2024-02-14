@@ -24,6 +24,7 @@
 html.is-extension {
   // Fixes issue with extension not rendering properly
   // .tabs-inner & .ion-page classes are added by Ionic
+
   ion-tabs,
   .tabs-inner,
   ion-router-outlet,
@@ -43,6 +44,7 @@ html.is-extension {
 
 // When scanner is active we need to hide everything else
 // because the scanner will show-up behind the webview
+
 body.scanner-active {
   background-color: transparent;
 
@@ -98,6 +100,7 @@ ion-content {
   }
 
   /** remove left-right padding **/
+
   &::part(scroll) {
     --padding-end: 0;
     --padding-start: 0;

@@ -49,7 +49,6 @@ export default {
     border-radius: $triangle;
     color: #fff;
     content: attr(data-tooltip);
-    font-size: 1rem;
     font-size: 85%;
     font-weight: normal;
     line-height: 1.15rem;
@@ -74,6 +73,7 @@ export default {
   @each $direction, $d in $xy-border {
     &.tooltip-#{$direction} {
       // arrows
+
       &::before {
         border-style: solid;
         border-width: $triangle;
@@ -106,7 +106,6 @@ export default {
 
         @else if $direction == right {
           border-color: transparent $background-color transparent transparent;
-          top: 50%;
           top: $triangle;
           left: calc(110% - #{$triangle});
           margin-top: -$triangle;

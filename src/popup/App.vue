@@ -360,6 +360,7 @@ export default defineComponent({
     }
 
     // Imitate the appearance of the mobile/extension app in a desktop browser
+
     &.is-desktop-web {
       --screen-border-radius: #{variables.$border-radius-app};
 

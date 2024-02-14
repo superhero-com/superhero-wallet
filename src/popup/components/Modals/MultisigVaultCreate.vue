@@ -473,6 +473,7 @@ export default defineComponent({
   padding-top: env(safe-area-inset-top);
 
   // Step 1
+
   &-form {
     .scan-button {
       color: variables.$color-white;
