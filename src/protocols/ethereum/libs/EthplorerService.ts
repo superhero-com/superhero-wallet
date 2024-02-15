@@ -2,6 +2,7 @@ import type { IToken, ITokenBalance } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { fetchJson, toShiftedBigNumber } from '@/utils';
 import { ETH_CONTRACT_ID_EXTERNAL } from '../config';
+import { toEthChecksumAddress } from '../helpers';
 
 const ETHPLORER_API_KEY = 'freekey';
 /**
@@ -33,8 +34,8 @@ export class EthplorerService {
 
   normalizeTokenStructure(token: any): IToken {
     return {
-      contractId: token.address,
-      decimals: 0, // TODO api does not provide this value so we need to come up how to get this
+      contractId: toEthChecksumAddress(token.address),
+      decimals: Number(token.decimals),
       name: token.name,
       protocol: PROTOCOLS.ethereum,
       symbol: token.symbol,
@@ -71,7 +72,7 @@ export class EthplorerService {
     }: any): ITokenBalance => ({
       address,
       amount: rawBalance,
-      contractId,
+      contractId: toEthChecksumAddress(contractId),
       convertedBalance: +toShiftedBigNumber(rawBalance, -decimals).toFixed(2),
       decimals,
       protocol: PROTOCOLS.ethereum,
