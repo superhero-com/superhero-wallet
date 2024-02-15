@@ -61,7 +61,7 @@ export function useTransactionTokens({
     const isReceived = direction === TX_DIRECTION.received;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const amount = (isAllowance)
-      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.getAmountPrecision())
+      ? toShiftedBigNumber(innerTx.value?.fee || 0, -adapter.coinPrecision)
       : getTxAmountTotal(transaction, direction);
 
     const symbol = isAllowance ? AE_SYMBOL : getTxAssetSymbol(transaction);
