@@ -11,10 +11,15 @@
             :coin-symbol="AE_SYMBOL"
             :token-symbol="getTxAssetSymbol(transaction)"
             :is-error-transaction="isErrorTransaction"
-            :payload="getTransactionPayload(transaction)"
+            :payload="getTransactionPayload(transaction)!"
             :contract-id="contractId"
             :show-header="!isDexAllowance"
-            :hide-amount-total="isDex || isDexAllowance || isMultisig"
+            :hide-amount-total="(
+              isDex
+              || isDexAllowance
+              || isMultisig
+              || isTransactionAex9(transaction)
+            )"
             :hide-fiat="isTransactionAex9(transaction)"
             :hash="hash"
             :protocol="PROTOCOLS.aeternity"
@@ -313,6 +318,7 @@ export default defineComponent({
 
       // Claim transactions have missing data that needs to be fetched from the middleware
       if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
+        // TODO move to aeternity adapter (fetchTransactionByHash)
         const middleware = await getMiddleware();
         try {
           rawTransaction = {

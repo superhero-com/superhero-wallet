@@ -242,6 +242,7 @@ export default defineComponent({
         address: ownerAddress,
         name: getName(ownerAddress as Encoded.AccountAddress).value,
         label: t('transaction.overview.accountAddress'),
+        url: protocolExplorer.prepareUrlForAccount(ownerAddress as Encoded.AccountAddress),
       };
     });
 
