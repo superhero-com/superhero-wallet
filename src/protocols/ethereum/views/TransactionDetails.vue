@@ -9,10 +9,12 @@
             :amount-total="amountTotal"
             :fee="fee"
             :coin-symbol="ETH_SYMBOL"
-            :token-symbol="ETH_SYMBOL"
+            :token-symbol="getTxAssetSymbol(transaction)"
             :hash="hash"
             :none-ae-coin="tokens"
             :protocol="PROTOCOLS.ethereum"
+            :hide-amount-total="!isTransactionCoin"
+            :hide-fiat="!isTransactionCoin"
             show-header
           >
             <template #tokens>
@@ -22,6 +24,29 @@
                 :protocol="PROTOCOLS.ethereum"
                 icon-size="rg"
                 multiple-rows
+              />
+            </template>
+
+            <template #gas>
+              <DetailsItem
+                v-if="transaction.tx.gasPrice"
+                :label="$t('pages.transactionDetails.gasPrice')"
+                data-cy="gas-price"
+              >
+                <template #value>
+                  <TokenAmount
+                    :amount="transaction.tx.gasPrice"
+                    :symbol="ETH_SYMBOL"
+                    :protocol="PROTOCOLS.ethereum"
+                    hide-fiat
+                  />
+                </template>
+              </DetailsItem>
+              <DetailsItem
+                v-if="transaction.tx.gasUsed"
+                :value="transaction.tx.gasUsed"
+                :label="$t('pages.transactionDetails.gasUsed')"
+                data-cy="gas"
               />
             </template>
           </TransactionDetailsBase>
@@ -44,7 +69,7 @@ import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITokenResolved, ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
-import { useUi } from '@/composables';
+import { useFungibleTokens, useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { ETH_SYMBOL } from '@/protocols/ethereum/config';
@@ -52,11 +77,16 @@ import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import { isCoin } from '@/utils';
 
 export default defineComponent({
   components: {
     TransactionDetailsBase,
     TransactionTokenRows,
+    DetailsItem,
+    TokenAmount,
     IonContent,
     IonPage,
   },
@@ -64,6 +94,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const { setLoaderVisible } = useUi();
+    const { getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as string;
@@ -77,16 +108,22 @@ export default defineComponent({
         : TX_DIRECTION.received,
     );
 
+    const isTransactionCoin = computed(
+      () => isCoin(transaction.value?.tx?.contractId!),
+    );
+
     // TODO move these calculations to base component after unifying ITransaction AE values
     const fee = computed((): number => transaction.value?.tx?.fee || 0);
     const amount = computed((): number => transaction.value?.tx?.amount || 0);
-    const amountTotal = computed((): number => amount.value + fee.value);
+    const amountTotal = computed(
+      (): number => getTxAmountTotal(transaction.value!, direction.value),
+    );
 
     const tokens = computed((): ITokenResolved[] => [{
-      amount: amountTotal.value,
-      symbol: ETH_SYMBOL,
+      amount: isTransactionCoin.value ? amountTotal.value : amount.value,
+      symbol: getTxAssetSymbol(transaction.value!),
       isReceived: direction.value === TX_DIRECTION.received,
-      contractId: adapter.coinContractId,
+      contractId: transaction.value?.tx?.contractId,
       isAe: false,
     }]);
 
@@ -100,10 +137,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
-        transaction.value = {
-          ...await adapter.fetchTransactionByHash(hash),
-          transactionOwner,
-        };
+        transaction.value = await adapter.fetchTransactionByHash(hash, transactionOwner);
       } catch (e) {
         router.push({ name: ROUTE_NOT_FOUND });
       }
@@ -115,11 +149,13 @@ export default defineComponent({
       amount,
       amountTotal,
       transactionOwner,
+      isTransactionCoin,
       direction,
       hash,
       transaction,
       fee,
       tokens,
+      getTxAssetSymbol,
     };
   },
 });

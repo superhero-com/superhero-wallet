@@ -318,11 +318,25 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return [];
   }
 
-  override async fetchTransactionByHash(hash: string) {
+  override async fetchTransactionByHash(hash: string, transactionOwner?: AccountAddress) {
     const web3Eth = this.getWeb3EthInstance();
     const transaction = await getTransaction(web3Eth, hash, DEFAULT_RETURN_FORMAT);
+
+    // If the transaction is a token transfer, fetch the token transaction using the etherscan API
+    // Because the web3 library does not give enough information about token transactions
+    if (transaction?.input !== '0x' && transaction?.blockNumber) {
+      const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
+      const service = new EtherscanService(ethActiveNetworkPredefinedSettings.value.middlewareUrl);
+      const tokenTx = await service.fetchAccountTokenTransactionByHash(
+        hash,
+        transactionOwner ?? transaction.from,
+        transaction.blockNumber,
+      );
+      return tokenTx;
+    }
+
     const block = await getBlock(web3Eth, transaction?.blockHash, true, DEFAULT_RETURN_FORMAT);
-    const normalized = normalizeWeb3EthTransactionStructure(transaction, block);
+    const normalized = normalizeWeb3EthTransactionStructure(transaction, block, transactionOwner);
     return normalized;
   }
 

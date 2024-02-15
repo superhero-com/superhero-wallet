@@ -1,8 +1,9 @@
-import { fromWei, toChecksumAddress } from 'web3-utils';
+import { fromWei } from 'web3-utils';
 import type { AccountAddress, AssetContractId, ITransaction } from '@/types';
 import { ETHERSCAN_API_KEY, PROTOCOLS, TXS_PER_PAGE } from '@/constants';
 import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
 import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
+import { toEthChecksumAddress } from '../helpers';
 
 interface EtherscanDefaultResponse {
   status: '1' | '0';
@@ -13,7 +14,7 @@ interface EtherscanDefaultResponse {
 interface EtherscanApiCallParams {
   module: 'account' | 'contract' | 'transaction' | 'block' | 'logs' | 'proxy' | 'stats' | 'gastracker';
   action: 'txlist' | 'tokentx' | 'getabi'; // Extend in the future
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 let lastCallTime: number;
@@ -94,12 +95,16 @@ export class EtherscanService {
       offset?: string;
       /** Decides if returned transaction list will contain all ERC-20 tokens or one specified */
       assetContractId?: AssetContractId;
+      startblock?: string;
+      endblock?: string;
     } = {},
   ): Promise<ITransaction[]> {
     const {
       assetContractId,
       page = '1',
       offset = TXS_PER_PAGE.toString(),
+      startblock,
+      endblock,
     } = options;
 
     const response = await this.fetchFromApi({
@@ -110,6 +115,8 @@ export class EtherscanService {
       page,
       offset,
       sort: 'desc',
+      startblock,
+      endblock,
     });
 
     if (response?.status !== '1') {
@@ -123,6 +130,19 @@ export class EtherscanService {
         assetContractId,
       ),
     ) || [];
+  }
+
+  async fetchAccountTokenTransactionByHash(
+    hash: string,
+    address: string,
+    blockNumber: string,
+  ): Promise<ITransaction> {
+    // Not the best solution, but it seems to be the only way to get token transaction details
+    const blockTransactions = await this.fetchAccountTokenTransactions(address, {
+      startblock: blockNumber,
+      endblock: blockNumber,
+    });
+    return blockTransactions.find((tx) => tx.hash === hash) as ITransaction;
   }
 
   static normalizeEtherscanTransactionStructure(
@@ -144,16 +164,23 @@ export class EtherscanService {
       value,
     } = transaction;
 
-    const senderId = toChecksumAddress(from) as any;
-    const recipientId = toChecksumAddress(to) as any;
-    const fee = gasUsed * Number(fromWei(gasPrice, 'ether'));
+    const senderId = toEthChecksumAddress(from) as any;
+    const recipientId = toEthChecksumAddress(to) as any;
+    const transactionOwnerChecksumAddress = toEthChecksumAddress(transactionOwner!) as any;
+    const contractId: any = (
+      toEthChecksumAddress(contractAddress || assetContractId)
+      || ETH_CONTRACT_ID
+    );
+    const gasPriceInEther = Number(fromWei(gasPrice, 'ether'));
+    const fee = gasUsed * gasPriceInEther;
     const amount = Number(fromWei(value, 'ether'));
     const pending = parseInt(confirmations, 10) <= ETH_SAFE_CONFIRMATION_COUNT;
     const microTime = timeStamp * 1000;
+    const isEthTransfer = !contractAddress;
 
     return {
       protocol: PROTOCOLS.ethereum,
-      transactionOwner: transactionOwner as any,
+      transactionOwner: transactionOwnerChecksumAddress,
       hash,
       microTime,
       pending,
@@ -162,12 +189,14 @@ export class EtherscanService {
         fee,
         senderId,
         recipientId,
-        type: 'SpendTx', // TODO: create own types
+        type: isEthTransfer ? 'SpendTx' : 'ContractCallTx', // TODO: create own types
         arguments: [],
-        callerId: '' as any,
-        contractId: contractAddress || assetContractId || ETH_CONTRACT_ID,
+        callerId: isEthTransfer ? '' as any : senderId,
+        contractId,
         function: functionName,
         nonce,
+        gasPrice: gasPriceInEther,
+        gasUsed,
       },
     };
   }

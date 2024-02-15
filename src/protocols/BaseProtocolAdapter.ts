@@ -118,7 +118,7 @@ export abstract class BaseProtocolAdapter {
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 
-  abstract fetchTransactionByHash(hash: string): Promise<any>;
+  abstract fetchTransactionByHash(hash: string, transactionOwner?: AccountAddress): Promise<any>;
 
   abstract fetchPendingTransactions(
     address: AccountAddress,
