@@ -64,7 +64,7 @@ import type {
   IActiveMultisigTransaction,
   ITransaction,
 } from '@/types';
-import { PROTOCOLS } from '@/constants';
+import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
   amountRounded,
   executeAndSetInterval,
@@ -154,19 +154,19 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
-      const aeToken = tokens.value?.find((t) => t?.isAe);
-      if (!aeToken || isErrorTransaction.value || isDexPool.value) {
+      const protocolCoin = tokens.value?.find(({ assetType }) => assetType === ASSET_TYPES.coin);
+      if (!protocolCoin || isErrorTransaction.value || isDexPool.value || !protocolCoin.protocol) {
         return 0;
       }
       return getFormattedAndRoundedFiat(
         +amountRounded(
           (
-            aeToken.decimals
-              ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
-              : aeToken.amount
+            protocolCoin.decimals
+              ? toShiftedBigNumber(protocolCoin.amount || 0, -protocolCoin.decimals)
+              : protocolCoin.amount
           )!,
         ),
-        PROTOCOLS.aeternity,
+        protocolCoin.protocol,
       );
     });
 
