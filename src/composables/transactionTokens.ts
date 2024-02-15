@@ -5,8 +5,8 @@ import type {
   ITransaction,
   TxFunctionParsed,
 } from '@/types';
-import { PROTOCOLS, TX_DIRECTION } from '@/constants';
-import { toShiftedBigNumber } from '@/utils';
+import { PROTOCOLS, TX_DIRECTION, ASSET_TYPES } from '@/constants';
+import { toShiftedBigNumber, isCoin } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
@@ -66,12 +66,18 @@ export function useTransactionTokens({
 
     const symbol = isAllowance ? AE_SYMBOL : getTxAssetSymbol(transaction);
     const token = protocolTokens[transaction.tx.contractId];
+    const isAe = isAllowance || (symbol === AE_SYMBOL && !isTransactionAex9(transaction));
+    const assetType = isCoin(transaction.tx?.contractId) || isAe
+      ? ASSET_TYPES.coin
+      : ASSET_TYPES.token;
 
     return [{
       ...innerTx.value || {},
       ...token || {},
       amount,
-      isAe: isAllowance || (symbol === AE_SYMBOL && !isTransactionAex9(transaction)),
+      isAe,
+      assetType,
+      protocol,
       isReceived,
       symbol,
     }];
