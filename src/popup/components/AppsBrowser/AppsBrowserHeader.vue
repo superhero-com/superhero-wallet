@@ -44,6 +44,7 @@
         @click="openActions"
       />
       <BtnClose
+        data-cy="btn-close"
         class="btn-close"
         @click="close"
       />

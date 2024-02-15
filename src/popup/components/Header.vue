@@ -44,7 +44,7 @@
         <div class="right">
           <BtnClose
             v-if="showHeaderNavigation"
-            data-cy="close"
+            data-cy="btn-close"
             class="btn-close"
             @click="close"
           />
