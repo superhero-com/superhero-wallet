@@ -89,7 +89,7 @@
           />
           <BtnMain
             :icon="isEdit ? null : PlusCircleIcon"
-            :disabled="Object.keys(errors).length"
+            :disabled="!!Object.keys(errors).length"
             data-cy="btn-add-network"
             class="add-button"
             @click="addOrUpdateNetwork()"

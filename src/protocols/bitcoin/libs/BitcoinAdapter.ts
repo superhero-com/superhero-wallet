@@ -56,6 +56,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     {
       key: 'nodeUrl',
       testId: 'url',
+      required: true,
+      defaultValue: BTC_NETWORK_DEFAULT_SETTINGS[NETWORK_TYPE_TESTNET].nodeUrl,
       getPlaceholder: () => tg('pages.network.networkUrlPlaceholder'),
       getLabel: () => tg('pages.network.networkUrlLabel'),
     },
