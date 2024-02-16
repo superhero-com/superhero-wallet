@@ -15,6 +15,7 @@
         show-protocol-icon
       />
       <BtnClose
+        data-cy="btn-close"
         class="close-button"
         @click="close"
       />
