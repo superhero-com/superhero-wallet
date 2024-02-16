@@ -1,7 +1,10 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details">
+      <AccountDetailsBase
+        v-if="isPageActive"
+        class="account-details"
+      >
         <template #buttons>
           <BtnBox
             v-if="isNodeMainnet && UNFINISHED_FEATURES"
@@ -33,8 +36,15 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import {
+  PropType,
+  computed,
+  defineComponent,
+  ref,
+  watch,
+} from 'vue';
 import { IonContent, IonPage } from '@ionic/vue';
+import { IonicLifecycleStatus } from '@/types';
 import {
   IS_MOBILE_APP,
   IS_IOS,
@@ -68,13 +78,26 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
-  setup() {
+  props: {
+    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
+  },
+  setup(props) {
+    const isPageActive = ref(false);
+
     const { isOnline } = useConnection();
     const { isNodeMainnet, isNodeTestnet } = useAeSdk();
     const { activeAccount } = useAccounts();
 
     const activeAccountFaucetUrl = computed(() => buildAeFaucetUrl(activeAccount.value.address));
     const activeAccountSimplexLink = computed(() => buildSimplexLink(activeAccount.value.address));
+
+    watch(() => props.ionicLifecycleStatus, (status) => {
+      if (status === 'didEnter') {
+        isPageActive.value = true;
+      } else if (status === 'didLeave') {
+        isPageActive.value = false;
+      }
+    });
 
     return {
       UNFINISHED_FEATURES,
@@ -92,6 +115,7 @@ export default defineComponent({
       activeAccount,
       activeAccountSimplexLink,
       activeAccountFaucetUrl,
+      isPageActive,
     };
   },
 });

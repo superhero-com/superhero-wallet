@@ -56,7 +56,7 @@
 
       <div
         class="tabs-content"
-        :style="{ height: routerHeight || '350px' }"
+        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px`}"
       >
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
@@ -75,7 +75,6 @@ import { StatusBar } from '@capacitor/status-bar';
 import {
   computed,
   defineComponent,
-  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -98,6 +97,8 @@ import AccountInfo from '@/popup/components/AccountInfo.vue';
 import BtnClose from '@/popup/components/buttons/BtnClose.vue';
 import TransactionAndTokenFilter from '@/popup/components/TransactionAndTokenFilter.vue';
 import { popOutAnimation, fadeAnimation } from '@/popup/animations';
+
+const INITIAL_TABS_HEIGHT = 330;
 
 export default defineComponent({
   name: 'AccountDetailsBase',
@@ -125,6 +126,7 @@ export default defineComponent({
 
     const routerHeight = ref<string>();
     const headerEl = ref<HTMLDivElement>();
+    const resizeObserver = ref<ResizeObserver>();
 
     const balanceNumeric = computed(() => balance.value.toNumber());
     const routeName = computed(() => route.name);
@@ -145,12 +147,8 @@ export default defineComponent({
      * Tabs change height when filters are shown/hidden
      */
     function observeTabsHeight() {
-      const resizeObserver = new ResizeObserver(() => {
-        nextTick(() => {
-          calculateRouterHeight();
-        });
-      });
-      resizeObserver.observe(headerEl.value!);
+      resizeObserver.value = new ResizeObserver(calculateRouterHeight);
+      resizeObserver.value.observe(headerEl.value!);
     }
 
     watch(
@@ -161,18 +159,21 @@ export default defineComponent({
     );
 
     onMounted(() => {
+      observeTabsHeight();
+      // The timeout ensures that the height is calculated correctly in some edge cases
+      setTimeout(() => {
+        calculateRouterHeight();
+      }, 150);
+
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#191919',
         });
       }
-      setTimeout(() => {
-        observeTabsHeight();
-        calculateRouterHeight();
-      }, 250);
     });
 
     onBeforeUnmount(() => {
+      resizeObserver.value?.disconnect();
       if (IS_MOBILE_APP) {
         StatusBar.setBackgroundColor({
           color: '#141414',
@@ -191,6 +192,7 @@ export default defineComponent({
       isScrollEnabled,
       fadeAnimation,
       IS_FIREFOX,
+      INITIAL_TABS_HEIGHT,
     };
   },
 });

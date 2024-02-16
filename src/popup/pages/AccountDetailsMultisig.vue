@@ -4,6 +4,7 @@
       <AccountDetailsBase
         v-if="activeMultisigAccount"
         without-default-buttons
+        :ionic-lifecycle-status="ionicLifecycleStatus"
       >
         <template #account-info>
           <AccountInfo
@@ -42,7 +43,8 @@
 
 <script lang="ts">
 import { IonContent, IonPage } from '@ionic/vue';
-import { computed, defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
+import { IonicLifecycleStatus } from '@/types';
 import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
@@ -68,6 +70,9 @@ export default defineComponent({
     AccountDetailsBase,
     IonPage,
     IonContent,
+  },
+  props: {
+    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
   },
   setup() {
     const { activeMultisigAccount } = useMultisigAccounts();
