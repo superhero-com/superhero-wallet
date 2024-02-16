@@ -14,7 +14,8 @@ import {
   PROTOCOL_AETERNITY,
   PROTOCOLS,
   STORAGE_KEYS,
-  RUNNING_IN_TESTS,
+  IS_IOS,
+  IS_MOBILE_APP,
 } from '@/constants';
 import {
   prepareAccountSelectOptions,
@@ -39,11 +40,9 @@ const mnemonic = useStorageRef<string>(
   STORAGE_KEYS.mnemonic,
   {
     backgroundSync: true,
-    migrations: RUNNING_IN_TESTS ? [
+    migrations: [
+      ...((IS_IOS && IS_MOBILE_APP) ? [migrateMnemonicCordovaToIonic] : []),
       migrateMnemonicVuexToComposable,
-    ] : [
-      migrateMnemonicVuexToComposable,
-      migrateMnemonicCordovaToIonic,
     ],
   },
 );
