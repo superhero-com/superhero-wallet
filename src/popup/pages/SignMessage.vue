@@ -34,11 +34,14 @@ export default defineComponent({
       try {
         setLoaderVisible(true);
         const aeSdk = await getAeSdk();
-        const message = route.query.message?.toString();
+        const rawMessage = route.query.message?.toString();
+        const isHexEncodedMessage = !!rawMessage && route.query.encoding?.toString() === 'hex';
+        const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
+        const displayMessage = message?.toString();
         const { host, href } = callbackOrigin.value || {} as any;
 
         await openModal(MODAL_MESSAGE_SIGN, {
-          message,
+          message: displayMessage,
           app: {
             host,
             name: host,
