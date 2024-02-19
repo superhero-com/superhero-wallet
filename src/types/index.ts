@@ -240,7 +240,7 @@ export interface IAccountRaw {
  * Account stored on the application store.
  */
 export interface IAccount extends IHdWalletAccount, IAccountRaw {
-  address: Encoded.AccountAddress;
+  address: AccountAddress;
   globalIdx: number;
   idx: number;
 }
@@ -269,17 +269,18 @@ export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
 
 export interface IMultisigConsensus {
   confirmationsRequired: number;
-  confirmedBy: Encoded.AccountAddress[];
+  confirmedBy: AccountAddress[];
   expirationHeight: number;
   expired: boolean;
-  proposedBy: Encoded.AccountAddress;
+  proposedBy: AccountAddress;
   txHash?: string;
 }
 
 export interface IMultisigAccountResponse {
   contractId: Encoded.ContractAddress;
   createdAt: string; // Date
-  gaAccountId: Encoded.AccountAddress; // Generalized Account used as the Multisig Account
+  /** Generalized Account used as the Multisig Account */
+  gaAccountId: AccountAddress;
   height: number;
   id: number;
   signerId: Encoded.AccountAddress;
@@ -292,9 +293,9 @@ export interface IMultisigAccountResponse {
  */
 export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountResponse {
   balance: Balance;
-  refusedBy?: Encoded.AccountAddress[];
+  refusedBy?: AccountAddress[];
   nonce: number;
-  signers: Encoded.AccountAddress[];
+  signers: AccountAddress[];
   hasPendingTransaction: boolean;
   pending?: boolean;
 }
@@ -421,13 +422,13 @@ export interface IGAMetaTx {
 
 export interface ITx {
   abiVersion?: number;
-  accountId?: Encoded.AccountAddress;
+  accountId?: AccountAddress;
   aexnType?: 'aex9';
   amount: number;
   arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId?: Encoded.AccountAddress;
+  callerId?: AccountAddress;
   code?: Encoded.ContractBytearray;
   commitmentId?: any;
   contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
@@ -443,7 +444,7 @@ export interface ITx {
   nameId?: any;
   nameSalt?: string;
   nonce?: number;
-  ownerId?: Encoded.AccountAddress;
+  ownerId?: AccountAddress;
   payerId?: string;
   payload?: Encoded.Bytearray;
   pointers?: any;
@@ -451,7 +452,7 @@ export interface ITx {
   return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string;
-  senderId?: Encoded.AccountAddress;
+  senderId?: AccountAddress;
   selectedTokenContractId?: AssetContractId;
   tag?: Tag;
   /**
@@ -487,9 +488,8 @@ export interface ITransaction {
    * For example when we send some assets from one owned account to another
    * we are displaying the same transaction twice on the dashboard: as sent and received.
    * TODO maybe this can be removed and calculated on the component level
-   * TODO change the type to `AccountAddress`
    */
-  transactionOwner?: Encoded.AccountAddress;
+  transactionOwner?: AccountAddress;
   tx: ITx;
   type?: string;
   url?: string;
@@ -762,7 +762,7 @@ export interface IWalletInfo {
 }
 
 export interface IAddressNamePair {
-  address: Encoded.AccountAddress;
+  address: AccountAddress;
   name: ChainName;
 }
 

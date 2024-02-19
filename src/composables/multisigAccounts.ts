@@ -8,6 +8,7 @@ import type {
   IMultisigAccount,
   IMultisigConsensus,
   IMultisigAccountResponse,
+  AccountAddress,
 } from '@/types';
 import {
   fetchJson,
@@ -59,7 +60,7 @@ function getStoredMultisigAccounts(networkId: string, isPending = false): IMulti
 
 const multisigAccounts = ref<IMultisigAccount[]>([]);
 const pendingMultisigAccounts = ref<IMultisigAccount[]>([]);
-const activeMultisigAccountId = ref<Encoded.AccountAddress>();
+const activeMultisigAccountId = ref<AccountAddress>();
 const activeMultisigNetworkId = ref('');
 const isAdditionalInfoNeeded = ref(false);
 
@@ -115,7 +116,7 @@ export function useMultisigAccounts({
     }
   })();
 
-  function setActiveMultisigAccountId(gaAccountId: Encoded.AccountAddress) {
+  function setActiveMultisigAccountId(gaAccountId: AccountAddress) {
     if (gaAccountId && allMultisigAccounts.value.some((acc) => acc.gaAccountId === gaAccountId)) {
       activeMultisigAccountId.value = gaAccountId;
       activeMultisigNetworkId.value = nodeNetworkId.value!;
@@ -135,8 +136,8 @@ export function useMultisigAccounts({
 
   function addTransactionToPendingMultisigAccount(
     txHash: string,
-    gaAccountId: Encoded.AccountAddress,
-    proposedBy: Encoded.AccountAddress,
+    gaAccountId: AccountAddress,
+    proposedBy: AccountAddress,
   ) {
     pendingMultisigAccounts.value = pendingMultisigAccounts.value.map(
       (account) => account.gaAccountId === gaAccountId
@@ -231,7 +232,7 @@ export function useMultisigAccounts({
                 ? { decodedResult: currentAccount.signers }
                 : contractInstance.get_signers(),
               contractInstance.get_consensus_info(),
-              gaAccountId ? aeSdk.getBalance(gaAccountId) : 0,
+              gaAccountId ? aeSdk.getBalance(gaAccountId as Encoded.AccountAddress) : 0,
             ]));
 
             const decodedConsensus = consensusResult.decodedResult;

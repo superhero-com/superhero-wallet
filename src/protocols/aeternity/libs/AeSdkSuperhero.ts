@@ -42,7 +42,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
     const account = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!;
 
     if (account) {
-      accounts.current[account.address] = {};
+      accounts.current[account.address as Encoded.AccountAddress] = {};
     }
 
     return accounts;
@@ -50,7 +50,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
 
   addresses() {
     const { aeAccounts } = useAccounts();
-    return aeAccounts.value.map(({ address }) => address);
+    return aeAccounts.value.map(({ address }) => address as Encoded.AccountAddress);
   }
 
   spendWithCustomOptions(

@@ -15,6 +15,7 @@ import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import BigNumber from 'bignumber.js';
 
 import type {
+  AccountAddress,
   AssetContractId,
   IAccount,
   IActiveMultisigTransaction,
@@ -236,7 +237,7 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
   );
 }
 
-export function getTxDirection(tx?: ITx | IGAAttachTx, address?: Encoded.AccountAddress) {
+export function getTxDirection(tx?: ITx | IGAAttachTx, address?: AccountAddress) {
   type ICommonTx = ITx & IGAAttachTx; // All possible properties of the tx
 
   if ((tx as ITx)?.tag === Tag.SpendTx) {
