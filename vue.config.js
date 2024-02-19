@@ -139,8 +139,8 @@ module.exports = {
       config.plugin('copy')
         .use(CopyWebpackPlugin, [{
           patterns: [
-            { from: 'public/favicons/favicon-48.webp', to: 'icons/icon_48.webp' },
-            { from: 'public/favicons/favicon-128.webp', to: 'icons/icon_128.webp' },
+            { from: 'public/favicons/favicon-48.png', to: 'icons/icon_48.png' },
+            { from: 'public/favicons/favicon-128.png', to: 'icons/icon_128.png' },
             { from: 'public/icons/cameraRequestPermission', to: 'icons/cameraRequestPermission' },
             { from: 'src/icons/logo.svg', to: 'icons/cameraRequestPermission/logo.svg' },
           ],
