@@ -7,15 +7,18 @@ import type {
   ITransaction,
 } from '@/types';
 import { PROTOCOLS, STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
-import { pipe, removeDuplicatedTransactions, sortTransactionsByDate } from '@/utils';
+import {
+  pipe,
+  removeDuplicatedTransactions,
+  sortTransactionsByDate,
+  includes,
+} from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
-import { AE_MDW_TO_NODE_APPROX_DELAY_TIME } from '@/protocols/aeternity/config';
 
 import { useAccounts } from './accounts';
 import { useBalances } from './balances';
 import { useStorageRef } from './storageRef';
 import { useNetworks } from './networks';
-import { useAeSdk } from './aeSdk';
 import { useFungibleTokens } from './fungibleTokens';
 
 type AccountsTransactionList = Record<AccountAddress, ICommonTransaction[]>;
@@ -63,7 +66,6 @@ export function useLatestTransactionList() {
   const { activeNetwork } = useNetworks();
   const { balances } = useBalances();
   const { tokenBalances } = useFungibleTokens();
-  const { waitTransactionMined } = useAeSdk();
 
   function removeAccountPendingTransaction(address: AccountAddress, hash: string) {
     accountsTransactionsPending.value[address] = remove(
@@ -102,18 +104,23 @@ export function useLatestTransactionList() {
 
   /**
    * Add temporary pending transaction and remove it when it's mined.
-   * For now this is usable only with Aeternity protocol
    */
   async function addAccountPendingTransaction(address: AccountAddress, transaction: ITransaction) {
     const account = getAccountByAddress(address);
-    if (account?.protocol === PROTOCOLS.aeternity && transaction?.hash) {
+    if (
+      account
+      && transaction?.hash
+      && includes([PROTOCOLS.aeternity, PROTOCOLS.ethereum], account?.protocol)
+    ) {
       if (!accountsTransactionsPending.value[address]) {
         accountsTransactionsPending.value[address] = [];
       }
       accountsTransactionsPending.value[address].push(transaction);
 
       try {
-        await waitTransactionMined(transaction.hash);
+        await ProtocolAdapterFactory
+          .getAdapter(account.protocol)
+          .waitTransactionMined(transaction.hash);
         loadAccountLatestTransactions(account);
       } finally {
         removeAccountPendingTransaction(address, transaction.hash);
@@ -154,7 +161,7 @@ export function useLatestTransactionList() {
           if (oldBalance && newBalance && !newBalance.isEqualTo(oldBalance)) {
             setTimeout(
               () => loadAccountLatestTransactions(account),
-              (account.protocol === PROTOCOLS.aeternity) ? AE_MDW_TO_NODE_APPROX_DELAY_TIME : 0,
+              ProtocolAdapterFactory.getAdapter(account.protocol).mdwToNodeApproxDelayTime,
             );
           }
         });

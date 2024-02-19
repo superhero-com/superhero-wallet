@@ -13,6 +13,13 @@ export const ETH_COIN_PRECISION = 18; // Amount of decimals
 export const ETH_COINGECKO_COIN_ID = 'ethereum';
 export const ETH_GAS_LIMIT = 21000;
 
+/**
+ * Estimated time we need to wait for the middleware (etherscan) to sync it's state
+ * with the node. There is a high risk that in some cases this won't be enough
+ * so consider using this constant as a workaround.
+ */
+export const ETH_MDW_TO_NODE_APPROX_DELAY_TIME = 30000;
+
 export const ERC20_ABI: ContractAbi = [
   {
     constant: true,

@@ -68,6 +68,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
   override hasTokensSupport = false;
 
+  override mdwToNodeApproxDelayTime = 0;
+
   private bip32 = BIP32Factory(ecc);
 
   private networkSettings: AdapterNetworkSettingList = [
@@ -414,5 +416,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return {
       hash: transactionId,
     };
+  }
+
+  override async waitTransactionMined(): Promise<any> {
+    // TODO if needed
   }
 }
