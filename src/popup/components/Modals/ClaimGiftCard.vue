@@ -111,7 +111,12 @@ import {
   unpackTx,
 } from '@aeternity/aepp-sdk';
 
-import type { RejectCallback, ResolveCallback, ObjectValues } from '@/types';
+import type {
+  AccountAddress,
+  ObjectValues,
+  RejectCallback,
+  ResolveCallback,
+} from '@/types';
 import {
   useAccounts,
   useAeSdk,
@@ -165,7 +170,7 @@ export default defineComponent({
     const { getFormattedFiat } = useCurrencies();
     const { claimInvite } = useInvites();
 
-    const recipientId = ref<Encoded.AccountAddress>(aeAccounts.value[0].address);
+    const recipientId = ref<AccountAddress>(aeAccounts.value[0].address);
     const amount = ref('');
     const balance = ref(new BigNumber(0));
     const step = ref<Step>(STEPS.initial);
@@ -193,7 +198,7 @@ export default defineComponent({
       buildTx({
         tag: Tag.SpendTx,
         senderId: address,
-        recipientId: recipientId.value,
+        recipientId: recipientId.value as Encoded.AccountAddress,
         amount: +amount.value,
         payload: encode(new TextEncoder().encode(''), Encoding.Bytearray),
         nonce: 1,

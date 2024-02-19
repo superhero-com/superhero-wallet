@@ -29,7 +29,8 @@ export class AeAccountHdWallet extends AccountBase {
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super();
     const { getLastActiveProtocolAccount } = useAccounts();
-    this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
+    this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!
+      .address as Encoded.AccountAddress;
     this.nodeNetworkId = nodeNetworkId;
   }
 

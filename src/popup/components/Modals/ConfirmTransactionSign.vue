@@ -413,12 +413,13 @@ export default defineComponent({
         try {
           verifying.value = true;
           const sdk = await getAeSdk();
-          const balance = await sdk.getBalance(activeAccount!.address).catch((err) => {
-            if (!isNotFoundError(err)) {
-              handleUnknownError(err);
-            }
-            return 0;
-          });
+          const balance = await sdk.getBalance(activeAccount!.address as Encoded.AccountAddress)
+            .catch((err) => {
+              if (!isNotFoundError(err)) {
+                handleUnknownError(err);
+              }
+              return 0;
+            });
           // We've chosen the approach to trust the aepp itself in amount of gas,
           // they think is needed
           const executionCostAettos = getExecutionCost(popupProps.value.txBase64).toString();
@@ -429,9 +430,10 @@ export default defineComponent({
             return;
           }
           if (popupProps.value.tx?.contractId) {
+            const accountAddress = popupProps.value.tx.callerId || popupProps.value.tx.senderId!;
             const dryRunResult = await sdk.txDryRun(
               popupProps.value.txBase64,
-              popupProps.value.tx.callerId || popupProps.value.tx.senderId!,
+              accountAddress as Encoded.AccountAddress,
             );
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
               error.value = new ContractByteArrayEncoder().decode(

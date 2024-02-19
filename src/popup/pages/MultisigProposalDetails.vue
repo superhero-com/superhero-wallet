@@ -279,7 +279,7 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { Tag } from '@aeternity/aepp-sdk';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
@@ -498,7 +498,7 @@ export default defineComponent({
         if (!rawTx) {
           throw Error('failed to load a transaction');
         }
-        transaction.value = await sendTx(gaAccountId, rawTx.tx, nonce);
+        transaction.value = await sendTx(gaAccountId as Encoded.AccountAddress, rawTx.tx, nonce);
 
         await updateMultisigAccounts();
 

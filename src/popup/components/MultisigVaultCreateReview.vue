@@ -99,6 +99,7 @@ import {
 import { Encoded } from '@aeternity/aepp-sdk';
 
 import type {
+  AccountAddress,
   IAccountFetched,
   ICreateMultisigAccount,
   IMultisigCreationPhase,
@@ -153,7 +154,7 @@ export default defineComponent({
 
     const { openModal } = useModals();
 
-    const creatorAddress = ref<Encoded.AccountAddress>(
+    const creatorAddress = ref<AccountAddress>(
       props.signers[0].address || aeAccounts.value[0].address,
     );
     const creatorAccountFetched = ref<IAccountFetched>();
