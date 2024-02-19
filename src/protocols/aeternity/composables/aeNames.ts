@@ -12,6 +12,7 @@ import type {
   IAddressNamePair,
   IAuction,
   IAuctionBid,
+  AccountAddress,
 } from '@/types';
 import {
   fetchAllPages,
@@ -56,7 +57,7 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
-type NamesRegistry = Record<NetworkId, Record<Encoded.AccountAddress, ChainName>>;
+type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
 let initialized = false;
 
@@ -101,7 +102,7 @@ export function useAeNames() {
     }
   }
 
-  async function updateExternalName(address: Encoded.AccountAddress) {
+  async function updateExternalName(address: AccountAddress) {
     ensureExternalNameRegistryExists();
 
     const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
@@ -115,7 +116,7 @@ export function useAeNames() {
   }
 
   // This function returns computed value to have reactive state and show proper data after fetching
-  function getName(address?: Encoded.AccountAddress): ComputedRef<ChainName | string> {
+  function getName(address?: AccountAddress): ComputedRef<ChainName | string> {
     if (!address || !nodeNetworkId.value) {
       return computed(() => '');
     }
@@ -171,7 +172,7 @@ export function useAeNames() {
     pendingAutoExtendNames.value.push(name);
   }
 
-  function fetchPendingNameClaimTransactions(address: Encoded.AccountAddress) {
+  function fetchPendingNameClaimTransactions(address: AccountAddress) {
     const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
     return aeternityAdapter.fetchPendingTransactions(address)
       .then(
@@ -185,11 +186,11 @@ export function useAeNames() {
       );
   }
 
-  async function fetchAllNames(address: Encoded.AccountAddress) {
+  async function fetchAllNames(address: AccountAddress) {
     const middleware = await getMiddleware();
 
     const names = await fetchAllPages(
-      () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
+      () => middleware.getNames({ owned_by: address as Encoded.AccountAddress, state: 'active', limit: 100 }),
       fetchFromMiddlewareCamelCased,
     );
 

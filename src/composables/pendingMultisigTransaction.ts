@@ -3,9 +3,9 @@ import {
   watch,
   computed,
 } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import type {
+  AccountAddress,
   IAccount,
   IActiveMultisigTransaction,
   ITransaction,
@@ -46,14 +46,14 @@ export function usePendingMultisigTransaction() {
   /**
    * Current proposal signers.
    */
-  const pendingMultisigTxSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSigners = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.signers ?? []
   ));
 
   /**
    * The Signers who approved the current proposal.
    */
-  const pendingMultisigTxConfirmedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxConfirmedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.confirmedBy ?? []
   ));
 
@@ -67,14 +67,14 @@ export function usePendingMultisigTransaction() {
   /**
    * The Signers who refused the current proposal.
    */
-  const pendingMultisigTxRefusedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxRefusedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.refusedBy ?? []
   ));
 
   /**
    * Sorted list of signatories, with confirmed signatories appearing first.
    */
-  const pendingMultisigTxSortedSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSortedSigners = computed((): AccountAddress[] => (
     [...pendingMultisigTxSigners.value].sort(
       (a) => activeMultisigAccount.value?.confirmedBy.includes(a) ? -1 : 1,
     )

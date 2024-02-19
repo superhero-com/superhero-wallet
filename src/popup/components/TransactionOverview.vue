@@ -23,6 +23,7 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
+  AccountAddress,
   IAccountOverview,
   ITransaction,
   TxFunction,
@@ -84,7 +85,7 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    function getTransactionParty(address: Encoded.AccountAddress): IAccountOverview {
+    function getTransactionParty(address: AccountAddress): IAccountOverview {
       return {
         address,
         label: t('transaction.overview.accountAddress'),

@@ -116,7 +116,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
         fee.value = BigNumber(unpackTx(
           buildTx({
             tag: Tag.ContractCallTx,
-            callerId: account.address,
+            callerId: account.address as Encoded.AccountAddress,
             contractId: (isAssetAe)
               ? STUB_CONTRACT_ADDRESS
               : val.selectedAsset.contractId as Encoded.ContractAddress,
@@ -136,8 +136,8 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       const minFee = BigNumber(unpackTx(
         buildTx({
           tag: Tag.SpendTx,
-          senderId: account.address,
-          recipientId: account.address,
+          senderId: account.address as Encoded.AccountAddress,
+          recipientId: account.address as Encoded.AccountAddress,
           amount,
           payload: encode(new TextEncoder().encode(val.payload), Encoding.Bytearray),
           nonce: nonce.value,

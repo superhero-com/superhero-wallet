@@ -11,6 +11,7 @@ import {
 import dayjs from 'dayjs';
 
 import type {
+  AccountAddress,
   IMultisigAccount,
   IMultisigCreationPhase,
   IRawMultisigAccount,
@@ -130,8 +131,8 @@ export function useMultisigAccountCreate() {
    * Prepare multisig account creation transaction
    */
   async function prepareVaultCreationRawTx(
-    payerId: Encoded.AccountAddress,
-    accountId: Encoded.AccountAddress,
+    payerId: AccountAddress,
+    accountId: AccountAddress,
   ) {
     const { signedAttachTx } = pendingMultisigCreationTxs.value[accountId];
     if (!signedAttachTx) {
@@ -142,7 +143,7 @@ export function useMultisigAccountCreate() {
     const paidTx = await aeSdk.signTransaction(
       await aeSdk.buildTx({
         tag: Tag.PayingForTx,
-        payerId,
+        payerId: payerId as Encoded.AccountAddress,
         tx: signedAttachTx,
       }),
       {
