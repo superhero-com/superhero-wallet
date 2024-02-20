@@ -172,7 +172,7 @@ export function useAeNames() {
 
   function fetchPendingNameClaimTransactions(address: AccountAddress) {
     const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-    return aeternityAdapter.fetchPendingTransactions(address)
+    return aeternityAdapter.fetchPendingTransactions?.(address)
       .then(
         (transactions: ITransaction[]) => (transactions)
           .filter(({ tx: { type } }) => type === 'NameClaimTx')

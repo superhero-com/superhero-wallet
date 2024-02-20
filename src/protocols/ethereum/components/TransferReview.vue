@@ -105,7 +105,7 @@ export default defineComponent({
 
       try {
         if (!isSelectedAssetEthCoin.value) {
-          actionResult = await ethAdapter.transferToken(
+          actionResult = await ethAdapter.transferToken?.(
             Number(amount),
             recipient,
             selectedAsset.contractId,

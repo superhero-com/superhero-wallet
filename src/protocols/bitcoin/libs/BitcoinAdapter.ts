@@ -19,7 +19,6 @@ import type {
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
-  IToken,
   ITransferResponse,
   MarketData,
   NetworkTypeDefault,
@@ -50,6 +49,9 @@ import { normalizeTransactionStructure } from '@/protocols/bitcoin/helpers';
 import { Blockstream } from '@/protocols/bitcoin/libs/Blockstream';
 import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetworkSettings';
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
+
+const TRANSACTION_POLLING_INTERVAL = 5000;
+const TRANSACTION_POLLING_MAX_ATTEMPTS = 10;
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
   override protocol = PROTOCOLS.bitcoin;
@@ -200,28 +202,6 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       this.getHdWalletAccountFromMnemonicSeed.bind(this),
       seed,
     );
-  }
-
-  override async fetchAvailableTokens() {
-    return []; // Bitcoin protocol has no fungible tokens
-  }
-
-  override async fetchAccountTokenBalances() {
-    return []; // Bitcoin protocol has no fungible tokens
-  }
-
-  override async fetchPendingTransactions() {
-    // TODO if needed
-    return [];
-  }
-
-  override async fetchTokenInfo(): Promise<IToken | undefined> {
-    return undefined;
-  }
-
-  override async transferToken() {
-    // has no tokens
-    return undefined;
   }
 
   override async fetchAccountTransactions(
@@ -420,7 +400,26 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async waitTransactionMined(): Promise<any> {
-    // TODO if needed
+  override waitTransactionMined(hash: string): Promise<any> {
+    return new Promise((resolve) => {
+      let attemptNo = 0;
+      const interval = setInterval(async () => {
+        attemptNo += 1;
+        const isLastAttempt = attemptNo >= TRANSACTION_POLLING_MAX_ATTEMPTS;
+        const isTransactionPickedUpByNode = await this.fetchTransactionByHash(hash);
+
+        // In BTC we fetch tranactions directly from the node, so we can be sure that
+        // the transaction will be in the list of transactions even when it's not mined yet.
+        if (isTransactionPickedUpByNode) {
+          clearInterval(interval);
+          return resolve(isTransactionPickedUpByNode);
+        }
+        if (isLastAttempt) {
+          clearInterval(interval);
+          return resolve(null);
+        }
+        return null;
+      }, TRANSACTION_POLLING_INTERVAL);
+    });
   }
 }

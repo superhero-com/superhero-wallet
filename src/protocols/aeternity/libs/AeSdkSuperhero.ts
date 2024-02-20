@@ -58,7 +58,7 @@ export class AeSdkSuperhero extends AeSdkWallet {
     recipientId: Encoded.AccountAddress | AensName,
     options: ISpendOptions,
   ): ReturnType<typeof sendTransaction> {
-    return super.spend(amount, recipientId, options as any); // TODO: remove type casting once https://github.com/aeternity/aepp-sdk-js/issues/1791 is resolved
+    return super.spend(amount, recipientId, options);
   }
 
   async getWalletInfo(): Promise<IWalletInfo> {

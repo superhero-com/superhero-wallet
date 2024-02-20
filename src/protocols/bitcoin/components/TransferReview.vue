@@ -14,7 +14,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total"
+            :amount="+transferData.total!"
             :symbol="BTC_SYMBOL"
             high-precision
             :protocol="PROTOCOLS.bitcoin"
@@ -34,8 +34,13 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAccounts, useModals, useUi } from '@/composables';
-import type { ITransferArgs, TransferFormModel } from '@/types';
+import {
+  useAccounts,
+  useLatestTransactionList,
+  useModals,
+  useUi,
+} from '@/composables';
+import type { ITransaction, ITransferArgs, TransferFormModel } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -63,7 +68,8 @@ export default defineComponent({
     const router = useRouter();
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
-    const { activeAccount } = useAccounts();
+    const { activeAccount, getLastActiveProtocolAccount } = useAccounts();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
 
     const loading = ref<boolean>(false);
 
@@ -111,12 +117,32 @@ export default defineComponent({
       if (!amount || !recipient || !selectedAsset) {
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const hash = await transfer({
         amount,
         recipient,
         selectedAsset,
       });
+
+      if (hash) {
+        const lastActiveBtcAccount = getLastActiveProtocolAccount(PROTOCOLS.bitcoin);
+        const transaction: ITransaction = {
+          hash: hash as any,
+          pending: true,
+          transactionOwner: lastActiveBtcAccount?.address,
+          protocol: PROTOCOLS.bitcoin,
+          tx: {
+            amount: Number(amount),
+            callerId: lastActiveBtcAccount?.address!,
+            contractId: selectedAsset.contractId as any,
+            senderId: lastActiveBtcAccount?.address,
+            type: 'SpendTx',
+            recipientId: recipient,
+            arguments: [],
+            fee: props.transferData.fee?.toNumber() ?? 0,
+          },
+        };
+        addAccountPendingTransaction(lastActiveBtcAccount?.address!, transaction);
+      }
 
       // TODO - redirect after transfer function will be ready
       router.push({ name: homeRouteName.value });

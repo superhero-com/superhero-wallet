@@ -202,11 +202,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     );
   }
 
-  override async constructAndSignTx() {
-    // TODO if needed
-    return {} as any;
-  }
-
   override async fetchAvailableTokens(): Promise<IToken[] | null> {
     const { ethActiveNetworkPredefinedSettings } = useEthNetworkSettings();
     const apiUrl = ethActiveNetworkPredefinedSettings.value.tokenMiddlewareUrl;
@@ -321,11 +316,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return { hash };
   }
 
-  override async fetchPendingTransactions() {
-    // TODO if needed
-    return [];
-  }
-
   override async fetchTransactionByHash(hash: string, transactionOwner?: AccountAddress) {
     const web3Eth = this.getWeb3EthInstance();
     const transaction = await getTransaction(web3Eth, hash, DEFAULT_RETURN_FORMAT);
@@ -419,26 +409,21 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     };
   }
 
-  override async spend(
+  async constructAndSignTx(
     amount: number,
-    recipient: AccountAddress,
-    options: {
-      fromAccount: AccountAddress;
-      maxPriorityFeePerGas: string;
-      maxFeePerGas: string;
-    },
-  ): Promise<ITransferResponse> {
+    recipient: string,
+    options: Record<string, any>,
+  ): Promise<FeeMarketEIP1559Transaction> {
     const { getAccountByAddress } = useAccounts();
     const { ethActiveNetworkSettings } = useEthNetworkSettings();
 
     const account = getAccountByAddress(options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Token transfer were initiated from not existing or not ethereum account.');
+      throw new Error('Ethereum transaction contruction & signing was initiated from non existing or not ethereum account.');
     }
 
-    const { chainId } = ethActiveNetworkSettings.value;
-    const web3Eth = this.getWeb3EthInstance();
     const nonce = await this.getTransactionCount(options.fromAccount);
+    const { chainId } = ethActiveNetworkSettings.value;
 
     const hexAmount = bigIntToHex(BigInt(toWei(amount.toFixed(ETH_COIN_PRECISION), 'ether')));
     const maxPriorityFeePerGas = bigIntToHex(BigInt(toWei(options.maxPriorityFeePerGas, 'ether')));
@@ -457,12 +442,23 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       type: '0x02',
     };
 
-    const tx = FeeMarketEIP1559Transaction.fromTxData(txData);
+    return FeeMarketEIP1559Transaction.fromTxData(txData).sign(account.secretKey);
+  }
 
-    const signedTx = tx.sign(account.secretKey);
-
+  override async spend(
+    amount: number,
+    recipient: AccountAddress,
+    options: {
+      fromAccount: AccountAddress;
+      maxPriorityFeePerGas: string;
+      maxFeePerGas: string;
+    },
+  ): Promise<ITransferResponse> {
+    const web3Eth = this.getWeb3EthInstance();
+    const signedTx = (await this.constructAndSignTx(amount, recipient, options));
     const serializedTx = signedTx.serialize();
     const hash = `0x${Buffer.from(signedTx.hash()).toString('hex')}`;
+
     sendSignedTransaction(web3Eth, serializedTx, DEFAULT_RETURN_FORMAT);
 
     return { hash };
@@ -482,10 +478,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
         if (
           minedTransaction?.blockNumber
-            && (
-              currentBlock?.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
-              || isLastAttempt
-            )
+          && (
+            currentBlock?.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
+            || isLastAttempt
+          )
         ) {
           clearInterval(interval);
           return resolve(minedTransaction);
