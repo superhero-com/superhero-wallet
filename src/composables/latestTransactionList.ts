@@ -63,7 +63,7 @@ const allLatestTransactions = computed((): ICommonTransaction[] => {
  */
 export function useLatestTransactionList() {
   const { accounts, getAccountByAddress } = useAccounts();
-  const { onNetworkChange } = useNetworks();
+  const { activeNetwork, onNetworkChange } = useNetworks();
   const { balances } = useBalances();
   const { tokenBalances } = useFungibleTokens();
 
@@ -76,7 +76,14 @@ export function useLatestTransactionList() {
 
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
+    const currentNetworkName = activeNetwork.value.name;
     const { regularTransactions } = await adapter.fetchAccountTransactions(address);
+
+    // This is needed in case user would switch between networks faster,
+    // than transactions would be returned (free Ethereum middleware limitations)
+    if (currentNetworkName !== activeNetwork.value.name) {
+      return true;
+    }
 
     if (regularTransactions.length) {
       accountsTransactionsLatest.value[address] = regularTransactions;
