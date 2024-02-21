@@ -88,7 +88,6 @@ import {
   IonRouterOutlet,
   IonContent,
   onIonViewDidLeave,
-  onIonViewDidEnter,
 } from '@ionic/vue';
 import {
   computed,
@@ -96,6 +95,7 @@ import {
   onMounted,
   ref,
   nextTick,
+  watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -338,16 +338,16 @@ export default defineComponent({
       }, 250);
     });
 
-    onIonViewDidEnter(() => {
+    watch(assetData, (newAssetData) => {
       setSharedAssetDetails({
         contractId,
         tokenPairs: tokenPairs.value,
-        tokenData: assetData.value,
+        tokenData: newAssetData,
         tokenBalance: fungibleTokenBalance.value,
         tokens: tokens.value,
         isMultisig: isMultisig.value,
       });
-    });
+    }, { immediate: true });
 
     onIonViewDidLeave(() => {
       resetSharedAssetDetails();
