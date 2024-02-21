@@ -61,7 +61,7 @@ let areTokenBalancesUpdating = false;
  * Store and provide the access to all protocol's fungible tokens.
  */
 export function useFungibleTokens() {
-  const { onNetworkChange } = useNetworks();
+  const { activeNetwork, onNetworkChange } = useNetworks();
   const { getAeSdk } = useAeSdk();
   const { tippingContractAddresses } = useTippingContracts();
   const {
@@ -86,6 +86,7 @@ export function useFungibleTokens() {
     const tokensFetchPromises = protocolsInUse.value.map(
       (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens(),
     );
+    const currentNetworkName = activeNetwork.value.name;
     // for each promise check if it returned null, if so, use cached data
     // because it means that we couldn't fetch new data
     const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
@@ -94,6 +95,12 @@ export function useFungibleTokens() {
         || Object.values(tokensAvailable.value[protocolsInUse.value[index]] || {})
       ),
     ).flat();
+
+    // This is necessary in case the user switches between networks faster,
+    // than the available tokens are returned (limitations of the free Ethereum middleware)
+    if (currentNetworkName !== activeNetwork.value.name) {
+      return;
+    }
 
     tokensAvailable.value = tokens.reduce((accumulator, token) => {
       const { contractId, protocol } = token;
