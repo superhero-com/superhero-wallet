@@ -74,7 +74,7 @@ export default defineComponent({
     /**
      * TODO if protocol is not set, assume AE, but this should be set correctly
      */
-    protocol: { type: String as PropType<Protocol>, required: true, default: PROTOCOLS.aeternity },
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.aeternity },
     iconSize: {
       type: String as PropType<AllowedTokenIconSize>,
       default: ICON_SIZES.sm,
