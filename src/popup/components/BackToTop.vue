@@ -2,7 +2,7 @@
   <div
     ref="el"
     class="back-to-top"
-    :class="{ sticky }"
+    :class="{ sticky, visible: isVisible}"
   >
     <transition name="fade-transition">
       <div
@@ -77,7 +77,11 @@ export default defineComponent({
 
 .back-to-top {
   width: 100%;
-  height: 40px;
+  height: 0;
+
+  &.visible {
+    height: 40px;
+  }
 
   &-btn-container {
     @include mixins.flex(flex-end, center);
