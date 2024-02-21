@@ -79,8 +79,8 @@ export function useLatestTransactionList() {
     const currentNetworkName = activeNetwork.value.name;
     const { regularTransactions } = await adapter.fetchAccountTransactions(address);
 
-    // This is needed in case user would switch between networks faster,
-    // than transactions would be returned (free Ethereum middleware limitations)
+    // This is necessary in case the user switches between networks faster,
+    // than transactions are returned (limitations of the free Ethereum middleware)
     if (currentNetworkName !== activeNetwork.value.name) {
       return true;
     }
