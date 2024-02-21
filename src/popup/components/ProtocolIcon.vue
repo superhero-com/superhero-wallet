@@ -21,7 +21,7 @@ import AeternityLogo from '@/icons/logo/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 
-const SIZES = [ICON_SIZES.xs, ICON_SIZES.md, ICON_SIZES.lg] as const;
+const SIZES = [ICON_SIZES.xs, ICON_SIZES.rg, ICON_SIZES.md, ICON_SIZES.lg] as const;
 
 export type AllowedProtocolIconSize = typeof SIZES[number];
 
