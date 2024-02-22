@@ -13,7 +13,6 @@
         :value="value"
         :type="type"
         :name="name"
-        @change="handleChange"
       >
     </span>
 
@@ -35,17 +34,6 @@ export default defineComponent({
     type: { type: String, default: 'checkbox' },
     name: { type: String, default: '' },
     disabled: Boolean,
-  },
-  setup(props, { emit }) {
-    function handleChange(event: InputEvent) {
-      if (!props.disabled) {
-        emit('input', (event.target as HTMLInputElement)?.checked || false);
-      }
-    }
-
-    return {
-      handleChange,
-    };
   },
 });
 </script>
