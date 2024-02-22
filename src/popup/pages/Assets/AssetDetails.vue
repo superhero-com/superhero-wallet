@@ -185,7 +185,11 @@ export default defineComponent({
     } = useFungibleTokens();
 
     const isCoin: boolean = !!route.matched.find(
-      ({ name }) => name && [ROUTE_COIN, ROUTE_COIN_DETAILS].includes(name.toString()),
+      ({ name }) => name && [
+        ROUTE_COIN,
+        ROUTE_COIN_DETAILS,
+        ROUTE_MULTISIG_COIN,
+      ].includes(name.toString()),
     );
     const contractId = route.params.id as AssetContractId;
     const isAe = contractId === AE_CONTRACT_ID;
