@@ -3,8 +3,13 @@ module.exports = {
   rules: {
     'subject-case': [
       2,
+      'never',
+      ['sentence-case', 'start-case', 'pascal-case', 'upper-case'],
+    ],
+    'scope-case': [
+      2,
       'always',
-      ['sentence-case', 'start-case', 'pascal-case', 'upper-case', 'lower-case'],
+      ['lower-case', 'kebab-case'],
     ],
     'type-enum': [
       2,
