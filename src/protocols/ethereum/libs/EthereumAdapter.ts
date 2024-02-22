@@ -489,7 +489,8 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         ) {
           clearInterval(interval);
           return resolve(minedTransaction);
-        } if (isLastAttempt) {
+        }
+        if (isLastAttempt) {
           clearInterval(interval);
           return resolve(null);
         }

@@ -37,7 +37,7 @@ export function useTransactionTokens({
       return [];
     }
 
-    const { protocol = PROTOCOLS.aeternity } = transaction || {};
+    const { protocol = PROTOCOLS.aeternity } = transaction;
     const protocolTokens = getProtocolAvailableTokens(protocol);
 
     // AE DEX and wrapped AE (WAE)
