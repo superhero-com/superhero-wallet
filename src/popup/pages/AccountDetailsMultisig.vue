@@ -2,9 +2,8 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
       <AccountDetailsBase
-        v-if="activeMultisigAccount"
+        v-if="activeMultisigAccount && isPageActive"
         without-default-buttons
-        :ionic-lifecycle-status="ionicLifecycleStatus"
       >
         <template #account-info>
           <AccountInfo
@@ -42,9 +41,13 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from '@ionic/vue';
-import { PropType, computed, defineComponent } from 'vue';
-import { IonicLifecycleStatus } from '@/types';
+import {
+  IonContent,
+  IonPage,
+  onIonViewDidEnter,
+  onIonViewDidLeave,
+} from '@ionic/vue';
+import { computed, defineComponent, ref } from 'vue';
 import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
@@ -71,10 +74,9 @@ export default defineComponent({
     IonPage,
     IonContent,
   },
-  props: {
-    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
-  },
   setup() {
+    const isPageActive = ref(false);
+
     const { activeMultisigAccount } = useMultisigAccounts();
 
     const simplexLink = computed(
@@ -83,10 +85,19 @@ export default defineComponent({
         : '',
     );
 
+    onIonViewDidEnter(() => {
+      isPageActive.value = true;
+    });
+
+    onIonViewDidLeave(() => {
+      isPageActive.value = false;
+    });
+
     return {
       UNFINISHED_FEATURES,
       PROTOCOL_AETERNITY,
       activeMultisigAccount,
+      isPageActive,
       simplexLink,
       CreditCardIcon,
       convertMultisigAccountToAccount,
