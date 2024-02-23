@@ -115,7 +115,7 @@ export default defineComponent({
       } else if (
         props.transaction.claim
         || (
-          [tippingV1, tippingV2].includes(innerTx.value.contractId)
+          [tippingV1, tippingV2].includes(innerTx.value?.contractId)
           && innerTx.value.function === TX_FUNCTIONS.claim
         )
       ) {
