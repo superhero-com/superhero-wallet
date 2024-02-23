@@ -162,6 +162,22 @@
           :label="$t('pages.token-details.atl-change')"
           :text="formatCurrency(assetData.atl)"
         />
+
+        <DetailsRow
+          v-if="isAssetCoin"
+          class="link"
+          :label="$t('pages.token-details.more')"
+        >
+          <template #text>
+            <LinkButton
+              is-external
+              :to="coinGeckoLinkUrl"
+              variant="muted"
+            >
+              {{ coinGeckoLinkLabel }}
+            </LinkButton>
+          </template>
+        </DetailsRow>
       </div>
     </IonContent>
   </IonPage>
@@ -174,11 +190,11 @@ import {
 } from 'vue';
 import BigNumber from 'bignumber.js';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { IAsset } from '@/types';
 import {
   PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   amountRounded,
   formatNumber,
@@ -190,6 +206,7 @@ import { useAssetDetails, useCurrencies } from '@/composables';
 import DetailsRow from '@/popup/components/Assets/DetailsRow.vue';
 import AddressTruncated from '@/popup/components/AddressTruncated.vue';
 import Tokens from '@/popup/components/Tokens.vue';
+import LinkButton from '@/popup/components/LinkButton.vue';
 
 export default defineComponent({
   name: 'AssetDetailsInfo',
@@ -199,19 +216,23 @@ export default defineComponent({
     Tokens,
     IonPage,
     IonContent,
+    LinkButton,
   },
 
   setup() {
     const { sharedAssetDetails } = useAssetDetails();
     const { formatCurrency } = useCurrencies();
 
-    const assetData = computed((): IAsset => sharedAssetDetails.tokenData || {});
+    const assetData = computed(() => sharedAssetDetails.tokenData || {});
+    const adapter = computed(() => ProtocolAdapterFactory.getAdapter(assetData.value?.protocol));
     const assetContractId = computed(() => assetData.value.contractId);
     const tokens = computed(() => sharedAssetDetails.tokens);
     const tokenPairs = computed(() => sharedAssetDetails.tokenPairs || {});
     const tokenBalance = computed(() => sharedAssetDetails.tokenBalance);
     const isAssetCoin = computed(() => isCoin(assetContractId.value));
     const decimals = computed(() => assetData.value?.decimals || tokenBalance.value?.decimals);
+    const coinGeckoLinkUrl = computed(() => `https://www.coingecko.com/en/coins/${adapter.value.getCoinGeckoCoinId()}`);
+    const coinGeckoLinkLabel = computed(() => coinGeckoLinkUrl.value.replace('https://', '').replace('en/coins', '...'));
 
     const poolShare = computed(() => {
       if (!tokenPairs.value?.balance || !tokenPairs.value?.totalSupply) {
@@ -234,6 +255,8 @@ export default defineComponent({
       formatCurrency,
       formatNumber,
       sharedAssetDetails,
+      coinGeckoLinkUrl,
+      coinGeckoLinkLabel,
       tokens,
       tokenPairs,
       tokenBalance,

@@ -18,11 +18,12 @@
       <TransactionOverview :transaction="transaction" />
 
       <div class="explorer">
-        <LinkButton :to="explorerUrl">
+        <LinkButton
+          is-external
+          :to="explorerUrl!"
+          variant="muted"
+        >
           {{ $t('pages.transactionDetails.explorer') }}
-          <template #icon>
-            <ExternalLink />
-          </template>
         </LinkButton>
       </div>
       <div class="data-grid">
@@ -183,7 +184,6 @@ import PayloadDetails from '@/popup/components/PayloadDetails.vue';
 import TransactionErrorStatus from '@/popup/components/TransactionErrorStatus.vue';
 
 import AnimatedPending from '@/icons/animated-pending.svg?vue-component';
-import ExternalLink from '@/icons/external-link.svg?vue-component';
 
 export default defineComponent({
   components: {
@@ -195,7 +195,6 @@ export default defineComponent({
     LinkButton,
     CopyText,
     AnimatedPending,
-    ExternalLink,
   },
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, required: true },
