@@ -752,8 +752,8 @@ export const routes: WalletAppRouteConfig[] = [
     },
   },
   {
-    path: '/notifications',
     name: ROUTE_NOTIFICATIONS,
+    path: '/notifications',
     component: Notifications,
     meta: {
       title: 'notifications',
@@ -763,8 +763,19 @@ export const routes: WalletAppRouteConfig[] = [
   },
   {
     name: ROUTE_NOT_FOUND,
-    path: '/:pathMatch(.*)*',
+    path: '/page-not-found',
     component: NotFound,
+    props: true,
+    meta: {
+      ifNotAuth: true,
+      notPersist: true,
+      showHeaderNavigation: true,
+      title: 'notFound',
+    },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: { name: ROUTE_NOT_FOUND },
     props: true,
     meta: {
       ifNotAuth: true,

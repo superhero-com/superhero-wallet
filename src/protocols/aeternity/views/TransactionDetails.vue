@@ -334,6 +334,7 @@ export default defineComponent({
           rawTransaction = pendingTransactions.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
+            setLoaderVisible(false);
             router.push({ name: ROUTE_NOT_FOUND });
             return;
           }
