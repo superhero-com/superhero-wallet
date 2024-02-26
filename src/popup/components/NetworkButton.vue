@@ -1,7 +1,6 @@
 <template>
   <BtnPill
     class="network-button"
-    with-hover-effects
     dense
     hollow
     @click.prevent="openNetworkSwitcherModal()"

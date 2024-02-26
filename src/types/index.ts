@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 
+import { Component } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -16,6 +17,7 @@ import {
   NOTIFICATION_TYPES,
   POPUP_ACTIONS,
   POPUP_TYPES,
+  ASSET_TYPES,
   STORAGE_KEYS,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -29,6 +31,7 @@ import {
   TX_RETURN_TYPES,
 } from '@/protocols/aeternity/config';
 import { BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import { ETH_CONTRACT_ID } from '@/protocols/ethereum/config';
 import { Protocol } from './protocols';
 
 export * from './filter';
@@ -86,17 +89,18 @@ export type BigNumberPublic = PublicPart<BigNumber> | BigNumber;
 export type Balance = BigNumberPublic;
 export type BalanceRaw = string;
 
+/**
+ * Each protocol has it's own address schema. This is only a generic placeholder.
+ * TODO replace the value with only the `string`.
+ */
+export type AccountAddress = Encoded.AccountAddress | string;
+
 export type NetworkId = string;
 
 export interface IPageableResponse<T> {
   data: T[];
   next: string;
 }
-
-export type IKeyPair = {
-  publicKey: Uint8Array;
-  secretKey: Uint8Array;
-};
 
 export interface IAppData {
   name: string;
@@ -111,9 +115,9 @@ export interface IWallet {
 }
 
 export interface IHdWalletAccount {
-  publicKey: string;
-  secretKey: string;
-  address: string;
+  publicKey: Uint8Array;
+  secretKey: Uint8Array;
+  address: AccountAddress;
 }
 
 export type InputMessageStatus = ObjectValues<typeof INPUT_MESSAGE_STATUSES>;
@@ -142,27 +146,52 @@ export interface ITokenBalanceResponse {
   txType: string;
 }
 
+export type AssetContractId =
+  | Encoded.ContractAddress
+  | typeof AE_CONTRACT_ID
+  | typeof BTC_CONTRACT_ID
+  | typeof ETH_CONTRACT_ID
+  | string;
+
+/**
+ * Account's fungible token balance data
+ */
+export interface ITokenBalance {
+  address: AccountAddress;
+  amount: number | string;
+  contractId: AssetContractId;
+  decimals?: number;
+  /** Amount of the token that is owned */
+  convertedBalance?: number;
+  protocol: Protocol;
+}
+
 /**
  * Fungible tokens that are available in currently used network.
  */
 export interface IToken {
-  contractId: Encoded.ContractAddress
-    | typeof AE_CONTRACT_ID
-    | typeof BTC_CONTRACT_ID;
+  amount?: number | string; // TODO consider removing data specific to an account
+  contractId: AssetContractId;
   contractTxi?: number;
-  convertedBalance?: number; // Amount of the token that is owned
-  decimals: number;
-  event_supply?: number;
+  convertedBalance?: number; // TODO consider removing data specific to an account
+  /**
+   * Precision required to calculate amounts.
+   * It's optional for the token because some protocols does not provide this
+   * when fetching the tokens data. Instead it is available for the token balance.
+   */
+  decimals?: number;
   extensions?: string[];
   holders?: number;
   image?: string;
   initialSupply?: number;
   name: string;
+  protocol: Protocol;
   symbol: string;
-  amount?: number | string;
 }
 
 export type TokenPair = Record<'token0' | 'token1', IToken | null>
+
+export type IAssetType = ObjectValues<typeof ASSET_TYPES>;
 
 /**
  * In most cases it's the result of firing one of the `TransactionResolvers`.
@@ -171,10 +200,9 @@ export interface ITokenResolved extends Partial<IToken> {
   isAe?: boolean;
   isPool?: boolean;
   isReceived?: boolean;
+  assetType?: IAssetType;
   symbol: string; // Ensure its present in the current interface
 }
-
-export type ITokenList = Record<string, IToken>
 
 /**
  * Coins are specific to the network user can connect to. We assume each network
@@ -187,6 +215,14 @@ export type ICoin = IToken & Omit<CoinGeckoMarketResponse, 'image'>;
  * In general the "Asset" is any form of coin or fungible token we use in the app.
  */
 export type IAsset = ICoin | IToken;
+
+/**
+ * Asset data with account related amounts and balances.
+ * TODO should replace overused IToken in places where the amount and balance is needed.
+ */
+export type IAccountAsset = Partial<ITokenBalance> & IToken;
+
+export type AssetList = Record<AssetContractId, IToken>;
 
 export type AccountType = 'hd-wallet';
 
@@ -204,7 +240,7 @@ export interface IAccountRaw {
  * Account stored on the application store.
  */
 export interface IAccount extends IHdWalletAccount, IAccountRaw {
-  address: Encoded.AccountAddress; // TODO use `string` as we use not only AE protocol
+  address: AccountAddress;
   globalIdx: number;
   idx: number;
 }
@@ -222,7 +258,7 @@ export interface IAccountFetched extends Omit<AeternityAccountFetched, 'balance'
 // TODO This interface is too loose. Empty object should not be valid.
 export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
   // TODO: use a proper type for an address since it can be a url
-  address?: Encoded.AccountAddress | string;
+  address?: AccountAddress;
   url?: string;
   contractCreate?: boolean;
   aens?: boolean;
@@ -233,17 +269,18 @@ export interface IAccountOverview extends Partial<Omit<IAccount, 'address'>> {
 
 export interface IMultisigConsensus {
   confirmationsRequired: number;
-  confirmedBy: Encoded.AccountAddress[];
+  confirmedBy: AccountAddress[];
   expirationHeight: number;
   expired: boolean;
-  proposedBy: Encoded.AccountAddress;
+  proposedBy: AccountAddress;
   txHash?: string;
 }
 
 export interface IMultisigAccountResponse {
   contractId: Encoded.ContractAddress;
   createdAt: string; // Date
-  gaAccountId: Encoded.AccountAddress; // Generalized Account used as the Multisig Account
+  /** Generalized Account used as the Multisig Account */
+  gaAccountId: AccountAddress;
   height: number;
   id: number;
   signerId: Encoded.AccountAddress;
@@ -256,9 +293,9 @@ export interface IMultisigAccountResponse {
  */
 export interface IMultisigAccount extends IMultisigConsensus, IMultisigAccountResponse {
   balance: Balance;
-  refusedBy?: Encoded.AccountAddress[];
+  refusedBy?: AccountAddress[];
   nonce: number;
-  signers: Encoded.AccountAddress[];
+  signers: AccountAddress[];
   hasPendingTransaction: boolean;
   pending?: boolean;
 }
@@ -385,13 +422,13 @@ export interface IGAMetaTx {
 
 export interface ITx {
   abiVersion?: number;
-  accountId?: Encoded.AccountAddress;
+  accountId?: AccountAddress;
   aexnType?: 'aex9';
   amount: number;
   arguments: TxArguments[]; // TODO: make arguments optional, spendTx doesn't have them
   callData?: Encoded.ContractBytearray;
   call_data?: string; // TODO incoming data is parsed with the use of camelcaseDeep, but not always
-  callerId: Encoded.AccountAddress; // TODO: make callerId optional, spendTx doesn't have it
+  callerId?: AccountAddress;
   code?: Encoded.ContractBytearray;
   commitmentId?: any;
   contractId: Encoded.ContractAddress; // TODO: make contractId optional, spendTx doesn't have it
@@ -407,7 +444,7 @@ export interface ITx {
   nameId?: any;
   nameSalt?: string;
   nonce?: number;
-  ownerId?: Encoded.AccountAddress;
+  ownerId?: AccountAddress;
   payerId?: string;
   payload?: Encoded.Bytearray;
   pointers?: any;
@@ -415,8 +452,8 @@ export interface ITx {
   return?: TxArguments;
   returnType?: typeof TX_RETURN_TYPES[number];
   recipientId?: string;
-  senderId?: Encoded.AccountAddress;
-  selectedTokenContractId?: string;
+  senderId?: AccountAddress;
+  selectedTokenContractId?: AssetContractId;
   tag?: Tag;
   /**
    * Middleware represents the `type` with different case than the aeSdk.
@@ -439,7 +476,6 @@ export interface ITransaction {
   microIndex?: number;
   microTime?: number;
   pending: boolean;
-  pendingTokenTx?: boolean;
   protocol?: Protocol;
   rawTx?: any; // TODO find type
   tipUrl?: string;
@@ -447,7 +483,13 @@ export interface ITransaction {
    * TODO "sent" field is used for removing local pending transaction - remove or rename it
    */
   sent?: boolean;
-  transactionOwner?: Encoded.AccountAddress;
+  /**
+   * Custom property added to have the perspective from which we are looking at the transaction.
+   * For example when we send some assets from one owned account to another
+   * we are displaying the same transaction twice on the dashboard: as sent and received.
+   * TODO maybe this can be removed and calculated on the component level
+   */
+  transactionOwner?: AccountAddress;
   tx: ITx;
   type?: string;
   url?: string;
@@ -459,7 +501,7 @@ export interface IDashboardTransaction extends ITransaction {
 
 export interface IActiveMultisigTransaction extends IMultisigAccount {
   totalConfirmations: number;
-  hash?: string;
+  hash: string;
   tx?: ITx;
   isMultisigTransaction: boolean;
   microTime?: number;
@@ -486,16 +528,15 @@ export type DexFunctionType =
   | 'maxSpent'
   | 'minReceived';
 
-export type ICommonTransaction = ITransaction | IActiveMultisigTransaction
+export type ICommonTransaction = ITransaction | IActiveMultisigTransaction;
 
-export type ITransactionsState = {
-  loaded: ITransaction[];
-  nextPageUrl: string | null;
-  localPendingTransaction: ITransaction | null;
-  tipWithdrawnTransactions: ITransaction[];
+export interface IFeeItem {
+  fee: BigNumberPublic;
+  time: number; // time in seconds
+  label: string;
+  maxPriorityFee?: BigNumberPublic;
+  maxFeePerGas?: BigNumberPublic;
 }
-
-export type IAccountTransactionsState = Record<string, ITransactionsState>
 
 /**
  * Browser popup window names
@@ -514,8 +555,6 @@ export interface ITopHeader {
   txsHash?: string;
   version: number;
 }
-
-export type ISignMessage = (m: any) => Promise<any>
 
 /**
  * Todo replace ChainName with AensName within the app
@@ -566,7 +605,7 @@ export interface IMiddleware {
     limit?: number;
     [key: string]: any;
   }]>;
-  getTx: (hash: string) => Promise<any>;
+  getTx: (hash: string) => Promise<ITransaction>;
   getTxByIndex: GenericApiMethod;
   getTxCountById: GenericApiMethod;
   getTxsByDirection: GenericApiMethod;
@@ -619,14 +658,6 @@ export interface IPopupProps extends IPopupActions, IPopupData {
 
 export interface IModalProps extends Partial<IPopupProps> {
   [key: string]: any; // Props defined on the component's level
-}
-
-export interface TokenProps {
-  contractId?: string;
-  tokenPairs?: any; // TODO: replace any with TokenPair & resolve issues
-  tokenData?: any; // TODO: replace any with IToken & resolve issues
-  tokens?: IToken[];
-  isMultisig?: boolean;
 }
 
 export interface IResponseChallenge {
@@ -691,8 +722,13 @@ export interface IFormModel {
   payload?: string;
 }
 
-export type TransferSendStep = typeof TRANSFER_SEND_STEPS.form | typeof TRANSFER_SEND_STEPS.review
-export type TransferSendStepExtended = TransferSendStep | typeof TRANSFER_SEND_STEPS.reviewTip;
+export type TransferSendStep = ObjectValues<typeof TRANSFER_SEND_STEPS>;
+export type TransferSendStepConfig = { component: Component; onSuccess: () => void };
+export type TransferSendStepConfigRegistry = {
+  [TRANSFER_SEND_STEPS.form]: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.review]: TransferSendStepConfig;
+  [TRANSFER_SEND_STEPS.reviewTip]?: TransferSendStepConfig;
+}
 
 export interface TransferFormModel extends IFormModel {
   fee?: BigNumber;
@@ -700,7 +736,15 @@ export interface TransferFormModel extends IFormModel {
   invoiceContract?: any;
   invoiceId?: any;
   note?: string;
+  maxPriorityFeePerGas?: string;
+  maxFeePerGas?: string;
   payload: string;
+}
+
+export interface ITransferArgs {
+  amount: string | BigNumberPublic;
+  recipient: AccountAddress;
+  selectedAsset: IAsset;
 }
 
 export type MarketData = Record<Protocol, CoinGeckoMarketResponse>;
@@ -718,15 +762,31 @@ export interface IWalletInfo {
 }
 
 export interface IAddressNamePair {
-  address: Encoded.AccountAddress;
+  address: AccountAddress;
   name: ChainName;
 }
 
+/**
+ * Different protocols use different methods to provide the ability to paginate the API
+ * response lists. This interface stores every possible option.
+ */
+export interface ITransactionApiPaginationParams {
+  /** Some APIs returns ready to use URL that allows to fetch next page results (eg.: Aeternity) */
+  nextPageUrl?: string;
+  /** Used by the Ethereum protocol */
+  nextPageNum?: string;
+  /** Used by the Bitcoin protocol to establish where the next page should start from */
+  lastTxId?: string;
+}
+
+/**
+ * TODO: Adapter's `fetchTransaction` method should return flat list of transaction without grouping
+ */
 export interface IFetchTransactionResult {
   regularTransactions: ITransaction[];
   pendingTransactions?: any[]; // TODO prepare types for PendingTransaction
   tipWithdrawnTransactions?: ITransaction[];
-  nextPageParams: string | null;
+  paginationParams: ITransactionApiPaginationParams;
 }
 export interface IFormSelectOption {
   text: string;
@@ -761,3 +821,12 @@ export type IonAnimationBuilder = (
   baseEl: Element,
   opts: { enteringEl: Element; leavingEl: Element }
 ) => Animation;
+
+export interface ITransferResponse {
+  hash: string;
+}
+
+export interface IAmountDecimalPlaces {
+  highPrecision?: boolean;
+  amount?: number;
+}

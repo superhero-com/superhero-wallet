@@ -7,8 +7,8 @@
     :transfer-data="transferData"
     :loading="loading"
     :avatar-name="isAddressChain ? transferData.address : undefined"
-    :show-fiat="isSelectedAssetAex9"
-    :protocol="PROTOCOL_AETERNITY"
+    :show-fiat="!isSelectedAssetAex9"
+    :protocol="PROTOCOLS.aeternity"
     class="transfer-review"
   >
     <template #subheader>
@@ -18,7 +18,7 @@
       >
         <AccountItem
           :address="activeMultisigAccount.gaAccountId"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
         />
       </div>
     </template>
@@ -46,7 +46,7 @@
           <TokenAmount
             :amount="PROPOSE_TRANSACTION_FEE"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             hide-fiat
             high-precision
             data-cy="multisig-review-fee"
@@ -57,7 +57,7 @@
 
     <template #total>
       <DetailsItem
-        v-if="transferData.selectedAsset.contractId === AE_CONTRACT_ID"
+        v-if="!isSelectedAssetAex9"
         :label="$t('common.total')"
         class="details-item"
       >
@@ -65,7 +65,7 @@
           <TokenAmount
             :amount="+transferData.total"
             :symbol="AE_SYMBOL"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
             high-precision
             data-cy="review-total"
           />
@@ -85,7 +85,8 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
-import type { TransferFormModel, ITransaction } from '@/types';
+import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   escapeSpecialChars,
   handleUnknownError,
@@ -93,20 +94,23 @@ import {
 } from '@/utils';
 import {
   useAccounts,
+  useAeSdk,
   useDeepLinkApi,
   useFungibleTokens,
+  useLatestTransactionList,
   useModals,
   useMultisigAccounts,
   useMultisigTransactions,
   useTippingContracts,
-  useTransactionList,
   useUi,
 } from '@/composables';
-import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
-import { PROTOCOL_AETERNITY } from '@/constants';
-import { aeToAettos } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { ROUTE_MULTISIG_DETAILS_PROPOSAL_DETAILS } from '@/popup/router/routeNames';
+
+import type { ContractInitializeOptions } from '@/protocols/aeternity/types';
+import { AE_SYMBOL, AE_CONTRACT_ID, TX_FUNCTIONS } from '@/protocols/aeternity/config';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
+import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
@@ -139,8 +143,9 @@ export default defineComponent({
     const { homeRouteName } = useUi();
     const { openDefaultModal } = useModals();
     const { openCallbackOrGoHome } = useDeepLinkApi();
-    const { upsertCustomPendingTransactionForAccount } = useTransactionList();
+    const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
+    const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
       addTransactionToPendingMultisigAccount,
@@ -149,8 +154,6 @@ export default defineComponent({
     const { getTippingContracts } = useTippingContracts();
     const {
       createOrChangeAllowance,
-      burnTriggerPoS,
-      transferToken,
     } = useFungibleTokens();
 
     const loading = ref<boolean>(false);
@@ -169,7 +172,27 @@ export default defineComponent({
       });
     }
 
-    async function transfer({ amount, recipient, selectedAsset }: any) {
+    async function burnTriggerPoS(
+      address: Encoded.ContractAddress,
+      posAddress: string,
+      invoiceId: string,
+      amount: number,
+      options: ContractInitializeOptions,
+    ) {
+      const aeSdk = await getAeSdk();
+      const tokenContract = await aeSdk.initializeContract({
+        aci: ZeitTokenACI,
+        address,
+      });
+      return tokenContract.burn_trigger_pos(
+        amount.toFixed(),
+        posAddress,
+        invoiceId,
+        options,
+      );
+    }
+
+    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
       const isSelectedAssetAeCoin = selectedAsset.contractId === AE_CONTRACT_ID;
 
       loading.value = true;
@@ -178,66 +201,51 @@ export default defineComponent({
 
         if (props.transferData.invoiceId !== null) {
           actionResult = await burnTriggerPoS(
-            selectedAsset.contractId,
-            amount,
+            selectedAsset.contractId as Encoded.ContractAddress,
+            amount.toString(),
             props.transferData.invoiceContract,
             props.transferData.invoiceId,
             { waitMined: false },
           );
         } else if (!isSelectedAssetAeCoin) {
-          actionResult = await transferToken(
-            selectedAsset.contractId,
+          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+          actionResult = await aeternityAdapter.transferToken(
+            Number(amount),
             recipient,
-            amount,
+            selectedAsset.contractId as Encoded.ContractAddress,
             { waitMined: false },
           );
         } else {
-          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
-          actionResult = await aeternityAdapter.spend(amount, recipient, {
+          const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+          actionResult = await aeternityAdapter.spend(Number(amount), recipient, {
             payload: props.transferData.payload,
           });
         }
 
-        if (actionResult && !isSelectedAssetAeCoin) {
-          const transaction: ITransaction = {
-            hash: actionResult.hash as Encoded.TxHash,
-            pendingTokenTx: true,
-            pending: true,
-            transactionOwner: activeAccount.value.address,
-            tx: {
-              amount,
-              callerId: activeAccount.value.address,
-              contractId: selectedAsset.contractId,
-              type: Tag[Tag.ContractCallTx],
-              function: TX_FUNCTIONS.transfer,
-              recipientId: recipient,
-              arguments: [],
-              fee: 0,
-            },
-          };
-          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
-        } else if (actionResult) {
+        if (actionResult) {
           const transaction: ITransaction = {
             hash: actionResult.hash as Encoded.TxHash,
             pending: true,
             transactionOwner: activeAccount.value.address,
+            protocol: PROTOCOLS.aeternity,
             tx: {
-              amount,
+              amount: Number(amount),
               callerId: activeAccount.value.address,
-              contractId: selectedAsset.contractId,
+              contractId: selectedAsset.contractId as Encoded.ContractAddress,
               senderId: activeAccount.value.address,
-              recipientId: recipient,
-              type: Tag[Tag.SpendTx],
+              type: (isSelectedAssetAeCoin) ? Tag[Tag.SpendTx] : Tag[Tag.ContractCallTx],
               function: TX_FUNCTIONS.transfer,
+              recipientId: recipient,
               arguments: [],
               fee: 0,
             },
           };
-
-          upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+          addAccountPendingTransaction(activeAccount.value.address, transaction);
         }
+
+        // TODO find out if emitting success in case falsy `actionResult` makes sense.
         emit('success');
-        return actionResult.hash;
+        return actionResult?.hash;
       } catch (error) {
         openTransactionFailedModal();
         throw error;
@@ -294,7 +302,7 @@ export default defineComponent({
             fee: 0,
           },
         };
-        upsertCustomPendingTransactionForAccount(activeAccount.value.address, transaction);
+        addAccountPendingTransaction(activeAccount.value.address, transaction);
         openCallbackOrGoHome(true);
         emit('success');
       } catch (error: any) {
@@ -315,7 +323,7 @@ export default defineComponent({
         } = useMultisigTransactions();
         if (activeMultisigAccount.value) {
           const txToPropose = await buildSpendTx(
-            activeMultisigAccount.value.gaAccountId,
+            activeMultisigAccount.value.gaAccountId as Encoded.AccountAddress,
             props.transferData.address!,
             aeToAettos(props.transferData.amount!),
             props.transferData.payload || undefined,
@@ -357,7 +365,7 @@ export default defineComponent({
 
       const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : toShiftedBigNumber(amountRaw, selectedAsset.decimals);
+        : toShiftedBigNumber(amountRaw, selectedAsset.decimals!);
 
       if (props.isMultisig) {
         await proposeMultisigTransaction();
@@ -379,7 +387,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       isSelectedAssetAex9,
       activeMultisigAccount,
       AE_SYMBOL,

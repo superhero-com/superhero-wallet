@@ -82,9 +82,9 @@ export default defineComponent({
   },
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    selectNetwork: (name: string) => undefined,
+    selectNetwork: (name: string) => true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    deleteNetwork: (name: string) => undefined,
+    deleteNetwork: (name: string) => true,
   },
   setup(props) {
     // Filter out the network protocol settings that has no `nodeUrl` default property

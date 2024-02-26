@@ -100,9 +100,8 @@ import {
 import { IonPage, IonContent } from '@ionic/vue';
 import type { IMiddlewareStatus } from '@/types';
 import { BUG_REPORT_URL, AGGREGATOR_URL } from '@/constants';
-import { useMiddleware } from '@/composables';
 import { AE_COMMIT_URL } from '@/protocols/aeternity/config';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { fetchJson } from '@/utils';
 
 import LinkButton from '@/popup/components/LinkButton.vue';
@@ -123,7 +122,7 @@ export default defineComponent({
   },
   setup() {
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { fetchMiddlewareStatus } = useMiddleware();
+    const { fetchMiddlewareStatus } = useAeMiddleware();
 
     const middlewareStatus = ref<IMiddlewareStatus>();
     const nodeStatus = ref(null);

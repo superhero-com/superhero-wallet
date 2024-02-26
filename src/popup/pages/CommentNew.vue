@@ -41,7 +41,7 @@ import {
 } from 'vue';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
 import { postJson } from '@/utils';
 import {
   useAccounts,
@@ -82,7 +82,7 @@ export default defineComponent({
       setActiveAccountByAddress,
     } = useAccounts();
 
-    const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOL_AETERNITY)!.address);
+    const creatorAddress = ref(getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address);
     const id = ref<string>('');
     const parentId = ref<number | undefined>(undefined);
     const text = ref<string>('');

@@ -2,28 +2,30 @@
   <IonPage>
     <IonContent class="ion-padding ion-content-bg--lighter">
       <div class="multisig-token-list-wrapper">
-        <TokensList
+        <AssetList
           :search-term="searchPhrase"
           is-multisig
         />
       </div>
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
 
-<script>
+<script lang="ts">
 import { IonContent, IonPage } from '@ionic/vue';
-import {
-  defineComponent,
-} from 'vue';
-import TokensList from '../components/FungibleTokens/TokensList.vue';
-import { useTransactionAndTokenFilter } from '../../composables';
+import { defineComponent } from 'vue';
+import { useTransactionAndTokenFilter } from '@/composables';
+
+import AssetList from '../components/Assets/AssetList.vue';
+import BackToTop from '../components/BackToTop.vue';
 
 export default defineComponent({
   components: {
-    TokensList,
+    AssetList,
     IonPage,
     IonContent,
+    BackToTop,
   },
   props: {
     showFilters: Boolean,

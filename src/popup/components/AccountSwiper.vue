@@ -69,12 +69,12 @@ import {
   ref,
   watch,
 } from 'vue';
-import { RouteLocation } from 'vue-router';
+import { RouteLocationNamedRaw } from 'vue-router';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import SwiperCore from 'swiper';
 import { Virtual } from 'swiper/modules';
 import { getAddressColor } from '@/utils';
-import { IS_MOBILE_APP, PROTOCOL_AETERNITY } from '@/constants';
+import { IS_MOBILE_APP, PROTOCOLS } from '@/constants';
 
 import AccountCardAdd from './AccountCardAdd.vue';
 import AccountSwiperSlide from './AccountSwiperSlide.vue';
@@ -94,7 +94,7 @@ export default defineComponent({
   },
   props: {
     activeIdx: { type: Number, required: true },
-    to: { type: Object as PropType<RouteLocation>, required: true },
+    to: { type: Object as PropType<RouteLocationNamedRaw>, required: true },
     addressList: { type: Array as PropType<string[]>, required: true },
     isMultisig: Boolean,
   },
@@ -138,7 +138,7 @@ export default defineComponent({
 
     return {
       IS_MOBILE_APP,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       currentIdx,
       customSwiper,
       getAccountColor,

@@ -1,7 +1,6 @@
 import type { WalletAppRouteConfig } from '@/types';
 import {
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
@@ -48,6 +47,7 @@ import {
 } from './routeNames';
 
 import About from '../pages/About.vue';
+import AccountDetailsTransactions from '../components/AccountDetailsTransactionsBase.vue';
 import AccountDetailsMultisig from '../pages/AccountDetailsMultisig.vue';
 import AccountDetailsMultisigTokens from '../pages/AccountDetailsMultisigTokens.vue';
 import AccountDetailsMultisigTransactions from '../pages/AccountDetailsMultisigTransactions.vue';
@@ -58,9 +58,9 @@ import CommentNew from '../pages/CommentNew.vue';
 import ConfirmTransactionSign from '../components/Modals/ConfirmTransactionSign.vue';
 import ConfirmRawSign from '../components/Modals/ConfirmRawSign.vue';
 import DonateError from '../pages/DonateError.vue';
-import TokenContainer from '../pages/FungibleTokens/TokenContainer.vue';
-import TokenTransactions from '../pages/FungibleTokens/TokenTransactions.vue';
-import TokenDetails from '../pages/FungibleTokens/TokenDetails.vue';
+import AssetDetails from '../pages/Assets/AssetDetails.vue';
+import AssetDetailsTransactions from '../pages/Assets/AssetDetailsTransactions.vue';
+import AssetDetailsInfo from '../pages/Assets/AssetDetailsInfo.vue';
 import Index from '../pages/Index.vue';
 import Invite from '../pages/Invite.vue';
 import InviteClaim from '../pages/InviteClaim.vue';
@@ -147,8 +147,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             path: '',
             name: ROUTE_ACCOUNT_DETAILS,
-            component: ProtocolSpecificView,
-            props: { viewComponentName: PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS },
+            component: AccountDetailsTransactions,
             meta: {
               hideHeader: true,
               showFilterBar: true,
@@ -283,7 +282,7 @@ export const routes: WalletAppRouteConfig[] = [
          * @see https://github.com/vuejs/router/issues/845
          */
         path: 'coins/:id?',
-        component: TokenContainer,
+        component: AssetDetails,
         beforeEnter: (to, from, next) => {
           if (!to.params.id) {
             next({ name: ROUTE_MULTISIG_ACCOUNT });
@@ -295,7 +294,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             name: ROUTE_MULTISIG_COIN,
             path: '',
-            component: TokenTransactions,
+            component: AssetDetailsTransactions,
             props: true,
             meta: {
               title: 'coinDetails',
@@ -309,7 +308,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             name: ROUTE_MULTISIG_COIN_DETAILS,
             path: 'details',
-            component: TokenDetails,
+            component: AssetDetailsInfo,
             props: true,
             meta: {
               title: 'coinDetails',
@@ -641,7 +640,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     // see https://github.com/vuejs/router/issues/845
     path: '/coins/:id?',
-    component: TokenContainer,
+    component: AssetDetails,
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {
         next({ name: ROUTE_ACCOUNT });
@@ -653,7 +652,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_COIN,
         path: '',
-        component: TokenTransactions,
+        component: AssetDetailsTransactions,
         props: true,
         meta: {
           title: 'coinDetails',
@@ -666,7 +665,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_COIN_DETAILS,
         path: 'details',
-        component: TokenDetails,
+        component: AssetDetailsInfo,
         props: true,
         meta: {
           title: 'coinDetails',
@@ -679,7 +678,7 @@ export const routes: WalletAppRouteConfig[] = [
   {
     // see https://github.com/vuejs/router/issues/845
     path: '/tokens/:id?',
-    component: TokenContainer,
+    component: AssetDetails,
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {
         next({ name: ROUTE_ACCOUNT });
@@ -691,7 +690,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_TOKEN,
         path: '',
-        component: TokenTransactions,
+        component: AssetDetailsTransactions,
         props: true,
         meta: {
           title: 'tokenDetails',
@@ -704,7 +703,7 @@ export const routes: WalletAppRouteConfig[] = [
       {
         name: ROUTE_TOKEN_DETAILS,
         path: 'details',
-        component: TokenDetails,
+        component: AssetDetailsInfo,
         props: true,
         meta: {
           title: 'tokenDetails',

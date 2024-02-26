@@ -2,6 +2,7 @@ import { computed } from 'vue';
 import { mapValues } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import type {
+  AccountAddress,
   Balance,
   BalanceRaw,
 } from '@/types';
@@ -11,16 +12,17 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from '@/composables/currencies';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAccounts } from './accounts';
-import { createNetworkWatcher } from './networks';
 import { useStorageRef } from './storageRef';
+import { useNetworks } from './networks';
 
-type Balances = Record<string, Balance>;
+type Balances = Record<AccountAddress, Balance>;
+
+let composableInitialized = false;
 
 // TODO: Set it to 3000 once the own middleware is ready
 const POLLING_INTERVAL = 5000;
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
   serializer: {
@@ -35,6 +37,7 @@ const balances = useStorageRef<Balances>({}, STORAGE_KEYS.balances, {
  */
 export function useBalances() {
   const { activeAccount, accounts } = useAccounts();
+  const { onNetworkChange } = useNetworks();
   const { getCurrentCurrencyRate } = useCurrencies();
 
   const balance = computed(() => balances.value[activeAccount.value.address] || new BigNumber(0));
@@ -59,7 +62,8 @@ export function useBalances() {
   }
 
   async function updateBalances() {
-    const balancesPromises = accounts.value.map(
+    const accountsCached = accounts.value; // Store the accounts for the time of update process
+    const balancesPromises = accountsCached.map(
       async ({
         address,
         protocol,
@@ -72,15 +76,19 @@ export function useBalances() {
     );
     const rawBalances = await Promise.all(balancesPromises);
     balances.value = Object.fromEntries(rawBalances.map(
-      (val, index) => [accounts.value[index].address, BigNumber(val)],
+      (val, index) => [accountsCached[index].address, BigNumber(val || 0)],
     ));
   }
 
-  onNetworkChange(() => {
-    updateBalances();
-  });
-
   initPollingWatcher(() => updateBalances());
+
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    onNetworkChange(() => {
+      updateBalances();
+    });
+  }
 
   return {
     balances,

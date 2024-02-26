@@ -15,6 +15,8 @@ import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
 import BigNumber from 'bignumber.js';
 
 import type {
+  AccountAddress,
+  AssetContractId,
   IAccount,
   IActiveMultisigTransaction,
   ICommonTransaction,
@@ -27,7 +29,7 @@ import type {
   TxFunctionRaw,
   TxType,
 } from '@/types';
-import { HASH_REGEX, PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import { HASH_REGEX, PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   compareCaseInsensitive,
   errorHasValidationKey,
@@ -86,7 +88,7 @@ export function calculateSupplyAmount(balance: number, totalSupply: number, rese
 export function categorizeContractCallTxObject(transaction: ITransaction): {
   amount?: string | number;
   to?: string;
-  token?: string;
+  token?: AssetContractId;
   url?: string;
   note?: string;
 } | null {
@@ -140,7 +142,7 @@ export function convertMultisigAccountToAccount(
 ): Partial<IAccount> {
   return {
     address: multisigAccount.gaAccountId,
-    protocol: PROTOCOL_AETERNITY,
+    protocol: PROTOCOLS.aeternity,
     idx: 0,
     globalIdx: 0,
   };
@@ -235,7 +237,7 @@ export function getTransactionTipUrl(transaction: ITransaction): string {
   );
 }
 
-export function getTxDirection(tx?: ITx | IGAAttachTx, address?: Encoded.AccountAddress) {
+export function getTxDirection(tx?: ITx | IGAAttachTx, address?: AccountAddress) {
   type ICommonTx = ITx & IGAAttachTx; // All possible properties of the tx
 
   if ((tx as ITx)?.tag === Tag.SpendTx) {
@@ -294,12 +296,15 @@ export function isAensNameValid(value: string) {
   );
 }
 
+/**
+ * Check if transaction does not refers to AE Coin.
+ */
 export function isTransactionAex9(transaction: ITransaction): boolean {
   if (transaction.tx?.aexnType === 'aex9') {
     return true;
   }
-  const token = categorizeContractCallTxObject(transaction)?.token;
-  return !!transaction.tx && !!token && token !== AE_CONTRACT_ID;
+  const contractId = categorizeContractCallTxObject(transaction)?.token;
+  return !!transaction.tx && !!contractId && contractId !== AE_CONTRACT_ID;
 }
 
 export function isTxDex(tx?: ITx, dexContracts?: IDexContracts) {

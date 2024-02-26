@@ -12,6 +12,7 @@ import type {
   IAddressNamePair,
   IAuction,
   IAuctionBid,
+  AccountAddress,
 } from '@/types';
 import {
   fetchAllPages,
@@ -21,16 +22,14 @@ import {
 import { Encoded, NAME_TTL } from '@aeternity/aepp-sdk';
 import {
   AUTO_EXTEND_NAME_BLOCKS_INTERVAL,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   STORAGE_KEYS,
 } from '@/constants';
 import Logger from '@/lib/logger';
 import {
-  createNetworkWatcher,
   useAccounts,
   useAeSdk,
   useModals,
-  useMiddleware,
   useStorageRef,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
@@ -39,8 +38,9 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { UPDATE_POINTER_ACTION } from '@/protocols/aeternity/config';
 import { isInsufficientBalanceError } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables/aeNetworkSettings';
+import { useAeNetworkSettings } from './aeNetworkSettings';
 import { useAeTippingBackend } from './aeTippingBackend';
+import { useAeMiddleware } from './aeMiddleware';
 
 const POLLING_INTERVAL = 10000;
 
@@ -56,9 +56,9 @@ interface IAuctionEntryParams {
   bids: IAuctionBid[];
 }
 
-type NamesRegistry = Record<NetworkId, Record<Encoded.AccountAddress, ChainName>>;
+type NamesRegistry = Record<NetworkId, Record<AccountAddress, ChainName>>;
 
-let initialized = false;
+let composableInitialized = false;
 
 const ownedNames = useStorageRef<IName[]>([], STORAGE_KEYS.namesOwned);
 const pendingAutoExtendNames = ref<ChainName[]>([]);
@@ -75,7 +75,6 @@ const externalNamesRegistry = ref<NamesRegistry>({});
 const auctions = ref<Record<string, IAuction>>({});
 
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
-const { onNetworkChange } = createNetworkWatcher();
 
 /**
  * Aeternity Blockchain allows to match a .chain name to the addresses (AENS service).
@@ -84,7 +83,7 @@ const { onNetworkChange } = createNetworkWatcher();
  */
 export function useAeNames() {
   const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
-  const { aeActiveNetworkSettings } = useAeNetworkSettings();
+  const { aeActiveNetworkSettings, onNetworkChange } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();
@@ -93,7 +92,7 @@ export function useAeNames() {
     isMiddlewareReady,
     getMiddleware,
     fetchFromMiddlewareCamelCased,
-  } = useMiddleware();
+  } = useAeMiddleware();
 
   function ensureExternalNameRegistryExists() {
     if (!externalNamesRegistry.value[nodeNetworkId.value!]) {
@@ -101,7 +100,7 @@ export function useAeNames() {
     }
   }
 
-  async function updateExternalName(address: Encoded.AccountAddress) {
+  async function updateExternalName(address: AccountAddress) {
     ensureExternalNameRegistryExists();
 
     const { preferredChainName } = await fetchJson(`${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`)
@@ -115,14 +114,14 @@ export function useAeNames() {
   }
 
   // This function returns computed value to have reactive state and show proper data after fetching
-  function getName(address?: Encoded.AccountAddress): ComputedRef<ChainName | string> {
+  function getName(address?: AccountAddress): ComputedRef<ChainName | string> {
     if (!address || !nodeNetworkId.value) {
       return computed(() => '');
     }
 
     if (
       isLocalAccountAddress(address)
-      || getLastActiveProtocolAccount(PROTOCOL_AETERNITY)?.address === address
+      || getLastActiveProtocolAccount(PROTOCOLS.aeternity)?.address === address
     ) {
       return computed(() => defaultNamesRegistry.value[nodeNetworkId.value!]?.[address] || '');
     }
@@ -171,8 +170,8 @@ export function useAeNames() {
     pendingAutoExtendNames.value.push(name);
   }
 
-  function fetchPendingNameClaimTransactions(address: Encoded.AccountAddress) {
-    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_AETERNITY);
+  function fetchPendingNameClaimTransactions(address: AccountAddress) {
+    const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
     return aeternityAdapter.fetchPendingTransactions(address)
       .then(
         (transactions: ITransaction[]) => (transactions)
@@ -185,11 +184,11 @@ export function useAeNames() {
       );
   }
 
-  async function fetchAllNames(address: Encoded.AccountAddress) {
+  async function fetchAllNames(address: AccountAddress) {
     const middleware = await getMiddleware();
 
     const names = await fetchAllPages(
-      () => middleware.getNames({ owned_by: address, state: 'active', limit: 100 }),
+      () => middleware.getNames({ owned_by: address as Encoded.AccountAddress, state: 'active', limit: 100 }),
       fetchFromMiddlewareCamelCased,
     );
 
@@ -301,36 +300,35 @@ export function useAeNames() {
     }
   }
 
-  onNetworkChange(async () => {
-    await Promise.all([
-      updateOwnedNames(),
-      updateDefaultNames(),
-    ]);
-    await extendExpiringOwnedNames();
-  });
-
-  watch(
-    aeAccounts,
-    async (val, oldVal) => {
-      if (isMiddlewareReady.value && val !== oldVal) {
-        await Promise.all([
-          updateOwnedNames(),
-          updateDefaultNames(),
-        ]);
-      }
-    },
-  );
-
   initPollingWatcher(() => {
     updateDefaultNames();
   });
 
-  (async () => {
-    if (!initialized) {
-      initialized = true;
-      retrieveCachedChainNames();
-    }
-  })();
+  if (!composableInitialized) {
+    composableInitialized = true;
+
+    retrieveCachedChainNames();
+
+    onNetworkChange(async () => {
+      await Promise.all([
+        updateOwnedNames(),
+        updateDefaultNames(),
+      ]);
+      await extendExpiringOwnedNames();
+    });
+
+    watch(
+      aeAccounts,
+      async (val, oldVal) => {
+        if (isMiddlewareReady.value && val !== oldVal) {
+          await Promise.all([
+            updateOwnedNames(),
+            updateDefaultNames(),
+          ]);
+        }
+      },
+    );
+  }
 
   return {
     ownedNames,

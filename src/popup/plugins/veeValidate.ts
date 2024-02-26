@@ -2,21 +2,25 @@ import { defineRule } from 'vee-validate';
 import { required } from '@vee-validate/rules';
 import BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { Encoding, isAddressValid } from '@aeternity/aepp-sdk';
+import { isAddressValid } from '@aeternity/aepp-sdk';
 import { NameEntry } from '@aeternity/aepp-sdk/es/apis/node';
+import {
+  INetwork,
+  NetworkType,
+  ObjectValues,
+  Protocol,
+} from '@/types';
 import {
   NETWORK_NAME_MAINNET,
   NETWORK_NAME_TESTNET,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import { isNotFoundError, isUrlValid } from '@/utils';
-import { useBalances, useCurrencies, useAeSdk } from '@/composables';
-import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
-import { tg } from '@/popup/plugins/i18n';
-import { INetwork, ObjectValues, Protocol } from '@/types';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useBalances, useCurrencies, useAeSdk } from '@/composables';
+import { tg } from '@/popup/plugins/i18n';
+import { getAddressByNameEntry, isAensNameValid } from '@/protocols/aeternity/helpers';
+import { AE_AENS_DOMAIN, AE_SYMBOL } from '@/protocols/aeternity/config';
 
 defineRule(
   'required',
@@ -33,9 +37,18 @@ defineRule(
   (value: string) => isAddressValid(value) || isAensNameValid(value) || tg('validation.address'),
 );
 
+/**
+ * `networkType` is required for the Bitcoin Address validation because same account has different
+ * address on the mainnet and testnet.
+ */
 defineRule(
   'account_address',
-  (value: string) => isAddressValid(value, Encoding.AccountAddress) || tg('validation.invalidAddress'),
+  (value: string, [protocol, networkType]: [Protocol, NetworkType]) => (
+    ProtocolAdapterFactory
+      .getAdapter(protocol)
+      .isAccountAddressValid(value, networkType)
+    || tg('validation.addressGeneric', { protocol })
+  ),
 );
 
 defineRule(
@@ -84,11 +97,6 @@ defineRule(
 );
 
 defineRule(
-  'address_btc',
-  (value: string, [network]: [string]) => isBtcAddressValid(value, network) || tg('validation.addressBtc'),
-);
-
-defineRule(
   'network_exists',
   (value: string, [customNetworks, savedNetworkName]: [INetwork[], string]) => {
     if (
@@ -99,6 +107,18 @@ defineRule(
     }
     return true;
   },
+);
+
+defineRule(
+  'is_hex_format',
+  (value: string) => (
+    (
+      value.toString().startsWith('0x')
+      && value.length >= 3
+      && parseInt(value.slice(2), 16).toString(16) === value.slice(2).toLowerCase()
+    )
+    || tg('validation.hexFormat')
+  ),
 );
 
 export default () => {
@@ -164,7 +184,7 @@ export default () => {
   defineRule(
     'ae_min_tip_amount',
     (value: string) => {
-      const aeMinTipAmount = 0.01 / (currencyRates.value?.[PROTOCOL_AETERNITY].usd || 1);
+      const aeMinTipAmount = 0.01 / (currencyRates.value?.[PROTOCOLS.aeternity].usd || 1);
       return BigNumber(value).isGreaterThan(aeMinTipAmount) || tg('pages.tipPage.minAmountError');
     },
   );
@@ -219,7 +239,7 @@ export default () => {
     (value: string, [comparedAddress, protocol]: [string, Protocol]) => (
       value !== comparedAddress
       || tg('validation.addressNotSameAs', [(protocol)
-        ? ProtocolAdapterFactory.getAdapter(protocol).getCoinSymbol()
+        ? ProtocolAdapterFactory.getAdapter(protocol).protocolSymbol
         : tg('common.tokens')])
     ),
   );

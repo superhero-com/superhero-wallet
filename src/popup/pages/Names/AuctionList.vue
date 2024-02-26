@@ -26,7 +26,7 @@
                 {{ name }}
                 <TokenAmount
                   :amount="getAeFee(lastBid.nameFee)"
-                  :protocol="PROTOCOL_AETERNITY"
+                  :protocol="PROTOCOLS.aeternity"
                 />
               </div>
               <div
@@ -71,12 +71,10 @@ import {
   blocksToRelativeTime,
   fetchAllPages,
 } from '@/utils';
-import {
-  useMiddleware,
-  useTopHeaderData,
-} from '@/composables';
+import { PROTOCOLS } from '@/constants';
+import { useTopHeaderData } from '@/composables';
 import { getAeFee } from '@/protocols/aeternity/helpers';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 
 import Filters from '@/popup/components/Filters.vue';
 import NameRow from '@/popup/components/NameRow.vue';
@@ -112,7 +110,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const { topBlockHeight } = useTopHeaderData();
-    const { getMiddleware, fetchFromMiddlewareCamelCased } = useMiddleware();
+    const { getMiddleware, fetchFromMiddlewareCamelCased } = useAeMiddleware();
 
     const loading = ref(false);
     const activeAuctions = ref<IActiveAuction[]>([]);
@@ -159,7 +157,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       blocksToRelativeTime,
       loading,
       displayMode,

@@ -108,9 +108,9 @@ export default defineComponent({
 
     const currentAsset = computed((): IAsset => props.selectedAsset || defaultCoin.value);
     const isDefaultAsset = computed(
-      () => protocolsInUse.value.map(
-        (protocol) => ProtocolAdapterFactory.getAdapter(protocol).getDefaultAssetContractId(),
-      ).includes(currentAsset.value.contractId),
+      () => protocolsInUse.value
+        .map((protocol) => ProtocolAdapterFactory.getAdapter(protocol).coinContractId)
+        .includes(currentAsset.value.contractId),
     );
     const currentAssetFiatPrice = computed(
       () => (isDefaultAsset.value) ? getCurrentCurrencyRate(props.protocol) : 0,

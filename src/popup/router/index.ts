@@ -15,18 +15,16 @@ import {
   POPUP_TYPE_RAW_SIGN,
   POPUP_TYPE_ACCOUNT_LIST,
   RUNNING_IN_POPUP,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { watchUntilTruthy } from '@/utils';
 import { getPopupProps } from '@/utils/getPopupProps';
-import initSdk from '@/lib/wallet';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { RouteLastUsedRoutes } from '@/lib/RouteLastUsedRoutes';
 import {
   useAccounts,
   usePopupProps,
-  useAeSdk,
   useUi,
 } from '@/composables';
 import { routes } from './routes';
@@ -86,18 +84,12 @@ router.beforeEach(async (to, from, next) => {
     }
 
     // In-app browser only works with AE accounts
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
-      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOL_AETERNITY);
+    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
+      const lastActiveAeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
       setActiveAccountByGlobalIdx(lastActiveAeAccount?.globalIdx);
       next({ name: ROUTE_APPS_BROWSER });
       return;
     }
-  }
-
-  const { isAeSdkReady } = useAeSdk();
-
-  if (!isAeSdkReady.value && !RUNNING_IN_POPUP) {
-    initSdk();
   }
 
   if (RUNNING_IN_POPUP && to.name !== ROUTE_NOT_FOUND) {

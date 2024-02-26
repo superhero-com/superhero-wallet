@@ -13,16 +13,17 @@
         received: token.isReceived,
         'multiple-rows': multipleRows,
       }"
-      :style="{ '--font-size': calculateFontSize(token.amount) }"
+      :style="{ '--font-size': calculateFontSize(token.amount!) }"
     >
       <Tokens
         :tokens="token.isPool ? filteredTokens : [token]"
         :icon-size="iconSize"
+        :protocol="protocol"
         full-symbol
       />
       <span class="amount">
         {{ token.isReceived ? '' : '−' }}
-        {{ isRounded ? token.amount : amountRounded(token.amount) }}
+        {{ amountFormatted({ token, isRounded }) }}
         <span class="token-name">
           {{ truncateString(getTokenName(token), 5) }}
         </span>
@@ -36,9 +37,8 @@ import {
   computed,
   defineComponent,
   PropType,
-  ref,
 } from 'vue';
-import type { ITokenResolved, ITransaction } from '@/types';
+import type { ITokenResolved, ITransaction, Protocol } from '@/types';
 import {
   amountRounded,
   calculateFontSize,
@@ -48,7 +48,7 @@ import { TX_DIRECTION } from '@/constants';
 import { useTransactionTokens } from '@/composables';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 
-import Tokens from './Tokens.vue';
+import Tokens, { AllowedTokenIconSize } from './Tokens.vue';
 
 export default defineComponent({
   name: 'TransactionTokenRows',
@@ -56,41 +56,45 @@ export default defineComponent({
   props: {
     transaction: { type: Object as PropType<ITransaction | undefined>, default: null },
     extTokens: { type: Array as PropType<ITokenResolved[] | undefined>, default: null },
-    iconSize: { type: String, default: 'rg' },
+    iconSize: { type: String as PropType<AllowedTokenIconSize>, default: 'sm' },
     direction: { type: String, default: '' },
+    protocol: { type: String as PropType<Protocol>, required: true },
     error: Boolean,
     isAllowance: Boolean,
+    /** If the amount is already rounded */
     isRounded: Boolean,
     reversed: Boolean,
     multipleRows: Boolean,
   },
   setup(props) {
-    const localTokens = ref();
-
-    if (!props.extTokens && !!props.transaction) {
-      const { tokens } = useTransactionTokens({
-        transaction: props.transaction,
-        direction: props.direction,
-        isAllowance: props.isAllowance,
-        showDetailedAllowanceInfo: true,
-      });
-
-      localTokens.value = tokens.value;
-    }
+    const { tokens } = useTransactionTokens({
+      transaction: props.transaction!,
+      direction: props.direction,
+      isAllowance: props.isAllowance,
+      showDetailedAllowanceInfo: true,
+    });
 
     const filteredTokens = computed<ITokenResolved[]>(
-      () => (props.extTokens || localTokens.value)?.filter(
+      () => (props.extTokens || tokens.value)?.filter(
         ({ amount }: Partial<ITokenResolved>) => amount !== undefined,
       ) || [],
     );
 
     const getTokenName = (token: ITokenResolved) => token?.isAe ? AE_SYMBOL : token.symbol;
 
+    const amountFormatted = ({ token, isRounded }: {token: ITokenResolved; isRounded: boolean}) => {
+      // if amount is in scientific notation it is not rounded
+      if (token.amount && (!isRounded || token.amount?.toString().indexOf('e') !== -1)) {
+        return amountRounded(token.amount);
+      }
+      return token.amount;
+    };
+
     return {
       filteredTokens,
       truncateString,
       getTokenName,
-      amountRounded,
+      amountFormatted,
       calculateFontSize,
       TX_DIRECTION,
     };

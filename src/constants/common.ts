@@ -8,16 +8,15 @@ export const MOBILE_WIDTH = 480;
 
 export const LOCAL_STORAGE_PREFIX = 'sh-wallet';
 
-export const PROTOCOL_AETERNITY = 'aeternity';
-export const PROTOCOL_BITCOIN = 'bitcoin';
+export const PROTOCOLS = {
+  aeternity: 'aeternity',
+  bitcoin: 'bitcoin',
+  ethereum: 'ethereum',
+} as const;
 
-export const PROTOCOLS = [
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
-] as const;
+export const PROTOCOL_LIST = Object.values(PROTOCOLS);
 
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS = 'AccountDetails';
-export const PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS = 'AccountDetailsTransactions';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS = 'AccountDetailsTokens';
 export const PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES = 'AccountDetailsNames';
 export const PROTOCOL_VIEW_TRANSACTION_DETAILS = 'TransactionDetails';
@@ -29,7 +28,6 @@ export const PROTOCOL_VIEW_TRANSFER_SEND = 'TransferSendModal';
  */
 export const DISTINCT_PROTOCOL_VIEWS = [
   PROTOCOL_VIEW_ACCOUNT_DETAILS,
-  PROTOCOL_VIEW_ACCOUNT_DETAILS_TRANSACTIONS,
   PROTOCOL_VIEW_TRANSACTION_DETAILS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_ASSETS,
   PROTOCOL_VIEW_ACCOUNT_DETAILS_NAMES,
@@ -95,8 +93,6 @@ export const NOTIFICATION_TYPES = {
 export const AENS = 'AENS';
 export const DEX = 'DEX';
 
-export const DASHBOARD_TRANSACTION_LIMIT = 3;
-
 /**
  * List of string keys used to save app data in user's device (local/browser storage).
  * Doing any change to the existing values would require creating migration.
@@ -121,6 +117,10 @@ export const STORAGE_KEYS = {
   fungibleTokenBalances: 'fungible-token-balances',
   permissions: 'permissions',
   appsBrowserHistory: 'apps-browser-history',
+  transactionsLatest: 'transactions-latest',
+  transactionsLoaded: 'transactions-loaded',
+  transactionsPending: 'transactions-pending',
+  transferSendData: 'transfer-send-data',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -382,8 +382,18 @@ export const ALLOWED_ICON_STATUSES = [
   'warning',
 ] as const;
 
-export const TRANSACTIONS_LOCAL_STORAGE_KEY = 'transactions';
-export const TRANSFER_SEND_DATA_LOCAL_STORAGE_KEY = 'transfer-send-data';
+/**
+ * Pixel size is defined in css variables in global.scss
+ */
+export const ICON_SIZES = {
+  xs: 'xs', // 12px
+  sm: 'sm', // 16px
+  rg: 'rg', // 18px
+  md: 'md', // 20px
+  lg: 'lg', // 24px
+  xl: 'xl', // 28px
+  xxl: 'xxl', // 30px
+} as const;
 
 export const TRANSFER_SEND_STEPS = {
   form: 'form',
@@ -405,3 +415,13 @@ export const BROWSER_ACTIONS = {
 export const PAGE_TRANSITION_DURATION = 150;
 
 export const MAX_BROWSER_HISTORY_ITEMS = 10;
+
+export const ASSET_TYPES = {
+  coin: 'coin',
+  token: 'token',
+} as const;
+
+/** 10 minutes is the time we are 100% sure the transaction was mined */
+export const TRANSACTION_CERTAINLY_MINED_TIME = 600000;
+
+export const POLLING_INTERVAL_TRANSACTIONS = 15000;

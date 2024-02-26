@@ -22,11 +22,10 @@
       <div>
         <TokenAmount
           :amount="rate.price"
-          :protocol="PROTOCOL_AETERNITY"
+          :protocol="PROTOCOLS.aeternity"
           class="price"
           hide-fiat
           no-symbol
-          aex9
           high-precision
         />
         <Tokens
@@ -44,18 +43,18 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { PROTOCOL_AETERNITY } from '@/constants';
 import { camelCase } from 'lodash-es';
 
+import type {
+  ITransaction,
+  TxFunctionParsed,
+} from '@/types';
+import { PROTOCOLS } from '@/constants';
 import {
   getTransactionTokenInfoResolver,
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import type {
-  ITransaction,
-  TxFunctionParsed,
-} from '@/types';
 import { useFungibleTokens } from '@/composables';
 
 import Tokens from './Tokens.vue';
@@ -70,7 +69,7 @@ export default defineComponent({
     transaction: { type: Object as PropType<ITransaction>, required: true },
   },
   setup(props) {
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const isSwapTx = computed(() => (
       isTxFunctionDexSwap(props.transaction.tx.function)
@@ -88,7 +87,10 @@ export default defineComponent({
 
       if (!resolver) return [];
 
-      const { tokens } = resolver(props.transaction, availableTokens.value);
+      const { tokens } = resolver(
+        props.transaction,
+        getProtocolAvailableTokens(PROTOCOLS.aeternity),
+      );
 
       if (tokens?.length <= 1) {
         return [];
@@ -115,8 +117,7 @@ export default defineComponent({
     });
 
     return {
-      PROTOCOL_AETERNITY,
-      availableTokens,
+      PROTOCOLS,
       isSwapTx,
       rates,
     };

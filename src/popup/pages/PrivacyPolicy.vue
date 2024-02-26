@@ -356,6 +356,7 @@
           </li>
         </ol>
       </div>
+      <BackToTop />
     </IonContent>
   </IonPage>
 </template>
@@ -370,10 +371,12 @@ import {
   APP_LINK_IOS,
 } from '@/constants';
 import LinkButton from '@/popup/components/LinkButton.vue';
+import BackToTop from '@/popup/components/BackToTop.vue';
 
 export default {
   components: {
     LinkButton,
+    BackToTop,
     IonContent,
     IonPage,
   },

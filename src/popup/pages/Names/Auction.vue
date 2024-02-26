@@ -40,11 +40,12 @@ import { produceNameId } from '@aeternity/aepp-sdk';
 import type { ChainName } from '@/types';
 
 import { executeAndSetInterval } from '@/utils';
-import { aettosToAe } from '@/protocols/aeternity/helpers';
-import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 import { ROUTE_AUCTION_BID, ROUTE_AUCTION_HISTORY } from '@/popup/router/routeNames';
-import { useMiddleware, useUi } from '@/composables';
+import { useUi } from '@/composables';
 import { fadeAnimation } from '@/popup/animations';
+import { aettosToAe } from '@/protocols/aeternity/helpers';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
+import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
 
 import Tabs from '../../components/tabs/Tabs.vue';
 import Tab from '../../components/tabs/Tab.vue';
@@ -65,7 +66,7 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
 
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
     const { params: routeParams } = useRoute();
     const { isAppActive, isLoaderVisible, setLoaderVisible } = useUi();
     const { setAuctionEntry } = useAeNames();

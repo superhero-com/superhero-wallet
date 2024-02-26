@@ -12,14 +12,14 @@ interface ICreateStorageRefOptions<T> {
    * Callbacks run on the data that will be saved and read from the browser storage.
    */
   serializer?: {
-    read: (v: T) => any;
-    write: (v: T) => any;
+    read: (val: T) => any;
+    write: (val: T) => any;
   };
   migrations?: Migration<T>[];
   /**
    * Allows to ensure the state is already synced with browser storage and migrated.
    */
-  onRestored?: () => any;
+  onRestored?: (val: T | null) => any;
 }
 
 /**
@@ -63,7 +63,7 @@ export function useStorageRef<T = string | object | any[]>(
         setStorageState(restoredValue);
       }
     }
-    onRestored?.();
+    onRestored?.(restoredValue);
     setLocalState(restoredValue);
 
     /**

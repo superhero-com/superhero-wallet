@@ -43,7 +43,7 @@
         show-explorer-link
         show-protocol-icon
         :address="modelValue.toString()"
-        :protocol="selectedAccount?.protocol"
+        :protocol="selectedAccount?.protocol!"
         class="address-truncated"
       />
     </div>
@@ -52,7 +52,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { IFormSelectOption } from '@/types';
+import type { AccountAddress, IFormSelectOption } from '@/types';
 import { useAccounts } from '@/composables';
 
 import Avatar from './Avatar.vue';
@@ -73,7 +73,7 @@ export default defineComponent({
     event: 'select',
   },
   props: {
-    modelValue: { type: [String, Number], default: null },
+    modelValue: { type: String as PropType<AccountAddress>, default: null },
     options: { type: Array as PropType<IFormSelectOption[]>, default: () => null },
     avatarOnly: Boolean,
   },
@@ -83,8 +83,7 @@ export default defineComponent({
 
     const selectedAccount = computed(
       () => (props.modelValue)
-        // TODO remove any after changing the address type to string
-        ? getAccountByAddress(props.modelValue as any)
+        ? getAccountByAddress(props.modelValue)
         : undefined,
     );
     return {

@@ -4,32 +4,35 @@
       <div class="transaction-details">
         <template v-if="transaction && !transaction.incomplete">
           <TransactionDetailsBase
-            :amount="getTxAmountTotal(transaction, TX_DIRECTION.received)"
             :transaction="transaction"
+            :amount="amount"
+            :amount-total="getTxAmountTotal(transaction, direction)"
+            :fee="transactionFee"
             :coin-symbol="AE_SYMBOL"
-            :transaction-fee="+aettosToAe(transactionFee)"
-            :token-symbol="getTxSymbol(transaction)"
-            :total-amount="getTxAmountTotal(transaction, direction)"
+            :token-symbol="getTxAssetSymbol(transaction)"
             :is-error-transaction="isErrorTransaction"
-            :is-transaction-aex9="isTransactionAex9(transaction)"
-            :payload="getTransactionPayload(transaction)"
-            :explorer-url="explorerUrl || ''"
-            :is-local-account-address="isLocalAccountAddress"
+            :payload="getTransactionPayload(transaction)!"
             :contract-id="contractId"
             :show-header="!isDexAllowance"
-            :hide-amount="isDex || isDexAllowance || isMultisig"
+            :hide-amount-total="(
+              isDex
+              || isDexAllowance
+              || isMultisig
+              || isTransactionAex9(transaction)
+            )"
+            :hide-fiat="isTransactionAex9(transaction)"
             :hash="hash"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           >
             <template #tokens>
-              <TransactionTokens
+              <TransactionTokenRows
                 :transaction="transaction"
                 :direction="direction"
                 :is-allowance="isDexAllowance"
                 :error="isErrorTransaction"
                 :reversed="isPool"
-                icon-size="md"
-                :is-rounded="false"
+                :protocol="PROTOCOLS.aeternity"
+                icon-size="rg"
                 multiple-rows
               />
             </template>
@@ -137,7 +140,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(gasPrice)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     hide-fiat
                   />
                 </template>
@@ -164,27 +167,25 @@ import {
   onMounted,
   watch,
 } from 'vue';
-import { merge } from 'lodash-es';
 import { useRoute, useRouter } from 'vue-router';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { IonContent, IonPage } from '@ionic/vue';
-import type { ITransaction, TxFunctionRaw } from '@/types';
-import {
-  useAccounts,
-  useFungibleTokens,
-  useMiddleware,
-  useMultisigAccounts,
-  useTransactionList,
-  useTransactionTx,
-  useUi,
-} from '@/composables';
-import { PROTOCOL_AETERNITY, TX_DIRECTION } from '@/constants';
+import type { ITransaction, ITx, TxFunctionRaw } from '@/types';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   fetchJson,
   handleUnknownError,
   splitAddress,
   watchUntilTruthy,
 } from '@/utils';
+import {
+  useAccounts,
+  useFungibleTokens,
+  useMultisigAccounts,
+  useTransactionList,
+  useTransactionTx,
+  useUi,
+} from '@/composables';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
 import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import {
@@ -195,8 +196,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
+import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -208,8 +208,9 @@ import SwapRoute from '@/popup/components/SwapRoute.vue';
 import TransactionDetailsPoolTokens from '@/popup/components/TransactionDetailsPoolTokens.vue';
 import DialogBox from '@/popup/components/DialogBox.vue';
 import Avatar from '@/popup/components/Avatar.vue';
-import TransactionTokens from '@/popup/components/TransactionTokenRows.vue';
+import TransactionTokenRows from '@/popup/components/TransactionTokenRows.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   components: {
@@ -220,7 +221,7 @@ export default defineComponent({
     SwapRates,
     TransactionDetailsBase,
     TransactionDetailsPoolTokens,
-    TransactionTokens,
+    TransactionTokenRows,
     DetailsItem,
     CopyText,
     LinkButton,
@@ -235,12 +236,12 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
 
-    const { aeActiveNetworkSettings, aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
-    const { getMiddleware } = useMiddleware();
+    const { aeActiveNetworkSettings } = useAeNetworkSettings();
+    const { getMiddleware } = useAeMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
-    const { getTxAmountTotal, getTxSymbol } = useFungibleTokens();
+    const { getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as Encoded.AccountAddress;
@@ -252,6 +253,11 @@ export default defineComponent({
           ? activeMultisigAccountId.value
           : activeAccount.value.address
       )));
+
+    const { transactionsLoaded } = useTransactionList({
+      accountAddress: externalAddress.value,
+      protocol: PROTOCOLS.aeternity,
+    });
 
     const {
       setExternalAddress,
@@ -266,39 +272,28 @@ export default defineComponent({
       externalAddress: externalAddress.value,
     });
 
-    const {
-      fetchAllPendingTransactions,
-      updateAccountTransaction,
-      getTransactionByHash,
-    } = useTransactionList();
-
     const transaction = ref<ITransaction>();
     const multisigContractId = ref<string>();
 
+    const amount = computed((): number => transaction.value
+      ? getTxAmountTotal(transaction.value, TX_DIRECTION.received)
+      : 0);
     const tipUrl = computed(() => transaction.value ? getTransactionTipUrl(transaction.value) : '');
     const contractId = computed(() => transaction.value?.tx.contractId);
     const txFunction = computed(() => transaction.value?.tx?.function as TxFunctionRaw | undefined);
     const isSwap = computed(() => isTxFunctionDexSwap(txFunction.value));
     const isPool = computed(() => isTxFunctionDexPool(txFunction.value));
     const tipLink = computed(() => /^http[s]*:\/\//.test(tipUrl.value) ? tipUrl.value : `http://${tipUrl.value}`);
-    const explorerUrl = computed(
-      () => (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-        .prepareUrlByHash(hash),
-    );
 
-    const gasPrice = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasPrice' in transaction.value?.tx?.tx?.tx) {
-        return transaction.value.tx.tx.tx.gasPrice;
-      }
-      return transaction.value?.tx?.gasPrice;
-    });
+    const gasPrice = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasPrice
+      || transaction.value?.tx?.gasPrice
+    ));
 
-    const gasUsed = computed(() => {
-      if (transaction.value?.tx?.tx?.tx && 'gasUsed' in transaction.value.tx.tx.tx) {
-        return transaction.value.tx.tx.tx.gasUsed;
-      }
-      return transaction.value?.tx?.gasUsed;
-    });
+    const gasUsed = computed(() => (
+      (transaction.value?.tx?.tx?.tx as ITx)?.gasUsed
+      || transaction.value?.tx?.gasUsed
+    ));
 
     const multisigTransactionFeePaidBy = computed((): string | null => {
       if (outerTxTag.value !== Tag.PayingForTx) return null;
@@ -314,46 +309,50 @@ export default defineComponent({
       const { tx } = transaction.value ?? {};
       const fee = tx?.fee ?? 0;
       const extraFee = tx?.tx?.tx?.fee ?? 0;
-      return fee + extraFee;
+      return +aettosToAe(fee + extraFee);
     });
 
     onMounted(async () => {
-      let rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+      let rawTransaction: ITransaction | undefined = transactionsLoaded.value
+        .find((tx) => tx.hash === hash) as ITransaction;
 
       // Claim transactions have missing data that needs to be fetched from the middleware
       if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
+        // TODO move to aeternity adapter (fetchTransactionByHash)
         const middleware = await getMiddleware();
         try {
-          rawTransaction = merge(rawTransaction, await middleware.getTx(hash));
+          rawTransaction = {
+            ...(rawTransaction || {}), // Claim transaction data
+            ...await middleware.getTx(hash),
+            protocol: PROTOCOLS.aeternity,
+          };
         } catch (e) {
-          // This case is for pending transaction
-          await fetchAllPendingTransactions();
+          // Pending transactions are not returned from the middleware.
+          const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+          const pendingTransactions = await adapter.fetchPendingTransactions(externalAddress.value);
 
-          rawTransaction = getTransactionByHash(activeAccount.value.address, hash);
+          rawTransaction = pendingTransactions.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
             router.push({ name: ROUTE_NOT_FOUND });
             return;
           }
         }
-
-        if (rawTransaction?.tx) {
-          if (props.multisigDashboard) {
-            await watchUntilTruthy(() => activeMultisigAccountId.value);
-          } else {
-            await watchUntilTruthy(() => activeAccount.value);
-          }
-          setExternalAddress(externalAddress.value);
-          transaction.value = {
-            ...rawTransaction,
-            transactionOwner: externalAddress.value,
-          };
-          updateAccountTransaction(activeAccount.value.address, transaction.value!);
-        }
-      } else {
-        transaction.value = rawTransaction;
       }
-      if (transaction.value?.tx) {
+
+      if (rawTransaction?.tx) {
+        if (props.multisigDashboard) {
+          await watchUntilTruthy(() => activeMultisigAccountId.value);
+        } else {
+          await watchUntilTruthy(() => activeAccount.value);
+        }
+
+        transaction.value = {
+          ...rawTransaction,
+          transactionOwner: externalAddress.value,
+        };
+
+        setExternalAddress(externalAddress.value);
         setTransactionTx(transaction.value.tx);
       }
 
@@ -380,12 +379,13 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_DIRECTION,
       transaction,
+      amount,
       isSwap,
       isPool,
-      getTxSymbol,
+      getTxAssetSymbol,
       getTxAmountTotal,
       isErrorTransaction,
       isDexAllowance,
@@ -396,7 +396,6 @@ export default defineComponent({
       tipUrl,
       tipLink,
       direction,
-      explorerUrl,
       hash,
       splitAddress,
       aettosToAe,

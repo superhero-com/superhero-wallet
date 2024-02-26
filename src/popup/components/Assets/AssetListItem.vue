@@ -21,17 +21,16 @@
         bright
       />
       <TokenAmount
-        :amount="+tokenData.convertedBalance || 0"
+        :amount="+(tokenData.convertedBalance ?? 0)"
         :symbol="tokenData.symbol"
-        :aex9="isTokenAeCoin"
-        :protocol="PROTOCOL_AETERNITY"
+        :protocol="PROTOCOLS.aeternity"
         dynamic-sizing
         no-symbol
         hide-fiat
       />
     </div>
     <div
-      v-if="isTokenAeCoin"
+      v-if="isAssetCoin"
       class="row bottom"
     >
       <div class="price">
@@ -47,8 +46,8 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { IToken } from '@/types';
-import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { PROTOCOLS } from '@/constants';
+import { isCoin } from '@/utils';
 import { useCurrencies } from '@/composables';
 import { ROUTE_COIN, ROUTE_MULTISIG_COIN, ROUTE_TOKEN } from '@/popup/router/routeNames';
 
@@ -79,26 +78,26 @@ export default defineComponent({
     /**
      * price and balanceFormatted are applicable only for AE Coin
      */
-    const price = computed(() => formatCurrency(getCurrentCurrencyRate(PROTOCOL_AETERNITY)));
+    const price = computed(() => formatCurrency(getCurrentCurrencyRate(props.tokenData.protocol)));
     const balanceFormatted = computed(
-      () => getFormattedFiat(props.tokenData.convertedBalance || 0, PROTOCOL_AETERNITY),
+      () => getFormattedFiat(props.tokenData.convertedBalance || 0, props.tokenData.protocol),
     );
 
-    const isTokenAeCoin = computed(() => props.tokenData.contractId === AE_CONTRACT_ID);
+    const isAssetCoin = computed(() => isCoin(props.tokenData.contractId));
 
     const targetRouteName = computed(() => {
       if (props.isMultisig) {
         return ROUTE_MULTISIG_COIN;
       }
-      if (isTokenAeCoin.value) {
+      if (isAssetCoin.value) {
         return ROUTE_COIN;
       }
       return ROUTE_TOKEN;
     });
 
     return {
-      PROTOCOL_AETERNITY,
-      isTokenAeCoin,
+      PROTOCOLS,
+      isAssetCoin,
       price,
       targetRouteName,
       balanceFormatted,

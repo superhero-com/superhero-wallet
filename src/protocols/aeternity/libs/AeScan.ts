@@ -1,10 +1,11 @@
 import { Encoding } from '@aeternity/aepp-sdk';
 import { validateHash } from '@/protocols/aeternity/helpers';
+import { ProtocolExplorer } from '@/lib/ProtocolExplorer';
 
 /**
  * @link https://aescan.io
  */
-export class AeScan {
+export class AeScan extends ProtocolExplorer {
   /**
    * @link https://aeternity-blockchain.atlassian.net/wiki/spaces/AID/pages/127140445/Paths+map+for+migration+Explorer+-+Scan
    */
@@ -19,6 +20,7 @@ export class AeScan {
   explorerUrl: string;
 
   constructor(explorerUrl: string) {
+    super();
     this.explorerUrl = explorerUrl;
   }
 
@@ -30,12 +32,12 @@ export class AeScan {
     return undefined;
   }
 
-  prepareUrlByHash(hash: string): string | undefined {
+  override prepareUrlForHash(hash: string): string | undefined {
     const endpoint = AeScan.getEndpointByHash(hash);
     return (endpoint) ? `${this.explorerUrl}/${endpoint}/${hash}` : undefined;
   }
 
-  prepareUrlForAccount(address: string) {
-    return `${this.explorerUrl}/accounts/${address}`;
+  override prepareUrlForAccount(addressOrName: string) {
+    return this.prepareUrlForHash(addressOrName) || `${this.explorerUrl}/accounts/${addressOrName}`;
   }
 }

@@ -15,7 +15,7 @@ import {
   NOTIFICATION_STATUS_READ,
   NOTIFICATION_ENTITY_TYPE_TIP,
   AGGREGATOR_URL,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   STORAGE_KEYS,
   NOTIFICATION_TYPES,
 } from '@/constants';
@@ -91,7 +91,7 @@ export function useNotifications({
 
   async function fetchAllNotifications(): Promise<INotification[]> {
     // TODO: Remove this condition once global filter is ready
-    if (activeAccount.value.protocol !== PROTOCOL_AETERNITY) {
+    if (activeAccount.value.protocol !== PROTOCOLS.aeternity) {
       return [];
     }
 
@@ -227,7 +227,6 @@ export function useNotifications({
     notificationsSuperhero,
     notificationsWallet,
     notificationsSettings,
-    canLoadMore,
     loadMoreNotifications,
     markAsReadAll,
     addWalletNotification,

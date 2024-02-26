@@ -5,10 +5,11 @@
         ref="innerScrollElem"
         class="account-details-tokens"
       >
-        <TokensList
+        <AssetList
           v-if="isOnline"
-          class="tokens-list"
           :search-term="searchPhrase"
+          class="tokens-list"
+          owned-only
         />
         <MessageOffline
           v-else
@@ -16,6 +17,7 @@
           :text="$t('modals.accountDetails.assetsNotAvailable')"
         />
       </div>
+      <BackToTop v-if="isOnline" />
     </IonContent>
   </IonPage>
 </template>
@@ -31,18 +33,21 @@ import {
   PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
+import type { IonicLifecycleStatus } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
-import { IonicLifecycleStatus } from '@/types';
-import TokensList from '@/popup/components/FungibleTokens/TokensList.vue';
+
+import AssetList from '@/popup/components/Assets/AssetList.vue';
 import MessageOffline from '@/popup/components/MessageOffline.vue';
+import BackToTop from '@/popup/components/BackToTop.vue';
 
 export default defineComponent({
   components: {
-    TokensList,
+    AssetList,
     MessageOffline,
     IonPage,
     IonContent,
+    BackToTop,
   },
   props: {
     showFilters: Boolean,

@@ -93,7 +93,7 @@ export default defineComponent({
     gap: 4px;
 
     .btn-main-icon {
-      --icon-size: 20px;
+      --icon-size: var(--icon-size-md);
 
       flex-shrink: 0;
       width: var(--icon-size);
@@ -101,7 +101,7 @@ export default defineComponent({
       color: inherit;
 
       &.lg {
-        --icon-size: 24px;
+        --icon-size: var(--icon-size-lg);
       }
     }
   }

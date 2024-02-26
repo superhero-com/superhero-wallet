@@ -3,9 +3,9 @@ import {
   watch,
   computed,
 } from 'vue';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import type {
+  AccountAddress,
   IAccount,
   IActiveMultisigTransaction,
   ITransaction,
@@ -15,16 +15,18 @@ import {
   MULTISIG_VAULT_MIN_NUM_OF_SIGNERS,
   TX_FUNCTIONS_MULTISIG,
 } from '@/protocols/aeternity/config';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAccounts } from './accounts';
-import { useMiddleware } from './middleware';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useMultisigTransactions } from './multisigTransactions';
 import { useTopHeaderData } from './topHeader';
 
+let composableInitialized = false;
+
 const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
 
 export function usePendingMultisigTransaction() {
-  const { getMiddleware } = useMiddleware();
+  const { getMiddleware } = useAeMiddleware();
   const { activeMultisigAccount } = useMultisigAccounts();
   const { fetchActiveMultisigTx } = useMultisigTransactions();
   const { topBlockHeight } = useTopHeaderData();
@@ -46,14 +48,14 @@ export function usePendingMultisigTransaction() {
   /**
    * Current proposal signers.
    */
-  const pendingMultisigTxSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSigners = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.signers ?? []
   ));
 
   /**
    * The Signers who approved the current proposal.
    */
-  const pendingMultisigTxConfirmedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxConfirmedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.confirmedBy ?? []
   ));
 
@@ -67,14 +69,14 @@ export function usePendingMultisigTransaction() {
   /**
    * The Signers who refused the current proposal.
    */
-  const pendingMultisigTxRefusedBy = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxRefusedBy = computed((): AccountAddress[] => (
     activeMultisigAccount.value?.refusedBy ?? []
   ));
 
   /**
    * Sorted list of signatories, with confirmed signatories appearing first.
    */
-  const pendingMultisigTxSortedSigners = computed((): Encoded.AccountAddress[] => (
+  const pendingMultisigTxSortedSigners = computed((): AccountAddress[] => (
     [...pendingMultisigTxSigners.value].sort(
       (a) => activeMultisigAccount.value?.confirmedBy.includes(a) ? -1 : 1,
     )
@@ -133,7 +135,7 @@ export function usePendingMultisigTransaction() {
    */
   const pendingMultisigTxLocalSigners = computed((): IAccount[] => (
     aeAccounts.value.filter(
-      (_account) => pendingMultisigTxSigners.value.includes(_account.address),
+      ({ address }) => pendingMultisigTxSigners.value.includes(address),
     )
   ));
 
@@ -143,7 +145,8 @@ export function usePendingMultisigTransaction() {
    */
   const pendingMultisigTxConfirmedByLocalSigners = computed((): boolean => (
     pendingMultisigTxLocalSigners.value.filter(
-      (acc) => activeMultisigAccount.value?.confirmedBy?.includes(acc.address),
+      ({ address }) => activeMultisigAccount.value?.confirmedBy
+        ?.includes(address),
     ).length === pendingMultisigTxLocalSigners.value.length
   ));
 
@@ -186,19 +189,23 @@ export function usePendingMultisigTransaction() {
     }
   }
 
-  watch(
-    () => activeMultisigAccount.value,
-    (newValue, oldValue) => {
-      if (!isEqual(newValue, oldValue)) {
-        assignPendingMultisigTx();
+  if (!composableInitialized) {
+    composableInitialized = true;
 
-        if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
-          fetchLatestMultisigAccountTransaction();
+    watch(
+      activeMultisigAccount,
+      (newValue, oldValue) => {
+        if (!isEqual(newValue, oldValue)) {
+          assignPendingMultisigTx();
+
+          if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
+            fetchLatestMultisigAccountTransaction();
+          }
         }
-      }
-    },
-    { immediate: true },
-  );
+      },
+      { immediate: true },
+    );
+  }
 
   return {
     pendingMultisigTransaction,

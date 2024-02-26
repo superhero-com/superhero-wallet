@@ -41,7 +41,6 @@
           <Scrollable class="address-scrollable-area">
             <AddressFormatted
               :address="accountAddressToDisplay"
-              :split-address="protocol === PROTOCOL_BITCOIN && !amount"
             />
           </Scrollable>
         </CopyText>
@@ -103,15 +102,16 @@ import {
 import { useI18n } from 'vue-i18n';
 import { Field } from 'vee-validate';
 import type {
+  AssetContractId,
+  AssetList,
   IAsset,
   IToken,
-  ITokenList,
   ResolveCallback,
   Protocol,
 } from '@/types';
 import {
   IS_MOBILE_DEVICE,
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
 } from '@/constants';
 import { RouteQueryActionsController } from '@/lib/RouteQueryActionsController';
 import { useAccounts, useCopy } from '@/composables';
@@ -148,11 +148,11 @@ export default defineComponent({
   },
   props: {
     resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
-    tokenContractId: { type: [String, Number], default: null },
+    tokenContractId: { type: String as PropType<AssetContractId>, default: null },
     heading: { type: String, default: '' },
     accountAddress: { type: String, default: null },
     accountName: { type: String, default: null },
-    tokens: { type: Object as PropType<ITokenList>, default: () => ({}) },
+    tokens: { type: Object as PropType<AssetList>, default: () => ({}) },
     disableAssetSelection: Boolean,
     protocol: { type: String as PropType<Protocol>, required: true },
   },
@@ -215,7 +215,7 @@ export default defineComponent({
         : t(
           'modals.receive.shareTextWithAmount',
           {
-            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).getCoinSymbol(false),
+            coinSymbol: ProtocolAdapterFactory.getAdapter(props.protocol).protocolSymbol,
             protocolName,
             address,
             walletLink,
@@ -244,7 +244,7 @@ export default defineComponent({
     })();
 
     return {
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       IS_MOBILE_DEVICE,
       ShareIcon,
       amount,

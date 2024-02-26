@@ -17,7 +17,7 @@
         <template #balance>
           <BalanceInfo
             :balance="+(activeMultisigAccount.balance || 0)"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
         </template>
 
@@ -33,7 +33,13 @@
         </template>
 
         <template #navigation>
-          <AccountDetailsNavigation is-multisig />
+          <AccountDetailsNavigation
+            :route-names="[
+              ROUTE_MULTISIG_DETAILS,
+              ROUTE_MULTISIG_DETAILS_INFO,
+              ROUTE_MULTISIG_DETAILS_ASSETS,
+            ]"
+          />
         </template>
       </AccountDetailsBase>
     </IonContent>
@@ -48,8 +54,13 @@ import {
   onIonViewDidLeave,
 } from '@ionic/vue';
 import { computed, defineComponent, ref } from 'vue';
-import { PROTOCOL_AETERNITY, UNFINISHED_FEATURES } from '@/constants';
+import { PROTOCOLS, UNFINISHED_FEATURES } from '@/constants';
 import { useMultisigAccounts } from '@/composables';
+import {
+  ROUTE_MULTISIG_DETAILS,
+  ROUTE_MULTISIG_DETAILS_ASSETS,
+  ROUTE_MULTISIG_DETAILS_INFO,
+} from '@/popup/router/routeNames';
 import { buildSimplexLink, convertMultisigAccountToAccount } from '@/protocols/aeternity/helpers';
 
 import BtnBox from '../components/buttons/BtnBox.vue';
@@ -95,7 +106,10 @@ export default defineComponent({
 
     return {
       UNFINISHED_FEATURES,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
+      ROUTE_MULTISIG_DETAILS,
+      ROUTE_MULTISIG_DETAILS_INFO,
+      ROUTE_MULTISIG_DETAILS_ASSETS,
       activeMultisigAccount,
       isPageActive,
       simplexLink,

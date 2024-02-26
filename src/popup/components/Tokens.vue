@@ -7,21 +7,19 @@
       v-if="!noIcons"
       class="icon"
     >
-      <!--
-        TODO: Find out better way of displaying coin icons related to protocols
-      -->
       <ProtocolIcon
-        v-if="imgToken?.symbol === BTC_SYMBOL"
+        v-if="imgToken && imgToken.assetType === ASSET_TYPES.coin"
         class="icon-image"
-        :protocol="PROTOCOL_BITCOIN"
-        :icon-size="iconSize"
+        :protocol="imgToken?.protocol || protocol"
+        :icon-size="(iconSize as any)"
+        is-logo-icon
       />
       <img
         v-else
         class="icon-image"
-        :src="imgToken.image || getTokenPlaceholderUrl(imgToken)"
-        :class="{ 'with-border': !imgToken.image }"
-        :title="imgToken.symbol"
+        :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
+        :class="{ 'with-border': !imgToken?.image }"
+        :title="imgToken?.symbol"
       >
     </span>
 
@@ -48,23 +46,17 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
-import type { ITokenResolved } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import type { ITokenResolved, Protocol } from '@/types';
+import { ASSET_TYPES, ICON_SIZES, PROTOCOLS } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
+  isCoin,
   truncateString as truncateStringFactory,
 } from '@/utils';
-import {
-  AE_AVATAR_URL,
-  AE_COIN_SYMBOL,
-  AE_CONTRACT_ID,
-  AE_SYMBOL,
-} from '@/protocols/aeternity/config';
-import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
-
-import AeIcon from '@/icons/tokens/ae.svg';
+import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
 import ProtocolIcon from './ProtocolIcon.vue';
 
-const SIZES = ['rg', 'md', 'lg', 'xl'] as const;
+const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
 
 export type AllowedTokenIconSize = typeof SIZES[number];
 
@@ -79,9 +71,13 @@ export default defineComponent({
     tokens: { type: Array as PropType<ITokenResolved[]>, required: true },
     symbolLength: { type: Number, default: 11 },
     doubleSymbolLength: { type: Number, default: 5 },
+    /**
+     * TODO if protocol is not set, assume AE, but this should be set correctly
+     */
+    protocol: { type: String as PropType<Protocol>, default: PROTOCOLS.aeternity },
     iconSize: {
-      type: String,
-      default: 'rg',
+      type: String as PropType<AllowedTokenIconSize>,
+      default: ICON_SIZES.sm,
       validator: (val: AllowedTokenIconSize) => SIZES.includes(val),
     },
     vertical: Boolean,
@@ -106,27 +102,24 @@ export default defineComponent({
     }
 
     function getTokenPlaceholderUrl(token: ITokenResolved) {
+      // TODO Should not be protocol specific
       return `${AE_AVATAR_URL}${token.contractId}`;
     }
 
-    /**
-     * TODO These transformations should be performed by the adapters based on asset protocol
-     */
     function mapToken(token: ITokenResolved): ITokenResolved {
-      let { image } = token;
+      const isTokenCoin = isCoin(token.contractId!) || token.isAe;
+      const protocol = token.protocol || props.protocol;
+      const adapter = ProtocolAdapterFactory.getAdapter(protocol);
       let name = token.symbol;
-
-      if (token.isAe || token.contractId === AE_CONTRACT_ID) {
-        image = AeIcon;
-        name = props.fullSymbol ? AE_COIN_SYMBOL : AE_SYMBOL;
-      } else if (token.symbol === BTC_SYMBOL) {
-        name = props.fullSymbol ? BTC_COIN_NAME : BTC_SYMBOL;
+      if (isTokenCoin) {
+        name = props.fullSymbol ? adapter.coinName : adapter.protocolSymbol;
       }
 
       return {
         ...token,
         name,
-        image,
+        protocol,
+        assetType: isTokenCoin ? ASSET_TYPES.coin : ASSET_TYPES.token,
       };
     }
 
@@ -139,8 +132,7 @@ export default defineComponent({
     ));
 
     return {
-      PROTOCOL_BITCOIN,
-      BTC_SYMBOL, // TODO this components should not have any protocol specific logic
+      ASSET_TYPES,
       fromToken,
       toToken,
       imgToken,
@@ -156,7 +148,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .tokens {
-  --icon-size: 16px;
+  --icon-size: var(--icon-size-sm);
 
   @extend %face-sans-16-semi-bold;
 
@@ -206,16 +198,16 @@ export default defineComponent({
     vertical-align: middle;
   }
 
-  &.md {
-    --icon-size: 18px;
+  &.rg {
+    --icon-size: var(--icon-size-rg);
   }
 
   &.lg {
-    --icon-size: 24px;
+    --icon-size: var(--icon-size-lg);
   }
 
-  &.xl {
-    --icon-size: 30px;
+  &.xxl {
+    --icon-size: var(--icon-size-xxl);
   }
 
   &.vertical {

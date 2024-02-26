@@ -7,8 +7,7 @@
       >
         <InfiniteScroll
           v-if="notificationsToShow.length"
-          :is-more-data="canLoadMore"
-          @loadMore="loadMoreNotifications"
+          @load-more="loadMoreNotifications"
         >
           <NotificationItem
             v-for="notification in notificationsToShow"
@@ -57,7 +56,6 @@ export default defineComponent({
 
     const {
       notificationsToShow,
-      canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
     } = useNotifications({ requirePolling: true });
@@ -80,7 +78,6 @@ export default defineComponent({
     return {
       innerElement,
       notificationsToShow,
-      canLoadMore,
       loadMoreNotifications,
       markAsReadAll,
     };

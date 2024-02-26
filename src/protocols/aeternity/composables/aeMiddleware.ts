@@ -8,7 +8,7 @@ import type {
 import { genSwaggerClient, mapObject } from '@/lib/swagger';
 import { fetchJson, watchUntilTruthy } from '@/utils';
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeNetworkSettings } from './aeNetworkSettings';
 
 const middleware = ref<IMiddleware | null>(null);
 const initializing = ref(false);
@@ -20,7 +20,7 @@ const isMiddlewareReady = computed(() => !!middleware.value);
  */
 let middlewareCurrentAeNetworkSettings: IAeNetworkSettings;
 
-export function useMiddleware() {
+export function useAeMiddleware() {
   const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
   async function fetchFromMiddleware<T = any>(path: string): Promise<T | null> {

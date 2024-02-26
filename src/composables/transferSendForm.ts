@@ -10,7 +10,6 @@ import type {
   Dictionary,
   IAsset,
   IToken,
-  Protocol,
   TransferFormModel,
 } from '@/types';
 import { useModals } from '@/composables/modals';
@@ -19,11 +18,11 @@ import {
   IS_PRODUCTION,
   MODAL_READ_QR_CODE,
 } from '@/constants';
-import { toShiftedBigNumber, getMessageByFieldName } from '@/utils';
+import { toShiftedBigNumber, getMessageByFieldName, isUrlValid } from '@/utils';
 import Logger from '@/lib/logger';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { NoUserMediaPermissionError } from '@/lib/errors';
 import { useTransferSendHandler } from './transferSendHandler';
+import { useAccountAssetsList } from './accountAssetsList';
 
 type SelectedAssetValueFunction = (
   tokenContractId?: string,
@@ -33,13 +32,11 @@ type SelectedAssetValueFunction = (
 interface UseTransferSendFormParams {
   transferData: TransferFormModel;
   getSelectedAssetValue?: SelectedAssetValueFunction;
-  protocol: Protocol;
 }
 
 export function useTransferSendForm({
   transferData,
   getSelectedAssetValue,
-  protocol,
 }: UseTransferSendFormParams) {
   const formModel = ref<TransferFormModel>(transferData);
   const invoiceId = ref(null);
@@ -49,8 +46,13 @@ export function useTransferSendForm({
   const { openModal, openDefaultModal } = useModals();
   const { errors, validate, validateField } = useForm();
   const { save: saveFormData } = useTransferSendHandler();
+  const { accountAssets } = useAccountAssetsList();
 
-  const hasError = computed((): boolean => ['address', 'amount'].some((errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error'));
+  const hasError = computed(
+    (): boolean => ['address', 'amount'].some(
+      (errorKey) => getMessageByFieldName(errors.value[errorKey]).status === 'error',
+    ),
+  );
 
   function clearPayload() {
     formModel.value.payload = '';
@@ -99,7 +101,7 @@ export function useTransferSendForm({
     Object.keys(updatedValues).forEach((field) => validateField(field));
   }
 
-  async function openScanQrModal(tokenBalances: IToken[]) {
+  async function openScanQrModal() {
     let scanResult: string | null = '';
     scanResult = await openModal(MODAL_READ_QR_CODE, {
       title: t(
@@ -132,8 +134,8 @@ export function useTransferSendForm({
       }
 
       // does user have the requested tokens?
-      const requestedTokenBalance = tokenBalances
-        .find(({ value }: any) => value === parsedScanResult.tokenContract);
+      const requestedTokenBalance = accountAssets.value
+        .find(({ contractId }) => contractId === parsedScanResult.tokenContract);
       if (!requestedTokenBalance) {
         formModel.value.address = undefined;
         openDefaultModal({ msg: t('modals.insufficient-balance.msg') });
@@ -141,14 +143,13 @@ export function useTransferSendForm({
       }
 
       // select requested token
-      formModel.value.selectedAsset = tokenBalances
-        .find(({ value }: any) => value === parsedScanResult.tokenContract);
+      formModel.value.selectedAsset = requestedTokenBalance;
 
       // SET result data
       formModel.value.address = parsedScanResult.tokenContract;
       formModel.value.amount = toShiftedBigNumber(
         parsedScanResult.amount,
-        -(formModel.value.selectedAsset as IToken)?.decimals,
+        -formModel.value.selectedAsset?.decimals!,
       ).toString();
       invoiceId.value = parsedScanResult.invoiceId;
       invoiceContract.value = parsedScanResult.invoiceContract;
@@ -159,9 +160,9 @@ export function useTransferSendForm({
       }
       updateFormModelValues(Object.fromEntries([
         ...new URL(
-          (scanResult.startsWith(ProtocolAdapterFactory.getAdapter(protocol).getAccountPrefix()))
-            ? `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`
-            : scanResult,
+          isUrlValid(scanResult)
+            ? scanResult
+            : `${APP_LINK_WEB}/account?account=${scanResult.replace('?', '&')}`,
         )
           .searchParams.entries(),
       ].map(([k, v]) => [k, v])));

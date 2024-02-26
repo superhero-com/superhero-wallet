@@ -11,6 +11,7 @@ import { Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
+  AssetContractId,
   BigNumberPublic,
   IAccount,
   ICommonTransaction,
@@ -29,13 +30,10 @@ import {
   DECIMAL_PLACES_HIGH_PRECISION,
   DECIMAL_PLACES_LOW_PRECISION,
   LOCAL_STORAGE_PREFIX,
-  PROTOCOL_AETERNITY,
-  PROTOCOL_BITCOIN,
+  PROTOCOL_LIST,
   TX_DIRECTION,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
-import { isBtcAddressValid } from '@/protocols/bitcoin/helpers';
-import { isAddressValid } from '@aeternity/aepp-sdk';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 /**
@@ -65,7 +63,7 @@ export function blocksToRelativeTime(blocks: number) {
   return secondsToRelativeTime(blocks * 3 * 60);
 }
 
-export function calculateFontSize(amountValue: BigNumber | number) {
+export function calculateFontSize(amountValue: BigNumber | number | string) {
   const amountLength = amountRounded(amountValue).replace(/\D/g, '').length;
 
   if (amountLength <= 8) {
@@ -108,6 +106,30 @@ export function composeStorageKeys(keys: StorageKeysInput): string {
 
 export function errorHasValidationKey(error: any, expectedKey: string): boolean {
   return error.validation?.some(({ key }: any) => expectedKey === key);
+}
+
+/**
+ * Create list of callbacks
+ */
+export function createCallbackRegistry<T extends(...args: any) => any>() {
+  let currentId = 0;
+  const callbackRegistry = new Map<number, T>();
+
+  return {
+    /**
+     * Add callback that will be fired when `runCallbacks` is ran.
+     * @returns function that allows to remove the callback from registry.
+     */
+    addCallback: (callback: T) => {
+      currentId += 1;
+      const savedId = currentId;
+      callbackRegistry.set(savedId, callback);
+      return () => callbackRegistry.delete(savedId);
+    },
+    runCallbacks: (...args: Parameters<T>) => {
+      callbackRegistry.forEach((callback) => callback?.(...args as Array<any>));
+    },
+  };
 }
 
 /**
@@ -182,6 +204,14 @@ export function removeLocalStorageItem(keys: string[]) {
 }
 
 /**
+ * Removes `propertyName: undefined` from the object.
+ * `{ a: 1, b: undefined }` => `{ a: 1 }`
+ */
+export function removeObjectUndefinedProperties(obj: object): object {
+  return Object.fromEntries(Object.entries(obj).filter((item) => item[1] !== undefined));
+}
+
+/**
  * TODO: Probably we need to replace this with Logger.write
  */
 export function handleUnknownError(error: any) {
@@ -218,6 +248,16 @@ export async function invokeDeviceShare(text: string): Promise<void> {
 
 export function isNotFoundError(error: any) {
   return error?.statusCode === 404;
+}
+
+/**
+ * Check if object has at least one property with a value, where 0 is also a correct value.
+ * `{ test: null }` => false
+ * `{ test: 'Foo' }` => true
+ * `{ test: 0 }` => true
+ */
+export function objectHasNonEmptyProperties(obj: object): boolean {
+  return Object.values(obj).some((val) => ![null, undefined, false].includes(val));
 }
 
 export function openInNewWindow(url: string) {
@@ -296,6 +336,11 @@ export function setLocalStorageItem(keys: string[], value: any): void {
     prepareStorageKey(keys),
     JSON.stringify(value),
   );
+}
+
+export async function sleep<T>(ms: number, fn?: () => Promise<T>) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  return fn?.();
 }
 
 export function sortTransactionsByDate(transactions: ICommonTransaction[]) {
@@ -377,19 +422,6 @@ export function watchUntilTruthy<T>(getter: WatchSource<T>): Promise<NonNullable
   });
 }
 
-export function detectProtocolByOwner(network: string, address?: string) {
-  if (!address) {
-    return null;
-  }
-  if (address.startsWith('ak_') && isAddressValid(address)) {
-    return PROTOCOL_AETERNITY;
-  }
-  if (isBtcAddressValid(address, network)) {
-    return PROTOCOL_BITCOIN;
-  }
-  return null;
-}
-
 /**
  * @returns {number} between -1 and n where -1 means there are no accounts found.
  */
@@ -436,5 +468,13 @@ export function checkIfSuperheroCallbackUrl(query: LocationQuery) {
 
   return [query['x-success'], query['x-cancel']].every(
     (value) => value && (value as string).startsWith(slicedAggregatorUrl),
+  );
+}
+
+export function isCoin(assetContractId: AssetContractId): boolean {
+  return PROTOCOL_LIST.some(
+    (protocol) => ProtocolAdapterFactory
+      .getAdapter(protocol)
+      .coinContractId === assetContractId,
   );
 }

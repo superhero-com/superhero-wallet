@@ -19,6 +19,15 @@
   &::-webkit-scrollbar {
     display: none;
   }
+
+  // Icon sizes used with the ICON_SIZES constant
+  --icon-size-xs: 12px;
+  --icon-size-sm: 16px;
+  --icon-size-rg: 18px;
+  --icon-size-md: 20px;
+  --icon-size-lg: 24px;
+  --icon-size-xl: 28px;
+  --icon-size-xxl: 30px;
 }
 
 html.is-extension {
@@ -218,12 +227,13 @@ hr {
   &-address {
     @extend %face-mono-11-medium;
 
+    display: inline-block;
     letter-spacing: 0.13em;
     color: rgba($color-white, 0.75);
     word-break: break-word;
     transition: 0.1s;
 
-    &:hover {
+    @at-root a &:hover {
       color: $color-white;
     }
   }

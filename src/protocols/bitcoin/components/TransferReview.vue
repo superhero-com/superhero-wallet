@@ -4,7 +4,7 @@
     :transfer-data="transferData"
     :loading="loading"
     show-fiat
-    :protocol="PROTOCOL_BITCOIN"
+    :protocol="PROTOCOLS.bitcoin"
     class="transfer-review"
   >
     <template #total>
@@ -17,7 +17,7 @@
             :amount="+transferData.total"
             :symbol="BTC_SYMBOL"
             high-precision
-            :protocol="PROTOCOL_BITCOIN"
+            :protocol="PROTOCOLS.bitcoin"
             data-cy="review-total"
           />
         </template>
@@ -35,14 +35,14 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAccounts, useModals, useUi } from '@/composables';
-import type { TransferFormModel } from '@/types';
-import { PROTOCOL_BITCOIN } from '@/constants';
+import type { ITransferArgs, TransferFormModel } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
-import { BTC_SYMBOL, BTC_CONTRACT_ID } from '@/protocols/bitcoin/config';
+import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import BigNumber from 'bignumber.js';
 
 export default defineComponent({
@@ -67,7 +67,6 @@ export default defineComponent({
 
     const loading = ref<boolean>(false);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function openTransactionFailedModal(msg: string) {
       openDefaultModal({
         title: t('modals.transaction-failed.msg'),
@@ -85,8 +84,8 @@ export default defineComponent({
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async function transfer({ amount, recipient, selectedAsset }: any) {
-      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOL_BITCOIN);
+    async function transfer({ amount, recipient, selectedAsset }: ITransferArgs) {
+      const bitcoinAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.bitcoin);
       try {
         loading.value = true;
         const { hash } = await bitcoinAdapter.spend(BigNumber(amount).toNumber(), recipient, {
@@ -125,9 +124,8 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_BITCOIN,
+      PROTOCOLS,
       BTC_SYMBOL,
-      BTC_CONTRACT_ID,
       loading,
       submit,
     };

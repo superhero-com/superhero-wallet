@@ -36,7 +36,9 @@
           />
 
           <DashboardCard
-            v-if="(isNodeMainnet || isNodeTestnet) && activeAccount.protocol === PROTOCOL_AETERNITY"
+            v-if="
+              (isNodeMainnet || isNodeTestnet)
+                && activeAccount.protocol === PROTOCOLS.aeternity"
             :title="$t('dashboard.nameCard.title')"
             :description="$t('dashboard.nameCard.description')"
             :btn-text="$t('dashboard.nameCard.button')"
@@ -64,7 +66,7 @@ import { useRoute } from 'vue-router';
 import {
   DASHBOARD_CARD_ID,
   IS_MOBILE_APP,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   UNFINISHED_FEATURES,
 } from '@/constants';
 import { ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM, ROUTE_APPS_BROWSER } from '@/popup/router/routeNames';
@@ -122,7 +124,7 @@ export default defineComponent({
     );
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       DASHBOARD_CARD_ID,
       UNFINISHED_FEATURES,
       ROUTE_ACCOUNT_DETAILS_NAMES_CLAIM,

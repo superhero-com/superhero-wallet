@@ -9,7 +9,8 @@
       <TransactionTokenRows
         :ext-tokens="tokens"
         :error="isErrorTransaction"
-        icon-size="md"
+        :protocol="transactionProtocol"
+        icon-size="rg"
       />
       <div class="footer">
         <div
@@ -63,7 +64,7 @@ import type {
   IActiveMultisigTransaction,
   ITransaction,
 } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import { ASSET_TYPES, PROTOCOLS } from '@/constants';
 import {
   amountRounded,
   executeAndSetInterval,
@@ -109,8 +110,11 @@ export default defineComponent({
     const transactionDate = ref();
 
     const currentTransaction = computed(
-      () => (props.multisigTransaction || props.transaction),
+      (): ITransaction => (props.multisigTransaction as ITransaction || props.transaction),
     );
+
+    // temp if protocol undefined assume it is aeternity
+    const transactionProtocol = computed(() => props.transaction?.protocol ?? PROTOCOLS.aeternity);
 
     const transactionOwner = computed(() => props.multisigTransaction
       ? props.multisigTransaction?.tx?.senderId
@@ -130,7 +134,7 @@ export default defineComponent({
       direction: direction.value,
       isAllowance: isDexAllowance.value,
       // TODO - refactor useTransactionTokens to use only tx
-      transaction: (props.multisigTransaction || props.transaction) as unknown as ITransaction,
+      transaction: currentTransaction.value,
     });
 
     const redirectRoute = computed((): Partial<RouteLocation> => {
@@ -150,19 +154,19 @@ export default defineComponent({
     });
 
     const fiatAmount = computed(() => {
-      const aeToken = tokens.value?.find((t) => t?.isAe);
-      if (!aeToken || isErrorTransaction.value || isDexPool.value) {
+      const protocolCoin = tokens.value?.find(({ assetType }) => assetType === ASSET_TYPES.coin);
+      if (!protocolCoin || isErrorTransaction.value || isDexPool.value || !protocolCoin.protocol) {
         return 0;
       }
       return getFormattedAndRoundedFiat(
         +amountRounded(
           (
-            aeToken.decimals
-              ? toShiftedBigNumber(aeToken.amount || 0, -aeToken.decimals)
-              : aeToken.amount
+            protocolCoin.decimals
+              ? toShiftedBigNumber(protocolCoin.amount || 0, -protocolCoin.decimals)
+              : protocolCoin.amount
           )!,
         ),
-        PROTOCOL_AETERNITY,
+        protocolCoin.protocol,
       );
     });
 
@@ -185,6 +189,7 @@ export default defineComponent({
       isErrorTransaction,
       tokens,
       currentTransaction,
+      transactionProtocol,
       transactionOwner,
       direction,
       formatDate,

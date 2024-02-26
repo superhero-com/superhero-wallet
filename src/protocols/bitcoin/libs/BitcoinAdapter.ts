@@ -8,22 +8,28 @@ import {
   Psbt,
   Transaction,
 } from 'bitcoinjs-lib';
+import { toOutputScript } from 'bitcoinjs-lib/src/address';
 import { toBitcoin, toSatoshi } from 'satoshi-bitcoin';
 
 import type {
+  AccountAddress,
   AdapterNetworkSettingList,
   ICoin,
+  IFetchTransactionResult,
   IHdWalletAccount,
   INetworkProtocolSettings,
   ITransaction,
+  IToken,
+  ITransferResponse,
   MarketData,
   NetworkTypeDefault,
-  IFetchTransactionResult,
+  ITransactionApiPaginationParams,
 } from '@/types';
 import { useNetworks } from '@/composables/networks';
 import {
+  NETWORK_TYPE_MAINNET,
   NETWORK_TYPE_TESTNET,
-  PROTOCOL_BITCOIN,
+  PROTOCOLS,
 } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
@@ -46,13 +52,27 @@ import { useBtcNetworkSettings } from '@/protocols/bitcoin/composables/btcNetwor
 import { BitcoinTransactionSigner } from './BitcoinTransactionSigner';
 
 export class BitcoinAdapter extends BaseProtocolAdapter {
-  protocolName = 'Bitcoin';
+  override protocol = PROTOCOLS.bitcoin;
 
-  coinPrecision = BTC_COIN_PRECISION;
+  override protocolName = 'Bitcoin';
 
-  bip32 = BIP32Factory(ecc);
+  override protocolSymbol = BTC_SYMBOL;
 
-  networkSettings: AdapterNetworkSettingList = [
+  override coinName = BTC_COIN_NAME;
+
+  override coinSymbol = BTC_SYMBOL;
+
+  override coinContractId = BTC_CONTRACT_ID;
+
+  override coinPrecision = BTC_COIN_PRECISION;
+
+  override hasTokensSupport = false;
+
+  override mdwToNodeApproxDelayTime = 0;
+
+  private bip32 = BIP32Factory(ecc);
+
+  private networkSettings: AdapterNetworkSettingList = [
     {
       key: 'nodeUrl',
       testId: 'url',
@@ -71,9 +91,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       : 'bc1q';
   }
 
-  override getExplorer(): any {
+  override getExplorer() {
     const { btcActiveNetworkPredefinedSettings } = useBtcNetworkSettings();
-
     return new Blockstream(btcActiveNetworkPredefinedSettings.value.explorerUrl!);
   }
 
@@ -81,19 +100,15 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_COIN_PRECISION;
   }
 
-  override getCoinSymbol() {
-    return BTC_SYMBOL;
-  }
-
   override getUrlTokenKey(): string {
     return BTC_CONTRACT_ID;
   }
 
-  getNetworkSettings() {
+  override getNetworkSettings() {
     return this.networkSettings;
   }
 
-  getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
+  override getNetworkTypeDefaultValues(networkType: NetworkTypeDefault): INetworkProtocolSettings {
     return BTC_NETWORK_DEFAULT_SETTINGS[networkType];
   }
 
@@ -101,19 +116,16 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return BTC_COINGECKO_COIN_ID;
   }
 
-  override getDefaultAssetContractId() {
-    return BTC_CONTRACT_ID;
-  }
-
   override getDefaultCoin(
     marketData: MarketData,
     convertedBalance?: number,
   ): ICoin {
     return {
-      ...(marketData?.[PROTOCOL_BITCOIN] || {}),
-      contractId: BTC_CONTRACT_ID,
-      symbol: BTC_SYMBOL,
-      decimals: BTC_COIN_PRECISION,
+      ...(marketData?.[PROTOCOLS.bitcoin] || {}),
+      protocol: PROTOCOLS.bitcoin,
+      contractId: this.coinContractId,
+      symbol: this.coinSymbol,
+      decimals: this.getAmountPrecision(),
       name: BTC_COIN_NAME,
       convertedBalance,
     };
@@ -130,6 +142,24 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return toBitcoin(
       Number(chainFunded) - Number(chainSpent) + Number(mempoolFunded) - Number(mempoolSpent),
     ).toString();
+  }
+
+  /**
+   * `networkType` is required to validate Bitcoin address on non mainnet networks
+   * because same account has different addresses on different networks.
+   */
+  override isAccountAddressValid(address: string, networkType?: NetworkTypeDefault) {
+    try {
+      const networksMap: Record<NetworkTypeDefault, keyof typeof networks> = {
+        [NETWORK_TYPE_MAINNET]: 'bitcoin',
+        [NETWORK_TYPE_TESTNET]: 'testnet',
+      };
+      const btcNetwork = networkType ? networks[networksMap[networkType]] : undefined;
+      toOutputScript(address, btcNetwork);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   override async isAccountUsed(address: string): Promise<boolean> {
@@ -158,8 +188,8 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     });
 
     return {
-      secretKey: child.privateKey as any,
-      publicKey: child.publicKey as any,
+      secretKey: child.privateKey!,
+      publicKey: child.publicKey,
       address: address!,
     };
   }
@@ -172,14 +202,31 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     );
   }
 
+  override async fetchAvailableTokens() {
+    return []; // Bitcoin protocol has no fungible tokens
+  }
+
+  override async fetchAccountTokenBalances() {
+    return []; // Bitcoin protocol has no fungible tokens
+  }
+
   override async fetchPendingTransactions() {
     // TODO if needed
     return [];
   }
 
-  override async fetchTransactions(
-    address: string,
-    lastTxId: string | null,
+  override async fetchTokenInfo(): Promise<IToken | undefined> {
+    return undefined;
+  }
+
+  override async transferToken() {
+    // has no tokens
+    return undefined;
+  }
+
+  override async fetchAccountTransactions(
+    address: AccountAddress,
+    { lastTxId }: ITransactionApiPaginationParams = {},
   ): Promise<IFetchTransactionResult> {
     const { activeNetwork } = useNetworks();
 
@@ -193,13 +240,28 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
 
     return {
       regularTransactions,
-      nextPageParams: regularTransactions[0]?.hash || null,
+      paginationParams: {
+        lastTxId: regularTransactions[regularTransactions.length - 1]?.hash || undefined,
+      },
     };
   }
 
-  async getTransactionByHash(hash: string) { // it is not actually a hash it's an id
-    const { activeNetwork } = useNetworks();
+  /**
+   * Bitcoin protocol has only one asset so this is only an alias.
+   */
+  override async fetchAccountAssetTransactions(
+    address: AccountAddress,
+    assetContractId: string,
+    params?: ITransactionApiPaginationParams,
+  ) {
+    return this.fetchAccountTransactions(address, params);
+  }
 
+  /**
+   * @param hash - transaction id
+   */
+  override async fetchTransactionByHash(hash: string): Promise<ITransaction> {
+    const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
     const rawTransaction = await fetchJson(`${nodeUrl}/tx/${hash}`);
     return normalizeTransactionStructure(rawTransaction);
@@ -330,7 +392,7 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
       publicKey: Buffer;
       secretKey: Buffer;
     },
-  ): Promise<{ hash: string }> {
+  ): Promise<ITransferResponse> {
     const { activeNetwork } = useNetworks();
     const { nodeUrl } = activeNetwork.value.protocols.bitcoin;
 
@@ -356,5 +418,9 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     return {
       hash: transactionId,
     };
+  }
+
+  override async waitTransactionMined(): Promise<any> {
+    // TODO if needed
   }
 }

@@ -1,15 +1,13 @@
-<!-- eslint-disable vue/no-v-model-argument -->
 <template>
   <TransferSendBase
-    v-bind="$attrs"
-    :protocol="PROTOCOL_AETERNITY"
+    :protocol="PROTOCOLS.aeternity"
     :current-step="currentStep"
-    :edit-transfer="editTransfer"
-    :proceed-to-next-step="proceedToNextStep"
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
-    :primary-button-disabled="isPrimaryButtonDisabled"
+    :sending-disabled="isSendingDisabled"
     @close="resolve"
+    @step-next="proceedToNextStep"
+    @step-prev="editTransfer"
   >
     <template #content>
       <component
@@ -20,7 +18,7 @@
         :is-address-chain="isAddressChain"
         :is-address-url="isAddressUrl"
         @success="currentStepConfig.onSuccess"
-        @error="(val) => error = val"
+        @error="(val: any) => error = val"
       />
     </template>
   </TransferSendBase>
@@ -34,17 +32,16 @@ import {
   PropType,
   ref,
 } from 'vue';
-import type {
-  ResolveCallback,
-  TransferSendStepExtended,
-  TransferFormModel,
-} from '@/types';
-
-import { Encoded } from '@aeternity/aepp-sdk';
 import { useI18n } from 'vue-i18n';
 
+import type {
+  AssetContractId,
+  TransferFormModel,
+  TransferSendStep,
+  TransferSendStepConfigRegistry,
+} from '@/types';
 import {
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
   PROTOCOL_VIEW_TRANSFER_SEND,
   TRANSFER_SEND_STEPS,
 } from '@/constants';
@@ -52,7 +49,7 @@ import { isUrlValid } from '@/utils';
 import { useAeSdk, useFungibleTokens } from '@/composables';
 import { AE_AENS_DOMAIN } from '@/protocols/aeternity/config';
 
-import TransferSendBase from '@/popup/components/Modals/TransferSendBase.vue';
+import TransferSendBase, { transferSendModalRequiredProps } from '@/popup/components/Modals/TransferSendBase.vue';
 import TransferSendForm from '../components/TransferSendForm.vue';
 import TransferReviewTip from '../components/TransferReviewTip.vue';
 import TransferReview from '../components/TransferReview.vue';
@@ -63,48 +60,45 @@ export default defineComponent({
     TransferSendBase,
   },
   props: {
-    resolve: { type: Function as PropType<ResolveCallback>, default: () => null },
-    tokenContractId: { type: String, default: null },
-    address: { type: String as PropType<Encoded.AccountAddress>, default: null },
-    amount: { type: String, default: '' },
-    payload: { type: String, default: '' },
+    ...transferSendModalRequiredProps,
+    tokenContractId: { type: String as PropType<AssetContractId>, default: null },
     isMultisig: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
     const { isAeNodeReady } = useAeSdk();
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
 
     const currentRenderedComponent = ref<Component>();
-    const currentStep = ref<TransferSendStepExtended>(TRANSFER_SEND_STEPS.form);
+    const currentStep = ref<TransferSendStep>(TRANSFER_SEND_STEPS.form);
     const error = ref(false);
     const transferData = ref<TransferFormModel>({
+      address: props.address as any, // TODO change to string globally
       amount: props.amount,
-      selectedAsset: undefined,
       payload: props.payload,
+      selectedAsset: (props.tokenContractId)
+        ? getProtocolAvailableTokens(PROTOCOLS.aeternity)[props.tokenContractId]
+        : undefined,
     });
 
     const isAddressChain = computed(() => !!transferData.value.address?.endsWith(AE_AENS_DOMAIN));
 
     const isAddressUrl = computed(() => (
       !isAddressChain.value
-        && transferData.value.address
-        && isUrlValid(transferData.value.address)
+      && transferData.value.address
+      && isUrlValid(transferData.value.address)
     ));
 
-    const isPrimaryButtonDisabled = computed(() => (
+    const isSendingDisabled = computed(() => (
       error.value
       || !isAeNodeReady.value
       || !transferData.value.address
       || !transferData.value.amount
     ));
 
-    const customPrimaryButtonText = computed(() => {
-      if (props.isMultisig) {
-        return t('modals.multisigTxProposal.proposeAndApprove');
-      }
-      return '';
-    });
+    const customPrimaryButtonText = computed(() => (props.isMultisig)
+      ? t('modals.multisigTxProposal.proposeAndApprove')
+      : '');
 
     function proceedToNextStep() {
       (currentRenderedComponent.value as any).submit();
@@ -120,24 +114,12 @@ export default defineComponent({
       currentStep.value = TRANSFER_SEND_STEPS.review;
     }
 
-    /**
-     * Review success means that the transfer has been initiated
-     * and the summary modal will be displayed by the `pendingTransactionHandler`
-     * after the transfer is finished.
-     */
-    function handleReviewSuccess() {
-      props.resolve();
-    }
-
     function editTransfer() {
       error.value = false;
       currentStep.value = TRANSFER_SEND_STEPS.form;
     }
 
-    const steps: Record<
-      TransferSendStepExtended,
-      { component: Component; onSuccess: () => void }
-    > = {
+    const steps: TransferSendStepConfigRegistry = {
       [TRANSFER_SEND_STEPS.form]: {
         component: TransferSendForm,
         onSuccess: handleSendFormSuccess,
@@ -148,22 +130,15 @@ export default defineComponent({
       },
       [TRANSFER_SEND_STEPS.review]: {
         component: TransferReview,
-        onSuccess: handleReviewSuccess,
+        onSuccess: props.resolve,
       },
     };
 
-    const currentStepConfig = computed(() => steps[currentStep.value]);
-
-    if (props.tokenContractId && availableTokens.value[props.tokenContractId]) {
-      transferData.value.selectedAsset = availableTokens.value[props.tokenContractId];
-    }
-    if (props.address) {
-      transferData.value.address = props.address;
-    }
+    const currentStepConfig = computed(() => steps[currentStep.value]!);
 
     return {
       TRANSFER_SEND_STEPS,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       currentRenderedComponent,
       steps,
       currentStep,
@@ -172,7 +147,7 @@ export default defineComponent({
       currentStepConfig,
       isAddressChain,
       isAddressUrl,
-      isPrimaryButtonDisabled,
+      isSendingDisabled,
       customPrimaryButtonText,
       proceedToNextStep,
       editTransfer,

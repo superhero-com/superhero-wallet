@@ -4,7 +4,7 @@ import {
   Encoded,
   Node,
 } from '@aeternity/aepp-sdk';
-import type { IInvite } from '@/types';
+import type { AccountAddress, IInvite } from '@/types';
 import { STORAGE_KEYS } from '@/constants';
 import { tg } from '@/popup/plugins/i18n';
 import { getAccountFromSecret } from '@/protocols/aeternity/helpers';
@@ -43,7 +43,7 @@ export function useInvites() {
     recipientId,
     amount = '0',
     isMax = false,
-  }: { secretKey: Buffer; recipientId: Encoded.AccountAddress; amount?: string; isMax: boolean }) {
+  }: { secretKey: Buffer; recipientId: AccountAddress; amount?: string; isMax: boolean }) {
     const aeSdk = new AeSdk({
       nodes: [{
         name: activeNetwork.value.name,
@@ -54,14 +54,14 @@ export function useInvites() {
     if (!isMax) {
       await aeSdk.spend(
         amount,
-        recipientId,
+        recipientId as Encoded.AccountAddress,
         // @ts-ignore
         { denomination: AE_AMOUNT_FORMATS.AE },
       );
     } else {
       await aeSdk.transferFunds(
         1, // Decimal percentage, 1 = 100%
-        recipientId,
+        recipientId as Encoded.AccountAddress,
         { verify: false },
       );
     }

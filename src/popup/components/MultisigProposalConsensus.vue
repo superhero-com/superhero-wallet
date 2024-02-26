@@ -33,7 +33,7 @@
         >
           <AccountItem
             :address="signer"
-            :protocol="PROTOCOL_AETERNITY"
+            :protocol="PROTOCOLS.aeternity"
           />
 
           <CheckCircle
@@ -69,7 +69,7 @@ import { computed, defineComponent } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
 import {
   MODAL_CONSENSUS_INFO,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   useAccounts,
@@ -184,7 +184,7 @@ export default defineComponent({
     }
 
     return {
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       activeMultisigAccount,
       isLocalAccountAddress,
       infoBox,

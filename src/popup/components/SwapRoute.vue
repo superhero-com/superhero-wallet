@@ -41,6 +41,7 @@ import type {
   TxFunctionParsed,
   TxFunctionRaw,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { useAeSdk, useFungibleTokens } from '@/composables';
 import { DEX_CONTRACTS } from '@/protocols/aeternity/config';
 import { getTransactionTokenInfoResolver, isTxFunctionDexSwap } from '@/protocols/aeternity/helpers';
@@ -58,7 +59,9 @@ export default defineComponent({
   },
   setup(props) {
     const { nodeNetworkId } = useAeSdk();
-    const { availableTokens } = useFungibleTokens();
+    const { getProtocolAvailableTokens } = useFungibleTokens();
+
+    const aeTokensAvailable = computed(() => getProtocolAvailableTokens(PROTOCOLS.aeternity));
 
     function getTxFunction(
       functionName: TxFunctionRaw | TxFunctionParsed | TxFunction,
@@ -76,7 +79,7 @@ export default defineComponent({
       if (!resolver) {
         return [];
       }
-      let { tokens } = resolver(props.transaction, availableTokens.value);
+      let { tokens } = resolver(props.transaction, aeTokensAvailable.value);
       const index = props.transaction.tx.arguments.findIndex(({ type }) => type === 'list');
       const waeContract = DEX_CONTRACTS[nodeNetworkId.value!]?.wae;
       const tokenLastIndex = tokens.length - 1;
@@ -86,7 +89,7 @@ export default defineComponent({
           tokens[0],
           ...props.transaction.tx.arguments[index].value
             .slice(1, props.transaction.tx.arguments[index].value.length - 1)
-            .map((element: any) => availableTokens.value[element.value]),
+            .map((element: any) => aeTokensAvailable.value[element.value]),
           tokens[1],
         ];
       }

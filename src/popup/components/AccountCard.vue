@@ -20,8 +20,7 @@
 
     <template #bottom>
       <AccountCardTotalTokens
-        v-if="account.protocol === PROTOCOL_AETERNITY"
-        :current-account="account"
+        :account="account"
       />
     </template>
   </AccountCardBase>
@@ -33,8 +32,7 @@ import {
   defineComponent,
   PropType,
 } from 'vue';
-import { IAccount } from '@/types';
-import { PROTOCOL_AETERNITY } from '@/constants';
+import type { IAccount } from '@/types';
 import { useBalances } from '@/composables';
 
 import AccountInfo from './AccountInfo.vue';
@@ -59,7 +57,6 @@ export default defineComponent({
     const numericBalance = computed(() => getAccountBalance(props.account.address).toNumber());
 
     return {
-      PROTOCOL_AETERNITY,
       numericBalance,
     };
   },

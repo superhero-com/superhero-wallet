@@ -10,10 +10,11 @@
           <div
             class="header"
           >
-            <TransactionTokens
+            <TransactionTokenRows
               v-if="multisigTx"
               :transaction="{ tx: multisigTx }"
-              icon-size="md"
+              :protocol="PROTOCOLS.aeternity"
+              icon-size="rg"
             />
           </div>
           <div class="content">
@@ -74,7 +75,7 @@
                   <div class="row">
                     <AccountItem
                       :address="activeMultisigAccount.proposedBy"
-                      :protocol="PROTOCOL_AETERNITY"
+                      :protocol="PROTOCOLS.aeternity"
                     />
                     <DialogBox
                       v-if="isLocalAccountAddress(activeMultisigAccount.proposedBy)"
@@ -137,7 +138,7 @@
                 <template #value>
                   <TokenAmount
                     :amount="+(aettosToAe(multisigTx.gasPrice))"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     :symbol="AE_SYMBOL"
                     hide-fiat
                   />
@@ -151,7 +152,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.gasPrice)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -169,7 +170,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(multisigTx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -182,7 +183,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(transaction.tx.fee)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                   />
                 </template>
               </DetailsItem>
@@ -196,7 +197,7 @@
                   <TokenAmount
                     :amount="+aettosToAe(totalSpent)"
                     :symbol="AE_SYMBOL"
-                    :protocol="PROTOCOL_AETERNITY"
+                    :protocol="PROTOCOLS.aeternity"
                     high-precision
                   />
                 </template>
@@ -278,7 +279,7 @@ import {
   watch,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
-import { Tag } from '@aeternity/aepp-sdk';
+import { Encoded, Tag } from '@aeternity/aepp-sdk';
 import { isEqual } from 'lodash-es';
 import { useRouter } from 'vue-router';
 import BigNumber from 'bignumber.js';
@@ -292,7 +293,7 @@ import type {
 } from '@/types';
 import {
   MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION,
-  PROTOCOL_AETERNITY,
+  PROTOCOLS,
 } from '@/constants';
 import {
   blocksToRelativeTime,
@@ -329,7 +330,7 @@ import PayloadDetails from '../components/PayloadDetails.vue';
 import DialogBox from '../components/DialogBox.vue';
 import MultisigProposalConsensus from '../components/MultisigProposalConsensus.vue';
 import Avatar from '../components/Avatar.vue';
-import TransactionTokens from '../components/TransactionTokenRows.vue';
+import TransactionTokenRows from '../components/TransactionTokenRows.vue';
 
 import AnimatedSpinner from '../../icons/animated-spinner.svg?skip-optimize';
 import ExternalLink from '../../icons/external-link.svg?vue-component';
@@ -337,7 +338,7 @@ import ExternalLink from '../../icons/external-link.svg?vue-component';
 export default defineComponent({
   components: {
     PayloadDetails,
-    TransactionTokens,
+    TransactionTokenRows,
     MultisigProposalConsensus,
     TransactionInfo,
     DialogBox,
@@ -383,7 +384,7 @@ export default defineComponent({
       callContractMethod,
     } = useMultisigTransactions();
 
-    const { getTxSymbol } = useFungibleTokens();
+    const { getTxAssetSymbol } = useFungibleTokens();
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
@@ -497,7 +498,7 @@ export default defineComponent({
         if (!rawTx) {
           throw Error('failed to load a transaction');
         }
-        transaction.value = await sendTx(gaAccountId, rawTx.tx, nonce);
+        transaction.value = await sendTx(gaAccountId as Encoded.AccountAddress, rawTx.tx, nonce);
 
         await updateMultisigAccounts();
 
@@ -529,14 +530,14 @@ export default defineComponent({
 
     return {
       AE_SYMBOL,
-      PROTOCOL_AETERNITY,
+      PROTOCOLS,
       TX_FUNCTIONS_MULTISIG,
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
       multisigTx,
       transaction,
       totalSpent,
-      getTxSymbol,
+      getTxAssetSymbol,
       getTransactionPayload,
       splitAddress,
       aettosToAe,

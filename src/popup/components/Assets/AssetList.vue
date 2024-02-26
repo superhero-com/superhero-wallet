@@ -1,9 +1,9 @@
 <template>
   <div class="tokens-list">
-    <TokensListItem
-      v-for="value in filteredTokens"
-      :key="value.contractId || value.id"
-      :token-data="value"
+    <AssetListItem
+      v-for="token in accountAssetsFiltered"
+      :key="token.contractId"
+      :token-data="token"
       :is-multisig="isMultisig"
     />
   </div>
@@ -11,26 +11,27 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
-import { useTokensList } from '@/composables';
-import TokensListItem from './TokensListItem.vue';
+import { useAccountAssetsList } from '@/composables';
+import AssetListItem from './AssetListItem.vue';
 
 export default defineComponent({
   components: {
-    TokensListItem,
+    AssetListItem,
   },
   props: {
     searchTerm: { type: String, default: '' },
+    ownedOnly: Boolean,
     isMultisig: Boolean,
   },
   setup(props) {
-    const { filteredTokens } = useTokensList({
-      ownedOnly: true,
+    const { accountAssetsFiltered } = useAccountAssetsList({
+      ownedOnly: props.ownedOnly,
       searchTerm: computed(() => props.searchTerm),
       isMultisig: props.isMultisig,
     });
 
     return {
-      filteredTokens,
+      accountAssetsFiltered,
     };
   },
 });

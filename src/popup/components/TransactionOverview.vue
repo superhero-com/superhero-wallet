@@ -23,21 +23,19 @@ import { TranslateResult, useI18n } from 'vue-i18n';
 import { BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import type {
+  AccountAddress,
   IAccountOverview,
   ITransaction,
   TxFunction,
 } from '@/types';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { useAeSdk, useTransactionTx } from '@/composables';
+
 import type { AeDecodedCallData } from '@/protocols/aeternity/types';
 import { TX_FUNCTIONS } from '@/protocols/aeternity/config';
-import {
-  useAeSdk,
-  useMiddleware,
-  useTransactionTx,
-} from '@/composables';
-import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { useAeNames } from '@/protocols/aeternity/composables/aeNames';
-import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 
 import TransactionInfo from './TransactionInfo.vue';
 
@@ -59,13 +57,18 @@ export default defineComponent({
   setup(props) {
     const { t, tm } = useI18n();
 
-    const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
     const { getAeSdk } = useAeSdk();
     const { getName } = useAeNames();
-    const { getMiddleware } = useMiddleware();
+    const { getMiddleware } = useAeMiddleware();
 
     const name = ref('');
     const ownershipAccount = ref<IAccountOverview | {}>({});
+
+    const adapter = ProtocolAdapterFactory.getAdapter(
+      props.transaction.protocol
+      || PROTOCOLS.aeternity,
+    );
+    const protocolExplorer = adapter.getExplorer();
 
     const {
       isDex,
@@ -79,18 +82,16 @@ export default defineComponent({
       externalAddress: props.transaction?.transactionOwner,
     });
 
-    function getTransactionParty(address: Encoded.AccountAddress): IAccountOverview {
+    function getTransactionParty(address: AccountAddress): IAccountOverview {
       return {
         address,
         label: t('transaction.overview.accountAddress'),
-        url: (new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!))
-          .prepareUrlByHash(address),
+        url: protocolExplorer.prepareUrlForAccount(address),
       };
     }
 
     const preparedTransaction = computed((): TransactionData => {
       const transactionTypes = tm('transaction.type') as Record<string, TranslateResult>;
-      const aeScan = new AeScan(aeActiveNetworkPredefinedSettings.value.explorerUrl!);
 
       const {
         senderId,
@@ -105,13 +106,13 @@ export default defineComponent({
             sender: {
               address: senderId,
               name: getName(senderId).value,
-              url: aeScan.prepareUrlByHash(senderId),
+              url: protocolExplorer.prepareUrlForAccount(senderId),
               label: t('transaction.overview.accountAddress'),
             },
             recipient: {
               address: recipientId,
               name: name.value || getName(recipientId).value,
-              url: aeScan.prepareUrlByHash(recipientId),
+              url: protocolExplorer.prepareUrlForAccount(recipientId),
               label: t('transaction.overview.accountAddress'),
             },
             title: t('transaction.type.spendTx'),
@@ -119,7 +120,7 @@ export default defineComponent({
         case Tag.ContractCallTx: {
           const contract: IAccountOverview = {
             address: contractId,
-            url: aeScan.prepareUrlByHash(contractId),
+            url: protocolExplorer.prepareUrlForHash(contractId),
             label: isDex.value
               ? t('transaction.overview.superheroDex')
               : t('common.smartContract'),
@@ -176,7 +177,7 @@ export default defineComponent({
             sender: {
               address: innerTx.value.ownerId,
               name: getName(innerTx.value.ownerId).value,
-              url: aeScan.prepareUrlByHash(innerTx.value.ownerId),
+              url: protocolExplorer.prepareUrlForAccount(innerTx.value.ownerId),
               label: t('multisig.multisigVault'),
             },
             recipient: {
@@ -191,13 +192,13 @@ export default defineComponent({
               sender: {
                 address: senderId,
                 name: getName(senderId).value,
-                url: aeScan.prepareUrlByHash(senderId),
+                url: protocolExplorer.prepareUrlForAccount(senderId),
                 label: t('transaction.overview.accountAddress'),
               },
               recipient: {
                 address: recipientId,
                 name: name.value || getName(recipientId).value,
-                url: aeScan.prepareUrlByHash(recipientId),
+                url: protocolExplorer.prepareUrlForAccount(recipientId),
                 label: t('transaction.overview.accountAddress'),
               },
               title: t('transaction.type.spendTx'),
@@ -241,6 +242,7 @@ export default defineComponent({
         address: ownerAddress,
         name: getName(ownerAddress as Encoded.AccountAddress).value,
         label: t('transaction.overview.accountAddress'),
+        url: protocolExplorer.prepareUrlForAccount(ownerAddress as Encoded.AccountAddress),
       };
     });
 
@@ -250,13 +252,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped lang="scss">
-@use '@/styles/mixins';
-
-.tag-wrapper {
-  @include mixins.flex(center, center);
-
-  gap: 8px;
-}
-</style>

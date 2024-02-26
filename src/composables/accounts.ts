@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
-import { Encoded } from '@aeternity/aepp-sdk';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import type {
+  AccountAddress,
   IAccount,
   IAccountRaw,
   IFormSelectOption,
@@ -11,13 +11,14 @@ import type {
 } from '@/types';
 import {
   ACCOUNT_HD_WALLET,
-  PROTOCOL_AETERNITY,
   PROTOCOLS,
+  PROTOCOL_LIST,
   STORAGE_KEYS,
   IS_IOS,
   IS_MOBILE_APP,
 } from '@/constants';
 import {
+  createCallbackRegistry,
   prepareAccountSelectOptions,
   watchUntilTruthy,
 } from '@/utils';
@@ -27,7 +28,12 @@ import migrateMnemonicVuexToComposable from '@/migrations/002-mnemonic-vuex-to-c
 import migrateMnemonicCordovaToIonic from '@/migrations/008-mnemonic-cordova-to-ionic';
 import { useStorageRef } from './storageRef';
 
-let isInitialized = false;
+let composableInitialized = false;
+
+const {
+  addCallback: onAccountChange,
+  runCallbacks: runOnAccountChangeCallbacks,
+} = createCallbackRegistry<(newAccount: IAccount, oldAccount: IAccount) => any>();
 
 const areAccountsRestored = ref(false);
 
@@ -80,7 +86,7 @@ const accounts = computed((): IAccount[] => {
     return [];
   }
 
-  const idxList = Object.fromEntries(PROTOCOLS.map(((protocol) => [protocol, 0])));
+  const idxList = Object.fromEntries(PROTOCOL_LIST.map(((protocol) => [protocol, 0])));
 
   return accountsRaw.value
     .map((account, globalIdx) => {
@@ -115,7 +121,7 @@ const accountsGroupedByProtocol = computed(
 );
 
 const aeAccounts = computed(
-  (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOL_AETERNITY] || [],
+  (): IAccount[] => accountsGroupedByProtocol.value[PROTOCOLS.aeternity] || [],
 );
 
 const accountsAddressList = computed(
@@ -144,7 +150,7 @@ const protocolsInUse = computed(
  * The wallets's data is created in fly with the use of computed properties.
  */
 export function useAccounts() {
-  function getAccountByAddress(address: Encoded.AccountAddress): IAccount | undefined {
+  function getAccountByAddress(address: AccountAddress): IAccount | undefined {
     return accounts.value.find((acc) => acc.address === address);
   }
 
@@ -174,14 +180,17 @@ export function useAccounts() {
   }
 
   function setActiveAccountByGlobalIdx(globalIdx: number = 0) {
-    const account = getAccountByGlobalIdx(globalIdx);
-    activeAccountGlobalIdx.value = account?.globalIdx || 0;
-    if (account) {
-      protocolLastActiveGlobalIdx.value[account.protocol] = account.globalIdx;
+    const accountCurrent = activeAccount.value;
+    const accountNew = getAccountByGlobalIdx(globalIdx);
+    activeAccountGlobalIdx.value = accountNew?.globalIdx || 0;
+
+    if (accountNew && accountCurrent.address !== accountNew.address) {
+      protocolLastActiveGlobalIdx.value[accountNew.protocol] = accountNew.globalIdx;
+      runOnAccountChangeCallbacks(accountNew, accountCurrent);
     }
   }
 
-  function setActiveAccountByAddress(address?: Encoded.AccountAddress) {
+  function setActiveAccountByAddress(address?: AccountAddress) {
     if (address) {
       setActiveAccountByGlobalIdx(getAccountByAddress(address)?.globalIdx);
     }
@@ -211,7 +220,7 @@ export function useAccounts() {
   /**
    * Determine if provided address belongs to any of the current user's accounts.
    */
-  function isLocalAccountAddress(address: Encoded.AccountAddress): boolean {
+  function isLocalAccountAddress(address: AccountAddress): boolean {
     return accountsAddressList.value.includes(address);
   }
 
@@ -233,14 +242,14 @@ export function useAccounts() {
    */
   async function discoverAccounts() {
     const lastUsedAccountIndexRegistry: number[] = await Promise.all(
-      PROTOCOLS.map(
+      PROTOCOL_LIST.map(
         (protocol) => ProtocolAdapterFactory
           .getAdapter(protocol)
           .discoverLastUsedAccountIndex(mnemonicSeed.value),
       ),
     );
 
-    PROTOCOLS.forEach((protocol, index) => {
+    PROTOCOL_LIST.forEach((protocol, index) => {
       for (let i = 0; i <= lastUsedAccountIndexRegistry[index]; i += 1) {
         addRawAccount({ isRestored: true, protocol });
       }
@@ -254,10 +263,10 @@ export function useAccounts() {
   }
 
   (async () => {
-    if (!isInitialized) {
-      await watchUntilTruthy(isLoggedIn);
+    if (!composableInitialized) {
+      composableInitialized = true;
 
-      isInitialized = true;
+      await watchUntilTruthy(isLoggedIn);
 
       protocolLastActiveGlobalIdx
         .value[activeAccount.value.protocol] = activeAccount.value.globalIdx;
@@ -284,6 +293,7 @@ export function useAccounts() {
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,
+    onAccountChange,
     setActiveAccountByAddress,
     setActiveAccountByGlobalIdx,
     setActiveAccountByProtocolAndIdx,

@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
-import { Encoded, Tag } from '@aeternity/aepp-sdk';
+import { Tag } from '@aeternity/aepp-sdk';
 import type {
+  AccountAddress,
   ITx,
   ObjectValues,
   TxFunctionRaw,
@@ -12,7 +13,7 @@ import {
   getTxTypeLabel,
   getTxTypeListLabel,
 } from '@/utils';
-import { TX_DIRECTION } from '@/constants';
+import { PROTOCOLS, TX_DIRECTION } from '@/constants';
 import {
   AE_TRANSACTION_OWNERSHIP_STATUS,
   TX_RETURN_TYPE_OK,
@@ -40,7 +41,7 @@ import { useTippingContracts } from './tippingContracts';
 
 interface UseTransactionOptions {
   tx?: ITx;
-  externalAddress?: Encoded.AccountAddress;
+  externalAddress?: AccountAddress;
 }
 
 export function useTransactionTx({
@@ -50,11 +51,11 @@ export function useTransactionTx({
   const { dexContracts } = useAeSdk();
   const { accounts, activeAccount } = useAccounts();
   const { tippingContractAddresses } = useTippingContracts();
-  const { availableTokens } = useFungibleTokens();
+  const { getProtocolAvailableTokens } = useFungibleTokens();
 
   const outerTx = ref<ITx | undefined>(tx);
   const innerTx = ref<ITx | undefined>(tx ? getInnerTransaction(tx) : undefined);
-  const ownerAddress = ref<Encoded.AccountAddress | undefined>(externalAddress);
+  const ownerAddress = ref<AccountAddress | undefined>(externalAddress);
 
   const hasNestedTx = computed(() => outerTx.value && isContainingNestedTx(outerTx.value));
   const innerTxTag = computed((): Tag | null => innerTx.value ? getTxTag(innerTx.value) : null);
@@ -92,7 +93,7 @@ export function useTransactionTx({
   const isDexAllowance = computed((): boolean => (
     !!innerTx.value
     && isTxFunctionDexAllowance(innerTx.value?.function)
-    && !!availableTokens.value[innerTx.value.contractId]
+    && !!getProtocolAvailableTokens(PROTOCOLS.aeternity)[innerTx.value.contractId]
   ));
 
   const isDexAddLiquidity = computed(
@@ -162,13 +163,11 @@ export function useTransactionTx({
     innerTx.value = getInnerTransaction(newTx);
   }
 
-  function setExternalAddress(address: Encoded.AccountAddress) {
+  function setExternalAddress(address: AccountAddress) {
     ownerAddress.value = address;
   }
 
-  function getOwnershipAddress(
-    externalOwnerAddress?: Encoded.AccountAddress,
-  ): Encoded.AccountAddress {
+  function getOwnershipAddress(externalOwnerAddress?: AccountAddress): AccountAddress {
     const { current, subAccount } = AE_TRANSACTION_OWNERSHIP_STATUS;
     switch (ownershipStatus.value) {
       case current:
