@@ -124,6 +124,7 @@ import {
   useAssetDetails,
   useCurrencies,
   useFungibleTokens,
+  useMultisigAccounts,
   useUi,
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
@@ -184,6 +185,20 @@ export default defineComponent({
       getProtocolAvailableTokens,
     } = useFungibleTokens();
 
+    const { activeMultisigAccount } = useMultisigAccounts();
+
+    const currentActiveAddress = computed(
+      () => isMultisig.value
+        ? activeMultisigAccount.value?.gaAccountId!
+        : activeAccount.value.address!,
+    );
+
+    const currentActiveProtocol = computed(
+      () => isMultisig.value
+        ? PROTOCOLS.aeternity
+        : activeAccount.value.protocol,
+    );
+
     const isCoin: boolean = !!route.matched.find(
       ({ name }) => name && [
         ROUTE_COIN,
@@ -219,24 +234,24 @@ export default defineComponent({
     const stickyTabsWrapperEl = ref<HTMLDivElement>();
 
     const fungibleToken = computed(
-      () => getProtocolAvailableTokens(activeAccount.value.protocol)[contractId],
+      () => getProtocolAvailableTokens(currentActiveProtocol.value)[contractId],
     );
     const fungibleTokenBalance = computed(
-      () => (isCoin) ? undefined : getAccountTokenBalance(activeAccount.value.address, contractId),
+      () => (isCoin) ? undefined : getAccountTokenBalance(currentActiveAddress.value, contractId),
     );
     const routeName = computed(() => route.name);
     const showFilterBar = computed(() => !!route?.meta?.showFilterBar);
     const activeAccountFaucetUrl = computed(
-      () => (isAe) ? buildAeFaucetUrl(activeAccount.value.address) : null,
+      () => (isAe) ? buildAeFaucetUrl(currentActiveAddress.value) : null,
     );
     const activeAccountSimplexLink = computed(
-      () => (isAe) ? buildSimplexLink(activeAccount.value.address) : null,
+      () => (isAe) ? buildSimplexLink(currentActiveAddress.value) : null,
     );
 
     const assetData = computed((): IToken | undefined => {
       if (isCoin) {
         return ProtocolAdapterFactory
-          .getAdapter(activeAccount.value.protocol)
+          .getAdapter(currentActiveProtocol.value)
           .getDefaultCoin(marketData.value!);
       }
       return fungibleToken.value;
@@ -250,7 +265,7 @@ export default defineComponent({
 
     const assetBalance = computed((): number => (isCoin)
       ? protocolCoinBalance.value.toNumber()
-      : getAccountTokenBalance(activeAccount.value.address, contractId)?.convertedBalance || 0);
+      : getAccountTokenBalance(currentActiveAddress.value, contractId)?.convertedBalance || 0);
 
     function calculateRouterHeight() {
       nextTick(() => {
