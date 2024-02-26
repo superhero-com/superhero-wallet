@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.6](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.5...v2.1.6) (2024-02-26)
+
+
+### Features
+
+* support signing messages encoded as hex ([63e398c](https://github.com/Superhero-com/superhero-wallet/commit/63e398ca0f5f3df0806385f2ca101ce0a580aeed))
+
 ### [2.1.5](https://github.com/Superhero-com/superhero-wallet/compare/v2.1.4...v2.1.5) (2024-02-13)
 
 
