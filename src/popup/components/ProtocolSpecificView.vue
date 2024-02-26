@@ -2,7 +2,8 @@
   <Component
     :is="componentToDisplay"
     v-if="viewComponentName"
-    :ionic-lifecycle-status="ionicLifecycleStatus"
+    :page-did-enter="pageDidEnter"
+    :page-will-enter="pageWillEnter"
   />
   <div v-else>
     <InfoBox
@@ -27,7 +28,6 @@ import {
   ref,
 } from 'vue';
 import type {
-  IonicLifecycleStatus,
   WalletRouteMeta,
   Protocol,
   ProtocolView,
@@ -82,7 +82,8 @@ export default defineComponent({
     const { activeNetwork } = useNetworks();
     const { activeAccount } = useAccounts();
 
-    const ionicLifecycleStatus = ref<IonicLifecycleStatus>();
+    const pageDidEnter = ref(false);
+    const pageWillEnter = ref(false);
 
     const protocol = ((): Protocol => {
       if (routeMeta.isMultisig) {
@@ -118,27 +119,28 @@ export default defineComponent({
       : null;
 
     onIonViewDidEnter(() => {
-      ionicLifecycleStatus.value = 'didEnter';
+      pageDidEnter.value = true;
     });
 
     onIonViewDidLeave(() => {
-      ionicLifecycleStatus.value = 'didLeave';
+      pageDidEnter.value = false;
     });
 
     // In case the component is a tab view, will enter will only be called
     // when we are switching to the tab from another tab
     // not when we are refreshing the page or navigating to the page containing the tab
     onIonViewWillEnter(() => {
-      ionicLifecycleStatus.value = 'willEnter';
+      pageWillEnter.value = true;
     });
 
     onIonViewWillLeave(() => {
-      ionicLifecycleStatus.value = 'willLeave';
+      pageWillEnter.value = false;
     });
 
     return {
       componentToDisplay,
-      ionicLifecycleStatus,
+      pageDidEnter,
+      pageWillEnter,
     };
   },
 });

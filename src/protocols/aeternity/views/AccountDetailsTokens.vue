@@ -30,10 +30,8 @@ import {
   computed,
   watch,
   onMounted,
-  PropType,
 } from 'vue';
 import { throttle } from 'lodash-es';
-import type { IonicLifecycleStatus } from '@/types';
 import { FIXED_TABS_SCROLL_HEIGHT } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter, useScrollConfig } from '@/composables';
 
@@ -51,7 +49,7 @@ export default defineComponent({
   },
   props: {
     showFilters: Boolean,
-    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
+    pageWillEnter: Boolean,
   },
   setup(props) {
     const { isOnline } = useConnection();
@@ -78,9 +76,9 @@ export default defineComponent({
     );
 
     watch(
-      () => props.ionicLifecycleStatus,
-      () => {
-        if (props.ionicLifecycleStatus === 'willEnter') {
+      () => props.pageWillEnter,
+      (willEnter) => {
+        if (willEnter) {
           setScrollConf(false);
         }
       },

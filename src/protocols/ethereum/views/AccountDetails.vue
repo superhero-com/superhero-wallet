@@ -1,7 +1,10 @@
 <template>
   <IonPage>
     <IonContent class="account-ion-content">
-      <AccountDetailsBase class="account-details">
+      <AccountDetailsBase
+        v-if="pageDidEnter"
+        class="account-details"
+      >
         <template #navigation>
           <AccountDetailsNavigation
             :route-names="[
@@ -31,6 +34,9 @@ export default defineComponent({
     IonPage,
     IonContent,
     AccountDetailsNavigation,
+  },
+  props: {
+    pageDidEnter: Boolean,
   },
   setup() {
     return {

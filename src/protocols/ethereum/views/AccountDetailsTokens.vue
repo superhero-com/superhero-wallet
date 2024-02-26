@@ -27,9 +27,7 @@
 import { IonContent, IonPage } from '@ionic/vue';
 import {
   defineComponent,
-  PropType,
 } from 'vue';
-import type { IonicLifecycleStatus } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import { useConnection, useTransactionAndTokenFilter } from '@/composables';
 
@@ -47,7 +45,6 @@ export default defineComponent({
   },
   props: {
     showFilters: Boolean,
-    ionicLifecycleStatus: { type: String as PropType<IonicLifecycleStatus>, default: null },
   },
   setup() {
     const { isOnline } = useConnection();
