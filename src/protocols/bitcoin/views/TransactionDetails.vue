@@ -105,6 +105,7 @@ export default defineComponent({
           transactionOwner,
         };
       } catch (e) {
+        setLoaderVisible(false);
         router.push({ name: ROUTE_NOT_FOUND });
       }
     });

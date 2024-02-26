@@ -139,6 +139,7 @@ export default defineComponent({
       try {
         transaction.value = await adapter.fetchTransactionByHash(hash, transactionOwner);
       } catch (e) {
+        setLoaderVisible(false);
         router.push({ name: ROUTE_NOT_FOUND });
       }
     });
