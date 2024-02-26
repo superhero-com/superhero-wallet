@@ -15,9 +15,9 @@
               no-symbol
               fiat-below
               large
-              :protocol="PROTOCOLS.aeternity"
+              :protocol="activeAccount.protocol"
               :amount="assetBalance"
-              :hide-fiat="!isAe"
+              :hide-fiat="!isCoin"
             />
           </div>
 
@@ -43,7 +43,11 @@
               :href="activeAccountFaucetUrl"
             />
             <BtnBox
-              v-else-if="!IS_IOS && (isNodeMainnet || isNodeTestnet)"
+              v-else-if="(
+                !IS_IOS
+                && (isNodeMainnet || isNodeTestnet)
+                && activeAccount.protocol === PROTOCOLS.aeternity
+              )"
               :text="$t('common.swap')"
               :icon="SwapIcon"
               :href="AE_DEX_URL"
@@ -64,7 +68,7 @@
               />
             </Tabs>
             <TransactionAndTokenFilter
-              :key="routeName"
+              :key="routeName?.toString()"
               :show-filters="showFilterBar"
             />
           </div>
@@ -370,6 +374,7 @@ export default defineComponent({
       stickyTabsWrapperEl,
       fungibleToken,
       isAe,
+      isCoin,
       isNodeMainnet,
       isNodeTestnet,
       activeAccountSimplexLink,
@@ -382,6 +387,7 @@ export default defineComponent({
       isMultisig,
       route,
       routerHeight,
+      activeAccount,
       fadeAnimation,
     };
   },
