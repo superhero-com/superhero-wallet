@@ -15,7 +15,7 @@
               no-symbol
               fiat-below
               large
-              :protocol="activeAccount.protocol"
+              :protocol="currentActiveProtocol"
               :amount="assetBalance"
               :hide-fiat="!isCoin"
             />
@@ -46,7 +46,7 @@
               v-else-if="(
                 !IS_IOS
                 && (isNodeMainnet || isNodeTestnet)
-                && activeAccount.protocol === PROTOCOLS.aeternity
+                && currentActiveProtocol === PROTOCOLS.aeternity
               )"
               :text="$t('common.swap')"
               :icon="SwapIcon"
@@ -390,6 +390,7 @@ export default defineComponent({
       assetBalance,
       assetData,
       contractId,
+      currentActiveProtocol,
       stickyTabsWrapperEl,
       fungibleToken,
       isAe,
@@ -406,7 +407,6 @@ export default defineComponent({
       isMultisig,
       route,
       routerHeight,
-      activeAccount,
       fadeAnimation,
     };
   },
