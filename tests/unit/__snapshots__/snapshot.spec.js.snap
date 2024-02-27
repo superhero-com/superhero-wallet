@@ -11,71 +11,78 @@ exports[`Pages About 1`] = `
       class="about"
     >
       <div
-        class="table"
+        class="panel"
       >
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-             Superhero Wallet 
-          </div>
-        </div>
-        <a
-          class="link-button default table-item link"
-          href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
-          target="_blank"
-        >
-          
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-            a1c1c5a 
-            <svg />
-          </div>
-          
-          <!--v-if-->
-        </a>
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-             v.version-specific-text
-          </div>
-        </div>
-        <div
-          class="table-item"
-        >
-          <div
-            class="name"
-          >
-            locale-specific-text
-          </div>
-          <div
-            class="value"
-          >
-            13.0.0
-          </div>
-        </div>
         <!--v-if-->
+        <div
+          class="panel-body"
+        >
+          
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+               Superhero Wallet 
+            </div>
+          </div>
+          <a
+            class="link-button default table-item link"
+            href="https://github.com/aeternity/superhero-wallet/commit/a1c1c5acc851c49248aad87088963f9ae5fb200e"
+            target="_blank"
+          >
+            
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+              a1c1c5a 
+              <svg />
+            </div>
+            
+            <!--v-if-->
+          </a>
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+               v.version-specific-text
+            </div>
+          </div>
+          <div
+            class="table-item"
+          >
+            <div
+              class="name"
+            >
+              locale-specific-text
+            </div>
+            <div
+              class="value"
+            >
+              13.0.0
+            </div>
+          </div>
+          <!--v-if-->
+          
+        </div>
       </div>
       <div
         class="additional-links"

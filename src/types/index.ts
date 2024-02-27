@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 
-import { Component } from 'vue';
+import { Component, CreateComponentPublicInstance } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { TranslateResult } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
@@ -67,6 +67,15 @@ type PublicPart<T> = { [K in keyof T]: T[K] };
 export type PartialDeep<T> = T extends object ? {
   [P in keyof T]?: PartialDeep<T[P]>;
 } : T;
+
+/**
+ * Useful when applying ref="..." to Vue Component instead of HTML element.
+ * In this case in order to access the child component's element we need to use
+ * `$el` property. Vue uses `any` for this property, but in most cases this is an HTML element.
+ */
+export interface ComponentRef extends CreateComponentPublicInstance {
+  $el: HTMLElement;
+}
 
 /**
  * Allowed options that can be passed to our fetch utility functions
