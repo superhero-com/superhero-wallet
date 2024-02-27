@@ -3,12 +3,14 @@ import type {
   AccountAddress,
   AssetContractId,
   ICommonTransaction,
+  IFetchTransactionResult,
   ITransactionApiPaginationParams,
   Protocol,
 } from '@/types';
 import { POLLING_INTERVAL_TRANSACTIONS, STORAGE_KEYS } from '@/constants';
 import { objectHasNonEmptyProperties } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { isEqual } from 'lodash-es';
 import { useConnection } from './connection';
 import { useUi } from './ui';
 import { useStorageRef } from './storageRef';
@@ -30,15 +32,18 @@ interface UseTransactionListOptions {
  * if the cached list should be cleared and fetched again.
  */
 const state = useStorageRef<{
-  accountAddress?: AccountAddress;
-  assetContractId?: AssetContractId;
+  accountAddress: AccountAddress;
+  assetContractId: AssetContractId;
   isEndReached: boolean;
   isInitialLoadDone: boolean;
   networkName?: string;
   nextPagePaginationParams: ITransactionApiPaginationParams;
   transactionsLoaded: ICommonTransaction[];
+  protocol?: Protocol;
 }>(
   {
+    accountAddress: '',
+    assetContractId: '',
     isEndReached: false,
     isInitialLoadDone: false,
     nextPagePaginationParams: {},
@@ -71,11 +76,9 @@ export function useTransactionList({
   const { activeNetwork } = useNetworks();
   const { accountsTransactionsPending } = useLatestTransactionList();
 
-  const adapter = ProtocolAdapterFactory.getAdapter(protocol);
-
   const transactionsPending = computed(
-    () => (accountsTransactionsPending.value[accountAddress] || [])
-      .filter(({ tx }) => tx?.contractId === assetContractId),
+    () => (accountsTransactionsPending.value[state.value.accountAddress] || [])
+      .filter(({ tx }) => tx?.contractId === state.value.assetContractId),
   );
 
   const transactionsLoadedAndPending = computed(() => [
@@ -83,20 +86,35 @@ export function useTransactionList({
     ...transactionsLoaded.value,
   ]);
 
-  function fetchTransactions(paginationParams?: ITransactionApiPaginationParams) {
-    return (assetContractId)
-      ? adapter.fetchAccountAssetTransactions(accountAddress, assetContractId, paginationParams)
-      : adapter.fetchAccountTransactions(accountAddress, paginationParams);
+  async function fetchTransactions(
+    withState: typeof state.value,
+  ): Promise<IFetchTransactionResult> {
+    const adapter = ProtocolAdapterFactory.getAdapter(state.value.protocol!);
+
+    const result = (withState?.assetContractId)
+      ? await adapter.fetchAccountAssetTransactions(
+        withState.accountAddress,
+        withState.assetContractId,
+        withState.nextPagePaginationParams,
+      )
+      : await adapter.fetchAccountTransactions(
+        withState?.accountAddress!,
+        withState?.nextPagePaginationParams,
+      );
+
+    // Fetch again if the state has changed since the fetch was initiated
+    if (!isEqual(withState, state.value)) {
+      return fetchTransactions(state.value);
+    }
+
+    return result;
   }
 
   async function loadCurrentPageTransactions() {
     if (isOnline.value && !isLoading.value && !state.value.isEndReached) {
       isLoading.value = true;
 
-      const {
-        paginationParams,
-        regularTransactions,
-      } = await fetchTransactions(state.value.nextPagePaginationParams);
+      const { paginationParams, regularTransactions } = await fetchTransactions(state.value);
 
       if (objectHasNonEmptyProperties(paginationParams)) {
         state.value.nextPagePaginationParams = paginationParams;
@@ -124,7 +142,7 @@ export function useTransactionList({
 
     pollingIntervalId = setInterval(async () => {
       if (isAppActive.value) {
-        const { paginationParams, regularTransactions } = await fetchTransactions();
+        const { paginationParams, regularTransactions } = await fetchTransactions(state.value);
 
         // If newly fetched first transaction is different than the first transaction stored
         // it means that the list and the pagination params needs to be reset.
@@ -148,6 +166,7 @@ export function useTransactionList({
     // Clear cached states if app wants to access different asset list
     if (
       accountAddress !== state.value.accountAddress
+      || protocol !== state.value.protocol
       || assetContractId !== state.value.assetContractId
       || activeNetwork.value.name !== state.value.networkName
     ) {
@@ -155,7 +174,8 @@ export function useTransactionList({
 
       state.value = {
         accountAddress,
-        assetContractId,
+        assetContractId: assetContractId!,
+        protocol,
         isEndReached: false,
         isInitialLoadDone: false,
         networkName: activeNetwork.value.name,
@@ -170,7 +190,6 @@ export function useTransactionList({
     isEndReached,
     transactionsLoaded,
     transactionsLoadedAndPending,
-    fetchTransactions,
     loadCurrentPageTransactions,
     initializeTransactionListPolling,
     stopTransactionListPolling,
