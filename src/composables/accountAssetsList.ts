@@ -7,6 +7,7 @@ import type {
   IAsset,
   ICoin,
 } from '@/types';
+import { PROTOCOLS } from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { useCurrencies } from './currencies';
 import { useFungibleTokens } from './fungibleTokens';
@@ -50,12 +51,18 @@ export function useAccountAssetsList({
     return currentBalance || new BigNumber(0);
   });
 
+  const accountProtocol = computed(
+    () => isMultisig ? PROTOCOLS.aeternity : activeAccount.value.protocol,
+  );
+
   const accountTokenBalances = computed(
-    () => getAccountTokenBalances(activeAccount.value.address),
+    () => getAccountTokenBalances(isMultisig
+      ? activeMultisigAccount.value?.gaAccountId!
+      : activeAccount.value.address),
   );
 
   const accountAvailableTokens = computed(
-    () => getProtocolAvailableTokens(activeAccount.value.protocol),
+    () => getProtocolAvailableTokens(accountProtocol.value),
   );
 
   const accountTokenBalancesContractIds = computed(
@@ -67,7 +74,7 @@ export function useAccountAssetsList({
    */
   const protocolCoin = computed(
     (): ICoin => ProtocolAdapterFactory
-      .getAdapter(activeAccount.value.protocol)
+      .getAdapter(accountProtocol.value)
       .getDefaultCoin(marketData.value!, +protocolCoinBalance.value),
   );
 
@@ -100,7 +107,7 @@ export function useAccountAssetsList({
     const searchTermParsed = (searchTerm?.value || '').trim().toLowerCase();
     const isSearchTermContract = searchTermParsed.startsWith('ct_');
     const protocolCoinContractId = ProtocolAdapterFactory
-      .getAdapter(activeAccount.value.protocol)
+      .getAdapter(accountProtocol.value)
       .coinContractId;
 
     return accountAssets.value
