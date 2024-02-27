@@ -23,11 +23,13 @@
               class="transaction-overview"
               :sender="{
                 label: $t('multisig.multisigVault'),
-                address: activeMultisigAccount.gaAccountId
+                address: activeMultisigAccount.gaAccountId,
+                url: protocolExplorer.prepareUrlForAccount(activeMultisigAccount.gaAccountId),
               }"
               :recipient="{
                 label: $t('common.smartContract'),
-                address: activeMultisigAccount.contractId
+                address: activeMultisigAccount.contractId,
+                url: activeMultisigAccountExplorerUrl,
               }"
               :transaction="{ tx: multisigTx }"
             />
@@ -317,6 +319,7 @@ import {
   getTransactionPayload,
   isInsufficientBalanceError,
 } from '@/protocols/aeternity/helpers';
+import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -385,6 +388,8 @@ export default defineComponent({
     } = useMultisigTransactions();
 
     const { getTxAssetSymbol } = useFungibleTokens();
+
+    const protocolExplorer = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity).getExplorer();
 
     const multisigTx = ref<ITx | null>(null);
     const transaction = ref<ITransaction | null>(null);
@@ -547,6 +552,7 @@ export default defineComponent({
       isLoaderVisible,
       pendingMultisigTxCanBeSent,
       pendingMultisigTxExpired,
+      protocolExplorer,
       expirationHeightToRelativeTime,
       pendingMultisigTxConfirmedByLocalSigners,
       proposalCompleted,
