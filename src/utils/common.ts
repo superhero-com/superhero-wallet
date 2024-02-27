@@ -8,7 +8,7 @@ import { WatchSource, watch } from 'vue';
 import { defer, uniqWith } from 'lodash-es';
 import BigNumber from 'bignumber.js';
 import { Share } from '@capacitor/share';
-import { useI18n } from 'vue-i18n';
+import { ComposerTranslation } from 'vue-i18n';
 import { LocationQuery } from 'vue-router';
 import type {
   AssetContractId,
@@ -309,7 +309,7 @@ export function removeDuplicatedTransactions(transactions: ITransaction[]) {
 }
 
 export function secondsToRelativeTime(seconds: number, shortForm?: boolean) {
-  const { t } = useI18n();
+  const t = tg as ComposerTranslation;
   const secondsPerMinute = 60;
   const secondsPerHour = secondsPerMinute * 60;
   const secondsPerDay = secondsPerHour * 24;
