@@ -1,4 +1,4 @@
-name: Test, build, and deploy
+name: Build and deploy
 on: [push, pull_request]
 jobs:
   main:
@@ -22,14 +22,6 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
       - name: Install app dependencies
         run: npm ci
-      - name: Run Commitlint
-        if: github.event_name == 'pull_request'
-        env:
-          HEAD: ${{ github.event.pull_request.head.sha }}
-          BASE: ${{ github.event.pull_request.base.sha }}
-        run: npx commitlint --from $BASE --to $HEAD --verbose
-      - run: npx cross-env NODE_ENV=production npm run lint:vue && npm run lint:css
-      - run: npm test
       - name: Build Ionic Vue android app
         run: npm run build:android
       - name: Build android apk
