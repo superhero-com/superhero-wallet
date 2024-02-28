@@ -69,7 +69,7 @@ export default defineComponent({
           .reduce((total, balance) => total.plus(balance), new BigNumber(0))
           .toFixed();
 
-        return getFiat(+totalBalance, PROTOCOLS.aeternity);
+        return getFiat(+totalBalance, PROTOCOLS.aeternity).toString();
       },
     );
 
