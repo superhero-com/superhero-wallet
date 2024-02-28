@@ -5,6 +5,7 @@
       :transactions="transactionList"
       :is-loading="isLoading"
       :is-end-reached="isEndReached"
+      @load-more="loadCurrentPageTransactions()"
     />
   </IonPage>
 </template>
@@ -40,6 +41,7 @@ export default defineComponent({
       isLoading,
       isEndReached,
       initializeTransactionListPolling,
+      loadCurrentPageTransactions,
       stopTransactionListPolling,
     } = useTransactionList({
       accountAddress: activeMultisigAccount.value?.gaAccountId!,
@@ -84,6 +86,7 @@ export default defineComponent({
       isLoading,
       isEndReached,
       transactionList,
+      loadCurrentPageTransactions,
     };
   },
 });
