@@ -72,12 +72,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
-@use '../../styles/mixins';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins';
 
 .back-to-top {
   width: 100%;
   height: 0;
+  z-index: $z-index-back-to-top;
 
   &.visible {
     height: 40px;
@@ -88,19 +89,18 @@ export default defineComponent({
 
     pointer-events: none;
     position: fixed;
-    z-index: variables.$z-index-header;
     bottom: 0;
     left: 0;
     width: 100%;
     padding: 12px 4px 4px 0;
-    background: variables.$color-bg-4;
+    background: $color-bg-4;
     /* stylelint-disable-next-line declaration-block-no-duplicate-properties */
     background:
       linear-gradient(
         180deg,
-        rgba(variables.$color-bg-4, 0) 5%,
-        rgba(variables.$color-bg-4, 0.8) 60%,
-        rgba(variables.$color-bg-4, 0.9) 100%
+        rgba($color-bg-4, 0) 5%,
+        rgba($color-bg-4, 0.8) 60%,
+        rgba($color-bg-4, 0.9) 100%
       );
   }
 
@@ -111,7 +111,7 @@ export default defineComponent({
     height: 40px;
     width: 41px;
     border-radius: 10px;
-    background-color: variables.$color-dialog;
+    background-color: $color-dialog;
     transition: opacity 0.2s ease-in-out;
 
     &:hover {

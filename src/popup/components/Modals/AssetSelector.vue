@@ -39,7 +39,6 @@
         @click="resolve(asset)"
       />
     </div>
-    <BackToTop />
   </Modal>
 </template>
 
@@ -62,14 +61,12 @@ import { useAccountAssetsList } from '@/composables';
 import Modal from '../Modal.vue';
 import AssetListItem from '../Assets/AssetListItem.vue';
 import InputSearch from '../InputSearch.vue';
-import BackToTop from '../BackToTop.vue';
 import Loader from '../Loader.vue';
 
 export default defineComponent({
   name: 'AssetSelector',
   components: {
     AssetListItem,
-    BackToTop,
     Modal,
     InputSearch,
     Loader,
@@ -147,6 +144,7 @@ export default defineComponent({
     opacity: 0;
     z-index: -1;
     transition: opacity 0.25s ease-in-out;
+    padding-bottom: 40px; // Back-to-top button height
 
     &.visible {
       opacity: 1;
