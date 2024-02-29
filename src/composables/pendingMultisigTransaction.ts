@@ -2,6 +2,7 @@ import {
   ref,
   watch,
   computed,
+  effectScope,
 } from 'vue';
 import { isEqual } from 'lodash-es';
 import type {
@@ -23,7 +24,12 @@ import { useTopHeaderData } from './topHeader';
 
 let composableInitialized = false;
 
-const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>();
+const pendingMultisigTransaction = ref<IActiveMultisigTransaction | null>(null);
+
+/** Used only to establish the multisig transaction function */
+const activeMultisigTransactionData = ref<ITransaction | null>(null);
+
+const isLoading = ref(false);
 
 export function usePendingMultisigTransaction() {
   const { getMiddleware } = useAeMiddleware();
@@ -31,12 +37,6 @@ export function usePendingMultisigTransaction() {
   const { fetchActiveMultisigTx } = useMultisigTransactions();
   const { topBlockHeight } = useTopHeaderData();
   const { aeAccounts } = useAccounts();
-
-  const latestMultisigAccountTransaction = ref<ITransaction | null>(null);
-
-  async function assignPendingMultisigTx() {
-    pendingMultisigTransaction.value = await fetchActiveMultisigTx();
-  }
 
   /**
    * The minimum required number of confirmations to process the current proposal.
@@ -162,7 +162,7 @@ export function usePendingMultisigTransaction() {
    */
   const isPendingMultisigTxCompletedAndRevoked = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
+    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.revoke
   ));
 
   /**
@@ -170,7 +170,7 @@ export function usePendingMultisigTransaction() {
    */
   const isPendingMultisigTxCompletedAndConfirmed = computed((): boolean => (
     !activeMultisigAccount.value?.txHash
-    && latestMultisigAccountTransaction.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
+    && activeMultisigTransactionData.value?.tx.function === TX_FUNCTIONS_MULTISIG.confirm
   ));
 
   /**
@@ -183,28 +183,43 @@ export function usePendingMultisigTransaction() {
       const { data: [latestTransaction] } = await middleware.getTxs({
         direction: 'backward', limit: 1, contract: contractId,
       });
-      latestMultisigAccountTransaction.value = latestTransaction;
+      return latestTransaction;
     } catch (error) {
       handleUnknownError(error);
+      return null;
     }
   }
 
   if (!composableInitialized) {
     composableInitialized = true;
 
-    watch(
-      activeMultisigAccount,
-      (newValue, oldValue) => {
-        if (!isEqual(newValue, oldValue)) {
-          assignPendingMultisigTx();
+    // Create persistent effect scope to avoid watcher being disposed
+    effectScope(true).run(() => {
+      const { activeMultisigAccount: scopedActiveMultisigAccount } = useMultisigAccounts();
 
-          if (!activeMultisigAccount.value?.txHash && !latestMultisigAccountTransaction.value) {
-            fetchLatestMultisigAccountTransaction();
+      watch(
+        scopedActiveMultisigAccount,
+        async (newValue, oldValue) => {
+          if (newValue && !isEqual(newValue, oldValue)) {
+            if (!newValue?.txHash) {
+              activeMultisigTransactionData.value = null;
+              pendingMultisigTransaction.value = null;
+            } else if (newValue.txHash !== oldValue?.txHash) {
+              isLoading.value = true;
+              [
+                activeMultisigTransactionData.value,
+                pendingMultisigTransaction.value,
+              ] = await Promise.all([
+                fetchLatestMultisigAccountTransaction(),
+                fetchActiveMultisigTx(),
+              ]);
+              isLoading.value = false;
+            }
           }
-        }
-      },
-      { immediate: true },
-    );
+        },
+        { immediate: true },
+      );
+    });
   }
 
   return {
@@ -223,6 +238,7 @@ export function usePendingMultisigTransaction() {
     pendingMultisigTxCanBeSent,
     pendingMultisigTxLocalSigners,
     pendingMultisigTxConfirmedByLocalSigners,
+    isLoading,
     isPendingMultisigTxCompleted,
     isPendingMultisigTxCompletedAndRevoked,
     isPendingMultisigTxCompletedAndConfirmed,

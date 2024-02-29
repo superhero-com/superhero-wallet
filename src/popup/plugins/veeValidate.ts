@@ -123,7 +123,7 @@ defineRule(
 
 export default () => {
   const { balance, updateBalances } = useBalances();
-  const { currencyRates } = useCurrencies({ withoutPolling: true });
+  const { currencyRates } = useCurrencies({ pollingDisabled: true });
   const { getAeSdk } = useAeSdk();
 
   const NAME_STATES = {

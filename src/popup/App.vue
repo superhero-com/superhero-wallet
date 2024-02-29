@@ -127,7 +127,7 @@ export default defineComponent({
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts();
     const { addWalletNotification } = useNotifications();
-    const { loadCoinsData } = useCurrencies({ withoutPolling: true });
+    const { loadCoinsData } = useCurrencies({ pollingDisabled: true });
     const { restoreLanguage } = useLanguages();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
