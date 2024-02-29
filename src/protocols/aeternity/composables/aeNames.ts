@@ -225,9 +225,14 @@ export function useAeNames() {
 
   function updateDefaultNames() {
     aeAccounts.value.map(async ({ address }) => {
+      const currentNodeId = nodeNetworkId.value;
       const response = await fetchJson(
         `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`,
       ).catch(() => ({}));
+
+      if (currentNodeId !== nodeNetworkId.value) {
+        return;
+      }
 
       setDefaultName({ address, name: response?.preferredChainName });
     });

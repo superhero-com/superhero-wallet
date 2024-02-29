@@ -213,7 +213,7 @@ export default defineComponent({
       setDefaultName,
     } = useAeNames();
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { fetchRespondChallenge } = useAeSdk();
+    const { nodeNetworkId, fetchRespondChallenge } = useAeSdk();
 
     const expand = ref(false);
     const newPointer = ref<string>('');
@@ -282,6 +282,7 @@ export default defineComponent({
         const { address } = activeAccount.value;
         const { name } = props;
         const url = `${aeActiveNetworkSettings.value.backendUrl}/profile/${address}`;
+        const currentNetworkId = nodeNetworkId.value;
 
         const response = await postJson(url, {
           body: {
@@ -292,6 +293,10 @@ export default defineComponent({
         const respondChallenge = await fetchRespondChallenge(response);
 
         await postJson(url, { body: respondChallenge });
+
+        if (currentNetworkId !== nodeNetworkId.value) {
+          return;
+        }
 
         setDefaultName({ address, name });
       } catch (error: any) {
