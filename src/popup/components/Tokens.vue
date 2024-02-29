@@ -7,20 +7,21 @@
       v-if="!noIcons"
       class="icon"
     >
-      <ProtocolIcon
-        v-if="imgToken && imgToken.assetType === ASSET_TYPES.coin"
+      <AssetIcon
+        v-if="imgToken"
         class="icon-image"
-        :protocol="imgToken?.protocol || protocol"
+        :contract-id="getDisplayTokenContractId(imgToken)!"
         :icon-size="(iconSize as any)"
-        is-logo-icon
-      />
-      <img
-        v-else
-        class="icon-image"
-        :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
-        :class="{ 'with-border': !imgToken?.image }"
-        :title="imgToken?.symbol"
       >
+        <template #fallback>
+          <img
+            class="icon-image"
+            :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
+            :class="{ 'with-border': !imgToken?.image }"
+            :title="imgToken?.symbol"
+          >
+        </template>
+      </AssetIcon>
     </span>
 
     <span class="symbols">
@@ -47,14 +48,19 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue';
 import type { ITokenResolved, Protocol } from '@/types';
-import { ASSET_TYPES, ICON_SIZES, PROTOCOLS } from '@/constants';
+import {
+  ASSET_TYPES,
+  ICON_SIZES,
+  PROTOCOLS,
+} from '@/constants';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import {
   isCoin,
   truncateString as truncateStringFactory,
 } from '@/utils';
 import { AE_AVATAR_URL } from '@/protocols/aeternity/config';
-import ProtocolIcon from './ProtocolIcon.vue';
+
+import AssetIcon from './AssetIcon.vue';
 
 const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.lg, ICON_SIZES.xxl] as const;
 
@@ -62,7 +68,7 @@ export type AllowedTokenIconSize = typeof SIZES[number];
 
 export default defineComponent({
   components: {
-    ProtocolIcon,
+    AssetIcon,
   },
   props: {
     /**
@@ -106,6 +112,16 @@ export default defineComponent({
       return `${AE_AVATAR_URL}${token.contractId}`;
     }
 
+    /**
+     * Some transactions are contract calls, but we still want to display the coin icon
+     * Thus if the transaction should display a coin, we use the protocol as contractId
+     */
+    function getDisplayTokenContractId(token: ITokenResolved) {
+      const protocolCoinContractId = ProtocolAdapterFactory
+        .getAdapter(token?.protocol ?? props.protocol).coinContractId;
+      return token.assetType === ASSET_TYPES.coin ? protocolCoinContractId : token.contractId;
+    }
+
     function mapToken(token: ITokenResolved): ITokenResolved {
       const isTokenCoin = isCoin(token.contractId!) || token.isAe;
       const protocol = token.protocol || props.protocol;
@@ -137,6 +153,7 @@ export default defineComponent({
       toToken,
       imgToken,
       getTokenPlaceholderUrl,
+      getDisplayTokenContractId,
       truncateString,
     };
   },

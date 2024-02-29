@@ -1,7 +1,4 @@
-import type {
-  ICurrency,
-  IPermission,
-} from '@/types';
+import type { ICurrency, IPermission } from '@/types';
 
 export const EXTENSION_HEIGHT = 600;
 export const MOBILE_WIDTH = 480;

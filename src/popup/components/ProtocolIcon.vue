@@ -16,7 +16,6 @@ import {
 } from 'vue';
 import { ICON_SIZES, PROTOCOLS } from '@/constants';
 import type { Protocol } from '@/types';
-import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import AeternityLogo from '@/icons/logo/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
@@ -36,14 +35,10 @@ export default defineComponent({
       default: ICON_SIZES.md,
       validator: (val: AllowedProtocolIconSize) => SIZES.includes(val),
     },
-    isLogoIcon: { type: Boolean, default: false },
   },
   setup(props) {
     const iconsMap: Record<Protocol, Component> = {
-      [PROTOCOLS.aeternity]:
-        props.isLogoIcon
-          ? AeternityLogo
-          : AeternityIcon,
+      [PROTOCOLS.aeternity]: AeternityLogo,
       [PROTOCOLS.bitcoin]: BitcoinIcon,
       [PROTOCOLS.ethereum]: EthereumIcon,
     };
