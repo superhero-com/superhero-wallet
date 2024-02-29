@@ -294,7 +294,7 @@ export const routes: WalletAppRouteConfig[] = [
           {
             name: ROUTE_MULTISIG_COIN,
             path: '',
-            component: AssetDetailsTransactions,
+            component: AccountDetailsMultisigTransactions,
             props: true,
             meta: {
               title: 'coinDetails',

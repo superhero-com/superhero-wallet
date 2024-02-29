@@ -5,6 +5,7 @@
       :transactions="transactionList"
       :is-loading="isLoading"
       :is-end-reached="isEndReached"
+      @load-more="loadCurrentPageTransactions()"
     />
   </IonPage>
 </template>
@@ -24,6 +25,8 @@ import { useMultisigAccounts, usePendingMultisigTransaction, useTransactionList 
 
 import TransactionList from '../components/TransactionList.vue';
 
+let initialized = false;
+
 export default defineComponent({
   components: {
     IonPage,
@@ -38,6 +41,7 @@ export default defineComponent({
       isLoading,
       isEndReached,
       initializeTransactionListPolling,
+      loadCurrentPageTransactions,
       stopTransactionListPolling,
     } = useTransactionList({
       accountAddress: activeMultisigAccount.value?.gaAccountId!,
@@ -53,21 +57,28 @@ export default defineComponent({
     ]);
 
     // Fired when accessing the page both as tab and whole AccountDetails page.
-    onIonViewDidEnter(async () => {
+    onIonViewDidEnter(() => {
       isPageActive.value = true;
-      initializeTransactionListPolling();
+      // IonRouterOutlet re-renders the page twice
+      // https://github.com/ionic-team/ionic-framework/issues/25254
+      if (!initialized) {
+        initializeTransactionListPolling();
+        initialized = true;
+      }
     });
 
     // Fired only when leaving to different tab within the AccountDetails.
     onIonViewDidLeave(() => {
       isPageActive.value = false;
       stopTransactionListPolling();
+      initialized = false;
     });
 
     // Fired when leaving the AccountDetails page.
     onUnmounted(() => {
       isPageActive.value = false;
       stopTransactionListPolling();
+      initialized = false;
     });
 
     return {
@@ -75,6 +86,7 @@ export default defineComponent({
       isLoading,
       isEndReached,
       transactionList,
+      loadCurrentPageTransactions,
     };
   },
 });

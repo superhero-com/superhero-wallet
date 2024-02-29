@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { uniqBy } from 'lodash-es';
 import type {
   AccountAddress,
   AssetContractId,
@@ -47,10 +48,6 @@ const state = useStorageRef<{
   STORAGE_KEYS.transactionsLoaded,
 );
 
-let pollingIntervalId: NodeJS.Timer;
-
-const isLoading = ref(false);
-
 const isEndReached = computed(() => state.value.isEndReached);
 const transactionsLoaded = computed(() => state.value.transactionsLoaded);
 
@@ -66,10 +63,23 @@ export function useTransactionList({
   assetContractId,
   protocol,
 }: UseTransactionListOptions) {
+  let pollingIntervalId: NodeJS.Timer | undefined;
+  const isLoading = ref(false);
+
   const { isOnline } = useConnection();
   const { isAppActive } = useUi();
   const { activeNetwork } = useNetworks();
   const { accountsTransactionsPending } = useLatestTransactionList();
+
+  state.value = {
+    accountAddress,
+    assetContractId,
+    isEndReached: false,
+    isInitialLoadDone: false,
+    networkName: activeNetwork.value.name,
+    nextPagePaginationParams: {},
+    transactionsLoaded: [],
+  };
 
   const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
@@ -98,6 +108,12 @@ export function useTransactionList({
         regularTransactions,
       } = await fetchTransactions(state.value.nextPagePaginationParams);
 
+      if (accountAddress !== state.value.accountAddress
+        || assetContractId !== state.value.assetContractId
+        || activeNetwork.value.name !== state.value.networkName) {
+        return;
+      }
+
       if (objectHasNonEmptyProperties(paginationParams)) {
         state.value.nextPagePaginationParams = paginationParams;
       } else {
@@ -106,7 +122,7 @@ export function useTransactionList({
 
       if (regularTransactions?.length) {
         if (state.value.isInitialLoadDone) {
-          state.value.transactionsLoaded.push(...regularTransactions);
+          state.value.transactionsLoaded = uniqBy([...state.value.transactionsLoaded, ...regularTransactions], 'hash');
         } else {
           state.value.transactionsLoaded = regularTransactions;
         }
@@ -120,11 +136,25 @@ export function useTransactionList({
   async function initializeTransactionListPolling() {
     if (!state.value.isInitialLoadDone || !transactionsLoaded.value.length) {
       await loadCurrentPageTransactions();
+      if (accountAddress !== state.value.accountAddress
+        || assetContractId !== state.value.assetContractId
+        || activeNetwork.value.name !== state.value.networkName) {
+        isLoading.value = false;
+        return;
+      }
     }
 
     pollingIntervalId = setInterval(async () => {
       if (isAppActive.value) {
         const { paginationParams, regularTransactions } = await fetchTransactions();
+
+        if (accountAddress !== state.value.accountAddress
+          || assetContractId !== state.value.assetContractId
+          || activeNetwork.value.name !== state.value.networkName) {
+          isLoading.value = false;
+          clearInterval(pollingIntervalId);
+          return;
+        }
 
         // If newly fetched first transaction is different than the first transaction stored
         // it means that the list and the pagination params needs to be reset.
@@ -143,27 +173,6 @@ export function useTransactionList({
   function stopTransactionListPolling() {
     clearInterval(pollingIntervalId);
   }
-
-  (async () => {
-    // Clear cached states if app wants to access different asset list
-    if (
-      accountAddress !== state.value.accountAddress
-      || assetContractId !== state.value.assetContractId
-      || activeNetwork.value.name !== state.value.networkName
-    ) {
-      stopTransactionListPolling(); // Ensure previous polling is reset
-
-      state.value = {
-        accountAddress,
-        assetContractId,
-        isEndReached: false,
-        isInitialLoadDone: false,
-        networkName: activeNetwork.value.name,
-        nextPagePaginationParams: {},
-        transactionsLoaded: [],
-      };
-    }
-  })();
 
   return {
     isLoading,
