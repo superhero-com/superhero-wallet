@@ -23,7 +23,7 @@ import { CoinGecko } from '@/lib/CoinGecko';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 
 export interface UseCurrenciesOptions {
-  withoutPolling?: boolean;
+  pollingDisabled?: boolean;
 }
 
 let composableInitialized = false;
@@ -50,7 +50,7 @@ const currentCurrencyCode = ref<CurrencyCode>(
 const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVAL);
 
 export function useCurrencies({
-  withoutPolling = false,
+  pollingDisabled = false,
 }: UseCurrenciesOptions = {}) {
   const { protocolsInUse, isLoggedIn } = useAccounts();
   const currentCurrencyInfo = computed(
@@ -151,7 +151,7 @@ export function useCurrencies({
     return (converted < 0.01) ? `<${formatCurrency(0.01)}` : formatCurrency(converted);
   }
 
-  if (!withoutPolling) {
+  if (!pollingDisabled) {
     initPollingWatcher(() => loadCurrencyRates());
   }
 
