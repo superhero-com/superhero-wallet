@@ -32,6 +32,7 @@ export function normalizeTransactionStructure(
     protocol: PROTOCOLS.bitcoin,
     transactionOwner: transactionOwner as any,
     hash: txid, // TODO: we can go with additional field
+    blockHeight: status.block_height,
     microTime: status.block_time * 1000,
     pending: !status.confirmed,
     tx: {

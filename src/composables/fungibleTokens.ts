@@ -84,7 +84,7 @@ export function useFungibleTokens() {
 
   async function loadAvailableTokens() {
     const tokensFetchPromises = protocolsInUse.value.map(
-      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens(),
+      (protocol) => ProtocolAdapterFactory.getAdapter(protocol).fetchAvailableTokens?.(),
     );
     const currentNetworkName = activeNetwork.value.name;
     // for each promise check if it returned null, if so, use cached data
@@ -122,7 +122,7 @@ export function useFungibleTokens() {
     accounts.value.map(
       ({ address, protocol }) => {
         tokenBalancesFetchPromisesByAddress[address] = ProtocolAdapterFactory
-          .getAdapter(protocol).fetchAccountTokenBalances(address);
+          .getAdapter(protocol).fetchAccountTokenBalances?.(address) ?? [] as any;
         return null;
       },
     );

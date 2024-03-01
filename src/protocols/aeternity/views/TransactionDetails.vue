@@ -196,7 +196,7 @@ import {
   isTxFunctionDexSwap,
   isTxFunctionDexPool,
 } from '@/protocols/aeternity/helpers';
-import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
+import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
@@ -237,7 +237,6 @@ export default defineComponent({
     const route = useRoute();
 
     const { aeActiveNetworkSettings } = useAeNetworkSettings();
-    const { getMiddleware } = useAeMiddleware();
     const { activeMultisigAccountId } = useMultisigAccounts({ pollOnce: true });
     const { activeAccount, isLocalAccountAddress } = useAccounts();
     const { setLoaderVisible } = useUi();
@@ -318,20 +317,19 @@ export default defineComponent({
 
       // Claim transactions have missing data that needs to be fetched from the middleware
       if (!rawTransaction || rawTransaction.incomplete || rawTransaction.claim) {
-        // TODO move to aeternity adapter (fetchTransactionByHash)
-        const middleware = await getMiddleware();
+        const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
+
         try {
           rawTransaction = {
             ...(rawTransaction || {}), // Claim transaction data
-            ...await middleware.getTx(hash),
-            protocol: PROTOCOLS.aeternity,
+            ...await adapter.fetchTransactionByHash(hash, externalAddress.value),
           };
         } catch (e) {
           // Pending transactions are not returned from the middleware.
-          const adapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          const pendingTransactions = await adapter.fetchPendingTransactions(externalAddress.value);
+          const pendingTransactions = await adapter
+            .fetchPendingTransactions?.(externalAddress.value);
 
-          rawTransaction = pendingTransactions.find((val) => val.hash === hash);
+          rawTransaction = pendingTransactions?.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
             setLoaderVisible(false);

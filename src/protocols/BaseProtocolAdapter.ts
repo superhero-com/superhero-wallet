@@ -108,26 +108,27 @@ export abstract class BaseProtocolAdapter {
     options: Record<string, any>,
   ): Promise<any>;
 
-  abstract fetchAvailableTokens(): Promise<IToken[] | null>;
+  fetchAvailableTokens?(): Promise<IToken[] | null>;
 
-  abstract fetchAccountTokenBalances(address: AccountAddress): Promise<ITokenBalance[] | null>;
+  fetchAccountTokenBalances?(address: AccountAddress): Promise<ITokenBalance[] | null>;
 
-  abstract transferToken(
+  transferToken?(
     amount: number,
     recipient: string,
     contractId: AssetContractId,
     options: Record<string, any>,
   ): Promise<ITransferResponse | undefined>;
 
-  abstract fetchTokenInfo(contractId: AssetContractId): Promise<IToken | undefined>;
+  fetchTokenInfo?(contractId: AssetContractId): Promise<IToken | undefined>;
 
   abstract fetchBalance(address: AccountAddress): Promise<string>;
 
-  abstract fetchTransactionByHash(hash: string, transactionOwner?: AccountAddress): Promise<any>;
+  abstract fetchTransactionByHash(
+    hash: string,
+    transactionOwner?: AccountAddress,
+  ): Promise<ITransaction>;
 
-  abstract fetchPendingTransactions(
-    address: AccountAddress,
-  ): Promise<ITransaction[]>;
+  fetchPendingTransactions?(address: AccountAddress): Promise<ITransaction[]>;
 
   /**
    * Fetches all asset transactions (Both Coin AND Token) for an account.

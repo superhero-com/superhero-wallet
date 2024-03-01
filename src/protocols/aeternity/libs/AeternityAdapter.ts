@@ -198,10 +198,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return (index > -1) ? index : 0;
   }
 
-  override async constructAndSignTx() {
-    // TODO
-  }
-
   override async fetchAvailableTokens(): Promise<IToken[]> {
     const { fetchFromMiddleware } = useAeMiddleware();
     const response: Omit<IToken, 'protocol'>[] = camelCaseKeysDeep(await fetchAllPages(
@@ -229,15 +225,6 @@ export class AeternityAdapter extends BaseProtocolAdapter {
       handleUnknownError(error);
     }
     return [];
-  }
-
-  override async fetchTransactionByHash() {
-    // TODO
-  }
-
-  override async fetchTokenInfo(): Promise<IToken | undefined> {
-    // TODO if needed
-    return undefined;
   }
 
   override async transferToken(
@@ -425,6 +412,24 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     };
   }
 
+  async fetchTransactionByHash(
+    hash: string,
+    transactionOwner?: AccountAddress,
+  ): Promise<ITransaction> {
+    const { getMiddleware } = useAeMiddleware();
+    const middleware = await getMiddleware();
+
+    return {
+      ...await middleware.getTx(hash),
+      protocol: PROTOCOLS.aeternity,
+      transactionOwner,
+    };
+  }
+
+  override constructAndSignTx(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+
   override async spend(
     amount: number,
     recipient: string,
@@ -432,9 +437,11 @@ export class AeternityAdapter extends BaseProtocolAdapter {
   ): Promise<ITransferResponse> {
     const { getAeSdk } = useAeSdk();
     const aeSdk = await getAeSdk();
-    return aeSdk.spendWithCustomOptions(amount, recipient as Encoded.AccountAddress, {
-      payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
-    });
+    return aeSdk.spendWithCustomOptions(
+      amount,
+      recipient as Encoded.AccountAddress,
+      { payload: encode(Buffer.from(options.payload), Encoding.Bytearray) },
+    );
   }
 
   override async waitTransactionMined(hash: string): Promise<any> {

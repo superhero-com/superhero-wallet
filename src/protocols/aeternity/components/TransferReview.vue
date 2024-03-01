@@ -209,7 +209,7 @@ export default defineComponent({
           );
         } else if (!isSelectedAssetAeCoin) {
           const aeternityAdapter = ProtocolAdapterFactory.getAdapter(PROTOCOLS.aeternity);
-          actionResult = await aeternityAdapter.transferToken(
+          actionResult = await aeternityAdapter.transferToken?.(
             Number(amount),
             recipient,
             selectedAsset.contractId as Encoded.ContractAddress,

@@ -6,12 +6,11 @@ import type {
   ICommonTransaction,
   ITransaction,
 } from '@/types';
-import { PROTOCOLS, STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
+import { STORAGE_KEYS, TRANSACTION_CERTAINLY_MINED_TIME } from '@/constants';
 import {
   pipe,
   removeDuplicatedTransactions,
   sortTransactionsByDate,
-  includes,
 } from '@/utils';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
@@ -114,11 +113,7 @@ export function useLatestTransactionList() {
    */
   async function addAccountPendingTransaction(address: AccountAddress, transaction: ITransaction) {
     const account = getAccountByAddress(address);
-    if (
-      account
-      && transaction?.hash
-      && includes([PROTOCOLS.aeternity, PROTOCOLS.ethereum], account?.protocol)
-    ) {
+    if (account && transaction?.hash) {
       if (!accountsTransactionsPending.value[address]) {
         accountsTransactionsPending.value[address] = [];
       }
