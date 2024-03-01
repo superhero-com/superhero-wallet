@@ -21,6 +21,7 @@ import {
   POPUP_TYPE_SIGN,
   STORAGE_KEYS,
 } from '@/constants';
+import { getCleanModalOptions } from '@/utils';
 import { aettosToAe, isTxOfASupportedType } from '@/protocols/aeternity/helpers';
 import { openPopup } from '@/offscreen/popupHandler';
 import migratePermissionsVuexToComposable from '@/migrations/003-permissions-vuex-to-composable';
@@ -142,22 +143,27 @@ export function usePermissions() {
    * or listing user's accounts.
    */
   async function checkOrAskPermission(
-    fullUrl: string,
     method: METHODS,
+    fullUrl?: string,
     modalProps: IModalProps = {},
   ): Promise<boolean> {
-    const url = new URL(fullUrl);
-    if (checkPermission(url.host, method, modalProps.tx)) {
-      return true;
-    }
+    let app: IAppData | undefined;
+    let props = getCleanModalOptions<typeof modalProps>(modalProps);
 
-    const app: IAppData = {
-      host: url.host,
-      name: url.hostname,
-      protocol: url.protocol,
-      url: url.href,
-    };
-    const props = { ...modalProps, app };
+    if (fullUrl) {
+      const url = new URL(fullUrl);
+      if (checkPermission(url.host, method, modalProps.tx)) {
+        return true;
+      }
+
+      app = {
+        host: url.host,
+        name: url.hostname,
+        protocol: url.protocol,
+        url: url.href,
+      };
+      props = { ...props, app };
+    }
 
     try {
       let { modal, popup } = modalAndPopupTypes[method] || {};
@@ -175,8 +181,8 @@ export function usePermissions() {
         popup = POPUP_TYPE_RAW_SIGN;
       }
       await (
-        (IS_OFFSCREEN_TAB)
-          ? openPopup(popup, url.href, props)
+        (IS_OFFSCREEN_TAB && app?.url)
+          ? openPopup(popup, app.url, props)
           : openModal(modal, props)
       );
       return true;

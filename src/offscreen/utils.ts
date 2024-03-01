@@ -2,6 +2,7 @@ import { CONNECTION_TYPES, IS_FIREFOX } from '@/constants';
 import type { Runtime } from 'webextension-polyfill';
 import { openPopup, removePopup, getPopup } from '@/background/bgPopupHandler';
 import { PopupMessageData } from '@/background';
+import { getCleanModalOptions } from '@/utils';
 
 export const detectConnectionType = (port: Runtime.Port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
@@ -15,16 +16,6 @@ export const detectConnectionType = (port: Runtime.Port) => {
   }
   return CONNECTION_TYPES.OTHER;
 };
-
-/**
- * Clean params from members that cause issues when sending messages
- */
-function getCleanParams(params: PopupMessageData['params']) {
-  const cleanedParams = { ...params };
-  delete cleanedParams.params?.onCompiler;
-  delete cleanedParams.params?.onNode;
-  return cleanedParams;
-}
 
 /**
  * If browser is FF we cannot send messaged to the background page
@@ -44,7 +35,7 @@ export async function executeOrSendMessageToBackground(method: PopupMessageData[
         return null;
     }
   }
-  const cleanParams = getCleanParams(params);
+  const cleanParams = getCleanModalOptions<typeof params>(params);
   return browser.runtime.sendMessage<PopupMessageData>({
     target: 'background',
     method,

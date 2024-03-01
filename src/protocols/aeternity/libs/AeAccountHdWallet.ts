@@ -21,6 +21,11 @@ interface InternalOptions {
   fromAccount?: Encoded.AccountAddress;
 }
 
+/**
+ * Tags that don't need permission if they are not called from an aepp
+ */
+const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
+
 export class AeAccountHdWallet extends AccountBase {
   override readonly address: Encoded.AccountAddress;
 
@@ -41,12 +46,12 @@ export class AeAccountHdWallet extends AccountBase {
     if (!this.nodeNetworkId.value) {
       throw new Error('Not connected to any network');
     }
-    if (options?.aeppOrigin) {
+    const tx = unpackTx(txBase64) as any as ITx;
+    if (!TAGS_TO_SIGN_WITHOUT_PERMISSION.includes(tx.tag!) || options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
-      const tx = unpackTx(txBase64) as any as ITx;
       const permissionGranted = await checkOrAskPermission(
-        options.aeppOrigin,
         METHODS.sign,
+        options?.aeppOrigin,
         { ...options, txBase64, tx },
       );
       if (!permissionGranted) {
@@ -72,8 +77,8 @@ export class AeAccountHdWallet extends AccountBase {
     if (options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
-        options.aeppOrigin,
         METHODS.signMessage,
+        options.aeppOrigin,
         { message },
       );
       if (!permissionGranted) {
