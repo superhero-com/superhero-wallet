@@ -90,8 +90,8 @@ export default defineComponent({
     AccountSelector,
   },
   props: {
-    selectedApp: { type: Object, required: true },
-    iframe: { type: Object, required: true },
+    selectedApp: { type: Object, default: null },
+    iframe: { type: Object, default: null },
   },
   emits: ['back', 'refresh'],
   setup(props, { emit }) {
@@ -111,10 +111,10 @@ export default defineComponent({
         ? homeRouteName.value
         : ROUTE_INDEX,
     );
-    const isSecure = computed(() => props.selectedApp.url.startsWith('https://'));
+    const isSecure = computed(() => props?.selectedApp?.url.startsWith('https://'));
     const selectedAppHost = computed(() => {
-      const url = new URL(props.selectedApp.url);
-      return url.host;
+      const url = new URL(props?.selectedApp?.url);
+      return url?.host;
     });
 
     const accountAddress = ref(unref(activeAccount.value.address));
@@ -137,7 +137,7 @@ export default defineComponent({
         const value = await openModal(MODAL_DAPP_BROWSER_ACTIONS,
           {
             iframe: props.iframe,
-            selectedApp: props.selectedApp,
+            selectedApp: props?.selectedApp,
           });
         if (value?.action === BROWSER_ACTIONS.refresh) {
           emit('refresh');
