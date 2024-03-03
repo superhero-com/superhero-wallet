@@ -165,7 +165,7 @@ export function useMaxAmount({ formModel }: MaxAmountOptions) {
       const aeSdk = await getAeSdk();
       try {
         nonce.value = (await aeSdk.api
-          .getAccountByPubkey(getAccount().address))?.nonce;
+          .getAccountNextNonce(getAccount().address)).nextNonce;
       } catch (error: any) {
         if (!error.message.includes('Account not found')) handleUnknownError(error);
       }
