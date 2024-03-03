@@ -159,7 +159,9 @@ import {
 import { camelCase } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import BigNumber from 'bignumber.js';
-import { decode, Encoded, getExecutionCost } from '@aeternity/aepp-sdk';
+import {
+  decode, Encoded, getExecutionCost, unpackTx, Tag, getTransactionSignerAddress, buildTx,
+} from '@aeternity/aepp-sdk';
 import { ContractByteArrayEncoder, BytecodeContractCallEncoder } from '@aeternity/aepp-calldata';
 
 import JsonBig from '@/lib/json-big';
@@ -429,12 +431,11 @@ export default defineComponent({
             error.value = t('validation.enoughCoin');
             return;
           }
-          if (popupProps.value.tx?.contractId) {
-            const accountAddress = popupProps.value.tx.callerId || popupProps.value.tx.senderId!;
-            const dryRunResult = await sdk.txDryRun(
-              popupProps.value.txBase64,
-              accountAddress as Encoded.AccountAddress,
-            );
+          const txParams = unpackTx(popupProps.value.txBase64);
+          if (txParams.tag === Tag.ContractCallTx || txParams.tag === Tag.ContractCreateTx) {
+            const accountAddress = getTransactionSignerAddress(popupProps.value.txBase64);
+            txParams.nonce = (await sdk.api.getAccountByPubkey(accountAddress)).nonce + 1;
+            const dryRunResult = await sdk.txDryRun(buildTx(txParams), accountAddress);
             if (dryRunResult.callObj && dryRunResult.callObj.returnType !== 'ok') {
               error.value = new ContractByteArrayEncoder().decode(
                 dryRunResult.callObj.returnValue as Encoded.ContractBytearray,
