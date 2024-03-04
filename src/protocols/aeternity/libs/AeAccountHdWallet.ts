@@ -8,7 +8,9 @@ import {
   Encoded,
   METHODS,
   Tag,
+  AensName,
 } from '@aeternity/aepp-sdk';
+import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
 import { useAccounts } from '@/composables/accounts';
@@ -83,6 +85,113 @@ export class AeAccountHdWallet extends MemoryAccount {
       message,
       options, // Mainly to pass the `fromAccount` property
     );
+  }
+
+  override async signTypedData(
+    data: Encoded.ContractBytearray,
+    aci: Parameters<AccountBase['signTypedData']>[1],
+    options: Parameters<AccountBase['signTypedData']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const dataType = new TypeResolver().resolveType(aci);
+      const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
+      const {
+        name, version, networkId, contractAddress,
+      } = options;
+      const opt = {
+        name, version, networkId, contractAddress, aci, data, decodedData,
+      };
+      const bigintReplacer = (k: string, v: any) => (
+        typeof v === 'bigint' ? `${v} (as BigInt)` : v
+      );
+      const message = `sign typed data:\n${JSON.stringify(opt, bigintReplacer, 2)}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signTypedData(
+      data,
+      aci,
+      options, // Mainly to pass the `fromAccount` property
+    );
+  }
+
+  override async signDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    options: Parameters<AccountBase['signDelegationToContract']>[1] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of name preclaim and oracle to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signDelegationToContract(contractAddress, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
+  }
+
+  override async signNameDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    name: AensName,
+    options: Parameters<AccountBase['signNameDelegationToContract']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of ${name} to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signNameDelegationToContract(contractAddress, name, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
+  }
+
+  override async signOracleQueryDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    oracleQueryId: Encoded.OracleQueryId,
+    options: Parameters<AccountBase['signOracleQueryDelegationToContract']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of ${oracleQueryId} to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signOracleQueryDelegationToContract(contractAddress, oracleQueryId, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
   }
 
   /**
