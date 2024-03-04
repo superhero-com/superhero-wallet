@@ -15,9 +15,9 @@
       >
         <template #fallback>
           <img
-            class="icon-image"
-            :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
+            class="fallback-img"
             :class="{ 'with-border': !imgToken?.image }"
+            :src="imgToken?.image || getTokenPlaceholderUrl(imgToken!)"
             :title="imgToken?.symbol"
           >
         </template>
@@ -192,11 +192,16 @@ export default defineComponent({
       width: var(--icon-size);
       height: var(--icon-size);
       border-radius: calc(var(--icon-size) / 2);
+      display: flex;
       vertical-align: middle;
       margin-right: 4px;
 
-      &.with-border {
-        border: 0.25px solid rgba(variables.$color-white, 0.75);
+      .fallback-img {
+        border-radius: calc(var(--icon-size) / 2);
+
+        &.with-border {
+          border: 0.25px solid rgba(variables.$color-white, 0.75);
+        }
       }
     }
   }
@@ -246,6 +251,12 @@ export default defineComponent({
         height: 44px;
         margin: 0;
         border-radius: 22px;
+
+        .fallback-img {
+          width: 100%;
+          height: 100%;
+          border-radius: 22px
+        }
       }
     }
   }
