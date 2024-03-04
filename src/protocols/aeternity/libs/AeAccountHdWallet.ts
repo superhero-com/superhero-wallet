@@ -53,7 +53,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         { ...options, txBase64, tx },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
@@ -76,7 +76,7 @@ export class AeAccountHdWallet extends MemoryAccount {
         { message },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 

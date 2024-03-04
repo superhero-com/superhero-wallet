@@ -154,7 +154,7 @@ export function useAeSdk() {
           if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
             return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
-          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+          return Promise.reject(new RpcRejectedByUserError());
         },
         async onAskAccounts(aeppId: string, params: any, origin: string) {
           const aepp = aeppInfo[aeppId];
@@ -162,7 +162,7 @@ export function useAeSdk() {
           if (await checkOrAskPermission(METHODS.address, host)) {
             return accountsAddressList.value;
           }
-          return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
+          return Promise.reject(new RpcRejectedByUserError());
         },
       },
       nodeNetworkId,
