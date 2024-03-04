@@ -55,7 +55,7 @@ export class AeAccountHdWallet extends AccountBase {
         { ...options, txBase64, tx },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
@@ -82,7 +82,7 @@ export class AeAccountHdWallet extends AccountBase {
         { message },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
