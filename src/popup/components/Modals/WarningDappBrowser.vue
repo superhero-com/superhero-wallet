@@ -37,7 +37,7 @@
         {{ $t('pages.warningDappBrowser.decline') }}
       </BtnMain>
       <BtnMain
-        variant="light"
+        variant="primary"
         @click="confirm"
       >
         {{ $t('common.confirm') }}
