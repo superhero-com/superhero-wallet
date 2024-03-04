@@ -70,7 +70,7 @@ export default defineComponent({
     withoutMargin: Boolean,
     protocol: { type: String as PropType<Protocol>, required: true },
   },
-  emits: ['update:modelValue', 'assetSelected'],
+  emits: ['update:modelValue', 'asset-selected'],
   setup(props) {
     const amountMessage = computed(() => getMessageByFieldName(props.errors.amount));
 
