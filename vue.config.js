@@ -95,6 +95,7 @@ module.exports = {
         __VUE_I18N_FULL_INSTALL__: JSON.stringify(true),
         __INTLIFY_PROD_DEVTOOLS__: JSON.stringify(false),
         __VUE_I18N_LEGACY_API__: JSON.stringify(false),
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
       });
 
       Object.entries(definitions['process.env']).forEach(([k, v]) => {
