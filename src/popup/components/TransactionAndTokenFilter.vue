@@ -38,6 +38,7 @@ import {
   computed,
   defineComponent,
   onMounted,
+  onUnmounted,
   ref,
   watch,
 } from 'vue';
@@ -69,6 +70,7 @@ export default defineComponent({
       displayMode,
       filtersConfig,
       filtersConfigAe,
+      resetFilter,
     } = useTransactionAndTokenFilter();
 
     const { viewportElement } = useViewport();
@@ -122,13 +124,15 @@ export default defineComponent({
       }
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       if (showFilterBar.value) {
         maxHeight.value = (transactionFilterEl?.value)?.clientHeight!;
         firstRender.value = false;
         observeFilterElHeight();
       }
     });
+
+    onUnmounted(() => resetFilter());
 
     return {
       transactionFilterEl,

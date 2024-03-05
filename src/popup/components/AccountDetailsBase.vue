@@ -79,7 +79,6 @@ import {
   onBeforeUnmount,
   onMounted,
   ref,
-  watch,
 } from 'vue';
 import { useRoute } from 'vue-router';
 import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
@@ -87,7 +86,6 @@ import { IS_MOBILE_APP, IS_FIREFOX } from '@/constants';
 import {
   useAccounts,
   useBalances,
-  useTransactionAndTokenFilter,
   useUi,
   useScrollConfig,
 } from '@/composables';
@@ -121,7 +119,6 @@ export default defineComponent({
     const ionRouter = useIonRouter();
 
     const { activeAccount } = useAccounts();
-    const { resetFilter } = useTransactionAndTokenFilter();
     const { isScrollEnabled } = useScrollConfig();
     const { homeRouteName } = useUi();
     const { balance } = useBalances();
@@ -152,13 +149,6 @@ export default defineComponent({
       resizeObserver.value = new ResizeObserver(calculateRouterHeight);
       resizeObserver.value.observe(headerEl.value!);
     }
-
-    watch(
-      () => route,
-      () => {
-        resetFilter();
-      },
-    );
 
     onMounted(() => {
       observeTabsHeight();
