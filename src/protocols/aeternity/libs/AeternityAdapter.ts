@@ -440,7 +440,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return aeSdk.spendWithCustomOptions(
       amount,
       recipient as Encoded.AccountAddress,
-      { payload: encode(Buffer.from(options.payload), Encoding.Bytearray) },
+      {
+        waitMined: false,
+        payload: encode(Buffer.from(options.payload), Encoding.Bytearray),
+      },
     );
   }
 
