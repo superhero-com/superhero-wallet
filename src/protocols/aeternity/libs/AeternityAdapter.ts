@@ -304,6 +304,8 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         ...transaction,
         pending: true,
         protocol: PROTOCOLS.aeternity,
+        microTime: Date.now(),
+        transactionOwner: address,
       }));
     } catch (error) {
       return [];
@@ -344,6 +346,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         blockHeight: height,
         claim: true,
         protocol: PROTOCOLS.aeternity,
+        transactionOwner: address,
       }));
 
       return tipWithdrawnTransactions;
