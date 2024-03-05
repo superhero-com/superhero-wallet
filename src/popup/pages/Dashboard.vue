@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <DashboardWrapper class="dashboard">
+      <DashboardWrapper v-if="pageIsActive">
         <template #header>
           <DashboardHeader />
         </template>
@@ -22,7 +22,7 @@
             :background="daeppBrowserBackground"
             :icon="GlobeIcon"
             :to="{ name: ROUTE_APPS_BROWSER }"
-            :card-id="DASHBOARD_CARD_ID.daeppBrowser"
+            :card-id="DASHBOARD_CARD_ID.daeppBrowser!"
           />
           <DashboardCard
             v-if="isNodeMainnet && UNFINISHED_FEATURES"
@@ -58,9 +58,15 @@
 import {
   computed,
   defineComponent,
+  ref,
   watch,
 } from 'vue';
-import { IonPage, IonContent } from '@ionic/vue';
+import {
+  IonPage,
+  IonContent,
+  onIonViewWillEnter,
+  onIonViewDidLeave,
+} from '@ionic/vue';
 import { useRoute } from 'vue-router';
 
 import {
@@ -106,6 +112,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const pageIsActive = ref(true);
+
     const route = useRoute();
 
     const { activeAccount } = useAccounts();
@@ -122,6 +130,14 @@ export default defineComponent({
         immediate: true,
       },
     );
+
+    onIonViewWillEnter(() => {
+      pageIsActive.value = true;
+    });
+
+    onIonViewDidLeave(() => {
+      pageIsActive.value = false;
+    });
 
     return {
       PROTOCOLS,
@@ -142,6 +158,7 @@ export default defineComponent({
       daeppBrowserBackground,
       isNodeMainnet,
       isNodeTestnet,
+      pageIsActive,
     };
   },
 });
