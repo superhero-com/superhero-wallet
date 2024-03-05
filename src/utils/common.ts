@@ -478,3 +478,14 @@ export function isCoin(assetContractId: AssetContractId): boolean {
       .coinContractId === assetContractId,
   );
 }
+
+/**
+ * Clean options from members that cause issues when sending messages
+ * or when signing transactions.
+ */
+export function getCleanModalOptions<T>(options: T): Omit<T, 'onCompiler' | 'onNode'> {
+  const cleanedOptions: any = { ...options };
+  delete cleanedOptions?.onCompiler;
+  delete cleanedOptions?.onNode;
+  return cleanedOptions;
+}

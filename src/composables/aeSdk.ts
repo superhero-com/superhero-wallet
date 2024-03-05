@@ -145,7 +145,7 @@ export function useAeSdk() {
         async onSubscription(aeppId: string, params: any, origin: string) {
           const aepp = aeppInfo[aeppId];
           const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
-          if (await checkOrAskPermission(host, METHODS.subscribeAddress)) {
+          if (await checkOrAskPermission(METHODS.subscribeAddress, host)) {
             return getLastActiveProtocolAccount(PROTOCOLS.aeternity)!.address;
           }
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
@@ -153,7 +153,7 @@ export function useAeSdk() {
         async onAskAccounts(aeppId: string, params: any, origin: string) {
           const aepp = aeppInfo[aeppId];
           const host = IS_EXTENSION_BACKGROUND ? aepp.origin : origin;
-          if (await checkOrAskPermission(host, METHODS.address)) {
+          if (await checkOrAskPermission(METHODS.address, host)) {
             return accountsAddressList.value;
           }
           return Promise.reject(new RpcRejectedByUserError('Rejected by user'));
