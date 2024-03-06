@@ -168,6 +168,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
     return isAddress(address);
   }
 
+  override isValidAddressOrNameEncoding(address: string) {
+    return this.isAccountAddressValid(address);
+  }
+
   override async isAccountUsed(address: AccountAddress): Promise<boolean> {
     const [balance, txCount] = await Promise.all([
       await this.fetchBalance(address),

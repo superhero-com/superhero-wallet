@@ -80,6 +80,14 @@ export abstract class BaseProtocolAdapter {
   abstract isAccountAddressValid(address: AccountAddress, networkType?: NetworkType): boolean;
 
   /**
+   * Validates if the address or name encoding matches the protocol.
+   */
+    abstract isValidAddressOrNameEncoding(
+      address: AccountAddress,
+      networkType?: NetworkType,
+    ): boolean;
+
+  /**
    * Check whether the network has encountered this account.
    * @param address Account address
    */

@@ -7,7 +7,9 @@
         class="address-formatted-chunk"
         :class="{ 'align-right': alignRight }"
         :style="cssVariable"
-      >{{ chunk }}</span>
+      >
+        {{ chunk }}
+      </span>
     </template>
     <span v-else>{{ address }}</span>
   </div>
@@ -35,9 +37,8 @@ export default defineComponent({
 
     const isAddress = computed(() => {
       const networkType = activeNetwork.value?.type;
-      return ProtocolAdapterFactory
-        .getAdapterByAccountAddress(props.address, networkType)
-        ?.isAccountAddressValid(props.address, networkType);
+      return !!ProtocolAdapterFactory
+        .getAdapterByAddressOrNameEncoding(props.address, networkType);
     });
     const addressChunks = computed(() => props.address.match(/.{1,3}/g)?.map(prepareChunk));
     const cssVariable = computed(() => ({
