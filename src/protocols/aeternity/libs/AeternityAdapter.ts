@@ -167,6 +167,12 @@ export class AeternityAdapter extends BaseProtocolAdapter {
     return isAddressValid(address, Encoding.AccountAddress);
   }
 
+  override isValidAddressOrNameEncoding(address: string) {
+    return isAddressValid(address, Encoding.ContractAddress)
+      || isAddressValid(address, Encoding.AccountAddress)
+      || isAddressValid(address, Encoding.Name);
+  }
+
   override async isAccountUsed(address: string): Promise<boolean> {
     const { getDryAeSdk } = useAeSdk();
     const aeSdk = await getDryAeSdk();

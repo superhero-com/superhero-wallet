@@ -55,9 +55,30 @@ export const ProtocolAdapterFactory = (() => {
     }, undefined as undefined | BaseProtocolAdapter);
   }
 
+  /**
+   * Go through all adapters one by one and try to validate the address or name encoding.
+   * Adapter that would return `true` will be returned.
+   */
+  function getAdapterByAddressOrNameEncoding(
+    address: string,
+    networkType?: NetworkType,
+  ): BaseProtocolAdapter | undefined {
+    return PROTOCOL_LIST.reduce((returnData, protocol) => {
+      if (!returnData) {
+        const adapter = getAdapter(protocol);
+        if (adapter.isValidAddressOrNameEncoding(address, networkType)) {
+          // eslint-disable-next-line no-param-reassign
+          returnData = adapter;
+        }
+      }
+      return returnData;
+    }, undefined as undefined | BaseProtocolAdapter);
+  }
+
   return {
     registerAdapter,
     getAdapter,
     getAdapterByAccountAddress,
+    getAdapterByAddressOrNameEncoding,
   };
 })();

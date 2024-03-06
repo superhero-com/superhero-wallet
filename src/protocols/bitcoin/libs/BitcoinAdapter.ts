@@ -164,6 +164,10 @@ export class BitcoinAdapter extends BaseProtocolAdapter {
     }
   }
 
+  override isValidAddressOrNameEncoding(address: string, networkType?: NetworkTypeDefault) {
+    return this.isAccountAddressValid(address, networkType);
+  }
+
   override async isAccountUsed(address: string): Promise<boolean> {
     const { activeNetwork } = useNetworks();
 
