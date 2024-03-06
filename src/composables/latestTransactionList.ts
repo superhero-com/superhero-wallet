@@ -129,7 +129,7 @@ export function useLatestTransactionList() {
       if (!accountsTransactionsPending.value[address]) {
         accountsTransactionsPending.value[address] = [];
       }
-      accountsTransactionsPending.value[address].push(transaction);
+      accountsTransactionsPending.value[address].push({ ...transaction, microTime: Date.now() });
 
       try {
         await ProtocolAdapterFactory
