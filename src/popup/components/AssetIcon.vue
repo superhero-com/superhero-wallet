@@ -24,7 +24,6 @@ import AeternityIcon from '@/icons/coin/aeternity.svg?vue-component';
 import BitcoinIcon from '@/icons/coin/bitcoin.svg?vue-component';
 import EthereumIcon from '@/icons/coin/ethereum.svg?vue-component';
 import LexonTokenIcon from '@/icons/tokens/ct_xtk8rSz9suPb6D6VLquyfVji25FcnFRDjn3dnn5mmvHsPiESt.svg?vue-component';
-import ChainlinkTokenIcon from '@/icons/tokens/0x779877a7b0d9e8603169ddbd7836e478b4624789.svg?vue-component';
 
 const SIZES = [ICON_SIZES.sm, ICON_SIZES.rg, ICON_SIZES.md, ICON_SIZES.lg] as const;
 
@@ -37,7 +36,6 @@ const COIN_ICONS: Record<Protocol, Component> = {
 const ASSET_ICONS: Dictionary<Component> = {
   ...COIN_ICONS,
   ct_xtk8rSz9suPb6D6VLquyfVji25FcnFRDjn3dnn5mmvHsPiESt: LexonTokenIcon,
-  '0x779877a7b0d9e8603169ddbd7836e478b4624789': ChainlinkTokenIcon,
 };
 
 export type AllowedAssetIconSize = typeof SIZES[number];
