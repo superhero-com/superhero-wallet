@@ -5,6 +5,8 @@ import { fetchJson, removeObjectUndefinedProperties, sleep } from '@/utils';
 import { ETH_CONTRACT_ID, ETH_SAFE_CONFIRMATION_COUNT } from '../config';
 import { toEthChecksumAddress } from '../helpers';
 
+const NO_TRANSACTIONS_FOUND_MESSAGE = 'No transactions found';
+
 interface EtherscanDefaultResponse {
   status: '1' | '0';
   message: string; // 'OK' / 'OK-<WithExplanation>'
@@ -73,7 +75,7 @@ export class EtherscanService {
       sort: 'desc',
     });
 
-    if (response?.status !== '1') {
+    if (response?.status !== '1' && response?.message !== NO_TRANSACTIONS_FOUND_MESSAGE) {
       throw new Error(response?.result || response?.message);
     }
 
@@ -119,7 +121,7 @@ export class EtherscanService {
       endblock,
     });
 
-    if (response?.status !== '1') {
+    if (response?.status !== '1' && response?.message !== NO_TRANSACTIONS_FOUND_MESSAGE) {
       throw new Error(response?.result || response?.message);
     }
 
