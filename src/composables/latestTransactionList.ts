@@ -76,7 +76,11 @@ export function useLatestTransactionList() {
   async function loadAccountLatestTransactions({ address, protocol }: IAccount) {
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const currentNetworkName = activeNetwork.value.name;
-    const { regularTransactions } = await adapter.fetchAccountTransactions(address);
+    const {
+      regularTransactions,
+      pendingTransactions,
+      tipWithdrawnTransactions,
+    } = await adapter.fetchAccountTransactions(address);
 
     // This is necessary in case the user switches between networks faster,
     // than transactions are returned (limitations of the free Ethereum middleware)
@@ -84,8 +88,16 @@ export function useLatestTransactionList() {
       return true;
     }
 
-    if (regularTransactions.length) {
-      accountsTransactionsLatest.value[address] = regularTransactions;
+    if (
+      regularTransactions.length
+      || pendingTransactions?.length
+      || tipWithdrawnTransactions?.length
+    ) {
+      accountsTransactionsLatest.value[address] = [
+        ...regularTransactions,
+        ...(pendingTransactions || []),
+        ...(tipWithdrawnTransactions || []),
+      ];
 
       if (accountsTransactionsPending.value[address]?.length) {
         regularTransactions.forEach(({ hash }) => removeAccountPendingTransaction(address, hash));
@@ -117,7 +129,7 @@ export function useLatestTransactionList() {
       if (!accountsTransactionsPending.value[address]) {
         accountsTransactionsPending.value[address] = [];
       }
-      accountsTransactionsPending.value[address].push(transaction);
+      accountsTransactionsPending.value[address].push({ ...transaction, microTime: Date.now() });
 
       try {
         await ProtocolAdapterFactory

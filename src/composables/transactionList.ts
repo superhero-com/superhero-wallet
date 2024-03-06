@@ -106,6 +106,8 @@ export function useTransactionList({
       const {
         paginationParams,
         regularTransactions,
+        pendingTransactions,
+        tipWithdrawnTransactions,
       } = await fetchTransactions(state.value.nextPagePaginationParams);
 
       if (accountAddress !== state.value.accountAddress
@@ -120,12 +122,20 @@ export function useTransactionList({
         state.value.isEndReached = true;
       }
 
-      if (regularTransactions?.length) {
-        if (state.value.isInitialLoadDone) {
-          state.value.transactionsLoaded = uniqBy([...state.value.transactionsLoaded, ...regularTransactions], 'hash');
-        } else {
-          state.value.transactionsLoaded = regularTransactions;
-        }
+      if (
+        regularTransactions?.length
+        || pendingTransactions?.length
+        || tipWithdrawnTransactions?.length
+      ) {
+        state.value.transactionsLoaded = uniqBy(
+          [
+            ...(state.value.isInitialLoadDone ? state.value.transactionsLoaded : []),
+            ...regularTransactions,
+            ...(pendingTransactions || []),
+            ...(tipWithdrawnTransactions || []),
+          ],
+          'hash',
+        );
       }
 
       isLoading.value = false;
@@ -146,7 +156,12 @@ export function useTransactionList({
 
     pollingIntervalId = setInterval(async () => {
       if (isAppActive.value) {
-        const { paginationParams, regularTransactions } = await fetchTransactions();
+        const {
+          paginationParams,
+          regularTransactions,
+          pendingTransactions,
+          tipWithdrawnTransactions,
+        } = await fetchTransactions();
 
         if (accountAddress !== state.value.accountAddress
           || assetContractId !== state.value.assetContractId
@@ -156,13 +171,20 @@ export function useTransactionList({
           return;
         }
 
+        const filteredLoadedTransactions = (state.value.transactionsLoaded as any)
+          .filter(({ claim = false, pending = false }) => !claim && !pending);
+
         // If newly fetched first transaction is different than the first transaction stored
         // it means that the list and the pagination params needs to be reset.
         if (
           regularTransactions?.length
-          && regularTransactions?.[0]?.hash !== state.value.transactionsLoaded?.[0]?.hash
+          && regularTransactions?.[0]?.hash !== filteredLoadedTransactions?.[0]?.hash
         ) {
-          state.value.transactionsLoaded = regularTransactions;
+          state.value.transactionsLoaded = [
+            ...regularTransactions,
+            ...(pendingTransactions || []),
+            ...(tipWithdrawnTransactions || []),
+          ];
           state.value.nextPagePaginationParams = paginationParams;
           state.value.isEndReached = false;
         }
