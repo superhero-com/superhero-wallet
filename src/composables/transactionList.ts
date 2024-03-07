@@ -71,15 +71,21 @@ export function useTransactionList({
   const { activeNetwork } = useNetworks();
   const { accountsTransactionsPending } = useLatestTransactionList();
 
-  state.value = {
-    accountAddress,
-    assetContractId,
-    isEndReached: false,
-    isInitialLoadDone: false,
-    networkName: activeNetwork.value.name,
-    nextPagePaginationParams: {},
-    transactionsLoaded: [],
-  };
+  if (
+    state.value.accountAddress !== accountAddress
+    || state.value.assetContractId !== assetContractId
+    || state.value.networkName !== activeNetwork.value.name
+  ) {
+    state.value = {
+      accountAddress,
+      assetContractId,
+      isEndReached: false,
+      isInitialLoadDone: false,
+      networkName: activeNetwork.value.name,
+      nextPagePaginationParams: {},
+      transactionsLoaded: [],
+    };
+  }
 
   const adapter = ProtocolAdapterFactory.getAdapter(protocol);
 
