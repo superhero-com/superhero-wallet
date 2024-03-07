@@ -625,23 +625,10 @@
       "connecting": "Connecting"
     },
     "fungible-tokens": {
-      "add": "Add Fungible Token",
-      "add-info": "This allows you to add token from given deployed fungible token contract",
-      "deploy": "Deploy Token",
-      "deploy-info": "This allows you to deploy your own fungible token contract",
-      "allowances": "Allowances",
-      "allowances-info": "Give or take an allowance",
-      "mint-info": "This allows you to mint or burn token amount",
-      "tokens": "Tokens",
+      "tokens": "Tokens | Token | Tokens",
       "searchPlaceholder": "Search by token name or contract address",
       "searchAssetsPlaceholder": "Search for assets",
-      "myTokens": "My Tokens",
-      "mcap": "MCap",
-      "price": "Price",
-      "not-available": "N/A",
-      "noTokens": "No tokens in account balance.",
       "buyAe": "Buy AE",
-      "receiveTokens": "Receive tokens",
       "select-asset": "Select asset"
     },
     "token-details": {

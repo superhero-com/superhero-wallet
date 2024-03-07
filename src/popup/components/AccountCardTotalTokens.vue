@@ -8,7 +8,7 @@
         {{ totalTokens }}
       </span>
       <span class="wording">
-        {{ $t('pages.fungible-tokens.tokens') }}
+        {{ $t('pages.fungible-tokens.tokens', totalTokens) }}
       </span>
     </div>
   </div>
