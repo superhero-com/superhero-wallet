@@ -173,6 +173,9 @@ export interface ITokenBalance {
   /** Amount of the token that is owned */
   convertedBalance?: number;
   protocol: Protocol;
+  // Allow setting symbol and name so that we can extract custom tokens from balance data
+  symbol?: string;
+  name?: string;
 }
 
 /**
