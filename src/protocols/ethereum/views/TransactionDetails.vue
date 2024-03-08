@@ -69,7 +69,7 @@ import { IonContent, IonPage } from '@ionic/vue';
 
 import type { ITokenResolved, ITransaction } from '@/types';
 import { TX_DIRECTION, PROTOCOLS } from '@/constants';
-import { useFungibleTokens, useUi } from '@/composables';
+import { useFungibleTokens, useLatestTransactionList, useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { ETH_SYMBOL } from '@/protocols/ethereum/config';
@@ -95,6 +95,7 @@ export default defineComponent({
     const route = useRoute();
     const { setLoaderVisible } = useUi();
     const { getTxAmountTotal, getTxAssetSymbol } = useFungibleTokens();
+    const { accountsTransactionsPending } = useLatestTransactionList();
 
     const hash = route.params.hash as string;
     const transactionOwner = route.params.transactionOwner as string;
@@ -136,11 +137,21 @@ export default defineComponent({
     );
 
     onMounted(async () => {
-      try {
-        transaction.value = await adapter.fetchTransactionByHash(hash, transactionOwner);
-      } catch (e) {
-        setLoaderVisible(false);
-        router.push({ name: ROUTE_NOT_FOUND });
+      // If the transaction is a token transfer and it is still pending use the pending transaction
+      // because API wont be synced yet
+      // pendingTransaction will have the most accurate data at this point
+      const pendingTokenTransaction = (accountsTransactionsPending.value[transactionOwner] || [])
+        .find((tx) => tx.hash === hash && tx.tx?.contractId !== adapter.coinContractId);
+
+      if (pendingTokenTransaction) {
+        transaction.value = pendingTokenTransaction as ITransaction;
+      } else {
+        try {
+          transaction.value = await adapter.fetchTransactionByHash(hash, transactionOwner);
+        } catch (e) {
+          setLoaderVisible(false);
+          router.push({ name: ROUTE_NOT_FOUND });
+        }
       }
     });
 

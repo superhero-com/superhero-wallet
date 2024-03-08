@@ -337,7 +337,9 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       return tokenTx;
     }
 
-    const block = await getBlock(web3Eth, transaction?.blockHash, true, DEFAULT_RETURN_FORMAT);
+    const block = transaction?.blockHash
+      ? await getBlock(web3Eth, transaction.blockHash, true, DEFAULT_RETURN_FORMAT)
+      : undefined;
     const normalized = normalizeWeb3EthTransactionStructure(transaction, block, transactionOwner);
     return normalized;
   }
