@@ -20,6 +20,7 @@
         :disabled="readonly"
         @keydown.enter.prevent="handleEnterClick"
         @input="(payload) => handleInput(payload as InputEvent)"
+        @blur="(payload) => handleInput(payload as InputEvent)"
       />
     </template>
 
