@@ -22,7 +22,7 @@
           :protocol="PROTOCOLS.aeternity"
           class="price"
           hide-fiat
-          no-symbol
+          hide-symbol
           high-precision
         />
         <Tokens
