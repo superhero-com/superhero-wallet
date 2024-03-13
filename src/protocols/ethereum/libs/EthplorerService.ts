@@ -84,13 +84,20 @@ export class EthplorerService {
 
     return tokens.map(({
       rawBalance,
-      tokenInfo: { address: contractId, decimals },
+      tokenInfo: {
+        address: contractId,
+        decimals,
+        name,
+        symbol,
+      },
     }: any): ITokenBalance => ({
       address,
       amount: rawBalance,
       contractId: toEthChecksumAddress(contractId),
       convertedBalance: +toShiftedBigNumber(rawBalance, -decimals).toFixed(2),
       decimals,
+      symbol,
+      name,
       protocol: PROTOCOLS.ethereum,
     })) || [];
   }

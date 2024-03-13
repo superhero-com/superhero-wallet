@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 import BigNumber from 'bignumber.js';
 import { Encoding } from '@aeternity/aepp-sdk';
 import { toShiftedBigNumber } from '@/utils';
@@ -22,6 +22,7 @@ import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import FungibleTokenFullInterfaceACI from '@/protocols/aeternity/aci/FungibleTokenFullInterfaceACI.json';
 import { aettosToAe, categorizeContractCallTxObject } from '@/protocols/aeternity/helpers';
 
+import { uniqBy } from 'lodash-es';
 import { useAccounts } from './accounts';
 import { useAeSdk } from './aeSdk';
 import { useTippingContracts } from './tippingContracts';
@@ -33,9 +34,10 @@ let composableInitialized = false;
 
 /**
  * List of all fungible tokens available on user's protocols.
+ * Does not include custom tokens extracted from user's token balances.
  * As this list is quite big (hundreds of items) it requires processing optimizations.
  */
-const tokensAvailable = useStorageRef<ProtocolRecord<AssetList>>(
+const defaultTokensAvailable = useStorageRef<ProtocolRecord<AssetList>>(
   {},
   STORAGE_KEYS.fungibleTokenList,
 );
@@ -47,6 +49,41 @@ const tokenBalances = useStorageRef<ITokenBalance[]>(
   [],
   STORAGE_KEYS.fungibleTokenBalances,
 );
+
+/**
+ * List of all fungible tokens available on user's protocols.
+ * Includes tokens from the user's account that are not on the main list.
+ */
+const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
+  const uniqueTokens: IToken[] = uniqBy(tokenBalances.value, 'contractId')
+    .map((tokenBalance) => ({
+      contractId: tokenBalance.contractId,
+      protocol: tokenBalance.protocol,
+      name: tokenBalance?.name!,
+      symbol: tokenBalance?.symbol!,
+    }));
+
+  const customTokensAvailable = uniqueTokens.reduce((customTokens, token) => {
+    const { contractId, protocol } = token;
+    if (!customTokens[protocol]) {
+      customTokens[protocol] = {} as AssetList;
+    }
+    if (!defaultTokensAvailable?.value?.[protocol]?.[contractId]) {
+      customTokens[protocol]![contractId] = token;
+    }
+    return customTokens;
+  }, {} as typeof tokensAvailable.value);
+
+  return Object.values(PROTOCOLS).reduce(
+    (allTokens, protocol) => {
+      allTokens[protocol] = {
+        ...defaultTokensAvailable.value[protocol],
+        ...customTokensAvailable[protocol],
+      };
+      return allTokens;
+    }, {} as typeof defaultTokensAvailable.value,
+  );
+});
 
 function getProtocolAvailableTokens(protocol: Protocol): AssetList {
   return tokensAvailable.value[protocol] || {} as AssetList;
@@ -92,7 +129,7 @@ export function useFungibleTokens() {
     const tokens: IToken[] = (await Promise.all(tokensFetchPromises)).map(
       (protocolTokens, index) => (
         protocolTokens
-        || Object.values(tokensAvailable.value[protocolsInUse.value[index]] || {})
+        || Object.values(defaultTokensAvailable.value[protocolsInUse.value[index]] || {})
       ),
     ).flat();
 
@@ -102,14 +139,14 @@ export function useFungibleTokens() {
       return;
     }
 
-    tokensAvailable.value = tokens.reduce((accumulator, token) => {
+    defaultTokensAvailable.value = tokens.reduce((accumulator, token) => {
       const { contractId, protocol } = token;
       if (!accumulator[protocol]) {
         accumulator[protocol] = {} as AssetList;
       }
       accumulator[protocol]![contractId] = token;
       return accumulator;
-    }, {} as typeof tokensAvailable.value);
+    }, {} as typeof defaultTokensAvailable.value);
   }
 
   async function loadTokenBalances() {
@@ -147,6 +184,7 @@ export function useFungibleTokens() {
         async ([address, promise]) => await promise || cachedTokenBalancesByAddress[address] || [],
       ),
     )).flat();
+
     areTokenBalancesUpdating = false;
   }
 
