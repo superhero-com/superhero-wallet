@@ -105,27 +105,27 @@
               />
             </Field>
 
-            <div class="limit-info">
+            <DetailsItem :label="$t('pages.permissions.spent-today')">
               <TokenAmount
-                :label="$t('pages.permissions.spent-today')"
+                class="transaction-limit-amount"
                 :amount="permission.transactionSignSpent"
                 :protocol="PROTOCOLS.aeternity"
               />
-            </div>
-            <div class="limit-info">
+            </DetailsItem>
+            <DetailsItem :label="$t('pages.permissions.left-today')">
               <TokenAmount
-                :label="$t('pages.permissions.left-today')"
+                class="transaction-limit-amount"
                 :amount="permission.transactionSignLimit - permission.transactionSignSpent"
                 :protocol="PROTOCOLS.aeternity"
               />
-            </div>
-            <div class="limit-info">
+            </DetailsItem>
+            <DetailsItem :label="$t('pages.account.balance')">
               <TokenAmount
-                :label="$t('pages.account.balance')"
+                class="transaction-limit-amount"
                 :amount="+balance"
                 :protocol="PROTOCOLS.aeternity"
               />
-            </div>
+            </DetailsItem>
           </div>
         </transition>
 
@@ -178,6 +178,7 @@ import { useBalances, useCurrencies, usePermissions } from '@/composables';
 import { ROUTE_NOT_FOUND, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
+import DetailsItem from '../components/DetailsItem.vue';
 import SwitchButton from '../components/SwitchButton.vue';
 import InputAmount from '../components/InputAmount.vue';
 import InputField from '../components/InputField.vue';
@@ -187,14 +188,15 @@ import DeleteIcon from '../../icons/trash.svg?vue-component';
 
 export default defineComponent({
   components: {
-    SwitchButton,
-    InputField,
-    InputAmount,
-    TokenAmount,
     BtnMain,
+    DetailsItem,
     Field,
-    IonPage,
+    InputAmount,
+    InputField,
     IonContent,
+    IonPage,
+    SwitchButton,
+    TokenAmount,
   },
   setup() {
     const router = useRouter();
@@ -308,8 +310,8 @@ export default defineComponent({
       margin-bottom: 16px;
     }
 
-    .limit-info {
-      padding: 4px 0;
+    .transaction-limit-amount {
+      width: 100%;
     }
   }
 

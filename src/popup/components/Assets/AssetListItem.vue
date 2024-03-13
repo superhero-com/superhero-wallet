@@ -22,10 +22,9 @@
       />
       <TokenAmount
         :amount="+(asset.convertedBalance ?? 0)"
-        :symbol="asset.symbol"
         :protocol="PROTOCOLS.aeternity"
         dynamic-sizing
-        no-symbol
+        hide-symbol
         hide-fiat
       />
     </div>

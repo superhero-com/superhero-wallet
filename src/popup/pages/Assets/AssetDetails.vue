@@ -14,7 +14,7 @@
 
             <TokenAmount
               class="token-amount"
-              no-symbol
+              hide-symbol
               fiat-below
               large
               :protocol="currentActiveProtocol"

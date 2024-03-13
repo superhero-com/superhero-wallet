@@ -11,11 +11,10 @@
     >
       {{ amountRounded }}
       <span
-        v-if="!noSymbol"
+        v-if="!hideSymbol"
         class="symbol"
-      >
-        {{ symbol }}
-      </span>
+        v-text="symbolComputed"
+      />
     </span>
 
     <span
@@ -39,23 +38,24 @@ import {
   formatNumber,
 } from '@/utils';
 import { useCurrencies } from '@/composables';
-import { AE_SYMBOL } from '@/protocols/aeternity/config';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 export default defineComponent({
   props: {
     amount: { type: Number, required: true },
-    symbol: { type: String, default: AE_SYMBOL },
-    fiatBelow: { type: Boolean, default: false },
+    symbol: { type: String, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
+    fiatBelow: Boolean,
     hideFiat: Boolean,
-    noSymbol: Boolean,
+    hideSymbol: Boolean,
     highPrecision: Boolean,
     dynamicSizing: Boolean,
     large: Boolean,
     small: Boolean,
   },
   setup(props) {
+    const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
+
     const { getFormattedAndRoundedFiat } = useCurrencies();
 
     const amountRounded = computed(() => {
@@ -65,9 +65,10 @@ export default defineComponent({
       return formatNumber(props.amount,
         {
           minimumFractionDigits: 2,
-          maximumFractionDigits: ProtocolAdapterFactory
-            .getAdapter(props.protocol)
-            .getAmountPrecision({ amount: props.amount, highPrecision: props.highPrecision }),
+          maximumFractionDigits: adapter.getAmountPrecision({
+            amount: props.amount,
+            highPrecision: props.highPrecision,
+          }),
         });
     });
 
@@ -75,9 +76,12 @@ export default defineComponent({
       (): string => (props.hideFiat) ? '' : getFormattedAndRoundedFiat(props.amount, props.protocol),
     );
 
+    const symbolComputed = computed(() => props.symbol || adapter.coinSymbol);
+
     return {
       amountRounded,
       amountFiat,
+      symbolComputed,
       calculateFontSize,
     };
   },
@@ -91,6 +95,9 @@ export default defineComponent({
 .token-amount {
   @extend %face-sans-15-medium;
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
   color: variables.$color-white;
 
   .amount {

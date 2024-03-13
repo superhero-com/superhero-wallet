@@ -10,7 +10,7 @@
           :amount="amount"
           :protocol="PROTOCOLS.aeternity"
           hide-fiat
-          no-symbol
+          hide-symbol
         />
         <div class="token-info">
           <Tokens

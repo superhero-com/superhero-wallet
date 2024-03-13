@@ -475,8 +475,6 @@ export default defineComponent({
     }
 
     > .details-item {
-      margin: 8px 0;
-
       :deep(.value) {
         @extend %face-mono-10-medium;
 

@@ -36,9 +36,8 @@
           <span
             v-if="secondary"
             class="secondary"
-          >
-            {{ secondary }}
-          </span>
+            v-text="secondary"
+          />
           <slot name="value" />
         </slot>
       </div>
@@ -87,7 +86,7 @@ export default defineComponent({
 @use '../../styles/typography';
 
 .details-item {
-  margin-block: 4px;
+  margin-top: 12px;
 
   .label {
     @extend %face-sans-15-medium;
