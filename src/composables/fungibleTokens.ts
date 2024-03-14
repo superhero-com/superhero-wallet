@@ -298,6 +298,8 @@ export function useFungibleTokens() {
       const newMiddlewareUrl = network.protocols[PROTOCOLS.aeternity].middlewareUrl;
       const oldMiddlewareUrl = oldNetwork?.protocols?.[PROTOCOLS.aeternity]?.middlewareUrl;
       if (newMiddlewareUrl !== oldMiddlewareUrl) {
+        tokenBalances.value = [];
+        defaultTokensAvailable.value = {};
         await loadAvailableTokens();
         await loadTokenBalances();
       }
