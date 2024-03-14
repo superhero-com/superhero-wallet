@@ -1,6 +1,11 @@
 import type { IToken, ITokenBalance } from '@/types';
 import { PROTOCOLS } from '@/constants';
-import { fetchJson, toShiftedBigNumber, sleep } from '@/utils';
+import {
+  fetchJson,
+  toShiftedBigNumber,
+  sleep,
+  amountRounded,
+} from '@/utils';
 import { ETH_CONTRACT_ID_EXTERNAL } from '../config';
 import { toEthChecksumAddress } from '../helpers';
 
@@ -94,7 +99,7 @@ export class EthplorerService {
       address,
       amount: rawBalance,
       contractId: toEthChecksumAddress(contractId),
-      convertedBalance: +toShiftedBigNumber(rawBalance, -decimals).toFixed(2),
+      convertedBalance: +amountRounded(toShiftedBigNumber(rawBalance, -decimals)),
       decimals,
       symbol,
       name,

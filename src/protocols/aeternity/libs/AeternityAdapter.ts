@@ -35,6 +35,7 @@ import { useAeSdk } from '@/composables/aeSdk';
 import { BaseProtocolAdapter } from '@/protocols/BaseProtocolAdapter';
 import { tg } from '@/popup/plugins/i18n';
 import {
+  amountRounded,
   fetchAllPages,
   fetchJson,
   getLastNotEmptyAccountIndex,
@@ -219,7 +220,7 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         address,
         amount,
         contractId,
-        convertedBalance: +toShiftedBigNumber(amount!, -decimals).toFixed(2),
+        convertedBalance: +amountRounded(toShiftedBigNumber(amount, -decimals)),
         protocol: PROTOCOLS.aeternity,
       }));
     } catch (error: any) {
