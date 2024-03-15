@@ -70,12 +70,11 @@ const dexContracts = computed(
 );
 
 export function useAeSdk() {
-  const { onNetworkChange } = useNetworks();
   const {
-    aeActiveNetworkSettings,
     activeNetworkName,
     areNetworksRestored,
-  } = useAeNetworkSettings();
+    onNetworkChange,
+  } = useNetworks();
   const {
     accountsAddressList,
     isLoggedIn,
@@ -83,6 +82,7 @@ export function useAeSdk() {
     onAccountChange,
   } = useAccounts();
   const { checkOrAskPermission } = usePermissions();
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
 
   /**
    * Create Node instance and get connection status

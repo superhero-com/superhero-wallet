@@ -29,6 +29,7 @@ import { useAeNetworkSettings } from '@/protocols/aeternity/composables';
 import { createPollingBasedOnMountedComponents } from './composablesHelpers';
 import { useAeSdk } from './aeSdk';
 import { useAccounts } from './accounts';
+import { useNetworks } from './networks';
 
 export interface MultisigAccountsOptions {
   pollOnce?: boolean;
@@ -71,7 +72,8 @@ export function useMultisigAccounts({
   pollOnce = false,
   pollingDisabled = false,
 }: MultisigAccountsOptions = {}) {
-  const { aeActiveNetworkPredefinedSettings, onNetworkChange } = useAeNetworkSettings();
+  const { onNetworkChange } = useNetworks();
+  const { aeActiveNetworkPredefinedSettings } = useAeNetworkSettings();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { aeAccounts } = useAccounts();
 
