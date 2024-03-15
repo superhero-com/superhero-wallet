@@ -20,8 +20,8 @@
         :amount="balance"
         :symbol="tokenSymbol"
         :protocol="account.protocol"
-        fiat-below
         class="token-amount"
+        vertical
         small
       />
     </div>
@@ -87,8 +87,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/mixins';
-
 .account-select-options-item {
   --border-width: 3px;
 
@@ -96,8 +94,9 @@ export default defineComponent({
   padding: 2px 8px;
 
   .option-wrapper {
-    @include mixins.flex(space-between, flex-start, row);
-
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
     padding: 6px 8px;
     border-radius: 10px;

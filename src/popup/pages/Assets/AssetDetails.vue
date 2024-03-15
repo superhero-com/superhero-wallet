@@ -15,7 +15,7 @@
             <TokenAmount
               class="token-amount"
               hide-symbol
-              fiat-below
+              vertical
               large
               :protocol="currentActiveProtocol"
               :amount="assetBalance"

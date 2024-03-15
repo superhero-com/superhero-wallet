@@ -1,7 +1,7 @@
 <template>
   <span
     class="token-amount"
-    :class="[{ large, small }]"
+    :class="[{ large, small, vertical }]"
   >
     <span
       class="amount"
@@ -20,7 +20,6 @@
     <span
       v-if="amountFiat"
       class="fiat"
-      :class="{ 'fiat-below': fiatBelow }"
       v-text="amountFiat"
     />
   </span>
@@ -45,7 +44,7 @@ export default defineComponent({
     amount: { type: Number, required: true },
     symbol: { type: String, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
-    fiatBelow: Boolean,
+    vertical: Boolean,
     hideFiat: Boolean,
     hideSymbol: Boolean,
     highPrecision: Boolean,
@@ -96,6 +95,7 @@ export default defineComponent({
   @extend %face-sans-15-medium;
 
   display: inline-flex;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
   color: variables.$color-white;
@@ -113,15 +113,14 @@ export default defineComponent({
   .fiat {
     @extend %face-sans-15-regular;
 
-    margin-left: 8px;
     color: rgba(variables.$color-white, 0.75);
+    white-space: nowrap;
+  }
 
-    &.fiat-below {
-      display: block;
-      margin-left: 0;
-      padding-top: 4px;
-      white-space: nowrap;
-    }
+  &.vertical {
+    flex-direction: column;
+    align-items: normal;
+    gap: 4px;
   }
 
   &.large {
