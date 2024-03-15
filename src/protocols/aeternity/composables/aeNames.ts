@@ -30,6 +30,7 @@ import {
   useAccounts,
   useAeSdk,
   useModals,
+  useNetworks,
   useStorageRef,
 } from '@/composables';
 import { createPollingBasedOnMountedComponents } from '@/composables/composablesHelpers';
@@ -83,7 +84,8 @@ const initPollingWatcher = createPollingBasedOnMountedComponents(POLLING_INTERVA
  */
 export function useAeNames() {
   const { aeAccounts, isLocalAccountAddress, getLastActiveProtocolAccount } = useAccounts();
-  const { aeActiveNetworkSettings, onNetworkChange } = useAeNetworkSettings();
+  const { onNetworkChange } = useNetworks();
+  const { aeActiveNetworkSettings } = useAeNetworkSettings();
   const { openDefaultModal } = useModals();
   const { nodeNetworkId, getAeSdk } = useAeSdk();
   const { fetchCachedChainNames } = useAeTippingBackend();

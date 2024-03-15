@@ -1,17 +1,14 @@
 import { computed } from 'vue';
 import type { NetworkTypeDefault } from '@/types';
 import { NETWORK_TYPE_CUSTOM, NETWORK_TYPE_TESTNET } from '@/constants';
+import { createCustomScopedComposable } from '@/composables/composablesHelpers';
 import { useNetworks } from '@/composables/networks';
+
 import type { IAeNetworkPredefinedSettings, IAeNetworkSettings } from '@/protocols/aeternity/types';
 import { AE_NETWORK_ADDITIONAL_SETTINGS } from '@/protocols/aeternity/config';
 
-export function useAeNetworkSettings() {
-  const {
-    activeNetwork,
-    activeNetworkName,
-    areNetworksRestored,
-    onNetworkChange,
-  } = useNetworks();
+export const useAeNetworkSettings = createCustomScopedComposable(() => {
+  const { activeNetwork } = useNetworks();
 
   const aeActiveNetworkSettings = computed(
     () => activeNetwork.value.protocols.aeternity as IAeNetworkSettings,
@@ -28,10 +25,7 @@ export function useAeNetworkSettings() {
   );
 
   return {
-    activeNetworkName,
     aeActiveNetworkSettings,
     aeActiveNetworkPredefinedSettings,
-    areNetworksRestored,
-    onNetworkChange,
   };
-}
+});
