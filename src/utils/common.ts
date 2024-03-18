@@ -1,6 +1,6 @@
 /**
  * All utility helper functions.
-*/
+ */
 
 /* eslint-disable no-use-before-define */
 
@@ -20,6 +20,7 @@ import type {
   IHdWalletAccount,
   IPageableResponse,
   IRequestInitBodyParsed,
+  ITokenResolved,
   ITransaction,
   StorageKeysInput,
   Truthy,
@@ -102,6 +103,18 @@ export function composeStorageKeys(keys: StorageKeysInput): string {
     LOCAL_STORAGE_PREFIX,
     ...Array.isArray(keys) ? keys : [keys],
   ].join('_');
+}
+
+/**
+ * Convert wrapped coin tokens into coins (eg.: WAE => AE).
+ */
+export function convertWrappedCoinTokenToCoin(asset: ITokenResolved): ITokenResolved {
+  return (asset.isWrappedCoin && asset.protocol)
+    ? {
+      ...asset,
+      ...ProtocolAdapterFactory.getAdapter(asset.protocol).getDefaultCoin({} as any),
+    }
+    : asset;
 }
 
 export function errorHasValidationKey(error: any, expectedKey: string): boolean {

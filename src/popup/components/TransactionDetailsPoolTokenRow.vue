@@ -15,10 +15,10 @@
         <div class="token-info">
           <Tokens
             v-if="token"
-            :tokens="token.isPool ? tokens : [token]"
+            :tokens="assetsMapped"
           />
           <AddressTruncated
-            v-if="token.contractId && !isAssetCoin(token.contractId)"
+            v-if="token.contractId && !token.isWrappedCoin && !isAssetCoin(token.contractId)"
             show-explorer-link
             :address="token.contractId"
             :protocol="PROTOCOLS.aeternity"
@@ -32,7 +32,7 @@
 <script lang="ts">
 import { PropType, computed, defineComponent } from 'vue';
 import type { ITokenResolved } from '@/types';
-import { isAssetCoin, toShiftedBigNumber } from '@/utils';
+import { convertWrappedCoinTokenToCoin, isAssetCoin, toShiftedBigNumber } from '@/utils';
 import { PROTOCOLS } from '@/constants';
 
 import DetailsItem from './DetailsItem.vue';
@@ -60,10 +60,16 @@ export default defineComponent({
         : props.token.amount!
     ));
 
+    const assetsMapped = computed(
+      () => (props.token.isPool ? props.tokens : [props.token])
+        .map((asset) => convertWrappedCoinTokenToCoin(asset)),
+    );
+
     return {
       isAssetCoin,
       PROTOCOLS,
       amount,
+      assetsMapped,
     };
   },
 });
