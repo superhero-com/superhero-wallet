@@ -45,9 +45,9 @@ import { TX_DIRECTION } from '@/constants';
 import {
   amountRounded,
   calculateFontSize,
+  convertWrappedCoinTokenToCoin,
   truncateString,
 } from '@/utils';
-import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 
 import { AllowedAssetIconSize } from './AssetIcon.vue';
 import Tokens from './Tokens.vue';
@@ -66,21 +66,10 @@ export default defineComponent({
     multipleRows: Boolean,
   },
   setup(props) {
-    const adapter = ProtocolAdapterFactory.getAdapter(props.protocol);
-
-    /**
-     * Convert wrapped coin tokens into coins so for example instead of WAE we are displaying AE.
-     */
-    function mapAsset(asset: ITokenResolved) {
-      return (asset?.isWrappedCoin)
-        ? { ...asset, ...adapter.getDefaultCoin({} as any) }
-        : asset;
-    }
-
     const filteredAssets = computed(
       (): ITokenResolved[] => (props.assets || [])
         ?.filter(({ amount }) => amount !== undefined)
-        ?.map((asset) => mapAsset(asset)),
+        ?.map((asset) => convertWrappedCoinTokenToCoin(asset)),
     );
 
     const amountFormatted = ({ token, isRounded }: {token: ITokenResolved; isRounded: boolean}) => {
