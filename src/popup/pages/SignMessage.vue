@@ -39,19 +39,36 @@ export default defineComponent({
         const message = isHexEncodedMessage ? Buffer.from(rawMessage, 'hex') : rawMessage;
         const displayMessage = message?.toString();
         const { host, href } = callbackOrigin.value || {} as any;
+        const jwt = route.query.jwt?.toString() === 'true';
 
-        await openModal(MODAL_MESSAGE_SIGN, {
-          message: displayMessage,
-          app: {
-            host,
-            name: host,
-            url: href,
-          },
-        });
+        if (jwt) {
+          const messageObject = JSON.parse(message as string);
 
-        const signature = await aeSdk.signMessage(message as string);
-        const signatureHex = Buffer.from(signature).toString('hex');
-        openCallbackOrGoHome(true, { signature: signatureHex });
+          await openModal(MODAL_MESSAGE_SIGN, {
+            message: JSON.stringify(messageObject, null, 2),
+            app: {
+              host,
+              name: host,
+              url: href,
+            },
+          });
+
+          const signature = await aeSdk.signMessageJWT(messageObject);
+          openCallbackOrGoHome(true, { signature });
+        } else {
+          await openModal(MODAL_MESSAGE_SIGN, {
+            message: displayMessage,
+            app: {
+              host,
+              name: host,
+              url: href,
+            },
+          });
+
+          const signature = await aeSdk.signMessage(message as string);
+          const signatureHex = Buffer.from(signature).toString('hex');
+          openCallbackOrGoHome(true, { signature: signatureHex });
+        }
       } catch (error: any) {
         openCallbackOrGoHome(false);
 
