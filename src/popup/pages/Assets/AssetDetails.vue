@@ -434,16 +434,16 @@ export default defineComponent({
   }
 
   .top {
+    display: flex;
+    flex-direction: column;
     text-align: center;
   }
 
   .token-amount {
     @extend %face-sans-22-medium;
 
-    padding-top: 10px;
+    margin-top: 10px;
     margin-bottom: 20px;
-    display: block;
-    text-align: center;
   }
 
   .token-actions {

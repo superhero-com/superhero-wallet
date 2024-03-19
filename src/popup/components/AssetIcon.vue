@@ -93,6 +93,7 @@ export default defineComponent({
 
   display: inline-block;
   flex-grow: 0;
+  flex-shrink: 0;
   width: var(--icon-size);
   height: var(--icon-size);
   border-radius: 50%;

@@ -112,6 +112,8 @@ export default defineComponent({
 .tokens {
   @extend %face-sans-16-semi-bold;
 
+  display: inline-flex;
+  align-items: center;
   color: rgba(variables.$color-white, 0.75);
   letter-spacing: -2%;
 
@@ -119,28 +121,18 @@ export default defineComponent({
     color: variables.$color-white;
   }
 
-  &,
-  .symbols,
-  .icon {
-    display: inline-flex;
-    align-items: center;
-    align-self: center;
-  }
-
   .icon {
     user-select: none;
-    width: max-content;
-    vertical-align: middle;
     margin-right: 4px;
   }
 
-  .symbol {
-    @extend %face-sans-16-regular;
+  .symbols {
+    .symbol {
+      @extend %face-sans-16-regular;
 
-    vertical-align: middle;
-    white-space: nowrap;
-    line-height: 20px;
-    letter-spacing: -0.02em;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
   }
 
   .separator {
