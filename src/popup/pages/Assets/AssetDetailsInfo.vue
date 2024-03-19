@@ -12,6 +12,7 @@
               v-if="tokens"
               class="token-details-tokens"
               :tokens="tokens"
+              bright
             />
           </template>
         </DetailsRow>
@@ -268,7 +269,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../../styles/typography';
 @use '../../../styles/variables';
 
 .token-details {
@@ -304,12 +304,6 @@ export default defineComponent({
     &:hover {
       color: variables.$color-white;
     }
-  }
-
-  .token-details-tokens {
-    @extend %face-sans-15-medium;
-
-    color: variables.$color-white;
   }
 }
 </style>

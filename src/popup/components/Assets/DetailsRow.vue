@@ -5,11 +5,12 @@
         {{ label }}
       </slot>
     </div>
-    <span class="text">
+
+    <div class="text">
       <slot name="text">
         {{ text }}
       </slot>
-    </span>
+    </div>
   </div>
 </template>
 
@@ -24,14 +25,14 @@ export default {
 
 <style lang="scss" scoped>
 @use '../../../styles/variables';
-@use '../../../styles/mixins';
 @use '../../../styles/typography';
 
 .details-row {
-  @include mixins.flex(space-between, center);
-
   @extend %face-sans-15-medium;
 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 8px var(--screen-padding-x);
 
   .title {
@@ -43,10 +44,6 @@ export default {
 
   .text {
     color: rgba(variables.$color-white, 0.75);
-  }
-
-  .white {
-    color: variables.$color-white;
   }
 }
 </style>
