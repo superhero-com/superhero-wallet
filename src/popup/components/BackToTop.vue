@@ -2,7 +2,7 @@
   <div
     ref="el"
     class="back-to-top"
-    :class="{ sticky, visible: isVisible}"
+    :class="{ sticky, visible: isVisible }"
   >
     <transition name="fade-transition">
       <div

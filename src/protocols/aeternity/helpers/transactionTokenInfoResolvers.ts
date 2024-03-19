@@ -192,7 +192,7 @@ const swapExactTokensForTokens = genLiquiditySwapResolver(
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[1]?.value, // amount_b_min: int
     amount: _arguments[1]?.value, // amount_b_desired: int
   }),
@@ -209,7 +209,7 @@ const swapTokensForExactTokens = genLiquiditySwapResolver(
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );
@@ -225,7 +225,7 @@ const swapExactAeForTokens = genLiquiditySwapResolver(
     isWrappedCoin: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
+    contractId: _arguments[1]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
@@ -242,7 +242,7 @@ const swapTokensForExactAe = genLiquiditySwapResolver(
     amount: _arguments[1]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     minAmount: _arguments[0]?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
     isWrappedCoin: true,
@@ -260,7 +260,7 @@ const swapExactTokensForAe = genLiquiditySwapResolver(
     amount: _arguments[0]?.value, // amount_a_desired: int
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[2]?.value?.[_arguments[2]?.value?.length - 1]?.value,
+    contractId: _arguments[2]?.value?.at(-1)?.value,
     maxAmount: _arguments[1]?.value,
     amount: _arguments[1]?.value, // amount_b_desired: int
     isWrappedCoin: true,
@@ -277,7 +277,7 @@ const swapAeForExactTokens = genLiquiditySwapResolver(
     isWrappedCoin: true,
   }),
   ({ tx: { arguments: _arguments } }) => ({
-    contractId: _arguments[1]?.value?.[_arguments[1]?.value?.length - 1]?.value,
+    contractId: _arguments[1]?.value?.at(-1)?.value,
     amount: _arguments[0]?.value, // amount_b_desired: int
   }),
 );

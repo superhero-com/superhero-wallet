@@ -1,13 +1,15 @@
 <template>
   <button
     class="apps-browser-history-list-item"
-    :class="{ 'no-title': !title}"
+    :class="{ 'no-title': !title }"
+    type="button"
   >
     <div class="app-image-wrapper">
       <img
         v-if="image"
         :src="imageUrl"
         class="app-image"
+        alt="Dapp favicon"
       >
       <IconWrapper
         v-else

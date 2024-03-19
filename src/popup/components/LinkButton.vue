@@ -2,6 +2,7 @@
   <a
     :class="['link-button', variant, { underlined }]"
     :href="IS_MOBILE_APP ? undefined : to"
+    rel="noopener noreferrer"
     target="_blank"
     @click="onClick"
   >

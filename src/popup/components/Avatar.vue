@@ -4,6 +4,7 @@
     :src="hasProfileImage ? profileImage : avatar"
     :class="[size, { borderless }]"
     :style="avatarStyle"
+    alt="Avatar"
   >
 </template>
 

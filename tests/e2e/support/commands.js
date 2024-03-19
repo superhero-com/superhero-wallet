@@ -72,10 +72,10 @@ Cypress.Commands.add('mockExternalRequests', () => {
   cy.stub(CoinGecko, 'fetchCoinCurrencyRates', { usd: 0.05 });
 });
 
-Cypress.Commands.add('login', (options = {}, route, isMockingExternalRequests = true) => {
+Cypress.Commands.add('login', (options, route, isMockingExternalRequests = true) => {
   if (isMockingExternalRequests) cy.mockExternalRequests();
 
-  const { isSeedBackedUp = false, pendingTransaction, network = null } = options;
+  const { isSeedBackedUp = false, pendingTransaction, network = null } = options || {};
 
   cy.openPopup(async (contentWindow) => {
     const dataToBeStored = {

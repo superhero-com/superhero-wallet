@@ -66,7 +66,7 @@
           <BtnMain
             v-else
             :text="$t('common.backToHome')"
-            :to="{name: ROUTE_ACCOUNT}"
+            :to="{ name: ROUTE_ACCOUNT }"
           />
           <SeedPhraseNotification
             v-if="showNotification"

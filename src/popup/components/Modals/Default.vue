@@ -2,7 +2,7 @@
   <Modal
     class="default"
     :class="{
-      'text-center': textCenter
+      'text-center': textCenter,
     }"
     has-close-button
     :full-screen="fullScreen"

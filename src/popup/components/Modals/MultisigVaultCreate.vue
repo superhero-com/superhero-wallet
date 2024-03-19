@@ -50,26 +50,27 @@
             :name="`signer-address-${index}`"
             :message="errorMessage || getErrorMessage(signer)"
             :class="{
-              error: checkIfSignerAddressDuplicated(signer)
+              error: checkIfSignerAddressDuplicated(signer),
             }"
           >
             <template #label-after>
-              <a
+              <BtnPlain
                 class="scan-button"
                 @click.prevent="openScanQrModal(index)"
               >
                 <QrScanIcon />
-              </a>
+              </BtnPlain>
             </template>
             <template #after>
-              <a
+              <BtnPlain
                 v-if="index >= MULTISIG_VAULT_MIN_NUM_OF_SIGNERS"
+                class="btn-plain"
                 @click="removeSigner(index)"
               >
                 <PlusCircleIcon
                   class="btn-remove-signer"
                 />
-              </a>
+              </BtnPlain>
             </template>
           </FormTextarea>
         </Field>
@@ -158,8 +159,10 @@
         <BtnMain
           :text="$t('modals.createMultisigAccount.btnTextShort')"
           wide
-          :disabled="multisigAccountCreationPhase != MULTISIG_CREATION_PHASES.signed
-            || notEnoughBalanceToCreateMultisig"
+          :disabled="(
+            multisigAccountCreationPhase !== MULTISIG_CREATION_PHASES.signed
+            || notEnoughBalanceToCreateMultisig
+          )"
           @click="createMultisigAccount"
         />
       </template>
@@ -218,6 +221,7 @@ import {
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
+import BtnPlain from '../buttons/BtnPlain.vue';
 import BtnText from '../buttons/BtnText.vue';
 import BtnHelp from '../buttons/BtnHelp.vue';
 import FormSelect from '../form/FormSelect.vue';
@@ -243,6 +247,7 @@ export default defineComponent({
     FormTextarea,
     Modal,
     BtnMain,
+    BtnPlain,
     BtnText,
     BtnHelp,
     MultisigVaultCreateProgress,
@@ -495,16 +500,20 @@ export default defineComponent({
       }
     }
 
-    .btn-remove-signer {
-      width: 20px !important;
-      margin: -4px -6px -4px 0;
-      transform: rotate(45deg);
-      cursor: pointer;
-      transition: variables.$transition-interactive;
-      color: variables.$color-grey-light;
+    .btn-plain {
+      display: flex;
 
-      &:hover {
-        opacity: 0.8;
+      .btn-remove-signer {
+        width: 20px !important;
+        margin: -4px -6px -4px 0;
+        transform: rotate(45deg);
+        cursor: pointer;
+        transition: variables.$transition-interactive;
+        color: variables.$color-grey-light;
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
     }
 

@@ -24,8 +24,9 @@
           v-else
           class="buttons"
         >
-          <button
+          <BtnPlain
             v-show="canBeDefault"
+            class="button-plain"
             :class="{ set: isDefault }"
             :disabled="isDefault"
             @click="handleSetDefault"
@@ -35,21 +36,23 @@
                 ? $t('pages.names.list.default')
                 : $t('pages.names.list.default-make')
             }}
-          </button>
-          <button
+          </BtnPlain>
+          <BtnPlain
             v-show="expand"
+            class="button-plain"
             :class="{ set: autoExtend }"
             @click="toggleAutoExtend"
           >
             {{ $t('pages.names.auto-extend') }}
-          </button>
-          <button
+          </BtnPlain>
+          <BtnPlain
             v-show="expand || !canBeDefault"
+            class="button-plain"
             :class="{ edit: showInput }"
             @click="expandAndShowInput"
           >
             {{ $t('pages.names.details.set-pointer') }}
-          </button>
+          </BtnPlain>
           <BtnHelp
             v-if="expand && !hasPointer"
             :title="$t('modals.name-pointers-help.title')"
@@ -407,13 +410,15 @@ export default defineComponent({
         margin-top: 2px;
         user-select: none;
 
-        button:not(.btn-help) {
+        .button-plain:not(.btn-help) {
           @extend %face-sans-12-medium;
 
           padding: 2px 8px;
-          cursor: pointer;
+          white-space: nowrap;
+          color: variables.$color-grey-light;
           background: variables.$color-border-hover;
           border-radius: 6px;
+          opacity: 1;
 
           @include mixins.mobile {
             padding: 2px 6px;

@@ -27,9 +27,9 @@ export function useEthMaxAmount({ formModel, fee }: EthMaxAmountOptions) {
   });
   const selectedTokenBalance = computed(
     () => new BigNumber(
-      +toShiftedBigNumber(
+      toShiftedBigNumber(
         formModel.value.selectedAsset?.amount!,
-        -formModel.value.selectedAsset?.decimals!,
+        -(formModel.value.selectedAsset?.decimals || -0),
       ) || 0,
     ),
   );

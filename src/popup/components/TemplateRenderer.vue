@@ -26,9 +26,12 @@ export default defineComponent({
     option: { type: Object, default: null },
   },
   setup(props, { attrs }) {
-    return () => h('span', { class: attrs.class }, renderNodeContent(h, new DOMParser()
-      .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
-    props.option));
+    return () => h('span', { class: attrs.class }, renderNodeContent(
+      h,
+      new DOMParser()
+        .parseFromString(`<root>${props.str || ''}</root>`, 'text/xml').childNodes[0],
+      props.option,
+    ));
   },
 });
 </script>

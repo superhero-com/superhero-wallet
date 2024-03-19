@@ -56,7 +56,7 @@
             :rules="{
               required: input.required === true,
               url: true,
-              ...input.validationRules
+              ...input.validationRules,
             }"
           >
             <InputField

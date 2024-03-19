@@ -1,5 +1,5 @@
 <template>
-  <div :class="['switch-button', { disabled: disabled, active: !!modelValue }]">
+  <div :class="['switch-button', { disabled, active: !!modelValue }]">
     <div class="label">
       {{ label }}
     </div>

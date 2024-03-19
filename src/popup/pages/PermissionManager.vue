@@ -34,7 +34,7 @@
               name="url"
               :rules="{
                 required: true,
-                url: permissionHostValidation
+                url: permissionHostValidation,
               }"
             >
               <InputField

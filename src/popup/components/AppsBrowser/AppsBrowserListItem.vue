@@ -1,11 +1,15 @@
 <template>
-  <button class="apps-browser-list-item">
+  <button
+    class="apps-browser-list-item"
+    type="button"
+  >
     <div
       class="app-image-wrapper"
     >
       <img
         :src="imageUrl"
         class="app-image"
+        alt="Dapp favicon"
       >
     </div>
     <div class="app-title">

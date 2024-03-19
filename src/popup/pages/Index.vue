@@ -12,6 +12,7 @@
           v-if="IN_FRAME"
           class="iframe-image"
           src="../../icons/iframe/sendAndReceive.svg"
+          alt="Send & receive tips across the globe!"
         >
         <div
           v-else

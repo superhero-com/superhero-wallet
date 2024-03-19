@@ -5,6 +5,7 @@
         <img
           class="image"
           :src="NotFoundImage"
+          alt="Feature not found"
         >
         <div class="title">
           {{ $t('pages.notFound.header') }}

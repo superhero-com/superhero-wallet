@@ -9,7 +9,7 @@
       `icon-variant-${iconVariant}`,
       {
         dimmed,
-      }
+      },
     ]"
   >
     <Badge

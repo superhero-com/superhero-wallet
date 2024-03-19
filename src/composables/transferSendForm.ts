@@ -149,7 +149,7 @@ export function useTransferSendForm({
       formModel.value.address = parsedScanResult.tokenContract;
       formModel.value.amount = toShiftedBigNumber(
         parsedScanResult.amount,
-        -formModel.value.selectedAsset?.decimals!,
+        -(formModel.value.selectedAsset?.decimals || -0),
       ).toString();
       invoiceId.value = parsedScanResult.invoiceId;
       invoiceContract.value = parsedScanResult.invoiceContract;

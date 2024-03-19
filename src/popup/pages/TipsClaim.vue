@@ -18,7 +18,7 @@
             :option="{
               attrs: {
                 href: AE_BLOG_CLAIM_TIP_URL,
-                target: '_blank'
+                target: '_blank',
               },
             }"
             icon="success"

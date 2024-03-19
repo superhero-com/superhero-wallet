@@ -14,12 +14,14 @@
         :icon="RefreshIcon"
         @click="refreshIframeContent"
       />
+      <!--
       <BrowserActionItem
-        v-if="false"
+        v-if="UNFINISHED_FEATURES"
         :title="$t('dappActionBrowser.bookmark.title')"
         :info="$t('dappActionBrowser.bookmark.description')"
         :icon="FavoriteIcon"
       />
+      -->
       <BrowserActionItem
         v-if="IS_MOBILE_DEVICE"
         :title="$t('dappActionBrowser.share.title')"

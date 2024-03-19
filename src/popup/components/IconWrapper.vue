@@ -3,14 +3,14 @@
     class="icon-wrapper"
     :class="[
       `icon-size-${iconSize}`,
-      { 'is-boxed': isBoxed }
+      { 'is-boxed': isBoxed },
     ]"
   >
     <Component
       :is="icon"
       v-if="icon"
       class="icon-wrapper-icon"
-      :class="{'icon-wrapper-fill': isFull}"
+      :class="{ 'icon-wrapper-fill': isFull }"
     />
     <ProtocolIcon
       v-else-if="protocolIcon"

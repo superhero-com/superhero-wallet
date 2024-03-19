@@ -51,6 +51,7 @@ module.exports = {
     'no-unused-vars': 'off',
     'no-underscore-dangle': 'off',
     'no-confusing-arrow': 'off',
+    'no-promise-executor-return': 'off',
     'import/prefer-default-export': 'off',
     '@intlify/vue-i18n/no-dynamic-keys': 'warn',
     '@intlify/vue-i18n/no-unused-keys': 'error',
@@ -61,7 +62,6 @@ module.exports = {
     'vue/no-reserved-component-names': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     '@typescript-eslint/member-delimiter-style': ['error'],
-    'default-param-last': 'off',
 
     'vuejs-accessibility/click-events-have-key-events': 'warn',
   },

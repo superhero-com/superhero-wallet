@@ -61,7 +61,7 @@
       />
       <BtnMain
         v-if="activeMultisigAccount"
-        :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger': 'primary'"
+        :variant="action === TX_FUNCTIONS_MULTISIG.revoke ? 'danger' : 'primary'"
         data-cy="to-confirm"
         extra-padded
         :disabled="!!actionHasError"

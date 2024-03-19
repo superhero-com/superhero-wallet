@@ -25,7 +25,7 @@
             :is="isLogoDisabled ? 'div' : 'RouterLink'"
             v-else-if="isLoggedIn"
             :to="isLogoDisabled ? null : { name: homeRouteName }"
-            :class="['home-button', { 'disabled': isLogoDisabled }]"
+            :class="['home-button', { disabled: isLogoDisabled }]"
           >
             <Logo class="home-icon" />
           </Component>

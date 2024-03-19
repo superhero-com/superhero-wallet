@@ -12,6 +12,7 @@
     :src="asset.image || getTokenPlaceholderUrl(asset!)"
     :class="[iconSize, { 'is-placeholder': !asset?.image }]"
     :title="asset?.name || asset?.symbol"
+    alt="Asset image"
   >
 </template>
 

@@ -61,14 +61,16 @@ export default defineComponent({
       if (Number.isInteger(props.amount) || props.amount === 0) {
         return props.amount;
       }
-      return formatNumber(props.amount,
+      return formatNumber(
+        props.amount,
         {
           minimumFractionDigits: 2,
           maximumFractionDigits: adapter.getAmountPrecision({
             amount: props.amount,
             highPrecision: props.highPrecision,
           }),
-        });
+        },
+      );
     });
 
     const amountFiat = computed(

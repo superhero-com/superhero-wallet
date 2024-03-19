@@ -2,7 +2,7 @@
   <div
     class="transfer-send-amount"
     :class="{
-      'without-margin': withoutMargin
+      'without-margin': withoutMargin,
     }"
   >
     <Field

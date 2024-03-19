@@ -134,11 +134,13 @@ export default defineComponent({
     async function openActions() {
       // eslint-disable-next-line no-useless-catch
       try {
-        const value = await openModal(MODAL_DAPP_BROWSER_ACTIONS,
+        const value = await openModal(
+          MODAL_DAPP_BROWSER_ACTIONS,
           {
             iframe: props.iframe,
             selectedApp: props?.selectedApp,
-          });
+          },
+        );
         if (value?.action === BROWSER_ACTIONS.refresh) {
           emit('refresh');
         }

@@ -3,7 +3,7 @@
     <IonContent class="ion-padding ion-content-bg">
       <div
         class="apps-browser"
-        :class="{'app-selected': selectedApp}"
+        :class="{ 'app-selected': selectedApp }"
       >
         <AppsBrowserHeader
           :selected-app="selectedApp"
@@ -39,7 +39,7 @@
                   v-else
                   size="sm"
                   :icon="CloseIcon"
-                  @click="resetField({value: ''})"
+                  @click="resetField({ value: '' })"
                 />
               </template>
             </InputField>
@@ -68,6 +68,7 @@
         <iframe
           v-else
           ref="iframeRef"
+          title="selectedApp"
           class="apps-browser-iframe"
           :src="selectedApp.url"
           @load="onAppLoaded()"
