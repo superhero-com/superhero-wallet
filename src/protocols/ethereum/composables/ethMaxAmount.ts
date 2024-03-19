@@ -8,6 +8,7 @@ import {
 } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { PROTOCOLS } from '@/constants';
+import { toShiftedBigNumber } from '@/utils';
 
 interface EthMaxAmountOptions extends MaxAmountOptions {
   fee: Ref<BigNumberPublic>;
@@ -25,7 +26,12 @@ export function useEthMaxAmount({ formModel, fee }: EthMaxAmountOptions) {
     return formModel.value?.selectedAsset?.contractId === ethAdapter.coinContractId;
   });
   const selectedTokenBalance = computed(
-    () => new BigNumber(formModel.value?.selectedAsset?.convertedBalance || 0),
+    () => new BigNumber(
+      +toShiftedBigNumber(
+        formModel.value.selectedAsset?.amount!,
+        -formModel.value.selectedAsset?.decimals!,
+      ) || 0,
+    ),
   );
 
   const max = computed(() => {

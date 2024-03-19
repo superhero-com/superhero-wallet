@@ -170,7 +170,7 @@ export interface ITokenBalance {
   amount: number | string;
   contractId: AssetContractId;
   decimals?: number;
-  /** Amount of the token that is owned */
+  /** Rounded amount of the token that is owned. Should not be used for precise calculations */
   convertedBalance?: number;
   protocol: Protocol;
   // Allow setting symbol and name so that we can extract custom tokens from balance data
