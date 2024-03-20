@@ -52,7 +52,7 @@ export default {
   .label {
     color: rgba(variables.$color-white, 0.5);
 
-    @extend %face-sans-15-regular;
+    @extend %face-sans-15-medium;
   }
 
   .switch {

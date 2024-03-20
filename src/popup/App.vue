@@ -89,6 +89,7 @@ import { watchUntilTruthy } from '@/utils';
 import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
+  useBiometricAuth,
   useConnection,
   useCurrencies,
   useLanguages,
@@ -126,6 +127,9 @@ export default defineComponent({
       qrScannerOpen,
       isLoaderVisible,
       initVisibilityListeners,
+      isAppActive,
+      secureLoginTimeout,
+      isSecureLoginEnabled,
     } = useUi();
     const { modalsOpen } = useModals();
     const { isLoggedIn } = useAccounts();
@@ -134,9 +138,16 @@ export default defineComponent({
     const { restoreLanguage } = useLanguages();
     const { restore: restoreTransferSendForm } = useTransferSendHandler();
     const { multisigAccounts } = useMultisigAccounts({ pollingDisabled: true });
+    const {
+      checkIsAvailable,
+      isAuthenticated,
+      openAuthModal,
+      deauthenticate,
+    } = useBiometricAuth();
 
     const innerElement = ref<HTMLDivElement>();
     const delayedShowHeader = ref(false);
+    const lastTimeAppWasActive = ref<Date>();
 
     const routeMeta = computed<WalletRouteMeta | undefined>(() => route.meta);
     const showScrollbar = computed(() => routeMeta.value?.showScrollbar);
@@ -227,6 +238,37 @@ export default defineComponent({
         }
       },
       { immediate: true },
+    );
+
+    /**
+     * Secure login timeout handling
+     * only enabled on mobile apps
+     */
+    watch(
+      isAppActive,
+      async (isActive, wasActive) => {
+        if (!IS_MOBILE_APP) {
+          return;
+        }
+
+        // App went to background
+        if (wasActive && !isActive) {
+          lastTimeAppWasActive.value = new Date();
+        }
+
+        // App resumed from background
+        if (isActive && !wasActive) {
+          if (isSecureLoginEnabled.value && isAuthenticated.value && lastTimeAppWasActive.value) {
+            await checkIsAvailable(); // Check if biometric auth is still available
+            const now = new Date();
+            const elapsedTime = now.getTime() - lastTimeAppWasActive.value.getTime();
+            if (elapsedTime > secureLoginTimeout.value) {
+              deauthenticate();
+              await openAuthModal();
+            }
+          }
+        }
+      },
     );
 
     initVisibilityListeners();

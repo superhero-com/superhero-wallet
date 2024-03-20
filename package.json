@@ -36,6 +36,7 @@
     "@aeternity/bip39": "^0.1.0",
     "@aeternity/hd-wallet": "^0.2.0",
     "@aeternity/json-bigint": "^0.3.1",
+    "@aparajita/capacitor-biometric-auth": "^7.1.1",
     "@awesome-cordova-plugins/screen-orientation": "^6.4.0",
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@capacitor-community/barcode-scanner": "^4.0.1",

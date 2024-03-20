@@ -75,6 +75,7 @@ import { MODAL_READ_QR_CODE } from '@/constants';
 import { isSeedLengthValid } from '@/utils';
 import {
   useAccounts,
+  useBiometricAuth,
   useModals,
   useUi,
 } from '@/composables';
@@ -104,6 +105,7 @@ export default defineComponent({
     const { t } = useI18n();
     const { discoverAccounts, setMnemonic } = useAccounts();
     const { openModal } = useModals();
+    const { openEnableBiometricAuthModal } = useBiometricAuth();
     const { loginTargetLocation, setBackedUpSeed } = useUi();
 
     const discovering = ref(false);
@@ -136,6 +138,7 @@ export default defineComponent({
       await discoverAccounts();
       props.resolve();
       router.push(loginTargetLocation.value);
+      openEnableBiometricAuthModal();
       discovering.value = false;
     }
 

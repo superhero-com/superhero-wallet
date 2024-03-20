@@ -118,6 +118,7 @@ export const STORAGE_KEYS = {
   transactionsLoaded: 'transactions-loaded',
   transactionsPending: 'transactions-pending',
   transferSendData: 'transfer-send-data',
+  secureLogin: 'secure-login',
 } as const;
 
 export const CURRENCIES: ICurrency[] = [
@@ -318,6 +319,8 @@ export const MODAL_TRANSFER_SEND = 'transfer-send';
 export const MODAL_DAPP_BROWSER_ACTIONS = 'browser-actions';
 export const MODAL_WARNING_DAPP_BROWSER = 'warning-dapp-browser';
 export const MODAL_CLAIM_GIFT_CARD = 'claim-gift-card';
+export const MODAL_SECURE_LOGIN = 'secure-login';
+export const MODAL_ENABLE_SECURE_LOGIN = 'enable-secure-login';
 
 export const POPUP_TYPE_CONNECT = 'connectConfirm';
 export const POPUP_TYPE_ACCOUNT_LIST = 'account-list';
@@ -389,7 +392,7 @@ export const ICON_SIZES = {
   md: 'md', // 20px
   lg: 'lg', // 24px
   xl: 'xl', // 28px
-  xxl: 'xxl', // 30px
+  xxl: 'xxl', // 44px
 } as const;
 
 export const TRANSFER_SEND_STEPS = {

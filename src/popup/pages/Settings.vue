@@ -7,6 +7,12 @@
           :title="$t('pages.index.seedPhrase')"
         />
         <PanelItem
+          v-if="IS_MOBILE_APP"
+          :to="{ name: ROUTE_SECURE_LOGIN_SETTINGS }"
+          :info="isSecureLoginEnabled ? 'On' : 'Off'"
+          :title="$t('pages.titles.secureLogin')"
+        />
+        <PanelItem
           :to="{ name: ROUTE_NETWORK_SETTINGS }"
           :title="$t('pages.titles.networks')"
           :info="activeNetwork.name"
@@ -46,10 +52,19 @@
 <script lang="ts">
 import { IonPage, IonContent } from '@ionic/vue';
 import { computed, defineComponent } from 'vue';
-import { useCurrencies, useNetworks, useUi } from '@/composables';
-import { ROUTE_NETWORK_SETTINGS, ROUTE_PERMISSIONS_SETTINGS } from '@/popup/router/routeNames';
+import {
+  useCurrencies,
+  useNetworks,
+  useUi,
+} from '@/composables';
+import {
+  ROUTE_NETWORK_SETTINGS,
+  ROUTE_PERMISSIONS_SETTINGS,
+  ROUTE_SECURE_LOGIN_SETTINGS,
+} from '@/popup/router/routeNames';
 
 import PanelItem from '@/popup/components/PanelItem.vue';
+import { IS_MOBILE_APP } from '@/constants';
 
 export default defineComponent({
   name: 'Settings',
@@ -61,17 +76,20 @@ export default defineComponent({
   setup() {
     const { currentCurrencyInfo } = useCurrencies();
     const { activeNetwork } = useNetworks();
-    const { saveErrorLog } = useUi();
+    const { saveErrorLog, isSecureLoginEnabled } = useUi();
 
     const activeCurrency = computed(
       () => `${currentCurrencyInfo.value.code.toUpperCase()} (${currentCurrencyInfo.value.symbol.toUpperCase()})`,
     );
 
     return {
+      IS_MOBILE_APP,
       ROUTE_NETWORK_SETTINGS,
       ROUTE_PERMISSIONS_SETTINGS,
+      ROUTE_SECURE_LOGIN_SETTINGS,
       activeNetwork,
       saveErrorLog,
+      isSecureLoginEnabled,
       activeCurrency,
     };
   },
