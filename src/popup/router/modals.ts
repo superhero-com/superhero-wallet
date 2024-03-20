@@ -31,6 +31,8 @@ import {
   PROTOCOL_VIEW_TRANSFER_SEND,
   MODAL_DAPP_BROWSER_ACTIONS,
   MODAL_WARNING_DAPP_BROWSER,
+  MODAL_SECURE_LOGIN,
+  MODAL_ENABLE_SECURE_LOGIN,
 } from '@/constants';
 import { useModals } from '@/composables';
 
@@ -64,6 +66,8 @@ import WarningDappBrowser from '../components/Modals/WarningDappBrowser.vue';
 import MultisigProposalConfirmActions from '../components/Modals/MultisigProposalConfirmActions.vue';
 import MessageSign from '../pages/Popups/MessageSign.vue';
 import BrowserActions from '../components/Modals/BrowserActions.vue';
+import SecureLogin from '../components/Modals/SecureLogin.vue';
+import EnableSecureLogin from '../components/Modals/EnableSecureLogin.vue';
 
 export default () => {
   const { registerModal } = useModals();
@@ -164,5 +168,11 @@ export default () => {
   });
   registerModal(MODAL_WARNING_DAPP_BROWSER, {
     component: WarningDappBrowser,
+  });
+  registerModal(MODAL_SECURE_LOGIN, {
+    component: SecureLogin,
+  });
+  registerModal(MODAL_ENABLE_SECURE_LOGIN, {
+    component: EnableSecureLogin,
   });
 };

@@ -30,3 +30,4 @@ export * from './fungibleTokens';
 export * from './scrollTransactions';
 export * from './languages';
 export * from './permissions';
+export * from './auth';
