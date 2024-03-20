@@ -15,7 +15,7 @@
         hollow,
         outlined,
         selected,
-      }
+      },
     ]"
     class="btn-base"
     @click="onClick"

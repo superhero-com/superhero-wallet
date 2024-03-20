@@ -215,7 +215,7 @@
                   :disabled="isLoaderVisible"
                   @click="dispatchProposalAction(
                     TX_FUNCTIONS_MULTISIG.refuse,
-                    $t('pages.proposalDetails.refuse')
+                    $t('pages.proposalDetails.refuse'),
                   )"
                 >
                   {{ $t('pages.proposalDetails.refuse') }}
@@ -243,7 +243,7 @@
                   "
                   @click="dispatchProposalAction(
                     TX_FUNCTIONS_MULTISIG.confirm,
-                    $t('pages.proposalDetails.sign')
+                    $t('pages.proposalDetails.sign'),
                   )"
                 >
                   {{ $t('pages.proposalDetails.sign') }}
@@ -258,7 +258,7 @@
                 :disabled="isLoaderVisible"
                 @click="dispatchProposalAction(
                   TX_FUNCTIONS_MULTISIG.revoke,
-                  $t('pages.proposalDetails.revoke')
+                  $t('pages.proposalDetails.revoke'),
                 )"
               >
                 {{ $t('pages.proposalDetails.revokeTransaction') }}
@@ -436,7 +436,7 @@ export default defineComponent({
 
     function handleInsufficientBalanceError(
       error: any,
-      isVault = false,
+      isVault: boolean,
       action?: string | TranslateResult,
     ) {
       if (error) {

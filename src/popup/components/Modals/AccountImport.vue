@@ -35,14 +35,14 @@
       @submit="importAccount"
     >
       <template #label-after>
-        <a
+        <BtnPlain
           data-cy="scan-button"
           class="scan-button"
           :class="{ disabled: discovering }"
           @click="openScanQrModal"
         >
           <QrScanIcon />
-        </a>
+        </BtnPlain>
       </template>
     </FormTextarea>
 
@@ -81,6 +81,7 @@ import {
 
 import Modal from '@/popup/components/Modal.vue';
 import BtnMain from '@/popup/components/buttons/BtnMain.vue';
+import BtnPlain from '@/popup/components/buttons/BtnPlain.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import AnimatedSpinnerIcon from '@/icons/animated-spinner.svg?skip-optimize';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
@@ -88,6 +89,7 @@ import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 export default defineComponent({
   components: {
     BtnMain,
+    BtnPlain,
     Modal,
     FormTextarea,
     QrScanIcon,

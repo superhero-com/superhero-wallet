@@ -6,7 +6,7 @@
     placeholder="0.00"
     :model-value="modelValue"
     :label="label"
-    :message="$attrs['message']"
+    :message="$attrs.message"
     @update:modelValue="$emit('update:modelValue', $event)"
   >
     <template

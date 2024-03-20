@@ -28,7 +28,9 @@
         <video
           ref="qrCodeVideoEl"
           class="video"
-        />
+        >
+          <track kind="captions" title="Scanning Qr Code" />
+        </video>
       </div>
     </div>
     <template
@@ -138,7 +140,9 @@ export default defineComponent({
 
       return new Promise((resolve) => {
         browserReader.value?.decodeFromVideoDevice(
-          undefined, qrCodeVideoEl.value, (result, _, controls) => {
+          undefined,
+          qrCodeVideoEl.value,
+          (result, _, controls) => {
             browserReaderControls.value = controls;
             if (result) {
               controls?.stop();

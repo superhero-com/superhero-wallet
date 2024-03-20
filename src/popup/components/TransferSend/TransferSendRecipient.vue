@@ -26,13 +26,13 @@
         @help="showRecipientHelp()"
       >
         <template #label-after>
-          <a
+          <BtnPlain
             class="scan-button"
             data-cy="scan-button"
             @click="$emit('openQrModal')"
           >
             <QrScanIcon />
-          </a>
+          </BtnPlain>
         </template>
       </FormTextarea>
     </Field>
@@ -65,6 +65,7 @@ import { useAeTippingUrls } from '@/protocols/aeternity/composables';
 import UrlStatus from '@/popup/components/UrlStatus.vue';
 import FormTextarea from '@/popup/components/form/FormTextarea.vue';
 import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
+import BtnPlain from '../buttons/BtnPlain.vue';
 
 export default defineComponent({
   components: {
@@ -72,6 +73,7 @@ export default defineComponent({
     UrlStatus,
     Field,
     QrScanIcon,
+    BtnPlain,
   },
   props: {
     isTipUrl: Boolean,

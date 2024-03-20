@@ -1,9 +1,10 @@
+<!-- eslint-disable vuejs-accessibility/label-has-for -->
 <template>
   <div
     class="input-field"
     :class="{
-      'error': hasError,
-      'warning': hasWarning,
+      error: hasError,
+      warning: hasWarning,
       readonly,
       code,
       thin,

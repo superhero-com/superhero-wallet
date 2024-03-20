@@ -14,6 +14,7 @@
         v-if="qrScannerOpen"
         id="camera-close-btn"
         class="camera-close-button"
+        type="button"
       >
         <Close />
       </button>
@@ -28,7 +29,7 @@
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->
         <IonRouterOutlet
           :animated="!RUNNING_IN_TESTS && !IS_FIREFOX"
-          :class="{ 'show-header': delayedShowHeader, 'ios': IS_IOS }"
+          :class="{ 'show-header': delayedShowHeader, ios: IS_IOS }"
           class="main"
         />
 
@@ -40,7 +41,9 @@
         <Component
           v-bind="props"
           :is="component"
-          v-for="({ component, key, props, viewComponentName }) in modalsOpen"
+          v-for="({
+            component, key, props, viewComponentName,
+          }) in modalsOpen"
           :key="key"
           :view-component-name="viewComponentName"
         />

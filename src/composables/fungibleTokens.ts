@@ -75,15 +75,13 @@ const tokensAvailable = computed((): ProtocolRecord<AssetList> => {
     return customTokens;
   }, {} as typeof tokensAvailable.value);
 
-  return Object.values(PROTOCOLS).reduce(
-    (allTokens, protocol) => {
-      allTokens[protocol] = {
-        ...defaultTokensAvailable.value[protocol],
-        ...customTokensAvailable[protocol],
-      };
-      return allTokens;
-    }, {} as typeof defaultTokensAvailable.value,
-  );
+  return Object.values(PROTOCOLS).reduce((allTokens, protocol) => {
+    allTokens[protocol] = {
+      ...defaultTokensAvailable.value[protocol],
+      ...customTokensAvailable[protocol],
+    };
+    return allTokens;
+  }, {} as typeof defaultTokensAvailable.value);
 });
 
 function getProtocolAvailableTokens(protocol: Protocol): AssetList {

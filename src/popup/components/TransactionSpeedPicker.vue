@@ -16,7 +16,7 @@
     >
       {{
         $t('modals.send.transactionWillBeCompleted', {
-          time: secondsToRelativeTime(feeList[modelValue].time, true)
+          time: secondsToRelativeTime(feeList[modelValue].time, true),
         })
       }}
     </p>

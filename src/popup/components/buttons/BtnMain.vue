@@ -18,7 +18,7 @@
       :is="icon"
       v-if="icon"
       class="btn-main-icon"
-      :class="{ 'lg': bigIcon }"
+      :class="{ lg: bigIcon }"
     />
 
     <slot>{{ text }}</slot>

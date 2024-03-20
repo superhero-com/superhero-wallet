@@ -1,7 +1,7 @@
 <template>
   <div
-    :class="['fixed-screen-footer',
-             { mobile: IS_MOBILE_DEVICE }, { noPaddingTop: noPaddingTop }]"
+    class="fixed-screen-footer"
+    :class="[{ mobile: IS_MOBILE_DEVICE }, { noPaddingTop }]"
   >
     <slot />
   </div>

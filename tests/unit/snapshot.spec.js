@@ -87,7 +87,9 @@ const testCases = [
 
 describe.each(testCases)('Pages', (test) => {
   it(test.name, async () => {
+    // eslint-disable-next-line no-import-assign
     environment.IS_WEB = !!test.data?.IS_WEB;
+    // eslint-disable-next-line no-import-assign
     environment.IN_FRAME = !!test.data?.IN_FRAME;
 
     const wrapper = mount(test.page, {

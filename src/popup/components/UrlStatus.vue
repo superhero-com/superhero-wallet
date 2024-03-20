@@ -5,13 +5,13 @@
     :class="status"
   >
     <span class="title">{{ statusData.title }}</span>
-    <a
+    <BtnPlain
       class="icon-link"
       :class="status"
       @click="showModal()"
     >
       <QuestionCircleIcon class="icon" />
-    </a>
+    </BtnPlain>
   </div>
   <Default v-else />
 </template>
@@ -25,11 +25,13 @@ import { useModals } from '@/composables';
 
 import Default from '@/icons/badges/default.svg?vue-component';
 import QuestionCircleIcon from '@/icons/question-circle-border.svg?vue-component';
+import BtnPlain from './buttons/BtnPlain.vue';
 
 export default defineComponent({
   components: {
     Default,
     QuestionCircleIcon,
+    BtnPlain,
   },
   props: {
     status: {

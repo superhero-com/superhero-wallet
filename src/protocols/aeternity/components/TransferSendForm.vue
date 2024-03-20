@@ -351,12 +351,14 @@ export default defineComponent({
     function setMaxValue() {
       const _fee = fee.value;
       formModel.value.amount = max.value;
-      setTimeout(() => {
-        if (_fee !== fee.value) {
-          formModel.value.amount = max.value;
-        }
-      },
-      100);
+      setTimeout(
+        () => {
+          if (_fee !== fee.value) {
+            formModel.value.amount = max.value;
+          }
+        },
+        100,
+      );
     }
 
     function emitCurrentFormModelState() {

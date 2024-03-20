@@ -2,7 +2,7 @@
   <InputField
     v-bind="$attrs"
     class="textarea"
-    :class="[ size, { 'auto-height' : autoHeight } ]"
+    :class="[size, { 'auto-height': autoHeight }]"
     :readonly="readonly"
     @update:modelValue="handleInput"
   >

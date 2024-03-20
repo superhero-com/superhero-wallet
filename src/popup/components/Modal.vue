@@ -16,7 +16,7 @@
         dense,
         'semi-dense': semiDense,
         'blur-bg': !(IS_FIREFOX && IS_EXTENSION),
-        'min-height': minHeight
+        'min-height': minHeight,
       }"
     >
       <div class="container">
@@ -53,7 +53,7 @@
           class="body"
           :class="{
             'text-center': centered,
-            'without-padding-bottom': bodyWithoutPaddingBottom
+            'without-padding-bottom': bodyWithoutPaddingBottom,
           }"
         >
           <slot />

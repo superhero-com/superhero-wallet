@@ -13,7 +13,7 @@
           '--translate-x-value': `${translateXValue}px`,
         }"
       >
-        <a
+        <BtnPlain
           v-for="(_, idx) in optionsSize"
           :key="idx"
           :class="{
@@ -25,7 +25,7 @@
           @click="$emit('change', idx)"
         >
           <span class="bullet" />
-        </a>
+        </BtnPlain>
       </div>
     </div>
 
@@ -40,6 +40,8 @@
 
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
+
+import BtnPlain from './buttons/BtnPlain.vue';
 import PlusCircleIcon from '../../icons/plus-circle-fill.svg?vue-component';
 
 // Physical size of the bullet area in pixels
@@ -52,6 +54,7 @@ const RESIZE_THRESHOLD = 5;
 
 export default defineComponent({
   components: {
+    BtnPlain,
     PlusCircleIcon,
   },
   props: {

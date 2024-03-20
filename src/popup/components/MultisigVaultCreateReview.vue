@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-v-text-v-html-on-component -->
 <template>
   <div class="multisig-vault-create-review">
     <h2 class="text-heading-1">

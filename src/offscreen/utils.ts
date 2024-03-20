@@ -6,7 +6,7 @@ import { getCleanModalOptions } from '@/utils';
 
 export const detectConnectionType = (port: Runtime.Port) => {
   const extensionProtocol = IS_FIREFOX ? 'moz-extension' : 'chrome-extension';
-  const [senderUrl] = port?.sender?.url?.split('?')!;
+  const [senderUrl] = port?.sender?.url?.split('?') || [];
   const isExtensionSender = (
     senderUrl.startsWith(`${extensionProtocol}://${browser.runtime.id}/index.html`)
     || IS_FIREFOX

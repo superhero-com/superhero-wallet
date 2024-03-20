@@ -12,7 +12,8 @@
             :key="code"
             :value="activeLanguage === code"
             :disabled="false"
-            :class="['language', {active: activeLanguage === code }]"
+            class="language"
+            :class="[{ active: activeLanguage === code }]"
             @input="switchLanguage(code)"
           >
             <div

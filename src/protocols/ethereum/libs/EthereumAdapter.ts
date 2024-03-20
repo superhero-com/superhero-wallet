@@ -289,7 +289,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const [nonce, gasLimit] = await Promise.all([
       this.getTransactionCount(options.fromAccount),
-      // @ts-expect-error
       contract.methods.transfer(recipient, hexAmount).estimateGas(),
     ]);
 
@@ -298,7 +297,6 @@ export class EthereumAdapter extends BaseProtocolAdapter {
       chainId,
       nonce,
       to: contractId,
-      // @ts-expect-error
       data: contract.methods.transfer(recipient, hexAmount).encodeABI(),
       value: 0x0,
       maxPriorityFeePerGas,
@@ -483,7 +481,10 @@ export class EthereumAdapter extends BaseProtocolAdapter {
         if (
           minedTransaction?.blockNumber
           && (
-            currentBlock?.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
+            (
+              currentBlock?.number
+              && currentBlock.number - BigInt(minedTransaction.blockNumber) >= BLOCKS_TO_WAIT
+            )
             || isLastAttempt
           )
         ) {

@@ -57,7 +57,7 @@
 
       <div
         class="tabs-content"
-        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px`}"
+        :style="{ height: routerHeight || `${INITIAL_TABS_HEIGHT}px` }"
       >
         <!-- We are disabling animations on FF because of a bug that causes flickering
           see: https://github.com/ionic-team/ionic-framework/issues/26620 -->

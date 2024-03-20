@@ -1,5 +1,5 @@
+<!-- eslint-disable vue/max-len -->
 <template>
-  <!-- eslint-disable max-len -->
   <IonPage>
     <IonContent
       class="ion-padding ion-content-bg"

@@ -1,7 +1,7 @@
 <template>
   <div
     class="network-row"
-    :class="{ 'inactive': !isActive }"
+    :class="{ inactive: !isActive }"
   >
     <RadioButton
       :value="isActive"
