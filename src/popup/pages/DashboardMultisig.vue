@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <IonContent class="ion-padding ion-content-bg">
-      <DashboardWrapper>
+      <DashboardWrapper v-if="pageIsActive">
         <template #header>
           <DashboardHeaderMultisig />
         </template>
@@ -26,8 +26,13 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonContent } from '@ionic/vue';
-import { defineComponent } from 'vue';
+import {
+  IonPage,
+  IonContent,
+  onIonViewWillEnter,
+  onIonViewDidLeave,
+} from '@ionic/vue';
+import { defineComponent, ref } from 'vue';
 
 import { MODAL_TRANSFER_SEND } from '@/constants';
 import { useModals } from '@/composables';
@@ -52,6 +57,8 @@ export default defineComponent({
     IonContent,
   },
   setup() {
+    const pageIsActive = ref(true);
+
     const { openModal } = useModals();
 
     function openTransferSendModal() {
@@ -60,7 +67,16 @@ export default defineComponent({
       });
     }
 
+    onIonViewWillEnter(() => {
+      pageIsActive.value = true;
+    });
+
+    onIonViewDidLeave(() => {
+      pageIsActive.value = false;
+    });
+
     return {
+      pageIsActive,
       ArrowSendIcon,
       openTransferSendModal,
     };

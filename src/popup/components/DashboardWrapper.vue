@@ -1,5 +1,8 @@
 <template>
-  <div class="dashboard">
+  <div
+    ref="dashboardWrapperEl"
+    class="dashboard"
+  >
     <slot name="header" />
 
     <div class="dashboard-cards">
@@ -29,8 +32,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { useUi } from '@/composables';
+import {
+  defineComponent,
+  onMounted,
+  ref,
+} from 'vue';
+import { useUi, useViewport } from '@/composables';
 
 import DashboardCard from './DashboardCard.vue';
 
@@ -42,10 +49,18 @@ export default defineComponent({
     DashboardCard,
   },
   setup() {
+    const dashboardWrapperEl = ref<HTMLElement | null>(null);
+
     const { isSeedBackedUp } = useUi();
+    const { initViewport } = useViewport();
+
+    onMounted(() => {
+      initViewport(dashboardWrapperEl.value?.parentElement!);
+    });
 
     return {
       isSeedBackedUp,
+      dashboardWrapperEl,
       WarningTriangleIcon,
     };
   },
