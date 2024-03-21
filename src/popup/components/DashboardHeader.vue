@@ -8,13 +8,14 @@
     <AccountSwiper
       :active-idx="activeAccountGlobalIdx"
       :address-list="accountsAddressList"
-      :to="{ name: ROUTE_ACCOUNT_DETAILS }"
-      @selectAccount="(index) => setActiveAccountByGlobalIdx(index)"
+      @select-account="(index) => setActiveAccountByGlobalIdx(index)"
     >
-      <template #slide="{ index }">
+      <template #slide="{ index, selected }">
         <AccountCard
           :account="accounts[index]"
-          :selected="index === activeAccountGlobalIdx"
+          :selected="selected"
+          :idx="index"
+          :to="{ name: ROUTE_ACCOUNT_DETAILS }"
         />
       </template>
     </AccountSwiper>

@@ -206,7 +206,7 @@ import type {
   ICreateMultisigAccount,
   ObjectValues,
 } from '@/types';
-import { ROUTE_MULTISIG_DETAILS_INFO } from '@/popup/router/routeNames';
+import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import {
   useAccounts,
   useModals,
@@ -415,7 +415,7 @@ export default defineComponent({
       if (multisigAccount.value) {
         await props.resolve();
         setActiveMultisigAccountId(multisigAccount.value.gaAccountId);
-        router.push({ name: ROUTE_MULTISIG_DETAILS_INFO });
+        router.push({ name: ROUTE_MULTISIG_ACCOUNT });
       }
     }
 

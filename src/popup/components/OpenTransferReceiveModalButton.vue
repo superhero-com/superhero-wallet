@@ -4,6 +4,7 @@
     :subtitle="subtitle"
     :icon="ArrowReceiveIcon"
     :is-big="isBig"
+    :disabled="disabled"
     @click="openTransferReceiveModal()"
   />
 </template>
@@ -22,6 +23,7 @@ export default defineComponent({
     isBig: Boolean,
     isMultisig: Boolean,
     tokenContractId: { type: String, default: '' },
+    disabled: Boolean,
   },
   setup(props) {
     const { openModal } = useModals();

@@ -94,6 +94,15 @@ export function useMultisigAccounts({
       : null,
   );
 
+  const isActiveMultisigAccountPending = computed(
+    (): boolean => (
+      !!activeMultisigAccount.value?.gaAccountId
+      && !!pendingMultisigAccounts.value.find(
+        ({ gaAccountId }) => gaAccountId === activeMultisigAccount.value!.gaAccountId,
+      )
+    ),
+  );
+
   // Get initial data for currently used network
   (async () => {
     await getAeSdk(); // Ensure we are connected
@@ -339,6 +348,7 @@ export function useMultisigAccounts({
     multisigAccounts: allMultisigAccounts,
     pendingMultisigAccounts,
     isAdditionalInfoNeeded,
+    isActiveMultisigAccountPending,
     activeMultisigAccountId,
     activeMultisigAccount,
     activeMultisigAccountExplorerUrl,

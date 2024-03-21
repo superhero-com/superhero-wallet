@@ -1,8 +1,12 @@
 <template>
-  <div
-    class="account-card-base"
-    :class="{ selected }"
+  <BtnBase
     data-cy="account-card-base"
+    class="account-card-base"
+    :class="{ active: selected && !pending }"
+    :to="to"
+    :disabled="!selected || pending"
+    :bg-color="color"
+    :variant="color ? undefined : 'dark'"
   >
     <div class="top">
       <slot name="top" />
@@ -15,30 +19,54 @@
     <div class="bottom">
       <slot name="bottom" />
     </div>
-  </div>
+  </BtnBase>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { PropType, computed, defineComponent } from 'vue';
+import { RouteLocationNamedRaw } from 'vue-router';
+
+import { getAddressColor } from '@/utils';
+
+import BtnBase from './buttons/BtnBase.vue';
+
+export const accountCardBaseCommonProps = {
+  selected: Boolean,
+  pending: Boolean,
+};
 
 export default defineComponent({
+  components: {
+    BtnBase,
+  },
   props: {
-    selected: Boolean,
+    address: { type: String, default: '' },
+    to: { type: Object as PropType<RouteLocationNamedRaw>, default: null },
+    ...accountCardBaseCommonProps,
+  },
+  setup(props) {
+    const color = computed(() => props.address ? getAddressColor(props.address) : undefined);
+
+    return {
+      color,
+    };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '../../styles/variables' as *;
 
 .account-card-base {
   display: flex;
-  width: 100%;
   flex-direction: column;
+  width: 100%;
+  height: 192px;
   padding: 12px;
+  border-radius: $border-radius-card;
   text-decoration: none;
 
-  &.selected {
+  &.active {
     .top,
     .middle,
     .bottom {
