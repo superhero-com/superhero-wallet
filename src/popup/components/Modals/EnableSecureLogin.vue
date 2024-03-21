@@ -51,6 +51,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
+import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
 import type { RejectCallback, ResolveCallback } from '@/types';
 import { useBiometricAuth, useUi } from '@/composables';
 
@@ -76,8 +77,10 @@ export default defineComponent({
 
     function onEnable() {
       if (!isAvailable.value) {
-        // TODO HEREREREEEE
-        // TODO If is not available, go to device settings
+        NativeSettings.open({
+          optionAndroid: AndroidSettings.Security,
+          optionIOS: IOSSettings.TouchIdPasscode,
+        });
         props.resolve();
         return;
       }
