@@ -48,7 +48,7 @@ export function useAccountAssetsList({
 
   const protocolCoinBalance = computed((): Balance => {
     const currentBalance = (isMultisig) ? activeMultisigAccount.value?.balance : balance.value;
-    return currentBalance || new BigNumber(0);
+    return new BigNumber(currentBalance ?? 0);
   });
 
   const accountProtocol = computed(

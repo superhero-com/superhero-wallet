@@ -311,7 +311,7 @@ import {
   useTransactionData,
   useUi,
 } from '@/composables';
-import { ROUTE_ACCOUNT } from '@/popup/router/routeNames';
+import { ROUTE_MULTISIG_ACCOUNT } from '@/popup/router/routeNames';
 import { AE_SYMBOL, TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 import {
   aettosToAe,
@@ -482,13 +482,13 @@ export default defineComponent({
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
-          router.push({ name: ROUTE_ACCOUNT });
+          router.push({ name: ROUTE_MULTISIG_ACCOUNT });
         }
       } catch (error: any) {
         handleInsufficientBalanceError(error, false, actionName.toString().toLowerCase());
+      } finally {
+        setLoaderVisible(false);
       }
-
-      setLoaderVisible(false);
     }
 
     /**
