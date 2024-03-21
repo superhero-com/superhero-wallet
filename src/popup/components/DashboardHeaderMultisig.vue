@@ -9,14 +9,16 @@
     <AccountSwiper
       :active-idx="multisigAccountIdx"
       :address-list="addressList"
-      :to="{ name: ROUTE_MULTISIG_DETAILS }"
       is-multisig
-      @selectAccount="(index) => selectAccount(index)"
+      @select-account="(index) => selectAccount(index)"
     >
-      <template #slide="{ index }">
+      <template #slide="{ index, selected }">
         <AccountCardMultisig
           :account="multisigAccounts[index]"
-          :selected="index === multisigAccountIdx"
+          :pending="isPendingAccount(multisigAccounts[index])"
+          :selected="selected"
+          :idx="index"
+          :to="{ name: ROUTE_MULTISIG_DETAILS }"
         />
       </template>
     </AccountSwiper>
@@ -29,6 +31,8 @@ import {
   defineComponent,
 } from 'vue';
 import BigNumber from 'bignumber.js';
+
+import type { IMultisigAccount } from '@/types';
 import { PROTOCOLS } from '@/constants';
 import {
   useCurrencies,
@@ -50,6 +54,7 @@ export default defineComponent({
     const {
       multisigAccounts,
       activeMultisigAccountId,
+      pendingMultisigAccounts,
       setActiveMultisigAccountId,
     } = useMultisigAccounts();
     const { getFiat } = useCurrencies();
@@ -80,6 +85,12 @@ export default defineComponent({
       }
     }
 
+    function isPendingAccount(account: IMultisigAccount): boolean {
+      return !!pendingMultisigAccounts.value.find(
+        ({ gaAccountId }) => gaAccountId === account.gaAccountId,
+      );
+    }
+
     return {
       ROUTE_MULTISIG_DETAILS,
       multisigAccounts,
@@ -87,6 +98,7 @@ export default defineComponent({
       multisigBalancesTotal,
       addressList,
       selectAccount,
+      isPendingAccount,
     };
   },
 });

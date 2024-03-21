@@ -9,6 +9,7 @@
       :name="name"
       :size="avatarSize"
       :borderless="avatarBorderless"
+      :is-placeholder="isPlaceholder"
     />
     <div
       class="account-details"
@@ -31,23 +32,26 @@
         class="account-name"
         v-text="getDefaultAccountLabel(account)"
       />
-      <div
-        v-if="account.address?.length"
-        class="account-address"
-      >
-        <CopyText
-          data-cy="copy"
-          :value="account.address"
-          :disabled="!canCopyAddress"
+
+      <slot name="address">
+        <div
+          v-if="account.address?.length"
+          class="account-address"
         >
-          <AddressTruncated
-            :address="account.address"
-            :protocol="account.protocol"
-            :show-protocol-icon="showProtocolIcon"
-            class="ae-address"
-          />
-        </CopyText>
-      </div>
+          <CopyText
+            data-cy="copy"
+            :value="account.address"
+            :disabled="!canCopyAddress"
+          >
+            <AddressTruncated
+              :address="account.address"
+              :protocol="account.protocol"
+              :show-protocol-icon="showProtocolIcon"
+              class="ae-address"
+            />
+          </CopyText>
+        </div>
+      </slot>
     </div>
   </div>
 </template>
@@ -82,6 +86,7 @@ export default defineComponent({
     isMultisig: Boolean,
     avatarBorderless: Boolean,
     isListName: Boolean,
+    isPlaceholder: Boolean,
     showProtocolIcon: Boolean,
   },
   setup(props) {
@@ -120,7 +125,6 @@ export default defineComponent({
 
   .avatar {
     margin-right: 8px;
-    background-color: variables.$color-black;
   }
 
   .account-details {

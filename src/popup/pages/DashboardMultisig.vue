@@ -8,10 +8,12 @@
 
         <template #buttons>
           <OpenTransferReceiveModalButton
+            :disabled="isActiveMultisigAccountPending"
             is-multisig
             is-big
           />
           <OpenTransferSendModalButton
+            :disabled="!!pendingMultisigTransaction || isActiveMultisigAccountPending"
             is-multisig
             is-big
           />
@@ -35,7 +37,7 @@ import {
 import { defineComponent, ref } from 'vue';
 
 import { MODAL_TRANSFER_SEND } from '@/constants';
-import { useModals } from '@/composables';
+import { useModals, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 
 import PendingMultisigTransactionCard from '../components/PendingMultisigTransactionCard.vue';
 import DashboardWrapper from '../components/DashboardWrapper.vue';
@@ -60,6 +62,8 @@ export default defineComponent({
     const pageIsActive = ref(true);
 
     const { openModal } = useModals();
+    const { isActiveMultisigAccountPending } = useMultisigAccounts();
+    const { pendingMultisigTransaction } = usePendingMultisigTransaction();
 
     function openTransferSendModal() {
       openModal(MODAL_TRANSFER_SEND, {
@@ -76,6 +80,8 @@ export default defineComponent({
     });
 
     return {
+      isActiveMultisigAccountPending,
+      pendingMultisigTransaction,
       pageIsActive,
       ArrowSendIcon,
       openTransferSendModal,
