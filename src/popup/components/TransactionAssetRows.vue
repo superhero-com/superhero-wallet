@@ -20,6 +20,7 @@
         :icon-size="iconSize"
         :protocol="protocol"
         full-symbol
+        bright
       />
       <span class="amount">
         {{ asset.isReceived ? '' : '&minus;' }}
