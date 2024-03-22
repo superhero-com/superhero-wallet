@@ -91,11 +91,14 @@ $size-xl: 56px;
   user-select: none;
   flex-shrink: 0;
   border: 1px solid var(--color);
-  background-color: rgba($color-white, 0.15);
 
   .avatar-img {
     width: 100%;
     height: 100%;
+  }
+
+  &.placeholder {
+    background-color: rgba($color-white, 0.15);
   }
 
   &.sm {
