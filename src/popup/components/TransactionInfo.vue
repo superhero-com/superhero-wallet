@@ -10,8 +10,9 @@
         v-if="sender.address"
         :name="sender.name"
         :address="sender.address"
-        borderless
+        size="lg"
       />
+
       <div class="mid">
         <TriangleRight class="triangle" />
         <div class="line" />
@@ -21,11 +22,11 @@
         v-if="recipient.address"
         :address="recipient.address"
         :name="recipient.name"
-        borderless
+        size="lg"
       />
       <div
         v-else
-        class="avatar"
+        class="custom-avatar"
       >
         <AensIcon
           v-if="recipient.aens"
@@ -100,10 +101,13 @@ export default defineComponent({
     display: flex;
     padding-bottom: 8px;
 
-    .avatar {
-      width: 56px;
-      height: 56px;
-      padding: 8px;
+    .custom-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
       border: 2px solid variables.$color-grey-border;
       border-radius: 100px;
     }
