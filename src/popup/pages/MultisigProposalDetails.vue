@@ -303,6 +303,7 @@ import {
 } from '@/utils';
 import {
   useAccounts,
+  useAeSdk,
   useFungibleTokens,
   useModals,
   useMultisigAccounts,
@@ -319,6 +320,7 @@ import {
   isInsufficientBalanceError,
 } from '@/protocols/aeternity/helpers';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
+import { AeAccountHdWallet } from '@/protocols/aeternity/libs/AeAccountHdWallet';
 
 import TransactionInfo from '../components/TransactionInfo.vue';
 import TokenAmount from '../components/TokenAmount.vue';
@@ -362,7 +364,7 @@ export default defineComponent({
 
     const { openDefaultModal, openModal } = useModals();
     const { isLoaderVisible, setLoaderVisible } = useUi();
-    const { isLocalAccountAddress } = useAccounts();
+    const { activeAccount, isLocalAccountAddress } = useAccounts();
     const {
       activeMultisigAccount,
       activeMultisigAccountExplorerUrl,
@@ -370,6 +372,8 @@ export default defineComponent({
       fetchAdditionalInfo,
       stopFetchingAdditionalInfo,
     } = useMultisigAccounts();
+
+    const { nodeNetworkId } = useAeSdk();
 
     const {
       pendingMultisigTxExpired,
@@ -472,13 +476,30 @@ export default defineComponent({
 
       setLoaderVisible(true);
       try {
-        await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
+        const chosenAddress = await openModal(MODAL_MULTISIG_PROPOSAL_CONFIRM_ACTION, {
           action,
           signers: pendingMultisigTxLocalSigners.value,
         });
 
         const { contractId, txHash } = activeMultisigAccount.value;
-        await callContractMethod(action, contractId, txHash as string);
+        const signingAccount = new AeAccountHdWallet(nodeNetworkId);
+        await callContractMethod(
+          action,
+          contractId,
+          txHash as string,
+          activeAccount.value.address !== chosenAddress
+            ? {
+              onAccount: {
+                address: chosenAddress,
+                signTransaction: signingAccount.signTransaction.bind({
+                  nodeNetworkId,
+                  sign: signingAccount.sign,
+                }),
+              },
+              fromAccount: chosenAddress,
+            }
+            : {},
+        );
         await updateMultisigAccounts();
 
         if (!activeMultisigAccount.value?.txHash) {
