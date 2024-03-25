@@ -421,7 +421,7 @@ export class EthereumAdapter extends BaseProtocolAdapter {
 
     const account = getAccountByAddress(options.fromAccount);
     if (!account || account.protocol !== PROTOCOLS.ethereum) {
-      throw new Error('Ethereum transaction contruction & signing was initiated from non existing or not ethereum account.');
+      throw new Error('Ethereum transaction construction & signing was initiated from non existing or not ethereum account.');
     }
 
     const nonce = await this.getTransactionCount(options.fromAccount);
