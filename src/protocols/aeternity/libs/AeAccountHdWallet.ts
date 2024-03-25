@@ -1,16 +1,16 @@
 /* eslint-disable class-methods-use-this */
 import {
   AccountBase,
+  MemoryAccount,
   sign,
-  messageToHash,
   RpcRejectedByUserError,
   unpackTx,
   Encoded,
   METHODS,
-  buildTx,
   Tag,
-  decode,
+  AensName,
 } from '@aeternity/aepp-sdk';
+import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
 import { useAccounts } from '@/composables/accounts';
@@ -26,13 +26,13 @@ interface InternalOptions {
  */
 const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 
-export class AeAccountHdWallet extends AccountBase {
+export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
-    super();
+    super(Buffer.alloc(64));
     const { getLastActiveProtocolAccount } = useAccounts();
     this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!
       .address as Encoded.AccountAddress;
@@ -55,19 +55,14 @@ export class AeAccountHdWallet extends AccountBase {
         { ...options, txBase64, tx },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
-    const encodedTx = decode(txBase64);
-    const signature = await this.sign(
-      Buffer.concat([
-        Buffer.from(this.nodeNetworkId.value),
-        Buffer.from(encodedTx),
-      ]),
-      options, // Mainly to pass the `fromAccount` property
-    );
-    return buildTx({ tag: Tag.SignedTx, encodedTx, signatures: [signature] });
+    return super.signTransaction(txBase64, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
   }
 
   override async signMessage(
@@ -82,14 +77,121 @@ export class AeAccountHdWallet extends AccountBase {
         { message },
       );
       if (!permissionGranted) {
-        throw new RpcRejectedByUserError('Rejected by user');
+        throw new RpcRejectedByUserError();
       }
     }
 
-    return this.sign(
-      messageToHash(message),
+    return super.signMessage(
+      message,
       options, // Mainly to pass the `fromAccount` property
     );
+  }
+
+  override async signTypedData(
+    data: Encoded.ContractBytearray,
+    aci: Parameters<AccountBase['signTypedData']>[1],
+    options: Parameters<AccountBase['signTypedData']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const dataType = new TypeResolver().resolveType(aci);
+      const decodedData = new ContractByteArrayEncoder().decodeWithType(data, dataType);
+      const {
+        name, version, networkId, contractAddress,
+      } = options;
+      const opt = {
+        name, version, networkId, contractAddress, aci, data, decodedData,
+      };
+      const bigintReplacer = (k: string, v: any) => (
+        typeof v === 'bigint' ? `${v} (as BigInt)` : v
+      );
+      const message = `sign typed data:\n${JSON.stringify(opt, bigintReplacer, 2)}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signTypedData(
+      data,
+      aci,
+      options, // Mainly to pass the `fromAccount` property
+    );
+  }
+
+  override async signDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    options: Parameters<AccountBase['signDelegationToContract']>[1] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of name preclaim and oracle to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signDelegationToContract(contractAddress, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
+  }
+
+  override async signNameDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    name: AensName,
+    options: Parameters<AccountBase['signNameDelegationToContract']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of ${name} to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signNameDelegationToContract(contractAddress, name, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
+  }
+
+  override async signOracleQueryDelegationToContract(
+    contractAddress: Encoded.ContractAddress,
+    oracleQueryId: Encoded.OracleQueryId,
+    options: Parameters<AccountBase['signOracleQueryDelegationToContract']>[2] = {},
+  ): Promise<Encoded.Signature> {
+    if (options?.aeppOrigin) {
+      const message = `sign delegation of ${oracleQueryId} to ${contractAddress}`;
+      const { checkOrAskPermission } = usePermissions();
+      const permissionGranted = await checkOrAskPermission(
+        METHODS.signMessage,
+        options.aeppOrigin,
+        { message },
+      );
+      if (!permissionGranted) {
+        throw new RpcRejectedByUserError();
+      }
+    }
+
+    return super.signOracleQueryDelegationToContract(contractAddress, oracleQueryId, {
+      ...options, // Mainly to pass the `fromAccount` property
+      networkId: this.nodeNetworkId.value,
+    });
   }
 
   /**
