@@ -180,30 +180,40 @@ export function useTransactionData({
       return [];
     }
 
+    let convertToCoin = false;
+
     const { protocol = PROTOCOLS.aeternity } = activeTransaction.value;
     const adapter = ProtocolAdapterFactory.getAdapter(protocol);
     const protocolTokens = getProtocolAvailableTokens(protocol);
 
-    // AE DEX and wrapped AE (WAE)
-    // TODO move this logic to adapter and store resolved data in the transactions
-    if (
-      innerTx.value?.function
-      && (!isDexAllowance.value || showDetailedAllowanceInfo)
-    ) {
-      const functionName = camelCase(innerTx.value?.function) as TxFunctionParsed;
-      const functionResolver = getTransactionTokenInfoResolver(functionName);
+    // TODO move AE specific logic to adapter and store resolved data in the transactions
+    if (protocol === PROTOCOLS.aeternity) {
+      // AE DEX and wrapped AE (WAE)
+      if (
+        innerTx.value?.function
+        && (!isDexAllowance.value || showDetailedAllowanceInfo)
+      ) {
+        const functionName = camelCase(innerTx.value.function) as TxFunctionParsed;
+        const functionResolver = getTransactionTokenInfoResolver(functionName);
 
-      if (functionResolver) {
-        return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
-          .tokens
-          .map(({
-            amount,
-            decimals,
-            ...otherAssetData
-          }) => ({
-            amount: +toShiftedBigNumber(amount!, -decimals!),
-            ...otherAssetData,
-          }));
+        if (functionResolver) {
+          return functionResolver({ tx: outerTx.value } as ITransaction, protocolTokens)
+            .tokens
+            .map(({
+              amount,
+              decimals,
+              ...otherAssetData
+            }) => ({
+              amount: +toShiftedBigNumber(amount!, -decimals!),
+              ...otherAssetData,
+            }));
+        }
+      }
+
+      // Convert all unresolved transaction with non-token contractId to coin.
+      // For example contract calls
+      if (!protocolTokens[innerTx.value.contractId] || innerTxTag.value === Tag.ContractCreateTx) {
+        convertToCoin = true;
       }
     }
 
@@ -212,7 +222,7 @@ export function useTransactionData({
       : getTxAmountTotal(activeTransaction.value, direction.value);
     const isReceived = direction.value === TX_DIRECTION.received;
 
-    if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value) {
+    if (isTransactionCoin.value || isDexAllowance.value || isMultisig.value || convertToCoin) {
       return [{
         ...innerTx.value || {},
         amount,
@@ -267,7 +277,7 @@ export function useTransactionData({
   return {
     outerTxTag,
     innerTxTag,
-    innerTx: innerTx as any,
+    innerTx,
     txTypeLabel,
     txTypeListLabel,
     txFunctionLabel,

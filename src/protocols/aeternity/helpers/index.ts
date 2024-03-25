@@ -174,9 +174,12 @@ export function isContainingNestedTx(tx: ITx): boolean {
   ].includes(tx.type);
 }
 
+/**
+ * TODO: Update returned type
+ */
 export function getInnerTransaction(tx?: ITx): any {
   if (!tx) {
-    return null;
+    return undefined;
   }
   if (isContainingNestedTx(tx)) {
     return tx.tx?.tx;
