@@ -10,6 +10,8 @@ import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetwo
 import { ETH_GAS_LIMIT } from '../config';
 import { etherFromGwei } from '../helpers';
 
+const BASE_FEE_MULTIPLIER = 1.5;
+
 export function useEthFeeCalculation() {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
   const { isActiveNetworkTestnet } = useNetworks();
@@ -82,9 +84,12 @@ export function useEthFeeCalculation() {
   async function updateFeeList() {
     const baseFee = new BigNumber(await fetchBaseFee());
 
-    maxFeePerGasSlow.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasSlow.value);
-    maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
-    maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
+    maxFeePerGasSlow.value = baseFee.multipliedBy(BASE_FEE_MULTIPLIER)
+      .plus(maxPriorityFeePerGasSlow.value);
+    maxFeePerGasMedium.value = baseFee.multipliedBy(BASE_FEE_MULTIPLIER)
+      .plus(maxPriorityFeePerGasMedium.value);
+    maxFeePerGasHigh.value = baseFee.multipliedBy(BASE_FEE_MULTIPLIER)
+      .plus(maxPriorityFeePerGasFast.value);
 
     feeSlow.value = maxFeePerGasSlow.value.multipliedBy(ETH_GAS_LIMIT);
     feeMedium.value = maxFeePerGasMedium.value.multipliedBy(ETH_GAS_LIMIT);
