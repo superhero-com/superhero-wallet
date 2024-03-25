@@ -29,6 +29,10 @@ import { useAeSdk } from './aeSdk';
 import { useMultisigAccounts } from './multisigAccounts';
 import { useTopHeaderData } from './topHeader';
 
+interface InternalOptions {
+  fromAccount?: Encoded.AccountAddress;
+}
+
 const MULTISIG_TRANSACTION_EXPIRATION_HEIGHT = 480;
 
 export function useMultisigTransactions() {
@@ -132,6 +136,7 @@ export function useMultisigTransactions() {
     action: TxFunctionMultisig,
     contractId: Encoded.ContractAddress,
     spendTxHash: string,
+    options?: Record<string, any> & InternalOptions,
   ) {
     const [aeSdk, topBlockHeight] = await Promise.all([getAeSdk(), fetchCurrentTopBlockHeight()]);
     const expirationHeight = topBlockHeight + MULTISIG_TRANSACTION_EXPIRATION_HEIGHT;
@@ -142,6 +147,7 @@ export function useMultisigTransactions() {
 
     const result = await gaContractRpc[action](spendTxHash, {
       FixedTTL: [expirationHeight],
+      ...options,
     });
 
     return result;

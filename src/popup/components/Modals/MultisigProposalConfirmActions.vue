@@ -22,20 +22,20 @@
       </h2>
 
       <FormSelect
-        :value="activeAccount.address"
+        :value="chosenAccountAddress"
         :options="eligibleAccounts"
         :default-text="$rt(confirmActionContent.formSelectText)"
         class="account-selector"
         persistent-default-text
         unstyled
         account-select
-        @select="setActiveAccountByAddress($event)"
+        @select="chosenAccountAddress = $event"
       />
 
       <div>
         <div class="active-account">
           <AccountItem
-            :address="activeAccount.address"
+            :address="chosenAccountAddress"
             :protocol="PROTOCOLS.aeternity"
           />
         </div>
@@ -66,7 +66,7 @@
         extra-padded
         :disabled="!!actionHasError"
         :text="$rt(confirmActionContent.btnText)"
-        @click="resolve"
+        @click="resolve(chosenAccountAddress)"
       />
     </template>
   </Modal>
@@ -76,6 +76,7 @@
 import {
   computed,
   defineComponent,
+  ref,
   PropType,
 } from 'vue';
 import { TranslateResult, useI18n } from 'vue-i18n';
@@ -87,7 +88,7 @@ import type {
   StatusIconType,
 } from '@/types';
 import { prepareAccountSelectOptions } from '@/utils';
-import { useAccounts, useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
+import { useMultisigAccounts, usePendingMultisigTransaction } from '@/composables';
 import { TX_FUNCTIONS_MULTISIG } from '@/protocols/aeternity/config';
 
 import { PROTOCOLS } from '@/constants';
@@ -117,13 +118,13 @@ export default defineComponent({
     const { tm } = useI18n();
 
     const { activeMultisigAccount } = useMultisigAccounts();
-    const { activeAccount, setActiveAccountByAddress } = useAccounts();
     const {
-      pendingMultisigTxSigners,
       pendingMultisigTxConfirmedBy,
       pendingMultisigTxRefusedBy,
       pendingMultisigTxLocalSigners,
     } = usePendingMultisigTransaction();
+
+    const chosenAccountAddress = ref(pendingMultisigTxLocalSigners.value[0].address);
 
     const eligibleAccounts = computed(
       (): IFormSelectOption[] => prepareAccountSelectOptions(pendingMultisigTxLocalSigners.value),
@@ -146,24 +147,21 @@ export default defineComponent({
 
     const actionHasError = computed(() => {
       const confirmActionText = confirmActionContent.value;
-      if (!pendingMultisigTxSigners.value.includes(activeAccount.value.address)) {
-        return confirmActionText.cannotDoActionWithSelectedAccount;
-      }
       if (
         props.action === TX_FUNCTIONS_MULTISIG.revoke
-        && activeMultisigAccount.value?.proposedBy !== activeAccount.value.address
+        && activeMultisigAccount.value?.proposedBy !== chosenAccountAddress.value
       ) {
         return confirmActionText.cannotDoActionWithSelectedAccount;
       }
       if (
         props.action === TX_FUNCTIONS_MULTISIG.confirm
-        && pendingMultisigTxConfirmedBy.value.includes(activeAccount.value.address)
+        && pendingMultisigTxConfirmedBy.value.includes(chosenAccountAddress.value)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
       if (
         props.action === TX_FUNCTIONS_MULTISIG.refuse
-        && pendingMultisigTxRefusedBy.value.includes(activeAccount.value.address)
+        && pendingMultisigTxRefusedBy.value.includes(chosenAccountAddress.value)
       ) {
         return confirmActionText.selectedAccountAlreadyDoneThisAction;
       }
@@ -179,9 +177,8 @@ export default defineComponent({
       TX_FUNCTIONS_MULTISIG,
       statusIcon,
       closeModal,
+      chosenAccountAddress,
       eligibleAccounts,
-      activeAccount,
-      setActiveAccountByAddress,
       activeMultisigAccount,
       confirmActionContent,
       actionHasError,
