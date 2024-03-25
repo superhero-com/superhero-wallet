@@ -214,6 +214,15 @@ export function usePendingMultisigTransaction() {
                 fetchActiveMultisigTx(),
               ]);
               isLoading.value = false;
+            } else if (
+              !isEqual(newValue.confirmedBy, oldValue.confirmedBy)
+              && pendingMultisigTransaction.value
+            ) {
+              pendingMultisigTransaction.value = {
+                ...pendingMultisigTransaction.value,
+                ...newValue,
+                totalConfirmations: newValue.confirmedBy.length,
+              };
             }
           }
         },
