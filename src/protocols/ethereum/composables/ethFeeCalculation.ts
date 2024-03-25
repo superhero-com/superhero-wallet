@@ -86,9 +86,9 @@ export function useEthFeeCalculation() {
     maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
     maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
 
-    feeSlow.value = baseFee.plus(maxPriorityFeePerGasSlow.value).multipliedBy(ETH_GAS_LIMIT);
-    feeMedium.value = baseFee.plus(maxPriorityFeePerGasMedium.value).multipliedBy(ETH_GAS_LIMIT);
-    feeHigh.value = baseFee.plus(maxPriorityFeePerGasFast.value).multipliedBy(ETH_GAS_LIMIT);
+    feeSlow.value = maxFeePerGasSlow.value.multipliedBy(ETH_GAS_LIMIT);
+    feeMedium.value = maxFeePerGasMedium.value.multipliedBy(ETH_GAS_LIMIT);
+    feeHigh.value = maxFeePerGasHigh.value.multipliedBy(ETH_GAS_LIMIT);
   }
 
   return {
