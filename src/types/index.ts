@@ -672,6 +672,7 @@ export interface IPopupData {
   action?: any;
   app?: IAppData;
   message?: string;
+  jwt?: boolean;
   type?: PopupActionType;
   tx?: ITx;
   txBase64?: Encoded.Transaction;

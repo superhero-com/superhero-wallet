@@ -46,6 +46,7 @@ export default defineComponent({
 
           await openModal(MODAL_MESSAGE_SIGN, {
             message: JSON.stringify(messageObject, null, 2),
+            jwt,
             app: {
               host,
               name: host,

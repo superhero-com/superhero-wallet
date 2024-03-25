@@ -1073,8 +1073,11 @@
     },
     "popupMessageSign": {
       "title": "Sign message",
-      "heading": "would like to sign message.",
-      "message": "Message"
+      "heading": "would like to sign a message.",
+      "message": "Message",
+      "type": "Type",
+      "typeJwt": "JSON Web Token (JWT)",
+      "typeAe": "Aeternity Signed Message"
     },
     "network": {
       "connectToNetwork": "Connect to network",

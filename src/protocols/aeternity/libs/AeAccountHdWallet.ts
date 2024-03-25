@@ -102,7 +102,7 @@ export class AeAccountHdWallet extends AccountBase {
       const permissionGranted = await checkOrAskPermission(
         METHODS.signMessageJWT,
         options.aeppOrigin,
-        { message: JSON.stringify(message) },
+        { message: JSON.stringify(message, null, 2), jwt: true },
       );
       if (!permissionGranted) {
         throw new RpcRejectedByUserError('Rejected by user');

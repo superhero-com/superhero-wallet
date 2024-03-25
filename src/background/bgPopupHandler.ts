@@ -72,6 +72,7 @@ export const openPopup = async (
         host,
       },
       message: params.message,
+      jwt: params.jwt,
       tx: params.tx,
       txBase64: params.txBase64,
     },
