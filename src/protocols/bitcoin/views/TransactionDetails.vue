@@ -45,7 +45,7 @@ import { TX_DIRECTION, PROTOCOLS } from '@/constants';
 import { useUi } from '@/composables';
 import { ProtocolAdapterFactory } from '@/lib/ProtocolAdapterFactory';
 import { ROUTE_NOT_FOUND } from '@/popup/router/routeNames';
-import { BTC_SYMBOL } from '@/protocols/bitcoin/config';
+import { BTC_COIN_NAME, BTC_SYMBOL } from '@/protocols/bitcoin/config';
 import { getTxAmountTotal } from '@/protocols/bitcoin/helpers';
 
 import TransactionDetailsBase from '@/popup/components/TransactionDetailsBase.vue';
@@ -81,6 +81,7 @@ export default defineComponent({
     const assets = computed((): ITokenResolved[] => [{
       amount: amount.value,
       symbol: BTC_SYMBOL,
+      name: BTC_COIN_NAME,
       isReceived: direction.value === TX_DIRECTION.received,
       contractId: adapter.coinContractId,
     }]);
