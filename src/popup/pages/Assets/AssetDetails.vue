@@ -211,6 +211,7 @@ export default defineComponent({
         ROUTE_COIN,
         ROUTE_COIN_DETAILS,
         ROUTE_MULTISIG_COIN,
+        ROUTE_MULTISIG_COIN_DETAILS,
       ].includes(name.toString()),
     );
     const contractId = route.params.id as AssetContractId;

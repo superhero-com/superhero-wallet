@@ -11,6 +11,7 @@
       />
       <div v-else>
         <TransactionListItem
+          is-multisig
           :multisig-transaction="pendingMultisigTransaction"
         />
       </div>

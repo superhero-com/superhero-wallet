@@ -165,7 +165,7 @@
         />
 
         <DetailsRow
-          v-if="isAssetCoin"
+          v-if="isCoin"
           class="link"
           :label="$t('pages.token-details.more')"
         >

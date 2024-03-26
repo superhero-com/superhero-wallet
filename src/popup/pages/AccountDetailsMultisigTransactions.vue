@@ -2,6 +2,7 @@
   <IonPage>
     <TransactionList
       v-if="isPageActive"
+      is-multisig
       :transactions="transactionList"
       :is-loading="isLoading"
       :is-end-reached="isEndReached"
