@@ -105,6 +105,7 @@ import {
 } from '@/constants';
 import {
   useAccounts,
+  useBiometricAuth,
   useModals,
   useUi,
 } from '@/composables';
@@ -137,6 +138,7 @@ export default defineComponent({
       setActiveAccountByGlobalIdx,
     } = useAccounts();
     const { openModal } = useModals();
+    const { openEnableBiometricAuthModal } = useBiometricAuth();
     const { loginTargetLocation } = useUi();
 
     const termsAgreed = ref(false);
@@ -148,6 +150,7 @@ export default defineComponent({
         protocol: PROTOCOLS.aeternity,
       });
       router.push(loginTargetLocation.value);
+      openEnableBiometricAuthModal();
     }
 
     async function importWallet() {

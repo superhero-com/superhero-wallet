@@ -16,6 +16,11 @@ export interface IOtherSettings {
   saveErrorLog?: boolean;
 }
 
+export interface ISecureLoginSettings {
+  isEnabled?: boolean;
+  timeout?: number;
+}
+
 const homeRouteName = ref(ROUTE_ACCOUNT);
 const isAppActive = ref(false);
 const isLoaderVisible = ref(false);
@@ -31,6 +36,10 @@ const hiddenCards = useStorageRef<string[]>(
     ],
   },
 );
+const secureLogin = useStorageRef<ISecureLoginSettings>(
+  {},
+  STORAGE_KEYS.secureLogin,
+);
 const otherSettings = useStorageRef<IOtherSettings>(
   {},
   STORAGE_KEYS.otherSettings,
@@ -43,6 +52,8 @@ const otherSettings = useStorageRef<IOtherSettings>(
 
 const isSeedBackedUp = computed(() => !!otherSettings.value.isSeedBackedUp);
 const saveErrorLog = computed(() => !!otherSettings.value.saveErrorLog);
+const isSecureLoginEnabled = computed(() => !!secureLogin.value.isEnabled);
+const secureLoginTimeout = computed(() => secureLogin.value.timeout ?? 0);
 
 export function useUi() {
   function setHomeRouteName(routeName: string, onChangeCallback?: () => any) {
@@ -82,6 +93,14 @@ export function useUi() {
     otherSettings.value.saveErrorLog = val;
   }
 
+  function setSecureLoginEnabled(val: boolean) {
+    secureLogin.value.isEnabled = val;
+  }
+
+  function setSecureLoginTimeout(val: number) {
+    secureLogin.value.timeout = val;
+  }
+
   function initVisibilityListeners() {
     handleVisibilityChange();
     onMounted(() => {
@@ -95,6 +114,7 @@ export function useUi() {
 
   function resetUiSettings() {
     hiddenCards.value = [];
+    secureLogin.value = {};
     otherSettings.value = {};
   }
 
@@ -107,6 +127,8 @@ export function useUi() {
     isLoaderVisible,
     isSeedBackedUp,
     saveErrorLog,
+    isSecureLoginEnabled,
+    secureLoginTimeout,
     initVisibilityListeners,
     setCardHidden,
     setBackedUpSeed,
@@ -116,5 +138,7 @@ export function useUi() {
     setQrScanner,
     setLoaderVisible,
     resetUiSettings,
+    setSecureLoginEnabled,
+    setSecureLoginTimeout,
   };
 }
