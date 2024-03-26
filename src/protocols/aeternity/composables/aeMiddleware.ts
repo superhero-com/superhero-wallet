@@ -13,7 +13,7 @@ import { fetchJson, watchUntilTruthy } from '@/utils';
 import { genSwaggerClient, mapObject } from '@/lib/swagger';
 
 import type { IAeNetworkSettings } from '@/protocols/aeternity/types';
-import { AEX9_TRANSFER_EVENT } from '@/protocols/aeternity/config';
+import { AEX9_TRANSFER_EVENT, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import { useAeNetworkSettings } from './aeNetworkSettings';
 import { categorizeContractCallTxObject } from '../helpers';
 
@@ -100,9 +100,11 @@ export function useAeMiddleware() {
       normalizedTransaction.hash = payload.txHash;
       normalizedTransaction.tx = {
         ...payload,
+        function: TX_FUNCTIONS.transfer,
         callerId: payload.senderId,
         type: Tag[Tag.ContractCallTx],
       };
+      normalizedTransaction.incomplete = true;
     }
 
     const contractCallData = categorizeContractCallTxObject(normalizedTransaction);
