@@ -52,7 +52,15 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
-import { MODAL_MULTISIG_VAULT_CREATE, PROTOCOLS } from '@/constants';
+import {
+  MODAL_AIR_GAP_CONFIRM_IMPORT,
+  MODAL_MULTISIG_VAULT_CREATE,
+  MODAL_READ_QR_CODE,
+  PROTOCOLS,
+} from '@/constants';
+import { tg } from '@/popup/plugins/i18n';
+import { IAirgapAccountRaw } from '@/types';
+import { handleUnknownError } from '@/utils';
 import {
   useAccounts,
   useAirGap,
@@ -63,9 +71,8 @@ import {
 import BtnSubheader from '@/popup/components/buttons/BtnSubheader.vue';
 import Modal from '@/popup/components/Modal.vue';
 
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
 import PlusCircleIcon from '@/icons/plus-circle-fill.svg?vue-component';
-import { IAccount } from '@/types';
-import { handleUnknownError } from '@/utils';
 
 export default defineComponent({
   components: {
@@ -77,10 +84,15 @@ export default defineComponent({
     isMultisig: Boolean,
   },
   setup(props) {
-    const { addRawAccount, setActiveAccountByProtocolAndIdx } = useAccounts();
+    const {
+      addRawAccount,
+      addAirGapAccount,
+      setActiveAccountByProtocolAndIdx,
+      setActiveAccountByGlobalIdx,
+    } = useAccounts();
     const { isOnline } = useConnection();
     const { openModal } = useModals();
-    const { extractAccountShareResponseData } = useAirGap();
+    const { extractAccountShareResponseData, deserializeData } = useAirGap();
 
     async function createPlainAccount() {
       const idx = addRawAccount({
@@ -97,25 +109,31 @@ export default defineComponent({
     }
 
     async function connectHardwareWallet() {
-      const scanResult = await root.$store.dispatch('modals/open', {
-        name: MODAL_READ_QR_CODE,
-        heading: root.$t('modals.importAirGapAccount.scanTitle'),
-        title: root.$t('modals.importAirGapAccount.scanDescription'),
-        icon: 'critical',
-      });
+      const scanResult = await openModal(
+        MODAL_READ_QR_CODE,
+        {
+          heading: tg('modals.importAirGapAccount.scanTitle'),
+          title: tg('modals.importAirGapAccount.scanDescription'),
+          icon: 'critical',
+        },
+      ).catch(() => null); // Closing the modal does nothing
 
-      if (!scanResult) return;
+      if (!scanResult) {
+        return;
+      }
 
-      const accounts = await extractAccountShareResponseData(scanResult) || [];
+      const deserializedData = await deserializeData(scanResult);
+      const accounts = await extractAccountShareResponseData(deserializedData) || [];
 
-      // Show Account import.
       try {
-        const selectedAccounts = await root.$store.dispatch('modals/open', {
-          name: MODAL_AIR_GAP_CONFIRM_IMPORT,
-          accounts,
-        });
-        selectedAccounts.forEach((account: IAccount) => {
-          root.$store.dispatch('accounts/airgap/import', account);
+        const selectedAccounts = await openModal(
+          MODAL_AIR_GAP_CONFIRM_IMPORT,
+          { accounts },
+        );
+        selectedAccounts.forEach((account: IAirgapAccountRaw) => {
+          const globalIdx = addAirGapAccount(account);
+          setActiveAccountByGlobalIdx(globalIdx);
+          props.resolve();
         });
       } catch (error) {
         handleUnknownError(error);
@@ -125,6 +143,7 @@ export default defineComponent({
 
     return {
       PlusCircleIcon,
+      QrScanIcon,
       isOnline,
       createPlainAccount,
       createMultisigAccount,

@@ -1,10 +1,12 @@
 import { computed, ref } from 'vue';
 import { uniq } from 'lodash-es';
+import { Encoded, decode } from '@aeternity/aepp-sdk';
 import { generateMnemonic, mnemonicToSeed } from '@aeternity/bip39';
 import type {
   AccountAddress,
   IAccount,
   IAccountRaw,
+  IAirgapAccountRaw,
   IFormSelectOption,
   Protocol,
   ProtocolRecord,
@@ -88,15 +90,26 @@ const accounts = computed((): IAccount[] => {
   }
 
   const idxList = Object.fromEntries(PROTOCOL_LIST.map(((protocol) => [protocol, 0])));
+  let airGapIdx = 0;
 
   return accountsRaw.value
     .map((account, globalIdx) => {
+      if (account.type === ACCOUNT_AIR_GAP_WALLET) {
+        const airGapAccount = account as IAirgapAccountRaw;
+        const idx = airGapIdx;
+        airGapIdx += 1;
+
+        return {
+          globalIdx,
+          idx,
+          publicKey: Buffer.from(decode(airGapAccount.address as Encoded.AccountAddress)),
+          ...airGapAccount,
+        } as unknown as IAccount;
+      }
       const idx = idxList[account.protocol];
       const hdWallet = ProtocolAdapterFactory
         .getAdapter(account.protocol)
-        // Type `any` here is used only to satisfy the account address type differences
-        // TODO remove `any` when IAccount.address will be set to `string`.
-        .getHdWalletAccountFromMnemonicSeed(mnemonicSeed.value, idx) as any;
+        .getHdWalletAccountFromMnemonicSeed(mnemonicSeed.value, idx);
 
       idxList[account.protocol] += 1;
 
@@ -240,6 +253,14 @@ export function useAccounts() {
   }
 
   /**
+   * Note: idx returned for airGap accounts is global and not protocol specific.
+   */
+  function addAirGapAccount(airGapAccount: IAirgapAccountRaw) {
+    accountsRaw.value.push(airGapAccount);
+    return getLastProtocolAccount(PROTOCOLS.aeternity)?.globalIdx || 0;
+  }
+
+  /**
    * Establish the last used account index under the actual seed phrase for each of the protocols
    * and collect the raw accounts so they can be stored in the browser storage.
    */
@@ -295,6 +316,7 @@ export function useAccounts() {
     discoverAccounts,
     isLocalAccountAddress,
     addRawAccount,
+    addAirGapAccount,
     getAccountByAddress,
     getAccountByGlobalIdx,
     getLastActiveProtocolAccount,

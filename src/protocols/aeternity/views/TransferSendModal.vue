@@ -5,6 +5,7 @@
     :hide-arrow-send-icon="isMultisig"
     :custom-primary-button-text="customPrimaryButtonText"
     :sending-disabled="isSendingDisabled"
+    :is-air-gap="isAirGap"
     @close="resolve"
     @step-next="proceedToNextStep"
     @step-prev="editTransfer"
@@ -95,27 +96,26 @@ export default defineComponent({
       && isUrlValid(transferData.value.address)
     ));
 
-    const isSendingDisabled = computed(() => (
-      error.value
-      || !isAeNodeReady.value
-      || !transferData.value.address
-      || !transferData.value.amount
-    ));
-
     const showScanButton = computed(() => (
       currentStep.value === TRANSFER_SEND_STEPS.review
       && props.isAirGap
     ));
 
-    // const customPrimaryButtonText = computed(() => (props.isMultisig)
-    //   ? t('modals.multisigTxProposal.proposeAndApprove')
-    //   : '');
+    const isSendingDisabled = computed(() => {
+      if (showScanButton.value) {
+        return (error.value || !isAeNodeReady.value);
+      }
+      return error.value
+        || !isAeNodeReady.value
+        || !transferData.value.address
+        || !transferData.value.amount;
+    });
 
     const customPrimaryButtonText = computed(() => {
       if (props.isMultisig) {
         return t('modals.multisigTxProposal.proposeAndApprove');
       }
-      if (props.isAirGap && showScanButton.value) {
+      if (showScanButton.value) {
         return t('common.scan');
       }
       return '';

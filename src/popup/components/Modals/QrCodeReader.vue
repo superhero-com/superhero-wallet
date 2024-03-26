@@ -95,7 +95,6 @@ import { useRoute } from 'vue-router';
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 import type QrScannerType from 'qr-scanner';
 import { URDecoder } from '@ngraveio/bc-ur';
-import { SerializerV3 } from '@airgap/serializer';
 import bs58check from 'bs58check';
 
 import type { RejectCallback, ResolveCallback } from '@/types';
@@ -129,14 +128,13 @@ export default defineComponent({
   },
   setup(props) {
     const route = useRoute();
-    const { setMobileQrScannerVisible } = useUi();
+    const { setMobileQrScannerVisible, scanProgress } = useUi();
 
     const qrCodeVideoEl = ref<HTMLVideoElement>();
     const hasDeviceCamera = ref(false);
     const isCameraReady = ref(false);
     const cameraPermissionGranted = ref(true);
     const isMultiFragmentQr = ref(false);
-    const scanProgress = ref(0);
     const decoder = ref(new URDecoder());
 
     let browserReader: QrScannerType | null = null;
@@ -151,14 +149,33 @@ export default defineComponent({
         browserReader?.destroy();
         browserReader = null;
       }
+
+      scanProgress.value = -1;
     }
 
-    async function getEncoderData() {
+    async function getCombinedData() {
       const combinedData = decoder.value.resultUR().decodeCBOR();
       const resultUr = bs58check.encode(combinedData);
+      return resultUr;
+    }
 
-      const serializer = SerializerV3.getInstance();
-      return serializer.deserialize(resultUr);
+    /**
+     * Returns when the QR code is complete
+     */
+    async function handleReceivePart(text: string) {
+      if (String(text).includes('BYTES/')) {
+        decoder.value.receivePart(text);
+        if (decoder.value.isComplete()) {
+          browserReader?.stop();
+          return getCombinedData();
+        }
+        isMultiFragmentQr.value = true;
+        scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
+      } else {
+        browserReader?.stop();
+        return text;
+      }
+      return null;
     }
 
     async function scanMobile(): Promise<string | Error> {
@@ -169,24 +186,17 @@ export default defineComponent({
 
       // eslint-disable-next-line no-async-promise-executor
       return new Promise(async (resolve) => {
+        let completeText: string | null = null;
+
         const listener = await BarcodeScanner.addListener(
           'barcodeScanned',
           async ({ barcode }) => {
             if (barcode.displayValue) {
-              if (barcode.displayValue.includes('BYTES/')) {
-                decoder.value.receivePart(barcode.displayValue);
-                if (decoder.value.isComplete()) {
-                  await listener.remove();
-                  stopReading();
-                  resolve(await getEncoderData());
-                } else {
-                  isMultiFragmentQr.value = true;
-                  scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
-                }
-              } else {
+              completeText = await handleReceivePart(barcode.displayValue);
+              if (completeText) {
                 await listener.remove();
                 stopReading();
-                resolve(barcode.displayValue);
+                resolve(completeText);
               }
             }
           },
@@ -203,17 +213,9 @@ export default defineComponent({
           async (result) => {
             const text = result.data;
             if (text) {
-              stopReading();
-              if (String(text).includes('BYTES/')) {
-                decoder.value.receivePart(text);
-                if (decoder.value.isComplete()) {
-                  resolve(await getEncoderData());
-                } else {
-                  isMultiFragmentQr.value = true;
-                  scanProgress.value = Math.floor(decoder.value.getProgress() * 100);
-                }
-              } else {
-                resolve(text);
+              const completeText = await handleReceivePart(text);
+              if (completeText) {
+                resolve(completeText);
               }
             }
           },

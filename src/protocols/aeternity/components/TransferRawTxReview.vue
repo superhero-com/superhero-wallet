@@ -4,10 +4,7 @@
     v-else
     class="transfer-raw-tx-review"
   >
-    <ModalHeader
-      title="Review and send transaction"
-    />
-
+    <ModalHeader :title="$t('modals.transferRawTx.title')" />
     <DetailsItem
       :label="$t('pages.send.sender')"
       data-cy="review-sender"
@@ -39,8 +36,9 @@
     >
       <template #value>
         <TokenAmount
-          :amount="+transferData.amount"
-          :symbol="AETERNITY_SYMBOL"
+          :amount="+transferData.amount!"
+          :symbol="AE_SYMBOL"
+          :protocol="PROTOCOLS.aeternity"
         />
       </template>
     </DetailsItem>
@@ -51,8 +49,9 @@
     >
       <template #value>
         <TokenAmount
-          :amount="+transferData.fee"
-          :symbol="AETERNITY_SYMBOL"
+          :amount="+transferData.fee!"
+          :symbol="AE_SYMBOL"
+          :protocol="PROTOCOLS.aeternity"
           high-precision
           data-cy="review-fee"
         />
@@ -60,13 +59,14 @@
     </DetailsItem>
 
     <DetailsItem
-      :label="$t('pages.signTransaction.total')"
+      :label="$t('common.total')"
       class="details-item"
     >
       <template #value>
         <TokenAmount
-          :amount="+transferData.total"
-          :symbol="AETERNITY_SYMBOL"
+          :amount="+transferData.total!"
+          :symbol="AE_SYMBOL"
+          :protocol="PROTOCOLS.aeternity"
           high-precision
           data-cy="review-total"
         />
@@ -80,24 +80,27 @@ import {
   defineComponent,
   onMounted,
   ref,
-} from '@vue/composition-api';
-import { TxBuilder } from '@aeternity/aepp-sdk';
+} from 'vue';
 import BigNumber from 'bignumber.js';
-import { useGetter } from '../../composables/vuex';
-import { useModals } from '../../composables';
+import { Encoded, unpackTx, Tag } from '@aeternity/aepp-sdk';
+import { TransferFormModel, ITransaction } from '@/types';
+import { MODAL_DEFAULT, PROTOCOLS } from '@/constants';
+import { toShiftedBigNumber } from '@/utils';
+import { AE_CONTRACT_ID, AE_SYMBOL, TX_FUNCTIONS } from '@/protocols/aeternity/config';
 import {
-  AETERNITY_CONTRACT_ID,
-  AETERNITY_SYMBOL,
-  MODAL_DEFAULT,
-  aettosToAe,
-  MODAL_SPEND_SUCCESS,
-} from '../utils';
-import { ISdk } from '../../types';
-import DetailsItem from './DetailsItem.vue';
-import TokenAmount from './TokenAmount.vue';
-import AvatarWithChainName from './AvatarWithChainName.vue';
-import ModalHeader from './ModalHeader.vue';
-import { TransferFormModel } from './Modals/TransferSend.vue';
+  useAeSdk,
+  useModals,
+  useAccounts,
+  useLatestTransactionList,
+} from '@/composables';
+import { aettosToAe, aeToAettos } from '@/protocols/aeternity/helpers';
+import { tg } from '@/popup/plugins/i18n';
+
+import DetailsItem from '@/popup/components/DetailsItem.vue';
+import TokenAmount from '@/popup/components/TokenAmount.vue';
+import AvatarWithChainName from '@/popup/components/AvatarWithChainName.vue';
+import ModalHeader from '@/popup/components/ModalHeader.vue';
+import Loader from '@/popup/components/Loader.vue';
 
 export default defineComponent({
   name: 'TransferRawTxReview',
@@ -106,54 +109,99 @@ export default defineComponent({
     AvatarWithChainName,
     DetailsItem,
     TokenAmount,
+    Loader,
   },
   props: {
     txRaw: { type: String, required: true },
   },
-  setup(props, { root, emit }) {
+  setup(props, { emit }) {
     const { openModal } = useModals();
+    const { getAeSdk } = useAeSdk();
 
     const transferData = ref<TransferFormModel>();
     const loading = ref<boolean>(true);
-    const sdk = useGetter<ISdk>('sdkPlugin/sdk');
     const recipientId = ref();
     const senderId = ref();
 
     async function submit() {
       emit('success');
       try {
-        const transaction = await sdk.value.sendTransaction(props.txRaw, {
-          waitMined: true,
-        });
-        openModal(MODAL_SPEND_SUCCESS, {
+        const aeSdk = await getAeSdk();
+        const { activeAccount } = useAccounts();
+        const { addAccountPendingTransaction } = useLatestTransactionList();
+
+        const transaction = await aeSdk.api.postTransaction({ tx: props.txRaw });
+
+        openModal(MODAL_DEFAULT, {
+          // Modal that is referenced in design (SpendSuccess) has been removed
+          title: tg('pages.send.title'),
           transaction,
         });
+
+        const {
+          amount: amountRaw,
+          fee,
+          selectedAsset,
+          address: recipient,
+        } = transferData.value!;
+        const isSelectedAssetAeCoin = selectedAsset?.contractId === AE_CONTRACT_ID;
+
+        if (!amountRaw || !recipient || !selectedAsset) {
+          return;
+        }
+
+        const amount = (selectedAsset?.contractId === AE_CONTRACT_ID)
+          ? aeToAettos(amountRaw)
+          : toShiftedBigNumber(amountRaw, selectedAsset?.decimals!);
+
+        const tempTransaction: ITransaction = {
+          hash: transaction.txHash,
+          pending: true,
+          transactionOwner: activeAccount.value.address,
+          protocol: PROTOCOLS.aeternity,
+          tx: {
+            amount: Number(amount),
+            callerId: activeAccount.value.address,
+            contractId: selectedAsset?.contractId as Encoded.ContractAddress,
+            senderId: activeAccount.value.address,
+            type: (isSelectedAssetAeCoin) ? Tag[Tag.SpendTx] : Tag[Tag.ContractCallTx],
+            function: TX_FUNCTIONS.transfer,
+            recipientId: recipient,
+            arguments: [],
+            fee: Number(fee),
+          },
+        };
+        addAccountPendingTransaction(activeAccount.value.address, tempTransaction);
       } catch (error) {
         openModal(MODAL_DEFAULT, {
-          title: root.$t('modals.transaction-failed.msg'),
+          title: tg('modals.transaction-failed.msg'),
           icon: 'critical',
         });
       }
     }
 
     onMounted(() => {
-      const { tx } = TxBuilder.unpackTx(props.txRaw).tx.encodedTx;
-      if (!tx) return;
-      recipientId.value = tx.recipientId;
-      senderId.value = tx.senderId;
+      const { encodedTx } = unpackTx<Tag.SignedTx>(props.txRaw as Encoded.Transaction) as any;
+      if (!encodedTx) {
+        return;
+      }
+      recipientId.value = encodedTx?.recipientId;
+      senderId.value = encodedTx?.senderId;
+      const fee = new BigNumber(aettosToAe(encodedTx?.fee || 0));
+      const amount = new BigNumber(aettosToAe(encodedTx?.amount || 0));
+
       transferData.value = {
-        amount: aettosToAe(tx?.amount || 0).toString(),
-        fee: aettosToAe(tx?.fee || 0),
-        total: new BigNumber(aettosToAe(tx?.fee || 0)).plus(
-          new BigNumber(aettosToAe(tx?.amount || 0)),
-        ).toNumber(),
-        payload: tx.payload,
+        amount: aettosToAe(encodedTx?.amount || 0).toString(),
+        fee,
+        total: fee.plus(amount).toNumber(),
+        payload: encodedTx.payload,
       };
     });
 
     return {
-      AETERNITY_SYMBOL,
-      AETERNITY_CONTRACT_ID,
+      AE_SYMBOL,
+      AE_CONTRACT_ID,
+      PROTOCOLS,
       loading,
       submit,
       aettosToAe,

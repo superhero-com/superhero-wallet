@@ -7,6 +7,7 @@
       :type-number="0"
       class="qrcode"
     />
+    <Loader v-else />
   </div>
 </template>
 
@@ -16,56 +17,70 @@ import {
   onMounted,
   PropType,
   ref,
-} from '@vue/composition-api';
-import { useGetter } from '../../composables/vuex';
-import { useAccounts, useAirGap, useSdk } from '../../composables';
+} from 'vue';
+import {
+  encode,
+  Encoded,
+  Encoding,
+  Tag,
+} from '@aeternity/aepp-sdk';
 
-import type { INetwork } from '../../types';
+import type { TransferFormModel } from '@/types';
+import { AE_CONTRACT_ID } from '@/protocols/aeternity/config';
+import { isAirgapAccount, toShiftedBigNumber } from '@/utils';
+import { aeToAettos } from '@/protocols/aeternity/helpers';
+import {
+  useAccounts,
+  useAirGap,
+  useAeSdk,
+} from '@/composables';
 
 import MultiFragmentsQrCode from './MultiFragmentsQrCode.vue';
-import { TransferFormModel } from './Modals/TransferSend.vue';
-import { AETERNITY_CONTRACT_ID, aeToAettos, convertToken } from '../utils';
+import Loader from './Loader.vue';
 
 export default defineComponent({
   components: {
     MultiFragmentsQrCode,
+    Loader,
   },
   props: {
     transferData: { type: Object as PropType<TransferFormModel>, required: true },
   },
-  setup(props, { root }) {
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const { getSdk } = useSdk({ store: root.$store });
-    const { activeAccount } = useAccounts({ store: root.$store });
-    const { generateTransactionURDataFragments } = useAirGap();
+  setup(props) {
     const fragments = ref();
 
+    const { nodeNetworkId, getAeSdk } = useAeSdk();
+    const { activeAccount } = useAccounts();
+    const { generateTransactionURDataFragments } = useAirGap();
+
     onMounted(async () => {
-      const sdk = await getSdk();
+      const aeSdk = await getAeSdk();
       const {
         amount: amountRaw,
         address: recipient,
         selectedAsset,
       } = props.transferData;
 
-      if (!amountRaw || !recipient || !selectedAsset || !activeAccount.value.airGapPublicKey) {
+      if (!amountRaw || !recipient || !selectedAsset || !isAirgapAccount(activeAccount.value)) {
         return null;
       }
 
-      const amount = (selectedAsset.contractId === AETERNITY_CONTRACT_ID)
+      const amount = (selectedAsset.contractId === AE_CONTRACT_ID)
         ? aeToAettos(amountRaw)
-        : convertToken(amountRaw, selectedAsset.decimals);
+        : toShiftedBigNumber(amountRaw, -(selectedAsset?.decimals ?? 0));
 
-      const txRaw = await sdk.spendTx({
-        senderId: activeAccount.value.address,
+      const txRaw = await aeSdk.buildTx({
+        tag: Tag.SpendTx,
+        senderId: activeAccount.value.address as Encoded.AccountAddress,
         recipientId: recipient,
-        amount,
-        payload: props.transferData.payload,
+        amount: amount.toString(),
+        payload: encode(new TextEncoder().encode(props.transferData.payload), Encoding.Bytearray),
       });
+
       fragments.value = await generateTransactionURDataFragments(
         activeAccount.value.airGapPublicKey,
         txRaw,
-        activeNetwork.value.networkId,
+        nodeNetworkId.value!,
       );
       return null;
     });
@@ -78,7 +93,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@use '../../styles/variables';
+@use '@/styles/variables' as *;
 
 .transfer-qr-code-generator {
   margin-top: 10px;
@@ -87,7 +102,7 @@ export default defineComponent({
   .qrcode {
     display: inline-flex;
     padding: 8px;
-    background-color: variables.$color-white;
+    background-color: $color-white;
     border-radius: 12px;
   }
 }

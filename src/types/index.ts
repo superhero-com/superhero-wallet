@@ -263,6 +263,12 @@ export interface IAccountRaw {
   type: AccountType;
   isRestored: boolean;
   protocol: Protocol;
+
+}
+
+export interface IAirgapAccountRaw extends IAccountRaw {
+  address: AccountAddress;
+  airGapPublicKey: string;
 }
 
 /**
@@ -273,8 +279,6 @@ export interface IAccount extends IHdWalletAccount, IAccountRaw {
   globalIdx: number;
   idx: number;
   name?: string;
-  airGapPublicKey?: string;
-  showed: boolean;
 }
 
 /**

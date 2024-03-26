@@ -33,7 +33,7 @@
         v-else
         data-cy="account-name-number"
         class="account-name"
-        v-text="getDefaultAccountLabel(account, { isAirGap })"
+        v-text="getDefaultAccountLabel(account)"
       />
 
       <slot name="address">

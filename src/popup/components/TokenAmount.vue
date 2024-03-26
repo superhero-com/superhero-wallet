@@ -27,7 +27,6 @@
     <span
       v-if="amountFiat"
       class="fiat"
-      :class="{ 'fiat-below': fiatBelow, 'fiat-right': fiatRight }"
       v-text="amountFiat"
     />
   </span>
@@ -53,8 +52,6 @@ export default defineComponent({
     symbol: { type: String, default: null },
     protocol: { type: String as PropType<Protocol>, required: true },
     vertical: Boolean,
-    fiatBelow: Boolean,
-    fiatRight: Boolean,
     hideFiat: Boolean,
     hideSymbol: Boolean,
     highPrecision: Boolean,
@@ -157,17 +154,6 @@ export default defineComponent({
 
     color: rgba($color-white, 0.75);
     white-space: nowrap;
-
-    &.fiat-below {
-      display: block;
-      margin-left: 0;
-      padding-top: 4px;
-      white-space: nowrap;
-    }
-
-    &.fiat-right {
-      text-align: right;
-    }
   }
 
   &.vertical {

@@ -23,6 +23,7 @@ export default defineComponent({
     icon: { type: String, default: '' },
     option: { type: Object, default: null },
     small: Boolean,
+    fullScreen: Boolean,
   },
   setup(props, { emit }) {
     const { openModal } = useModals();
@@ -37,6 +38,7 @@ export default defineComponent({
           msg: props.msg,
           option: props.option,
           textCenter: true,
+          fullScreen: props.fullScreen,
         });
       }
     }

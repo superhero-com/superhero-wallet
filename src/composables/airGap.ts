@@ -1,31 +1,46 @@
-import { decode } from '@aeternity/aepp-sdk/es/tx/builder/helpers';
+import { ref } from 'vue';
+import { Encoded } from '@aeternity/aepp-sdk';
 import { UR, UREncoder } from '@ngraveio/bc-ur';
 import bs58check from 'bs58check';
-import { IACMessageType, SerializerV3 } from '@airgap/serializer';
-import type {
+import { AeternityModule } from '@airgap/aeternity';
+import {
+  MainProtocolSymbols,
+  IACMessageType,
   AccountShareResponse,
-  IACMessageDefinitionObjectV3,
-  TransactionSignResponse,
-  TransactionSignRequest,
-} from '@airgap/serializer';
-import { AeternityAddress } from '@airgap/aeternity';
-import { MainProtocolSymbols } from '@airgap/coinlib-core';
-import type { IAccount } from '../types';
-import { ACCOUNT_AIR_GAP_WALLET, MOBILE_SCHEMA, handleUnknownError } from '../popup/utils';
+  AeternityProtocol,
+} from 'airgap-coin-lib';
+import { SerializerV3, IACMessageDefinitionObjectV3 } from '@airgap/serializer';
+
+import type { IAccountRaw } from '@/types';
+import { handleUnknownError } from '@/utils';
+import { ACCOUNT_AIR_GAP_WALLET, MOBILE_SCHEMA, PROTOCOLS } from '@/constants';
+
+const isComposableInitialized = ref(false);
+let serializer: SerializerV3;
 
 export function useAirGap() {
+  (async () => {
+    if (isComposableInitialized.value) {
+      return;
+    }
+    isComposableInitialized.value = true;
+
+    const serializerV3Companion = await new AeternityModule().createV3SerializerCompanion();
+    serializerV3Companion.schemas.forEach((schema) => {
+      SerializerV3.addSchema(schema.type, schema.schema, MainProtocolSymbols.AE);
+    });
+    serializer = SerializerV3.getInstance();
+  })();
+
   /**
    * Encodes an array of IACMessageDefinitionObjectV3 objects into a UR string.
-   * @param data - The array of IACMessageDefinitionObjectV3 objects to encode.
-   * @returns The UR string or null if an error occurs.
    */
   async function encodeIACMessageDefinitionObjects(data: IACMessageDefinitionObjectV3[]) {
     try {
-      const serializer = SerializerV3.getInstance();
       const serializedData = await serializer.serialize(data);
 
-      const buffer = await bs58check.decode(serializedData);
-      const ur = UR.fromBuffer(buffer);
+      const dataUint8Array = bs58check.decode(serializedData);
+      const ur = UR.fromBuffer(Buffer.from(dataUint8Array));
 
       // Set the chunk sizes for single-chunk and multi-chunk encoding.
       const SETTINGS_SERIALIZER_SINGLE_CHUNK_SIZE = 500;
@@ -43,66 +58,63 @@ export function useAirGap() {
           ur,
           SETTINGS_SERIALIZER_MULTI_CHUNK_SIZE,
         );
-        const fragments = [];
+        const fragments: string[] = [];
 
-        // eslint-disable-next-line no-restricted-syntax, guard-for-in
-        for (
-          // eslint-disable-next-line  @typescript-eslint/no-unused-vars
-          const _index in [...Array(multiEncoder.fragmentsLength)]
-        ) {
-          // eslint-disable-next-line no-await-in-loop
-          fragments.push(await multiEncoder.nextPart());
-        }
+        [...Array(multiEncoder.fragmentsLength)].forEach(() => {
+          fragments.push(multiEncoder.nextPart());
+        });
+
         return fragments;
       }
 
       // Encode the UR and return the UR string in upper case.
-      return [(await singleEncoder.nextPart()).toUpperCase()];
+      return [(singleEncoder.nextPart()).toUpperCase()];
     } catch (error) {
       handleUnknownError(error);
       return [];
     }
   }
 
-  /**
-   * Extracts shared addresses groups from encoded UR Data.
-   * @param serializedData
-   * @returns IAccount[]
-   */
-  async function extractAccountShareResponseData(
-    data: IACMessageDefinitionObjectV3[] = [],
-  ): Promise<IAccount[]> {
-    return data
-      .filter((item) => item.type === IACMessageType.AccountShareResponse)
-      .map((item) => {
-        const address = AeternityAddress.from(
-          (item.payload as AccountShareResponse).publicKey,
-        ).asString();
-        const publicKey = Buffer.from(decode(address, 'ak'));
-
-        return {
-          address,
-          publicKey,
-          name: '',
-          showed: true,
-          type: ACCOUNT_AIR_GAP_WALLET,
-          airGapPublicKey: (item.payload as AccountShareResponse).publicKey,
-        } as IAccount;
-      });
+  async function deserializeData(data: string) {
+    return serializer.deserialize(data);
   }
 
   /**
-   * Extracts the signed transaction response data from a serialized string
+   * Extracts shared accounts from deserialized data.
+   */
+  async function extractAccountShareResponseData(
+    data: IACMessageDefinitionObjectV3[] = [],
+  ): Promise<IAccountRaw[]> {
+    return Promise.all(
+      data
+        .filter((item) => item.type === IACMessageType.AccountShareResponse)
+        .map(async (item) => {
+          const aeProtocol = new AeternityProtocol();
+          const address = await aeProtocol.getAddressFromPublicKey(
+            (item.payload as AccountShareResponse).publicKey,
+          ) as Encoded.AccountAddress;
+
+          return {
+            address,
+            type: ACCOUNT_AIR_GAP_WALLET,
+            airGapPublicKey: (item.payload as AccountShareResponse).publicKey,
+            protocol: PROTOCOLS.aeternity,
+            isRestored: false,
+          };
+        }),
+    );
+  }
+
+  /**
+   * Extracts the signed transaction response data from deserialized data
    * and returns the transaction object.
-   * @param serializedData - The serialized string to extract data from.
-   * @returns The transaction object or null if no transaction object is found.
    */
   async function extractSignedTransactionResponseData(
     data: IACMessageDefinitionObjectV3[] = [],
   ): Promise<string | null> {
     const payload = data.find(
       (item) => item.type === IACMessageType.TransactionSignResponse,
-    )?.payload as TransactionSignResponse;
+    )?.payload as any;
 
     return payload?.transaction || null;
   }
@@ -114,7 +126,7 @@ export function useAirGap() {
   ): Promise<string[]> {
     const id = Math.floor(Math.random() * 90000000 + 10000000);
     const callbackURL = `${MOBILE_SCHEMA}?d=`;
-    const payload: TransactionSignRequest = {
+    const payload: any = {
       callbackURL,
       publicKey,
       transaction: {
@@ -133,6 +145,8 @@ export function useAirGap() {
   }
 
   return {
+    serializer,
+    deserializeData,
     encodeIACMessageDefinitionObjects,
     extractAccountShareResponseData,
     generateTransactionURDataFragments,

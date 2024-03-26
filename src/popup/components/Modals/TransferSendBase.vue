@@ -32,7 +32,7 @@
       <BtnMain
         class="button-action-primary"
         :disabled="!isOnline || sendingDisabled"
-        :icon="(showSendButton && !hideArrowSendIcon) ? ArrowSendIcon : null"
+        :icon="primaryButtonIcon"
         :text="primaryButtonText"
         data-cy="next-step-button"
         @click="$emit('step-next')"
@@ -54,6 +54,8 @@ import { TRANSFER_SEND_STEPS } from '@/constants';
 import { useConnection } from '@/composables';
 
 import ArrowSendIcon from '@/icons/arrow-send.svg?vue-component';
+import QrScanIcon from '@/icons/qr-scan.svg?vue-component';
+
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
 
@@ -105,6 +107,11 @@ export default defineComponent({
       TRANSFER_SEND_STEPS.reviewRawTx,
     ].includes(props.currentStep as any));
 
+    const showScanButton = computed(() => (
+      [TRANSFER_SEND_STEPS.review].includes(props.currentStep as any)
+      && props.isAirGap
+    ));
+
     const primaryButtonText = computed(() => {
       if (props.customPrimaryButtonText) {
         return props.customPrimaryButtonText;
@@ -115,13 +122,25 @@ export default defineComponent({
       return t('common.send');
     });
 
+    const primaryButtonIcon = computed(() => {
+      if (showScanButton.value) {
+        return QrScanIcon;
+      }
+      if (showSendButton.value && !props.hideArrowSendIcon) {
+        return ArrowSendIcon;
+      }
+      return null;
+    });
+
     return {
       isOnline,
       primaryButtonText,
+      primaryButtonIcon,
       showEditButton,
       showCancelButton,
       showSendButton,
       ArrowSendIcon,
+      QrScanIcon,
       TRANSFER_SEND_STEPS,
     };
   },

@@ -26,7 +26,7 @@
         v-for="account in accounts"
         :key="account.address"
         class="account-row"
-        :class="{disabled: isAccountAlreadyImported(account)}"
+        :class="{ disabled: isAccountAlreadyImported(account) }"
       >
         <AccountImportRow :account="account" />
       </div>
@@ -48,9 +48,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType } from '@vue/composition-api';
-import type { IAccount } from '../../../types';
-import { useState } from '../../../composables/vuex';
+import { computed, defineComponent, PropType } from 'vue';
+
+import { useAccounts } from '@/composables';
+import type { IAccount } from '@/types';
+<<<<<<< Updated upstream
+=======
+import { parseCodeToBytes } from '@/utils';
+>>>>>>> Stashed changes
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -64,7 +69,6 @@ export default defineComponent({
   },
   props: {
     resolve: {
-      // eslint-disable-next-line no-unused-vars
       type: Function as PropType<(selectedAccounts: IAccount[]) => void>,
       required: true,
     },
@@ -72,15 +76,19 @@ export default defineComponent({
     accounts: { type: Array as PropType<IAccount[]>, required: true },
   },
   setup(props) {
-    const importedAccounts = useState<IAccount[]>('accounts', 'list');
-    const canImportAccounts = computed(() => props.accounts.length > 0);
-
+    // TODO AIRGAP: need to add functionality for selecting the accounts
+    const { aeAccounts } = useAccounts();
     function isAccountAlreadyImported(account: IAccount) {
-      return importedAccounts.value.some((acc) => acc.address === account.address);
+      return aeAccounts.value.some((acc) => acc.address === account.address);
     }
 
+    const selectedAccounts = computed(
+      () => props.accounts.filter((account) => !isAccountAlreadyImported(account)),
+    );
+    const canImportAccounts = computed(() => selectedAccounts.value.length > 0);
+
     function confirm() {
-      props.resolve(props.accounts.filter((account) => !isAccountAlreadyImported(account)));
+      props.resolve(selectedAccounts.value);
     }
 
     function cancel() {

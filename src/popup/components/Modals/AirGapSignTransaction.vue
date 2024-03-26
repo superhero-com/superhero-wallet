@@ -8,16 +8,16 @@
   >
     <template #header>
       <div class="title">
-        {{ $t('modals.scanSignedAirGapTx.heading') }}
+        {{ $t('modals.signAirGapTx.heading') }}
       </div>
     </template>
     <div class="qrcode-wrapper">
       <MultiFragmentsQrCode
         v-if="fragments"
+        class="qrcode"
         :value="fragments"
         :size="280"
         :type-number="0"
-        class="qrcode"
       />
     </div>
     <template #footer>
@@ -43,15 +43,17 @@ import {
   PropType,
   ref,
 } from 'vue';
-import { IACMessageType } from '@airgap/serializer';
-import type {
-  IACMessageDefinitionObjectV3,
-  TransactionSignResponse,
-} from '@airgap/serializer';
+import { IACMessageType } from 'airgap-coin-lib';
 
-import type { INetwork } from '@/types';
+import { tg } from '@/popup/plugins/i18n';
 import { MODAL_READ_QR_CODE } from '@/constants';
-import { useAccounts, useModals, useAirGap } from '@/composables';
+import { isAirgapAccount } from '@/utils';
+import {
+  useAccounts,
+  useModals,
+  useAirGap,
+  useAeSdk,
+} from '@/composables';
 
 import Modal from '../Modal.vue';
 import BtnMain from '../buttons/BtnMain.vue';
@@ -67,7 +69,6 @@ export default defineComponent({
   },
   props: {
     txRaw: { type: String, required: true },
-    // eslint-disable-next-line no-unused-vars
     resolve: { type: Function as PropType<(txRaw: string) => void>, required: true },
     reject: { type: Function as PropType<() => void>, required: true },
   },
@@ -75,29 +76,39 @@ export default defineComponent({
     const fragments = ref();
     const { openModal } = useModals();
     const { activeAccount } = useAccounts();
-    const activeNetwork = useGetter<INetwork>('activeNetwork');
-    const { generateTransactionURDataFragments } = useAirGap();
+    const { nodeNetworkId } = useAeSdk();
+    const { generateTransactionURDataFragments, deserializeData } = useAirGap();
 
     onMounted(async () => {
-      fragments.value = await generateTransactionURDataFragments(
-        activeAccount.value.airGapPublicKey as string,
-        props.txRaw,
-        activeNetwork.value.networkId,
-      );
+      if (isAirgapAccount(activeAccount.value)) {
+        fragments.value = await generateTransactionURDataFragments(
+          activeAccount.value.airGapPublicKey,
+          props.txRaw,
+          nodeNetworkId?.value!,
+        );
+      }
     });
 
     async function scanSignedTransaction() {
-      const scanResult: IACMessageDefinitionObjectV3[] = await openModal(MODAL_READ_QR_CODE, {
+      const scanResult: string = await openModal(MODAL_READ_QR_CODE, {
         heading: tg('modals.scanAirGapTx.heading'),
         title: tg('modals.scanAirGapTx.title'),
         icon: 'critical',
-      });
+      }).catch(() => null); // Closing the modal does nothing
 
-      if (scanResult?.length) {
+      if (!scanResult) {
+        return;
+      }
+
+      const deserializedData = await deserializeData(scanResult);
+
+      if (deserializedData?.length) {
         // filter sign transaction type
-        const tx = scanResult.find((item) => item.type === IACMessageType.TransactionSignResponse);
+        const tx = deserializedData.find(
+          (item) => item.type === IACMessageType.TransactionSignResponse,
+        );
         if (tx) {
-          props.resolve((tx.payload as TransactionSignResponse).transaction);
+          props.resolve((tx.payload as any).transaction);
         } else {
           props.reject();
         }

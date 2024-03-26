@@ -14,10 +14,11 @@ import {
 import { ContractByteArrayEncoder, TypeResolver } from '@aeternity/aepp-calldata';
 import { Ref } from 'vue';
 import type { ITx } from '@/types';
+import { useModals } from '@/composables/modals';
 import { useAccounts } from '@/composables/accounts';
 import { useAeMiddleware } from '@/protocols/aeternity/composables';
 import { usePermissions } from '@/composables/permissions';
-import { PROTOCOLS } from '@/constants';
+import { MODAL_AIR_GAP_SIGN_TRANSACTION, PROTOCOLS } from '@/constants';
 import { handleUnknownError } from '@/utils';
 
 interface InternalOptions {
@@ -32,13 +33,16 @@ const TAGS_TO_SIGN_WITHOUT_PERMISSION: Tag[] = [Tag.SpendTx, Tag.PayingForTx];
 export class AeAccountHdWallet extends MemoryAccount {
   override readonly address: Encoded.AccountAddress;
 
+  readonly isAirgap: boolean = false;
+
   nodeNetworkId: Ref<string | undefined>;
 
   constructor(nodeNetworkId: Ref<string | undefined>) {
     super(Buffer.alloc(64));
     const { getLastActiveProtocolAccount } = useAccounts();
-    this.address = getLastActiveProtocolAccount(PROTOCOLS.aeternity)!
-      .address as Encoded.AccountAddress;
+    const aeAccount = getLastActiveProtocolAccount(PROTOCOLS.aeternity);
+    this.address = aeAccount!.address as Encoded.AccountAddress;
+    this.isAirgap = aeAccount?.type === 'airgap';
     this.nodeNetworkId = nodeNetworkId;
   }
 
@@ -49,6 +53,12 @@ export class AeAccountHdWallet extends MemoryAccount {
     if (!this.nodeNetworkId.value) {
       throw new Error('Not connected to any network');
     }
+
+    if (this.isAirgap) {
+      const { openModal } = useModals();
+      return openModal(MODAL_AIR_GAP_SIGN_TRANSACTION, { txRaw: txBase64 });
+    }
+
     const tx = unpackTx(txBase64) as any as ITx;
     if (!TAGS_TO_SIGN_WITHOUT_PERMISSION.includes(tx.tag!) || options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
@@ -73,6 +83,10 @@ export class AeAccountHdWallet extends MemoryAccount {
     message: string,
     options: Parameters<AccountBase['signMessage']>[1],
   ): Promise<Uint8Array> {
+    if (this.isAirgap) {
+      throw new Error('AirGap signMessage not implemented yet');
+    }
+
     if (options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(
@@ -190,6 +204,9 @@ export class AeAccountHdWallet extends MemoryAccount {
     data: string | Uint8Array,
     options?: Record<string, any> & InternalOptions,
   ): Promise<Uint8Array> {
+    if (this.isAirgap) {
+      throw new Error('AirGap sign not implemented yet');
+    }
     if (options?.aeppOrigin) {
       const { checkOrAskPermission } = usePermissions();
       const permissionGranted = await checkOrAskPermission(

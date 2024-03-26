@@ -10,9 +10,10 @@ import {
   PropType,
   ref,
   watch,
-} from '@vue/composition-api';
+} from 'vue';
 import QRCodeStyling, { TypeNumber } from 'qr-code-styling';
-import SHLogo from '../../icons/logo-small-blue.png';
+
+import SHLogo from '@/icons/logo-small-blue.webp';
 
 export default defineComponent({
   name: 'MultiFragmentsQrCode',
@@ -57,7 +58,7 @@ export default defineComponent({
 
     watch(() => props.value, () => {
       if (updateQrCode.value) {
-        clearTimeout(updateQrCode.value);
+        clearInterval(updateQrCode.value);
       }
     });
 

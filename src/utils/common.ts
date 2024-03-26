@@ -14,6 +14,7 @@ import type {
   AssetContractId,
   BigNumberPublic,
   IAccount,
+  IAirgapAccountRaw,
   ICommonTransaction,
   IDashboardTransaction,
   IFormSelectOption,
@@ -197,14 +198,12 @@ export async function fetchJson<T = any>(
  */
 
 export function getDefaultAccountLabel(
-  { protocol, idx }: Partial<IAccount> = {},
-  { isAirGap }: {isAirGap:Boolean} = { isAirGap: false },
+  { protocol, idx, type }: Partial<IAccount> = {},
 ): string {
-  if (isAirGap) {
-    return tg('common.airGap');
-  }
+  const isAirGap = type === 'airgap';
   return [
-    (protocol) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
+    (protocol && !isAirGap) ? ProtocolAdapterFactory.getAdapter(protocol).protocolName : null,
+    (isAirGap) ? tg('common.airGap') : null,
     tg('pages.account.heading'),
     (idx || 0) + 1,
   ]
@@ -523,3 +522,13 @@ export const toBase64Url = (data: Buffer | Uint8Array | string): string => Buffe
   .replace(/\//g, '_')
   .replace(/\+/g, '-')
   .replace(/=+$/, '');
+
+/**
+ * Type guard for TypeScript.
+ * Check if the account is an AirGap account and set the type accordingly.
+ */
+export function isAirgapAccount(
+  account: IAccount | IAirgapAccountRaw,
+): account is IAirgapAccountRaw {
+  return (account as unknown as IAirgapAccountRaw).airGapPublicKey !== undefined;
+}

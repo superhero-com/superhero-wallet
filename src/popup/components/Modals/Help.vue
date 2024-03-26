@@ -2,6 +2,7 @@
   <Default
     v-bind="$attrs"
     :icon="icon || 'info'"
+    :full-screen="fullScreen"
   >
     <template #msg>
       <TemplateRenderer
@@ -25,6 +26,7 @@ export default {
     msg: { type: String, default: '' },
     option: { type: Object, default: null },
     icon: { type: String, default: null },
+    fullScreen: Boolean,
   },
 };
 </script>

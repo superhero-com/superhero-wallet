@@ -3,7 +3,13 @@
     <ModalHeader
       :title="title"
       :subtitle="withoutSubtitle ? null : subtitle"
-    />
+    >
+      <template #title>
+        <div v-if="$slots.title">
+          <slot name="title" />
+        </div>
+      </template>
+    </ModalHeader>
 
     <slot name="subheader" />
 

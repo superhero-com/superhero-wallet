@@ -20,6 +20,7 @@
           :title="$t('modals.scanAirGapTx.help.title')"
           :msg="$t('modals.scanAirGapTx.help.msg')"
           icon="qr-scan"
+          full-screen
         />
       </div>
     </template>
@@ -29,10 +30,14 @@
         class="multisig-account"
       >
         <AccountItem
-          :address="activeMultisigAccount.gaAccountId"
+          :address="activeMultisigAccount?.gaAccountId!"
           :protocol="PROTOCOLS.aeternity"
         />
       </div>
+      <TransferQRCodeGenerator
+        v-if="isAirGap"
+        :transfer-data="transferData"
+      />
     </template>
 
     <template
@@ -75,7 +80,7 @@
       >
         <template #value>
           <TokenAmount
-            :amount="+transferData.total"
+            :amount="+transferData?.total!"
             :symbol="AE_SYMBOL"
             :protocol="PROTOCOLS.aeternity"
             high-precision
@@ -97,6 +102,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Encoded, Tag } from '@aeternity/aepp-sdk';
+
 import type { TransferFormModel, ITransaction, ITransferArgs } from '@/types';
 import { MODAL_READ_QR_CODE, PROTOCOLS } from '@/constants';
 import {
@@ -127,17 +133,21 @@ import { aeToAettos } from '@/protocols/aeternity/helpers';
 import ZeitTokenACI from '@/protocols/aeternity/aci/FungibleTokenFullACI.json';
 
 import TransferReviewBase from '@/popup/components/TransferSend/TransferReviewBase.vue';
+import TransferQRCodeGenerator from '@/popup/components/TransferQRCodeGenerator.vue';
 import AccountItem from '@/popup/components/AccountItem.vue';
 import DetailsItem from '@/popup/components/DetailsItem.vue';
 import TokenAmount from '@/popup/components/TokenAmount.vue';
+import BtnHelp from '@/popup/components/buttons/BtnHelp.vue';
 
 export default defineComponent({
   name: 'AeTransferReview',
   components: {
     TokenAmount,
     DetailsItem,
+    TransferQRCodeGenerator,
     TransferReviewBase,
     AccountItem,
+    BtnHelp,
   },
   model: {
     prop: 'transferData',
@@ -160,7 +170,7 @@ export default defineComponent({
     const { openCallbackOrGoHome } = useDeepLinkApi();
     const { addAccountPendingTransaction } = useLatestTransactionList();
     const { activeAccount } = useAccounts();
-    const { extractSignedTransactionResponseData } = useAirGap();
+    const { extractSignedTransactionResponseData, deserializeData } = useAirGap();
     const { getAeSdk } = useAeSdk();
     const {
       activeMultisigAccount,
@@ -190,6 +200,7 @@ export default defineComponent({
       }
       return tg('pages.send.reviewtx');
     });
+
     const headerSubtitle = computed(() => {
       if (props.isAirGap) {
         return tg('modals.airGapSend.reviewSubTitle');
@@ -385,15 +396,18 @@ export default defineComponent({
     }
 
     async function scanSignedTransaction() {
-      const scanResult = await await openModal(MODAL_READ_QR_CODE, {
+      const scanResult: string = await openModal(MODAL_READ_QR_CODE, {
         heading: tg('modals.scanAirGapTx.heading'),
         title: tg('modals.scanAirGapTx.title'),
         icon: 'critical',
-      });
+      }).catch(() => null); // Closing the modal does nothing
 
-      if (!scanResult) return;
+      if (!scanResult) {
+        return;
+      }
 
-      const txRaw = await extractSignedTransactionResponseData(scanResult);
+      const deserializedData = await deserializeData(scanResult);
+      const txRaw = await extractSignedTransactionResponseData(deserializedData);
 
       if (!txRaw) {
         return;
