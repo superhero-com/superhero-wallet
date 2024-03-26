@@ -310,6 +310,8 @@
     "qrCodeReader": {
       "grantPermission": "Grant camera permission",
       "scanQr": "Scan QR code",
+      "noWebcam": "No camera detected",
+      "noWebcamSubtitle": "Please enable your device camera and check again if it is functioning properly.",
       "subtitle": "Allow Superhero wallet to access your camera in order to scan QR codes.",
       "settings": "Settings"
     },

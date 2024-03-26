@@ -4,9 +4,12 @@ export { };
 
 declare global {
   interface Window {
-    popupProps?: Partial<IPopupProps>
+    popupProps?: Partial<IPopupProps>;
   }
   interface ScreenOrientation {
-    lock: (orientation: 'portrait' | 'landscape' | 'portrait-primary' | 'portrait-secondary' | 'landscape-primary' | 'landscape-secondary' | 'any') => Promise<void>
+    lock: (orientation: 'portrait' | 'landscape' | 'portrait-primary' | 'portrait-secondary' | 'landscape-primary' | 'landscape-secondary' | 'any') => Promise<void>;
+  }
+  interface Navigator {
+    enumerateDevices: (callback: (devices: MediaDeviceInfo[]) => void) => Promise<void>;
   }
 }
