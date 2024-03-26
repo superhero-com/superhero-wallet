@@ -58,6 +58,7 @@ import {
   AE_NETWORK_DEFAULT_SETTINGS,
   AE_PROTOCOL_NAME,
   AE_SYMBOL,
+  AEX9_TRANSFER_EVENT,
 } from '@/protocols/aeternity/config';
 import { AeScan } from '@/protocols/aeternity/libs/AeScan';
 import { useAeMiddleware, useAeNetworkSettings } from '@/protocols/aeternity/composables';
@@ -262,6 +263,13 @@ export class AeternityAdapter extends BaseProtocolAdapter {
         .filter(({ type }: any) => !type?.startsWith('Internal'))
         .map((responseData: any) => normalizeMiddlewareTransactionStructure(responseData, address));
 
+      // DEX transaction is represented in 3 objects, only last one should be used
+      // this condition checking edge case when not all 3 objects in one chunk
+      if (data.at(-1)?.type === AEX9_TRANSFER_EVENT) {
+        regularTransactions[regularTransactions.length - 1] = (
+          await this.fetchTransactionByHash(data.at(-1)?.payload.txHash, address)
+        );
+      }
       // Filter out the doubled AEX9 transfer entries
       regularTransactions = uniqBy(regularTransactions.reverse(), 'hash').reverse();
 
