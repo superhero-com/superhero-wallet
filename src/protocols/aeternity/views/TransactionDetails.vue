@@ -320,6 +320,7 @@ export default defineComponent({
           rawTransaction = {
             ...(rawTransaction || {}), // Claim transaction data
             ...await adapter.fetchTransactionByHash(hash, externalAddress.value),
+            incomplete: false,
           };
         } catch (e) {
           // Pending transactions are not returned from the middleware.
@@ -329,10 +330,11 @@ export default defineComponent({
           rawTransaction = pendingTransactions?.find((val) => val.hash === hash);
 
           if (!rawTransaction) {
-            setLoaderVisible(false);
             router.push({ name: ROUTE_NOT_FOUND });
             return;
           }
+        } finally {
+          setLoaderVisible(false);
         }
       }
 

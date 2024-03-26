@@ -127,6 +127,8 @@ export const TX_FUNCTIONS = {
   pendingTipToken: 'pending_tip_token',
   payForGaAttach: 'pay_for_ga_attach',
   gaMetaSpend: 'ga_meta_spend',
+  /** For example Connecting to superhero.chat */
+  verifyAccount: 'verify_account',
 } as const;
 
 /**
