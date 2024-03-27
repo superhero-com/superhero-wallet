@@ -91,6 +91,7 @@ $size-xl: 56px;
   user-select: none;
   flex-shrink: 0;
   border: 1px solid var(--color);
+  background-color: $color-bg-2;
 
   .avatar-img {
     width: 100%;
