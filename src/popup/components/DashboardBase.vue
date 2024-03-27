@@ -7,6 +7,7 @@
       >
         <TotalWalletAmount
           :total-balance="balancesTotal"
+          :is-multisig="isMultisig"
           class="total-amount"
         />
 
@@ -67,7 +68,7 @@
 
 <script lang="ts">
 import { PropType, defineComponent } from 'vue';
-import type { IAccount, IFormSelectOption } from '@/types';
+import type { IAccount, IFormSelectOption, IMultisigAccount } from '@/types';
 import { useUi } from '@/composables';
 
 import DashboardCard from './DashboardCard.vue';
@@ -86,11 +87,12 @@ export default defineComponent({
     TotalWalletAmount,
   },
   props: {
-    accounts: { type: Array as PropType<IAccount[]>, default: () => [] },
+    accounts: { type: Array as PropType<IAccount[] | IMultisigAccount[]>, default: () => [] },
     accountsSelectOptions: { type: Array as PropType<IFormSelectOption[]>, default: null },
     activeAccountAddress: { type: String, default: '' },
     activeIdx: { type: Number, default: 0 },
     balancesTotal: { type: String, default: null },
+    isMultisig: Boolean,
   },
   emits: {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
