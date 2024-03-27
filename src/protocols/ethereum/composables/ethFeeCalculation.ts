@@ -5,61 +5,68 @@ import { useI18n } from 'vue-i18n';
 import { computed, ref } from 'vue';
 
 import type { IFeeItem } from '@/types';
-import { useNetworks } from '@/composables';
 import { useEthNetworkSettings } from '@/protocols/ethereum/composables/ethNetworkSettings';
 import { ETH_GAS_LIMIT } from '../config';
-import { etherFromGwei } from '../helpers';
+
+const MAX_PRIORITY_FEE_MULTIPLIERS = {
+  slow: 1,
+  medium: 1.5,
+  fast: 2,
+} as const;
 
 export function useEthFeeCalculation() {
   const { ethActiveNetworkSettings } = useEthNetworkSettings();
-  const { isActiveNetworkTestnet } = useNetworks();
   const { t } = useI18n();
 
-  const feeSelectedIndex = ref(1);
+  const feeSelectedIndex = ref(0);
 
-  // total fee
-  const feeSlow = ref(new BigNumber(0.00000002));
-  const feeMedium = ref(new BigNumber(0.00000002));
-  const feeHigh = ref(new BigNumber(0.00000002));
+  // base fee per gas
+  const defaultBaseFeePerGas = ref(new BigNumber(0));
 
-  // max priority fee per gas
-  const maxPriorityFeePerGasSlow = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.1),
-  );
-  const maxPriorityFeePerGasMedium = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.15),
-  );
-  const maxPriorityFeePerGasFast = ref(
-    etherFromGwei(isActiveNetworkTestnet.value ? 0.000001 : 0.2),
-  );
+  // max priority fee per gas (tip for miner)
+  const defaultMaxPriorityFeePerGas = ref(new BigNumber(0));
 
-  // maximum fee per gas that will be paid
-  const maxFeePerGasSlow = ref(new BigNumber(0));
-  const maxFeePerGasMedium = ref(new BigNumber(0));
-  const maxFeePerGasHigh = ref(new BigNumber(0));
+  // maximum fee per gas that can be used
+  const defaultMaxFeePerGas = ref(new BigNumber(0));
+
+  const maxPriorityFeePerGasSlow = computed(() => (
+    defaultMaxPriorityFeePerGas.value.multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.slow)
+  ));
+  const maxPriorityFeePerGasMedium = computed(() => (
+    defaultMaxPriorityFeePerGas.value.multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.medium)
+  ));
+  const maxPriorityFeePerGasFast = computed(() => (
+    defaultMaxPriorityFeePerGas.value.multipliedBy(MAX_PRIORITY_FEE_MULTIPLIERS.fast)
+  ));
 
   // TODO - set correct time values
   const feeList = computed((): IFeeItem[] => [
     {
-      fee: feeSlow.value,
+      fee: defaultBaseFeePerGas.value
+        .plus(maxPriorityFeePerGasSlow.value)
+        .multipliedBy(ETH_GAS_LIMIT),
       time: 300,
       label: t('common.transferSpeed.slow'),
       maxPriorityFee: maxPriorityFeePerGasSlow.value,
-      maxFeePerGas: maxFeePerGasSlow.value,
+      maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasSlow.value),
     },
     {
-      fee: feeMedium.value,
+      fee: defaultBaseFeePerGas.value
+        .plus(maxPriorityFeePerGasMedium.value)
+        .multipliedBy(ETH_GAS_LIMIT),
       time: 180,
       label: t('common.transferSpeed.medium'),
       maxPriorityFee: maxPriorityFeePerGasMedium.value,
-      maxFeePerGas: maxFeePerGasMedium.value,
+      maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasMedium.value),
     },
     {
-      fee: feeHigh.value,
+      fee: defaultBaseFeePerGas.value
+        .plus(maxPriorityFeePerGasFast.value)
+        .multipliedBy(ETH_GAS_LIMIT),
       time: 30,
       label: t('common.transferSpeed.fast'),
       maxPriorityFee: maxPriorityFeePerGasFast.value,
-      maxFeePerGas: maxFeePerGasHigh.value,
+      maxFeePerGas: defaultMaxFeePerGas.value.plus(maxPriorityFeePerGasFast.value),
     },
   ]);
 
@@ -69,26 +76,14 @@ export function useEthFeeCalculation() {
     () => feeList.value[feeSelectedIndex.value].maxPriorityFee,
   );
 
-  /**
-   * Return the base fee of the latest block in Ether
-   */
-  async function fetchBaseFee() {
+  async function updateFeeList() {
     const { nodeUrl } = ethActiveNetworkSettings.value;
     const web3Eth = new Web3Eth(nodeUrl);
-    const latestBlock = await web3Eth.getBlock('latest', false);
-    return fromWei(latestBlock.baseFeePerGas!, 'ether');
-  }
+    const feeData = await web3Eth.calculateFeeData();
 
-  async function updateFeeList() {
-    const baseFee = new BigNumber(await fetchBaseFee());
-
-    maxFeePerGasSlow.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasSlow.value);
-    maxFeePerGasMedium.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasMedium.value);
-    maxFeePerGasHigh.value = baseFee.multipliedBy(2).plus(maxPriorityFeePerGasFast.value);
-
-    feeSlow.value = maxFeePerGasSlow.value.multipliedBy(ETH_GAS_LIMIT);
-    feeMedium.value = maxFeePerGasMedium.value.multipliedBy(ETH_GAS_LIMIT);
-    feeHigh.value = maxFeePerGasHigh.value.multipliedBy(ETH_GAS_LIMIT);
+    defaultBaseFeePerGas.value = new BigNumber(fromWei(feeData.baseFeePerGas!, 'ether'));
+    defaultMaxFeePerGas.value = new BigNumber(fromWei(feeData.maxFeePerGas!, 'ether'));
+    defaultMaxPriorityFeePerGas.value = new BigNumber(fromWei(feeData.maxPriorityFeePerGas!, 'ether'));
   }
 
   return {
@@ -97,7 +92,6 @@ export function useEthFeeCalculation() {
     feeSelectedIndex,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    fetchBaseFee,
     updateFeeList,
   };
 }

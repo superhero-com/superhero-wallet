@@ -88,6 +88,7 @@ import {
   ETH_COIN_NAME,
   ETH_COIN_PRECISION,
   ETH_COIN_SYMBOL,
+  ETH_GAS_LIMIT,
 } from '@/protocols/ethereum/config';
 import { useEthMaxAmount } from '@/protocols/ethereum/composables/ethMaxAmount';
 
@@ -160,7 +161,9 @@ export default defineComponent({
       getSelectedAssetValue,
     });
 
-    const { max } = useEthMaxAmount({ formModel, fee });
+    const maxFee = computed(() => maxFeePerGas.value!.multipliedBy(ETH_GAS_LIMIT));
+
+    const { max } = useEthMaxAmount({ formModel, fee: maxFee });
 
     const numericFee = computed(() => +fee.value.toFixed());
 
