@@ -63,7 +63,8 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     '@typescript-eslint/member-delimiter-style': ['error'],
 
-    'vuejs-accessibility/click-events-have-key-events': 'warn',
+    // TODO: https://github.com/superhero-com/superhero-wallet/issues/2857
+    'vuejs-accessibility/click-events-have-key-events': 'off',
   },
   overrides: [
     {
