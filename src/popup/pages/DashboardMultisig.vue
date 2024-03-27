@@ -5,6 +5,8 @@
         class="dashboard-multisig"
         :active-idx="multisigAccountIdx"
         :balances-total="multisigBalancesTotal"
+        :accounts="multisigAccounts"
+        is-multisig
       >
         <template #swiper>
           <AccountSwiper
