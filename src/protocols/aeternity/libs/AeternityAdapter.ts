@@ -397,7 +397,10 @@ export class AeternityAdapter extends BaseProtocolAdapter {
           .filter(({ tx }) => !tx.contractId || tx.contractId === this.coinContractId);
       } else {
         regularTransactions = res.regularTransactions
-          .filter(({ tx }) => tx.contractId === assetContractId);
+          .filter(({ tx }) => (
+            tx.contractId === assetContractId
+            || JSON.stringify({ ...tx.arguments, ...tx.log }).includes(assetContractId)
+          ));
       }
     } catch (error: any) {
       Logger.write(error);
