@@ -311,6 +311,7 @@ export default defineComponent({
     }
 
     .transaction-limit-amount {
+      justify-content: space-between;
       width: 100%;
     }
   }
