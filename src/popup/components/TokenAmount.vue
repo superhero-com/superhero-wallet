@@ -99,7 +99,6 @@ export default defineComponent({
   display: inline-flex;
   gap: 8px;
   align-items: center;
-  justify-content: space-between;
   color: variables.$color-white;
 
   .amount {
