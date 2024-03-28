@@ -1,4 +1,5 @@
 import { IS_IOS, IS_MOBILE_APP } from '@/constants';
+import { useUi } from '@/composables';
 import type { Migration } from '@/types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -83,10 +84,16 @@ async function cleanMnemonicFiles() {
 
 const migration: Migration = async (restoredValue: string) => {
   if (!restoredValue && IS_IOS && IS_MOBILE_APP) {
-    const restoredCordovaValue = await getRestoreMnemonicFromCordova();
-    if (restoredCordovaValue) {
-      cleanMnemonicFiles();
-      return restoredCordovaValue;
+    const { setLoaderVisible } = useUi();
+    setLoaderVisible(true);
+    try {
+      const restoredCordovaValue = await getRestoreMnemonicFromCordova();
+      if (restoredCordovaValue) {
+        cleanMnemonicFiles();
+        return restoredCordovaValue;
+      }
+    } finally {
+      setLoaderVisible(false);
     }
   }
   return restoredValue;

@@ -141,7 +141,10 @@ export default defineComponent({
 
     const termsAgreed = ref(false);
 
+    let isWalletNew = false;
+
     async function createWallet() {
+      isWalletNew = true;
       setGeneratedMnemonic();
       addRawAccount({
         isRestored: false,
@@ -151,7 +154,8 @@ export default defineComponent({
     }
 
     async function importWallet() {
-      return openModal(MODAL_ACCOUNT_IMPORT);
+      isWalletNew = true;
+      await openModal(MODAL_ACCOUNT_IMPORT);
     }
 
     /**
@@ -160,7 +164,7 @@ export default defineComponent({
     onMounted(async () => {
       if (IS_IOS && IS_MOBILE_APP) {
         await watchUntilTruthy(mnemonic);
-        if (mnemonic.value) {
+        if (mnemonic.value && !isWalletNew) {
           await discoverAccounts();
           setActiveAccountByGlobalIdx(0);
           if (isLoggedIn.value) {
